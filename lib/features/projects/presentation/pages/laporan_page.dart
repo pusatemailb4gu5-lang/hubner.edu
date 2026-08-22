@@ -64,11 +64,17 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
     required VoidCallback onTap,
     required bool isDark,
   }) {
-    return InkWell(
+    return BouncyButton(
+      scaleDown: 0.92,
       onTap: onTap,
-      borderRadius: BorderRadius.circular(20),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? (isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9))
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(20),
+        ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -498,13 +504,13 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
         final double statusBarHeight = MediaQuery.of(context).padding.top;
 
         return Scaffold(
-          backgroundColor: isDark ? const Color(0xFF26173E) : const Color(0xFF7F52FC),
+          backgroundColor: isDark ? const Color(0xFFD6A5F8) : const Color(0xFF7F52FC),
           body: StreamBuilder<QuerySnapshot>(
             stream: _projectsStream,
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return Scaffold(
-                  backgroundColor: isDark ? const Color(0xFF26173E) : const Color(0xFF7F52FC),
+                  backgroundColor: isDark ? const Color(0xFFD6A5F8) : const Color(0xFF7F52FC),
                   body: const Center(child: CircularProgressIndicator(color: Colors.white)),
                 );
               }
@@ -536,7 +542,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
               // Main Body with Hero & Draggable White Sheet
               Expanded(
                 child: Scaffold(
-                  backgroundColor: isDark ? const Color(0xFF26173E) : const Color(0xFF7F52FC),
+                  backgroundColor: isDark ? const Color(0xFFD6A5F8) : const Color(0xFF7F52FC),
                   body: Stack(
                     children: [
                       // ==========================================
@@ -595,7 +601,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                        if (Navigator.canPop(context)) ...[
-                                        GestureDetector(
+                                        BouncyButton(
                                           onTap: () => Navigator.pop(context),
                                           child: Container(
                                             width: 40,
@@ -629,7 +635,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                               style: GoogleFonts.plusJakartaSans(
                                                 fontSize: 22,
                                                 fontWeight: FontWeight.w900,
-                                                color: Colors.white,
+                                                color: isDark ? const Color(0xFF0F172A) : Colors.white,
                                                 letterSpacing: -0.4,
                                                 height: 1.2,
                                               ),
@@ -639,7 +645,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                               'Pantau presensi, progres tugas, dan evaluasi hasil belajar siswa.',
                                               style: GoogleFonts.dmSans(
                                                 fontSize: 13,
-                                                color: Colors.white.withValues(alpha: 0.92),
+                                                color: isDark ? const Color(0xFF334155) : Colors.white.withValues(alpha: 0.92),
                                                 fontWeight: FontWeight.w500,
                                               ),
                                             ),
@@ -775,7 +781,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                       const SizedBox(width: 8),
 
                                       // Atur Presensi Button
-                                      GestureDetector(
+                                      BouncyButton(
                                         onTap: () {
                                           final screenWidth = MediaQuery.of(context).size.width;
                                           if (screenWidth > 900) {
@@ -840,23 +846,21 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                   // ==========================================
                                   Row(
                                     children: [
-                                      // Total Siswa Card
+                                      // Total Siswa Card (Kembali ke Warna Kuning Hangat yang Cerah)
                                       Expanded(
                                         child: Container(
                                           height: 78,
                                           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                                           decoration: BoxDecoration(
-                                            color: isDark
-                                                ? const Color(0xFF18181B).withValues(alpha: 0.88)
-                                                : const Color(0xFFFFFBEB),
+                                            color: const Color(0xFFFFFBEB),
                                             borderRadius: BorderRadius.circular(20),
                                             border: Border.all(
-                                              color: isDark ? const Color(0xFF27272A) : Colors.transparent,
+                                              color: Colors.transparent,
                                               width: 1.1,
                                             ),
                                             boxShadow: [
                                               BoxShadow(
-                                                color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.06),
+                                                color: Colors.black.withValues(alpha: 0.08),
                                                 blurRadius: 8,
                                                 offset: const Offset(0, 2),
                                               ),
@@ -866,9 +870,9 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                             crossAxisAlignment: CrossAxisAlignment.center,
                                             children: [
                                               // Ikon Frameless di Kiri
-                                              Icon(
+                                              const Icon(
                                                 Icons.people_alt_rounded,
-                                                color: isDark ? const Color(0xFFFBBF24) : const Color(0xFFD97706),
+                                                color: Color(0xFFD97706),
                                                 size: 28,
                                               ),
                                               const SizedBox(width: 10),
@@ -883,7 +887,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                                       style: GoogleFonts.plusJakartaSans(
                                                         fontSize: 24,
                                                         fontWeight: FontWeight.w900,
-                                                        color: isDark ? const Color(0xFFFBBF24) : const Color(0xFF92400E),
+                                                        color: const Color(0xFF92400E),
                                                         height: 1.0,
                                                       ),
                                                     ),
@@ -893,7 +897,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                                       style: GoogleFonts.plusJakartaSans(
                                                         fontSize: 11.5,
                                                         fontWeight: FontWeight.w700,
-                                                        color: isDark ? const Color(0xFFFCD34D) : const Color(0xFFB45309),
+                                                        color: const Color(0xFFB45309),
                                                       ),
                                                       maxLines: 1,
                                                       overflow: TextOverflow.ellipsis,
@@ -907,23 +911,21 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                       ),
                                       const SizedBox(width: 10),
 
-                                      // Telah Bergabung Card
+                                      // Telah Bergabung Card (Kembali ke Warna Hijau Mint Segar yang Cerah)
                                       Expanded(
                                         child: Container(
                                           height: 78,
                                           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                                           decoration: BoxDecoration(
-                                            color: isDark
-                                                ? const Color(0xFF18181B).withValues(alpha: 0.88)
-                                                : const Color(0xFFECFDF5),
+                                            color: const Color(0xFFECFDF5),
                                             borderRadius: BorderRadius.circular(20),
                                             border: Border.all(
-                                              color: isDark ? const Color(0xFF27272A) : Colors.transparent,
+                                              color: Colors.transparent,
                                               width: 1.1,
                                             ),
                                             boxShadow: [
                                               BoxShadow(
-                                                color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.06),
+                                                color: Colors.black.withValues(alpha: 0.08),
                                                 blurRadius: 8,
                                                 offset: const Offset(0, 2),
                                               ),
@@ -1405,7 +1407,8 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                               studentCompletedTasks[doc.id] = completed;
                                             }
 
-                                            return GestureDetector(
+                                            return BouncyButton(
+                                              scaleDown: 0.88,
                                               onTap: () => _exportToCSV(
                                                 context: context,
                                                 className: className,
@@ -1414,8 +1417,8 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                                 studentCompletedTasks: studentCompletedTasks,
                                               ),
                                               child: Container(
-                                                width: 32,
-                                                height: 32,
+                                                width: 34,
+                                                height: 34,
                                                 decoration: BoxDecoration(
                                                   shape: BoxShape.circle,
                                                   color: const Color(0xFF0F172A),
@@ -1431,7 +1434,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                                 child: const Icon(
                                                   Icons.file_download_rounded,
                                                   color: Colors.white,
-                                                  size: 17,
+                                                  size: 18,
                                                 ),
                                               ),
                                             );
@@ -1443,7 +1446,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                   const SizedBox(height: 10),
 
                                   // ==========================================
-                                  // TABEL LAPORAN (STRUKTUR TABEL AWAL LENGKAP)
+                                  // TABEL LAPORAN: HEADER LILAC SLIDER DENGAN TEKS HITAM & 2 KOLOM RAPI
                                   // ==========================================
                                   Padding(
                                     padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -1466,53 +1469,73 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                         borderRadius: BorderRadius.circular(20),
                                         child: Column(
                                           children: [
-                                            // Table Header
+                                            // Table Header: 3 Kolom dengan Warna Berbeda (Ungu, Biru, Toska)
                                             Container(
-                                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                                              color: isDark ? const Color(0xFF27272A) : const Color(0xFFF8FAFC),
+                                              decoration: BoxDecoration(
+                                                border: Border(
+                                                  bottom: BorderSide(
+                                                    color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                                                    width: 1,
+                                                  ),
+                                                ),
+                                              ),
                                               child: Row(
                                                 children: [
-                                                  Expanded(
-                                                    flex: 3,
-                                                    child: Text(
-                                                      'Nama Siswa (${masterList.length})',
-                                                      style: GoogleFonts.plusJakartaSans(
-                                                        fontSize: 12,
-                                                        fontWeight: FontWeight.bold,
-                                                        color: isDark ? Colors.white70 : Colors.black54,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                  Expanded(
-                                                    flex: 2,
-                                                    child: Text(
-                                                      'Progress',
-                                                      textAlign: TextAlign.center,
-                                                      style: GoogleFonts.plusJakartaSans(
-                                                        fontSize: 12,
-                                                        fontWeight: FontWeight.bold,
-                                                        color: isDark ? Colors.white70 : Colors.black54,
-                                                      ),
-                                                    ),
-                                                  ),
+                                                  // Kolom 1: Nama Siswa (Ungu)
                                                   Expanded(
                                                     flex: 4,
-                                                    child: Text(
-                                                      _selectedTypeFilter == 'tugas'
-                                                          ? 'Status Tugas'
-                                                          : (_selectedTypeFilter == 'quiz' ? 'Nilai Quiz' : 'Tugas & Quiz'),
-                                                      textAlign: TextAlign.center,
-                                                      style: GoogleFonts.plusJakartaSans(
-                                                        fontSize: 12,
-                                                        fontWeight: FontWeight.bold,
-                                                        color: isDark ? Colors.white70 : Colors.black54,
+                                                    child: Container(
+                                                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                                                      color: const Color(0xFFD6A5F8),
+                                                      child: Text(
+                                                        'Nama Siswa (${masterList.length})',
+                                                        style: GoogleFonts.plusJakartaSans(
+                                                          fontSize: 12.5,
+                                                          fontWeight: FontWeight.w800,
+                                                          color: const Color(0xFF0F172A),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  // Kolom 2: Progress (Biru)
+                                                  Expanded(
+                                                    flex: 2,
+                                                    child: Container(
+                                                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 12),
+                                                      color: const Color(0xFFBAE6FD),
+                                                      child: Text(
+                                                        'Progress',
+                                                        textAlign: TextAlign.center,
+                                                        style: GoogleFonts.plusJakartaSans(
+                                                          fontSize: 12.5,
+                                                          fontWeight: FontWeight.w800,
+                                                          color: const Color(0xFF0F172A),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  // Kolom 3: Tugas & Quiz (Toska)
+                                                  Expanded(
+                                                    flex: 4,
+                                                    child: Container(
+                                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+                                                      color: const Color(0xFF99F6E4),
+                                                      child: Text(
+                                                        _selectedTypeFilter == 'tugas'
+                                                            ? 'Status Tugas'
+                                                            : (_selectedTypeFilter == 'quiz' ? 'Nilai Quiz' : 'Tugas & Quiz'),
+                                                        textAlign: TextAlign.center,
+                                                        style: GoogleFonts.plusJakartaSans(
+                                                          fontSize: 12.5,
+                                                          fontWeight: FontWeight.w800,
+                                                          color: const Color(0xFF0F172A),
+                                                        ),
                                                       ),
                                                     ),
                                                   ),
                                                 ],
                                               ),
                                             ),
-                                            const Divider(height: 1, color: Color(0xFFE2E8F0)),
 
                                             // Table Body
                                             masterList.isEmpty
@@ -1542,7 +1565,10 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                                         shrinkWrap: true,
                                                         physics: const NeverScrollableScrollPhysics(),
                                                         itemCount: masterList.length,
-                                                        separatorBuilder: (context, index) => const Divider(height: 1, color: Color(0xFFF1F5F9)),
+                                                        separatorBuilder: (context, index) => Divider(
+                                                          height: 1,
+                                                          color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+                                                        ),
                                                         itemBuilder: (context, index) {
                                                           final student = masterList[index] as Map<String, dynamic>;
                                                           final String sName = student['name'] ?? 'Siswa';
@@ -1572,26 +1598,35 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                                           return Material(
                                                             color: isEven
                                                                 ? (isDark ? const Color(0xFF1E1E24) : Colors.white)
-                                                                : (isDark ? const Color(0xFF1A1A20) : const Color(0xFFFAFAFA)),
+                                                                : (isDark ? const Color(0xFF16161B) : const Color(0xFFFAFAFA)),
                                                             child: InkWell(
                                                               onTap: joined
                                                                   ? () => _showStudentSubmissionDetailsSheet(context, sName, sUid, stages)
                                                                   : null,
                                                               child: Padding(
-                                                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                                                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                                                                 child: Row(
+                                                                  crossAxisAlignment: CrossAxisAlignment.center,
                                                                   children: [
-                                                                    // Col 1: Avatar + Name
+                                                                    // Kolom 1: Avatar (Zoomed) + Nama Full (Tidak ...)
                                                                     Expanded(
-                                                                      flex: 3,
+                                                                      flex: 4,
                                                                       child: Row(
+                                                                        crossAxisAlignment: CrossAxisAlignment.center,
                                                                         children: [
                                                                           Container(
-                                                                            width: 32,
-                                                                            height: 32,
+                                                                            width: 36,
+                                                                            height: 36,
                                                                             decoration: BoxDecoration(
                                                                               shape: BoxShape.circle,
                                                                               color: joined ? _getAvatarColor(sName) : Colors.red[50],
+                                                                              boxShadow: [
+                                                                                BoxShadow(
+                                                                                  color: Colors.black.withValues(alpha: 0.06),
+                                                                                  blurRadius: 4,
+                                                                                  offset: const Offset(0, 1.5),
+                                                                                ),
+                                                                              ],
                                                                             ),
                                                                             child: StudentAvatarWidget(
                                                                               uid: sUid,
@@ -1600,10 +1635,11 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                                                               joined: joined,
                                                                             ),
                                                                           ),
-                                                                          const SizedBox(width: 8),
+                                                                          const SizedBox(width: 10),
                                                                           Expanded(
                                                                             child: Column(
                                                                               crossAxisAlignment: CrossAxisAlignment.start,
+                                                                              mainAxisSize: MainAxisSize.min,
                                                                               children: [
                                                                                 Text(
                                                                                   sName,
@@ -1614,14 +1650,16 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                                                                         ? (isDark ? Colors.white : Colors.black87)
                                                                                         : (isDark ? Colors.white38 : Colors.black38),
                                                                                   ),
-                                                                                  maxLines: 1,
-                                                                                  overflow: TextOverflow.ellipsis,
+                                                                                  softWrap: true,
                                                                                 ),
+                                                                                const SizedBox(height: 2),
                                                                                 Text(
-                                                                                  joined ? 'UID: ${sUid.length > 6 ? sUid.substring(0, 6) : sUid}' : 'Belum Bergabung',
+                                                                                  joined
+                                                                                      ? (sUid.isNotEmpty ? 'UID: ${sUid.length > 6 ? sUid.substring(0, 6) : sUid}' : 'Telah Terhubung')
+                                                                                      : 'Belum Bergabung',
                                                                                   style: GoogleFonts.dmSans(
                                                                                     fontSize: 10.5,
-                                                                                    color: joined ? Colors.black45 : Colors.redAccent,
+                                                                                    color: joined ? (isDark ? Colors.white54 : Colors.black45) : Colors.redAccent,
                                                                                     fontWeight: FontWeight.w500,
                                                                                   ),
                                                                                 ),
@@ -1631,18 +1669,20 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                                                         ],
                                                                       ),
                                                                     ),
+                                                                    const SizedBox(width: 6),
 
-                                                                    // Col 2: Progress
+                                                                    // Kolom 2: Progress (Angka + Linear Bar)
                                                                     Expanded(
                                                                       flex: 2,
                                                                       child: Column(
+                                                                        crossAxisAlignment: CrossAxisAlignment.center,
                                                                         mainAxisAlignment: MainAxisAlignment.center,
                                                                         children: [
                                                                           Text(
                                                                             filteredTasks.isNotEmpty ? '$filteredDoneCount/${filteredTasks.length}' : '-',
                                                                             style: GoogleFonts.plusJakartaSans(
-                                                                              fontSize: 13,
-                                                                              fontWeight: FontWeight.bold,
+                                                                              fontSize: 12.5,
+                                                                              fontWeight: FontWeight.w800,
                                                                               color: isDark ? Colors.white : Colors.black87,
                                                                             ),
                                                                             textAlign: TextAlign.center,
@@ -1650,12 +1690,12 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                                                           if (filteredTasks.isNotEmpty) ...[
                                                                             const SizedBox(height: 4),
                                                                             SizedBox(
-                                                                              width: 44,
+                                                                              width: 42,
                                                                               child: ClipRRect(
                                                                                 borderRadius: BorderRadius.circular(4),
                                                                                 child: LinearProgressIndicator(
                                                                                   value: progressPercent / 100,
-                                                                                  minHeight: 3.5,
+                                                                                  minHeight: 4.0,
                                                                                   backgroundColor: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
                                                                                   valueColor: AlwaysStoppedAnimation<Color>(
                                                                                     progressPercent == 100
@@ -1669,8 +1709,9 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                                                         ],
                                                                       ),
                                                                     ),
+                                                                    const SizedBox(width: 6),
 
-                                                                    // Col 3: Task Badges
+                                                                    // Kolom 3: Tugas & Quiz Badges
                                                                     Expanded(
                                                                       flex: 4,
                                                                       child: joined && filteredTasks.isNotEmpty
@@ -1678,6 +1719,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                                                               scrollDirection: Axis.horizontal,
                                                                               physics: const ClampingScrollPhysics(),
                                                                               child: Row(
+                                                                                mainAxisAlignment: MainAxisAlignment.center,
                                                                                 children: filteredTasks.map((tInfo) {
                                                                                   final String tKey = tInfo['key'];
                                                                                   final String tTitle = tInfo['title'];
@@ -1693,8 +1735,8 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                                                                       message: '❓ Quiz: $tTitle\nNilai: ${quizScore ?? "Belum dikerjakan"}',
                                                                                       triggerMode: TooltipTriggerMode.tap,
                                                                                       child: Container(
-                                                                                        margin: const EdgeInsets.only(right: 5),
-                                                                                        width: 32,
+                                                                                        margin: const EdgeInsets.only(right: 4),
+                                                                                        width: 30,
                                                                                         height: 22,
                                                                                         decoration: BoxDecoration(
                                                                                           color: isFinished ? const Color(0xFFFFF7ED) : const Color(0xFFF1F5F9),
@@ -1708,7 +1750,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                                                                         child: Text(
                                                                                           displayText,
                                                                                           style: GoogleFonts.plusJakartaSans(
-                                                                                            fontSize: 12.5,
+                                                                                            fontSize: 11.5,
                                                                                             fontWeight: FontWeight.bold,
                                                                                             color: isFinished ? const Color(0xFFEA580C) : Colors.black45,
                                                                                           ),
@@ -1724,7 +1766,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                                                                             ? () => _showViewTaskSubmissionDialog(context, sName, tTitle, studentData, tKey)
                                                                                             : null,
                                                                                         child: Container(
-                                                                                          margin: const EdgeInsets.only(right: 5),
+                                                                                          margin: const EdgeInsets.only(right: 4),
                                                                                           width: 22,
                                                                                           height: 22,
                                                                                           decoration: BoxDecoration(
@@ -1741,7 +1783,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                                                                               : Text(
                                                                                                   '-',
                                                                                                   style: GoogleFonts.plusJakartaSans(
-                                                                                                    fontSize: 12.5,
+                                                                                                    fontSize: 11.5,
                                                                                                     fontWeight: FontWeight.bold,
                                                                                                     color: Colors.black38,
                                                                                                   ),
@@ -1753,10 +1795,14 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                                                                 }).toList(),
                                                                               ),
                                                                             )
-                                                                          : Text(
-                                                                              joined ? 'Belum ada data' : 'Belum bergabung',
-                                                                              style: GoogleFonts.dmSans(fontSize: 12, color: Colors.black38, fontStyle: FontStyle.italic),
-                                                                              textAlign: TextAlign.center,
+                                                                          : Center(
+                                                                              child: Text(
+                                                                                joined ? '-' : 'Belum Bergabung',
+                                                                                style: GoogleFonts.dmSans(
+                                                                                  fontSize: 11.5,
+                                                                                  color: isDark ? Colors.white38 : Colors.black38,
+                                                                                ),
+                                                                              ),
                                                                             ),
                                                                     ),
                                                                   ],
@@ -2295,12 +2341,12 @@ class _SoftAnimatedPatternPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final whiteDotPaint = Paint()
-      ..color = Colors.white.withValues(alpha: isDark ? 0.08 : 0.12)
+      ..color = Colors.white.withValues(alpha: isDark ? 0.35 : 0.12)
       ..style = PaintingStyle.fill;
 
     final greyDotPaint = Paint()
       ..color = isDark
-          ? const Color(0xFF94A3B8).withValues(alpha: 0.10)
+          ? const Color(0xFF475569).withValues(alpha: 0.20)
           : Colors.white.withValues(alpha: 0.08)
       ..style = PaintingStyle.fill;
 
@@ -2312,14 +2358,14 @@ class _SoftAnimatedPatternPainter extends CustomPainter {
 
     final ringPaint = Paint()
       ..color = isDark
-          ? const Color(0xFFCBD5E1).withValues(alpha: 0.06)
+          ? Colors.white.withValues(alpha: 0.30)
           : Colors.white.withValues(alpha: 0.08)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.4;
 
     final blackRingPaint = Paint()
       ..color = isDark
-          ? Colors.black.withValues(alpha: 0.18)
+          ? Colors.black.withValues(alpha: 0.16)
           : Colors.white.withValues(alpha: 0.04)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2.0;
@@ -2354,6 +2400,115 @@ class _SoftAnimatedPatternPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant _SoftAnimatedPatternPainter oldDelegate) {
     return oldDelegate.animationValue != animationValue || oldDelegate.isDark != isDark;
+  }
+}
+
+// BouncyButton Component (Liquid Spring Water Bounce with Squash)
+class BouncyButton extends StatefulWidget {
+  final Widget child;
+  final VoidCallback? onTap;
+  final double scaleDown;
+  final Duration duration;
+  final bool enableSquash;
+
+  const BouncyButton({
+    super.key,
+    required this.child,
+    this.onTap,
+    this.scaleDown = 0.90,
+    this.duration = const Duration(milliseconds: 140),
+    this.enableSquash = true,
+  });
+
+  @override
+  State<BouncyButton> createState() => _BouncyButtonState();
+}
+
+class _BouncyButtonState extends State<BouncyButton>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _scaleAnimation;
+  late Animation<double> _squashAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: widget.duration,
+    );
+    _scaleAnimation = Tween<double>(
+      begin: 1.0,
+      end: widget.scaleDown,
+    ).animate(CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeOutCubic,
+      reverseCurve: Curves.elasticOut,
+    ));
+    _squashAnimation = Tween<double>(
+      begin: 1.0,
+      end: 1.06,
+    ).animate(CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeOutCubic,
+      reverseCurve: Curves.elasticOut,
+    ));
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _onTapDown(TapDownDetails details) {
+    if (widget.onTap != null) {
+      _controller.forward();
+    }
+  }
+
+  void _onTapUp(TapUpDetails details) {
+    if (widget.onTap != null) {
+      _controller.reverse();
+    }
+  }
+
+  void _onTapCancel() {
+    if (widget.onTap != null) {
+      _controller.reverse();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTapDown: _onTapDown,
+      onTapUp: _onTapUp,
+      onTapCancel: _onTapCancel,
+      onTap: widget.onTap,
+      child: AnimatedBuilder(
+        animation: _controller,
+        builder: (context, child) {
+          if (widget.enableSquash) {
+            return Transform(
+              alignment: Alignment.center,
+              transform: Matrix4.diagonal3Values(
+                _scaleAnimation.value * _squashAnimation.value,
+                _scaleAnimation.value * (2.0 - _squashAnimation.value),
+                1.0,
+              ),
+              child: child,
+            );
+          }
+          return Transform.scale(
+            scale: _scaleAnimation.value,
+            child: child,
+          );
+        },
+        child: widget.child,
+      ),
+    );
   }
 }
 
@@ -2442,18 +2597,21 @@ class _StudentAvatarWidgetState extends State<StudentAvatarWidget> {
   Widget build(BuildContext context) {
     final String avatar = _profile?['avatar']?.toString() ?? widget.defaultAvatar;
     return ClipOval(
-      child: Image.asset(
-        avatar,
-        fit: BoxFit.cover,
-        errorBuilder: (ctx, err, st) => Container(
-          alignment: Alignment.center,
-          color: widget.joined ? _getAvatarColor(widget.studentName) : Colors.red[50],
-          child: Text(
-            widget.joined ? _getInitials(widget.studentName) : '!',
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: 11.7,
-              fontWeight: FontWeight.bold,
-              color: widget.joined ? Colors.white : Colors.red[400],
+      child: Transform.scale(
+        scale: 1.45,
+        child: Image.asset(
+          avatar,
+          fit: BoxFit.cover,
+          errorBuilder: (ctx, err, st) => Container(
+            alignment: Alignment.center,
+            color: widget.joined ? _getAvatarColor(widget.studentName) : Colors.red[50],
+            child: Text(
+              widget.joined ? _getInitials(widget.studentName) : '!',
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 11.7,
+                fontWeight: FontWeight.bold,
+                color: widget.joined ? Colors.white : Colors.red[400],
+              ),
             ),
           ),
         ),

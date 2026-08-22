@@ -7199,14 +7199,16 @@ class _AnimatedScheduleCapsuleState extends State<_AnimatedScheduleCapsule> {
               width: 28,
               height: 28,
               decoration: BoxDecoration(
-                color: isDark ? const Color(0xFF18181B) : Colors.black.withValues(alpha: 0.08),
+                color: isDark
+                    ? const Color(0xFF18181B)
+                    : widget.accentColor.withValues(alpha: 0.22),
                 shape: BoxShape.circle,
               ),
               child: Center(
                 child: Icon(
                   Icons.warning_amber_rounded,
                   size: 16,
-                  color: widget.cardColor,
+                  color: isDark ? Colors.white : Colors.black87,
                 ),
               ),
             ),
@@ -7258,14 +7260,16 @@ class _AnimatedScheduleCapsuleState extends State<_AnimatedScheduleCapsule> {
               width: 28,
               height: 28,
               decoration: BoxDecoration(
-                color: isDark ? const Color(0xFF18181B) : Colors.black.withValues(alpha: 0.08),
+                color: isDark
+                    ? const Color(0xFF18181B)
+                    : widget.accentColor.withValues(alpha: 0.22),
                 shape: BoxShape.circle,
               ),
               child: Center(
                 child: Icon(
                   Icons.check_rounded,
                   size: 16,
-                  color: widget.cardColor,
+                  color: isDark ? Colors.white : Colors.black87,
                 ),
               ),
             ),
