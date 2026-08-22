@@ -4663,7 +4663,7 @@ class _ClassPageState extends State<ClassPage> {
                       ),
                   ],
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 8),
                 if (liveStages.isEmpty)
                   Container(
                     width: double.infinity,
@@ -4690,7 +4690,7 @@ class _ClassPageState extends State<ClassPage> {
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
                     itemCount: liveStages.length,
-                    separatorBuilder: (context, index) => const SizedBox(height: 12),
+                    separatorBuilder: (context, index) => const SizedBox(height: 6),
                     itemBuilder: (context, index) {
                       final stage = liveStages[index] as Map<String, dynamic>;
                       final String stageName = stage['name'] ?? 'Elemen ${index + 1}';
@@ -5018,6 +5018,7 @@ class _ClassPageState extends State<ClassPage> {
             final double screenHeight = MediaQuery.of(context).size.height;
 
             return Scaffold(
+              resizeToAvoidBottomInset: false,
               backgroundColor: isDark ? const Color(0xFF000000) : const Color(0xFFF8FAFC),
               body: Stack(
                 children: [
@@ -5100,8 +5101,17 @@ class _ClassPageState extends State<ClassPage> {
                                               children: [
                                                 Text(
                                                   name,
+                                                  maxLines: 3,
+                                                  overflow: TextOverflow.ellipsis,
                                                   style: GoogleFonts.plusJakartaSans(
-                                                    fontSize: 26.0,
+                                                    fontSize: () {
+                                                      final len = name.length;
+                                                      if (len > 60) return 16.0;
+                                                      if (len > 40) return 18.5;
+                                                      if (len > 25) return 21.0;
+                                                      if (len > 15) return 23.5;
+                                                      return 26.0;
+                                                    }(),
                                                     fontWeight: FontWeight.w900,
                                                     color: const Color(0xFF0F172A),
                                                     height: 1.15,
@@ -5354,11 +5364,11 @@ class _ClassPageState extends State<ClassPage> {
 
                   // Layer 1: Draggable Sheet Tahapan Pembelajaran (Meluncur Menutup Hero Saat Di-Drag/Scroll ke Atas)
                   DraggableScrollableSheet(
-                    initialChildSize: 0.58,
-                    minChildSize: 0.58,
+                    initialChildSize: 0.62,
+                    minChildSize: 0.62,
                     maxChildSize: 0.95,
                     snap: true,
-                    snapSizes: const [0.58, 0.95],
+                    snapSizes: const [0.62, 0.95],
                     builder: (context, scrollController) {
                       return Container(
                         decoration: BoxDecoration(
@@ -5377,7 +5387,7 @@ class _ClassPageState extends State<ClassPage> {
                         child: SingleChildScrollView(
                           controller: scrollController,
                           physics: const ClampingScrollPhysics(),
-                          padding: const EdgeInsets.fromLTRB(0, 12, 0, 40),
+                          padding: const EdgeInsets.fromLTRB(0, 14, 0, 40),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -5391,7 +5401,7 @@ class _ClassPageState extends State<ClassPage> {
                                   ),
                                 ),
                               ),
-                              const SizedBox(height: 12),
+                              const SizedBox(height: 16),
                               StreamBuilder<QuerySnapshot>(
                                 stream: FirebaseFirestore.instance
                                     .collection('users')
@@ -5428,7 +5438,7 @@ class _ClassPageState extends State<ClassPage> {
                                   );
                                 },
                               ),
-                              const SizedBox(height: 18),
+                              const SizedBox(height: 8),
                               Padding(
                                 padding: const EdgeInsets.symmetric(horizontal: 14),
                                 child: stagesListWidget,

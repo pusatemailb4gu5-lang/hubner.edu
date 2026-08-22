@@ -59,3 +59,4 @@ flutter:
     - assets/icon_pack/chat/
     - assets/iconapp/icon.png
     - assets/sounds/
+    - shorebird.yaml

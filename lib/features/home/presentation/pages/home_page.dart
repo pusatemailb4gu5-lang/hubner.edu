@@ -1559,7 +1559,7 @@ class _HomePageState extends State<HomePage> {
                         left: 14.0,
                         right: 14.0,
                         top: 8.0,
-                        bottom: 100.0,
+                        bottom: 125.0,
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,

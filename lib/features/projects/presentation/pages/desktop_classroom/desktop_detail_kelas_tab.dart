@@ -339,8 +339,16 @@ class DesktopDetailKelasTab extends StatelessWidget {
                                             children: [
                                               Text(
                                                 projectTitle,
+                                                maxLines: 3,
+                                                overflow: TextOverflow.ellipsis,
                                                 style: GoogleFonts.plusJakartaSans(
-                                                  fontSize: 28.1,
+                                                  fontSize: () {
+                                                    final len = projectTitle.length;
+                                                    if (len > 70) return 18.0;
+                                                    if (len > 50) return 21.0;
+                                                    if (len > 32) return 24.0;
+                                                    return 28.1;
+                                                  }(),
                                                   fontWeight: FontWeight.bold,
                                                   color: heroTextColor,
                                                   height: 1.2,

@@ -467,7 +467,9 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
                   Positioned(
                     left: 20,
                     right: 20,
-                    bottom: 24,
+                    bottom: MediaQuery.of(context).padding.bottom > 0
+                        ? MediaQuery.of(context).padding.bottom + 18
+                        : 32,
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(35),
                       child: BackdropFilter(
@@ -1612,7 +1614,7 @@ class _DiscussionTabState extends State<DiscussionTab> {
               child: listContent,
             ),
             Positioned(
-              bottom: safeBottomPadding + 10,
+              bottom: safeBottomPadding + 20,
               right: 16,
               child: GestureDetector(
                 onTap: () => _showCreateDiscussionDialog(context),

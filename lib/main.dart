@@ -35,14 +35,15 @@ void main() async {
     persistenceEnabled: false,
   );
 
-  // System UI: transparent status bar + white navigation bar to match app background
+  // System UI: transparent status bar + transparent navigation bar with dark icons (black 3-button nav)
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
     statusBarColor: Colors.transparent,
     statusBarIconBrightness: Brightness.dark,
-    systemNavigationBarColor: Colors.white,
+    systemNavigationBarColor: Colors.transparent,
     systemNavigationBarIconBrightness: Brightness.dark,
     systemNavigationBarDividerColor: Colors.transparent,
+    systemNavigationBarContrastEnforced: false,
   ));
 
   final prefs = await SharedPreferences.getInstance();
