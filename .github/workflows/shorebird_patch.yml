@@ -21,9 +21,14 @@ jobs:
           java-version: '17'
 
       - name: Set up Shorebird
-        uses: shorebirdtech/actions/setup-shorebird@v1
+        uses: shorebirdtech/setup-shorebird@v1
         with:
-          shorebird-token: ${{ secrets.SHOREBIRD_TOKEN }}
+          cache: true
+
+      - name: Set executable permissions for Gradle wrapper
+        run: chmod +x ./android/gradlew
 
       - name: Deploy Patch for Android
         run: shorebird patch android --force
+        env:
+          SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}

@@ -5017,10 +5017,19 @@ class _ClassPageState extends State<ClassPage> {
 
             final double screenHeight = MediaQuery.of(context).size.height;
 
-            return Scaffold(
-              resizeToAvoidBottomInset: false,
-              backgroundColor: isDark ? const Color(0xFF000000) : const Color(0xFFF8FAFC),
-              body: Stack(
+            return AnnotatedRegion<SystemUiOverlayStyle>(
+              value: SystemUiOverlayStyle(
+                statusBarColor: Colors.transparent,
+                statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+                systemNavigationBarColor: Colors.transparent,
+                systemNavigationBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+                systemNavigationBarDividerColor: Colors.transparent,
+                systemNavigationBarContrastEnforced: false,
+              ),
+              child: Scaffold(
+                resizeToAvoidBottomInset: false,
+                backgroundColor: isDark ? const Color(0xFF000000) : const Color(0xFFF8FAFC),
+                body: Stack(
                 children: [
                   // Layer 0: Fixed Hero Background & Header Content (Statis di belakang, tidak bergeser naik saat di-scroll)
                   Positioned(
@@ -5644,7 +5653,8 @@ class _ClassPageState extends State<ClassPage> {
                   ),
                 ],
               ),
-            );
+            ),
+          );
           },
         );
       },

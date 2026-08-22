@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'dart:async';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -118,9 +119,18 @@ class _SplashPageState extends State<SplashPage> with SingleTickerProviderStateM
     // Responsive font sizes
     final logoFontSize = widthToUse > 400 ? 44.0 : (widthToUse > 320 ? 36.0 : 30.0);
 
-    return Scaffold(
-      backgroundColor: isDark ? const Color(0xFF000000) : const Color(0xFF7F52FC),
-      body: Container(
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.light,
+        systemNavigationBarColor: Colors.transparent,
+        systemNavigationBarIconBrightness: Brightness.light,
+        systemNavigationBarDividerColor: Colors.transparent,
+        systemNavigationBarContrastEnforced: false,
+      ),
+      child: Scaffold(
+        backgroundColor: isDark ? const Color(0xFF000000) : const Color(0xFF7F52FC),
+        body: Container(
         color: isDark ? const Color(0xFF000000) : const Color(0xFF7F52FC),
         child: Stack(
           children: [
@@ -264,6 +274,9 @@ class _SplashPageState extends State<SplashPage> with SingleTickerProviderStateM
           ],
         ),
       ),
-    );
-  }
+    ),
+  );
 }
+}
+
+

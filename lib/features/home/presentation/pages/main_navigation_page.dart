@@ -457,84 +457,94 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
             );
           }
 
-            return Scaffold(
-              backgroundColor: isDark ? Colors.black : Colors.white,
-              body: Stack(
-                children: [
-                  Positioned.fill(
-                    child: IndexedStack(index: _currentIndex, children: _pages),
-                  ),
-                  Positioned(
-                    left: 20,
-                    right: 20,
-                    bottom: MediaQuery.of(context).padding.bottom > 0
-                        ? MediaQuery.of(context).padding.bottom + 18
-                        : 32,
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(35),
-                      child: BackdropFilter(
-                        filter: ui.ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-                        child: Container(
-                          height: 66,
-                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
-                          decoration: BoxDecoration(
-                            color: isDark
-                                ? const Color(0xFF141416).withValues(alpha: 0.85)
-                                : Colors.white.withValues(alpha: 0.8),
-                            borderRadius: BorderRadius.circular(35),
-                            border: Border.all(
+            return AnnotatedRegion<SystemUiOverlayStyle>(
+              value: SystemUiOverlayStyle(
+                statusBarColor: Colors.transparent,
+                statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+                systemNavigationBarColor: Colors.transparent,
+                systemNavigationBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+                systemNavigationBarDividerColor: Colors.transparent,
+                systemNavigationBarContrastEnforced: false,
+              ),
+              child: Scaffold(
+                backgroundColor: isDark ? Colors.black : Colors.white,
+                body: Stack(
+                  children: [
+                    Positioned.fill(
+                      child: IndexedStack(index: _currentIndex, children: _pages),
+                    ),
+                    Positioned(
+                      left: 20,
+                      right: 20,
+                      bottom: MediaQuery.of(context).padding.bottom > 0
+                          ? MediaQuery.of(context).padding.bottom + 18
+                          : 32,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(35),
+                        child: BackdropFilter(
+                          filter: ui.ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+                          child: Container(
+                            height: 66,
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
+                            decoration: BoxDecoration(
                               color: isDark
-                                  ? Colors.white.withValues(alpha: 0.15)
-                                  : Colors.white.withValues(alpha: 0.45),
-                              width: 1.5,
-                            ),
-                            boxShadow: [
-                              BoxShadow(
+                                  ? const Color(0xFF141416).withValues(alpha: 0.85)
+                                  : Colors.white.withValues(alpha: 0.8),
+                              borderRadius: BorderRadius.circular(35),
+                              border: Border.all(
                                 color: isDark
-                                    ? Colors.black.withValues(alpha: 0.6)
-                                    : const Color(0xFF0F172A).withValues(alpha: 0.08),
-                                blurRadius: 20,
-                                offset: const Offset(0, 6),
+                                    ? Colors.white.withValues(alpha: 0.15)
+                                    : Colors.white.withValues(alpha: 0.45),
+                                width: 1.5,
                               ),
-                            ],
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceAround,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              _buildNavItem(
-                                icon: Icons.grid_view_rounded,
-                                label: 'Beranda',
-                                index: 0,
-                              ),
-                              _buildNavItem(
-                                icon: Icons.assignment_outlined,
-                                label: isGuru ? 'Laporan' : 'Tugas',
-                                index: 1,
-                              ),
-                              _buildNavItem(
-                                icon: Icons.chat_bubble_outline_rounded,
-                                label: 'Diskusi',
-                                index: 2,
-                                unreadCount: totalUnread,
-                              ),
-                              _buildNavItem(
-                                icon: isGuru ? Icons.article_outlined : Icons.analytics_outlined,
-                                label: isGuru ? 'Dokumen' : 'Monitoring',
-                                index: 3,
-                              ),
-                              _buildNavItem(
-                                icon: Icons.person_outline_rounded,
-                                label: 'Profil',
-                                index: 4,
-                              ),
-                            ],
+                              boxShadow: [
+                                BoxShadow(
+                                  color: isDark
+                                      ? Colors.black.withValues(alpha: 0.6)
+                                      : const Color(0xFF0F172A).withValues(alpha: 0.08),
+                                  blurRadius: 20,
+                                  offset: const Offset(0, 6),
+                                ),
+                              ],
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceAround,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                _buildNavItem(
+                                  icon: Icons.grid_view_rounded,
+                                  label: 'Beranda',
+                                  index: 0,
+                                ),
+                                _buildNavItem(
+                                  icon: Icons.assignment_outlined,
+                                  label: isGuru ? 'Laporan' : 'Tugas',
+                                  index: 1,
+                                ),
+                                _buildNavItem(
+                                  icon: Icons.chat_bubble_outline_rounded,
+                                  label: 'Diskusi',
+                                  index: 2,
+                                  unreadCount: totalUnread,
+                                ),
+                                _buildNavItem(
+                                  icon: isGuru ? Icons.article_outlined : Icons.analytics_outlined,
+                                  label: isGuru ? 'Dokumen' : 'Monitoring',
+                                  index: 3,
+                                ),
+                                _buildNavItem(
+                                  icon: Icons.person_outline_rounded,
+                                  label: 'Profil',
+                                  index: 4,
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             );
               },
