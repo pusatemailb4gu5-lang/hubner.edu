@@ -461,7 +461,7 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
               value: SystemUiOverlayStyle(
                 statusBarColor: Colors.transparent,
                 statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
-                systemNavigationBarColor: Colors.transparent,
+                systemNavigationBarColor: isDark ? Colors.black : Colors.white,
                 systemNavigationBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
                 systemNavigationBarDividerColor: Colors.transparent,
                 systemNavigationBarContrastEnforced: false,

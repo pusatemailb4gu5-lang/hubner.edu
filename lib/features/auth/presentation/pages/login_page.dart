@@ -672,7 +672,7 @@ class _LoginPageState extends State<LoginPage> {
         value: SystemUiOverlayStyle(
           statusBarColor: Colors.transparent,
           statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
-          systemNavigationBarColor: Colors.transparent,
+          systemNavigationBarColor: isDark ? Colors.black : Colors.white,
           systemNavigationBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
           systemNavigationBarDividerColor: Colors.transparent,
           systemNavigationBarContrastEnforced: false,

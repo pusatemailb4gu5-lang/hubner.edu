@@ -97,7 +97,7 @@ class _OnboardingPageState extends State<OnboardingPage> with SingleTickerProvid
       value: SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
         statusBarIconBrightness: Brightness.light,
-        systemNavigationBarColor: Colors.transparent,
+        systemNavigationBarColor: isDark ? Colors.black : Colors.white,
         systemNavigationBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
         systemNavigationBarDividerColor: Colors.transparent,
         systemNavigationBarContrastEnforced: false,

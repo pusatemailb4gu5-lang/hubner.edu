@@ -4663,7 +4663,7 @@ class _ClassPageState extends State<ClassPage> {
                       ),
                   ],
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 4),
                 if (liveStages.isEmpty)
                   Container(
                     width: double.infinity,
@@ -4687,6 +4687,7 @@ class _ClassPageState extends State<ClassPage> {
                   )
                 else
                   ListView.separated(
+                    padding: EdgeInsets.zero,
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
                     itemCount: liveStages.length,
@@ -5039,7 +5040,7 @@ class _ClassPageState extends State<ClassPage> {
               value: SystemUiOverlayStyle(
                 statusBarColor: Colors.transparent,
                 statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
-                systemNavigationBarColor: Colors.transparent,
+                systemNavigationBarColor: isDark ? Colors.black : Colors.white,
                 systemNavigationBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
                 systemNavigationBarDividerColor: Colors.transparent,
                 systemNavigationBarContrastEnforced: false,
