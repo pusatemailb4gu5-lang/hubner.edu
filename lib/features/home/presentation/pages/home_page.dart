@@ -3718,13 +3718,6 @@ class _HomePageState extends State<HomePage> {
                           }
                           final bool isDark = AppColors.isDarkMode;
                           final double t = ((scrollOffset - 20.0) / 40.0).clamp(0.0, 1.0);
-                          final Color headerBg = isDark
-                              ? Colors.black.withValues(alpha: t * 0.50)
-                              : Colors.white.withValues(alpha: t * 0.85);
-                          final Color borderColor = isDark
-                              ? Colors.transparent
-                              : const Color(0xFFE2E8F0).withValues(alpha: t * 0.8);
-                          final double shadowAlpha = isDark ? 0.0 : t * 0.06;
 
                           return Positioned(
                             top: 0,
@@ -3732,214 +3725,119 @@ class _HomePageState extends State<HomePage> {
                             right: 0,
                             child: Opacity(
                               opacity: t,
-                              child: ClipRect(
-                                child: BackdropFilter(
-                                  filter: ui.ImageFilter.blur(sigmaX: t * 16, sigmaY: t * 16),
-                                  child: Container(
-                                    padding: const EdgeInsets.fromLTRB(14, 8, 14, 10),
-                                    decoration: BoxDecoration(
-                                      color: headerBg,
-                                      border: isDark
-                                          ? null
-                                          : Border(
-                                              bottom: BorderSide(
-                                                color: t > 0.1 ? borderColor : Colors.transparent,
-                                                width: 1.0,
-                                              ),
-                                            ),
-                                      boxShadow: (!isDark && t > 0.1)
-                                          ? [
-                                              BoxShadow(
-                                                color: Colors.black.withValues(alpha: shadowAlpha),
-                                                blurRadius: 8,
-                                                offset: const Offset(0, 2),
-                                              ),
-                                            ]
-                                          : null,
-                                    ),
-                                    child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                      crossAxisAlignment: CrossAxisAlignment.center,
-                                      children: [
-                                        // Sebelah Kiri: Avatar di sebelah kirinya Nama dan Role
-                                        Expanded(
-                                          child: Row(
-                                            children: [
-                                              if (userPhoto.isNotEmpty) ...[
-                                                Container(
-                                                  width: 36,
-                                                  height: 36,
-                                                  decoration: BoxDecoration(
-                                                    shape: BoxShape.circle,
-                                                    color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
-                                                    boxShadow: [
-                                                      BoxShadow(
-                                                        color: Colors.black.withValues(alpha: 0.08),
-                                                        blurRadius: 4,
-                                                        offset: const Offset(0, 2),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                  child: ClipOval(
-                                                    child: Transform.scale(
-                                                      scale: 1.45,
-                                                      child: userPhoto.startsWith('http')
-                                                          ? Image.network(
-                                                              userPhoto,
-                                                              fit: BoxFit.cover,
-                                                              errorBuilder: (_, __, ___) => Center(
-                                                                child: Text(
-                                                                  userName.isNotEmpty
-                                                                      ? userName.substring(0, (userName.length >= 2 ? 2 : 1)).toUpperCase()
-                                                                      : 'U',
-                                                                  style: GoogleFonts.plusJakartaSans(
-                                                                    fontWeight: FontWeight.w800,
-                                                                    color: isDark ? Colors.white : Colors.black,
-                                                                    fontSize: 13,
-                                                                  ),
-                                                                ),
-                                                              ),
-                                                            )
-                                                          : Image.asset(
-                                                              userPhoto,
-                                                              fit: BoxFit.cover,
-                                                              errorBuilder: (_, __, ___) => Center(
-                                                                child: Text(
-                                                                  userName.isNotEmpty
-                                                                      ? userName.substring(0, (userName.length >= 2 ? 2 : 1)).toUpperCase()
-                                                                      : 'U',
-                                                                  style: GoogleFonts.plusJakartaSans(
-                                                                    fontWeight: FontWeight.w800,
-                                                                    color: isDark ? Colors.white : Colors.black,
-                                                                    fontSize: 13,
-                                                                  ),
-                                                                ),
-                                                              ),
-                                                            ),
-                                                    ),
-                                                  ),
-                                                ),
-                                                const SizedBox(width: 9),
-                                              ],
-                                              Expanded(
-                                                child: Column(
-                                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                                  mainAxisSize: MainAxisSize.min,
-                                                  children: [
-                                                    Text(
-                                                      role.toLowerCase() == 'guru'
-                                                          ? 'Pengajar · ${schoolLevel.isNotEmpty ? schoolLevel.toUpperCase() : 'SMA/SMK'}'
-                                                          : 'Siswa · ${schoolLevel.isNotEmpty ? schoolLevel.toUpperCase() : 'SMA/SMK'}',
-                                                      style: GoogleFonts.plusJakartaSans(
-                                                        fontSize: 11.0,
-                                                        fontWeight: FontWeight.w600,
-                                                        color: isDark ? Colors.white60 : const Color(0xFF64748B),
-                                                      ),
-                                                      maxLines: 1,
-                                                      overflow: TextOverflow.ellipsis,
-                                                    ),
-                                                    const SizedBox(height: 1.0),
-                                                    Text(
-                                                      fullName.isNotEmpty ? fullName : userName,
-                                                      style: GoogleFonts.plusJakartaSans(
-                                                        fontSize: 16.0,
-                                                        fontWeight: FontWeight.w800,
-                                                        color: isDark ? Colors.white : const Color(0xFF0F172A),
-                                                        height: 1.15,
-                                                      ),
-                                                      maxLines: 1,
-                                                      overflow: TextOverflow.ellipsis,
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                            ],
-                                          ),
+                              child: Container(
+                                padding: const EdgeInsets.fromLTRB(14, 8, 14, 16),
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    begin: Alignment.topCenter,
+                                    end: Alignment.bottomCenter,
+                                    colors: [
+                                      (isDark ? Colors.black : Colors.white).withValues(alpha: t * 0.95),
+                                      (isDark ? Colors.black : Colors.white).withValues(alpha: t * 0.70),
+                                      (isDark ? Colors.black : Colors.white).withValues(alpha: 0.0),
+                                    ],
+                                    stops: const [0.0, 0.60, 1.0],
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        'Hi, ${(fullName.isNotEmpty ? fullName : userName).trim()}',
+                                        style: GoogleFonts.plusJakartaSans(
+                                          fontSize: 18.5,
+                                          fontWeight: FontWeight.w800,
+                                          color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                          letterSpacing: -0.4,
                                         ),
-                                        const SizedBox(width: 10),
-                                        Row(
-                                          children: [
-                                            ValueListenableBuilder<String>(
-                                              valueListenable: HubnerApp.themeNotifier,
-                                              builder: (context, currentTheme, _) {
-                                                final bool currentIsDark = currentTheme == 'Gelap' || currentTheme == 'Hitam';
-                                                return BouncyButton(
-                                                  onTap: () => _toggleThemeWithBounce(context, currentIsDark),
-                                                  child: Container(
-                                                    width: 42,
-                                                    height: 42,
-                                                    decoration: BoxDecoration(
-                                                      color: currentIsDark
-                                                          ? const Color(0xFF18181B)
-                                                          : Colors.white,
-                                                      shape: BoxShape.circle,
-                                                      border: Border.all(
-                                                        color: currentIsDark
-                                                            ? const Color(0xFF27272A)
-                                                            : const Color(0xFFF1F5F9),
-                                                        width: 1.2,
-                                                      ),
-                                                      boxShadow: [
-                                                        BoxShadow(
-                                                          color: Colors.black.withValues(alpha: currentIsDark ? 0.35 : 0.04),
-                                                          blurRadius: 8,
-                                                          offset: const Offset(0, 2),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                    child: Icon(
-                                                      currentIsDark ? Icons.wb_sunny_rounded : Icons.nightlight_round,
-                                                      color: currentIsDark ? const Color(0xFFFBBF24) : Colors.black87,
-                                                      size: 20,
-                                                    ),
-                                                  ),
-                                                );
-                                              },
-                                            ),
-                                            const SizedBox(width: 10),
-                                            BouncyButton(
-                                              onTap: () {
-                                                Navigator.push(
-                                                  context,
-                                                  MaterialPageRoute(
-                                                    builder: (_) => const NotificationsPage(),
-                                                  ),
-                                                );
-                                              },
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 10),
+                                    Row(
+                                      children: [
+                                        ValueListenableBuilder<String>(
+                                          valueListenable: HubnerApp.themeNotifier,
+                                          builder: (context, currentTheme, _) {
+                                            final bool currentIsDark = currentTheme == 'Gelap' || currentTheme == 'Hitam';
+                                            return BouncyButton(
+                                              onTap: () => _toggleThemeWithBounce(context, currentIsDark),
                                               child: Container(
-                                                width: 42,
-                                                height: 42,
+                                                width: 36,
+                                                height: 36,
                                                 decoration: BoxDecoration(
-                                                  color: isDark
+                                                  color: currentIsDark
                                                       ? const Color(0xFF18181B)
                                                       : Colors.white,
                                                   shape: BoxShape.circle,
                                                   border: Border.all(
-                                                    color: isDark
+                                                    color: currentIsDark
                                                         ? const Color(0xFF27272A)
                                                         : const Color(0xFFF1F5F9),
-                                                    width: 1.2,
+                                                    width: 1.1,
                                                   ),
                                                   boxShadow: [
                                                     BoxShadow(
-                                                      color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.04),
-                                                      blurRadius: 8,
-                                                      offset: const Offset(0, 2),
+                                                      color: Colors.black.withValues(alpha: currentIsDark ? 0.35 : 0.04),
+                                                      blurRadius: 6,
+                                                      offset: const Offset(0, 1.5),
                                                     ),
                                                   ],
                                                 ),
                                                 child: Icon(
-                                                  Icons.notifications_none_rounded,
-                                                  color: isDark ? Colors.white : Colors.black,
-                                                  size: 20,
+                                                  currentIsDark ? Icons.wb_sunny_rounded : Icons.nightlight_round,
+                                                  color: currentIsDark ? const Color(0xFFFBBF24) : Colors.black87,
+                                                  size: 16,
                                                 ),
                                               ),
+                                            );
+                                          },
+                                        ),
+                                        const SizedBox(width: 8),
+                                        BouncyButton(
+                                          onTap: () {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (_) => const NotificationsPage(),
+                                              ),
+                                            );
+                                          },
+                                          child: Container(
+                                            width: 36,
+                                            height: 36,
+                                            decoration: BoxDecoration(
+                                              color: isDark
+                                                  ? const Color(0xFF18181B)
+                                                  : Colors.white,
+                                              shape: BoxShape.circle,
+                                              border: Border.all(
+                                                color: isDark
+                                                    ? const Color(0xFF27272A)
+                                                    : const Color(0xFFF1F5F9),
+                                                width: 1.1,
+                                              ),
+                                              boxShadow: [
+                                                BoxShadow(
+                                                  color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.04),
+                                                  blurRadius: 6,
+                                                  offset: const Offset(0, 1.5),
+                                                ),
+                                              ],
                                             ),
-                                          ],
+                                            child: Icon(
+                                              Icons.notifications_none_rounded,
+                                              color: isDark ? Colors.white : Colors.black,
+                                              size: 17,
+                                            ),
+                                          ),
                                         ),
                                       ],
                                     ),
-                                  ),
+                                  ],
                                 ),
                               ),
                             ),

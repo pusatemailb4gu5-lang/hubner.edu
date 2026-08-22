@@ -25,6 +25,10 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
   int? _selectedMateriFilterIdx;
   String _selectedTypeFilter = 'all'; // 'all', 'tugas', 'quiz'
 
+  final GlobalKey _classDropdownKey = GlobalKey();
+  final GlobalKey _elemenDropdownKey = GlobalKey();
+  final GlobalKey _materiDropdownKey = GlobalKey();
+
   late Stream<QuerySnapshot> _projectsStream;
   Stream<QuerySnapshot>? _progressStream;
   String? _lastLoadedProjectId;
@@ -38,6 +42,398 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
 
   // Soft pattern animation controller for hero background
   late AnimationController _patternAnimController;
+
+  void _openClassDropdown(BuildContext context, GlobalKey buttonKey, List<QueryDocumentSnapshot> classrooms) {
+    final RenderBox? renderBox = buttonKey.currentContext?.findRenderObject() as RenderBox?;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    Offset offset = Offset.zero;
+    Size size = Size.zero;
+    if (renderBox != null) {
+      size = renderBox.size;
+      offset = renderBox.localToGlobal(Offset.zero);
+    }
+
+    final double top = offset.dy + size.height + 6;
+    final double left = offset.dx;
+    final double width = math.max(size.width, 240.0);
+
+    showDialog(
+      context: context,
+      barrierColor: Colors.transparent,
+      builder: (dialogCtx) {
+        return Stack(
+          children: [
+            Positioned(
+              top: top,
+              left: left,
+              width: width,
+              child: Material(
+                color: Colors.transparent,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: isDark ? const Color(0xFF18181B) : Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                      width: 1.2,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: isDark ? 0.45 : 0.12),
+                        blurRadius: 16,
+                        offset: const Offset(0, 6),
+                      ),
+                    ],
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(20),
+                    child: ListView.separated(
+                      shrinkWrap: true,
+                      padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 6),
+                      itemCount: classrooms.length,
+                      separatorBuilder: (_, _) => Divider(
+                        height: 1,
+                        color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+                      ),
+                      itemBuilder: (context, index) {
+                        final doc = classrooms[index];
+                        final data = doc.data() as Map<String, dynamic>;
+                        final bool isSelected = doc.id == _selectedProjectId;
+
+                        return InkWell(
+                          borderRadius: BorderRadius.circular(12),
+                          onTap: () {
+                            Navigator.pop(dialogCtx);
+                            setState(() {
+                              _selectedProjectId = doc.id;
+                              _selectedStageFilterIdx = null;
+                              _selectedMateriFilterIdx = null;
+                            });
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                            child: Row(
+                              children: [
+                                _buildClassIcon(data, size: 30),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: Text(
+                                    data['name'] ?? 'Classroom',
+                                    style: GoogleFonts.plusJakartaSans(
+                                      fontSize: 13,
+                                      fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
+                                      color: isSelected
+                                          ? const Color(0xFF60A5FA)
+                                          : (isDark ? Colors.white : const Color(0xFF0F172A)),
+                                    ),
+                                  ),
+                                ),
+                                if (isSelected)
+                                  const Icon(Icons.check_rounded, color: Color(0xFF60A5FA), size: 18),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _openElemenDropdown(BuildContext context, GlobalKey buttonKey, List stages) {
+    final RenderBox? renderBox = buttonKey.currentContext?.findRenderObject() as RenderBox?;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    Offset offset = Offset.zero;
+    Size size = Size.zero;
+    if (renderBox != null) {
+      size = renderBox.size;
+      offset = renderBox.localToGlobal(Offset.zero);
+    }
+
+    final double top = offset.dy + size.height + 6;
+    final double left = offset.dx;
+    final double width = math.max(size.width, 220.0);
+
+    showDialog(
+      context: context,
+      barrierColor: Colors.transparent,
+      builder: (dialogCtx) {
+        return Stack(
+          children: [
+            Positioned(
+              top: top,
+              left: left,
+              width: width,
+              child: Material(
+                color: Colors.transparent,
+                child: Container(
+                  constraints: const BoxConstraints(maxHeight: 320),
+                  decoration: BoxDecoration(
+                    color: isDark ? const Color(0xFF18181B) : Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                      width: 1.2,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: isDark ? 0.45 : 0.12),
+                        blurRadius: 16,
+                        offset: const Offset(0, 6),
+                      ),
+                    ],
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(20),
+                    child: SingleChildScrollView(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          InkWell(
+                            borderRadius: BorderRadius.circular(12),
+                            onTap: () {
+                              Navigator.pop(dialogCtx);
+                              setState(() {
+                                _selectedStageFilterIdx = null;
+                                _selectedMateriFilterIdx = null;
+                              });
+                            },
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      'Semua Elemen',
+                                      style: GoogleFonts.plusJakartaSans(
+                                        fontSize: 13,
+                                        fontWeight: _selectedStageFilterIdx == null ? FontWeight.bold : FontWeight.w600,
+                                        color: _selectedStageFilterIdx == null
+                                            ? const Color(0xFF60A5FA)
+                                            : (isDark ? Colors.white : const Color(0xFF0F172A)),
+                                      ),
+                                    ),
+                                  ),
+                                  if (_selectedStageFilterIdx == null)
+                                    const Icon(Icons.check_rounded, color: Color(0xFF60A5FA), size: 18),
+                                ],
+                              ),
+                            ),
+                          ),
+                          ...List.generate(stages.length, (idx) {
+                            final stage = stages[idx] as Map<String, dynamic>;
+                            final String title = stage['title'] ?? 'Elemen ${idx + 1}';
+                            final bool isSelected = _selectedStageFilterIdx == idx;
+
+                            return Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Divider(height: 1, color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9)),
+                                InkWell(
+                                  borderRadius: BorderRadius.circular(12),
+                                  onTap: () {
+                                    Navigator.pop(dialogCtx);
+                                    setState(() {
+                                      _selectedStageFilterIdx = idx;
+                                      _selectedMateriFilterIdx = null;
+                                    });
+                                  },
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                                    child: Row(
+                                      children: [
+                                        Expanded(
+                                          child: Text(
+                                            title,
+                                            style: GoogleFonts.plusJakartaSans(
+                                              fontSize: 13,
+                                              fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
+                                              color: isSelected
+                                                  ? const Color(0xFF60A5FA)
+                                                  : (isDark ? Colors.white : const Color(0xFF0F172A)),
+                                            ),
+                                          ),
+                                        ),
+                                        if (isSelected)
+                                          const Icon(Icons.check_rounded, color: Color(0xFF60A5FA), size: 18),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            );
+                          }),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _openMateriDropdown(BuildContext context, GlobalKey buttonKey, List stages) {
+    if (_selectedStageFilterIdx == null) return;
+    final stage = stages[_selectedStageFilterIdx!] as Map<String, dynamic>;
+    final List rawMateris = stage['materis'] as List? ?? [];
+    List<Map<String, dynamic>> materis = [];
+    if (rawMateris.isNotEmpty) {
+      materis = List<Map<String, dynamic>>.from(rawMateris);
+    } else {
+      final List tasksList = stage['tasks'] as List? ?? [];
+      if (tasksList.isNotEmpty) {
+        materis = [
+          {'title': 'Materi', 'tasks': tasksList}
+        ];
+      }
+    }
+    if (materis.isEmpty) return;
+
+    final RenderBox? renderBox = buttonKey.currentContext?.findRenderObject() as RenderBox?;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    Offset offset = Offset.zero;
+    Size size = Size.zero;
+    if (renderBox != null) {
+      size = renderBox.size;
+      offset = renderBox.localToGlobal(Offset.zero);
+    }
+
+    final double top = offset.dy + size.height + 6;
+    final double left = offset.dx;
+    final double width = math.max(size.width, 220.0);
+
+    showDialog(
+      context: context,
+      barrierColor: Colors.transparent,
+      builder: (dialogCtx) {
+        return Stack(
+          children: [
+            Positioned(
+              top: top,
+              left: left,
+              width: width,
+              child: Material(
+                color: Colors.transparent,
+                child: Container(
+                  constraints: const BoxConstraints(maxHeight: 320),
+                  decoration: BoxDecoration(
+                    color: isDark ? const Color(0xFF18181B) : Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                      width: 1.2,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: isDark ? 0.45 : 0.12),
+                        blurRadius: 16,
+                        offset: const Offset(0, 6),
+                      ),
+                    ],
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(20),
+                    child: SingleChildScrollView(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          InkWell(
+                            borderRadius: BorderRadius.circular(12),
+                            onTap: () {
+                              Navigator.pop(dialogCtx);
+                              setState(() {
+                                _selectedMateriFilterIdx = null;
+                              });
+                            },
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      'Semua Materi',
+                                      style: GoogleFonts.plusJakartaSans(
+                                        fontSize: 13,
+                                        fontWeight: _selectedMateriFilterIdx == null ? FontWeight.bold : FontWeight.w600,
+                                        color: _selectedMateriFilterIdx == null
+                                            ? const Color(0xFF60A5FA)
+                                            : (isDark ? Colors.white : const Color(0xFF0F172A)),
+                                      ),
+                                    ),
+                                  ),
+                                  if (_selectedMateriFilterIdx == null)
+                                    const Icon(Icons.check_rounded, color: Color(0xFF60A5FA), size: 18),
+                                ],
+                              ),
+                            ),
+                          ),
+                          ...List.generate(materis.length, (mIdx) {
+                            final m = materis[mIdx];
+                            final String title = m['title'] ?? 'Materi ${mIdx + 1}';
+                            final bool isSelected = _selectedMateriFilterIdx == mIdx;
+
+                            return Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Divider(height: 1, color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9)),
+                                InkWell(
+                                  borderRadius: BorderRadius.circular(12),
+                                  onTap: () {
+                                    Navigator.pop(dialogCtx);
+                                    setState(() {
+                                      _selectedMateriFilterIdx = mIdx;
+                                    });
+                                  },
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                                    child: Row(
+                                      children: [
+                                        Expanded(
+                                          child: Text(
+                                            title,
+                                            style: GoogleFonts.plusJakartaSans(
+                                              fontSize: 13,
+                                              fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
+                                              color: isSelected
+                                                  ? const Color(0xFF60A5FA)
+                                                  : (isDark ? Colors.white : const Color(0xFF0F172A)),
+                                            ),
+                                          ),
+                                        ),
+                                        if (isSelected)
+                                          const Icon(Icons.check_rounded, color: Color(0xFF60A5FA), size: 18),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            );
+                          }),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   Widget _buildClassIcon(Map<String, dynamic> data, {double size = 26}) {
     final rawIcon = (data['icon'] ?? '').toString();
@@ -657,127 +1053,62 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                   const SizedBox(height: 16),
 
                                    // ==========================================
-                                  // 2. PILIH CLASSROOM (POPUP MENU BUTTON PERSIS TAMBAH TUGAS) & ATUR PRESENSI
-                                  // ==========================================
-                                  Row(
-                                    children: [
-                                      // Pilih Kelas Selector (PopupMenuButton)
-                                      Expanded(
-                                        child: PopupMenuButton<String>(
-                                          tooltip: '',
-                                          position: PopupMenuPosition.under,
-                                          offset: const Offset(0, 6),
-                                          color: isDark ? const Color(0xFF18181B) : Colors.white,
-                                          elevation: 6,
-                                          constraints: const BoxConstraints(minWidth: 220, maxWidth: 340),
-                                          shadowColor: Colors.black.withValues(alpha: isDark ? 0.45 : 0.14),
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(16),
-                                            side: BorderSide(
-                                              color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
-                                              width: 1.0,
-                                            ),
-                                          ),
-                                          onSelected: (val) {
-                                            setState(() {
-                                              _selectedProjectId = val;
-                                              _selectedStageFilterIdx = null;
-                                              _selectedMateriFilterIdx = null;
-                                            });
-                                          },
-                                          itemBuilder: (context) => classrooms.asMap().entries.map((entry) {
-                                            final int idx = entry.key;
-                                            final doc = entry.value;
-                                            final data = doc.data() as Map<String, dynamic>;
-                                            final bool isLast = idx == classrooms.length - 1;
-                                            final bool isSelected = doc.id == _selectedProjectId;
-
-                                            return PopupMenuItem<String>(
-                                              value: doc.id,
-                                              padding: EdgeInsets.zero,
-                                              child: Container(
-                                                constraints: const BoxConstraints(minHeight: 46),
-                                                alignment: Alignment.centerLeft,
-                                                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                                                decoration: BoxDecoration(
-                                                  border: Border(
-                                                    bottom: BorderSide(
-                                                      color: isLast
-                                                          ? Colors.transparent
-                                                          : (isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9)),
-                                                      width: 1,
-                                                    ),
-                                                  ),
-                                                ),
-                                                child: Row(
-                                                  children: [
-                                                    _buildClassIcon(data, size: 28),
-                                                    const SizedBox(width: 10),
-                                                    Expanded(
-                                                      child: Text(
-                                                        data['name'] ?? 'Classroom',
-                                                        style: GoogleFonts.plusJakartaSans(
-                                                          fontSize: 13,
-                                                          fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
-                                                          color: isSelected
-                                                              ? const Color(0xFF60A5FA)
-                                                              : (isDark ? Colors.white : const Color(0xFF0F172A)),
-                                                        ),
-                                                        softWrap: true,
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                            );
-                                          }).toList(),
-                                          child: Container(
-                                            height: 52,
-                                            padding: const EdgeInsets.fromLTRB(4, 4, 16, 4),
-                                            decoration: BoxDecoration(
-                                              color: isDark ? const Color(0xFF18181B).withValues(alpha: 0.90) : Colors.white,
-                                              borderRadius: BorderRadius.circular(30),
-                                              border: Border.all(
-                                                color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
-                                                width: 1.2,
-                                              ),
-                                              boxShadow: [
-                                                BoxShadow(
-                                                  color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.08),
-                                                  blurRadius: 8,
-                                                  offset: const Offset(0, 2),
-                                                ),
-                                              ],
-                                            ),
-                                            child: Row(
-                                              children: [
-                                                // Real Classroom Icon (Besar & mepet batas kiri card)
-                                                _buildClassIcon(classroomData, size: 44),
-                                                const SizedBox(width: 10),
-                                                Expanded(
-                                                  child: Text(
-                                                    className,
-                                                    style: GoogleFonts.plusJakartaSans(
-                                                      fontSize: 13,
-                                                      fontWeight: FontWeight.bold,
-                                                      color: isDark ? Colors.white : Colors.black87,
-                                                      height: 1.15,
-                                                    ),
-                                                    maxLines: 2,
-                                                    overflow: TextOverflow.ellipsis,
-                                                  ),
-                                                ),
-                                                const SizedBox(width: 4),
-                                                Icon(
-                                                  Icons.keyboard_arrow_down_rounded,
-                                                  color: isDark ? Colors.white70 : Colors.black54,
-                                                  size: 22,
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        ),
-                                      ),
+                                   // 2. PILIH CLASSROOM (BOUNCY BUTTON DENGAN DROPDOWN OVERLAY PERSIS CATATAN) & ATUR PRESENSI
+                                   // ==========================================
+                                   Row(
+                                     children: [
+                                       // Pilih Kelas Selector (BouncyButton)
+                                       Expanded(
+                                         child: BouncyButton(
+                                           key: _classDropdownKey,
+                                           onTap: () => _openClassDropdown(context, _classDropdownKey, classrooms),
+                                           child: Container(
+                                             height: 52,
+                                             padding: const EdgeInsets.fromLTRB(4, 4, 16, 4),
+                                             decoration: BoxDecoration(
+                                               color: isDark ? const Color(0xFF18181B).withValues(alpha: 0.90) : Colors.white,
+                                               borderRadius: BorderRadius.circular(30),
+                                               border: Border.all(
+                                                 color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+                                                 width: 1.2,
+                                               ),
+                                               boxShadow: [
+                                                 BoxShadow(
+                                                   color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.08),
+                                                   blurRadius: 8,
+                                                   offset: const Offset(0, 2),
+                                                 ),
+                                               ],
+                                             ),
+                                             child: Row(
+                                               children: [
+                                                 // Real Classroom Icon (Besar & mepet batas kiri card)
+                                                 _buildClassIcon(classroomData, size: 44),
+                                                 const SizedBox(width: 10),
+                                                 Expanded(
+                                                   child: Text(
+                                                     className,
+                                                     style: GoogleFonts.plusJakartaSans(
+                                                       fontSize: 13,
+                                                       fontWeight: FontWeight.bold,
+                                                       color: isDark ? Colors.white : Colors.black87,
+                                                       height: 1.15,
+                                                     ),
+                                                     maxLines: 2,
+                                                     overflow: TextOverflow.ellipsis,
+                                                   ),
+                                                 ),
+                                                 const SizedBox(width: 4),
+                                                 Icon(
+                                                   Icons.keyboard_arrow_down_rounded,
+                                                   color: isDark ? Colors.white70 : Colors.black54,
+                                                   size: 22,
+                                                 ),
+                                               ],
+                                             ),
+                                           ),
+                                         ),
+                                       ),
                                       const SizedBox(width: 8),
 
                                       // Atur Presensi Button
@@ -979,101 +1310,15 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                   const SizedBox(height: 12),
 
                                   // ==========================================
-                                  // 4. SEMUA ELEMEN & SEMUA MATERI (POPUP MENU BUTTON PERSIS TAMBAH TUGAS)
+                                  // 4. SEMUA ELEMEN & SEMUA MATERI (BOUNCY BUTTON DENGAN DROPDOWN OVERLAY PERSIS CATATAN)
                                   // ==========================================
                                   Row(
                                     children: [
-                                      // PopupMenuButton Elemen
+                                      // Dropdown Elemen (BouncyButton)
                                       Expanded(
-                                        child: PopupMenuButton<int?>(
-                                          tooltip: '',
-                                          position: PopupMenuPosition.under,
-                                          offset: const Offset(0, 6),
-                                          color: isDark ? const Color(0xFF18181B) : Colors.white,
-                                          elevation: 6,
-                                          constraints: const BoxConstraints(minWidth: 200, maxWidth: 320),
-                                          shadowColor: Colors.black.withValues(alpha: isDark ? 0.45 : 0.14),
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(16),
-                                            side: BorderSide(
-                                              color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
-                                              width: 1.0,
-                                            ),
-                                          ),
-                                          onSelected: (val) {
-                                            setState(() {
-                                              _selectedStageFilterIdx = val;
-                                              _selectedMateriFilterIdx = null;
-                                            });
-                                          },
-                                          itemBuilder: (context) => [
-                                            PopupMenuItem<int?>(
-                                              value: null,
-                                              padding: EdgeInsets.zero,
-                                              child: Container(
-                                                constraints: const BoxConstraints(minHeight: 44),
-                                                alignment: Alignment.centerLeft,
-                                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                                                decoration: BoxDecoration(
-                                                  border: Border(
-                                                    bottom: BorderSide(
-                                                      color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
-                                                      width: 1,
-                                                    ),
-                                                  ),
-                                                ),
-                                                child: Text(
-                                                  'Semua Elemen',
-                                                  style: GoogleFonts.plusJakartaSans(
-                                                    fontSize: 13.5,
-                                                    fontWeight: _selectedStageFilterIdx == null ? FontWeight.bold : FontWeight.w600,
-                                                    color: _selectedStageFilterIdx == null
-                                                        ? const Color(0xFF60A5FA)
-                                                        : (isDark ? Colors.white : const Color(0xFF0F172A)),
-                                                  ),
-                                                  softWrap: true,
-                                                ),
-                                              ),
-                                            ),
-                                            ...List.generate(stages.length, (sIdx) {
-                                              final stage = stages[sIdx] as Map<String, dynamic>;
-                                              final String sName = stage['name'] ?? 'Elemen ${sIdx + 1}';
-                                              final String cleanName = sName.replaceFirst(RegExp(r'^Materi\s*\d*:\s*', caseSensitive: false), '').trim();
-                                              final bool isLast = sIdx == stages.length - 1;
-                                              final bool isSelected = _selectedStageFilterIdx == sIdx;
-
-                                              return PopupMenuItem<int?>(
-                                                value: sIdx,
-                                                padding: EdgeInsets.zero,
-                                                child: Container(
-                                                  constraints: const BoxConstraints(minHeight: 44),
-                                                  alignment: Alignment.centerLeft,
-                                                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                                                  decoration: BoxDecoration(
-                                                    border: Border(
-                                                      bottom: BorderSide(
-                                                        color: isLast
-                                                            ? Colors.transparent
-                                                            : (isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9)),
-                                                        width: 1,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                  child: Text(
-                                                    cleanName,
-                                                    style: GoogleFonts.plusJakartaSans(
-                                                      fontSize: 13.5,
-                                                      color: isSelected
-                                                          ? const Color(0xFF60A5FA)
-                                                          : (isDark ? Colors.white : const Color(0xFF0F172A)),
-                                                      fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                                                    ),
-                                                    softWrap: true,
-                                                  ),
-                                                ),
-                                              );
-                                            }),
-                                          ],
+                                        child: BouncyButton(
+                                          key: _elemenDropdownKey,
+                                          onTap: () => _openElemenDropdown(context, _elemenDropdownKey, stages),
                                           child: Container(
                                             height: 52,
                                             padding: const EdgeInsets.symmetric(horizontal: 14),
@@ -1125,115 +1370,11 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                       ),
                                       const SizedBox(width: 8),
 
-                                      // PopupMenuButton Materi
+                                      // Dropdown Materi (BouncyButton)
                                       Expanded(
-                                        child: PopupMenuButton<int?>(
-                                          tooltip: '',
-                                          position: PopupMenuPosition.under,
-                                          offset: const Offset(0, 6),
-                                          color: isDark ? const Color(0xFF18181B) : Colors.white,
-                                          elevation: 6,
-                                          constraints: const BoxConstraints(minWidth: 200, maxWidth: 320),
-                                          shadowColor: Colors.black.withValues(alpha: isDark ? 0.45 : 0.14),
-                                          enabled: _selectedStageFilterIdx != null,
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(16),
-                                            side: BorderSide(
-                                              color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
-                                              width: 1.0,
-                                            ),
-                                          ),
-                                          onSelected: (val) {
-                                            setState(() {
-                                              _selectedMateriFilterIdx = val;
-                                            });
-                                          },
-                                          itemBuilder: (context) {
-                                            if (_selectedStageFilterIdx == null) return [];
-                                            final stage = stages[_selectedStageFilterIdx!] as Map<String, dynamic>;
-                                            final List rawMateris = stage['materis'] as List? ?? [];
-                                            List<Map<String, dynamic>> materis = [];
-                                            if (rawMateris.isNotEmpty) {
-                                              materis = List<Map<String, dynamic>>.from(rawMateris);
-                                            } else {
-                                              final List tasksList = stage['tasks'] as List? ?? [];
-                                              if (tasksList.isNotEmpty) {
-                                                materis = [
-                                                  {'title': 'Materi', 'tasks': tasksList}
-                                                ];
-                                              }
-                                            }
-
-                                            return [
-                                              PopupMenuItem<int?>(
-                                                value: null,
-                                                padding: EdgeInsets.zero,
-                                                child: Container(
-                                                  constraints: const BoxConstraints(minHeight: 44),
-                                                  alignment: Alignment.centerLeft,
-                                                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                                                  decoration: BoxDecoration(
-                                                    border: Border(
-                                                      bottom: BorderSide(
-                                                        color: materis.isEmpty
-                                                            ? Colors.transparent
-                                                            : (isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9)),
-                                                        width: 1,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                  child: Text(
-                                                    'Semua Materi',
-                                                    style: GoogleFonts.plusJakartaSans(
-                                                      fontSize: 13.5,
-                                                      fontWeight: _selectedMateriFilterIdx == null ? FontWeight.bold : FontWeight.w600,
-                                                      color: _selectedMateriFilterIdx == null
-                                                          ? const Color(0xFF60A5FA)
-                                                          : (isDark ? Colors.white : const Color(0xFF0F172A)),
-                                                    ),
-                                                    softWrap: true,
-                                                  ),
-                                                ),
-                                              ),
-                                              ...List.generate(materis.length, (mIdx) {
-                                                final m = materis[mIdx];
-                                                final String mTitle = m['title'] ?? 'Materi ${mIdx + 1}';
-                                                final bool isLast = mIdx == materis.length - 1;
-                                                final bool isSelected = _selectedMateriFilterIdx == mIdx;
-
-                                                return PopupMenuItem<int?>(
-                                                  value: mIdx,
-                                                  padding: EdgeInsets.zero,
-                                                  child: Container(
-                                                    constraints: const BoxConstraints(minHeight: 44),
-                                                    alignment: Alignment.centerLeft,
-                                                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                                                    decoration: BoxDecoration(
-                                                      border: Border(
-                                                        bottom: BorderSide(
-                                                          color: isLast
-                                                              ? Colors.transparent
-                                                              : (isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9)),
-                                                          width: 1,
-                                                        ),
-                                                      ),
-                                                    ),
-                                                    child: Text(
-                                                      mTitle,
-                                                      style: GoogleFonts.plusJakartaSans(
-                                                        fontSize: 13.5,
-                                                        color: isSelected
-                                                            ? const Color(0xFF60A5FA)
-                                                            : (isDark ? Colors.white : const Color(0xFF0F172A)),
-                                                        fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                                                      ),
-                                                      softWrap: true,
-                                                    ),
-                                                  ),
-                                                );
-                                              }),
-                                            ];
-                                          },
+                                        child: BouncyButton(
+                                          key: _materiDropdownKey,
+                                          onTap: () => _openMateriDropdown(context, _materiDropdownKey, stages),
                                           child: Container(
                                             height: 52,
                                             padding: const EdgeInsets.symmetric(horizontal: 14),
@@ -1446,7 +1587,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                   const SizedBox(height: 10),
 
                                   // ==========================================
-                                  // TABEL LAPORAN: HEADER LILAC SLIDER DENGAN TEKS HITAM & 2 KOLOM RAPI
+                                  // TABEL LAPORAN: HORIZONTAL SCROLLABLE, 3 KOLOM BERBEDA WARNA
                                   // ==========================================
                                   Padding(
                                     padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -1456,7 +1597,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                         border: Border.all(
                                           color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
                                         ),
-                                        borderRadius: BorderRadius.circular(20),
+                                        borderRadius: BorderRadius.circular(12),
                                         boxShadow: [
                                           BoxShadow(
                                             color: Colors.black.withValues(alpha: 0.03),
@@ -1466,355 +1607,386 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                         ],
                                       ),
                                       child: ClipRRect(
-                                        borderRadius: BorderRadius.circular(20),
-                                        child: Column(
-                                          children: [
-                                            // Table Header: 3 Kolom dengan Warna Berbeda (Ungu, Biru, Toska)
-                                            Container(
-                                              decoration: BoxDecoration(
-                                                border: Border(
-                                                  bottom: BorderSide(
-                                                    color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
-                                                    width: 1,
+                                        borderRadius: BorderRadius.circular(12),
+                                        child: SingleChildScrollView(
+                                          scrollDirection: Axis.horizontal,
+                                          physics: const BouncingScrollPhysics(),
+                                          child: SizedBox(
+                                            width: 990,
+                                            child: Column(
+                                              children: [
+                                                // Table Header: Nama (200), Progress (90), Tugas 1-5 (5x70), Quiz 1-5 (5x70)
+                                                Container(
+                                                  decoration: BoxDecoration(
+                                                    border: Border(
+                                                      bottom: BorderSide(
+                                                        color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                                                        width: 1,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  child: Row(
+                                                    children: [
+                                                      // Kolom 1: Nama Siswa (Ungu, Lebar 200)
+                                                      Container(
+                                                        width: 200,
+                                                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                                                        color: const Color(0xFFD6A5F8),
+                                                        child: Text(
+                                                          'Nama Siswa (${masterList.length})',
+                                                          style: GoogleFonts.plusJakartaSans(
+                                                            fontSize: 12.5,
+                                                            fontWeight: FontWeight.w800,
+                                                            color: const Color(0xFF0F172A),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                      // Kolom 2: Progress (Biru, Lebar 90)
+                                                      Container(
+                                                        width: 90,
+                                                        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 12),
+                                                        color: const Color(0xFFBAE6FD),
+                                                        child: Text(
+                                                          'Progress',
+                                                          textAlign: TextAlign.center,
+                                                          style: GoogleFonts.plusJakartaSans(
+                                                            fontSize: 12.5,
+                                                            fontWeight: FontWeight.w800,
+                                                            color: const Color(0xFF0F172A),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                      // Kolom 3..7: Tugas 1 s/d 5 (Toska, 5 x 70)
+                                                      ...List.generate(5, (i) {
+                                                        return Container(
+                                                          width: 70,
+                                                          padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 12),
+                                                          color: const Color(0xFF99F6E4),
+                                                          alignment: Alignment.center,
+                                                          child: Text(
+                                                            'Tugas ${i + 1}',
+                                                            textAlign: TextAlign.center,
+                                                            style: GoogleFonts.plusJakartaSans(
+                                                              fontSize: 12.0,
+                                                              fontWeight: FontWeight.w800,
+                                                              color: const Color(0xFF0F172A),
+                                                            ),
+                                                          ),
+                                                        );
+                                                      }),
+                                                      // Kolom 8..12: Quiz 1 s/d 5 (Kuning Pastel, 5 x 70)
+                                                      ...List.generate(5, (i) {
+                                                        return Container(
+                                                          width: 70,
+                                                          padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 12),
+                                                          color: const Color(0xFFFDE68A),
+                                                          alignment: Alignment.center,
+                                                          child: Text(
+                                                            'Quiz ${i + 1}',
+                                                            textAlign: TextAlign.center,
+                                                            style: GoogleFonts.plusJakartaSans(
+                                                              fontSize: 12.0,
+                                                              fontWeight: FontWeight.w800,
+                                                              color: const Color(0xFF0F172A),
+                                                            ),
+                                                          ),
+                                                        );
+                                                      }),
+                                                    ],
                                                   ),
                                                 ),
-                                              ),
-                                              child: Row(
-                                                children: [
-                                                  // Kolom 1: Nama Siswa (Ungu)
-                                                  Expanded(
-                                                    flex: 4,
-                                                    child: Container(
-                                                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                                                      color: const Color(0xFFD6A5F8),
-                                                      child: Text(
-                                                        'Nama Siswa (${masterList.length})',
-                                                        style: GoogleFonts.plusJakartaSans(
-                                                          fontSize: 12.5,
-                                                          fontWeight: FontWeight.w800,
-                                                          color: const Color(0xFF0F172A),
+
+                                                // Table Body
+                                                masterList.isEmpty
+                                                    ? Padding(
+                                                        padding: const EdgeInsets.all(32.0),
+                                                        child: Center(
+                                                          child: Text(
+                                                            'Belum ada siswa di kelas ini.',
+                                                            style: GoogleFonts.dmSans(color: Colors.black38),
+                                                          ),
                                                         ),
-                                                      ),
-                                                    ),
-                                                  ),
-                                                  // Kolom 2: Progress (Biru)
-                                                  Expanded(
-                                                    flex: 2,
-                                                    child: Container(
-                                                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 12),
-                                                      color: const Color(0xFFBAE6FD),
-                                                      child: Text(
-                                                        'Progress',
-                                                        textAlign: TextAlign.center,
-                                                        style: GoogleFonts.plusJakartaSans(
-                                                          fontSize: 12.5,
-                                                          fontWeight: FontWeight.w800,
-                                                          color: const Color(0xFF0F172A),
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  ),
-                                                  // Kolom 3: Tugas & Quiz (Toska)
-                                                  Expanded(
-                                                    flex: 4,
-                                                    child: Container(
-                                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
-                                                      color: const Color(0xFF99F6E4),
-                                                      child: Text(
-                                                        _selectedTypeFilter == 'tugas'
-                                                            ? 'Status Tugas'
-                                                            : (_selectedTypeFilter == 'quiz' ? 'Nilai Quiz' : 'Tugas & Quiz'),
-                                                        textAlign: TextAlign.center,
-                                                        style: GoogleFonts.plusJakartaSans(
-                                                          fontSize: 12.5,
-                                                          fontWeight: FontWeight.w800,
-                                                          color: const Color(0xFF0F172A),
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
+                                                      )
+                                                    : StreamBuilder<QuerySnapshot>(
+                                                        stream: _getProgressStream(_selectedProjectId!),
+                                                        builder: (context, progressSnapshot) {
+                                                          final progressDocs = progressSnapshot.data?.docs ?? [];
+                                                          final Map<String, Map<String, dynamic>> studentProgressData = {};
 
-                                            // Table Body
-                                            masterList.isEmpty
-                                                ? Padding(
-                                                    padding: const EdgeInsets.all(32.0),
-                                                    child: Center(
-                                                      child: Text(
-                                                        'Belum ada siswa di kelas ini.',
-                                                        style: GoogleFonts.dmSans(color: Colors.black38),
-                                                      ),
-                                                    ),
-                                                  )
-                                                : StreamBuilder<QuerySnapshot>(
-                                                    stream: _getProgressStream(_selectedProjectId!),
-                                                    builder: (context, progressSnapshot) {
-                                                      final progressDocs = progressSnapshot.data?.docs ?? [];
-                                                      final Map<String, Map<String, dynamic>> studentProgressData = {};
-
-                                                      for (var doc in progressDocs) {
-                                                        final data = doc.data() as Map<String, dynamic>;
-                                                        studentProgressData[doc.id] = data;
-                                                      }
-
-                                                      final List<Map<String, dynamic>> filteredTasks = _getFilteredTasks(stages);
-
-                                                      return ListView.separated(
-                                                        shrinkWrap: true,
-                                                        physics: const NeverScrollableScrollPhysics(),
-                                                        itemCount: masterList.length,
-                                                        separatorBuilder: (context, index) => Divider(
-                                                          height: 1,
-                                                          color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
-                                                        ),
-                                                        itemBuilder: (context, index) {
-                                                          final student = masterList[index] as Map<String, dynamic>;
-                                                          final String sName = student['name'] ?? 'Siswa';
-                                                          final String sUid = student['uid'] ?? '';
-                                                          final bool joined = student['joined'] ?? false;
-
-                                                          final Map<String, dynamic> studentData = joined ? (studentProgressData[sUid] ?? {}) : {};
-                                                          final List<String> completed = joined ? List<String>.from(studentData['completedTasks'] ?? []) : [];
-                                                          final String sAvatar = (studentData['avatar']?.toString().isNotEmpty == true
-                                                              ? studentData['avatar'].toString()
-                                                              : (student['avatar']?.toString().isNotEmpty == true
-                                                                  ? student['avatar'].toString()
-                                                                  : 'assets/icon_pack/avatar/avatar_2.png'));
-
-                                                          int filteredDoneCount = 0;
-                                                          for (var t in filteredTasks) {
-                                                            if (completed.contains(t['key'])) {
-                                                              filteredDoneCount++;
-                                                            }
+                                                          for (var doc in progressDocs) {
+                                                            final data = doc.data() as Map<String, dynamic>;
+                                                            studentProgressData[doc.id] = data;
                                                           }
-                                                          final double progressPercent = filteredTasks.isNotEmpty
-                                                              ? (filteredDoneCount / filteredTasks.length) * 100
-                                                              : 0.0;
 
-                                                          final bool isEven = index % 2 == 0;
+                                                          final List<Map<String, dynamic>> filteredTasks = _getFilteredTasks(stages);
+                                                          final List<Map<String, dynamic>> tugasList = filteredTasks.where((t) => t['type'] != 'quiz').toList();
+                                                          final List<Map<String, dynamic>> quizList = filteredTasks.where((t) => t['type'] == 'quiz').toList();
 
-                                                          return Material(
-                                                            color: isEven
-                                                                ? (isDark ? const Color(0xFF1E1E24) : Colors.white)
-                                                                : (isDark ? const Color(0xFF16161B) : const Color(0xFFFAFAFA)),
-                                                            child: InkWell(
-                                                              onTap: joined
-                                                                  ? () => _showStudentSubmissionDetailsSheet(context, sName, sUid, stages)
-                                                                  : null,
-                                                              child: Padding(
-                                                                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                                                                child: Row(
-                                                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                                                  children: [
-                                                                    // Kolom 1: Avatar (Zoomed) + Nama Full (Tidak ...)
-                                                                    Expanded(
-                                                                      flex: 4,
-                                                                      child: Row(
-                                                                        crossAxisAlignment: CrossAxisAlignment.center,
-                                                                        children: [
-                                                                          Container(
-                                                                            width: 36,
-                                                                            height: 36,
-                                                                            decoration: BoxDecoration(
-                                                                              shape: BoxShape.circle,
-                                                                              color: joined ? _getAvatarColor(sName) : Colors.red[50],
-                                                                              boxShadow: [
-                                                                                BoxShadow(
-                                                                                  color: Colors.black.withValues(alpha: 0.06),
-                                                                                  blurRadius: 4,
-                                                                                  offset: const Offset(0, 1.5),
-                                                                                ),
-                                                                              ],
-                                                                            ),
-                                                                            child: StudentAvatarWidget(
-                                                                              uid: sUid,
-                                                                              defaultAvatar: sAvatar,
-                                                                              studentName: sName,
-                                                                              joined: joined,
-                                                                            ),
-                                                                          ),
-                                                                          const SizedBox(width: 10),
-                                                                          Expanded(
-                                                                            child: Column(
-                                                                              crossAxisAlignment: CrossAxisAlignment.start,
-                                                                              mainAxisSize: MainAxisSize.min,
-                                                                              children: [
-                                                                                Text(
-                                                                                  sName,
-                                                                                  style: GoogleFonts.plusJakartaSans(
-                                                                                    fontSize: 13,
-                                                                                    fontWeight: FontWeight.bold,
-                                                                                    color: joined
-                                                                                        ? (isDark ? Colors.white : Colors.black87)
-                                                                                        : (isDark ? Colors.white38 : Colors.black38),
-                                                                                  ),
-                                                                                  softWrap: true,
-                                                                                ),
-                                                                                const SizedBox(height: 2),
-                                                                                Text(
-                                                                                  joined
-                                                                                      ? (sUid.isNotEmpty ? 'UID: ${sUid.length > 6 ? sUid.substring(0, 6) : sUid}' : 'Telah Terhubung')
-                                                                                      : 'Belum Bergabung',
-                                                                                  style: GoogleFonts.dmSans(
-                                                                                    fontSize: 10.5,
-                                                                                    color: joined ? (isDark ? Colors.white54 : Colors.black45) : Colors.redAccent,
-                                                                                    fontWeight: FontWeight.w500,
-                                                                                  ),
-                                                                                ),
-                                                                              ],
-                                                                            ),
-                                                                          ),
-                                                                        ],
-                                                                      ),
-                                                                    ),
-                                                                    const SizedBox(width: 6),
+                                                          return ListView.separated(
+                                                            shrinkWrap: true,
+                                                            physics: const NeverScrollableScrollPhysics(),
+                                                            itemCount: masterList.length,
+                                                            separatorBuilder: (context, index) => Divider(
+                                                              height: 1,
+                                                              color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+                                                            ),
+                                                            itemBuilder: (context, index) {
+                                                              final student = masterList[index] as Map<String, dynamic>;
+                                                              final String sName = student['name'] ?? 'Siswa';
+                                                              final String sUid = student['uid'] ?? '';
+                                                              final bool joined = student['joined'] ?? false;
 
-                                                                    // Kolom 2: Progress (Angka + Linear Bar)
-                                                                    Expanded(
-                                                                      flex: 2,
-                                                                      child: Column(
-                                                                        crossAxisAlignment: CrossAxisAlignment.center,
-                                                                        mainAxisAlignment: MainAxisAlignment.center,
-                                                                        children: [
-                                                                          Text(
-                                                                            filteredTasks.isNotEmpty ? '$filteredDoneCount/${filteredTasks.length}' : '-',
-                                                                            style: GoogleFonts.plusJakartaSans(
-                                                                              fontSize: 12.5,
-                                                                              fontWeight: FontWeight.w800,
-                                                                              color: isDark ? Colors.white : Colors.black87,
-                                                                            ),
-                                                                            textAlign: TextAlign.center,
-                                                                          ),
-                                                                          if (filteredTasks.isNotEmpty) ...[
-                                                                            const SizedBox(height: 4),
-                                                                            SizedBox(
-                                                                              width: 42,
-                                                                              child: ClipRRect(
-                                                                                borderRadius: BorderRadius.circular(4),
-                                                                                child: LinearProgressIndicator(
-                                                                                  value: progressPercent / 100,
-                                                                                  minHeight: 4.0,
-                                                                                  backgroundColor: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
-                                                                                  valueColor: AlwaysStoppedAnimation<Color>(
-                                                                                    progressPercent == 100
-                                                                                        ? const Color(0xFF10B981)
-                                                                                        : const Color(0xFF7F52FC),
+                                                              final Map<String, dynamic> studentData = joined ? (studentProgressData[sUid] ?? {}) : {};
+                                                              final List<String> completed = joined ? List<String>.from(studentData['completedTasks'] ?? []) : [];
+                                                              final String sAvatar = (studentData['avatar']?.toString().isNotEmpty == true
+                                                                  ? studentData['avatar'].toString()
+                                                                  : (student['avatar']?.toString().isNotEmpty == true
+                                                                      ? student['avatar'].toString()
+                                                                      : 'assets/icon_pack/avatar/avatar_2.png'));
+
+                                                              int filteredDoneCount = 0;
+                                                              for (var t in filteredTasks) {
+                                                                if (completed.contains(t['key'])) {
+                                                                  filteredDoneCount++;
+                                                                }
+                                                              }
+                                                              final double progressPercent = filteredTasks.isNotEmpty
+                                                                  ? (filteredDoneCount / filteredTasks.length) * 100
+                                                                  : 0.0;
+
+                                                              final bool isEven = index % 2 == 0;
+
+                                                              return Material(
+                                                                color: isEven
+                                                                    ? (isDark ? const Color(0xFF1E1E24) : Colors.white)
+                                                                    : (isDark ? const Color(0xFF16161B) : const Color(0xFFFAFAFA)),
+                                                                child: InkWell(
+                                                                  onTap: joined
+                                                                      ? () => _showStudentSubmissionDetailsSheet(context, sName, sUid, stages)
+                                                                      : null,
+                                                                  child: Row(
+                                                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                                                    children: [
+                                                                      // Kolom 1: Avatar + Nama 2 Baris (Lebar 200)
+                                                                      Container(
+                                                                        width: 200,
+                                                                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+                                                                        child: Row(
+                                                                          crossAxisAlignment: CrossAxisAlignment.center,
+                                                                          children: [
+                                                                            Container(
+                                                                              width: 36,
+                                                                              height: 36,
+                                                                              decoration: BoxDecoration(
+                                                                                shape: BoxShape.circle,
+                                                                                color: joined ? _getAvatarColor(sName) : Colors.red[50],
+                                                                                boxShadow: [
+                                                                                  BoxShadow(
+                                                                                    color: Colors.black.withValues(alpha: 0.06),
+                                                                                    blurRadius: 4,
+                                                                                    offset: const Offset(0, 1.5),
                                                                                   ),
-                                                                                ),
+                                                                                ],
+                                                                              ),
+                                                                              child: StudentAvatarWidget(
+                                                                                uid: sUid,
+                                                                                defaultAvatar: sAvatar,
+                                                                                studentName: sName,
+                                                                                joined: joined,
+                                                                              ),
+                                                                            ),
+                                                                            const SizedBox(width: 8),
+                                                                            Expanded(
+                                                                              child: Column(
+                                                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                                                mainAxisSize: MainAxisSize.min,
+                                                                                children: [
+                                                                                  Text(
+                                                                                    sName,
+                                                                                    style: GoogleFonts.plusJakartaSans(
+                                                                                      fontSize: 12.5,
+                                                                                      fontWeight: FontWeight.bold,
+                                                                                      color: joined
+                                                                                          ? (isDark ? Colors.white : Colors.black87)
+                                                                                          : (isDark ? Colors.white38 : Colors.black38),
+                                                                                      height: 1.15,
+                                                                                    ),
+                                                                                    maxLines: 2,
+                                                                                    softWrap: true,
+                                                                                    overflow: TextOverflow.ellipsis,
+                                                                                  ),
+                                                                                  const SizedBox(height: 2),
+                                                                                  Text(
+                                                                                    joined
+                                                                                        ? (sUid.isNotEmpty ? 'UID: ${sUid.length > 6 ? sUid.substring(0, 6) : sUid}' : 'Telah Terhubung')
+                                                                                        : 'Belum Bergabung',
+                                                                                    style: GoogleFonts.dmSans(
+                                                                                      fontSize: 10.0,
+                                                                                      color: joined ? (isDark ? Colors.white54 : Colors.black45) : Colors.redAccent,
+                                                                                      fontWeight: FontWeight.w500,
+                                                                                    ),
+                                                                                  ),
+                                                                                ],
                                                                               ),
                                                                             ),
                                                                           ],
-                                                                        ],
+                                                                        ),
                                                                       ),
-                                                                    ),
-                                                                    const SizedBox(width: 6),
 
-                                                                    // Kolom 3: Tugas & Quiz Badges
-                                                                    Expanded(
-                                                                      flex: 4,
-                                                                      child: joined && filteredTasks.isNotEmpty
-                                                                          ? SingleChildScrollView(
-                                                                              scrollDirection: Axis.horizontal,
-                                                                              physics: const ClampingScrollPhysics(),
-                                                                              child: Row(
-                                                                                mainAxisAlignment: MainAxisAlignment.center,
-                                                                                children: filteredTasks.map((tInfo) {
-                                                                                  final String tKey = tInfo['key'];
-                                                                                  final String tTitle = tInfo['title'];
-                                                                                  final String tType = tInfo['type'];
-                                                                                  final bool isDone = completed.contains(tKey);
-
-                                                                                  if (tType == 'quiz') {
-                                                                                    final quizScore = studentData['quizScore_$tKey'];
-                                                                                    final String displayText = quizScore != null ? quizScore.toString() : '-';
-                                                                                    final bool isFinished = quizScore != null;
-
-                                                                                    return Tooltip(
-                                                                                      message: '❓ Quiz: $tTitle\nNilai: ${quizScore ?? "Belum dikerjakan"}',
-                                                                                      triggerMode: TooltipTriggerMode.tap,
-                                                                                      child: Container(
-                                                                                        margin: const EdgeInsets.only(right: 4),
-                                                                                        width: 30,
-                                                                                        height: 22,
-                                                                                        decoration: BoxDecoration(
-                                                                                          color: isFinished ? const Color(0xFFFFF7ED) : const Color(0xFFF1F5F9),
-                                                                                          borderRadius: BorderRadius.circular(6),
-                                                                                          border: Border.all(
-                                                                                            color: isFinished ? const Color(0xFFEA580C) : Colors.black12,
-                                                                                            width: 1,
-                                                                                          ),
-                                                                                        ),
-                                                                                        alignment: Alignment.center,
-                                                                                        child: Text(
-                                                                                          displayText,
-                                                                                          style: GoogleFonts.plusJakartaSans(
-                                                                                            fontSize: 11.5,
-                                                                                            fontWeight: FontWeight.bold,
-                                                                                            color: isFinished ? const Color(0xFFEA580C) : Colors.black45,
-                                                                                          ),
-                                                                                        ),
-                                                                                      ),
-                                                                                    );
-                                                                                  } else {
-                                                                                    return Tooltip(
-                                                                                      message: '📝 Tugas: $tTitle\n${isDone ? "Sudah dikerjakan (Klik untuk lihat)" : "Belum dikerjakan"}',
-                                                                                      triggerMode: TooltipTriggerMode.tap,
-                                                                                      child: GestureDetector(
-                                                                                        onTap: isDone
-                                                                                            ? () => _showViewTaskSubmissionDialog(context, sName, tTitle, studentData, tKey)
-                                                                                            : null,
-                                                                                        child: Container(
-                                                                                          margin: const EdgeInsets.only(right: 4),
-                                                                                          width: 22,
-                                                                                          height: 22,
-                                                                                          decoration: BoxDecoration(
-                                                                                            color: isDone ? const Color(0xFFDCFCE7) : const Color(0xFFF1F5F9),
-                                                                                            borderRadius: BorderRadius.circular(6),
-                                                                                            border: Border.all(
-                                                                                              color: isDone ? const Color(0xFF10B981) : Colors.black12,
-                                                                                              width: 1,
-                                                                                            ),
-                                                                                          ),
-                                                                                          alignment: Alignment.center,
-                                                                                          child: isDone
-                                                                                              ? const Icon(Icons.check_rounded, size: 12, color: Color(0xFF15803D))
-                                                                                              : Text(
-                                                                                                  '-',
-                                                                                                  style: GoogleFonts.plusJakartaSans(
-                                                                                                    fontSize: 11.5,
-                                                                                                    fontWeight: FontWeight.bold,
-                                                                                                    color: Colors.black38,
-                                                                                                  ),
-                                                                                                ),
-                                                                                        ),
-                                                                                      ),
-                                                                                    );
-                                                                                  }
-                                                                                }).toList(),
+                                                                      // Kolom 2: Progress (Lebar 90)
+                                                                      Container(
+                                                                        width: 90,
+                                                                        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 12),
+                                                                        child: Column(
+                                                                          crossAxisAlignment: CrossAxisAlignment.center,
+                                                                          mainAxisAlignment: MainAxisAlignment.center,
+                                                                          children: [
+                                                                            Text(
+                                                                              filteredTasks.isNotEmpty ? '$filteredDoneCount/${filteredTasks.length}' : '-',
+                                                                              style: GoogleFonts.plusJakartaSans(
+                                                                                fontSize: 12.5,
+                                                                                fontWeight: FontWeight.w800,
+                                                                                color: isDark ? Colors.white : Colors.black87,
                                                                               ),
-                                                                            )
-                                                                          : Center(
-                                                                              child: Text(
-                                                                                joined ? '-' : 'Belum Bergabung',
-                                                                                style: GoogleFonts.dmSans(
-                                                                                  fontSize: 11.5,
-                                                                                  color: isDark ? Colors.white38 : Colors.black38,
+                                                                              textAlign: TextAlign.center,
+                                                                            ),
+                                                                            if (filteredTasks.isNotEmpty) ...[
+                                                                              const SizedBox(height: 4),
+                                                                              SizedBox(
+                                                                                width: 44,
+                                                                                child: ClipRRect(
+                                                                                  borderRadius: BorderRadius.circular(4),
+                                                                                  child: LinearProgressIndicator(
+                                                                                    value: progressPercent / 100,
+                                                                                    minHeight: 4.0,
+                                                                                    backgroundColor: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+                                                                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                                                                      progressPercent == 100
+                                                                                          ? const Color(0xFF10B981)
+                                                                                          : const Color(0xFF7F52FC),
+                                                                                    ),
+                                                                                  ),
                                                                                 ),
                                                                               ),
-                                                                            ),
-                                                                    ),
-                                                                  ],
+                                                                            ],
+                                                                          ],
+                                                                        ),
+                                                                      ),
+
+                                                                      // Kolom 3..7: Tugas 1 s/d 5 (Lebar 5 x 70)
+                                                                      ...List.generate(5, (i) {
+                                                                        final task = i < tugasList.length ? tugasList[i] : null;
+                                                                        final String? tKey = task?['key'];
+                                                                        final String? tTitle = task?['title'];
+                                                                        final bool isDone = tKey != null && completed.contains(tKey);
+
+                                                                        return Container(
+                                                                          width: 70,
+                                                                          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 12),
+                                                                          alignment: Alignment.center,
+                                                                          child: (!joined || task == null)
+                                                                              ? Text(
+                                                                                  '-',
+                                                                                  style: GoogleFonts.plusJakartaSans(
+                                                                                    fontSize: 12,
+                                                                                    fontWeight: FontWeight.w600,
+                                                                                    color: isDark ? Colors.white24 : Colors.black26,
+                                                                                  ),
+                                                                                )
+                                                                              : Tooltip(
+                                                                                  message: '📝 Tugas: $tTitle\n${isDone ? "Sudah dikerjakan (Klik untuk lihat)" : "Belum dikerjakan"}',
+                                                                                  triggerMode: TooltipTriggerMode.tap,
+                                                                                  child: GestureDetector(
+                                                                                    onTap: isDone
+                                                                                        ? () => _showViewTaskSubmissionDialog(context, sName, tTitle ?? 'Tugas ${i + 1}', studentData, tKey)
+                                                                                        : null,
+                                                                                    child: Container(
+                                                                                      width: 24,
+                                                                                      height: 24,
+                                                                                      decoration: BoxDecoration(
+                                                                                        color: isDone ? const Color(0xFFDCFCE7) : const Color(0xFFF1F5F9),
+                                                                                        borderRadius: BorderRadius.circular(6),
+                                                                                        border: Border.all(
+                                                                                          color: isDone ? const Color(0xFF10B981) : Colors.black12,
+                                                                                          width: 1,
+                                                                                        ),
+                                                                                      ),
+                                                                                      alignment: Alignment.center,
+                                                                                      child: isDone
+                                                                                          ? const Icon(Icons.check_rounded, size: 13, color: Color(0xFF15803D))
+                                                                                          : Text(
+                                                                                              '-',
+                                                                                              style: GoogleFonts.plusJakartaSans(
+                                                                                                fontSize: 11.5,
+                                                                                                fontWeight: FontWeight.bold,
+                                                                                                color: Colors.black38,
+                                                                                              ),
+                                                                                            ),
+                                                                                    ),
+                                                                                  ),
+                                                                                ),
+                                                                        );
+                                                                      }),
+
+                                                                      // Kolom 8..12: Quiz 1 s/d 5 (Lebar 5 x 70)
+                                                                      ...List.generate(5, (i) {
+                                                                        final quiz = i < quizList.length ? quizList[i] : null;
+                                                                        final String? qKey = quiz?['key'];
+                                                                        final String? qTitle = quiz?['title'];
+                                                                        final quizScore = (qKey != null && joined) ? studentData['quizScore_$qKey'] : null;
+                                                                        final bool isFinished = quizScore != null;
+
+                                                                        return Container(
+                                                                          width: 70,
+                                                                          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 12),
+                                                                          alignment: Alignment.center,
+                                                                          child: (!joined || quiz == null)
+                                                                              ? Text(
+                                                                                  '-',
+                                                                                  style: GoogleFonts.plusJakartaSans(
+                                                                                    fontSize: 12,
+                                                                                    fontWeight: FontWeight.w600,
+                                                                                    color: isDark ? Colors.white24 : Colors.black26,
+                                                                                  ),
+                                                                                )
+                                                                              : Tooltip(
+                                                                                  message: '❓ Quiz: $qTitle\nNilai: ${quizScore ?? "Belum dikerjakan"}',
+                                                                                  triggerMode: TooltipTriggerMode.tap,
+                                                                                  child: Container(
+                                                                                    width: 32,
+                                                                                    height: 24,
+                                                                                    decoration: BoxDecoration(
+                                                                                      color: isFinished ? const Color(0xFFFFF7ED) : const Color(0xFFF1F5F9),
+                                                                                      borderRadius: BorderRadius.circular(6),
+                                                                                      border: Border.all(
+                                                                                        color: isFinished ? const Color(0xFFEA580C) : Colors.black12,
+                                                                                        width: 1,
+                                                                                      ),
+                                                                                    ),
+                                                                                    alignment: Alignment.center,
+                                                                                    child: Text(
+                                                                                      isFinished ? quizScore.toString() : '-',
+                                                                                      style: GoogleFonts.plusJakartaSans(
+                                                                                        fontSize: 11.5,
+                                                                                        fontWeight: FontWeight.bold,
+                                                                                        color: isFinished ? const Color(0xFFEA580C) : Colors.black45,
+                                                                                      ),
+                                                                                    ),
+                                                                                  ),
+                                                                                ),
+                                                                        );
+                                                                      }),
+                                                                    ],
+                                                                  ),
                                                                 ),
-                                                              ),
-                                                            ),
+                                                              );
+                                                            },
                                                           );
                                                         },
-                                                      );
-                                                    },
-                                                  ),
-                                          ],
+                                                      ),
+                                              ],
+                                            ),
+                                          ),
                                         ),
                                       ),
                                     ),
@@ -2403,7 +2575,7 @@ class _SoftAnimatedPatternPainter extends CustomPainter {
   }
 }
 
-// BouncyButton Component (Liquid Spring Water Bounce with Squash)
+// BouncyButton Component (Liquid Spring Water Bounce with Squash, identical to Home)
 class BouncyButton extends StatefulWidget {
   final Widget child;
   final VoidCallback? onTap;
@@ -2415,8 +2587,8 @@ class BouncyButton extends StatefulWidget {
     super.key,
     required this.child,
     this.onTap,
-    this.scaleDown = 0.90,
-    this.duration = const Duration(milliseconds: 140),
+    this.scaleDown = 0.88,
+    this.duration = const Duration(milliseconds: 130),
     this.enableSquash = true,
   });
 
@@ -2424,11 +2596,11 @@ class BouncyButton extends StatefulWidget {
   State<BouncyButton> createState() => _BouncyButtonState();
 }
 
-class _BouncyButtonState extends State<BouncyButton>
-    with SingleTickerProviderStateMixin {
+class _BouncyButtonState extends State<BouncyButton> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _scaleAnimation;
-  late Animation<double> _squashAnimation;
+  late Animation<double> _squashX;
+  late Animation<double> _squashY;
 
   @override
   void initState() {
@@ -2436,23 +2608,31 @@ class _BouncyButtonState extends State<BouncyButton>
     _controller = AnimationController(
       vsync: this,
       duration: widget.duration,
+      reverseDuration: widget.enableSquash
+          ? const Duration(milliseconds: 380)
+          : const Duration(milliseconds: 100),
     );
-    _scaleAnimation = Tween<double>(
-      begin: 1.0,
-      end: widget.scaleDown,
-    ).animate(CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeOutCubic,
-      reverseCurve: Curves.elasticOut,
-    ));
-    _squashAnimation = Tween<double>(
-      begin: 1.0,
-      end: 1.06,
-    ).animate(CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeOutCubic,
-      reverseCurve: Curves.elasticOut,
-    ));
+    _scaleAnimation = Tween<double>(begin: 1.0, end: widget.scaleDown).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: Curves.easeInOutSine,
+        reverseCurve: widget.enableSquash ? Curves.elasticOut : Curves.easeOutCubic,
+      ),
+    );
+    _squashX = Tween<double>(begin: 1.0, end: widget.enableSquash ? 1.05 : 1.0).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: Curves.easeInOutSine,
+        reverseCurve: widget.enableSquash ? Curves.elasticOut : Curves.easeOutCubic,
+      ),
+    );
+    _squashY = Tween<double>(begin: 1.0, end: widget.enableSquash ? 0.92 : 1.0).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: Curves.easeInOutSine,
+        reverseCurve: widget.enableSquash ? Curves.elasticOut : Curves.easeOutCubic,
+      ),
+    );
   }
 
   @override
@@ -2461,49 +2641,32 @@ class _BouncyButtonState extends State<BouncyButton>
     super.dispose();
   }
 
-  void _onTapDown(TapDownDetails details) {
-    if (widget.onTap != null) {
-      _controller.forward();
-    }
-  }
-
-  void _onTapUp(TapUpDetails details) {
-    if (widget.onTap != null) {
-      _controller.reverse();
-    }
-  }
-
-  void _onTapCancel() {
-    if (widget.onTap != null) {
-      _controller.reverse();
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
-      onTapDown: _onTapDown,
-      onTapUp: _onTapUp,
-      onTapCancel: _onTapCancel,
-      onTap: widget.onTap,
+      onTapDown: (_) {
+        HapticFeedback.selectionClick();
+        _controller.forward();
+      },
+      onTapUp: (_) async {
+        _controller.reverse();
+        widget.onTap?.call();
+      },
+      onTapCancel: () => _controller.reverse(),
       child: AnimatedBuilder(
         animation: _controller,
         builder: (context, child) {
-          if (widget.enableSquash) {
-            return Transform(
-              alignment: Alignment.center,
-              transform: Matrix4.diagonal3Values(
-                _scaleAnimation.value * _squashAnimation.value,
-                _scaleAnimation.value * (2.0 - _squashAnimation.value),
-                1.0,
-              ),
-              child: child,
-            );
-          }
           return Transform.scale(
             scale: _scaleAnimation.value,
-            child: child,
+            alignment: Alignment.center,
+            child: widget.enableSquash
+                ? Transform(
+                    alignment: Alignment.center,
+                    transform: Matrix4.diagonal3Values(_squashX.value, _squashY.value, 1.0),
+                    child: child,
+                  )
+                : child,
           );
         },
         child: widget.child,

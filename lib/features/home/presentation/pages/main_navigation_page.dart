@@ -704,168 +704,153 @@ class _FluidIPhoneBottomNavBarState extends State<_FluidIPhoneBottomNavBar>
           onHorizontalDragCancel: () {
             _finishDrag();
           },
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(30),
-            child: BackdropFilter(
-              filter: ui.ImageFilter.blur(sigmaX: 25, sigmaY: 25),
-              child: Container(
-                height: 58,
-                padding: EdgeInsets.zero,
-                decoration: BoxDecoration(
-                  color: isDark
-                      ? Colors.black.withValues(alpha: 0.40)
-                      : Colors.white.withValues(alpha: 0.40),
-                  borderRadius: BorderRadius.circular(30),
-                  border: Border.all(
-                    color: isDark
-                        ? Colors.white.withValues(alpha: 0.15)
-                        : Colors.white.withValues(alpha: 0.60),
-                    width: 1.2,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: isDark
-                          ? Colors.black.withValues(alpha: 0.45)
-                          : const Color(0xFF0F172A).withValues(alpha: 0.08),
-                      blurRadius: 20,
-                      offset: const Offset(0, 6),
-                    ),
-                  ],
+          child: Container(
+            height: 58,
+            padding: EdgeInsets.zero,
+            decoration: BoxDecoration(
+              color: isDark
+                  ? Colors.black.withValues(alpha: 0.90)
+                  : Colors.white.withValues(alpha: 0.90),
+              borderRadius: BorderRadius.circular(30),
+              border: Border.all(
+                color: isDark
+                    ? Colors.white.withValues(alpha: 0.15)
+                    : const Color(0xFFE2E8F0),
+                width: 1.0,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.08),
+                  blurRadius: 16,
+                  offset: const Offset(0, 4),
                 ),
-                child: Stack(
-                  alignment: Alignment.centerLeft,
-                  children: [
-                    // 1. Fluid Liquid Sliding Pill Indicator (Expands & Bounces on Hold)
-                    Positioned(
-                      left: pillLeft,
-                      top: 4,
-                      bottom: 4,
-                      child: AnimatedBuilder(
-                        animation: _pressController,
-                        builder: (context, child) {
-                          return Transform.scale(
-                            scaleX: _pressStretchAnim.value,
-                            scaleY: _pressScaleAnim.value,
-                            alignment: Alignment.center,
-                            child: child,
-                          );
-                        },
-                        child: Container(
-                          width: pillWidth,
-                          decoration: BoxDecoration(
-                            color: isDark
-                                ? Colors.white.withValues(alpha: 0.18)
-                                : Colors.black.withValues(alpha: 0.08),
-                            borderRadius: BorderRadius.circular(25),
-                            border: Border.all(
-                              color: isDark
-                                  ? Colors.white.withValues(alpha: 0.25)
-                                  : Colors.black.withValues(alpha: 0.06),
-                              width: 1.0,
-                            ),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.04),
-                                blurRadius: 6,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
-                          ),
+              ],
+            ),
+            child: Stack(
+              alignment: Alignment.centerLeft,
+              children: [
+                // 1. Fluid Liquid Sliding Pill Indicator (Darker & Prominent on Active)
+                Positioned(
+                  left: pillLeft,
+                  top: 4,
+                  bottom: 4,
+                  child: AnimatedBuilder(
+                    animation: _pressController,
+                    builder: (context, child) {
+                      return Transform.scale(
+                        scaleX: _pressStretchAnim.value,
+                        scaleY: _pressScaleAnim.value,
+                        alignment: Alignment.center,
+                        child: child,
+                      );
+                    },
+                    child: Container(
+                      width: pillWidth,
+                      decoration: BoxDecoration(
+                        color: isDark
+                            ? Colors.white.withValues(alpha: 0.20)
+                            : const Color(0xFF0F172A).withValues(alpha: 0.08),
+                        borderRadius: BorderRadius.circular(25),
+                        border: Border.all(
+                          color: isDark
+                              ? Colors.white.withValues(alpha: 0.28)
+                              : const Color(0xFF0F172A).withValues(alpha: 0.12),
+                          width: 1.0,
                         ),
                       ),
                     ),
+                  ),
+                ),
 
-                  // 2. Interactive Navigation Items (Protected with FittedBox against overflow)
-                  Row(
-                    children: List.generate(5, (index) {
-                      final item = navItems[index];
-                      final IconData icon = item['icon'] as IconData;
-                      final String label = item['label'] as String;
-                      final int unread = (index == 2) ? widget.totalUnread : 0;
+              // 2. Interactive Navigation Items (Protected with FittedBox against overflow)
+              Row(
+                children: List.generate(5, (index) {
+                  final item = navItems[index];
+                  final IconData icon = item['icon'] as IconData;
+                  final String label = item['label'] as String;
+                  final int unread = (index == 2) ? widget.totalUnread : 0;
 
-                      // Calculate distance from continuous pill position
-                      final double dist = (index - _currentPillPosition).abs();
-                      final double activeFactor = (1.0 - dist).clamp(0.0, 1.0);
-                      final bool isClosest = dist < 0.5;
+                  // Calculate distance from continuous pill position
+                  final double dist = (index - _currentPillPosition).abs();
+                  final double activeFactor = (1.0 - dist).clamp(0.0, 1.0);
+                  final bool isClosest = dist < 0.5;
 
-                      return Expanded(
-                        child: Container(
-                          alignment: Alignment.center,
-                          padding: const EdgeInsets.symmetric(horizontal: 2),
-                          child: FittedBox(
-                            fit: BoxFit.scaleDown,
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              crossAxisAlignment: CrossAxisAlignment.center,
+                  return Expanded(
+                    child: Container(
+                      alignment: Alignment.center,
+                      padding: const EdgeInsets.symmetric(horizontal: 2),
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Stack(
+                              clipBehavior: Clip.none,
                               children: [
-                                Stack(
-                                  clipBehavior: Clip.none,
-                                  children: [
-                                    Transform.scale(
-                                      scale: 1.0 + (activeFactor * 0.12),
-                                      child: Icon(
-                                        icon,
-                                        color: isDark
-                                            ? Color.lerp(Colors.white38, Colors.white, activeFactor)
-                                            : Color.lerp(Colors.black38, Colors.black, activeFactor),
-                                        size: 21,
+                                Transform.scale(
+                                  scale: 1.0 + (activeFactor * 0.12),
+                                  child: Icon(
+                                    icon,
+                                    color: isDark
+                                        ? Color.lerp(Colors.white38, Colors.white, activeFactor)
+                                        : Color.lerp(const Color(0xFF64748B), const Color(0xFF0F172A), activeFactor),
+                                    size: 21,
+                                  ),
+                                ),
+                                if (unread > 0)
+                                  Positioned(
+                                    top: -4,
+                                    right: -6,
+                                    child: Container(
+                                      padding: const EdgeInsets.all(3),
+                                      decoration: const BoxDecoration(
+                                        color: Color(0xFFEF4444),
+                                        shape: BoxShape.circle,
                                       ),
-                                    ),
-                                    if (unread > 0)
-                                      Positioned(
-                                        top: -4,
-                                        right: -6,
-                                        child: Container(
-                                          padding: const EdgeInsets.all(3),
-                                          decoration: const BoxDecoration(
-                                            color: Color(0xFFEF4444),
-                                            shape: BoxShape.circle,
-                                          ),
-                                          constraints: const BoxConstraints(
-                                            minWidth: 14,
-                                            minHeight: 14,
-                                          ),
-                                          child: Center(
-                                            child: Text(
-                                              '$unread',
-                                              style: GoogleFonts.plusJakartaSans(
-                                                color: Colors.white,
-                                                fontSize: 9,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
+                                      constraints: const BoxConstraints(
+                                        minWidth: 14,
+                                        minHeight: 14,
+                                      ),
+                                      child: Center(
+                                        child: Text(
+                                          '$unread',
+                                          style: GoogleFonts.plusJakartaSans(
+                                            color: Colors.white,
+                                            fontSize: 9,
+                                            fontWeight: FontWeight.bold,
                                           ),
                                         ),
                                       ),
-                                  ],
-                                ),
-                                if (isClosest && activeFactor > 0.3) ...[
-                                  const SizedBox(width: 4),
-                                  Opacity(
-                                    opacity: activeFactor,
-                                    child: Text(
-                                      label,
-                                      style: GoogleFonts.plusJakartaSans(
-                                        color: isDark ? Colors.white : Colors.black,
-                                        fontSize: 12.0,
-                                        fontWeight: FontWeight.w800,
-                                        letterSpacing: -0.2,
-                                      ),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
                                     ),
                                   ),
-                                ],
                               ],
                             ),
-                          ),
+                            if (isClosest && activeFactor > 0.3) ...[
+                              const SizedBox(width: 4),
+                              Opacity(
+                                opacity: activeFactor,
+                                child: Text(
+                                  label,
+                                  style: GoogleFonts.plusJakartaSans(
+                                    color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                    fontSize: 12.0,
+                                    fontWeight: FontWeight.w900,
+                                    letterSpacing: -0.2,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ],
                         ),
-                      );
-                    }),
-                  ),
-                ],
+                      ),
+                    ),
+                  );
+                }),
               ),
-            ),
+            ],
           ),
         ),
       );
