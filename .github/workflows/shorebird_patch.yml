@@ -26,6 +26,6 @@ jobs:
           cache: true
 
       - name: Deploy Patch for Android
-        run: shorebird patch android --force
+        run: shorebird patch android --allow-asset-diffs
         env:
           SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
