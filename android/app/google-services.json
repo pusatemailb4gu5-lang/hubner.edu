@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "441060738052",
+    "project_id": "hubneredu",
+    "storage_bucket": "hubneredu.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:441060738052:android:6ae1f06bb9f6836432a151",
+        "android_client_info": {
+          "package_name": "com.hubner.hubner"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "441060738052-dsc7cp7tmn5ap4kvahnlgrjtpl5u3n6l.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.hubner.hubner",
+            "certificate_hash": "42dd70416d2ff78520cc9458299f41cdbfa4a671"
+          }
+        },
+        {
+          "client_id": "441060738052-j0h3plr6ne53408dh25jdb7akh7fou09.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCGcLi64sdami38IrRC-v7Q31599F4bDd4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "441060738052-j0h3plr6ne53408dh25jdb7akh7fou09.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
