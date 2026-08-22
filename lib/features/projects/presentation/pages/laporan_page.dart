@@ -9,7 +9,6 @@ import 'dart:convert';
 import 'dart:math' as math;
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
-import 'package:hubner/core/theme/app_colors.dart';
 import 'package:hubner/features/projects/presentation/pages/manage_attendance_page.dart';
 import 'package:hubner/main.dart';
 
@@ -499,13 +498,13 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
         final double statusBarHeight = MediaQuery.of(context).padding.top;
 
         return Scaffold(
-          backgroundColor: isDark ? const Color(0xFF130E20) : const Color(0xFF7F52FC),
+          backgroundColor: isDark ? const Color(0xFF26173E) : const Color(0xFF7F52FC),
           body: StreamBuilder<QuerySnapshot>(
             stream: _projectsStream,
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return Scaffold(
-                  backgroundColor: isDark ? const Color(0xFF130E20) : const Color(0xFF7F52FC),
+                  backgroundColor: isDark ? const Color(0xFF26173E) : const Color(0xFF7F52FC),
                   body: const Center(child: CircularProgressIndicator(color: Colors.white)),
                 );
               }
@@ -537,7 +536,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
               // Main Body with Hero & Draggable White Sheet
               Expanded(
                 child: Scaffold(
-                  backgroundColor: isDark ? const Color(0xFF130E20) : const Color(0xFF7F52FC),
+                  backgroundColor: isDark ? const Color(0xFF26173E) : const Color(0xFF7F52FC),
                   body: Stack(
                     children: [
                       // ==========================================
@@ -595,24 +594,28 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                   Row(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      if (Navigator.canPop(context)) ...[
+                                       if (Navigator.canPop(context)) ...[
                                         GestureDetector(
                                           onTap: () => Navigator.pop(context),
                                           child: Container(
                                             width: 40,
                                             height: 40,
                                             decoration: BoxDecoration(
-                                              color: Colors.white.withValues(alpha: 0.92),
+                                              color: isDark ? const Color(0xFF18181B) : Colors.white.withValues(alpha: 0.92),
                                               shape: BoxShape.circle,
+                                              border: Border.all(
+                                                color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+                                                width: 1.2,
+                                              ),
                                               boxShadow: [
                                                 BoxShadow(
-                                                  color: Colors.black.withValues(alpha: 0.1),
+                                                  color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.1),
                                                   blurRadius: 6,
                                                   offset: const Offset(0, 2),
                                                 ),
                                               ],
                                             ),
-                                            child: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.black87, size: 17),
+                                            child: Icon(Icons.arrow_back_ios_new_rounded, color: isDark ? Colors.white : Colors.black87, size: 17),
                                           ),
                                         ),
                                         const SizedBox(width: 12),
@@ -647,7 +650,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                   ),
                                   const SizedBox(height: 16),
 
-                                  // ==========================================
+                                   // ==========================================
                                   // 2. PILIH CLASSROOM (POPUP MENU BUTTON PERSIS TAMBAH TUGAS) & ATUR PRESENSI
                                   // ==========================================
                                   Row(
@@ -658,13 +661,16 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                           tooltip: '',
                                           position: PopupMenuPosition.under,
                                           offset: const Offset(0, 6),
-                                          color: Colors.white,
+                                          color: isDark ? const Color(0xFF18181B) : Colors.white,
                                           elevation: 6,
                                           constraints: const BoxConstraints(minWidth: 220, maxWidth: 340),
-                                          shadowColor: Colors.black.withValues(alpha: 0.14),
+                                          shadowColor: Colors.black.withValues(alpha: isDark ? 0.45 : 0.14),
                                           shape: RoundedRectangleBorder(
                                             borderRadius: BorderRadius.circular(16),
-                                            side: const BorderSide(color: Color(0xFFE2E8F0), width: 1.0),
+                                            side: BorderSide(
+                                              color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                                              width: 1.0,
+                                            ),
                                           ),
                                           onSelected: (val) {
                                             setState(() {
@@ -690,7 +696,9 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                                 decoration: BoxDecoration(
                                                   border: Border(
                                                     bottom: BorderSide(
-                                                      color: isLast ? Colors.transparent : const Color(0xFFF1F5F9),
+                                                      color: isLast
+                                                          ? Colors.transparent
+                                                          : (isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9)),
                                                       width: 1,
                                                     ),
                                                   ),
@@ -705,7 +713,9 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                                         style: GoogleFonts.plusJakartaSans(
                                                           fontSize: 13,
                                                           fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
-                                                          color: isSelected ? const Color(0xFF2563EB) : const Color(0xFF0F172A),
+                                                          color: isSelected
+                                                              ? const Color(0xFF60A5FA)
+                                                              : (isDark ? Colors.white : const Color(0xFF0F172A)),
                                                         ),
                                                         softWrap: true,
                                                       ),
@@ -719,11 +729,15 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                             height: 52,
                                             padding: const EdgeInsets.fromLTRB(4, 4, 16, 4),
                                             decoration: BoxDecoration(
-                                              color: Colors.white,
+                                              color: isDark ? const Color(0xFF18181B).withValues(alpha: 0.90) : Colors.white,
                                               borderRadius: BorderRadius.circular(30),
+                                              border: Border.all(
+                                                color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+                                                width: 1.2,
+                                              ),
                                               boxShadow: [
                                                 BoxShadow(
-                                                  color: Colors.black.withValues(alpha: 0.08),
+                                                  color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.08),
                                                   blurRadius: 8,
                                                   offset: const Offset(0, 2),
                                                 ),
@@ -740,7 +754,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                                     style: GoogleFonts.plusJakartaSans(
                                                       fontSize: 13,
                                                       fontWeight: FontWeight.bold,
-                                                      color: Colors.black87,
+                                                      color: isDark ? Colors.white : Colors.black87,
                                                       height: 1.15,
                                                     ),
                                                     maxLines: 2,
@@ -748,7 +762,11 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                                   ),
                                                 ),
                                                 const SizedBox(width: 4),
-                                                const Icon(Icons.keyboard_arrow_down_rounded, color: Colors.black54, size: 22),
+                                                Icon(
+                                                  Icons.keyboard_arrow_down_rounded,
+                                                  color: isDark ? Colors.white70 : Colors.black54,
+                                                  size: 22,
+                                                ),
                                               ],
                                             ),
                                           ),
@@ -782,11 +800,15 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                           height: 52,
                                           padding: const EdgeInsets.symmetric(horizontal: 16),
                                           decoration: BoxDecoration(
-                                            color: const Color(0xFF1E293B),
+                                            color: isDark ? const Color(0xFF18181B) : const Color(0xFF1E293B),
                                             borderRadius: BorderRadius.circular(30),
+                                            border: Border.all(
+                                              color: isDark ? const Color(0xFF27272A) : Colors.transparent,
+                                              width: 1.2,
+                                            ),
                                             boxShadow: [
                                               BoxShadow(
-                                                color: Colors.black.withValues(alpha: 0.12),
+                                                color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.12),
                                                 blurRadius: 8,
                                                 offset: const Offset(0, 2),
                                               ),
@@ -824,11 +846,17 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                           height: 78,
                                           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                                           decoration: BoxDecoration(
-                                            color: const Color(0xFFFFFBEB),
+                                            color: isDark
+                                                ? const Color(0xFF18181B).withValues(alpha: 0.88)
+                                                : const Color(0xFFFFFBEB),
                                             borderRadius: BorderRadius.circular(20),
+                                            border: Border.all(
+                                              color: isDark ? const Color(0xFF27272A) : Colors.transparent,
+                                              width: 1.1,
+                                            ),
                                             boxShadow: [
                                               BoxShadow(
-                                                color: Colors.black.withValues(alpha: 0.06),
+                                                color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.06),
                                                 blurRadius: 8,
                                                 offset: const Offset(0, 2),
                                               ),
@@ -838,9 +866,9 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                             crossAxisAlignment: CrossAxisAlignment.center,
                                             children: [
                                               // Ikon Frameless di Kiri
-                                              const Icon(
+                                              Icon(
                                                 Icons.people_alt_rounded,
-                                                color: Color(0xFFD97706),
+                                                color: isDark ? const Color(0xFFFBBF24) : const Color(0xFFD97706),
                                                 size: 28,
                                               ),
                                               const SizedBox(width: 10),
@@ -855,7 +883,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                                       style: GoogleFonts.plusJakartaSans(
                                                         fontSize: 24,
                                                         fontWeight: FontWeight.w900,
-                                                        color: const Color(0xFF92400E),
+                                                        color: isDark ? const Color(0xFFFBBF24) : const Color(0xFF92400E),
                                                         height: 1.0,
                                                       ),
                                                     ),
@@ -865,7 +893,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                                       style: GoogleFonts.plusJakartaSans(
                                                         fontSize: 11.5,
                                                         fontWeight: FontWeight.w700,
-                                                        color: const Color(0xFFB45309),
+                                                        color: isDark ? const Color(0xFFFCD34D) : const Color(0xFFB45309),
                                                       ),
                                                       maxLines: 1,
                                                       overflow: TextOverflow.ellipsis,
@@ -885,11 +913,17 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                           height: 78,
                                           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                                           decoration: BoxDecoration(
-                                            color: const Color(0xFFECFDF5),
+                                            color: isDark
+                                                ? const Color(0xFF18181B).withValues(alpha: 0.88)
+                                                : const Color(0xFFECFDF5),
                                             borderRadius: BorderRadius.circular(20),
+                                            border: Border.all(
+                                              color: isDark ? const Color(0xFF27272A) : Colors.transparent,
+                                              width: 1.1,
+                                            ),
                                             boxShadow: [
                                               BoxShadow(
-                                                color: Colors.black.withValues(alpha: 0.06),
+                                                color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.06),
                                                 blurRadius: 8,
                                                 offset: const Offset(0, 2),
                                               ),
@@ -953,13 +987,16 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                           tooltip: '',
                                           position: PopupMenuPosition.under,
                                           offset: const Offset(0, 6),
-                                          color: Colors.white,
+                                          color: isDark ? const Color(0xFF18181B) : Colors.white,
                                           elevation: 6,
                                           constraints: const BoxConstraints(minWidth: 200, maxWidth: 320),
-                                          shadowColor: Colors.black.withValues(alpha: 0.14),
+                                          shadowColor: Colors.black.withValues(alpha: isDark ? 0.45 : 0.14),
                                           shape: RoundedRectangleBorder(
                                             borderRadius: BorderRadius.circular(16),
-                                            side: const BorderSide(color: Color(0xFFE2E8F0), width: 1.0),
+                                            side: BorderSide(
+                                              color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                                              width: 1.0,
+                                            ),
                                           ),
                                           onSelected: (val) {
                                             setState(() {
@@ -975,9 +1012,12 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                                 constraints: const BoxConstraints(minHeight: 44),
                                                 alignment: Alignment.centerLeft,
                                                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                                                decoration: const BoxDecoration(
+                                                decoration: BoxDecoration(
                                                   border: Border(
-                                                    bottom: BorderSide(color: Color(0xFFF1F5F9), width: 1),
+                                                    bottom: BorderSide(
+                                                      color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+                                                      width: 1,
+                                                    ),
                                                   ),
                                                 ),
                                                 child: Text(
@@ -985,7 +1025,9 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                                   style: GoogleFonts.plusJakartaSans(
                                                     fontSize: 13.5,
                                                     fontWeight: _selectedStageFilterIdx == null ? FontWeight.bold : FontWeight.w600,
-                                                    color: _selectedStageFilterIdx == null ? const Color(0xFF2563EB) : const Color(0xFF0F172A),
+                                                    color: _selectedStageFilterIdx == null
+                                                        ? const Color(0xFF60A5FA)
+                                                        : (isDark ? Colors.white : const Color(0xFF0F172A)),
                                                   ),
                                                   softWrap: true,
                                                 ),
@@ -1008,7 +1050,9 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                                   decoration: BoxDecoration(
                                                     border: Border(
                                                       bottom: BorderSide(
-                                                        color: isLast ? Colors.transparent : const Color(0xFFF1F5F9),
+                                                        color: isLast
+                                                            ? Colors.transparent
+                                                            : (isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9)),
                                                         width: 1,
                                                       ),
                                                     ),
@@ -1017,7 +1061,9 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                                     cleanName,
                                                     style: GoogleFonts.plusJakartaSans(
                                                       fontSize: 13.5,
-                                                      color: isSelected ? const Color(0xFF2563EB) : const Color(0xFF0F172A),
+                                                      color: isSelected
+                                                          ? const Color(0xFF60A5FA)
+                                                          : (isDark ? Colors.white : const Color(0xFF0F172A)),
                                                       fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
                                                     ),
                                                     softWrap: true,
@@ -1030,11 +1076,15 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                             height: 52,
                                             padding: const EdgeInsets.symmetric(horizontal: 14),
                                             decoration: BoxDecoration(
-                                              color: Colors.white,
+                                              color: isDark ? const Color(0xFF18181B).withValues(alpha: 0.90) : Colors.white,
                                               borderRadius: BorderRadius.circular(30),
+                                              border: Border.all(
+                                                color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+                                                width: 1.2,
+                                              ),
                                               boxShadow: [
                                                 BoxShadow(
-                                                  color: Colors.black.withValues(alpha: 0.06),
+                                                  color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.06),
                                                   blurRadius: 6,
                                                   offset: const Offset(0, 2),
                                                 ),
@@ -1053,7 +1103,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                                     style: GoogleFonts.plusJakartaSans(
                                                       fontSize: 12,
                                                       fontWeight: FontWeight.bold,
-                                                      color: Colors.black87,
+                                                      color: isDark ? Colors.white : Colors.black87,
                                                       height: 1.15,
                                                     ),
                                                     overflow: TextOverflow.ellipsis,
@@ -1061,7 +1111,11 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                                   ),
                                                 ),
                                                 const SizedBox(width: 4),
-                                                const Icon(Icons.keyboard_arrow_down_rounded, color: Colors.black54, size: 20),
+                                                Icon(
+                                                  Icons.keyboard_arrow_down_rounded,
+                                                  color: isDark ? Colors.white70 : Colors.black54,
+                                                  size: 20,
+                                                ),
                                               ],
                                             ),
                                           ),
@@ -1075,14 +1129,17 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                           tooltip: '',
                                           position: PopupMenuPosition.under,
                                           offset: const Offset(0, 6),
-                                          color: Colors.white,
+                                          color: isDark ? const Color(0xFF18181B) : Colors.white,
                                           elevation: 6,
                                           constraints: const BoxConstraints(minWidth: 200, maxWidth: 320),
-                                          shadowColor: Colors.black.withValues(alpha: 0.14),
+                                          shadowColor: Colors.black.withValues(alpha: isDark ? 0.45 : 0.14),
                                           enabled: _selectedStageFilterIdx != null,
                                           shape: RoundedRectangleBorder(
                                             borderRadius: BorderRadius.circular(16),
-                                            side: const BorderSide(color: Color(0xFFE2E8F0), width: 1.0),
+                                            side: BorderSide(
+                                              color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                                              width: 1.0,
+                                            ),
                                           ),
                                           onSelected: (val) {
                                             setState(() {
@@ -1116,7 +1173,9 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                                   decoration: BoxDecoration(
                                                     border: Border(
                                                       bottom: BorderSide(
-                                                        color: materis.isEmpty ? Colors.transparent : const Color(0xFFF1F5F9),
+                                                        color: materis.isEmpty
+                                                            ? Colors.transparent
+                                                            : (isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9)),
                                                         width: 1,
                                                       ),
                                                     ),
@@ -1126,7 +1185,9 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                                     style: GoogleFonts.plusJakartaSans(
                                                       fontSize: 13.5,
                                                       fontWeight: _selectedMateriFilterIdx == null ? FontWeight.bold : FontWeight.w600,
-                                                      color: _selectedMateriFilterIdx == null ? const Color(0xFF2563EB) : const Color(0xFF0F172A),
+                                                      color: _selectedMateriFilterIdx == null
+                                                          ? const Color(0xFF60A5FA)
+                                                          : (isDark ? Colors.white : const Color(0xFF0F172A)),
                                                     ),
                                                     softWrap: true,
                                                   ),
@@ -1148,7 +1209,9 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                                     decoration: BoxDecoration(
                                                       border: Border(
                                                         bottom: BorderSide(
-                                                          color: isLast ? Colors.transparent : const Color(0xFFF1F5F9),
+                                                          color: isLast
+                                                              ? Colors.transparent
+                                                              : (isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9)),
                                                           width: 1,
                                                         ),
                                                       ),
@@ -1157,7 +1220,9 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                                       mTitle,
                                                       style: GoogleFonts.plusJakartaSans(
                                                         fontSize: 13.5,
-                                                        color: isSelected ? const Color(0xFF2563EB) : const Color(0xFF0F172A),
+                                                        color: isSelected
+                                                            ? const Color(0xFF60A5FA)
+                                                            : (isDark ? Colors.white : const Color(0xFF0F172A)),
                                                         fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
                                                       ),
                                                       softWrap: true,
@@ -1171,13 +1236,19 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                             height: 52,
                                             padding: const EdgeInsets.symmetric(horizontal: 14),
                                             decoration: BoxDecoration(
-                                              color: _selectedStageFilterIdx == null
-                                                  ? Colors.white.withValues(alpha: 0.72)
-                                                  : Colors.white,
+                                              color: isDark
+                                                  ? const Color(0xFF18181B).withValues(alpha: (_selectedStageFilterIdx == null ? 0.50 : 0.90))
+                                                  : (_selectedStageFilterIdx == null
+                                                      ? Colors.white.withValues(alpha: 0.72)
+                                                      : Colors.white),
                                               borderRadius: BorderRadius.circular(30),
+                                              border: Border.all(
+                                                color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+                                                width: 1.2,
+                                              ),
                                               boxShadow: [
                                                 BoxShadow(
-                                                  color: Colors.black.withValues(alpha: 0.06),
+                                                  color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.06),
                                                   blurRadius: 6,
                                                   offset: const Offset(0, 2),
                                                 ),
@@ -1200,7 +1271,9 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                                     style: GoogleFonts.plusJakartaSans(
                                                       fontSize: 12,
                                                       fontWeight: FontWeight.bold,
-                                                      color: _selectedStageFilterIdx == null ? Colors.black38 : Colors.black87,
+                                                      color: isDark
+                                                          ? (_selectedStageFilterIdx == null ? Colors.white38 : Colors.white)
+                                                          : (_selectedStageFilterIdx == null ? Colors.black38 : Colors.black87),
                                                       height: 1.15,
                                                     ),
                                                     overflow: TextOverflow.ellipsis,
@@ -1210,7 +1283,9 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                                 const SizedBox(width: 4),
                                                 Icon(
                                                   Icons.keyboard_arrow_down_rounded,
-                                                  color: _selectedStageFilterIdx == null ? Colors.black26 : Colors.black54,
+                                                  color: isDark
+                                                      ? (_selectedStageFilterIdx == null ? Colors.white24 : Colors.white70)
+                                                      : (_selectedStageFilterIdx == null ? Colors.black26 : Colors.black54),
                                                   size: 20,
                                                 ),
                                               ],
@@ -2219,14 +2294,35 @@ class _SoftAnimatedPatternPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final dotPaint = Paint()
-      ..color = Colors.white.withValues(alpha: isDark ? 0.06 : 0.12)
+    final whiteDotPaint = Paint()
+      ..color = Colors.white.withValues(alpha: isDark ? 0.08 : 0.12)
+      ..style = PaintingStyle.fill;
+
+    final greyDotPaint = Paint()
+      ..color = isDark
+          ? const Color(0xFF94A3B8).withValues(alpha: 0.10)
+          : Colors.white.withValues(alpha: 0.08)
+      ..style = PaintingStyle.fill;
+
+    final blackDotPaint = Paint()
+      ..color = isDark
+          ? Colors.black.withValues(alpha: 0.22)
+          : Colors.white.withValues(alpha: 0.05)
       ..style = PaintingStyle.fill;
 
     final ringPaint = Paint()
-      ..color = Colors.white.withValues(alpha: isDark ? 0.04 : 0.08)
+      ..color = isDark
+          ? const Color(0xFFCBD5E1).withValues(alpha: 0.06)
+          : Colors.white.withValues(alpha: 0.08)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.4;
+
+    final blackRingPaint = Paint()
+      ..color = isDark
+          ? Colors.black.withValues(alpha: 0.18)
+          : Colors.white.withValues(alpha: 0.04)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.0;
 
     const double spacing = 32.0;
     final int cols = (size.width / spacing).ceil() + 1;
@@ -2238,6 +2334,11 @@ class _SoftAnimatedPatternPainter extends CustomPainter {
         final double y = j * spacing;
         final double wave = math.sin((i * 0.4) + (j * 0.4) + (animationValue * math.pi * 2));
         final double radius = 1.5 + (wave * 0.75);
+        final int patternType = (i + j) % 3;
+        final Paint dotPaint = patternType == 0
+            ? whiteDotPaint
+            : (patternType == 1 ? greyDotPaint : blackDotPaint);
+
         canvas.drawCircle(Offset(x, y), math.max(0.6, radius), dotPaint);
       }
     }
@@ -2246,7 +2347,7 @@ class _SoftAnimatedPatternPainter extends CustomPainter {
     final double offset2 = math.cos(animationValue * math.pi * 2) * 10;
 
     canvas.drawCircle(Offset(size.width * 0.2 + offset1, size.height * 0.3 + offset2), 42, ringPaint);
-    canvas.drawCircle(Offset(size.width * 0.85 - offset2, size.height * 0.65 + offset1), 54, ringPaint);
+    canvas.drawCircle(Offset(size.width * 0.85 - offset2, size.height * 0.65 + offset1), 54, blackRingPaint);
     canvas.drawCircle(Offset(size.width * 0.5 + offset2, size.height * 0.85 - offset1), 32, ringPaint);
   }
 

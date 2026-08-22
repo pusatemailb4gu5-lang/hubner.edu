@@ -707,41 +707,29 @@ class _FluidIPhoneBottomNavBarState extends State<_FluidIPhoneBottomNavBar>
           child: ClipRRect(
             borderRadius: BorderRadius.circular(30),
             child: BackdropFilter(
-              filter: ui.ImageFilter.blur(sigmaX: 30, sigmaY: 30),
+              filter: ui.ImageFilter.blur(sigmaX: 25, sigmaY: 25),
               child: Container(
                 height: 58,
                 padding: EdgeInsets.zero,
                 decoration: BoxDecoration(
                   color: isDark
-                      ? const Color(0xFF141416).withValues(alpha: 0.88)
-                      : Colors.white.withValues(alpha: 0.92),
+                      ? Colors.black.withValues(alpha: 0.40)
+                      : Colors.white.withValues(alpha: 0.40),
                   borderRadius: BorderRadius.circular(30),
                   border: Border.all(
                     color: isDark
-                        ? Colors.white.withValues(alpha: 0.18)
-                        : const Color(0xFFE2E8F0),
+                        ? Colors.white.withValues(alpha: 0.15)
+                        : Colors.white.withValues(alpha: 0.60),
                     width: 1.2,
                   ),
                   boxShadow: [
                     BoxShadow(
                       color: isDark
-                          ? Colors.black.withValues(alpha: 0.6)
-                          : const Color(0xFF0F172A).withValues(alpha: 0.14),
-                      blurRadius: 24,
-                      offset: const Offset(0, 7),
+                          ? Colors.black.withValues(alpha: 0.45)
+                          : const Color(0xFF0F172A).withValues(alpha: 0.08),
+                      blurRadius: 20,
+                      offset: const Offset(0, 6),
                     ),
-                    if (!isDark) ...[
-                      BoxShadow(
-                        color: const Color(0xFF0F172A).withValues(alpha: 0.04),
-                        blurRadius: 10,
-                        offset: const Offset(0, 2),
-                      ),
-                      BoxShadow(
-                        color: Colors.white,
-                        blurRadius: 4,
-                        offset: const Offset(0, -1),
-                      ),
-                    ],
                   ],
                 ),
                 child: Stack(
@@ -766,13 +754,13 @@ class _FluidIPhoneBottomNavBarState extends State<_FluidIPhoneBottomNavBar>
                           width: pillWidth,
                           decoration: BoxDecoration(
                             color: isDark
-                                ? Colors.white.withValues(alpha: 0.16)
-                                : const Color(0xFF0F172A).withValues(alpha: 0.08),
+                                ? Colors.white.withValues(alpha: 0.18)
+                                : Colors.black.withValues(alpha: 0.08),
                             borderRadius: BorderRadius.circular(25),
                             border: Border.all(
                               color: isDark
-                                  ? Colors.white.withValues(alpha: 0.22)
-                                  : const Color(0xFF0F172A).withValues(alpha: 0.08),
+                                  ? Colors.white.withValues(alpha: 0.25)
+                                  : Colors.black.withValues(alpha: 0.06),
                               width: 1.0,
                             ),
                             boxShadow: [

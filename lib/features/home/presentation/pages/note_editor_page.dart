@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../../../core/theme/app_colors.dart';
 
 class NoteEditorPage extends StatefulWidget {
   final String? noteId;
@@ -99,8 +101,10 @@ class _NoteEditorPageState extends State<NoteEditorPage> {
 
   @override
   Widget build(BuildContext context) {
+    final bool isDark = AppColors.isDarkMode;
+
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: isDark ? const Color(0xFF09090B) : Colors.white,
       body: Align(
         alignment: Alignment.topCenter,
         child: Container(
@@ -108,68 +112,98 @@ class _NoteEditorPageState extends State<NoteEditorPage> {
           child: SafeArea(
             child: Column(
               children: [
-                // AppBar (Clean)
+                // AppBar
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 8.0),
+                  padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      GestureDetector(
+                      // Tombol Back (<): Dark sama seperti lonceng, Light putih border halus
+                      BouncyButton(
                         onTap: () => Navigator.pop(context),
                         child: Container(
-                          width: 44,
-                          height: 44,
-                          decoration: const BoxDecoration(
-                            color: Color(0xFFF1F5F9),
+                          width: 42,
+                          height: 42,
+                          decoration: BoxDecoration(
+                            color: isDark ? const Color(0xFF18181B) : Colors.white,
                             shape: BoxShape.circle,
+                            border: Border.all(
+                              color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+                              width: 1.2,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.04),
+                                blurRadius: 8,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
                           ),
-                          child: const Icon(
+                          child: Icon(
                             Icons.arrow_back_rounded,
-                            color: Colors.black,
-                            size: 18,
+                            color: isDark ? Colors.white : Colors.black87,
+                            size: 20,
                           ),
                         ),
                       ),
                       Text(
                         widget.noteId == null ? 'Catatan Baru' : 'Edit Catatan',
                         style: GoogleFonts.plusJakartaSans(
-                          fontSize: 21.1,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.black,
+                          fontSize: 18.0,
+                          fontWeight: FontWeight.w700,
+                          color: isDark ? Colors.white : Colors.black,
                         ),
                       ),
+                      // Tombol Centang (✓): Dark sama seperti lonceng, Light warna hitam text/icon putih
                       _isSaving
-                          ? const SizedBox(
-                              width: 44,
-                              height: 44,
-                              child: Padding(
-                                padding: EdgeInsets.all(12.0),
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  color: Colors.black,
+                          ? SizedBox(
+                              width: 42,
+                              height: 42,
+                              child: Center(
+                                child: SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: isDark ? Colors.white : Colors.black,
+                                  ),
                                 ),
                               ),
                             )
-                          : GestureDetector(
+                          : BouncyButton(
                               onTap: _saveNote,
                               child: Container(
-                                width: 44,
-                                height: 44,
-                                decoration: const BoxDecoration(
-                                  color: Colors.black,
+                                width: 42,
+                                height: 42,
+                                decoration: BoxDecoration(
+                                  color: isDark ? const Color(0xFF18181B) : Colors.black,
                                   shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: isDark ? const Color(0xFF27272A) : Colors.black,
+                                    width: 1.2,
+                                  ),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.15),
+                                      blurRadius: 8,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ],
                                 ),
                                 child: const Icon(
                                   Icons.check_rounded,
                                   color: Colors.white,
-                                  size: 18,
+                                  size: 20,
                                 ),
                               ),
                             ),
                     ],
                   ),
                 ),
-                const Divider(color: Color(0xFFF1F5F9), height: 1),
+                Divider(
+                  color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+                  height: 1,
+                ),
 
                 // Editor Body
                 Expanded(
@@ -181,17 +215,18 @@ class _NoteEditorPageState extends State<NoteEditorPage> {
                         TextField(
                           controller: _titleController,
                           maxLines: 1,
+                          cursorColor: isDark ? Colors.white : Colors.black,
                           style: GoogleFonts.plusJakartaSans(
-                            fontSize: 25.7,
+                            fontSize: 24.0,
                             fontWeight: FontWeight.bold,
-                            color: Colors.black87,
+                            color: isDark ? Colors.white : Colors.black87,
                           ),
                           decoration: InputDecoration(
                             hintText: 'Judul Catatan',
                             hintStyle: GoogleFonts.plusJakartaSans(
-                              fontSize: 25.7,
+                              fontSize: 24.0,
                               fontWeight: FontWeight.bold,
-                              color: Colors.black26,
+                              color: isDark ? Colors.white30 : Colors.black26,
                             ),
                             border: InputBorder.none,
                           ),
@@ -201,16 +236,17 @@ class _NoteEditorPageState extends State<NoteEditorPage> {
                         TextField(
                           controller: _contentController,
                           maxLines: null,
+                          cursorColor: isDark ? Colors.white : Colors.black,
                           style: GoogleFonts.dmSans(
-                            fontSize: 17.6,
-                            color: Colors.black87,
+                            fontSize: 16.5,
+                            color: isDark ? const Color(0xFFE2E8F0) : Colors.black87,
                             height: 1.6,
                           ),
                           decoration: InputDecoration(
                             hintText: 'Mulai menulis catatan Anda di sini...',
                             hintStyle: GoogleFonts.dmSans(
-                              fontSize: 17.6,
-                              color: Colors.black26,
+                              fontSize: 16.5,
+                              color: isDark ? Colors.white30 : Colors.black26,
                             ),
                             border: InputBorder.none,
                           ),
@@ -223,6 +259,105 @@ class _NoteEditorPageState extends State<NoteEditorPage> {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+class BouncyButton extends StatefulWidget {
+  final Widget child;
+  final VoidCallback? onTap;
+  final double scaleDown;
+  final Duration duration;
+  final bool enableSquash;
+
+  const BouncyButton({
+    super.key,
+    required this.child,
+    this.onTap,
+    this.scaleDown = 0.88,
+    this.duration = const Duration(milliseconds: 130),
+    this.enableSquash = true,
+  });
+
+  @override
+  State<BouncyButton> createState() => _BouncyButtonState();
+}
+
+class _BouncyButtonState extends State<BouncyButton> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _scaleAnimation;
+  late Animation<double> _squashX;
+  late Animation<double> _squashY;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: widget.duration,
+      reverseDuration: widget.enableSquash
+          ? const Duration(milliseconds: 380)
+          : const Duration(milliseconds: 100),
+    );
+    _scaleAnimation = Tween<double>(begin: 1.0, end: widget.scaleDown).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: Curves.easeInOutSine,
+        reverseCurve: widget.enableSquash ? Curves.elasticOut : Curves.easeOutCubic,
+      ),
+    );
+    _squashX = Tween<double>(begin: 1.0, end: widget.enableSquash ? 1.05 : 1.0).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: Curves.easeInOutSine,
+        reverseCurve: widget.enableSquash ? Curves.elasticOut : Curves.easeOutCubic,
+      ),
+    );
+    _squashY = Tween<double>(begin: 1.0, end: widget.enableSquash ? 0.92 : 1.0).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: Curves.easeInOutSine,
+        reverseCurve: widget.enableSquash ? Curves.elasticOut : Curves.easeOutCubic,
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTapDown: (_) {
+        HapticFeedback.selectionClick();
+        _controller.forward();
+      },
+      onTapUp: (_) async {
+        _controller.reverse();
+        widget.onTap?.call();
+      },
+      onTapCancel: () => _controller.reverse(),
+      child: AnimatedBuilder(
+        animation: _controller,
+        builder: (context, child) {
+          return Transform.scale(
+            scale: _scaleAnimation.value,
+            alignment: Alignment.center,
+            child: widget.enableSquash
+                ? Transform(
+                    alignment: Alignment.center,
+                    transform: Matrix4.diagonal3Values(_squashX.value, _squashY.value, 1.0),
+                    child: child,
+                  )
+                : child,
+          );
+        },
+        child: widget.child,
       ),
     );
   }

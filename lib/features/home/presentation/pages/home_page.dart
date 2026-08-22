@@ -3719,12 +3719,12 @@ class _HomePageState extends State<HomePage> {
                           final bool isDark = AppColors.isDarkMode;
                           final double t = ((scrollOffset - 20.0) / 40.0).clamp(0.0, 1.0);
                           final Color headerBg = isDark
-                              ? const Color(0xFF0F172A).withValues(alpha: t * 0.96)
-                              : Colors.white.withValues(alpha: t * 0.96);
+                              ? Colors.black.withValues(alpha: t * 0.50)
+                              : Colors.white.withValues(alpha: t * 0.85);
                           final Color borderColor = isDark
-                              ? Colors.white.withValues(alpha: t * 0.1)
+                              ? Colors.transparent
                               : const Color(0xFFE2E8F0).withValues(alpha: t * 0.8);
-                          final double shadowAlpha = isDark ? t * 0.35 : t * 0.06;
+                          final double shadowAlpha = isDark ? 0.0 : t * 0.06;
 
                           return Positioned(
                             top: 0,
@@ -3734,18 +3734,20 @@ class _HomePageState extends State<HomePage> {
                               opacity: t,
                               child: ClipRect(
                                 child: BackdropFilter(
-                                  filter: ui.ImageFilter.blur(sigmaX: t * 14, sigmaY: t * 14),
+                                  filter: ui.ImageFilter.blur(sigmaX: t * 16, sigmaY: t * 16),
                                   child: Container(
                                     padding: const EdgeInsets.fromLTRB(14, 8, 14, 10),
                                     decoration: BoxDecoration(
                                       color: headerBg,
-                                      border: Border(
-                                        bottom: BorderSide(
-                                          color: t > 0.1 ? borderColor : Colors.transparent,
-                                          width: 1.0,
-                                        ),
-                                      ),
-                                      boxShadow: t > 0.1
+                                      border: isDark
+                                          ? null
+                                          : Border(
+                                              bottom: BorderSide(
+                                                color: t > 0.1 ? borderColor : Colors.transparent,
+                                                width: 1.0,
+                                              ),
+                                            ),
+                                      boxShadow: (!isDark && t > 0.1)
                                           ? [
                                               BoxShadow(
                                                 color: Colors.black.withValues(alpha: shadowAlpha),
@@ -4329,6 +4331,7 @@ class _HomePageState extends State<HomePage> {
                 _AnimatedScheduleCapsule(
                   schedules: schedules,
                   accentColor: accentColor,
+                  cardColor: backgroundColor,
                 ),
                 const SizedBox(height: 4),
                 // Middle: Complete Subject Title (Enlarged 2x, bold, black/white)
@@ -6380,8 +6383,8 @@ class _QuickNotesDropdownContent extends StatelessWidget {
                     color: isDark ? Colors.white : const Color(0xFF0F172A),
                   ),
                 ),
-                GestureDetector(
-                  behavior: HitTestBehavior.opaque,
+                BouncyButton(
+                  scaleDown: 0.92,
                   onTap: () {
                     Navigator.pop(context);
                     Navigator.of(context).push(
@@ -6394,27 +6397,21 @@ class _QuickNotesDropdownContent extends StatelessWidget {
                       ),
                     );
                   },
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4.5),
-                    decoration: BoxDecoration(
-                      color: isDark
-                          ? const Color(0xFF38BDF8).withValues(alpha: 0.15)
-                          : const Color(0xFFEFF6FF),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(
                           Icons.add_rounded,
                           color: isDark ? const Color(0xFF38BDF8) : const Color(0xFF2563EB),
-                          size: 15,
+                          size: 16,
                         ),
                         const SizedBox(width: 2),
                         Text(
                           'Tambah',
                           style: GoogleFonts.plusJakartaSans(
-                            fontSize: 12.0,
+                            fontSize: 12.5,
                             color: isDark ? const Color(0xFF38BDF8) : const Color(0xFF2563EB),
                             fontWeight: FontWeight.bold,
                           ),
@@ -6501,8 +6498,17 @@ class _QuickNotesDropdownContent extends StatelessWidget {
                       return '${dt.day.toString().padLeft(2, '0')}/${dt.month.toString().padLeft(2, '0')}/${dt.year}';
                     }
 
-                    final String createdStr = formatDate(noteData['createdAt']);
-                    final String updatedStr = formatDate(noteData['updatedAt'] ?? noteData['createdAt']);
+                    // Tampilkan tanggal diubah / diedit jika ada, atau tanggal dibuat
+                    final dynamic rawUpdated = noteData['updatedAt'];
+                    final dynamic rawCreated = noteData['createdAt'];
+                    final bool isEdited = rawUpdated != null &&
+                        rawCreated != null &&
+                        (rawUpdated is Timestamp && rawCreated is Timestamp
+                            ? rawUpdated.seconds != rawCreated.seconds
+                            : rawUpdated.toString() != rawCreated.toString());
+
+                    final String prefix = isEdited ? 'Diubah ' : 'Dibuat ';
+                    final String dateStr = '$prefix${formatDate(isEdited ? rawUpdated : (rawUpdated ?? rawCreated))}';
 
                     return InkWell(
                       borderRadius: BorderRadius.circular(10),
@@ -6521,41 +6527,9 @@ class _QuickNotesDropdownContent extends StatelessWidget {
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                         child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            // Tanggal Dibuat dan Diubah di Bagian Kiri (Tanpa Ikon)
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 4.5),
-                              decoration: BoxDecoration(
-                                color: isDark
-                                    ? const Color(0xFF27272A).withValues(alpha: 0.6)
-                                    : const Color(0xFFF1F5F9),
-                                borderRadius: BorderRadius.circular(6),
-                              ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text(
-                                    'Dibuat: $createdStr',
-                                    style: GoogleFonts.dmSans(
-                                      fontSize: 10.0,
-                                      fontWeight: FontWeight.w500,
-                                      color: isDark ? Colors.white54 : const Color(0xFF64748B),
-                                    ),
-                                  ),
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    'Diubah: $updatedStr',
-                                    style: GoogleFonts.dmSans(
-                                      fontSize: 10.0,
-                                      fontWeight: FontWeight.w600,
-                                      color: isDark ? Colors.white70 : const Color(0xFF334155),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(width: 10),
+                            // Judul dan Isi Catatan di Kiri
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -6586,11 +6560,27 @@ class _QuickNotesDropdownContent extends StatelessWidget {
                                 ],
                               ),
                             ),
-                            const SizedBox(width: 6),
-                            Icon(
-                              Icons.chevron_right_rounded,
-                              size: 16,
-                              color: isDark ? Colors.white30 : Colors.black26,
+                            const SizedBox(width: 8),
+                            // Tanggal di atas tombol > (Tanpa Card)
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  dateStr,
+                                  style: GoogleFonts.dmSans(
+                                    fontSize: 10.0,
+                                    fontWeight: FontWeight.w500,
+                                    color: isDark ? Colors.white38 : const Color(0xFF94A3B8),
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                Icon(
+                                  Icons.chevron_right_rounded,
+                                  size: 16,
+                                  color: isDark ? Colors.white30 : Colors.black26,
+                                ),
+                              ],
                             ),
                           ],
                         ),
@@ -7154,11 +7144,13 @@ class _ManagementActionButtonState extends State<ManagementActionButton> {
 class _AnimatedScheduleCapsule extends StatefulWidget {
   final List schedules;
   final Color accentColor;
+  final Color cardColor;
   const _AnimatedScheduleCapsule({
-    Key? key,
+    super.key,
     required this.schedules,
     this.accentColor = const Color(0xFF7F52FC),
-  }) : super(key: key);
+    this.cardColor = Colors.white,
+  });
 
   @override
   State<_AnimatedScheduleCapsule> createState() => _AnimatedScheduleCapsuleState();
@@ -7207,14 +7199,14 @@ class _AnimatedScheduleCapsuleState extends State<_AnimatedScheduleCapsule> {
               width: 28,
               height: 28,
               decoration: BoxDecoration(
-                color: widget.accentColor.withValues(alpha: 0.22),
+                color: isDark ? const Color(0xFF18181B) : Colors.black.withValues(alpha: 0.08),
                 shape: BoxShape.circle,
               ),
               child: Center(
                 child: Icon(
                   Icons.warning_amber_rounded,
-                  size: 15,
-                  color: isDark ? Colors.white : Colors.black87,
+                  size: 16,
+                  color: widget.cardColor,
                 ),
               ),
             ),
@@ -7266,14 +7258,14 @@ class _AnimatedScheduleCapsuleState extends State<_AnimatedScheduleCapsule> {
               width: 28,
               height: 28,
               decoration: BoxDecoration(
-                color: widget.accentColor.withValues(alpha: 0.22),
+                color: isDark ? const Color(0xFF18181B) : Colors.black.withValues(alpha: 0.08),
                 shape: BoxShape.circle,
               ),
               child: Center(
                 child: Icon(
                   Icons.check_rounded,
                   size: 16,
-                  color: isDark ? Colors.white : Colors.black87,
+                  color: widget.cardColor,
                 ),
               ),
             ),
