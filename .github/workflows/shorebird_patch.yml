@@ -25,9 +25,6 @@ jobs:
         with:
           cache: true
 
-      - name: Set executable permissions for Gradle wrapper
-        run: chmod +x ./android/gradlew
-
       - name: Deploy Patch for Android
         run: shorebird patch android --force
         env:
