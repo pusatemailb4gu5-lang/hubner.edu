@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:hubner/features/home/presentation/pages/chat_room_page.dart';
 import 'package:hubner/features/home/presentation/pages/manage_friends_page.dart';
+import 'package:hubner/features/projects/presentation/pages/desktop_classroom_page.dart';
 
 class DesktopDiskusiTab extends StatefulWidget {
   final String currentProjectId;
@@ -156,7 +157,7 @@ class _DesktopDiskusiTabState extends State<DesktopDiskusiTab> {
                     ),
                     const SizedBox(height: 8),
                     if (isLoadingMembers)
-                      const Center(child: Padding(padding: EdgeInsets.all(16), child: CircularProgressIndicator(color: Color(0xFF7C3AED))))
+                      const Center(child: Padding(padding: EdgeInsets.all(16), child: ThreeDotsLoader()))
                     else
                       Container(
                         constraints: const BoxConstraints(maxHeight: 180),
@@ -541,7 +542,7 @@ class _DesktopDiskusiTabState extends State<DesktopDiskusiTab> {
                         .snapshots(),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const Center(child: CircularProgressIndicator(color: Color(0xFF7C3AED)));
+                        return const Center(child: Padding(padding: EdgeInsets.all(24), child: ThreeDotsLoader()));
                       }
 
                       final docs = snapshot.data?.docs ?? [];

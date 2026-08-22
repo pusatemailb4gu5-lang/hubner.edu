@@ -1409,7 +1409,7 @@ class _HomePageState extends State<HomePage> {
                   if (userSnapshot.connectionState == ConnectionState.waiting) {
                     return Scaffold(
                       backgroundColor: isDark ? Colors.black : Colors.white,
-                      body: const Center(child: CircularProgressIndicator(color: Color(0xFF7C3AED))),
+                      body: const Center(child: ThreeDotsLoader()),
                     );
                   }
                   if (!userSnapshot.hasData || !userSnapshot.data!.exists) {
@@ -3726,124 +3726,207 @@ class _HomePageState extends State<HomePage> {
                             child: Opacity(
                               opacity: t,
                               child: Container(
-                                padding: const EdgeInsets.fromLTRB(14, 8, 14, 16),
+                                padding: const EdgeInsets.fromLTRB(14, 8, 14, 36),
                                 decoration: BoxDecoration(
                                   gradient: LinearGradient(
                                     begin: Alignment.topCenter,
                                     end: Alignment.bottomCenter,
                                     colors: [
+                                      (isDark ? Colors.black : Colors.white).withValues(alpha: t * 0.98),
                                       (isDark ? Colors.black : Colors.white).withValues(alpha: t * 0.95),
-                                      (isDark ? Colors.black : Colors.white).withValues(alpha: t * 0.70),
+                                      (isDark ? Colors.black : Colors.white).withValues(alpha: t * 0.45),
                                       (isDark ? Colors.black : Colors.white).withValues(alpha: 0.0),
                                     ],
-                                    stops: const [0.0, 0.60, 1.0],
+                                    stops: const [0.0, 0.48, 0.75, 1.0],
                                   ),
                                 ),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: [
-                                    Expanded(
-                                      child: Text(
-                                        'Hi, ${(fullName.isNotEmpty ? fullName : userName).trim()}',
-                                        style: GoogleFonts.plusJakartaSans(
-                                          fontSize: 18.5,
-                                          fontWeight: FontWeight.w800,
-                                          color: isDark ? Colors.white : const Color(0xFF0F172A),
-                                          letterSpacing: -0.4,
-                                        ),
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 10),
-                                    Row(
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      crossAxisAlignment: CrossAxisAlignment.center,
                                       children: [
-                                        ValueListenableBuilder<String>(
-                                          valueListenable: HubnerApp.themeNotifier,
-                                          builder: (context, currentTheme, _) {
-                                            final bool currentIsDark = currentTheme == 'Gelap' || currentTheme == 'Hitam';
-                                            return BouncyButton(
-                                              onTap: () => _toggleThemeWithBounce(context, currentIsDark),
+                                        // Sebelah Kiri: Avatar di sebelah kirinya Nama dan Role
+                                        Expanded(
+                                          child: Row(
+                                            children: [
+                                              if (userPhoto.isNotEmpty) ...[
+                                                Container(
+                                                  width: 36,
+                                                  height: 36,
+                                                  decoration: BoxDecoration(
+                                                    shape: BoxShape.circle,
+                                                    color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
+                                                    boxShadow: [
+                                                      BoxShadow(
+                                                        color: Colors.black.withValues(alpha: 0.08),
+                                                        blurRadius: 4,
+                                                        offset: const Offset(0, 2),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  child: ClipOval(
+                                                    child: Transform.scale(
+                                                      scale: 1.45,
+                                                      child: userPhoto.startsWith('http')
+                                                          ? Image.network(
+                                                              userPhoto,
+                                                              fit: BoxFit.cover,
+                                                              errorBuilder: (_, __, ___) => Center(
+                                                                child: Text(
+                                                                  userName.isNotEmpty
+                                                                      ? userName.substring(0, (userName.length >= 2 ? 2 : 1)).toUpperCase()
+                                                                      : 'U',
+                                                                  style: GoogleFonts.plusJakartaSans(
+                                                                    fontWeight: FontWeight.w800,
+                                                                    color: isDark ? Colors.white : Colors.black,
+                                                                    fontSize: 13,
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                            )
+                                                          : Image.asset(
+                                                              userPhoto,
+                                                              fit: BoxFit.cover,
+                                                              errorBuilder: (_, __, ___) => Center(
+                                                                child: Text(
+                                                                  userName.isNotEmpty
+                                                                      ? userName.substring(0, (userName.length >= 2 ? 2 : 1)).toUpperCase()
+                                                                      : 'U',
+                                                                  style: GoogleFonts.plusJakartaSans(
+                                                                    fontWeight: FontWeight.w800,
+                                                                    color: isDark ? Colors.white : Colors.black,
+                                                                    fontSize: 13,
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                            ),
+                                                    ),
+                                                  ),
+                                                ),
+                                                const SizedBox(width: 9),
+                                              ],
+                                              Expanded(
+                                                child: Column(
+                                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                                  mainAxisSize: MainAxisSize.min,
+                                                  children: [
+                                                    Text(
+                                                      role.toLowerCase() == 'guru'
+                                                          ? 'Pengajar · ${schoolLevel.isNotEmpty ? schoolLevel.toUpperCase() : 'SMA/SMK'}'
+                                                          : 'Siswa · ${schoolLevel.isNotEmpty ? schoolLevel.toUpperCase() : 'SMA/SMK'}',
+                                                      style: GoogleFonts.plusJakartaSans(
+                                                        fontSize: 11.0,
+                                                        fontWeight: FontWeight.w600,
+                                                        color: isDark ? Colors.white60 : const Color(0xFF64748B),
+                                                      ),
+                                                      maxLines: 1,
+                                                      overflow: TextOverflow.ellipsis,
+                                                    ),
+                                                    const SizedBox(height: 1.0),
+                                                    Text(
+                                                      fullName.isNotEmpty ? fullName : userName,
+                                                      style: GoogleFonts.plusJakartaSans(
+                                                        fontSize: 16.0,
+                                                        fontWeight: FontWeight.w800,
+                                                        color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                                        height: 1.15,
+                                                      ),
+                                                      maxLines: 1,
+                                                      overflow: TextOverflow.ellipsis,
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        const SizedBox(width: 10),
+                                        Row(
+                                          children: [
+                                            ValueListenableBuilder<String>(
+                                              valueListenable: HubnerApp.themeNotifier,
+                                              builder: (context, currentTheme, _) {
+                                                final bool currentIsDark = currentTheme == 'Gelap' || currentTheme == 'Hitam';
+                                                return BouncyButton(
+                                                  onTap: () => _toggleThemeWithBounce(context, currentIsDark),
+                                                  child: Container(
+                                                    width: 42,
+                                                    height: 42,
+                                                    decoration: BoxDecoration(
+                                                      color: currentIsDark
+                                                          ? const Color(0xFF18181B)
+                                                          : Colors.white,
+                                                      shape: BoxShape.circle,
+                                                      border: Border.all(
+                                                        color: currentIsDark
+                                                            ? const Color(0xFF27272A)
+                                                            : const Color(0xFFF1F5F9),
+                                                        width: 1.2,
+                                                      ),
+                                                      boxShadow: [
+                                                        BoxShadow(
+                                                          color: Colors.black.withValues(alpha: currentIsDark ? 0.35 : 0.04),
+                                                          blurRadius: 8,
+                                                          offset: const Offset(0, 2),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                    child: Icon(
+                                                      currentIsDark ? Icons.wb_sunny_rounded : Icons.nightlight_round,
+                                                      color: currentIsDark ? const Color(0xFFFBBF24) : Colors.black87,
+                                                      size: 20,
+                                                    ),
+                                                  ),
+                                                );
+                                              },
+                                            ),
+                                            const SizedBox(width: 10),
+                                            BouncyButton(
+                                              onTap: () {
+                                                Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                    builder: (_) => const NotificationsPage(),
+                                                  ),
+                                                );
+                                              },
                                               child: Container(
-                                                width: 36,
-                                                height: 36,
+                                                width: 42,
+                                                height: 42,
                                                 decoration: BoxDecoration(
-                                                  color: currentIsDark
+                                                  color: isDark
                                                       ? const Color(0xFF18181B)
                                                       : Colors.white,
                                                   shape: BoxShape.circle,
                                                   border: Border.all(
-                                                    color: currentIsDark
+                                                    color: isDark
                                                         ? const Color(0xFF27272A)
                                                         : const Color(0xFFF1F5F9),
-                                                    width: 1.1,
+                                                    width: 1.2,
                                                   ),
                                                   boxShadow: [
                                                     BoxShadow(
-                                                      color: Colors.black.withValues(alpha: currentIsDark ? 0.35 : 0.04),
-                                                      blurRadius: 6,
-                                                      offset: const Offset(0, 1.5),
+                                                      color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.04),
+                                                      blurRadius: 8,
+                                                      offset: const Offset(0, 2),
                                                     ),
                                                   ],
                                                 ),
                                                 child: Icon(
-                                                  currentIsDark ? Icons.wb_sunny_rounded : Icons.nightlight_round,
-                                                  color: currentIsDark ? const Color(0xFFFBBF24) : Colors.black87,
-                                                  size: 16,
+                                                  Icons.notifications_none_rounded,
+                                                  color: isDark ? Colors.white : Colors.black,
+                                                  size: 20,
                                                 ),
                                               ),
-                                            );
-                                          },
-                                        ),
-                                        const SizedBox(width: 8),
-                                        BouncyButton(
-                                          onTap: () {
-                                            Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                builder: (_) => const NotificationsPage(),
-                                              ),
-                                            );
-                                          },
-                                          child: Container(
-                                            width: 36,
-                                            height: 36,
-                                            decoration: BoxDecoration(
-                                              color: isDark
-                                                  ? const Color(0xFF18181B)
-                                                  : Colors.white,
-                                              shape: BoxShape.circle,
-                                              border: Border.all(
-                                                color: isDark
-                                                    ? const Color(0xFF27272A)
-                                                    : const Color(0xFFF1F5F9),
-                                                width: 1.1,
-                                              ),
-                                              boxShadow: [
-                                                BoxShadow(
-                                                  color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.04),
-                                                  blurRadius: 6,
-                                                  offset: const Offset(0, 1.5),
-                                                ),
-                                              ],
                                             ),
-                                            child: Icon(
-                                              Icons.notifications_none_rounded,
-                                              color: isDark ? Colors.white : Colors.black,
-                                              size: 17,
-                                            ),
-                                          ),
+                                          ],
                                         ),
                                       ],
                                     ),
-                                  ],
+                                  ),
                                 ),
-                              ),
-                            ),
-                          );
-                        },
-                      ),
+                              );
+                            },
+                          ),
                   ],
                 ),
               );
@@ -7211,6 +7294,7 @@ class _HomeSearchAndNotesRowState extends State<_HomeSearchAndNotesRow> {
   late final TextEditingController _controller;
   late final FocusNode _focusNode;
   Timer? _debounceTimer;
+  DateTime _expandedTime = DateTime.now();
 
   @override
   void initState() {
@@ -7225,6 +7309,35 @@ class _HomeSearchAndNotesRowState extends State<_HomeSearchAndNotesRow> {
     _controller.dispose();
     _focusNode.dispose();
     super.dispose();
+  }
+
+  void _expand() {
+    _expandedTime = DateTime.now();
+    setState(() {
+      _isExpanded = true;
+    });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        Future.delayed(const Duration(milliseconds: 60), () {
+          if (mounted) {
+            _focusNode.requestFocus();
+          }
+        });
+      }
+    });
+  }
+
+  void _collapse() {
+    if (DateTime.now().difference(_expandedTime).inMilliseconds < 450) {
+      return; // Cegah touch release / ghost tap dari tombol search yang berada di koordinat yang sama
+    }
+    _focusNode.unfocus();
+    _debounceTimer?.cancel();
+    setState(() {
+      _isExpanded = false;
+      _controller.clear();
+    });
+    widget.onSearchChanged('');
   }
 
   void _onChanged(String val) {
@@ -7272,7 +7385,7 @@ class _HomeSearchAndNotesRowState extends State<_HomeSearchAndNotesRow> {
                 focusNode: _focusNode,
                 keyboardType: TextInputType.text,
                 textInputAction: TextInputAction.search,
-                autofocus: true,
+                autofocus: false,
                 onChanged: _onChanged,
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 14,
@@ -7290,15 +7403,7 @@ class _HomeSearchAndNotesRowState extends State<_HomeSearchAndNotesRow> {
               ),
             ),
             GestureDetector(
-              onTap: () {
-                _focusNode.unfocus();
-                _debounceTimer?.cancel();
-                setState(() {
-                  _isExpanded = false;
-                  _controller.clear();
-                });
-                widget.onSearchChanged('');
-              },
+              onTap: _collapse,
               behavior: HitTestBehavior.opaque,
               child: Container(
                 padding: const EdgeInsets.all(4),
@@ -7380,14 +7485,7 @@ class _HomeSearchAndNotesRowState extends State<_HomeSearchAndNotesRow> {
 
         // Tombol Cari Lingkaran Netral
         BouncyButton(
-          onTap: () {
-            setState(() {
-              _isExpanded = true;
-            });
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              if (mounted) _focusNode.requestFocus();
-            });
-          },
+          onTap: _expand,
           child: Container(
             width: 48,
             height: 48,

@@ -709,8 +709,8 @@ class _FluidIPhoneBottomNavBarState extends State<_FluidIPhoneBottomNavBar>
             padding: EdgeInsets.zero,
             decoration: BoxDecoration(
               color: isDark
-                  ? Colors.black.withValues(alpha: 0.90)
-                  : Colors.white.withValues(alpha: 0.90),
+                  ? Colors.black.withValues(alpha: 0.80)
+                  : Colors.white.withValues(alpha: 0.80),
               borderRadius: BorderRadius.circular(30),
               border: Border.all(
                 color: isDark

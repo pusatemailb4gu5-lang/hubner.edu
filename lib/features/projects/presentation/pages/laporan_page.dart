@@ -1590,14 +1590,19 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                   // TABEL LAPORAN: HORIZONTAL SCROLLABLE, 3 KOLOM BERBEDA WARNA
                                   // ==========================================
                                   Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                                    padding: const EdgeInsets.only(left: 16, right: 0),
                                     child: Container(
                                       decoration: BoxDecoration(
                                         color: isDark ? const Color(0xFF1E1E24) : Colors.white,
-                                        border: Border.all(
-                                          color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                                        border: Border(
+                                          top: BorderSide(color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0), width: 1),
+                                          bottom: BorderSide(color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0), width: 1),
+                                          left: BorderSide(color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0), width: 1),
                                         ),
-                                        borderRadius: BorderRadius.circular(12),
+                                        borderRadius: const BorderRadius.only(
+                                          topLeft: Radius.circular(12),
+                                          bottomLeft: Radius.circular(12),
+                                        ),
                                         boxShadow: [
                                           BoxShadow(
                                             color: Colors.black.withValues(alpha: 0.03),
@@ -1607,10 +1612,13 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                         ],
                                       ),
                                       child: ClipRRect(
-                                        borderRadius: BorderRadius.circular(12),
+                                        borderRadius: const BorderRadius.only(
+                                          topLeft: Radius.circular(12),
+                                          bottomLeft: Radius.circular(12),
+                                        ),
                                         child: SingleChildScrollView(
                                           scrollDirection: Axis.horizontal,
-                                          physics: const BouncingScrollPhysics(),
+                                          physics: const ClampingScrollPhysics(),
                                           child: SizedBox(
                                             width: 990,
                                             child: Column(
@@ -1631,7 +1639,15 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                                       Container(
                                                         width: 200,
                                                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                                                        color: const Color(0xFFD6A5F8),
+                                                        decoration: BoxDecoration(
+                                                          color: const Color(0xFFD6A5F8),
+                                                          border: Border(
+                                                            right: BorderSide(
+                                                              color: Colors.black.withValues(alpha: 0.08),
+                                                              width: 1,
+                                                            ),
+                                                          ),
+                                                        ),
                                                         child: Text(
                                                           'Nama Siswa (${masterList.length})',
                                                           style: GoogleFonts.plusJakartaSans(
@@ -1645,7 +1661,15 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                                       Container(
                                                         width: 90,
                                                         padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 12),
-                                                        color: const Color(0xFFBAE6FD),
+                                                        decoration: BoxDecoration(
+                                                          color: const Color(0xFFBAE6FD),
+                                                          border: Border(
+                                                            right: BorderSide(
+                                                              color: Colors.black.withValues(alpha: 0.08),
+                                                              width: 1,
+                                                            ),
+                                                          ),
+                                                        ),
                                                         child: Text(
                                                           'Progress',
                                                           textAlign: TextAlign.center,
@@ -1661,7 +1685,15 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                                         return Container(
                                                           width: 70,
                                                           padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 12),
-                                                          color: const Color(0xFF99F6E4),
+                                                          decoration: BoxDecoration(
+                                                            color: const Color(0xFF99F6E4),
+                                                            border: Border(
+                                                              right: BorderSide(
+                                                                color: Colors.black.withValues(alpha: 0.08),
+                                                                width: 1,
+                                                              ),
+                                                            ),
+                                                          ),
                                                           alignment: Alignment.center,
                                                           child: Text(
                                                             'Tugas ${i + 1}',
@@ -1679,7 +1711,17 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                                         return Container(
                                                           width: 70,
                                                           padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 12),
-                                                          color: const Color(0xFFFDE68A),
+                                                          decoration: BoxDecoration(
+                                                            color: const Color(0xFFFDE68A),
+                                                            border: i == 4
+                                                                ? null
+                                                                : Border(
+                                                                    right: BorderSide(
+                                                                      color: Colors.black.withValues(alpha: 0.08),
+                                                                      width: 1,
+                                                                    ),
+                                                                  ),
+                                                          ),
                                                           alignment: Alignment.center,
                                                           child: Text(
                                                             'Quiz ${i + 1}',
@@ -1698,12 +1740,17 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
 
                                                 // Table Body
                                                 masterList.isEmpty
-                                                    ? Padding(
-                                                        padding: const EdgeInsets.all(32.0),
+                                                    ? Container(
+                                                        width: 990,
+                                                        padding: const EdgeInsets.symmetric(vertical: 36, horizontal: 16),
+                                                        color: isDark ? const Color(0xFF1E1E24) : Colors.white,
                                                         child: Center(
                                                           child: Text(
                                                             'Belum ada siswa di kelas ini.',
-                                                            style: GoogleFonts.dmSans(color: Colors.black38),
+                                                            style: GoogleFonts.dmSans(
+                                                              color: isDark ? Colors.white38 : Colors.black38,
+                                                              fontSize: 13,
+                                                            ),
                                                           ),
                                                         ),
                                                       )
@@ -1771,6 +1818,14 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                                                       Container(
                                                                         width: 200,
                                                                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+                                                                        decoration: BoxDecoration(
+                                                                          border: Border(
+                                                                            right: BorderSide(
+                                                                              color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+                                                                              width: 1,
+                                                                            ),
+                                                                          ),
+                                                                        ),
                                                                         child: Row(
                                                                           crossAxisAlignment: CrossAxisAlignment.center,
                                                                           children: [
@@ -1837,6 +1892,14 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                                                       Container(
                                                                         width: 90,
                                                                         padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 12),
+                                                                        decoration: BoxDecoration(
+                                                                          border: Border(
+                                                                            right: BorderSide(
+                                                                              color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+                                                                              width: 1,
+                                                                            ),
+                                                                          ),
+                                                                        ),
                                                                         child: Column(
                                                                           crossAxisAlignment: CrossAxisAlignment.center,
                                                                           mainAxisAlignment: MainAxisAlignment.center,
@@ -1883,6 +1946,14 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                                                         return Container(
                                                                           width: 70,
                                                                           padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 12),
+                                                                          decoration: BoxDecoration(
+                                                                            border: Border(
+                                                                              right: BorderSide(
+                                                                                color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+                                                                                width: 1,
+                                                                              ),
+                                                                            ),
+                                                                          ),
                                                                           alignment: Alignment.center,
                                                                           child: (!joined || task == null)
                                                                               ? Text(
@@ -1939,6 +2010,16 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                                                         return Container(
                                                                           width: 70,
                                                                           padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 12),
+                                                                          decoration: BoxDecoration(
+                                                                            border: i == 4
+                                                                                ? null
+                                                                                : Border(
+                                                                                    right: BorderSide(
+                                                                                      color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+                                                                                      width: 1,
+                                                                                    ),
+                                                                                  ),
+                                                                          ),
                                                                           alignment: Alignment.center,
                                                                           child: (!joined || quiz == null)
                                                                               ? Text(
