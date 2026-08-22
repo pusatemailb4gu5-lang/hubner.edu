@@ -35,17 +35,6 @@ void main() async {
     persistenceEnabled: false,
   );
 
-  // System UI: transparent status bar + transparent navigation bar with dark icons (black 3-button nav)
-  SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-  SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
-    statusBarColor: Colors.transparent,
-    statusBarIconBrightness: Brightness.dark,
-    systemNavigationBarColor: Colors.white,
-    systemNavigationBarIconBrightness: Brightness.dark,
-    systemNavigationBarDividerColor: Colors.transparent,
-    systemNavigationBarContrastEnforced: false,
-  ));
-
   final prefs = await SharedPreferences.getInstance();
   final hasSavedLogin = prefs.getBool('isLoggedIn') ?? false;
   final hasFirebaseAuthUser = FirebaseAuth.instance.currentUser != null;
@@ -60,6 +49,29 @@ void main() async {
 
   HubnerApp.themeNotifier.value = savedTheme;
   HubnerApp.languageNotifier.value = savedLanguage;
+
+  final bool initialIsDark = savedTheme == 'Gelap' || savedTheme == 'Hitam';
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+  SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+    statusBarColor: Colors.transparent,
+    statusBarIconBrightness: initialIsDark ? Brightness.light : Brightness.dark,
+    systemNavigationBarColor: initialIsDark ? Colors.black : Colors.white,
+    systemNavigationBarIconBrightness: initialIsDark ? Brightness.light : Brightness.dark,
+    systemNavigationBarDividerColor: Colors.transparent,
+    systemNavigationBarContrastEnforced: false,
+  ));
+
+  HubnerApp.themeNotifier.addListener(() {
+    final bool isDark = HubnerApp.themeNotifier.value == 'Gelap' || HubnerApp.themeNotifier.value == 'Hitam';
+    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+      systemNavigationBarColor: isDark ? Colors.black : Colors.white,
+      systemNavigationBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+      systemNavigationBarDividerColor: Colors.transparent,
+      systemNavigationBarContrastEnforced: false,
+    ));
+  });
 
   runApp(HubnerApp(isLoggedIn: isLoggedIn));
 }
@@ -83,44 +95,60 @@ class HubnerApp extends StatelessWidget {
       valueListenable: themeNotifier,
       builder: (context, themeMode, child) {
         AppColors.themeMode = themeMode;
-        return MaterialApp(
-          title: 'Hubner Edu',
-          debugShowCheckedModeBanner: false,
-          theme: AppTheme.light(),
-          scrollBehavior: const MaterialScrollBehavior().copyWith(
-            scrollbars: false,
-          ),
-          builder: (context, child) {
-            return ValueListenableBuilder<bool>(
-              valueListenable: showBorderNotifier,
-              builder: (context, showBorder, _) {
-                Widget currentBody = child!;
-                final double screenWidth = MediaQuery.of(context).size.width;
-                final double responsiveFontScale = screenWidth < 500
-                    ? (screenWidth / 500).clamp(0.78, 1.0)
-                    : 1.0;
+        final bool isDark = themeMode == 'Gelap' || themeMode == 'Hitam';
+        final overlayStyle = SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+          systemNavigationBarColor: isDark ? Colors.black : Colors.white,
+          systemNavigationBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+          systemNavigationBarDividerColor: Colors.transparent,
+          systemNavigationBarContrastEnforced: false,
+        );
 
-                return MediaQuery(
-                  data: MediaQuery.of(context).copyWith(
-                    textScaler: TextScaler.linear(responsiveFontScale),
-                  ),
-                  child: Stack(
-                    children: [
-                      currentBody,
-                      ValueListenableBuilder<bool>(
-                        valueListenable: HubnerApp.isThemeTransitioning,
-                        builder: (context, isTransitioning, _) {
-                          if (!isTransitioning) return const SizedBox.shrink();
-                          return const FullScreenThemeTransitionBlur();
-                        },
+        return AnnotatedRegion<SystemUiOverlayStyle>(
+          value: overlayStyle,
+          child: MaterialApp(
+            title: 'Hubner Edu',
+            debugShowCheckedModeBanner: false,
+            theme: AppTheme.light(),
+            scrollBehavior: const MaterialScrollBehavior().copyWith(
+              scrollbars: false,
+            ),
+            builder: (context, child) {
+              return ValueListenableBuilder<bool>(
+                valueListenable: showBorderNotifier,
+                builder: (context, showBorder, _) {
+                  Widget currentBody = child!;
+                  final double screenWidth = MediaQuery.of(context).size.width;
+                  final double responsiveFontScale = screenWidth < 500
+                      ? (screenWidth / 500).clamp(0.78, 1.0)
+                      : 1.0;
+
+                  return AnnotatedRegion<SystemUiOverlayStyle>(
+                    value: overlayStyle,
+                    child: MediaQuery(
+                      data: MediaQuery.of(context).copyWith(
+                        textScaler: TextScaler.linear(responsiveFontScale),
                       ),
-                    ],
-                  ),
-                );
-              },
-            );
-          },
-          home: kIsWeb && !isLoggedIn ? const LandingPage() : const SplashPage(),
+                      child: Stack(
+                        children: [
+                          currentBody,
+                          ValueListenableBuilder<bool>(
+                            valueListenable: HubnerApp.isThemeTransitioning,
+                            builder: (context, isTransitioning, _) {
+                              if (!isTransitioning) return const SizedBox.shrink();
+                              return const FullScreenThemeTransitionBlur();
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              );
+            },
+            home: kIsWeb && !isLoggedIn ? const LandingPage() : const SplashPage(),
+          ),
         );
       },
     );

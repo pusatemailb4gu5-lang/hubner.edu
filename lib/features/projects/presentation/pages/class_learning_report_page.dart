@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:hubner/core/theme/app_colors.dart';
+import 'package:hubner/main.dart';
 import 'class_page.dart';
 
 class ClassLearningReportPage extends StatefulWidget {
@@ -41,17 +42,20 @@ class _ClassLearningReportPageState extends State<ClassLearningReportPage>
 
   @override
   Widget build(BuildContext context) {
-    final bool isDark = AppColors.isDarkMode;
+    return ValueListenableBuilder<String>(
+      valueListenable: HubnerApp.themeNotifier,
+      builder: (context, themeMode, _) {
+        final bool isDark = themeMode == 'Gelap' || themeMode == 'Hitam';
 
-    return StreamBuilder<DocumentSnapshot>(
-      stream: FirebaseFirestore.instance.collection('projects').doc(widget.projectId).snapshots(),
-      builder: (context, projectSnap) {
-        if (projectSnap.connectionState == ConnectionState.waiting && !projectSnap.hasData) {
-          return Scaffold(
-            backgroundColor: isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
-            body: const Center(child: CircularProgressIndicator()),
-          );
-        }
+        return StreamBuilder<DocumentSnapshot>(
+          stream: FirebaseFirestore.instance.collection('projects').doc(widget.projectId).snapshots(),
+          builder: (context, projectSnap) {
+            if (projectSnap.connectionState == ConnectionState.waiting && !projectSnap.hasData) {
+              return Scaffold(
+                backgroundColor: isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
+                body: const Center(child: CircularProgressIndicator()),
+              );
+            }
 
         final projectData = (projectSnap.data?.data() as Map<String, dynamic>?) ?? {};
         final liveStages = projectData['stages'] as List? ?? [];
@@ -209,14 +213,16 @@ class _ClassLearningReportPageState extends State<ClassLearningReportPage>
                       ),
                     ],
                   ),
-                );
-              },
-            );
-          },
-        );
-      },
-    );
-  }
+                  );
+                },
+              );
+            },
+          );
+        },
+      );
+    },
+  );
+}
 
   Widget _buildHeroHeader({
     required BuildContext context,

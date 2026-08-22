@@ -474,73 +474,17 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
                       child: IndexedStack(index: _currentIndex, children: _pages),
                     ),
                     Positioned(
-                      left: 20,
-                      right: 20,
+                      left: 14,
+                      right: 14,
                       bottom: MediaQuery.of(context).padding.bottom > 0
-                          ? MediaQuery.of(context).padding.bottom + 18
-                          : 32,
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(35),
-                        child: BackdropFilter(
-                          filter: ui.ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-                          child: Container(
-                            height: 66,
-                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
-                            decoration: BoxDecoration(
-                              color: isDark
-                                  ? const Color(0xFF141416).withValues(alpha: 0.85)
-                                  : Colors.white.withValues(alpha: 0.8),
-                              borderRadius: BorderRadius.circular(35),
-                              border: Border.all(
-                                color: isDark
-                                    ? Colors.white.withValues(alpha: 0.15)
-                                    : Colors.white.withValues(alpha: 0.45),
-                                width: 1.5,
-                              ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: isDark
-                                      ? Colors.black.withValues(alpha: 0.6)
-                                      : const Color(0xFF0F172A).withValues(alpha: 0.08),
-                                  blurRadius: 20,
-                                  offset: const Offset(0, 6),
-                                ),
-                              ],
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceAround,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                _buildNavItem(
-                                  icon: Icons.grid_view_rounded,
-                                  label: 'Beranda',
-                                  index: 0,
-                                ),
-                                _buildNavItem(
-                                  icon: Icons.assignment_outlined,
-                                  label: isGuru ? 'Laporan' : 'Tugas',
-                                  index: 1,
-                                ),
-                                _buildNavItem(
-                                  icon: Icons.chat_bubble_outline_rounded,
-                                  label: 'Diskusi',
-                                  index: 2,
-                                  unreadCount: totalUnread,
-                                ),
-                                _buildNavItem(
-                                  icon: isGuru ? Icons.article_outlined : Icons.analytics_outlined,
-                                  label: isGuru ? 'Dokumen' : 'Monitoring',
-                                  index: 3,
-                                ),
-                                _buildNavItem(
-                                  icon: Icons.person_outline_rounded,
-                                  label: 'Profil',
-                                  index: 4,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
+                          ? MediaQuery.of(context).padding.bottom + 14
+                          : 26,
+                      child: _FluidIPhoneBottomNavBar(
+                        currentIndex: _currentIndex,
+                        onTabSelected: _updateIndex,
+                        isDark: isDark,
+                        isGuru: isGuru,
+                        totalUnread: totalUnread,
                       ),
                     ),
                   ],
@@ -552,114 +496,6 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
           }
         );
       }
-    );
-  }
-
-  Widget _buildNavItem({
-    required IconData icon,
-    required String label,
-    required int index,
-    int unreadCount = 0,
-  }) {
-    final bool isSelected = _currentIndex == index;
-    final bool isDark = AppColors.isDarkMode;
-
-    return GestureDetector(
-      onTap: () {
-        _updateIndex(index);
-      },
-      behavior: HitTestBehavior.opaque,
-      child: AnimatedScale(
-        scale: isSelected ? 1.0 : 0.92,
-        duration: const Duration(milliseconds: 320),
-        curve: Curves.easeOutBack,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 260),
-          curve: Curves.easeOutCubic,
-          height: 48,
-          alignment: Alignment.center,
-          padding: EdgeInsets.symmetric(
-            horizontal: isSelected ? 14 : 10,
-          ),
-          decoration: BoxDecoration(
-            color: isSelected
-                ? (isDark
-                    ? Colors.white.withValues(alpha: 0.16)
-                    : Colors.black.withValues(alpha: 0.08))
-                : Colors.transparent,
-            borderRadius: BorderRadius.circular(24),
-            border: isSelected
-                ? Border.all(
-                    color: isDark
-                        ? Colors.white.withValues(alpha: 0.22)
-                        : Colors.black.withValues(alpha: 0.12),
-                    width: 0.9,
-                  )
-                : null,
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  AnimatedScale(
-                    scale: isSelected ? 1.1 : 1.0,
-                    duration: const Duration(milliseconds: 300),
-                    curve: Curves.easeOutBack,
-                    child: Icon(
-                      icon,
-                      color: isSelected
-                          ? (isDark ? Colors.white : Colors.black)
-                          : (isDark ? Colors.white38 : Colors.black38),
-                      size: 21,
-                    ),
-                  ),
-                  if (unreadCount > 0)
-                    Positioned(
-                      top: -4,
-                      right: -6,
-                      child: Container(
-                        padding: const EdgeInsets.all(3),
-                        decoration: const BoxDecoration(
-                          color: Color(0xFFEF4444),
-                          shape: BoxShape.circle,
-                        ),
-                        constraints: const BoxConstraints(
-                          minWidth: 14,
-                          minHeight: 14,
-                        ),
-                        child: Center(
-                          child: Text(
-                            '$unreadCount',
-                            style: GoogleFonts.plusJakartaSans(
-                              color: Colors.white,
-                              fontSize: 9,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-              if (isSelected) ...[
-                const SizedBox(width: 7),
-                Text(
-                  label,
-                  style: GoogleFonts.plusJakartaSans(
-                    color: isDark ? Colors.white : Colors.black,
-                    fontSize: 12.5,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: -0.2,
-                  ),
-                ),
-              ],
-            ],
-          ),
-        ),
-      ),
     );
   }
 
@@ -692,6 +528,362 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
       onTap: () => _updateIndex(index),
     );
   }
+}
+
+class _FluidIPhoneBottomNavBar extends StatefulWidget {
+  final int currentIndex;
+  final ValueChanged<int> onTabSelected;
+  final bool isDark;
+  final bool isGuru;
+  final int totalUnread;
+
+  const _FluidIPhoneBottomNavBar({
+    super.key,
+    required this.currentIndex,
+    required this.onTabSelected,
+    required this.isDark,
+    required this.isGuru,
+    required this.totalUnread,
+  });
+
+  @override
+  State<_FluidIPhoneBottomNavBar> createState() => _FluidIPhoneBottomNavBarState();
+}
+
+class _FluidIPhoneBottomNavBarState extends State<_FluidIPhoneBottomNavBar>
+    with TickerProviderStateMixin {
+  late AnimationController _animController;
+  late AnimationController _pressController;
+  late Animation<double> _pressScaleAnim;
+  late Animation<double> _pressStretchAnim;
+  late Animation<double> _anim;
+  double _currentPillPosition = 0.0;
+  bool _isDragging = false;
+  int _lastHapticIndex = -1;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentPillPosition = widget.currentIndex.toDouble();
+    _lastHapticIndex = widget.currentIndex;
+    _animController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 380),
+    );
+    _pressController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 240),
+    );
+    _pressScaleAnim = Tween<double>(begin: 1.0, end: 1.10).animate(
+      CurvedAnimation(
+        parent: _pressController,
+        curve: Curves.easeOutBack,
+        reverseCurve: Curves.elasticOut,
+      ),
+    );
+    _pressStretchAnim = Tween<double>(begin: 1.0, end: 1.15).animate(
+      CurvedAnimation(
+        parent: _pressController,
+        curve: Curves.easeOutBack,
+        reverseCurve: Curves.elasticOut,
+      ),
+    );
+  }
+
+  @override
+  void didUpdateWidget(covariant _FluidIPhoneBottomNavBar oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.currentIndex != widget.currentIndex && !_isDragging) {
+      _animateTo(widget.currentIndex.toDouble());
+    }
+  }
+
+  @override
+  void dispose() {
+    _animController.dispose();
+    _pressController.dispose();
+    super.dispose();
+  }
+
+  void _onPressStart() {
+    _pressController.forward();
+    HapticFeedback.selectionClick();
+  }
+
+  void _onPressEnd() {
+    _pressController.reverse();
+  }
+
+  void _animateTo(double target) {
+    _anim = Tween<double>(
+      begin: _currentPillPosition,
+      end: target,
+    ).animate(
+      CurvedAnimation(
+        parent: _animController,
+        curve: Curves.easeOutBack,
+      ),
+    )..addListener(() {
+        setState(() {
+          _currentPillPosition = _anim.value;
+        });
+      });
+    _animController.forward(from: 0.0);
+  }
+
+  void _handleDrag(double localDx, double totalWidth) {
+    final double tabWidth = totalWidth / 5;
+    final double rawPos = (localDx / tabWidth) - 0.5;
+    final double clampedPos = rawPos.clamp(0.0, 4.0);
+
+    final int targetIdx = clampedPos.round().clamp(0, 4);
+    if (targetIdx != _lastHapticIndex) {
+      HapticFeedback.selectionClick();
+      _lastHapticIndex = targetIdx;
+    }
+
+    setState(() {
+      _currentPillPosition = clampedPos;
+    });
+  }
+
+  void _finishDrag() {
+    final int finalIndex = _currentPillPosition.round().clamp(0, 4);
+    _isDragging = false;
+    _onPressEnd();
+    _animateTo(finalIndex.toDouble());
+    if (finalIndex != widget.currentIndex) {
+      widget.onTabSelected(finalIndex);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final bool isDark = widget.isDark;
+    final bool isGuru = widget.isGuru;
+
+    final navItems = [
+      {'icon': Icons.grid_view_rounded, 'label': 'Beranda'},
+      {'icon': Icons.assignment_outlined, 'label': isGuru ? 'Laporan' : 'Tugas'},
+      {'icon': Icons.chat_bubble_outline_rounded, 'label': 'Diskusi'},
+      {'icon': isGuru ? Icons.article_outlined : Icons.analytics_outlined, 'label': isGuru ? 'Dokumen' : 'Monitoring'},
+      {'icon': Icons.person_outline_rounded, 'label': 'Profil'},
+    ];
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final double totalWidth = constraints.maxWidth;
+        final double tabWidth = totalWidth / 5;
+
+        // Fluid liquid pill calculation perfectly centered on the active tab
+        final double pillWidth = tabWidth - 6.0;
+        final double pillCenter = (_currentPillPosition + 0.5) * tabWidth;
+        final double pillLeft = (pillCenter - (pillWidth / 2) - 2.0).clamp(2.0, totalWidth - pillWidth - 5.0);
+
+        return GestureDetector(
+          onTapDown: (details) {
+            _onPressStart();
+            final int index = (details.localPosition.dx / tabWidth).floor().clamp(0, 4);
+            _animateTo(index.toDouble());
+            widget.onTabSelected(index);
+          },
+          onTapUp: (_) => _onPressEnd(),
+          onTapCancel: () => _onPressEnd(),
+          onHorizontalDragStart: (details) {
+            _isDragging = true;
+            _onPressStart();
+            _animController.stop();
+            _handleDrag(details.localPosition.dx, totalWidth);
+          },
+          onHorizontalDragUpdate: (details) {
+            _handleDrag(details.localPosition.dx, totalWidth);
+          },
+          onHorizontalDragEnd: (details) {
+            _finishDrag();
+          },
+          onHorizontalDragCancel: () {
+            _finishDrag();
+          },
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(30),
+            child: BackdropFilter(
+              filter: ui.ImageFilter.blur(sigmaX: 30, sigmaY: 30),
+              child: Container(
+                height: 58,
+                padding: EdgeInsets.zero,
+                decoration: BoxDecoration(
+                  color: isDark
+                      ? const Color(0xFF141416).withValues(alpha: 0.88)
+                      : Colors.white.withValues(alpha: 0.92),
+                  borderRadius: BorderRadius.circular(30),
+                  border: Border.all(
+                    color: isDark
+                        ? Colors.white.withValues(alpha: 0.18)
+                        : const Color(0xFFE2E8F0),
+                    width: 1.2,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: isDark
+                          ? Colors.black.withValues(alpha: 0.6)
+                          : const Color(0xFF0F172A).withValues(alpha: 0.14),
+                      blurRadius: 24,
+                      offset: const Offset(0, 7),
+                    ),
+                    if (!isDark) ...[
+                      BoxShadow(
+                        color: const Color(0xFF0F172A).withValues(alpha: 0.04),
+                        blurRadius: 10,
+                        offset: const Offset(0, 2),
+                      ),
+                      BoxShadow(
+                        color: Colors.white,
+                        blurRadius: 4,
+                        offset: const Offset(0, -1),
+                      ),
+                    ],
+                  ],
+                ),
+                child: Stack(
+                  alignment: Alignment.centerLeft,
+                  children: [
+                    // 1. Fluid Liquid Sliding Pill Indicator (Expands & Bounces on Hold)
+                    Positioned(
+                      left: pillLeft,
+                      top: 4,
+                      bottom: 4,
+                      child: AnimatedBuilder(
+                        animation: _pressController,
+                        builder: (context, child) {
+                          return Transform.scale(
+                            scaleX: _pressStretchAnim.value,
+                            scaleY: _pressScaleAnim.value,
+                            alignment: Alignment.center,
+                            child: child,
+                          );
+                        },
+                        child: Container(
+                          width: pillWidth,
+                          decoration: BoxDecoration(
+                            color: isDark
+                                ? Colors.white.withValues(alpha: 0.16)
+                                : const Color(0xFF0F172A).withValues(alpha: 0.08),
+                            borderRadius: BorderRadius.circular(25),
+                            border: Border.all(
+                              color: isDark
+                                  ? Colors.white.withValues(alpha: 0.22)
+                                  : const Color(0xFF0F172A).withValues(alpha: 0.08),
+                              width: 1.0,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.04),
+                                blurRadius: 6,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+
+                  // 2. Interactive Navigation Items (Protected with FittedBox against overflow)
+                  Row(
+                    children: List.generate(5, (index) {
+                      final item = navItems[index];
+                      final IconData icon = item['icon'] as IconData;
+                      final String label = item['label'] as String;
+                      final int unread = (index == 2) ? widget.totalUnread : 0;
+
+                      // Calculate distance from continuous pill position
+                      final double dist = (index - _currentPillPosition).abs();
+                      final double activeFactor = (1.0 - dist).clamp(0.0, 1.0);
+                      final bool isClosest = dist < 0.5;
+
+                      return Expanded(
+                        child: Container(
+                          alignment: Alignment.center,
+                          padding: const EdgeInsets.symmetric(horizontal: 2),
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Stack(
+                                  clipBehavior: Clip.none,
+                                  children: [
+                                    Transform.scale(
+                                      scale: 1.0 + (activeFactor * 0.12),
+                                      child: Icon(
+                                        icon,
+                                        color: isDark
+                                            ? Color.lerp(Colors.white38, Colors.white, activeFactor)
+                                            : Color.lerp(Colors.black38, Colors.black, activeFactor),
+                                        size: 21,
+                                      ),
+                                    ),
+                                    if (unread > 0)
+                                      Positioned(
+                                        top: -4,
+                                        right: -6,
+                                        child: Container(
+                                          padding: const EdgeInsets.all(3),
+                                          decoration: const BoxDecoration(
+                                            color: Color(0xFFEF4444),
+                                            shape: BoxShape.circle,
+                                          ),
+                                          constraints: const BoxConstraints(
+                                            minWidth: 14,
+                                            minHeight: 14,
+                                          ),
+                                          child: Center(
+                                            child: Text(
+                                              '$unread',
+                                              style: GoogleFonts.plusJakartaSans(
+                                                color: Colors.white,
+                                                fontSize: 9,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                                if (isClosest && activeFactor > 0.3) ...[
+                                  const SizedBox(width: 4),
+                                  Opacity(
+                                    opacity: activeFactor,
+                                    child: Text(
+                                      label,
+                                      style: GoogleFonts.plusJakartaSans(
+                                        color: isDark ? Colors.white : Colors.black,
+                                        fontSize: 12.0,
+                                        fontWeight: FontWeight.w800,
+                                        letterSpacing: -0.2,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ),
+                        ),
+                      );
+                    }),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    },
+  );
+}
 }
 
 // --- Dynamic Discussion Tab (Chat Threads) ---

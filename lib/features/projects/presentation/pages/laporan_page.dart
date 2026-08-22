@@ -11,6 +11,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:hubner/core/theme/app_colors.dart';
 import 'package:hubner/features/projects/presentation/pages/manage_attendance_page.dart';
+import 'package:hubner/main.dart';
 
 class LaporanPage extends StatefulWidget {
   const LaporanPage({super.key});
@@ -491,20 +492,23 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
 
   @override
   Widget build(BuildContext context) {
-    final bool isDark = AppColors.isDarkMode;
-    final double statusBarHeight = MediaQuery.of(context).padding.top;
+    return ValueListenableBuilder<String>(
+      valueListenable: HubnerApp.themeNotifier,
+      builder: (context, themeMode, _) {
+        final bool isDark = themeMode == 'Gelap' || themeMode == 'Hitam';
+        final double statusBarHeight = MediaQuery.of(context).padding.top;
 
-    return Scaffold(
-      backgroundColor: isDark ? const Color(0xFF130E20) : const Color(0xFF7F52FC),
-      body: StreamBuilder<QuerySnapshot>(
-        stream: _projectsStream,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Scaffold(
-              backgroundColor: Color(0xFF7F52FC),
-              body: Center(child: CircularProgressIndicator(color: Colors.white)),
-            );
-          }
+        return Scaffold(
+          backgroundColor: isDark ? const Color(0xFF130E20) : const Color(0xFF7F52FC),
+          body: StreamBuilder<QuerySnapshot>(
+            stream: _projectsStream,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Scaffold(
+                  backgroundColor: isDark ? const Color(0xFF130E20) : const Color(0xFF7F52FC),
+                  body: const Center(child: CircularProgressIndicator(color: Colors.white)),
+                );
+              }
 
           final classrooms = snapshot.data?.docs ?? [];
           if (classrooms.isEmpty) {
@@ -1777,6 +1781,8 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
           );
         },
       ),
+    );
+      },
     );
   }
 
