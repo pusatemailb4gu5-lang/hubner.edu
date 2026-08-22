@@ -4784,230 +4784,248 @@ class _ClassPageState extends State<ClassPage> {
                             ],
                           ),
                         ),
-                        child: Material(
-                          color: Colors.transparent,
-                          child: InkWell(
-                            onTap: isLockedForStudent
-                                ? () {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text('Elemen "$stageName" belum dibuka oleh guru.'),
-                                        backgroundColor: Colors.black87,
-                                      ),
-                                    );
-                                  }
-                                : () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (_) => DetailCpPage(
-                                          projectId: projectId,
-                                          projectTitle: name,
-                                          stageIdx: index,
-                                          isOwner: isOwner,
-                                          accentColor: accentColor,
-                                          cardColor: cardColor,
-                                        ),
-                                      ),
-                                    );
-                                  },
-                            borderRadius: BorderRadius.circular(32),
-                            child: Container(
-                              padding: const EdgeInsets.fromLTRB(6, 6, 14, 6),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            // 1. Angka Bulat Terpisah (Separated Number Badge)
+                            Container(
+                              width: 40,
+                              height: 40,
                               decoration: BoxDecoration(
-                                color: stageCardBg,
-                                borderRadius: BorderRadius.circular(32),
+                                color: bBg,
+                                shape: BoxShape.circle,
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.05),
-                                    blurRadius: 10,
+                                    color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.04),
+                                    blurRadius: 6,
                                     offset: const Offset(0, 2),
                                   ),
                                 ],
                               ),
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  // Circular number badge - simetris atas-bawah-kiri seukuran icon slider
-                                  Container(
-                                    width: 42,
-                                    height: 42,
-                                    decoration: BoxDecoration(
-                                      color: bBg,
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: Center(
-                                      child: Text(
-                                        (index + 1).toString().padLeft(2, '0'),
-                                        style: GoogleFonts.plusJakartaSans(
-                                          fontSize: 15.5,
-                                          fontWeight: FontWeight.w900,
-                                          color: bFg,
-                                          letterSpacing: -0.5,
-                                        ),
-                                      ),
-                                    ),
+                              child: Center(
+                                child: Text(
+                                  (index + 1).toString().padLeft(2, '0'),
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontSize: 14.5,
+                                    fontWeight: FontWeight.w900,
+                                    color: bFg,
+                                    letterSpacing: -0.5,
                                   ),
-                                  const SizedBox(width: 10),
-                                  // Title & Subtitle
-                                  Expanded(
-                                    child: Padding(
-                                      padding: const EdgeInsets.symmetric(vertical: 2),
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Text(
-                                            stageName,
-                                            style: GoogleFonts.plusJakartaSans(
-                                              fontSize: 13.5,
-                                              fontWeight: FontWeight.bold,
-                                              color: stageTitleColor,
-                                              height: 1.25,
-                                            ),
-                                          ),
-                                          const SizedBox(height: 2),
-                                          Text(
-                                            stageDesc.isNotEmpty
-                                                ? stageDesc
-                                                : (totalMateris > 0
-                                                    ? '$totalMateris Materi · $totalTasksCount Tugas'
-                                                    : 'Atur materi & tugas'),
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                            style: GoogleFonts.dmSans(
-                                              fontSize: 11.5,
-                                              color: stageSubtitleColor,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                   // Status Dropdown Menu Mini (Tanpa ikon, tanpa celah, rata kiri, ada pembatas garis)
-                                   PopupMenuButton<String>(
-                                     tooltip: '',
-                                     padding: EdgeInsets.zero,
-                                     constraints: const BoxConstraints(minWidth: 88, maxWidth: 88),
-                                     shape: RoundedRectangleBorder(
-                                       borderRadius: BorderRadius.circular(10),
-                                       side: isDark
-                                           ? const BorderSide(color: Color(0xFF27272A), width: 1.0)
-                                           : const BorderSide(color: Color(0xFFE2E8F0), width: 1.0),
-                                     ),
-                                     elevation: 4,
-                                     color: isDark ? const Color(0xFF101012) : Colors.white,
-                                     enabled: isOwner,
-                                     onSelected: (val) {
-                                       _updateStageStatus(index, val, liveStages);
-                                     },
-                                     itemBuilder: (context) => [
-                                       PopupMenuItem(
-                                         value: 'proses',
-                                         height: 28,
-                                         padding: EdgeInsets.zero,
-                                         child: Container(
-                                           height: 28,
-                                           alignment: Alignment.centerLeft,
-                                           padding: const EdgeInsets.symmetric(horizontal: 10),
-                                           decoration: BoxDecoration(
-                                             border: Border(
-                                               bottom: BorderSide(
-                                                 color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
-                                                 width: 1,
-                                               ),
-                                             ),
-                                           ),
-                                           child: Text(
-                                             'Proses',
-                                             style: GoogleFonts.plusJakartaSans(
-                                               fontSize: 11.5,
-                                               fontWeight: FontWeight.w700,
-                                               color: isDark ? Colors.white : const Color(0xFF0F172A),
-                                             ),
-                                           ),
-                                         ),
-                                       ),
-                                       PopupMenuItem(
-                                         value: 'selesai',
-                                         height: 28,
-                                         padding: EdgeInsets.zero,
-                                         child: Container(
-                                           height: 28,
-                                           alignment: Alignment.centerLeft,
-                                           padding: const EdgeInsets.symmetric(horizontal: 10),
-                                           decoration: BoxDecoration(
-                                             border: Border(
-                                               bottom: BorderSide(
-                                                 color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
-                                                 width: 1,
-                                               ),
-                                             ),
-                                           ),
-                                           child: Text(
-                                             'Selesai',
-                                             style: GoogleFonts.plusJakartaSans(
-                                               fontSize: 11.5,
-                                               fontWeight: FontWeight.w700,
-                                               color: isDark ? Colors.white : const Color(0xFF0F172A),
-                                             ),
-                                           ),
-                                         ),
-                                       ),
-                                       PopupMenuItem(
-                                         value: 'akan_datang',
-                                         height: 28,
-                                         padding: EdgeInsets.zero,
-                                         child: Container(
-                                           height: 28,
-                                           alignment: Alignment.centerLeft,
-                                           padding: const EdgeInsets.symmetric(horizontal: 10),
-                                           child: Text(
-                                             'Akan Datang',
-                                             style: GoogleFonts.plusJakartaSans(
-                                               fontSize: 11.5,
-                                               fontWeight: FontWeight.w700,
-                                               color: isDark ? Colors.white : const Color(0xFF0F172A),
-                                             ),
-                                           ),
-                                         ),
-                                       ),
-                                     ],
-                                     child: Container(
-                                       width: 88,
-                                       height: 26,
-                                       alignment: Alignment.center,
-                                       decoration: BoxDecoration(
-                                         color: (stageStatus == 'proses' || stageStatus == 'selesai')
-                                             ? (isDark ? Colors.black.withValues(alpha: 0.12) : Colors.white.withValues(alpha: 0.85))
-                                             : (isDark ? statusFg.withValues(alpha: 0.18) : statusBg),
-                                         borderRadius: BorderRadius.circular(8),
-                                       ),
-                                       child: Text(
-                                         statusLabel,
-                                         style: GoogleFonts.plusJakartaSans(
-                                           fontSize: 10.5,
-                                           fontWeight: FontWeight.bold,
-                                           color: (stageStatus == 'proses' || stageStatus == 'selesai')
-                                               ? const Color(0xFF0F172A)
-                                               : (isDark ? Colors.white : statusFg),
-                                         ),
-                                         maxLines: 1,
-                                         overflow: TextOverflow.ellipsis,
-                                       ),
-                                     ),
-                                   ),
-                                  const SizedBox(width: 4),
-                                  Icon(
-                                    Icons.chevron_right_rounded,
-                                    color: isDark ? Colors.white38 : Colors.black38,
-                                    size: 18,
-                                  ),
-                                ],
+                                ),
                               ),
                             ),
-                          ),
+                            const SizedBox(width: 8),
+
+                            // 2. CP Card Terpisah (Kiri sedikit round atas-bawah, Kanan round penuh)
+                            Expanded(
+                              child: Material(
+                                color: Colors.transparent,
+                                child: InkWell(
+                                  onTap: isLockedForStudent
+                                      ? () {
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            SnackBar(
+                                              content: Text('Elemen "$stageName" belum dibuka oleh guru.'),
+                                              backgroundColor: Colors.black87,
+                                            ),
+                                          );
+                                        }
+                                      : () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (_) => DetailCpPage(
+                                                projectId: projectId,
+                                                projectTitle: name,
+                                                stageIdx: index,
+                                                isOwner: isOwner,
+                                                accentColor: accentColor,
+                                                cardColor: cardColor,
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                  borderRadius: BorderRadius.circular(10),
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                                    decoration: BoxDecoration(
+                                      color: stageCardBg,
+                                      borderRadius: BorderRadius.circular(10),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.05),
+                                          blurRadius: 10,
+                                          offset: const Offset(0, 2),
+                                        ),
+                                      ],
+                                    ),
+                                    child: Row(
+                                      crossAxisAlignment: CrossAxisAlignment.center,
+                                      children: [
+                                        // Title & Subtitle
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Text(
+                                                stageName,
+                                                style: GoogleFonts.plusJakartaSans(
+                                                  fontSize: 13.5,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: stageTitleColor,
+                                                  height: 1.25,
+                                                ),
+                                              ),
+                                              const SizedBox(height: 2),
+                                              Text(
+                                                stageDesc.isNotEmpty
+                                                    ? stageDesc
+                                                    : (totalMateris > 0
+                                                        ? '$totalMateris Materi · $totalTasksCount Tugas'
+                                                        : 'Atur materi & tugas'),
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                                style: GoogleFonts.dmSans(
+                                                  fontSize: 11.5,
+                                                  color: stageSubtitleColor,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        // Status Dropdown Menu Mini (Frameless)
+                                        PopupMenuButton<String>(
+                                          tooltip: '',
+                                          padding: EdgeInsets.zero,
+                                          constraints: const BoxConstraints(minWidth: 88, maxWidth: 88),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(12),
+                                            side: isDark
+                                                ? const BorderSide(color: Color(0xFF27272A), width: 1.0)
+                                                : const BorderSide(color: Color(0xFFE2E8F0), width: 1.0),
+                                          ),
+                                          elevation: 4,
+                                          color: isDark ? const Color(0xFF101012) : Colors.white,
+                                          enabled: isOwner,
+                                          onSelected: (val) {
+                                            _updateStageStatus(index, val, liveStages);
+                                          },
+                                          itemBuilder: (context) => [
+                                            PopupMenuItem(
+                                              value: 'proses',
+                                              height: 28,
+                                              padding: EdgeInsets.zero,
+                                              child: Container(
+                                                height: 28,
+                                                alignment: Alignment.centerLeft,
+                                                padding: const EdgeInsets.symmetric(horizontal: 10),
+                                                decoration: BoxDecoration(
+                                                  border: Border(
+                                                    bottom: BorderSide(
+                                                      color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+                                                      width: 1,
+                                                    ),
+                                                  ),
+                                                ),
+                                                child: Text(
+                                                  'Proses',
+                                                  style: GoogleFonts.plusJakartaSans(
+                                                    fontSize: 11.5,
+                                                    fontWeight: FontWeight.w700,
+                                                    color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                            PopupMenuItem(
+                                              value: 'selesai',
+                                              height: 28,
+                                              padding: EdgeInsets.zero,
+                                              child: Container(
+                                                height: 28,
+                                                alignment: Alignment.centerLeft,
+                                                padding: const EdgeInsets.symmetric(horizontal: 10),
+                                                decoration: BoxDecoration(
+                                                  border: Border(
+                                                    bottom: BorderSide(
+                                                      color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+                                                      width: 1,
+                                                    ),
+                                                  ),
+                                                ),
+                                                child: Text(
+                                                  'Selesai',
+                                                  style: GoogleFonts.plusJakartaSans(
+                                                    fontSize: 11.5,
+                                                    fontWeight: FontWeight.w700,
+                                                    color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                            PopupMenuItem(
+                                              value: 'akan_datang',
+                                              height: 28,
+                                              padding: EdgeInsets.zero,
+                                              child: Container(
+                                                height: 28,
+                                                alignment: Alignment.centerLeft,
+                                                padding: const EdgeInsets.symmetric(horizontal: 10),
+                                                child: Text(
+                                                  'Akan Datang',
+                                                  style: GoogleFonts.plusJakartaSans(
+                                                    fontSize: 11.5,
+                                                    fontWeight: FontWeight.w700,
+                                                    color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                          child: Container(
+                                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                                            child: Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              crossAxisAlignment: CrossAxisAlignment.center,
+                                              children: [
+                                                Container(
+                                                  width: 5.5,
+                                                  height: 5.5,
+                                                  decoration: BoxDecoration(
+                                                    color: stageStatus == 'selesai'
+                                                        ? const Color(0xFF047857)
+                                                        : stageStatus == 'proses'
+                                                            ? const Color(0xFFC2410C)
+                                                            : (isDark ? Colors.white38 : Colors.black38),
+                                                    shape: BoxShape.circle,
+                                                  ),
+                                                ),
+                                                const SizedBox(width: 4.5),
+                                                Text(
+                                                  statusLabel,
+                                                  style: GoogleFonts.plusJakartaSans(
+                                                    fontSize: 11,
+                                                    fontWeight: FontWeight.w700,
+                                                    color: (stageStatus == 'proses')
+                                                        ? const Color(0xFF9A3412)
+                                                        : (stageStatus == 'selesai')
+                                                            ? const Color(0xFF065F46)
+                                                            : (isDark ? Colors.white70 : Colors.black54),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       );
                     },
