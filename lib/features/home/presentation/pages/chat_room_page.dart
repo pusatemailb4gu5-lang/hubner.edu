@@ -2592,9 +2592,17 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                   final double fullScreenHeight = MediaQuery.of(context).size.height;
                   final double fullScreenWidth = MediaQuery.of(context).size.width;
 
-                  return Scaffold(
-                  backgroundColor: isDark ? const Color(0xFF000000) : const Color(0xFFFAF8FF),
-                  body: Stack(
+                  return AnnotatedRegion<SystemUiOverlayStyle>(
+                    value: SystemUiOverlayStyle(
+                      statusBarColor: Colors.transparent,
+                      statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+                      systemNavigationBarColor: isDark ? const Color(0xFF000000) : Colors.white,
+                      systemNavigationBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+                      systemNavigationBarDividerColor: Colors.transparent,
+                    ),
+                    child: Scaffold(
+                      backgroundColor: isDark ? const Color(0xFF000000) : const Color(0xFFFAF8FF),
+                      body: Stack(
                     children: [
                       // 1. Sticky Wallpaper background (Does not move or squish when keyboard appears)
                       Positioned(
@@ -3097,9 +3105,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
 
                       // Messages and Floating Controls Viewport
                       Expanded(
-                        child: SafeArea(
-                          top: false,
-                          child: Stack(
+                        child: Stack(
                             children: [
                               // 1. Full Screen Messages ListView with 94px bottom padding (completely unobstructed)
                               Positioned.fill(
@@ -3198,7 +3204,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                         left: 14,
                                         right: 14,
                                         top: 16,
-                                        bottom: 94 + (_replyingToMessage != null ? 50.0 : 0.0),
+                                        bottom: 16,
                                       ),
                                       itemCount: messageDocs.length,
                                       itemBuilder: (context, index) {
@@ -3677,7 +3683,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                               if (_showScrollToBottom)
                                 Positioned(
                                   right: 18,
-                                  bottom: 84 + ((_replyingToMessage != null || _editingMessageId != null) ? 48.0 : 0.0),
+                                  bottom: 16,
                                   child: BouncyButton(
                                     scaleDown: 0.85,
                                     onTap: () => _scrollToBottom(animate: true),
@@ -3708,310 +3714,308 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                     ),
                                   ),
                                 ),
+                            ],
+                          ),
+                        ),
 
-                              // 4. Glassmorphic Flat Input Bar (Non-Round, Transparan 80% Hitam + Blur)
-                              Positioned(
-                                left: 0,
-                                right: 0,
-                                bottom: 0,
-                                child: ClipRect(
-                                  child: BackdropFilter(
-                                    filter: ui.ImageFilter.blur(sigmaX: 16, sigmaY: 16),
-                                    child: Container(
+                        // 3. Glassmorphic Flat Input Bar (Full width flush to bottom acting as backdrop for Android buttons)
+                        ClipRect(
+                          child: BackdropFilter(
+                            filter: ui.ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+                            child: Container(
+                              width: double.infinity,
+                              decoration: BoxDecoration(
+                                color: isDark
+                                    ? const Color(0xFF000000).withValues(alpha: 0.85)
+                                    : Colors.white.withValues(alpha: 0.85),
+                                border: Border(
+                                  top: BorderSide(
+                                    color: isDark
+                                        ? const Color(0xFF27272A)
+                                        : const Color(0xFFF1F5F9),
+                                    width: 1.0,
+                                  ),
+                                ),
+                              ),
+                              padding: EdgeInsets.fromLTRB(
+                                14.0,
+                                10.0,
+                                14.0,
+                                MediaQuery.of(context).viewInsets.bottom > 0
+                                    ? 10.0
+                                    : (MediaQuery.of(context).padding.bottom > 0
+                                        ? MediaQuery.of(context).padding.bottom + 4.0
+                                        : 12.0),
+                              ),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  // Replying Banner
+                                  if (_replyingToMessage != null) ...[
+                                    Container(
+                                      height: 38,
+                                      margin: const EdgeInsets.only(bottom: 8),
                                       decoration: BoxDecoration(
-                                        color: isDark
-                                            ? const Color(0xFF000000).withValues(alpha: 0.80)
-                                            : Colors.white.withValues(alpha: 0.70),
-                                        border: Border(
-                                          top: BorderSide(
-                                            color: isDark
-                                                ? const Color(0xFF27272A)
-                                                : const Color(0xFFF1F5F9),
-                                            width: 1.0,
-                                          ),
+                                        color: isDark ? const Color(0xFF18181B) : const Color(0xFFF8FAFC),
+                                        borderRadius: BorderRadius.circular(19),
+                                        border: Border.all(
+                                          color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                                          width: 1.0,
                                         ),
                                       ),
-                                      padding: EdgeInsets.fromLTRB(
-                                        14.0,
-                                        10.0,
-                                        14.0,
-                                        MediaQuery.of(context).padding.bottom > 0
-                                            ? MediaQuery.of(context).padding.bottom + 6.0
-                                            : 12.0,
-                                      ),
-                                      child: Column(
-                                        mainAxisSize: MainAxisSize.min,
-                                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                                      child: Row(
                                         children: [
-                                          // Replying Banner
-                                          if (_replyingToMessage != null) ...[
-                                            Container(
-                                              height: 38,
-                                              margin: const EdgeInsets.only(bottom: 8),
-                                              decoration: BoxDecoration(
-                                                color: isDark ? const Color(0xFF18181B) : const Color(0xFFF8FAFC),
-                                                borderRadius: BorderRadius.circular(19),
-                                                border: Border.all(
-                                                  color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
-                                                  width: 1.0,
+                                          Container(
+                                            width: 38,
+                                            height: 38,
+                                            decoration: BoxDecoration(
+                                              color: const Color(0xFF2563EB).withValues(alpha: 0.12),
+                                              shape: BoxShape.circle,
+                                            ),
+                                            child: const Icon(Icons.reply_rounded, color: Color(0xFF2563EB), size: 16),
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              mainAxisAlignment: MainAxisAlignment.center,
+                                              children: [
+                                                Text(
+                                                  _replyingToMessage!['sender'] ?? 'User',
+                                                  style: GoogleFonts.plusJakartaSans(
+                                                    fontSize: 12.0,
+                                                    fontWeight: FontWeight.bold,
+                                                    color: const Color(0xFF2563EB),
+                                                  ),
                                                 ),
+                                                Text(
+                                                  _replyingToMessage!['message'] == '[Gambar Lampiran]'
+                                                      ? '📷 Foto'
+                                                      : (_replyingToMessage!['message'] ?? ''),
+                                                  maxLines: 1,
+                                                  overflow: TextOverflow.ellipsis,
+                                                  style: GoogleFonts.dmSans(
+                                                    fontSize: 11.0,
+                                                    color: isDark ? Colors.white70 : Colors.black54,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                          GestureDetector(
+                                            onTap: () {
+                                              setState(() {
+                                                _replyingToMessage = null;
+                                              });
+                                            },
+                                            child: Container(
+                                              margin: const EdgeInsets.only(right: 8),
+                                              padding: const EdgeInsets.all(4),
+                                              decoration: BoxDecoration(
+                                                color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                                                shape: BoxShape.circle,
                                               ),
-                                              child: Row(
-                                                children: [
-                                                  Container(
-                                                    width: 38,
-                                                    height: 38,
-                                                    decoration: BoxDecoration(
-                                                      color: const Color(0xFF2563EB).withValues(alpha: 0.12),
-                                                      shape: BoxShape.circle,
-                                                    ),
-                                                    child: const Icon(Icons.reply_rounded, color: Color(0xFF2563EB), size: 16),
-                                                  ),
-                                                  const SizedBox(width: 8),
-                                                  Expanded(
-                                                    child: Column(
-                                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                                      mainAxisAlignment: MainAxisAlignment.center,
-                                                      children: [
-                                                        Text(
-                                                          _replyingToMessage!['sender'] ?? 'User',
-                                                          style: GoogleFonts.plusJakartaSans(
-                                                            fontSize: 12.0,
-                                                            fontWeight: FontWeight.bold,
-                                                            color: const Color(0xFF2563EB),
-                                                          ),
-                                                        ),
-                                                        Text(
-                                                          _replyingToMessage!['message'] == '[Gambar Lampiran]'
-                                                              ? '📷 Foto'
-                                                              : (_replyingToMessage!['message'] ?? ''),
-                                                          maxLines: 1,
-                                                          overflow: TextOverflow.ellipsis,
-                                                          style: GoogleFonts.dmSans(
-                                                            fontSize: 11.0,
-                                                            color: isDark ? Colors.white70 : Colors.black54,
-                                                          ),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                  GestureDetector(
-                                                    onTap: () {
-                                                      setState(() {
-                                                        _replyingToMessage = null;
-                                                      });
-                                                    },
-                                                    child: Container(
-                                                      margin: const EdgeInsets.only(right: 8),
-                                                      padding: const EdgeInsets.all(4),
-                                                      decoration: BoxDecoration(
-                                                        color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
-                                                        shape: BoxShape.circle,
-                                                      ),
-                                                      child: Icon(
-                                                        Icons.close_rounded,
-                                                        size: 13,
-                                                        color: isDark ? Colors.white70 : Colors.black54,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ],
+                                              child: Icon(
+                                                Icons.close_rounded,
+                                                size: 13,
+                                                color: isDark ? Colors.white70 : Colors.black54,
                                               ),
                                             ),
-                                          ],
-
-                                          // Editing Banner
-                                          if (_editingMessageId != null) ...[
-                                            Container(
-                                              height: 38,
-                                              margin: const EdgeInsets.only(bottom: 8),
-                                              decoration: BoxDecoration(
-                                                color: isDark ? const Color(0xFF18181B) : const Color(0xFFF8FAFC),
-                                                borderRadius: BorderRadius.circular(19),
-                                                border: Border.all(
-                                                  color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
-                                                  width: 1.0,
-                                                ),
-                                              ),
-                                              child: Row(
-                                                children: [
-                                                  Container(
-                                                    width: 38,
-                                                    height: 38,
-                                                    decoration: BoxDecoration(
-                                                      color: const Color(0xFF7C3AED).withValues(alpha: 0.12),
-                                                      shape: BoxShape.circle,
-                                                    ),
-                                                    child: const Icon(Icons.edit_rounded, color: Color(0xFF7C3AED), size: 16),
-                                                  ),
-                                                  const SizedBox(width: 8),
-                                                  Expanded(
-                                                    child: Column(
-                                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                                      mainAxisAlignment: MainAxisAlignment.center,
-                                                      children: [
-                                                        Text(
-                                                          'Edit Pesan',
-                                                          style: GoogleFonts.plusJakartaSans(
-                                                            fontSize: 12.0,
-                                                            fontWeight: FontWeight.bold,
-                                                            color: const Color(0xFF7C3AED),
-                                                          ),
-                                                        ),
-                                                        Text(
-                                                          'Perbarui teks di kolom lalu kirim',
-                                                          maxLines: 1,
-                                                          overflow: TextOverflow.ellipsis,
-                                                          style: GoogleFonts.dmSans(
-                                                            fontSize: 11.0,
-                                                            color: isDark ? Colors.white70 : Colors.black54,
-                                                          ),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                  GestureDetector(
-                                                    onTap: () {
-                                                      setState(() {
-                                                        _editingMessageId = null;
-                                                        _messageController.clear();
-                                                      });
-                                                    },
-                                                    child: Container(
-                                                      margin: const EdgeInsets.only(right: 8),
-                                                      padding: const EdgeInsets.all(4),
-                                                      decoration: BoxDecoration(
-                                                        color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
-                                                        shape: BoxShape.circle,
-                                                      ),
-                                                      child: Icon(
-                                                        Icons.close_rounded,
-                                                        size: 13,
-                                                        color: isDark ? Colors.white70 : Colors.black54,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          ],
-
-                                          Row(
-                                            crossAxisAlignment: CrossAxisAlignment.center,
-                                            children: [
-                                              // Tombol Gambar (36x36 terpusat)
-                                              BouncyButton(
-                                                onTap: _pickAndSendImage,
-                                                child: Container(
-                                                  width: 36,
-                                                  height: 36,
-                                                  margin: const EdgeInsets.only(right: 6),
-                                                  decoration: BoxDecoration(
-                                                    color: isDark ? const Color(0xFF18181B) : const Color(0xFFF8FAFC),
-                                                    shape: BoxShape.circle,
-                                                    border: Border.all(
-                                                      color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
-                                                      width: 1.0,
-                                                    ),
-                                                  ),
-                                                  child: Icon(
-                                                    Icons.image_rounded,
-                                                    color: isDark ? Colors.white70 : const Color(0xFF4F46E5),
-                                                    size: 18,
-                                                  ),
-                                                ),
-                                              ),
-                                              // Text Field (1 Baris lurus sejajar)
-                                              Expanded(
-                                                child: Container(
-                                                  constraints: const BoxConstraints(minHeight: 38),
-                                                  alignment: Alignment.center,
-                                                  decoration: BoxDecoration(
-                                                    color: isDark ? const Color(0xFF18181B) : const Color(0xFFF8FAFC),
-                                                    borderRadius: BorderRadius.circular(19),
-                                                    border: Border.all(
-                                                      color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
-                                                      width: 1.0,
-                                                    ),
-                                                  ),
-                                                  child: KeyboardListener(
-                                                    focusNode: _inputFocusNode,
-                                                    onKeyEvent: (event) {
-                                                      if (event is KeyDownEvent && event.logicalKey == LogicalKeyboardKey.enter) {
-                                                        if (!HardwareKeyboard.instance.isShiftPressed) {
-                                                          _sendMessage();
-                                                        }
-                                                      }
-                                                    },
-                                                    child: TextField(
-                                                      controller: _messageController,
-                                                      minLines: 1,
-                                                      maxLines: 4,
-                                                      keyboardType: TextInputType.multiline,
-                                                      textInputAction: TextInputAction.send,
-                                                      onSubmitted: (_) => _sendMessage(),
-                                                      style: GoogleFonts.dmSans(
-                                                        fontSize: 13.5,
-                                                        color: isDark ? Colors.white : Colors.black87,
-                                                      ),
-                                                      decoration: InputDecoration(
-                                                        hintText: _editingMessageId != null ? 'Edit pesan...' : 'Tulis pesan...',
-                                                        hintStyle: GoogleFonts.dmSans(
-                                                          color: isDark ? Colors.white38 : Colors.black26,
-                                                          fontSize: 13.5,
-                                                        ),
-                                                        border: InputBorder.none,
-                                                        isDense: true,
-                                                        contentPadding: const EdgeInsets.symmetric(
-                                                          horizontal: 14,
-                                                          vertical: 9,
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ),
-                                              ),
-                                              const SizedBox(width: 4),
-                                              // Tombol Kirim: Ikon saja warna hitam lurus sejajar dengan animasi bounce responsif
-                                              BouncyButton(
-                                                scaleDown: 0.75,
-                                                duration: const Duration(milliseconds: 100),
-                                                onTap: _sendMessage,
-                                                child: Container(
-                                                  width: 36,
-                                                  height: 36,
-                                                  alignment: Alignment.center,
-                                                  child: Icon(
-                                                    _editingMessageId != null ? Icons.check_rounded : Icons.send_rounded,
-                                                    color: _editingMessageId != null
-                                                        ? const Color(0xFF7C3AED)
-                                                        : (isDark ? Colors.white : Colors.black),
-                                                    size: 21,
-                                                  ),
-                                                ),
-                                              ),
-                                            ],
                                           ),
                                         ],
                                       ),
                                     ),
+                                  ],
+
+                                  // Editing Banner
+                                  if (_editingMessageId != null) ...[
+                                    Container(
+                                      height: 38,
+                                      margin: const EdgeInsets.only(bottom: 8),
+                                      decoration: BoxDecoration(
+                                        color: isDark ? const Color(0xFF18181B) : const Color(0xFFF8FAFC),
+                                        borderRadius: BorderRadius.circular(19),
+                                        border: Border.all(
+                                          color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                                          width: 1.0,
+                                        ),
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          Container(
+                                            width: 38,
+                                            height: 38,
+                                            decoration: BoxDecoration(
+                                              color: const Color(0xFF7C3AED).withValues(alpha: 0.12),
+                                              shape: BoxShape.circle,
+                                            ),
+                                            child: const Icon(Icons.edit_rounded, color: Color(0xFF7C3AED), size: 16),
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              mainAxisAlignment: MainAxisAlignment.center,
+                                              children: [
+                                                Text(
+                                                  'Edit Pesan',
+                                                  style: GoogleFonts.plusJakartaSans(
+                                                    fontSize: 12.0,
+                                                    fontWeight: FontWeight.bold,
+                                                    color: const Color(0xFF7C3AED),
+                                                  ),
+                                                ),
+                                                Text(
+                                                  'Perbarui teks di kolom lalu kirim',
+                                                  maxLines: 1,
+                                                  overflow: TextOverflow.ellipsis,
+                                                  style: GoogleFonts.dmSans(
+                                                    fontSize: 11.0,
+                                                    color: isDark ? Colors.white70 : Colors.black54,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                          GestureDetector(
+                                            onTap: () {
+                                              setState(() {
+                                                _editingMessageId = null;
+                                                _messageController.clear();
+                                              });
+                                            },
+                                            child: Container(
+                                              margin: const EdgeInsets.only(right: 8),
+                                              padding: const EdgeInsets.all(4),
+                                              decoration: BoxDecoration(
+                                                color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                                                shape: BoxShape.circle,
+                                              ),
+                                              child: Icon(
+                                                Icons.close_rounded,
+                                                size: 13,
+                                                color: isDark ? Colors.white70 : Colors.black54,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+
+                                  Row(
+                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    children: [
+                                      // Tombol Gambar (36x36 terpusat)
+                                      BouncyButton(
+                                        onTap: _pickAndSendImage,
+                                        child: Container(
+                                          width: 36,
+                                          height: 36,
+                                          margin: const EdgeInsets.only(right: 6),
+                                          decoration: BoxDecoration(
+                                            color: isDark ? const Color(0xFF18181B) : const Color(0xFFF8FAFC),
+                                            shape: BoxShape.circle,
+                                            border: Border.all(
+                                              color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                                              width: 1.0,
+                                            ),
+                                          ),
+                                          child: Icon(
+                                            Icons.image_rounded,
+                                            color: isDark ? Colors.white70 : const Color(0xFF4F46E5),
+                                            size: 18,
+                                          ),
+                                        ),
+                                      ),
+                                      // Text Field (1 Baris lurus sejajar)
+                                      Expanded(
+                                        child: Container(
+                                          constraints: const BoxConstraints(minHeight: 38),
+                                          alignment: Alignment.center,
+                                          decoration: BoxDecoration(
+                                            color: isDark ? const Color(0xFF18181B) : const Color(0xFFF8FAFC),
+                                            borderRadius: BorderRadius.circular(19),
+                                            border: Border.all(
+                                              color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                                              width: 1.0,
+                                            ),
+                                          ),
+                                          child: KeyboardListener(
+                                            focusNode: _inputFocusNode,
+                                            onKeyEvent: (event) {
+                                              if (event is KeyDownEvent && event.logicalKey == LogicalKeyboardKey.enter) {
+                                                if (!HardwareKeyboard.instance.isShiftPressed) {
+                                                  _sendMessage();
+                                                }
+                                              }
+                                            },
+                                            child: TextField(
+                                              controller: _messageController,
+                                              minLines: 1,
+                                              maxLines: 4,
+                                              keyboardType: TextInputType.multiline,
+                                              textInputAction: TextInputAction.send,
+                                              onSubmitted: (_) => _sendMessage(),
+                                              style: GoogleFonts.dmSans(
+                                                fontSize: 13.5,
+                                                color: isDark ? Colors.white : Colors.black87,
+                                              ),
+                                              decoration: InputDecoration(
+                                                hintText: _editingMessageId != null ? 'Edit pesan...' : 'Tulis pesan...',
+                                                hintStyle: GoogleFonts.dmSans(
+                                                  color: isDark ? Colors.white38 : Colors.black26,
+                                                  fontSize: 13.5,
+                                                ),
+                                                border: InputBorder.none,
+                                                isDense: true,
+                                                contentPadding: const EdgeInsets.symmetric(
+                                                  horizontal: 14,
+                                                  vertical: 9,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 4),
+                                      // Tombol Kirim: Ikon saja warna hitam lurus sejajar dengan animasi bounce responsif
+                                      BouncyButton(
+                                        scaleDown: 0.75,
+                                        duration: const Duration(milliseconds: 100),
+                                        onTap: _sendMessage,
+                                        child: Container(
+                                          width: 36,
+                                          height: 36,
+                                          alignment: Alignment.center,
+                                          child: Icon(
+                                            _editingMessageId != null ? Icons.check_rounded : Icons.send_rounded,
+                                            color: _editingMessageId != null
+                                                ? const Color(0xFF7C3AED)
+                                                : (isDark ? Colors.white : Colors.black),
+                                            size: 21,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                ),
+                                ],
                               ),
-                            ],
+                            ),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                ],
+                      ],
+                    ),
+                  ],
+                ),
               ),
             );
-          },
-        );
-      },
-    ),
-  );
+        },
+      );
+    },
+  ),
+);
 },
 );
   }
