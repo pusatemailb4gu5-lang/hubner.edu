@@ -3361,18 +3361,18 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                                           ),
                                                           decoration: BoxDecoration(
                                                             color: isMe
-                                                                ? (isDark ? const Color(0xFF141416).withValues(alpha: 0.85) : Colors.black)
-                                                                : (isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9)),
+                                                                ? (isDark ? const Color(0xFF3B185F) : const Color(0xFF7C3AED))
+                                                                : (isDark ? const Color(0xFF1C1C1E) : Colors.white),
                                                             borderRadius: BorderRadius.only(
-                                                              topLeft: const Radius.circular(16),
-                                                              topRight: const Radius.circular(16),
-                                                              bottomLeft: isMe ? const Radius.circular(16) : const Radius.circular(4),
-                                                              bottomRight: isMe ? const Radius.circular(4) : const Radius.circular(16),
+                                                              topLeft: const Radius.circular(18),
+                                                              topRight: const Radius.circular(18),
+                                                              bottomLeft: isMe ? const Radius.circular(18) : const Radius.circular(4),
+                                                              bottomRight: isMe ? const Radius.circular(4) : const Radius.circular(18),
                                                             ),
                                                             border: Border.all(
                                                               color: isMe
-                                                                  ? (isDark ? Colors.white.withValues(alpha: 0.12) : Colors.transparent)
-                                                                  : (isDark ? const Color(0xFF3F3F46) : const Color(0xFFE2E8F0)),
+                                                                  ? (isDark ? const Color(0xFF6B21A8).withValues(alpha: 0.35) : Colors.transparent)
+                                                                  : (isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0)),
                                                               width: 1.0,
                                                             ),
                                                             boxShadow: [
@@ -3980,7 +3980,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                         ),
                                       ),
                                       const SizedBox(width: 4),
-                                      // Tombol Kirim: Ikon saja warna hitam lurus sejajar dengan animasi bounce responsif
+                                      // Tombol Kirim: Ikon saja warna ungu Hubner lurus sejajar dengan animasi bounce responsif
                                       BouncyButton(
                                         scaleDown: 0.75,
                                         duration: const Duration(milliseconds: 100),
@@ -3991,9 +3991,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                           alignment: Alignment.center,
                                           child: Icon(
                                             _editingMessageId != null ? Icons.check_rounded : Icons.send_rounded,
-                                            color: _editingMessageId != null
-                                                ? const Color(0xFF7C3AED)
-                                                : (isDark ? Colors.white : Colors.black),
+                                            color: isDark ? const Color(0xFFD6A5F8) : const Color(0xFF7C3AED),
                                             size: 21,
                                           ),
                                         ),

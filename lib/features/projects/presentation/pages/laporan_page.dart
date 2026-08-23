@@ -487,38 +487,42 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
     required VoidCallback onTap,
     required bool isDark,
   }) {
+    const Color orangeDotColor = Color(0xFFEA580C);
+
     return BouncyButton(
       scaleDown: 0.92,
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
-          color: isSelected
-              ? (isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9))
-              : Colors.transparent,
+          color: isDark ? const Color(0xFF1C1C1E) : (isSelected ? const Color(0xFFF1F5F9) : const Color(0xFFF8FAFC)),
           borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+            width: 1.0,
+          ),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              width: 18,
-              height: 18,
+              width: 16,
+              height: 16,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: isSelected ? const Color(0xFFF97316) : (isDark ? Colors.white38 : const Color(0xFF94A3B8)),
+                  color: isSelected ? orangeDotColor : (isDark ? const Color(0xFF71717A) : const Color(0xFF94A3B8)),
                   width: 1.8,
                 ),
               ),
               alignment: Alignment.center,
               child: isSelected
                   ? Container(
-                      width: 9,
-                      height: 9,
+                      width: 8,
+                      height: 8,
                       decoration: const BoxDecoration(
                         shape: BoxShape.circle,
-                        color: Color(0xFFF97316),
+                        color: orangeDotColor,
                       ),
                     )
                   : null,
@@ -527,11 +531,11 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
             Text(
               label,
               style: GoogleFonts.plusJakartaSans(
-                fontSize: 14.0,
+                fontSize: 13.5,
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
                 color: isSelected
-                    ? (isDark ? Colors.white : const Color(0xFF1E293B))
-                    : (isDark ? Colors.white60 : const Color(0xFF64748B)),
+                    ? (isDark ? Colors.white : const Color(0xFF0F172A))
+                    : (isDark ? const Color(0xFF71717A) : const Color(0xFF64748B)),
               ),
             ),
           ],
@@ -807,19 +811,50 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
     final textAns = progressData['textAnswer_$tKey']?.toString() ?? '';
     final fileAns = progressData['fileAnswer_$tKey']?.toString() ?? '';
     final List? groupMembers = progressData['groupMembers_$tKey'] as List?;
+    final bool isDark = HubnerApp.themeNotifier.value == 'Gelap' ||
+        HubnerApp.themeNotifier.value == 'Hitam' ||
+        Theme.of(context).brightness == Brightness.dark;
     
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        backgroundColor: isDark ? const Color(0xFF18181B) : Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(24),
+          side: BorderSide(
+            color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+            width: 1.2,
+          ),
+        ),
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Detail Jawaban Tugas', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, fontSize: 17.6)),
-            const SizedBox(height: 4),
-            Text('Siswa: $studentName', style: GoogleFonts.plusJakartaSans(fontSize: 14.0, color: Colors.black54)),
-            Text('Tugas: $taskTitle', style: GoogleFonts.plusJakartaSans(fontSize: 14.0, color: Colors.black54, fontWeight: FontWeight.w600)),
+            Text(
+              'Detail Jawaban Tugas',
+              style: GoogleFonts.plusJakartaSans(
+                fontWeight: FontWeight.bold,
+                fontSize: 18.0,
+                color: isDark ? Colors.white : const Color(0xFF0F172A),
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              'Siswa: $studentName',
+              style: GoogleFonts.dmSans(
+                fontSize: 14.0,
+                color: isDark ? const Color(0xFFD4D4D8) : const Color(0xFF475569),
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              'Tugas: $taskTitle',
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 14.0,
+                color: isDark ? const Color(0xFFD6A5F8) : const Color(0xFF7C3AED),
+                fontWeight: FontWeight.w600,
+              ),
+            ),
           ],
         ),
         content: Column(
@@ -827,23 +862,46 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             if (textAns.isNotEmpty) ...[
-              Text('Jawaban Teks:', style: GoogleFonts.plusJakartaSans(fontSize: 14.0, fontWeight: FontWeight.bold, color: Colors.black54)),
-              const SizedBox(height: 4),
+              Text(
+                'Jawaban Teks:',
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 13.5,
+                  fontWeight: FontWeight.bold,
+                  color: isDark ? const Color(0xFFD4D4D8) : const Color(0xFF475569),
+                ),
+              ),
+              const SizedBox(height: 6),
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF8FAFC),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: const Color(0xFFE2E8F0)),
+                  color: isDark ? const Color(0xFF141416) : const Color(0xFFF8FAFC),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(
+                    color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                  ),
                 ),
-                child: Text(textAns, style: GoogleFonts.plusJakartaSans(fontSize: 14.0, color: Colors.black87)),
+                child: Text(
+                  textAns,
+                  style: GoogleFonts.dmSans(
+                    fontSize: 14.5,
+                    color: isDark ? Colors.white : const Color(0xFF0F172A),
+                    height: 1.45,
+                  ),
+                ),
               ),
               const SizedBox(height: 12),
             ],
             if (fileAns.isNotEmpty) ...[
-              Text('Berkas Lampiran:', style: GoogleFonts.plusJakartaSans(fontSize: 14.0, fontWeight: FontWeight.bold, color: Colors.black54)),
-              const SizedBox(height: 4),
+              Text(
+                'Berkas Lampiran:',
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 13.5,
+                  fontWeight: FontWeight.bold,
+                  color: isDark ? const Color(0xFFD4D4D8) : const Color(0xFF475569),
+                ),
+              ),
+              const SizedBox(height: 6),
               GestureDetector(
                 onTap: () async {
                   final uri = Uri.tryParse(fileAns);
@@ -859,45 +917,72 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                     }
                   }
                 },
-                child: Row(
-                  children: [
-                    const Icon(Icons.attach_file_rounded, size: 14, color: Colors.blueAccent),
-                    const SizedBox(width: 6),
-                    Expanded(
-                      child: Text(
-                        fileAns,
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 14.0,
-                          color: Colors.blueAccent,
-                          fontWeight: FontWeight.bold,
-                          decoration: TextDecoration.underline,
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  decoration: BoxDecoration(
+                    color: isDark ? const Color(0xFF172554) : const Color(0xFFEFF6FF),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: isDark ? const Color(0xFF1E3A8A) : const Color(0xFFBFDBFE),
                     ),
-                  ],
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.attach_file_rounded,
+                        size: 16,
+                        color: isDark ? const Color(0xFF93C5FD) : const Color(0xFF2563EB),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          fileAns,
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 13.5,
+                            color: isDark ? const Color(0xFF93C5FD) : const Color(0xFF2563EB),
+                            fontWeight: FontWeight.bold,
+                            decoration: TextDecoration.underline,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
               const SizedBox(height: 12),
             ],
             if (groupMembers != null && groupMembers.isNotEmpty) ...[
-              Text('Anggota Kelompok:', style: GoogleFonts.plusJakartaSans(fontSize: 14.0, fontWeight: FontWeight.bold, color: Colors.black54)),
-              const SizedBox(height: 4),
+              Text(
+                'Anggota Kelompok:',
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 13.5,
+                  fontWeight: FontWeight.bold,
+                  color: isDark ? const Color(0xFFD4D4D8) : const Color(0xFF475569),
+                ),
+              ),
+              const SizedBox(height: 6),
               Wrap(
                 spacing: 6,
                 runSpacing: 4,
                 children: groupMembers.map((uid) {
                   final displayUid = uid.toString().length > 5 ? uid.toString().substring(0, 5) : uid.toString();
                   return Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFEFF6FF),
+                      color: isDark ? const Color(0xFF172554) : const Color(0xFFEFF6FF),
                       borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: const Color(0xFF2563EB).withValues(alpha: 0.1)),
+                      border: Border.all(
+                        color: isDark ? const Color(0xFF1E3A8A) : const Color(0xFF2563EB).withValues(alpha: 0.15),
+                      ),
                     ),
                     child: Text(
                       uid.toString() == progressData['uid'].toString() ? '$studentName (Pengirim)' : 'UID: $displayUid',
-                      style: GoogleFonts.dmSans(fontSize: 14.0, color: const Color(0xFF2563EB), fontWeight: FontWeight.w500),
+                      style: GoogleFonts.dmSans(
+                        fontSize: 13.0,
+                        color: isDark ? const Color(0xFF93C5FD) : const Color(0xFF2563EB),
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   );
                 }).toList(),
@@ -905,13 +990,27 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
               const SizedBox(height: 12),
             ],
             if (textAns.isEmpty && fileAns.isEmpty)
-              Text('Siswa belum mengunggah berkas atau jawaban.', style: GoogleFonts.plusJakartaSans(fontSize: 14.0, color: Colors.black45, fontStyle: FontStyle.italic)),
+              Text(
+                'Siswa belum mengunggah berkas atau jawaban.',
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 14.0,
+                  color: isDark ? const Color(0xFF71717A) : Colors.black45,
+                  fontStyle: FontStyle.italic,
+                ),
+              ),
           ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: Text('Tutup', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, color: Colors.black54)),
+            child: Text(
+              'Tutup',
+              style: GoogleFonts.plusJakartaSans(
+                fontWeight: FontWeight.bold,
+                fontSize: 14.5,
+                color: isDark ? const Color(0xFFD6A5F8) : const Color(0xFF7C3AED),
+              ),
+            ),
           )
         ],
       ),
@@ -927,13 +1026,13 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
         final double statusBarHeight = MediaQuery.of(context).padding.top;
 
         return Scaffold(
-          backgroundColor: isDark ? const Color(0xFFD6A5F8) : const Color(0xFF7F52FC),
+          backgroundColor: isDark ? const Color(0xFF6B3BA3) : const Color(0xFF7F52FC),
           body: StreamBuilder<QuerySnapshot>(
             stream: _projectsStream,
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting && !snapshot.hasData) {
                 return Scaffold(
-                  backgroundColor: isDark ? const Color(0xFFD6A5F8) : const Color(0xFF7F52FC),
+                  backgroundColor: isDark ? const Color(0xFF6B3BA3) : const Color(0xFF7F52FC),
                   body: const SizedBox.shrink(),
                 );
               }
@@ -965,7 +1064,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
               // Main Body with Hero & Draggable White Sheet
               Expanded(
                 child: Scaffold(
-                  backgroundColor: isDark ? const Color(0xFFD6A5F8) : const Color(0xFF7F52FC),
+                  backgroundColor: isDark ? const Color(0xFF6B3BA3) : const Color(0xFF7F52FC),
                   body: Stack(
                     children: [
                       // ==========================================
@@ -1030,7 +1129,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                             width: 40,
                                             height: 40,
                                             decoration: BoxDecoration(
-                                              color: isDark ? const Color(0xFF18181B) : Colors.white.withValues(alpha: 0.92),
+                                              color: isDark ? const Color(0xFF1C1C1E) : Colors.white.withValues(alpha: 0.95),
                                               shape: BoxShape.circle,
                                               border: Border.all(
                                                 color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
@@ -1044,7 +1143,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                                 ),
                                               ],
                                             ),
-                                            child: Icon(Icons.arrow_back_ios_new_rounded, color: isDark ? Colors.white : Colors.black87, size: 17),
+                                            child: Icon(Icons.arrow_back_ios_new_rounded, color: isDark ? Colors.white : const Color(0xFF7F52FC), size: 17),
                                           ),
                                         ),
                                         const SizedBox(width: 12),
@@ -1058,7 +1157,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                               style: GoogleFonts.plusJakartaSans(
                                                 fontSize: 22,
                                                 fontWeight: FontWeight.w900,
-                                                color: isDark ? const Color(0xFF0F172A) : Colors.white,
+                                                color: Colors.white,
                                                 letterSpacing: -0.4,
                                                 height: 1.2,
                                               ),
@@ -1068,7 +1167,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                               'Pantau presensi, progres tugas, dan evaluasi hasil belajar siswa.',
                                               style: GoogleFonts.dmSans(
                                                 fontSize: 14.0,
-                                                color: isDark ? const Color(0xFF334155) : Colors.white.withValues(alpha: 0.92),
+                                                color: Colors.white.withValues(alpha: 0.92),
                                                 fontWeight: FontWeight.w500,
                                               ),
                                             ),
@@ -1093,7 +1192,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                              height: 52,
                                              padding: const EdgeInsets.fromLTRB(4, 4, 16, 4),
                                              decoration: BoxDecoration(
-                                               color: isDark ? const Color(0xFF18181B).withValues(alpha: 0.90) : Colors.white,
+                                               color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
                                                borderRadius: BorderRadius.circular(30),
                                                border: Border.all(
                                                  color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
@@ -1164,7 +1263,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                           height: 52,
                                           padding: const EdgeInsets.symmetric(horizontal: 16),
                                           decoration: BoxDecoration(
-                                            color: isDark ? const Color(0xFF18181B) : const Color(0xFF1E293B),
+                                            color: isDark ? const Color(0xFF1C1C1E) : Colors.white.withValues(alpha: 0.95),
                                             borderRadius: BorderRadius.circular(30),
                                             border: Border.all(
                                               color: isDark ? const Color(0xFF27272A) : Colors.transparent,
@@ -1181,7 +1280,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                           child: Row(
                                             mainAxisSize: MainAxisSize.min,
                                             children: [
-                                              const Icon(Icons.manage_accounts_rounded, color: Colors.white, size: 18),
+                                              Icon(Icons.manage_accounts_rounded, color: isDark ? Colors.white : const Color(0xFF7F52FC), size: 18),
                                               const SizedBox(width: 6),
                                               Text(
                                                 'Atur Presensi',
@@ -1204,21 +1303,21 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                   // ==========================================
                                   Row(
                                     children: [
-                                      // Total Siswa Card (Kembali ke Warna Kuning Hangat yang Cerah)
+                                      // Total Siswa Card
                                       Expanded(
                                         child: Container(
                                           height: 78,
                                           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                                           decoration: BoxDecoration(
-                                            color: const Color(0xFFFFFBEB),
+                                            color: isDark ? const Color(0xFF451A03) : const Color(0xFFFFFBEB),
                                             borderRadius: BorderRadius.circular(20),
                                             border: Border.all(
-                                              color: Colors.transparent,
+                                              color: isDark ? const Color(0xFFC76D10).withValues(alpha: 0.4) : Colors.transparent,
                                               width: 1.1,
                                             ),
                                             boxShadow: [
                                               BoxShadow(
-                                                color: Colors.black.withValues(alpha: 0.08),
+                                                color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.08),
                                                 blurRadius: 8,
                                                 offset: const Offset(0, 2),
                                               ),
@@ -1228,9 +1327,9 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                             crossAxisAlignment: CrossAxisAlignment.center,
                                             children: [
                                               // Ikon Frameless di Kiri
-                                              const Icon(
+                                              Icon(
                                                 Icons.people_alt_rounded,
-                                                color: Color(0xFFD97706),
+                                                color: isDark ? const Color(0xFFFBBF24) : const Color(0xFFD97706),
                                                 size: 28,
                                               ),
                                               const SizedBox(width: 10),
@@ -1245,7 +1344,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                                       style: GoogleFonts.plusJakartaSans(
                                                         fontSize: 24,
                                                         fontWeight: FontWeight.w900,
-                                                        color: const Color(0xFF92400E),
+                                                        color: isDark ? const Color(0xFFFDE68A) : const Color(0xFF92400E),
                                                         height: 1.0,
                                                       ),
                                                     ),
@@ -1255,7 +1354,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                                       style: GoogleFonts.plusJakartaSans(
                                                         fontSize: 14.0,
                                                         fontWeight: FontWeight.w700,
-                                                        color: const Color(0xFFB45309),
+                                                        color: isDark ? const Color(0xFFFDBA74) : const Color(0xFFB45309),
                                                       ),
                                                       maxLines: 1,
                                                       overflow: TextOverflow.ellipsis,
@@ -1269,21 +1368,21 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                       ),
                                       const SizedBox(width: 10),
 
-                                      // Telah Bergabung Card (Kembali ke Warna Hijau Mint Segar yang Cerah)
+                                      // Telah Bergabung Card
                                       Expanded(
                                         child: Container(
                                           height: 78,
                                           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                                           decoration: BoxDecoration(
-                                            color: const Color(0xFFECFDF5),
+                                            color: isDark ? const Color(0xFF064E3B) : const Color(0xFFECFDF5),
                                             borderRadius: BorderRadius.circular(20),
                                             border: Border.all(
-                                              color: Colors.transparent,
+                                              color: isDark ? const Color(0xFF147D75).withValues(alpha: 0.4) : Colors.transparent,
                                               width: 1.1,
                                             ),
                                             boxShadow: [
                                               BoxShadow(
-                                                color: Colors.black.withValues(alpha: 0.08),
+                                                color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.08),
                                                 blurRadius: 8,
                                                 offset: const Offset(0, 2),
                                               ),
@@ -1293,9 +1392,9 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                             crossAxisAlignment: CrossAxisAlignment.center,
                                             children: [
                                               // Ikon Frameless di Kiri
-                                              const Icon(
+                                              Icon(
                                                 Icons.how_to_reg_rounded,
-                                                color: Color(0xFF059669),
+                                                color: isDark ? const Color(0xFF34D399) : const Color(0xFF059669),
                                                 size: 28,
                                               ),
                                               const SizedBox(width: 10),
@@ -1310,7 +1409,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                                       style: GoogleFonts.plusJakartaSans(
                                                         fontSize: 24,
                                                         fontWeight: FontWeight.w900,
-                                                        color: const Color(0xFF065F46),
+                                                        color: isDark ? const Color(0xFFA7F3D0) : const Color(0xFF065F46),
                                                         height: 1.0,
                                                       ),
                                                     ),
@@ -1320,7 +1419,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                                       style: GoogleFonts.plusJakartaSans(
                                                         fontSize: 14.0,
                                                         fontWeight: FontWeight.w700,
-                                                        color: const Color(0xFF047857),
+                                                        color: isDark ? const Color(0xFF6EE7B7) : const Color(0xFF047857),
                                                       ),
                                                       maxLines: 1,
                                                       overflow: TextOverflow.ellipsis,
@@ -1350,7 +1449,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                             height: 52,
                                             padding: const EdgeInsets.symmetric(horizontal: 14),
                                             decoration: BoxDecoration(
-                                              color: isDark ? const Color(0xFF18181B).withValues(alpha: 0.90) : Colors.white,
+                                              color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
                                               borderRadius: BorderRadius.circular(30),
                                               border: Border.all(
                                                 color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
@@ -1407,9 +1506,9 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                             padding: const EdgeInsets.symmetric(horizontal: 14),
                                             decoration: BoxDecoration(
                                               color: isDark
-                                                  ? const Color(0xFF18181B).withValues(alpha: (_selectedStageFilterIdx == null ? 0.50 : 0.90))
+                                                  ? const Color(0xFF1C1C1E).withValues(alpha: (_selectedStageFilterIdx == null ? 0.55 : 1.0))
                                                   : (_selectedStageFilterIdx == null
-                                                      ? Colors.white.withValues(alpha: 0.72)
+                                                      ? Colors.white.withValues(alpha: 0.75)
                                                       : Colors.white),
                                               borderRadius: BorderRadius.circular(30),
                                               border: Border.all(
@@ -1475,11 +1574,11 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                       // LAYER 1: DRAGGABLE SCROLLABLE SHEET PUTIH FULL KE BAWAH (Seperti Detail Classroom)
                       // ==========================================
                       DraggableScrollableSheet(
-                        initialChildSize: 0.50,
-                        minChildSize: 0.50,
+                        initialChildSize: 0.58,
+                        minChildSize: 0.58,
                         maxChildSize: 0.96,
                         snap: true,
-                        snapSizes: const [0.50, 0.96],
+                        snapSizes: const [0.58, 0.96],
                         builder: (context, scrollController) {
                           final bool showTugas = _selectedTypeFilter == 'all' || _selectedTypeFilter == 'tugas';
                           final bool showQuiz = _selectedTypeFilter == 'all' || _selectedTypeFilter == 'quiz';
@@ -1591,7 +1690,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                               height: 34,
                                               decoration: BoxDecoration(
                                                 shape: BoxShape.circle,
-                                                color: const Color(0xFF0F172A),
+                                                color: const Color(0xFF7C3AED),
                                                 boxShadow: [
                                                   BoxShadow(
                                                     color: Colors.black.withValues(alpha: 0.14),
@@ -1658,15 +1757,15 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                                   ),
                                                   child: Row(
                                                     children: [
-                                                      // Kolom 1: Nama Siswa (Ungu, Lebar 200)
+                                                      // Kolom 1: Nama Siswa (Ungu Core 01, Lebar 200)
                                                       Container(
                                                         width: 200,
                                                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
                                                         decoration: BoxDecoration(
-                                                          color: const Color(0xFFD6A5F8),
+                                                          color: isDark ? const Color(0xFF6B3BA3) : const Color(0xFF7C3AED),
                                                           border: Border(
                                                             right: BorderSide(
-                                                              color: Colors.black.withValues(alpha: 0.08),
+                                                              color: Colors.black.withValues(alpha: 0.12),
                                                               width: 1,
                                                             ),
                                                           ),
@@ -1676,20 +1775,20 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                                           style: GoogleFonts.plusJakartaSans(
                                                             fontSize: 14.0,
                                                             fontWeight: FontWeight.w800,
-                                                            color: const Color(0xFF0F172A),
+                                                            color: Colors.white,
                                                           ),
                                                         ),
                                                       ),
-                                                      // Kolom 2: Progress (Biru, Lebar 90)
+                                                      // Kolom 2: Progress (Biru Sky Blue 02, Lebar 90)
                                                       Container(
                                                         width: 90,
                                                         padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 12),
                                                         decoration: BoxDecoration(
-                                                          color: const Color(0xFFBAE6FD),
+                                                          color: isDark ? const Color(0xFF2864A8) : const Color(0xFF2563EB),
                                                           border: (showTugas || showQuiz)
                                                               ? Border(
                                                                   right: BorderSide(
-                                                                    color: Colors.black.withValues(alpha: 0.08),
+                                                                    color: Colors.black.withValues(alpha: 0.12),
                                                                     width: 1,
                                                                   ),
                                                                 )
@@ -1701,23 +1800,23 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                                           style: GoogleFonts.plusJakartaSans(
                                                             fontSize: 14.0,
                                                             fontWeight: FontWeight.w800,
-                                                            color: const Color(0xFF0F172A),
+                                                            color: Colors.white,
                                                           ),
                                                         ),
                                                       ),
-                                                      // Kolom 3..7: Tugas 1 s/d 5 (Toska, 5 x 70)
+                                                      // Kolom 3..7: Tugas 1 s/d 5 (Toska Emerald 03, 5 x 70)
                                                       if (showTugas)
                                                         ...List.generate(5, (i) {
                                                           return Container(
                                                             width: 70,
                                                             padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 12),
                                                             decoration: BoxDecoration(
-                                                              color: const Color(0xFF99F6E4),
+                                                              color: isDark ? const Color(0xFF147D75) : const Color(0xFF0D9488),
                                                               border: (i == 4 && !showQuiz)
                                                                   ? null
                                                                   : Border(
                                                                       right: BorderSide(
-                                                                        color: Colors.black.withValues(alpha: 0.08),
+                                                                        color: Colors.black.withValues(alpha: 0.12),
                                                                         width: 1,
                                                                       ),
                                                                     ),
@@ -1729,24 +1828,24 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                                               style: GoogleFonts.plusJakartaSans(
                                                                 fontSize: 14.0,
                                                                 fontWeight: FontWeight.w800,
-                                                                color: const Color(0xFF0F172A),
+                                                                color: Colors.white,
                                                               ),
                                                             ),
                                                           );
                                                         }),
-                                                      // Kolom 8..12: Quiz 1 s/d 5 (Kuning Pastel, 5 x 70)
+                                                      // Kolom 8..12: Quiz 1 s/d 5 (Orange Amber 04, 5 x 70)
                                                       if (showQuiz)
                                                         ...List.generate(5, (i) {
                                                           return Container(
                                                             width: 70,
                                                             padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 12),
                                                             decoration: BoxDecoration(
-                                                              color: const Color(0xFFFDE68A),
+                                                              color: isDark ? const Color(0xFFC76D10) : const Color(0xFFEA580C),
                                                               border: i == 4
                                                                   ? null
                                                                   : Border(
                                                                       right: BorderSide(
-                                                                        color: Colors.black.withValues(alpha: 0.08),
+                                                                        color: Colors.black.withValues(alpha: 0.12),
                                                                         width: 1,
                                                                       ),
                                                                     ),
@@ -1758,7 +1857,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                                               style: GoogleFonts.plusJakartaSans(
                                                                 fontSize: 14.0,
                                                                 fontWeight: FontWeight.w800,
-                                                                color: const Color(0xFF0F172A),
+                                                                color: Colors.white,
                                                               ),
                                                             ),
                                                           );
@@ -1863,7 +1962,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                                                         : (isDark ? const Color(0xFF16161B) : const Color(0xFFFAFAFA)),
                                                                     child: InkWell(
                                                                       onTap: joined
-                                                                          ? () => _showStudentSubmissionDetailsSheet(context, sName, sUid, stages)
+                                                                          ? () => _showStudentSubmissionDetailsSheet(context, sName, sUid, stages, defaultAvatar: sAvatar)
                                                                           : null,
                                                                       child: Row(
                                                                         crossAxisAlignment: CrossAxisAlignment.center,
@@ -2052,22 +2151,24 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                                                                             width: 24,
                                                                                             height: 24,
                                                                                             decoration: BoxDecoration(
-                                                                                              color: isDone ? const Color(0xFFDCFCE7) : const Color(0xFFF1F5F9),
+                                                                                              color: isDone
+                                                                                                  ? (isDark ? const Color(0xFF064E3B) : const Color(0xFFDCFCE7))
+                                                                                                  : (isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9)),
                                                                                               borderRadius: BorderRadius.circular(6),
                                                                                               border: Border.all(
-                                                                                                color: isDone ? const Color(0xFF10B981) : Colors.black12,
+                                                                                                color: isDone ? const Color(0xFF10B981) : (isDark ? const Color(0xFF3F3F46) : Colors.black12),
                                                                                                 width: 1,
                                                                                               ),
                                                                                             ),
                                                                                             alignment: Alignment.center,
                                                                                             child: isDone
-                                                                                                ? const Icon(Icons.check_rounded, size: 13, color: Color(0xFF15803D))
+                                                                                                ? Icon(Icons.check_rounded, size: 13, color: isDark ? const Color(0xFF6EE7B7) : const Color(0xFF15803D))
                                                                                                 : Text(
                                                                                                     '-',
                                                                                                     style: GoogleFonts.plusJakartaSans(
                                                                                                       fontSize: 14.0,
                                                                                                       fontWeight: FontWeight.bold,
-                                                                                                      color: Colors.black38,
+                                                                                                      color: isDark ? const Color(0xFF71717A) : Colors.black38,
                                                                                                     ),
                                                                                                   ),
                                                                                           ),
@@ -2115,10 +2216,12 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                                                                           width: 32,
                                                                                           height: 24,
                                                                                           decoration: BoxDecoration(
-                                                                                            color: isFinished ? const Color(0xFFFFF7ED) : const Color(0xFFF1F5F9),
+                                                                                            color: isFinished
+                                                                                                ? (isDark ? const Color(0xFF451A03) : const Color(0xFFFFF7ED))
+                                                                                                : (isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9)),
                                                                                             borderRadius: BorderRadius.circular(6),
                                                                                             border: Border.all(
-                                                                                              color: isFinished ? const Color(0xFFEA580C) : Colors.black12,
+                                                                                              color: isFinished ? (isDark ? const Color(0xFFF97316) : const Color(0xFFEA580C)) : (isDark ? const Color(0xFF3F3F46) : Colors.black12),
                                                                                               width: 1,
                                                                                             ),
                                                                                           ),
@@ -2128,7 +2231,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                                                                             style: GoogleFonts.plusJakartaSans(
                                                                                               fontSize: 14.0,
                                                                                               fontWeight: FontWeight.bold,
-                                                                                              color: isFinished ? const Color(0xFFEA580C) : Colors.black45,
+                                                                                              color: isFinished ? (isDark ? const Color(0xFFFDBA74) : const Color(0xFFEA580C)) : (isDark ? const Color(0xFF71717A) : Colors.black45),
                                                                                             ),
                                                                                           ),
                                                                                         ),
@@ -2270,12 +2373,17 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
     BuildContext context,
     String studentName,
     String studentUid,
-    List stages,
-  ) {
+    List stages, {
+    String defaultAvatar = 'assets/icon_pack/avatar/avatar_2.png',
+  }) {
+    final bool isDark = HubnerApp.themeNotifier.value == 'Gelap' ||
+        HubnerApp.themeNotifier.value == 'Hitam' ||
+        Theme.of(context).brightness == Brightness.dark;
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.white,
+      backgroundColor: isDark ? const Color(0xFF18181B) : Colors.white,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
       ),
@@ -2334,49 +2442,117 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
 
             return Padding(
               padding: EdgeInsets.only(
-                top: 24,
-                left: 24,
-                right: 24,
+                top: 20,
+                left: 20,
+                right: 20,
                 bottom: 24 + safeBottom,
               ),
               child: ConstrainedBox(
-                constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.75),
+                constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.78),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Center(
                       child: Container(
-                        width: 48,
+                        width: 44,
                         height: 5,
                         decoration: BoxDecoration(
-                          color: const Color(0xFFE2E8F0),
+                          color: isDark ? const Color(0xFF3F3F46) : const Color(0xFFE2E8F0),
                           borderRadius: BorderRadius.circular(10),
                         ),
                       ),
                     ),
-                    const SizedBox(height: 20),
-                    Text(
-                      'Detail Aktivitas Siswa',
-                      style: GoogleFonts.plusJakartaSans(fontSize: 18.7, fontWeight: FontWeight.bold, color: Colors.black87),
-                    ),
-                    Text(
-                      studentName,
-                      style: GoogleFonts.plusJakartaSans(fontSize: 15.2, fontWeight: FontWeight.w600, color: Colors.black45),
+                    const SizedBox(height: 18),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Container(
+                          width: 44,
+                          height: 44,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: _getAvatarColor(studentName),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.08),
+                                blurRadius: 6,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: StudentAvatarWidget(
+                            uid: studentUid,
+                            defaultAvatar: defaultAvatar,
+                            studentName: studentName,
+                            joined: true,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Detail Aktivitas Siswa',
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 17.5,
+                                  fontWeight: FontWeight.w800,
+                                  color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                  letterSpacing: -0.2,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                studentName,
+                                style: GoogleFonts.dmSans(
+                                  fontSize: 14.5,
+                                  fontWeight: FontWeight.w600,
+                                  color: isDark ? const Color(0xFFD4D4D8) : const Color(0xFF475569),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                          decoration: BoxDecoration(
+                            color: isDark ? const Color(0xFF064E3B) : const Color(0xFFDCFCE7),
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: isDark
+                                  ? const Color(0xFF10B981).withValues(alpha: 0.35)
+                                  : const Color(0xFF10B981).withValues(alpha: 0.2),
+                            ),
+                          ),
+                          child: Text(
+                            '${completedTasks.length}/${activities.length} Selesai',
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 12.5,
+                              fontWeight: FontWeight.bold,
+                              color: isDark ? const Color(0xFF6EE7B7) : const Color(0xFF15803D),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 16),
-                    const Divider(height: 1, color: Color(0xFFF1F5F9)),
-                    const SizedBox(height: 12),
+                    Divider(height: 1, color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9)),
+                    const SizedBox(height: 14),
                     Expanded(
                       child: activities.isEmpty
                           ? Center(
                               child: Text(
                                 'Belum ada kegiatan di classroom ini.',
-                                style: GoogleFonts.dmSans(fontSize: 14, color: Colors.black38),
+                                style: GoogleFonts.dmSans(
+                                  fontSize: 14.5,
+                                  color: isDark ? const Color(0xFF71717A) : const Color(0xFF94A3B8),
+                                ),
                               ),
                             )
                           : ListView.separated(
                               shrinkWrap: true,
+                              physics: const BouncingScrollPhysics(),
                               itemCount: activities.length,
                               separatorBuilder: (context, index) => const SizedBox(height: 10),
                               itemBuilder: (context, index) {
@@ -2394,24 +2570,82 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       if (textAns.isNotEmpty) ...[
-                                        const SizedBox(height: 4),
-                                        Text('Jawaban: "$textAns"', style: GoogleFonts.dmSans(fontSize: 14.0, fontStyle: FontStyle.italic, color: Colors.black87)),
+                                        const SizedBox(height: 6),
+                                        Container(
+                                          width: double.infinity,
+                                          padding: const EdgeInsets.all(10),
+                                          decoration: BoxDecoration(
+                                            color: isDark ? const Color(0xFF18181B) : Colors.white,
+                                            borderRadius: BorderRadius.circular(10),
+                                            border: Border.all(
+                                              color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                                            ),
+                                          ),
+                                          child: Text(
+                                            'Jawaban: "$textAns"',
+                                            style: GoogleFonts.dmSans(
+                                              fontSize: 13.5,
+                                              fontStyle: FontStyle.italic,
+                                              color: isDark ? const Color(0xFFE4E4E7) : const Color(0xFF334155),
+                                            ),
+                                          ),
+                                        ),
                                       ],
                                       if (fileAns.isNotEmpty) ...[
-                                        const SizedBox(height: 4),
-                                        Row(
-                                          children: [
-                                            const Icon(Icons.attach_file_rounded, size: 12, color: Colors.blueAccent),
-                                            const SizedBox(width: 4),
-                                            Expanded(
-                                              child: Text(fileAns, style: GoogleFonts.plusJakartaSans(fontSize: 14.0, color: Colors.blueAccent, fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis),
+                                        const SizedBox(height: 6),
+                                        GestureDetector(
+                                          onTap: () async {
+                                            final uri = Uri.tryParse(fileAns);
+                                            if (uri != null && (fileAns.startsWith('http://') || fileAns.startsWith('https://'))) {
+                                              if (await canLaunchUrl(uri)) {
+                                                await launchUrl(uri, mode: LaunchMode.externalApplication);
+                                              }
+                                            }
+                                          },
+                                          child: Container(
+                                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                                            decoration: BoxDecoration(
+                                              color: isDark ? const Color(0xFF172554) : const Color(0xFFEFF6FF),
+                                              borderRadius: BorderRadius.circular(10),
+                                              border: Border.all(
+                                                color: isDark ? const Color(0xFF1E3A8A) : const Color(0xFFBFDBFE),
+                                              ),
                                             ),
-                                          ],
+                                            child: Row(
+                                              children: [
+                                                Icon(
+                                                  Icons.attach_file_rounded,
+                                                  size: 14,
+                                                  color: isDark ? const Color(0xFF93C5FD) : const Color(0xFF2563EB),
+                                                ),
+                                                const SizedBox(width: 6),
+                                                Expanded(
+                                                  child: Text(
+                                                    fileAns,
+                                                    style: GoogleFonts.plusJakartaSans(
+                                                      fontSize: 13.0,
+                                                      color: isDark ? const Color(0xFF93C5FD) : const Color(0xFF2563EB),
+                                                      fontWeight: FontWeight.bold,
+                                                      decoration: TextDecoration.underline,
+                                                    ),
+                                                    overflow: TextOverflow.ellipsis,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
                                         ),
                                       ],
                                       if (textAns.isEmpty && fileAns.isEmpty) ...[
                                         const SizedBox(height: 4),
-                                        Text('Belum mengumpulkan jawaban', style: GoogleFonts.dmSans(fontSize: 14.0, color: Colors.black38)),
+                                        Text(
+                                          'Belum mengumpulkan jawaban',
+                                          style: GoogleFonts.dmSans(
+                                            fontSize: 13.0,
+                                            color: isDark ? const Color(0xFF71717A) : const Color(0xFF94A3B8),
+                                            fontStyle: FontStyle.italic,
+                                          ),
+                                        ),
                                       ]
                                     ],
                                   );
@@ -2426,16 +2660,46 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                           crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
                                             if (score != null)
-                                              Text('Nilai: $score / 100', style: GoogleFonts.plusJakartaSans(fontSize: 14.0, fontWeight: FontWeight.bold, color: Colors.orange[800]))
+                                              Container(
+                                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                                decoration: BoxDecoration(
+                                                  color: isDark ? const Color(0xFF451A03) : const Color(0xFFFFF7ED),
+                                                  borderRadius: BorderRadius.circular(8),
+                                                  border: Border.all(
+                                                    color: isDark ? const Color(0xFFC76D10).withValues(alpha: 0.4) : const Color(0xFFFDBA74),
+                                                  ),
+                                                ),
+                                                child: Text(
+                                                  'Nilai: $score / 100',
+                                                  style: GoogleFonts.plusJakartaSans(
+                                                    fontSize: 13.0,
+                                                    fontWeight: FontWeight.bold,
+                                                    color: isDark ? const Color(0xFFFDBA74) : const Color(0xFFC2410C),
+                                                  ),
+                                                ),
+                                              )
                                             else
-                                              Text('Belum mengerjakan kuis', style: GoogleFonts.plusJakartaSans(fontSize: 14.0, color: Colors.black38)),
+                                              Text(
+                                                'Belum mengerjakan kuis',
+                                                style: GoogleFonts.dmSans(
+                                                  fontSize: 13.0,
+                                                  color: isDark ? const Color(0xFF71717A) : const Color(0xFF94A3B8),
+                                                ),
+                                              ),
                                             if (isLocked) ...[
-                                              const SizedBox(height: 4),
+                                              const SizedBox(height: 6),
                                               Row(
                                                 children: [
-                                                  const Icon(Icons.lock_rounded, size: 12, color: Colors.redAccent),
+                                                  const Icon(Icons.lock_rounded, size: 13, color: Colors.redAccent),
                                                   const SizedBox(width: 4),
-                                                  Text('Kuis Terkunci (Keluar Aplikasi)', style: GoogleFonts.plusJakartaSans(fontSize: 14.0, color: Colors.redAccent, fontWeight: FontWeight.bold)),
+                                                  Text(
+                                                    'Kuis Terkunci (Keluar Aplikasi)',
+                                                    style: GoogleFonts.plusJakartaSans(
+                                                      fontSize: 12.5,
+                                                      color: Colors.redAccent,
+                                                      fontWeight: FontWeight.bold,
+                                                    ),
+                                                  ),
                                                 ],
                                               ),
                                             ]
@@ -2456,7 +2720,10 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                               });
                                               if (context.mounted) {
                                                 ScaffoldMessenger.of(context).showSnackBar(
-                                                  const SnackBar(content: Text('Kuis berhasil dibuka kembali!'), backgroundColor: Colors.green),
+                                                  const SnackBar(
+                                                    content: Text('Kuis berhasil dibuka kembali!'),
+                                                    backgroundColor: Color(0xFF10B981),
+                                                  ),
                                                 );
                                               }
                                             } catch (e) {
@@ -2470,22 +2737,31 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                           style: ElevatedButton.styleFrom(
                                             backgroundColor: Colors.redAccent,
                                             foregroundColor: Colors.white,
-                                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                                             elevation: 0,
                                           ),
-                                          child: Text('Buka Kunci', style: GoogleFonts.plusJakartaSans(fontSize: 14.0, fontWeight: FontWeight.bold)),
+                                          child: Text(
+                                            'Buka Kunci',
+                                            style: GoogleFonts.plusJakartaSans(
+                                              fontSize: 13.0,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
                                         ),
                                     ],
                                   );
                                 }
 
                                 return Container(
-                                  padding: const EdgeInsets.all(12),
+                                  padding: const EdgeInsets.all(14),
                                   decoration: BoxDecoration(
-                                    color: const Color(0xFFF8FAFC),
-                                    borderRadius: BorderRadius.circular(16),
-                                    border: Border.all(color: const Color(0xFFF1F5F9)),
+                                    color: isDark ? const Color(0xFF141416) : const Color(0xFFF8FAFC),
+                                    borderRadius: BorderRadius.circular(18),
+                                    border: Border.all(
+                                      color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                                      width: 1.0,
+                                    ),
                                   ),
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -2494,27 +2770,66 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                         children: [
                                           Expanded(
-                                            child: Text(
-                                              title,
-                                              style: GoogleFonts.plusJakartaSans(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.black87),
+                                            child: Row(
+                                              children: [
+                                                Icon(
+                                                  type == 'quiz' ? Icons.quiz_rounded : Icons.assignment_rounded,
+                                                  size: 17,
+                                                  color: type == 'quiz'
+                                                      ? const Color(0xFFEA580C)
+                                                      : (isDark ? const Color(0xFFD6A5F8) : const Color(0xFF7C3AED)),
+                                                ),
+                                                const SizedBox(width: 8),
+                                                Expanded(
+                                                  child: Text(
+                                                    title,
+                                                    style: GoogleFonts.plusJakartaSans(
+                                                      fontSize: 14.5,
+                                                      fontWeight: FontWeight.bold,
+                                                      color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
                                             ),
                                           ),
                                           Container(
-                                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                                             decoration: BoxDecoration(
-                                              color: isCompleted ? const Color(0xFFDCFCE7) : const Color(0xFFF1F5F9),
-                                              borderRadius: BorderRadius.circular(6),
+                                              color: isCompleted
+                                                  ? (isDark ? const Color(0xFF064E3B) : const Color(0xFFDCFCE7))
+                                                  : (isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9)),
+                                              borderRadius: BorderRadius.circular(8),
+                                              border: Border.all(
+                                                color: isCompleted
+                                                    ? (isDark ? const Color(0xFF10B981).withValues(alpha: 0.3) : const Color(0xFF10B981).withValues(alpha: 0.2))
+                                                    : (isDark ? const Color(0xFF3F3F46) : const Color(0xFFE2E8F0)),
+                                              ),
                                             ),
                                             child: Text(
                                               isCompleted ? 'Selesai' : 'Belum',
-                                              style: GoogleFonts.plusJakartaSans(fontSize: 14.0, fontWeight: FontWeight.bold, color: isCompleted ? Colors.green[800] : Colors.black45),
+                                              style: GoogleFonts.plusJakartaSans(
+                                                fontSize: 12.0,
+                                                fontWeight: FontWeight.bold,
+                                                color: isCompleted
+                                                    ? (isDark ? const Color(0xFF6EE7B7) : const Color(0xFF15803D))
+                                                    : (isDark ? const Color(0xFF71717A) : const Color(0xFF94A3B8)),
+                                              ),
                                             ),
                                           ),
                                         ],
                                       ),
-                                      Text(
-                                        '${act['stageName']} > ${act['materiTitle']}',
-                                        style: GoogleFonts.dmSans(fontSize: 14.0, color: Colors.black38),
+                                      const SizedBox(height: 4),
+                                      Padding(
+                                        padding: const EdgeInsets.only(left: 25.0),
+                                        child: Text(
+                                          '${act['stageName']} > ${act['materiTitle']}',
+                                          style: GoogleFonts.dmSans(
+                                            fontSize: 12.5,
+                                            color: isDark ? const Color(0xFF71717A) : const Color(0xFF64748B),
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
                                       ),
                                       const SizedBox(height: 6),
                                       detailWidget,
@@ -2633,7 +2948,7 @@ class _BouncyMenuSliderCardState extends State<_BouncyMenuSliderCard> with Singl
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 14.0,
                       fontWeight: FontWeight.bold,
-                      color: const Color(0xFF0F172A),
+                      color: const Color(0xFF7C3AED),
                       height: 1.15,
                     ),
                   ),
@@ -2674,32 +2989,24 @@ class _SoftAnimatedPatternPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final whiteDotPaint = Paint()
-      ..color = Colors.white.withValues(alpha: isDark ? 0.35 : 0.12)
+      ..color = Colors.white.withValues(alpha: isDark ? 0.15 : 0.12)
       ..style = PaintingStyle.fill;
 
     final greyDotPaint = Paint()
-      ..color = isDark
-          ? const Color(0xFF475569).withValues(alpha: 0.20)
-          : Colors.white.withValues(alpha: 0.08)
+      ..color = Colors.white.withValues(alpha: isDark ? 0.08 : 0.08)
       ..style = PaintingStyle.fill;
 
     final blackDotPaint = Paint()
-      ..color = isDark
-          ? Colors.black.withValues(alpha: 0.22)
-          : Colors.white.withValues(alpha: 0.05)
+      ..color = Colors.white.withValues(alpha: isDark ? 0.04 : 0.05)
       ..style = PaintingStyle.fill;
 
     final ringPaint = Paint()
-      ..color = isDark
-          ? Colors.white.withValues(alpha: 0.30)
-          : Colors.white.withValues(alpha: 0.08)
+      ..color = Colors.white.withValues(alpha: isDark ? 0.10 : 0.08)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.4;
 
     final blackRingPaint = Paint()
-      ..color = isDark
-          ? Colors.black.withValues(alpha: 0.16)
-          : Colors.white.withValues(alpha: 0.04)
+      ..color = Colors.white.withValues(alpha: isDark ? 0.05 : 0.04)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2.0;
 
