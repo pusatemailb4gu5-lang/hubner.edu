@@ -7511,109 +7511,126 @@ class _HomeSearchAndNotesRowState extends State<_HomeSearchAndNotesRow> {
         );
       },
       child: _isExpanded
-          ? Container(
+          ? Row(
               key: const ValueKey('home_search_bar_expanded'),
-              height: 48,
-              padding: const EdgeInsets.symmetric(horizontal: 14),
-              decoration: BoxDecoration(
-                color: isDark ? const Color(0xFF18181B) : Colors.white,
-                borderRadius: BorderRadius.circular(28),
-                border: Border.all(
-                  color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
-                  width: 1.2,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.05),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.search_rounded,
-                    color: isDark ? Colors.white60 : Colors.black45,
-                    size: 20,
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: TextField(
-                      key: const ValueKey('home_search_input'),
-                      controller: _controller,
-                      focusNode: _focusNode,
-                      keyboardType: TextInputType.text,
-                      textInputAction: TextInputAction.search,
-                      autofocus: false,
-                      onChanged: (val) {
-                        setState(() {});
-                        _onChanged(val);
-                      },
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 14,
-                        color: isDark ? Colors.white : Colors.black87,
+              children: [
+                // Text box pencarian model input id gabung
+                Expanded(
+                  child: Container(
+                    height: 44,
+                    padding: const EdgeInsets.symmetric(horizontal: 14),
+                    decoration: BoxDecoration(
+                      color: isDark ? const Color(0xFF18181B) : Colors.white,
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(
+                        color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                        width: 1.2,
                       ),
-                      decoration: InputDecoration(
-                        hintText: 'Cari kelas atau materi...',
-                        hintStyle: GoogleFonts.dmSans(
-                          color: isDark ? Colors.white38 : Colors.black38,
-                          fontSize: 14,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.04),
+                          blurRadius: 6,
+                          offset: const Offset(0, 2),
                         ),
-                        border: InputBorder.none,
-                        isDense: true,
-                        contentPadding: const EdgeInsets.symmetric(vertical: 10),
-                      ),
+                      ],
                     ),
-                  ),
-                  if (_controller.text.isNotEmpty)
-                    GestureDetector(
-                      onTap: () {
-                        _controller.clear();
-                        setState(() {});
-                        widget.onSearchChanged('');
-                      },
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 6),
-                        child: Icon(
-                          Icons.clear_rounded,
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.search_rounded,
                           color: isDark ? Colors.white60 : Colors.black45,
                           size: 18,
                         ),
-                      ),
-                    ),
-                  GestureDetector(
-                    onTap: _collapse,
-                    behavior: HitTestBehavior.opaque,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                      decoration: BoxDecoration(
-                        color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            Icons.close_rounded,
-                            size: 13,
-                            color: isDark ? Colors.white70 : Colors.black54,
-                          ),
-                          const SizedBox(width: 3),
-                          Text(
-                            'Tutup',
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: TextField(
+                            key: const ValueKey('home_search_input'),
+                            controller: _controller,
+                            focusNode: _focusNode,
+                            keyboardType: TextInputType.text,
+                            textInputAction: TextInputAction.search,
+                            autofocus: false,
+                            onChanged: (val) {
+                              setState(() {});
+                              _onChanged(val);
+                            },
                             style: GoogleFonts.plusJakartaSans(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                              color: isDark ? Colors.white70 : Colors.black54,
+                              fontSize: 13.5,
+                              color: isDark ? Colors.white : Colors.black87,
+                            ),
+                            decoration: InputDecoration(
+                              hintText: 'Cari kelas / materi...',
+                              hintStyle: GoogleFonts.dmSans(
+                                color: isDark ? Colors.white38 : Colors.black38,
+                                fontSize: 13.5,
+                              ),
+                              border: InputBorder.none,
+                              isDense: true,
+                              contentPadding: const EdgeInsets.symmetric(vertical: 8),
                             ),
                           ),
-                        ],
-                      ),
+                        ),
+                        if (_controller.text.isNotEmpty)
+                          GestureDetector(
+                            onTap: () {
+                              _controller.clear();
+                              setState(() {});
+                              widget.onSearchChanged('');
+                            },
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 4),
+                              child: Icon(
+                                Icons.clear_rounded,
+                                color: isDark ? Colors.white60 : Colors.black45,
+                                size: 16,
+                              ),
+                            ),
+                          ),
+                      ],
                     ),
                   ),
-                ],
-              ),
+                ),
+                const SizedBox(width: 8),
+
+                // Tombol Tutup warna hitam text putih frameless mirip tombol gabung di detail kelas
+                GestureDetector(
+                  onTap: _collapse,
+                  child: Container(
+                    height: 44,
+                    padding: const EdgeInsets.symmetric(horizontal: 14),
+                    decoration: BoxDecoration(
+                      color: isDark ? Colors.white : Colors.black,
+                      borderRadius: BorderRadius.circular(14),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.12),
+                          blurRadius: 4,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.close_rounded,
+                          size: 15,
+                          color: isDark ? Colors.black : Colors.white,
+                        ),
+                        const SizedBox(width: 5),
+                        Text(
+                          'Tutup',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 13.5,
+                            fontWeight: FontWeight.bold,
+                            color: isDark ? Colors.black : Colors.white,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
             )
           : Row(
               key: const ValueKey('home_search_bar_collapsed'),

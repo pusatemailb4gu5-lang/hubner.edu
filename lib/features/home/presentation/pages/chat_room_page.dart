@@ -568,6 +568,9 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
       final Map<String, dynamic> updates = {
         'lastMessage': '$senderName mengirim gambar',
         'time': _formatCurrentTime(),
+        'hasMessages': true,
+        'hiddenForUids': [],
+        'clearedByUids': [],
       };
       for (var mUid in memberUids) {
         if (mUid != user.uid) {
@@ -707,6 +710,9 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
       final Map<String, dynamic> updates = {
         'lastMessage': '$senderName: $text',
         'time': _formatCurrentTime(),
+        'hasMessages': true,
+        'hiddenForUids': [],
+        'clearedByUids': [],
       };
       
       for (var mUid in memberUids) {
