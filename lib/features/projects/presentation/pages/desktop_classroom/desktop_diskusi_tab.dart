@@ -4,9 +4,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:hubner/core/widgets/three_dots_loader.dart';
+import 'package:hubner/main.dart' show HubnerApp;
 import 'package:hubner/features/home/presentation/pages/chat_room_page.dart';
 import 'package:hubner/features/home/presentation/pages/manage_friends_page.dart';
-import 'package:hubner/features/projects/presentation/pages/desktop_classroom_page.dart';
 
 class DesktopDiskusiTab extends StatefulWidget {
   final String currentProjectId;
@@ -25,7 +25,6 @@ class DesktopDiskusiTab extends StatefulWidget {
 class _DesktopDiskusiTabState extends State<DesktopDiskusiTab> {
   String? _selectedDiscussionId;
   String _selectedChannelName = '';
-  String _selectedTitle = '';
   String _searchQuery = '';
 
   Future<List<Map<String, dynamic>>> _loadProjectMembers(String projectId) async {
@@ -42,13 +41,14 @@ class _DesktopDiskusiTabState extends State<DesktopDiskusiTab> {
     }).toList();
   }
 
-  void _showCreateDiscussionDialog(BuildContext context) {
+  void _showCreateDiscussionDialog(BuildContext context, {required bool isDark}) {
     final channelController = TextEditingController();
     final titleController = TextEditingController();
     List<Map<String, dynamic>> projectMembers = [];
     List<String> selectedMemberUids = [];
     String selectedAvatar = 'assets/icon_pack/chat/chat_1.png';
     bool isLoadingMembers = true;
+    bool createDriveFolder = false;
 
     final currentUid = FirebaseAuth.instance.currentUser?.uid ?? '';
     selectedMemberUids.add(currentUid);
@@ -65,7 +65,7 @@ class _DesktopDiskusiTabState extends State<DesktopDiskusiTab> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.white,
+      backgroundColor: isDark ? const Color(0xFF18181B) : Colors.white,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
       ),
@@ -89,7 +89,7 @@ class _DesktopDiskusiTabState extends State<DesktopDiskusiTab> {
                         width: 48,
                         height: 5,
                         decoration: BoxDecoration(
-                          color: const Color(0xFFE2E8F0),
+                          color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
                           borderRadius: BorderRadius.circular(10),
                         ),
                       ),
@@ -100,7 +100,7 @@ class _DesktopDiskusiTabState extends State<DesktopDiskusiTab> {
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 21.1,
                         fontWeight: FontWeight.bold,
-                        color: Colors.black,
+                        color: isDark ? Colors.white : Colors.black,
                       ),
                     ),
                     const SizedBox(height: 18),
@@ -109,8 +109,8 @@ class _DesktopDiskusiTabState extends State<DesktopDiskusiTab> {
                     Container(
                       padding: const EdgeInsets.all(14),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF0F766E),
-                        borderRadius: BorderRadius.circular(14),
+                        color: isDark ? const Color(0xFF147D75) : const Color(0xFF0F766E),
+                        borderRadius: BorderRadius.circular(16),
                       ),
                       child: Row(
                         children: [
@@ -130,7 +130,7 @@ class _DesktopDiskusiTabState extends State<DesktopDiskusiTab> {
                                 Text(
                                   'Grup Kelas',
                                   style: GoogleFonts.dmSans(
-                                    fontSize: 14.0,
+                                    fontSize: 13.0,
                                     fontWeight: FontWeight.w500,
                                     color: Colors.white.withValues(alpha: 0.7),
                                   ),
@@ -139,7 +139,7 @@ class _DesktopDiskusiTabState extends State<DesktopDiskusiTab> {
                                 Text(
                                   widget.currentProjectTitle,
                                   style: GoogleFonts.plusJakartaSans(
-                                    fontSize: 16.4,
+                                    fontSize: 16.0,
                                     fontWeight: FontWeight.bold,
                                     color: Colors.white,
                                   ),
@@ -154,7 +154,11 @@ class _DesktopDiskusiTabState extends State<DesktopDiskusiTab> {
                     const SizedBox(height: 16),
                     Text(
                       'Anggota Diskusi',
-                      style: GoogleFonts.plusJakartaSans(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.black54),
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: isDark ? Colors.white70 : Colors.black54,
+                      ),
                     ),
                     const SizedBox(height: 8),
                     if (isLoadingMembers)
@@ -163,15 +167,22 @@ class _DesktopDiskusiTabState extends State<DesktopDiskusiTab> {
                       Container(
                         constraints: const BoxConstraints(maxHeight: 180),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFF8FAFC),
+                          color: isDark ? const Color(0xFF141416) : const Color(0xFFF8FAFC),
                           borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: const Color(0xFFF1F5F9)),
+                          border: Border.all(color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9)),
                         ),
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             ListTile(
-                              title: Text('Pilih Semua', style: GoogleFonts.plusJakartaSans(fontSize: 14, fontWeight: FontWeight.bold)),
+                              title: Text(
+                                'Pilih Semua',
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                  color: isDark ? Colors.white : Colors.black87,
+                                ),
+                              ),
                               contentPadding: const EdgeInsets.symmetric(horizontal: 14),
                               trailing: AnimatedContainer(
                                 duration: const Duration(milliseconds: 200),
@@ -179,9 +190,13 @@ class _DesktopDiskusiTabState extends State<DesktopDiskusiTab> {
                                 height: 22,
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
-                                  color: (selectedMemberUids.length - 1 >= projectMembers.where((m) => m['uid'] != currentUid).length) ? Colors.black : Colors.transparent,
+                                  color: (selectedMemberUids.length - 1 >= projectMembers.where((m) => m['uid'] != currentUid).length)
+                                      ? const Color(0xFF7C3AED)
+                                      : Colors.transparent,
                                   border: Border.all(
-                                    color: (selectedMemberUids.length - 1 >= projectMembers.where((m) => m['uid'] != currentUid).length) ? Colors.black : Colors.black26,
+                                    color: (selectedMemberUids.length - 1 >= projectMembers.where((m) => m['uid'] != currentUid).length)
+                                        ? const Color(0xFF7C3AED)
+                                        : (isDark ? Colors.white38 : Colors.black26),
                                     width: 2,
                                   ),
                                 ),
@@ -207,13 +222,13 @@ class _DesktopDiskusiTabState extends State<DesktopDiskusiTab> {
                                 });
                               },
                             ),
-                            const Divider(color: Color(0xFFF1F5F9), height: 1),
+                            Divider(color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9), height: 1),
                             Expanded(
                               child: ListView.separated(
                                 shrinkWrap: true,
                                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
                                 itemCount: projectMembers.length,
-                                separatorBuilder: (context, index) => const Divider(color: Color(0xFFF1F5F9), height: 1),
+                                separatorBuilder: (context, index) => Divider(color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9), height: 1),
                                 itemBuilder: (context, idx) {
                                   final m = projectMembers[idx];
                                   final mUid = m['uid'] as String;
@@ -221,14 +236,27 @@ class _DesktopDiskusiTabState extends State<DesktopDiskusiTab> {
                                   final isChecked = selectedMemberUids.contains(mUid);
 
                                   return ListTile(
-                                    title: Text(m['name'], style: GoogleFonts.plusJakartaSans(fontSize: 14, fontWeight: FontWeight.w600)),
-                                    subtitle: Text('ID: ${m['userId']}', style: GoogleFonts.plusJakartaSans(fontSize: 14.0, color: Colors.black38)),
+                                    title: Text(
+                                      m['name'],
+                                      style: GoogleFonts.plusJakartaSans(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w600,
+                                        color: isDark ? Colors.white : Colors.black87,
+                                      ),
+                                    ),
+                                    subtitle: Text(
+                                      'ID: ${m['userId']}',
+                                      style: GoogleFonts.plusJakartaSans(
+                                        fontSize: 13.0,
+                                        color: isDark ? Colors.white38 : Colors.black38,
+                                      ),
+                                    ),
                                     leading: Container(
                                       width: 28,
                                       height: 28,
                                       decoration: BoxDecoration(
                                         shape: BoxShape.circle,
-                                        border: Border.all(color: Colors.black, width: 1),
+                                        border: Border.all(color: isDark ? const Color(0xFF27272A) : Colors.black, width: 1),
                                       ),
                                       child: ClipOval(
                                         child: Image.asset(m['avatar']),
@@ -241,9 +269,9 @@ class _DesktopDiskusiTabState extends State<DesktopDiskusiTab> {
                                       height: 22,
                                       decoration: BoxDecoration(
                                         shape: BoxShape.circle,
-                                        color: isChecked ? Colors.black : Colors.transparent,
+                                        color: isChecked ? const Color(0xFF7C3AED) : Colors.transparent,
                                         border: Border.all(
-                                          color: isChecked ? Colors.black : Colors.black26,
+                                          color: isChecked ? const Color(0xFF7C3AED) : (isDark ? Colors.white38 : Colors.black26),
                                           width: 2,
                                         ),
                                       ),
@@ -275,57 +303,81 @@ class _DesktopDiskusiTabState extends State<DesktopDiskusiTab> {
                     const SizedBox(height: 16),
                     Text(
                       'Nama Saluran (Channel)',
-                      style: GoogleFonts.plusJakartaSans(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.black54),
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: isDark ? Colors.white70 : Colors.black54,
+                      ),
                     ),
                     const SizedBox(height: 8),
                     TextField(
                       controller: channelController,
-                      style: GoogleFonts.dmSans(fontSize: 15.2),
+                      style: GoogleFonts.dmSans(
+                        fontSize: 15.2,
+                        color: isDark ? Colors.white : Colors.black87,
+                      ),
                       decoration: InputDecoration(
                         hintText: 'Contoh: #diskusi-materi',
-                        hintStyle: GoogleFonts.dmSans(color: Colors.black26, fontSize: 15.2),
+                        hintStyle: GoogleFonts.dmSans(
+                          color: isDark ? Colors.white38 : Colors.black26,
+                          fontSize: 15.2,
+                        ),
                         filled: true,
-                        fillColor: const Color(0xFFF8FAFC),
+                        fillColor: isDark ? const Color(0xFF141416) : const Color(0xFFF8FAFC),
                         contentPadding: const EdgeInsets.all(16),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(16),
-                          borderSide: const BorderSide(color: Color(0xFFF1F5F9)),
+                          borderSide: BorderSide(color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9)),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(16),
-                          borderSide: const BorderSide(color: Colors.black),
+                          borderSide: const BorderSide(color: Color(0xFF7C3AED), width: 1.5),
                         ),
                       ),
                     ),
                     const SizedBox(height: 16),
                     Text(
                       'Judul Diskusi',
-                      style: GoogleFonts.plusJakartaSans(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.black54),
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: isDark ? Colors.white70 : Colors.black54,
+                      ),
                     ),
                     const SizedBox(height: 8),
                     TextField(
                       controller: titleController,
-                      style: GoogleFonts.dmSans(fontSize: 15.2),
+                      style: GoogleFonts.dmSans(
+                        fontSize: 15.2,
+                        color: isDark ? Colors.white : Colors.black87,
+                      ),
                       decoration: InputDecoration(
                         hintText: 'Contoh: Diskusi Belajar Kelas',
-                        hintStyle: GoogleFonts.dmSans(color: Colors.black26, fontSize: 15.2),
+                        hintStyle: GoogleFonts.dmSans(
+                          color: isDark ? Colors.white38 : Colors.black26,
+                          fontSize: 15.2,
+                        ),
                         filled: true,
-                        fillColor: const Color(0xFFF8FAFC),
+                        fillColor: isDark ? const Color(0xFF141416) : const Color(0xFFF8FAFC),
                         contentPadding: const EdgeInsets.all(16),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(16),
-                          borderSide: const BorderSide(color: Color(0xFFF1F5F9)),
+                          borderSide: BorderSide(color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9)),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(16),
-                          borderSide: const BorderSide(color: Colors.black),
+                          borderSide: const BorderSide(color: Color(0xFF7C3AED), width: 1.5),
                         ),
                       ),
                     ),
                     const SizedBox(height: 16),
                     Text(
                       'Pilih Avatar Diskusi',
-                      style: GoogleFonts.plusJakartaSans(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.black54),
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: isDark ? Colors.white70 : Colors.black54,
+                      ),
                     ),
                     const SizedBox(height: 8),
                     SizedBox(
@@ -350,8 +402,10 @@ class _DesktopDiskusiTabState extends State<DesktopDiskusiTab> {
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
                                   border: Border.all(
-                                    color: isSelected ? Colors.black : const Color(0xFFE2E8F0),
-                                    width: isSelected ? 2.0 : 1.0,
+                                    color: isSelected
+                                        ? const Color(0xFF7C3AED)
+                                        : (isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0)),
+                                    width: isSelected ? 2.5 : 1.0,
                                   ),
                                 ),
                                 child: ClipOval(
@@ -363,6 +417,69 @@ class _DesktopDiskusiTabState extends State<DesktopDiskusiTab> {
                         },
                       ),
                     ),
+                    const SizedBox(height: 16),
+                    // Opsi Buat Folder Penyimpanan Data
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                      decoration: BoxDecoration(
+                        color: isDark ? const Color(0xFF141416) : const Color(0xFFF8FAFC),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 38,
+                            height: 38,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF7C3AED).withValues(alpha: 0.12),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.folder_shared_rounded,
+                              color: Color(0xFF7C3AED),
+                              size: 20,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Folder Penyimpanan Data',
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontSize: 13.5,
+                                    fontWeight: FontWeight.bold,
+                                    color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                  ),
+                                ),
+                                Text(
+                                  'Buat folder arsip berkas grup otomatis',
+                                  style: GoogleFonts.dmSans(
+                                    fontSize: 11.5,
+                                    color: isDark ? Colors.white60 : const Color(0xFF64748B),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Switch(
+                            value: createDriveFolder,
+                            activeThumbColor: Colors.white,
+                            activeTrackColor: const Color(0xFF7C3AED),
+                            onChanged: (val) {
+                              setModalState(() {
+                                createDriveFolder = val;
+                              });
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+
                     const SizedBox(height: 24),
                     SizedBox(
                       width: double.infinity,
@@ -387,6 +504,7 @@ class _DesktopDiskusiTabState extends State<DesktopDiskusiTab> {
                             'time': 'Sekarang',
                             'memberUids': finalMembers,
                             'creatorUid': currentUid,
+                            'createDriveFolder': createDriveFolder,
                             'createdAt': FieldValue.serverTimestamp(),
                             'colorIndex': Random().nextInt(5),
                             'unreadCounts': {
@@ -399,7 +517,6 @@ class _DesktopDiskusiTabState extends State<DesktopDiskusiTab> {
                             setState(() {
                               _selectedDiscussionId = newDocRef.id;
                               _selectedChannelName = chan.startsWith('#') ? chan : '#$chan';
-                              _selectedTitle = ttl;
                             });
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(content: Text('Diskusi baru berhasil dibuat!')),
@@ -407,7 +524,7 @@ class _DesktopDiskusiTabState extends State<DesktopDiskusiTab> {
                           }
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.black,
+                          backgroundColor: const Color(0xFF7C3AED),
                           foregroundColor: Colors.white,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(16),
@@ -434,336 +551,395 @@ class _DesktopDiskusiTabState extends State<DesktopDiskusiTab> {
   Widget build(BuildContext context) {
     final currentUid = FirebaseAuth.instance.currentUser?.uid ?? '';
 
-    return Row(
-      children: [
-        // ─── 30% Left Panel: List of Discussion Threads for Current Classroom ───
-        Expanded(
-          flex: 30,
-          child: Container(
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              border: Border(
-                right: BorderSide(color: Color(0xFFE2E8F0), width: 1.5),
-              ),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Header (Title, Member Icon, + Create Button)
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 20, 16, 12),
-                  child: Row(
-                    children: [
-                      Text(
-                        'Diskusi',
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                          color: const Color(0xFF0F172A),
-                        ),
-                      ),
-                      const Spacer(),
-                      // Manage Friends / Members button
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (_) => const ManageFriendsPage()),
-                          );
-                        },
-                        child: Container(
-                          width: 40,
-                          height: 40,
-                          decoration: const BoxDecoration(
-                            color: Color(0xFFF1F5F9),
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(
-                            Icons.people_outline_rounded,
-                            color: Colors.black87,
-                            size: 20,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      // Create New Discussion Thread Button (+)
-                      GestureDetector(
-                        onTap: () => _showCreateDiscussionDialog(context),
-                        child: Container(
-                          width: 40,
-                          height: 40,
-                          decoration: const BoxDecoration(
-                            color: Colors.black,
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(
-                            Icons.add_rounded,
-                            color: Colors.white,
-                            size: 22,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+    return ValueListenableBuilder<String>(
+      valueListenable: HubnerApp.themeNotifier,
+      builder: (context, themeMode, _) {
+        final bool isDark = themeMode == 'Gelap' ||
+            themeMode == 'Hitam' ||
+            Theme.of(context).brightness == Brightness.dark;
 
-                // Search Bar
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
-                  child: TextField(
-                    onChanged: (val) => setState(() => _searchQuery = val.trim().toLowerCase()),
-                    decoration: InputDecoration(
-                      hintText: 'Cari thread diskusi...',
-                      hintStyle: GoogleFonts.dmSans(fontSize: 14.0, color: const Color(0xFF94A3B8)),
-                      prefixIcon: const Icon(Icons.search_rounded, size: 18, color: Color(0xFF64748B)),
-                      isDense: true,
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                      fillColor: const Color(0xFFF8FAFC),
-                      filled: true,
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(14),
-                        borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(14),
-                        borderSide: const BorderSide(color: Colors.black),
-                      ),
+        return Row(
+          children: [
+            // ─── 30% Left Panel: List of Discussion Threads for Current Classroom ───
+            Expanded(
+              flex: 30,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: isDark ? const Color(0xFF18181B) : Colors.white,
+                  border: Border(
+                    right: BorderSide(
+                      color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                      width: 1.5,
                     ),
                   ),
                 ),
-                const SizedBox(height: 8),
-                const Divider(height: 1, color: Color(0xFFF1F5F9)),
-
-                // Stream List of Discussions for this Project
-                Expanded(
-                  child: StreamBuilder<QuerySnapshot>(
-                    stream: FirebaseFirestore.instance
-                        .collection('discussions')
-                        .orderBy('createdAt', descending: true)
-                        .snapshots(),
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting && !snapshot.hasData) {
-                        return const SizedBox.shrink();
-                      }
-
-                      final docs = snapshot.data?.docs ?? [];
-                      
-                      // Filter docs by projectId and user membership
-                      final filteredDocs = docs.where((doc) {
-                        final data = doc.data() as Map<String, dynamic>;
-                        final docProjectId = data['projectId'] as String? ?? '';
-                        if (docProjectId != widget.currentProjectId) return false;
-
-                        final memberUids = data['memberUids'] as List?;
-                        if (memberUids != null && !memberUids.contains(currentUid)) {
-                          return false;
-                        }
-
-                        if (_searchQuery.isNotEmpty) {
-                          final title = (data['title'] ?? '').toString().toLowerCase();
-                          final channel = (data['channel'] ?? '').toString().toLowerCase();
-                          return title.contains(_searchQuery) || channel.contains(_searchQuery);
-                        }
-                        return true;
-                      }).toList();
-
-                      // Auto-select first thread if nothing selected or selected doc is gone
-                      if (filteredDocs.isNotEmpty) {
-                        final bool activeExists = filteredDocs.any((d) => d.id == _selectedDiscussionId);
-                        if (!activeExists) {
-                          WidgetsBinding.instance.addPostFrameCallback((_) {
-                            if (mounted) {
-                              final firstData = filteredDocs[0].data() as Map<String, dynamic>;
-                              setState(() {
-                                _selectedDiscussionId = filteredDocs[0].id;
-                                _selectedChannelName = firstData['channel'] ?? '#general';
-                                _selectedTitle = firstData['title'] ?? '';
-                              });
-                            }
-                          });
-                        }
-                      }
-
-                      if (filteredDocs.isEmpty) {
-                        return Center(
-                          child: Padding(
-                            padding: const EdgeInsets.all(24.0),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                const Icon(Icons.forum_outlined, size: 48, color: Color(0xFFCBD5E1)),
-                                const SizedBox(height: 12),
-                                Text(
-                                  _searchQuery.isEmpty
-                                      ? 'Belum ada thread diskusi untuk kelas ini.'
-                                      : 'Thread diskusi tidak ditemukan.',
-                                  textAlign: TextAlign.center,
-                                  style: GoogleFonts.dmSans(
-                                    fontSize: 14.0,
-                                    color: const Color(0xFF94A3B8),
-                                  ),
-                                ),
-                                const SizedBox(height: 16),
-                                ElevatedButton.icon(
-                                  onPressed: () => _showCreateDiscussionDialog(context),
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: const Color(0xFF7C3AED),
-                                    foregroundColor: Colors.white,
-                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                                  ),
-                                  icon: const Icon(Icons.add_rounded, size: 18),
-                                  label: Text('Buat Diskusi Baru', style: GoogleFonts.plusJakartaSans(fontSize: 14.0, fontWeight: FontWeight.bold)),
-                                ),
-                              ],
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Header (Title, Member Icon, + Create Button)
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 20, 16, 12),
+                      child: Row(
+                        children: [
+                          Text(
+                            'Diskusi',
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                              color: isDark ? Colors.white : const Color(0xFF0F172A),
                             ),
                           ),
-                        );
-                      }
-
-                      return ListView.separated(
-                        itemCount: filteredDocs.length,
-                        separatorBuilder: (_, __) => const Divider(height: 1, color: Color(0xFFF8FAFC)),
-                        itemBuilder: (context, index) {
-                          final docId = filteredDocs[index].id;
-                          final chat = filteredDocs[index].data() as Map<String, dynamic>;
-                          final channelName = chat['channel'] ?? '#general';
-                          final title = chat['title'] ?? 'Diskusi';
-                          final lastMsg = chat['lastMessage'] ?? '';
-                          final avatar = chat['avatar'] as String? ?? 'assets/icon_pack/chat/chat_1.png';
-                          final isSelected = docId == _selectedDiscussionId;
-
-                          final Map<String, dynamic>? unreadCounts = chat['unreadCounts'] as Map<String, dynamic>?;
-                          final int unreadCount = unreadCounts?[currentUid] as int? ?? 0;
-
-                          return InkWell(
+                          const Spacer(),
+                          // Manage Friends / Members button
+                          GestureDetector(
                             onTap: () {
-                              setState(() {
-                                _selectedDiscussionId = docId;
-                                _selectedChannelName = channelName;
-                                _selectedTitle = title;
-                              });
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (_) => const ManageFriendsPage()),
+                              );
                             },
-                            child: AnimatedContainer(
-                              duration: const Duration(milliseconds: 150),
-                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                            child: Container(
+                              width: 40,
+                              height: 40,
                               decoration: BoxDecoration(
-                                color: isSelected ? const Color(0xFFEFF6FF) : Colors.white,
-                                border: isSelected
-                                    ? const Border(left: BorderSide(color: Color(0xFF2563EB), width: 4))
-                                    : null,
+                                color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: isDark ? const Color(0xFF3F3F46) : const Color(0xFFE2E8F0),
+                                  width: 1.0,
+                                ),
                               ),
-                              child: Row(
-                                children: [
-                                  Container(
-                                    width: 44,
-                                    height: 44,
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      border: Border.all(color: const Color(0xFFE2E8F0), width: 1.0),
+                              child: Icon(
+                                Icons.people_outline_rounded,
+                                color: isDark ? Colors.white : Colors.black87,
+                                size: 20,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          // Create New Discussion Thread Button (+)
+                          GestureDetector(
+                            onTap: () => _showCreateDiscussionDialog(context, isDark: isDark),
+                            child: Container(
+                              width: 40,
+                              height: 40,
+                              decoration: const BoxDecoration(
+                                color: Color(0xFF7C3AED),
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.add_rounded,
+                                color: Colors.white,
+                                size: 22,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    // Search Bar
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
+                      child: TextField(
+                        onChanged: (val) => setState(() => _searchQuery = val.trim().toLowerCase()),
+                        style: GoogleFonts.dmSans(
+                          fontSize: 14.0,
+                          color: isDark ? Colors.white : const Color(0xFF0F172A),
+                        ),
+                        decoration: InputDecoration(
+                          hintText: 'Cari thread diskusi...',
+                          hintStyle: GoogleFonts.dmSans(
+                            fontSize: 14.0,
+                            color: isDark ? Colors.white38 : const Color(0xFF94A3B8),
+                          ),
+                          prefixIcon: Icon(
+                            Icons.search_rounded,
+                            size: 18,
+                            color: isDark ? Colors.white60 : const Color(0xFF64748B),
+                          ),
+                          isDense: true,
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                          fillColor: isDark ? const Color(0xFF141416) : const Color(0xFFF8FAFC),
+                          filled: true,
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(14),
+                            borderSide: BorderSide(
+                              color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                            ),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(14),
+                            borderSide: const BorderSide(color: Color(0xFF7C3AED), width: 1.5),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Divider(
+                      height: 1,
+                      color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+                    ),
+
+                    // Stream List of Discussions for this Project
+                    Expanded(
+                      child: StreamBuilder<QuerySnapshot>(
+                        stream: FirebaseFirestore.instance
+                            .collection('discussions')
+                            .orderBy('createdAt', descending: true)
+                            .snapshots(),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState == ConnectionState.waiting && !snapshot.hasData) {
+                            return const SizedBox.shrink();
+                          }
+
+                          final docs = snapshot.data?.docs ?? [];
+                          
+                          // Filter docs by projectId and user membership
+                          final filteredDocs = docs.where((doc) {
+                            final data = doc.data() as Map<String, dynamic>;
+                            final docProjectId = data['projectId'] as String? ?? '';
+                            if (docProjectId != widget.currentProjectId) return false;
+
+                            final memberUids = data['memberUids'] as List?;
+                            if (memberUids != null && !memberUids.contains(currentUid)) {
+                              return false;
+                            }
+
+                            if (_searchQuery.isNotEmpty) {
+                              final title = (data['title'] ?? '').toString().toLowerCase();
+                              final channel = (data['channel'] ?? '').toString().toLowerCase();
+                              return title.contains(_searchQuery) || channel.contains(_searchQuery);
+                            }
+                            return true;
+                          }).toList();
+
+                          // Auto-select first thread if nothing selected or selected doc is gone
+                          if (filteredDocs.isNotEmpty) {
+                            final bool activeExists = filteredDocs.any((d) => d.id == _selectedDiscussionId);
+                            if (!activeExists) {
+                              WidgetsBinding.instance.addPostFrameCallback((_) {
+                                if (mounted) {
+                                  final firstData = filteredDocs[0].data() as Map<String, dynamic>;
+                                  setState(() {
+                                    _selectedDiscussionId = filteredDocs[0].id;
+                                    _selectedChannelName = firstData['channel'] ?? '#general';
+                                  });
+                                }
+                              });
+                            }
+                          }
+
+                          if (filteredDocs.isEmpty) {
+                            return Center(
+                              child: Padding(
+                                padding: const EdgeInsets.all(24.0),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.forum_outlined,
+                                      size: 48,
+                                      color: isDark ? const Color(0xFF3F3F46) : const Color(0xFFCBD5E1),
                                     ),
-                                    child: ClipOval(
-                                      child: Image.asset(
-                                        avatar,
-                                        fit: BoxFit.cover,
-                                        errorBuilder: (ctx, err, st) => const Icon(Icons.forum_outlined),
+                                    const SizedBox(height: 12),
+                                    Text(
+                                      _searchQuery.isEmpty
+                                          ? 'Belum ada thread diskusi untuk kelas ini.'
+                                          : 'Thread diskusi tidak ditemukan.',
+                                      textAlign: TextAlign.center,
+                                      style: GoogleFonts.dmSans(
+                                        fontSize: 14.0,
+                                        color: isDark ? Colors.white60 : const Color(0xFF94A3B8),
                                       ),
                                     ),
-                                  ),
-                                  const SizedBox(width: 12),
-
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          channelName,
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: GoogleFonts.plusJakartaSans(
-                                            fontSize: 14,
-                                            fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
-                                            color: const Color(0xFF0F766E),
-                                          ),
-                                        ),
-                                        const SizedBox(height: 2),
-                                        Text(
-                                          title,
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: GoogleFonts.plusJakartaSans(
-                                            fontSize: 14.0,
-                                            fontWeight: FontWeight.w600,
-                                            color: const Color(0xFF0F172A),
-                                          ),
-                                        ),
-                                        const SizedBox(height: 2),
-                                        Text(
-                                          lastMsg,
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: GoogleFonts.dmSans(
-                                            fontSize: 14.0,
-                                            color: const Color(0xFF64748B),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-
-                                  if (unreadCount > 0) ...[
-                                    const SizedBox(width: 8),
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
-                                      decoration: BoxDecoration(
-                                        color: const Color(0xFF7C3AED),
-                                        borderRadius: BorderRadius.circular(12),
+                                    const SizedBox(height: 16),
+                                    ElevatedButton.icon(
+                                      onPressed: () => _showCreateDiscussionDialog(context, isDark: isDark),
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: const Color(0xFF7C3AED),
+                                        foregroundColor: Colors.white,
+                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                                       ),
-                                      child: Text(
-                                        '$unreadCount',
+                                      icon: const Icon(Icons.add_rounded, size: 18),
+                                      label: Text(
+                                        'Buat Diskusi Baru',
                                         style: GoogleFonts.plusJakartaSans(
                                           fontSize: 14.0,
                                           fontWeight: FontWeight.bold,
-                                          color: Colors.white,
                                         ),
                                       ),
                                     ),
                                   ],
-                                ],
+                                ),
                               ),
+                            );
+                          }
+
+                          return ListView.separated(
+                            itemCount: filteredDocs.length,
+                            separatorBuilder: (_, _) => Divider(
+                              height: 1,
+                              color: isDark ? const Color(0xFF27272A) : const Color(0xFFF8FAFC),
                             ),
+                            itemBuilder: (context, index) {
+                              final docId = filteredDocs[index].id;
+                              final chat = filteredDocs[index].data() as Map<String, dynamic>;
+                              final channelName = chat['channel'] ?? '#general';
+                              final title = chat['title'] ?? 'Diskusi';
+                              final lastMsg = chat['lastMessage'] ?? '';
+                              final avatar = chat['avatar'] as String? ?? 'assets/icon_pack/chat/chat_1.png';
+                              final isSelected = docId == _selectedDiscussionId;
+
+                              final Map<String, dynamic>? unreadCounts = chat['unreadCounts'] as Map<String, dynamic>?;
+                              final int unreadCount = unreadCounts?[currentUid] as int? ?? 0;
+
+                              return InkWell(
+                                onTap: () {
+                                  setState(() {
+                                    _selectedDiscussionId = docId;
+                                    _selectedChannelName = channelName;
+                                  });
+                                },
+                                child: AnimatedContainer(
+                                  duration: const Duration(milliseconds: 150),
+                                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                  decoration: BoxDecoration(
+                                    color: isSelected
+                                        ? (isDark ? const Color(0xFF2E1065) : const Color(0xFFEFF6FF))
+                                        : (isDark ? const Color(0xFF18181B) : Colors.white),
+                                    border: isSelected
+                                        ? Border(
+                                            left: BorderSide(
+                                              color: isDark ? const Color(0xFFA855F7) : const Color(0xFF7C3AED),
+                                              width: 4,
+                                            ),
+                                          )
+                                        : null,
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Container(
+                                        width: 44,
+                                        height: 44,
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          border: Border.all(
+                                            color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                                            width: 1.0,
+                                          ),
+                                        ),
+                                        child: ClipOval(
+                                          child: Image.asset(
+                                            avatar,
+                                            fit: BoxFit.cover,
+                                            errorBuilder: (ctx, err, st) => Icon(
+                                              Icons.forum_outlined,
+                                              color: isDark ? Colors.white60 : Colors.black54,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 12),
+
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              channelName,
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: GoogleFonts.plusJakartaSans(
+                                                fontSize: 13.0,
+                                                fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
+                                                color: isDark ? const Color(0xFF2DD4BF) : const Color(0xFF0F766E),
+                                              ),
+                                            ),
+                                            const SizedBox(height: 2),
+                                            Text(
+                                              title,
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: GoogleFonts.plusJakartaSans(
+                                                fontSize: 14.5,
+                                                fontWeight: FontWeight.w600,
+                                                color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                              ),
+                                            ),
+                                            const SizedBox(height: 2),
+                                            Text(
+                                              lastMsg,
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: GoogleFonts.dmSans(
+                                                fontSize: 13.5,
+                                                color: isDark ? const Color(0xFFD4D4D8) : const Color(0xFF64748B),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+
+                                      if (unreadCount > 0) ...[
+                                        const SizedBox(width: 8),
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                                          decoration: BoxDecoration(
+                                            color: const Color(0xFF7C3AED),
+                                            borderRadius: BorderRadius.circular(12),
+                                          ),
+                                          child: Text(
+                                            '$unreadCount',
+                                            style: GoogleFonts.plusJakartaSans(
+                                              fontSize: 12.0,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ],
+                                  ),
+                                ),
+                              );
+                            },
                           );
                         },
-                      );
-                    },
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-
-        // ─── 70% Right Panel: Embedded Group Chat Room Page ───
-        Expanded(
-          flex: 70,
-          child: Container(
-            color: Colors.white,
-            child: _selectedDiscussionId != null
-                ? ChatRoomPage(
-                    key: ValueKey(_selectedDiscussionId),
-                    discussionId: _selectedDiscussionId!,
-                    channelName: _selectedChannelName,
-                    projectId: widget.currentProjectId,
-                    isEmbedded: true,
-                  )
-                : Center(
-                    child: Text(
-                      'Pilih atau buat thread diskusi untuk memulai obrolan.',
-                      style: GoogleFonts.dmSans(fontSize: 14, color: const Color(0xFF94A3B8)),
+                      ),
                     ),
-                  ),
-          ),
-        ),
-      ],
+                  ],
+                ),
+              ),
+            ),
+
+            // ─── 70% Right Panel: Embedded Group Chat Room Page ───
+            Expanded(
+              flex: 70,
+              child: Container(
+                color: isDark ? const Color(0xFF000000) : Colors.white,
+                child: _selectedDiscussionId != null
+                    ? ChatRoomPage(
+                        key: ValueKey(_selectedDiscussionId),
+                        discussionId: _selectedDiscussionId!,
+                        channelName: _selectedChannelName,
+                        projectId: widget.currentProjectId,
+                        isEmbedded: true,
+                      )
+                    : Center(
+                        child: Text(
+                          'Pilih atau buat thread diskusi untuk memulai obrolan.',
+                          style: GoogleFonts.dmSans(
+                            fontSize: 14,
+                            color: isDark ? Colors.white38 : const Color(0xFF94A3B8),
+                          ),
+                        ),
+                      ),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }

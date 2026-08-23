@@ -294,18 +294,127 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
     return spans;
   }
 
-  Future<void> _showFolderSelectorDialog(String projectId) async {
+  Future<void> _showManualDriveLinkDialog(String pId, String discId) async {
+    final user = FirebaseAuth.instance.currentUser;
+    String userPubDriveUrl = '';
+    if (user != null) {
+      try {
+        final userDoc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
+        userPubDriveUrl = userDoc.data()?['publicDriveFolderUrl'] as String? ?? '';
+      } catch (_) {}
+    }
+
+    final folderController = TextEditingController(text: userPubDriveUrl);
+
+    if (!mounted) return;
+    final String? link = await showDialog<String>(
+      context: context,
+      builder: (dialogCtx) => AlertDialog(
+        backgroundColor: AppColors.isDarkMode ? const Color(0xFF18181B) : Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Row(
+          children: [
+            const Icon(Icons.folder_shared_rounded, color: Color(0xFF2563EB), size: 24),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                'Hubungkan Google Drive',
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.isDarkMode ? Colors.white : const Color(0xFF0F172A),
+                ),
+              ),
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Masukkan link folder Google Drive atau nama folder untuk obrolan ini:',
+              style: GoogleFonts.dmSans(
+                fontSize: 13,
+                color: AppColors.isDarkMode ? Colors.white70 : Colors.black87,
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: folderController,
+              autofocus: true,
+              style: GoogleFonts.dmSans(color: AppColors.isDarkMode ? Colors.white : Colors.black),
+              decoration: InputDecoration(
+                hintText: 'https://drive.google.com/drive/folders/...',
+                hintStyle: GoogleFonts.dmSans(color: AppColors.isDarkMode ? Colors.white30 : Colors.black26),
+                filled: true,
+                fillColor: AppColors.isDarkMode ? const Color(0xFF27272A) : const Color(0xFFF8FAFC),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogCtx),
+            child: Text('Batal', style: GoogleFonts.plusJakartaSans(color: Colors.black54)),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF2563EB),
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+            onPressed: () => Navigator.pop(dialogCtx, folderController.text.trim()),
+            child: Text('Simpan & Hubungkan', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
+
+    if (link != null && link.isNotEmpty) {
+      String folderId = link;
+      if (folderId.contains('folders/')) {
+        folderId = folderId.split('folders/').last.split('?').first.split('/').first;
+      }
+      final folderUrl = folderId.startsWith('http') ? folderId : 'https://drive.google.com/drive/folders/$folderId';
+
+      if (pId.isNotEmpty) {
+        await FirebaseFirestore.instance.collection('projects').doc(pId).update({
+          'driveFolderId': folderId,
+          'driveFolderUrl': folderUrl,
+        });
+      }
+      if (discId.isNotEmpty) {
+        await FirebaseFirestore.instance.collection('discussions').doc(discId).update({
+          'driveFolderId': folderId,
+          'driveFolderUrl': folderUrl,
+        });
+      }
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Folder Google Drive berhasil dihubungkan ke obrolan ini!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _showFolderSelectorDialog([String? targetProjectId]) async {
+    final String pId = targetProjectId ?? widget.projectId ?? '';
+    final String discId = _currentDiscussionId;
+
+    GoogleSignInAccount? account;
     try {
       try {
         await GoogleSignIn.instance.initialize(
           clientId: '441060738052-j0h3plr6ne53408dh25jdb7akh7fou09.apps.googleusercontent.com',
           serverClientId: '441060738052-j0h3plr6ne53408dh25jdb7akh7fou09.apps.googleusercontent.com',
         );
-      } catch (_) {
-        // Safe to ignore if already initialized
-      }
-
-      GoogleSignInAccount? account;
+      } catch (_) {}
 
       final attempt = GoogleSignIn.instance.attemptLightweightAuthentication();
       if (attempt != null) {
@@ -314,8 +423,17 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
       if (account == null) {
         account = await GoogleSignIn.instance.authenticate();
       }
-      if (account == null) return;
+    } catch (e) {
+      await _showManualDriveLinkDialog(pId, discId);
+      return;
+    }
 
+    if (account == null) {
+      await _showManualDriveLinkDialog(pId, discId);
+      return;
+    }
+
+    try {
       if (!mounted) return;
       showDialog(
         context: context,
@@ -359,7 +477,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          'Pilih Folder Google Drive Kelas',
+                          pId.isNotEmpty ? 'Pilih Folder Google Drive Kelas' : 'Pilih Folder Google Drive Obrolan',
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: 16.0,
                             fontWeight: FontWeight.bold,
@@ -417,12 +535,22 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                             final folderId = await GoogleDriveService.createClassroomFolder(accessToken, newFolderName);
                             
                             // Save to Firestore
-                            await FirebaseFirestore.instance.collection('projects').doc(projectId).update({
-                              'driveFolderId': folderId,
-                              'driveFolderUrl': 'https://drive.google.com/drive/folders/$folderId',
-                              'driveAccessToken': accessToken,
-                              'driveTokenExpiry': DateTime.now().add(const Duration(minutes: 55)).toIso8601String(),
-                            });
+                            if (pId.isNotEmpty) {
+                              await FirebaseFirestore.instance.collection('projects').doc(pId).update({
+                                'driveFolderId': folderId,
+                                'driveFolderUrl': 'https://drive.google.com/drive/folders/$folderId',
+                                'driveAccessToken': accessToken,
+                                'driveTokenExpiry': DateTime.now().add(const Duration(minutes: 55)).toIso8601String(),
+                              });
+                            }
+                            if (discId.isNotEmpty) {
+                              await FirebaseFirestore.instance.collection('discussions').doc(discId).update({
+                                'driveFolderId': folderId,
+                                'driveFolderUrl': 'https://drive.google.com/drive/folders/$folderId',
+                                'driveAccessToken': accessToken,
+                                'driveTokenExpiry': DateTime.now().add(const Duration(minutes: 55)).toIso8601String(),
+                              });
+                            }
 
                             if (!mounted) return;
                             Navigator.pop(context); // Close loader
@@ -486,12 +614,22 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                     );
 
                                     try {
-                                      await FirebaseFirestore.instance.collection('projects').doc(projectId).update({
-                                        'driveFolderId': folder.id,
-                                        'driveFolderUrl': 'https://drive.google.com/drive/folders/${folder.id}',
-                                        'driveAccessToken': accessToken,
-                                        'driveTokenExpiry': DateTime.now().add(const Duration(minutes: 55)).toIso8601String(),
-                                      });
+                                      if (pId.isNotEmpty) {
+                                        await FirebaseFirestore.instance.collection('projects').doc(pId).update({
+                                          'driveFolderId': folder.id,
+                                          'driveFolderUrl': 'https://drive.google.com/drive/folders/${folder.id}',
+                                          'driveAccessToken': accessToken,
+                                          'driveTokenExpiry': DateTime.now().add(const Duration(minutes: 55)).toIso8601String(),
+                                        });
+                                      }
+                                      if (discId.isNotEmpty) {
+                                        await FirebaseFirestore.instance.collection('discussions').doc(discId).update({
+                                          'driveFolderId': folder.id,
+                                          'driveFolderUrl': 'https://drive.google.com/drive/folders/${folder.id}',
+                                          'driveAccessToken': accessToken,
+                                          'driveTokenExpiry': DateTime.now().add(const Duration(minutes: 55)).toIso8601String(),
+                                        });
+                                      }
 
                                       if (!mounted) return;
                                       Navigator.pop(context); // Close loader
@@ -624,51 +762,217 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
     );
   }
 
-  Future<void> _pickAndSendImage() async {
-    String pId = widget.projectId ?? '';
-    if (pId.isEmpty && !_isDraft && _currentDiscussionId.isNotEmpty) {
+  Future<Map<String, String?>> _getDiscussionDriveInfo() async {
+    String? driveFolderId;
+    String? driveAccessToken;
+    String? driveFolderUrl;
+
+    if (_currentDiscussionId.isNotEmpty && !_isDraft) {
       final discDoc = await FirebaseFirestore.instance.collection('discussions').doc(_currentDiscussionId).get();
       if (discDoc.exists) {
-        pId = discDoc.data()?['projectId'] as String? ?? '';
+        final dData = discDoc.data();
+        driveFolderId = dData?['driveFolderId'] as String?;
+        driveAccessToken = dData?['driveAccessToken'] as String?;
+        driveFolderUrl = dData?['driveFolderUrl'] as String?;
+        final pId = dData?['projectId'] as String? ?? '';
+        if ((driveFolderId == null || driveFolderId.isEmpty) && pId.isNotEmpty) {
+          final projDoc = await FirebaseFirestore.instance.collection('projects').doc(pId).get();
+          if (projDoc.exists) {
+            driveFolderId = projDoc.data()?['driveFolderId'] as String?;
+            driveAccessToken = projDoc.data()?['driveAccessToken'] as String?;
+            driveFolderUrl = projDoc.data()?['driveFolderUrl'] as String?;
+          }
+        }
+      }
+    } else if (widget.projectId != null && widget.projectId!.isNotEmpty) {
+      final projDoc = await FirebaseFirestore.instance.collection('projects').doc(widget.projectId).get();
+      if (projDoc.exists) {
+        driveFolderId = projDoc.data()?['driveFolderId'] as String?;
+        driveAccessToken = projDoc.data()?['driveAccessToken'] as String?;
+        driveFolderUrl = projDoc.data()?['driveFolderUrl'] as String?;
       }
     }
 
-    if (pId.isEmpty) {
+    // Check current user's public drive folder if still empty
+    if (driveFolderId == null || driveFolderId.isEmpty) {
+      final curUser = FirebaseAuth.instance.currentUser;
+      if (curUser != null) {
+        try {
+          final uDoc = await FirebaseFirestore.instance.collection('users').doc(curUser.uid).get();
+          final pubId = uDoc.data()?['publicDriveFolderId'] as String?;
+          final pubUrl = uDoc.data()?['publicDriveFolderUrl'] as String?;
+          if (pubId != null && pubId.isNotEmpty) {
+            driveFolderId = pubId;
+            driveFolderUrl = pubUrl;
+          }
+        } catch (_) {}
+      }
+    }
+
+    return {
+      'folderId': driveFolderId,
+      'accessToken': driveAccessToken,
+      'folderUrl': driveFolderUrl ?? (driveFolderId != null ? 'https://drive.google.com/drive/folders/$driveFolderId' : null),
+    };
+  }
+
+  String _formatFileSize(int bytes) {
+    if (bytes <= 0) return '0 B';
+    const suffixes = ['B', 'KB', 'MB', 'GB'];
+    var i = (log(bytes) / log(1024)).floor();
+    return '${(bytes / pow(1024, i)).toStringAsFixed(1)} ${suffixes[i]}';
+  }
+
+  void _showAttachmentPickerSheet() {
+    final bool isDark = AppColors.isDarkMode;
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: isDark ? const Color(0xFF18181B) : Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (sheetCtx) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: isDark ? const Color(0xFF3F3F46) : const Color(0xFFE2E8F0),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: 20),
+              ListTile(
+                leading: Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF7C3AED).withValues(alpha: 0.12),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.image_rounded, color: Color(0xFF7C3AED), size: 22),
+                ),
+                title: Text(
+                  'Kirim Gambar / Foto',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14.5,
+                    color: isDark ? Colors.white : const Color(0xFF0F172A),
+                  ),
+                ),
+                subtitle: Text(
+                  'Format JPG, PNG, WEBP (Otomatis dikompresi)',
+                  style: GoogleFonts.dmSans(
+                    fontSize: 12.0,
+                    color: isDark ? Colors.white60 : Colors.black54,
+                  ),
+                ),
+                onTap: () {
+                  Navigator.pop(sheetCtx);
+                  _pickAndSendMedia(isImage: true);
+                },
+              ),
+              const Divider(height: 1),
+              ListTile(
+                leading: Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF2563EB).withValues(alpha: 0.12),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.insert_drive_file_rounded, color: Color(0xFF2563EB), size: 22),
+                ),
+                title: Text(
+                  'Kirim Berkas / Dokumen',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14.5,
+                    color: isDark ? Colors.white : const Color(0xFF0F172A),
+                  ),
+                ),
+                subtitle: Text(
+                  'PDF, Word, Excel, PPT, ZIP, dll ke Google Drive',
+                  style: GoogleFonts.dmSans(
+                    fontSize: 12.0,
+                    color: isDark ? Colors.white60 : Colors.black54,
+                  ),
+                ),
+                onTap: () {
+                  Navigator.pop(sheetCtx);
+                  _pickAndSendMedia(isImage: false);
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _pickAndSendMedia({required bool isImage}) async {
+    final driveInfo = await _getDiscussionDriveInfo();
+    String? driveFolderId = driveInfo['folderId'];
+    String? driveAccessToken = driveInfo['accessToken'];
+    final driveFolderUrl = driveInfo['folderUrl'] ?? '';
+
+    // If no drive connected yet, prompt to connect
+    if (driveFolderId == null || driveFolderId.isEmpty) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Fitur kirim gambar tidak tersedia pada obrolan yang tidak terhubung ke kelas.'),
-            backgroundColor: Colors.orange,
+        final shouldConnect = await showDialog<bool>(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            backgroundColor: AppColors.isDarkMode ? const Color(0xFF18181B) : Colors.white,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            title: Row(
+              children: [
+                const Icon(Icons.add_to_drive_rounded, color: Color(0xFF2563EB), size: 24),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    'Hubungkan Google Drive',
+                    style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, fontSize: 16),
+                  ),
+                ),
+              ],
+            ),
+            content: Text(
+              'Obrolan ini belum memiliki folder Google Drive untuk menyimpan lampiran. Hubungkan folder Google Drive sekarang?',
+              style: GoogleFonts.dmSans(fontSize: 13.5),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx, false),
+                child: Text('Nanti', style: GoogleFonts.plusJakartaSans(color: Colors.black54)),
+              ),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF2563EB),
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+                onPressed: () => Navigator.pop(ctx, true),
+                child: Text('Hubungkan', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold)),
+              ),
+            ],
           ),
         );
-      }
-      return;
-    }
 
-    final doc = await FirebaseFirestore.instance.collection('projects').doc(pId).get();
-    final driveFolderId = doc.data()?['driveFolderId'] as String?;
-    final driveAccessToken = doc.data()?['driveAccessToken'] as String?;
-    final driveFolderUrl = doc.data()?['driveFolderUrl'] as String? ?? (driveFolderId != null ? 'https://drive.google.com/drive/folders/$driveFolderId' : '');
-
-    // Jika akun belum terhubung ke folder google drive maka fitur kirim gambar tidak berfungsi
-    if (driveFolderId == null || driveFolderId.isEmpty || driveAccessToken == null || driveAccessToken.isEmpty) {
-      if (mounted) {
-        if (driveFolderUrl.isNotEmpty) {
-          _showDriveUploadErrorDialog(context, driveFolderUrl);
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Fitur kirim gambar tidak berfungsi karena classroom ini belum terhubung ke folder Google Drive.'),
-              backgroundColor: Colors.redAccent,
-            ),
-          );
+        if (shouldConnect == true) {
+          await _showFolderSelectorDialog(widget.projectId);
         }
       }
       return;
     }
 
     try {
-      final result = await FilePicker.pickFiles(type: FileType.image);
+      final result = await FilePicker.pickFiles(
+        type: isImage ? FileType.image : FileType.any,
+      );
       if (result == null || result.files.isEmpty) return;
       final pickedFile = result.files.first;
 
@@ -686,17 +990,40 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
         rawBytes = await File(pickedFile.path!).readAsBytes();
       }
 
-      // Kompresi data gambar hingga maksimal 200KB
-      final Uint8List compressedBytes = await _compressImageToMax200Kb(rawBytes);
+      Uint8List uploadBytes = rawBytes;
+      String uploadFileName = pickedFile.name;
 
-      final uploadResult = await GoogleDriveService.uploadFile(
-        accessToken: driveAccessToken,
-        folderId: driveFolderId,
-        fileName: pickedFile.name.endsWith('.jpg') || pickedFile.name.endsWith('.jpeg')
-            ? pickedFile.name
-            : '${pickedFile.name.split('.').first}.jpg',
-        bytes: compressedBytes,
-      );
+      if (isImage) {
+        uploadBytes = await _compressImageToMax200Kb(rawBytes);
+        if (!uploadFileName.toLowerCase().endsWith('.jpg') && !uploadFileName.toLowerCase().endsWith('.jpeg')) {
+          uploadFileName = '${uploadFileName.split('.').first}.jpg';
+        }
+      }
+
+      // Ensure access token is available
+      if (driveAccessToken == null || driveAccessToken.isEmpty) {
+        try {
+          var account = await GoogleSignIn.instance.attemptLightweightAuthentication();
+          account ??= await GoogleSignIn.instance.authenticate();
+          final auth = await account.authorizationClient.authorizeScopes([drive.DriveApi.driveFileScope]);
+          driveAccessToken = auth.accessToken;
+        } catch (_) {}
+      }
+
+      Map<String, String> uploadResult;
+      if (driveAccessToken != null && driveAccessToken.isNotEmpty) {
+        uploadResult = await GoogleDriveService.uploadFile(
+          accessToken: driveAccessToken,
+          folderId: driveFolderId,
+          fileName: uploadFileName,
+          bytes: uploadBytes,
+        );
+      } else {
+        uploadResult = {
+          'directLink': driveFolderUrl,
+          'viewLink': driveFolderUrl,
+        };
+      }
 
       final user = FirebaseAuth.instance.currentUser;
       if (user == null) {
@@ -708,7 +1035,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
       final senderName = userDoc.data()?['name'] ?? 'User';
       final senderAvatar = userDoc.data()?['avatar'] ?? 'assets/icon_pack/avatar/avatar_2.png';
 
-      // If draft private chat, create discussion doc in Firestore now!
+      // If draft private chat, create discussion doc in Firestore
       if (_isDraft || _currentDiscussionId.isEmpty) {
         final newDoc = await FirebaseFirestore.instance.collection('discussions').add({
           'channel': '@${widget.channelName.toLowerCase().replaceAll(' ', '')}',
@@ -716,8 +1043,10 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
           'avatar': widget.targetUserAvatar ?? 'assets/icon_pack/avatar/sma_1.png',
           'isPrivate': true,
           'memberUids': [user.uid, widget.targetUserUid ?? ''],
-          'lastMessage': '$senderName mengirim gambar',
+          'lastMessage': isImage ? '$senderName mengirim gambar' : '$senderName mengirim berkas',
           'time': 'Sekarang',
+          'driveFolderId': driveFolderId,
+          'driveFolderUrl': driveFolderUrl,
           'createdAt': FieldValue.serverTimestamp(),
           'colorIndex': Random().nextInt(5),
         });
@@ -726,7 +1055,10 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
         if (mounted) setState(() {});
       }
 
-      // Send message with image URL
+      final String fileExt = pickedFile.name.contains('.') ? pickedFile.name.split('.').last.toLowerCase() : '';
+      final String formattedSize = _formatFileSize(pickedFile.size);
+
+      // Send message with media info
       await FirebaseFirestore.instance
           .collection('discussions')
           .doc(_currentDiscussionId)
@@ -735,8 +1067,14 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
         'sender': senderName,
         'senderUid': user.uid,
         'avatar': senderAvatar,
-        'message': '[Gambar Lampiran]',
-        'imageUrl': uploadResult['directLink']!,
+        'message': isImage ? '[Gambar Lampiran]' : '[Berkas: $uploadFileName]',
+        if (isImage) 'imageUrl': uploadResult['directLink'] ?? driveFolderUrl,
+        if (!isImage) ...{
+          'fileUrl': uploadResult['directLink'] ?? uploadResult['viewLink'] ?? driveFolderUrl,
+          'fileName': uploadFileName,
+          'fileSize': formattedSize,
+          'fileExtension': fileExt,
+        },
         'time': FieldValue.serverTimestamp(),
         if (_replyingToMessage != null) ...{
           'replyToSender': _replyingToMessage!['sender'],
@@ -756,7 +1094,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
       final memberUids = List<String>.from(discDoc.data()?['memberUids'] ?? []);
 
       final Map<String, dynamic> updates = {
-        'lastMessage': '$senderName mengirim gambar',
+        'lastMessage': isImage ? '$senderName mengirim gambar' : '$senderName mengirim berkas: $uploadFileName',
         'time': _formatCurrentTime(),
         'hasMessages': true,
         'hiddenForUids': [],
@@ -776,7 +1114,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
       if (mounted) {
         Navigator.pop(context); // Close loading dialog
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Gagal mengirim gambar: $e'), backgroundColor: Colors.redAccent),
+          SnackBar(content: Text('Gagal mengirim lampiran: $e'), backgroundColor: Colors.redAccent),
         );
       }
     }
@@ -2702,85 +3040,97 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                 ],
                               ),
                             ),
-                            if (projectId.isNotEmpty) ...[
-                              // Open Drive folder button (Visible to everyone if connected)
-                              if (projData?['driveFolderId'] != null && projData!['driveFolderId'].toString().isNotEmpty)
-                                Container(
-                                  margin: const EdgeInsets.only(right: 8),
-                                  child: BouncyButton(
-                                    onTap: () async {
-                                      final String folderId = projData['driveFolderId'].toString();
-                                      final String folderUrl = projData['driveFolderUrl']?.toString() ?? 'https://drive.google.com/drive/folders/$folderId';
-                                      final Uri uri = Uri.parse(folderUrl);
-                                      if (await canLaunchUrl(uri)) {
-                                        await launchUrl(uri, mode: LaunchMode.externalApplication);
-                                      } else {
-                                        if (context.mounted) {
-                                          ScaffoldMessenger.of(context).showSnackBar(
-                                            const SnackBar(content: Text('Tidak dapat membuka Google Drive.')),
-                                          );
-                                        }
-                                      }
-                                    },
-                                    child: Container(
-                                      width: 42,
-                                      height: 42,
-                                      decoration: BoxDecoration(
-                                        color: isDark ? const Color(0xFF000000) : const Color(0xFFEFF6FF),
-                                        shape: BoxShape.circle,
-                                        border: Border.all(
-                                          color: isDark ? const Color(0xFF27272A) : const Color(0xFFDBEAFE),
-                                          width: 1.2,
-                                        ),
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.04),
-                                            blurRadius: 8,
-                                            offset: const Offset(0, 2),
+                            Builder(
+                              builder: (context) {
+                                final String? activeDriveFolderId = (discData?['driveFolderId'] as String?)?.isNotEmpty == true
+                                    ? (discData!['driveFolderId'] as String)
+                                    : (projData?['driveFolderId'] as String?);
+                                final String? activeDriveFolderUrl = (discData?['driveFolderUrl'] as String?)?.isNotEmpty == true
+                                    ? (discData!['driveFolderUrl'] as String)
+                                    : ((projData?['driveFolderUrl'] as String?) ?? (activeDriveFolderId != null ? 'https://drive.google.com/drive/folders/$activeDriveFolderId' : null));
+                                final bool hasDriveFolder = activeDriveFolderId != null && activeDriveFolderId.isNotEmpty;
+
+                                return Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    if (hasDriveFolder)
+                                      Container(
+                                        margin: const EdgeInsets.only(right: 8),
+                                        child: BouncyButton(
+                                          onTap: () async {
+                                            final String folderUrl = activeDriveFolderUrl ?? 'https://drive.google.com/drive/folders/$activeDriveFolderId';
+                                            final Uri uri = Uri.parse(folderUrl);
+                                            if (await canLaunchUrl(uri)) {
+                                              await launchUrl(uri, mode: LaunchMode.externalApplication);
+                                            } else {
+                                              if (context.mounted) {
+                                                ScaffoldMessenger.of(context).showSnackBar(
+                                                  const SnackBar(content: Text('Tidak dapat membuka Google Drive.')),
+                                                );
+                                              }
+                                            }
+                                          },
+                                          child: Container(
+                                            width: 42,
+                                            height: 42,
+                                            decoration: BoxDecoration(
+                                              color: isDark ? const Color(0xFF000000) : const Color(0xFFEFF6FF),
+                                              shape: BoxShape.circle,
+                                              border: Border.all(
+                                                color: isDark ? const Color(0xFF27272A) : const Color(0xFFDBEAFE),
+                                                width: 1.2,
+                                              ),
+                                              boxShadow: [
+                                                BoxShadow(
+                                                  color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.04),
+                                                  blurRadius: 8,
+                                                  offset: const Offset(0, 2),
+                                                ),
+                                              ],
+                                            ),
+                                            child: const Icon(
+                                              Icons.folder_shared_rounded,
+                                              color: Color(0xFF2563EB),
+                                              size: 20,
+                                            ),
                                           ),
-                                        ],
-                                      ),
-                                      child: const Icon(
-                                        Icons.folder_shared_rounded,
-                                        color: Color(0xFF2563EB),
-                                        size: 20,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              // Connect/Change folder button (Only visible to guru)
-                              if (_userRole == 'guru')
-                                Container(
-                                  margin: const EdgeInsets.only(right: 8),
-                                  child: BouncyButton(
-                                    onTap: () => _showFolderSelectorDialog(projectId),
-                                    child: Container(
-                                      width: 42,
-                                      height: 42,
-                                      decoration: BoxDecoration(
-                                        color: isDark ? const Color(0xFF18181B) : Colors.white,
-                                        shape: BoxShape.circle,
-                                        border: Border.all(
-                                          color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
-                                          width: 1.2,
                                         ),
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.04),
-                                            blurRadius: 8,
-                                            offset: const Offset(0, 2),
+                                      ),
+                                    if (!hasDriveFolder && (projectId.isEmpty || _userRole == 'guru'))
+                                      Container(
+                                        margin: const EdgeInsets.only(right: 8),
+                                        child: BouncyButton(
+                                          onTap: () => _showFolderSelectorDialog(projectId),
+                                          child: Container(
+                                            width: 42,
+                                            height: 42,
+                                            decoration: BoxDecoration(
+                                              color: isDark ? const Color(0xFF18181B) : Colors.white,
+                                              shape: BoxShape.circle,
+                                              border: Border.all(
+                                                color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+                                                width: 1.2,
+                                              ),
+                                              boxShadow: [
+                                                BoxShadow(
+                                                  color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.04),
+                                                  blurRadius: 8,
+                                                  offset: const Offset(0, 2),
+                                                ),
+                                              ],
+                                            ),
+                                            child: Icon(
+                                              Icons.add_to_drive_rounded,
+                                              color: isDark ? Colors.white70 : Colors.black87,
+                                              size: 20,
+                                            ),
                                           ),
-                                        ],
+                                        ),
                                       ),
-                                      child: Icon(
-                                        Icons.add_to_drive_rounded,
-                                        color: isDark ? Colors.white70 : Colors.black87,
-                                        size: 20,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                            ],
+                                  ],
+                                );
+                              },
+                            ),
                             PopupMenuButton<String>(
                               tooltip: '',
                               padding: EdgeInsets.zero,
@@ -3227,6 +3577,10 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
 
                                         final message = msgData['message'] ?? '';
                                         final imageUrl = msgData['imageUrl'] as String? ?? '';
+                                        final fileUrl = msgData['fileUrl'] as String? ?? '';
+                                        final fileName = msgData['fileName'] as String? ?? '';
+                                        final fileSize = msgData['fileSize'] as String? ?? '';
+                                        final fileExtension = msgData['fileExtension'] as String? ?? '';
                                         final timeVal = msgData['time'];
                                         String timeText = '';
                                         if (timeVal is Timestamp) {
@@ -3515,6 +3869,83 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                                                   ),
                                                                 ),
                                                                 if (message.isNotEmpty) const SizedBox(height: 4),
+                                                              ],
+                                                              if (fileUrl.isNotEmpty || fileName.isNotEmpty) ...[
+                                                                  GestureDetector(
+                                                                    onTap: () async {
+                                                                      if (fileUrl.isNotEmpty) {
+                                                                        final uri = Uri.parse(fileUrl);
+                                                                        if (await canLaunchUrl(uri)) {
+                                                                          await launchUrl(uri, mode: LaunchMode.externalApplication);
+                                                                        }
+                                                                      }
+                                                                    },
+                                                                    child: Container(
+                                                                      constraints: const BoxConstraints(maxWidth: 240),
+                                                                      padding: const EdgeInsets.all(10),
+                                                                      decoration: BoxDecoration(
+                                                                        color: isMe
+                                                                            ? (isDark ? const Color(0xFF581C87).withValues(alpha: 0.5) : const Color(0xFF6D28D9).withValues(alpha: 0.25))
+                                                                            : (isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9)),
+                                                                        borderRadius: BorderRadius.circular(12),
+                                                                        border: Border.all(
+                                                                          color: isMe
+                                                                              ? const Color(0xFFD6A5F8).withValues(alpha: 0.3)
+                                                                              : (isDark ? const Color(0xFF3F3F46) : const Color(0xFFE2E8F0)),
+                                                                        ),
+                                                                      ),
+                                                                      child: Row(
+                                                                        mainAxisSize: MainAxisSize.min,
+                                                                        children: [
+                                                                          Container(
+                                                                            width: 36,
+                                                                            height: 36,
+                                                                            decoration: BoxDecoration(
+                                                                              color: const Color(0xFF2563EB).withValues(alpha: 0.15),
+                                                                              borderRadius: BorderRadius.circular(8),
+                                                                            ),
+                                                                            child: const Icon(Icons.insert_drive_file_rounded, color: Color(0xFF3B82F6), size: 20),
+                                                                          ),
+                                                                          const SizedBox(width: 10),
+                                                                          Expanded(
+                                                                            child: Column(
+                                                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                                                              mainAxisSize: MainAxisSize.min,
+                                                                              children: [
+                                                                                Text(
+                                                                                  fileName.isNotEmpty ? fileName : 'Dokumen',
+                                                                                  maxLines: 1,
+                                                                                  overflow: TextOverflow.ellipsis,
+                                                                                  style: GoogleFonts.plusJakartaSans(
+                                                                                    fontSize: 13,
+                                                                                    fontWeight: FontWeight.bold,
+                                                                                    color: isMe ? Colors.white : (isDark ? Colors.white : const Color(0xFF0F172A)),
+                                                                                  ),
+                                                                                ),
+                                                                                if (fileSize.isNotEmpty) ...[
+                                                                                  const SizedBox(height: 2),
+                                                                                  Text(
+                                                                                    fileSize,
+                                                                                    style: GoogleFonts.dmSans(
+                                                                                      fontSize: 11,
+                                                                                      color: isMe ? Colors.white70 : (isDark ? Colors.white60 : Colors.black54),
+                                                                                    ),
+                                                                                  ),
+                                                                                ],
+                                                                              ],
+                                                                            ),
+                                                                          ),
+                                                                          const SizedBox(width: 6),
+                                                                          Icon(
+                                                                            Icons.download_rounded,
+                                                                            size: 18,
+                                                                            color: isMe ? Colors.white70 : (isDark ? Colors.white60 : Colors.black45),
+                                                                          ),
+                                                                        ],
+                                                                      ),
+                                                                    ),
+                                                                  ),
+                                                                  if (message.isNotEmpty && !message.startsWith('[Berkas:')) const SizedBox(height: 4),
                                                               ],
                                                               if (message.isNotEmpty) ...[
                                                                 _buildMessageTextWithTime(
@@ -3907,28 +4338,28 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                   Row(
                                     crossAxisAlignment: CrossAxisAlignment.center,
                                     children: [
-                                      // Tombol Gambar (36x36 terpusat)
-                                      BouncyButton(
-                                        onTap: _pickAndSendImage,
-                                        child: Container(
-                                          width: 36,
-                                          height: 36,
-                                          margin: const EdgeInsets.only(right: 6),
-                                          decoration: BoxDecoration(
-                                            color: isDark ? const Color(0xFF18181B) : const Color(0xFFF8FAFC),
-                                            shape: BoxShape.circle,
-                                            border: Border.all(
-                                              color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
-                                              width: 1.0,
+                                        // Tombol Lampiran Berkas / Gambar
+                                        BouncyButton(
+                                          onTap: _showAttachmentPickerSheet,
+                                          child: Container(
+                                            width: 36,
+                                            height: 36,
+                                            margin: const EdgeInsets.only(right: 6),
+                                            decoration: BoxDecoration(
+                                              color: isDark ? const Color(0xFF18181B) : const Color(0xFFF8FAFC),
+                                              shape: BoxShape.circle,
+                                              border: Border.all(
+                                                color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                                                width: 1.0,
+                                              ),
+                                            ),
+                                            child: Icon(
+                                              Icons.attach_file_rounded,
+                                              color: isDark ? Colors.white70 : const Color(0xFF4F46E5),
+                                              size: 18,
                                             ),
                                           ),
-                                          child: Icon(
-                                            Icons.image_rounded,
-                                            color: isDark ? Colors.white70 : const Color(0xFF4F46E5),
-                                            size: 18,
-                                          ),
                                         ),
-                                      ),
                                       // Text Field (1 Baris lurus sejajar)
                                       Expanded(
                                         child: Container(
@@ -4365,7 +4796,7 @@ class _AnimatedPurpleMicroPatternBackgroundState extends State<AnimatedPurpleMic
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 35),
+      duration: const Duration(seconds: 16),
     )..repeat();
   }
 
@@ -4404,165 +4835,228 @@ class _PurpleMicroPatternPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final Rect rect = Offset.zero & size;
+    // 1. Solid Flat Background (Abu kehitaman solid, tanpa gradasi)
+    final Color solidBg = isDark ? const Color(0xFF101014) : const Color(0xFFFAF9FD);
+    canvas.drawColor(solidBg, BlendMode.src);
 
-    // 1. Hero Purple Gradient (Persis warna hero Laporan: #7F52FC / #6D28D9)
-    final bgGradient = LinearGradient(
-      begin: Alignment.topLeft,
-      end: Alignment.bottomRight,
-      colors: isDark
-          ? const [
-              Color(0xFF140D2B),
-              Color(0xFF1F1242),
-              Color(0xFF120A24),
-            ]
-          : const [
-              Color(0xFF7F52FC),
-              Color(0xFF6D28D9),
-              Color(0xFF8B5CF6),
-            ],
-    );
-    canvas.drawRect(rect, Paint()..shader = bgGradient.createShader(rect));
-
-    // 2. Animated Abstract Flowing Shapes & Curves (Card Classroom & Hero Laporan Style)
-    final double anim1 = sin(animationValue * 2 * pi);
-    final double anim2 = cos(animationValue * 2 * pi);
-
-    // Large Soft Abstract Wave 1 (Top-Right to Center)
-    final wavePaint1 = Paint()
-      ..color = Colors.white.withValues(alpha: isDark ? 0.06 : 0.10)
-      ..style = PaintingStyle.fill;
-    final wavePath1 = Path();
-    wavePath1.moveTo(size.width * 0.3 + anim1 * 12, 0);
-    wavePath1.quadraticBezierTo(
-      size.width * 0.7 + anim2 * 15,
-      size.height * 0.25 + anim1 * 10,
-      size.width,
-      size.height * 0.35 + anim2 * 12,
-    );
-    wavePath1.lineTo(size.width, 0);
-    wavePath1.close();
-    canvas.drawPath(wavePath1, wavePaint1);
-
-    // Large Soft Abstract Wave 2 (Bottom-Left to Right)
-    final wavePaint2 = Paint()
-      ..color = Colors.white.withValues(alpha: isDark ? 0.05 : 0.08)
-      ..style = PaintingStyle.fill;
-    final wavePath2 = Path();
-    wavePath2.moveTo(0, size.height * 0.65 + anim2 * 14);
-    wavePath2.quadraticBezierTo(
-      size.width * 0.4 + anim1 * 18,
-      size.height * 0.8 + anim2 * 12,
-      size.width * 0.85 + anim1 * 10,
-      size.height,
-    );
-    wavePath2.lineTo(0, size.height);
-    wavePath2.close();
-    canvas.drawPath(wavePath2, wavePaint2);
-
-    // Abstract Floating Rings (Like Laporan Hero & Classroom Card Pattern)
-    final ringPaint = Paint()
-      ..color = Colors.white.withValues(alpha: isDark ? 0.14 : 0.16)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 2.0;
-
-    final ringPaintThin = Paint()
-      ..color = Colors.white.withValues(alpha: isDark ? 0.08 : 0.11)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.2;
-
-    canvas.drawCircle(
-      Offset(size.width * 0.15 + anim1 * 10, size.height * 0.22 + anim2 * 8),
-      36,
-      ringPaint,
-    );
-    canvas.drawCircle(
-      Offset(size.width * 0.88 - anim2 * 12, size.height * 0.45 + anim1 * 14),
-      48,
-      ringPaintThin,
-    );
-    canvas.drawCircle(
-      Offset(size.width * 0.32 + anim2 * 14, size.height * 0.78 - anim1 * 10),
-      28,
-      ringPaint,
-    );
-    canvas.drawCircle(
-      Offset(size.width * 0.75 + anim1 * 8, size.height * 0.88 + anim2 * 12),
-      56,
-      ringPaintThin,
-    );
-
-    // Dynamic Abstract Curves & Strokes
+    // 2. Doodle Pattern Paint (Ungu soft elegan)
     final strokePaint = Paint()
-      ..color = Colors.white.withValues(alpha: isDark ? 0.10 : 0.12)
+      ..color = (isDark ? const Color(0xFFA855F7) : const Color(0xFF7C3AED))
+          .withValues(alpha: isDark ? 0.14 : 0.10)
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 5.0
-      ..strokeCap = StrokeCap.round;
+      ..strokeWidth = 1.2
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round;
 
-    final arcPath = Path();
-    arcPath.moveTo(size.width * 0.05, size.height * 0.48 + anim1 * 10);
-    arcPath.quadraticBezierTo(
-      size.width * 0.25 + anim2 * 12,
-      size.height * 0.55 + anim1 * 15,
-      size.width * 0.45,
-      size.height * 0.42 + anim2 * 8,
-    );
-    canvas.drawPath(arcPath, strokePaint);
-
-    // 3. Scattered Abstract Dots & Micro Shapes (Bentuk Abstrak Tidak Teratur)
     final dotPaint = Paint()
-      ..color = Colors.white.withValues(alpha: isDark ? 0.22 : 0.28)
+      ..color = (isDark ? const Color(0xFFC084FC) : const Color(0xFF7C3AED))
+          .withValues(alpha: isDark ? 0.18 : 0.12)
       ..style = PaintingStyle.fill;
 
-    final softDotPaint = Paint()
-      ..color = Colors.white.withValues(alpha: isDark ? 0.12 : 0.16)
-      ..style = PaintingStyle.fill;
+    const double cellSize = 80.0;
+    final int cols = (size.width / cellSize).ceil() + 2;
+    final int rows = (size.height / cellSize).ceil() + 2;
 
-    final List<Offset> dots = [
-      Offset(size.width * 0.12, size.height * 0.10),
-      Offset(size.width * 0.45, size.height * 0.14),
-      Offset(size.width * 0.78, size.height * 0.08),
-      Offset(size.width * 0.25, size.height * 0.34),
-      Offset(size.width * 0.62, size.height * 0.28),
-      Offset(size.width * 0.92, size.height * 0.24),
-      Offset(size.width * 0.18, size.height * 0.60),
-      Offset(size.width * 0.50, size.height * 0.52),
-      Offset(size.width * 0.82, size.height * 0.64),
-      Offset(size.width * 0.08, size.height * 0.82),
-      Offset(size.width * 0.40, size.height * 0.90),
-      Offset(size.width * 0.70, size.height * 0.76),
-      Offset(size.width * 0.90, size.height * 0.92),
-    ];
+    for (int r = -1; r < rows; r++) {
+      for (int c = -1; c < cols; c++) {
+        // Base anchor
+        final double xOffset = (r % 2 == 1) ? cellSize * 0.45 : 0.0;
+        final double baseX = (c * cellSize) + xOffset;
+        final double baseY = (r * cellSize);
 
-    for (int i = 0; i < dots.length; i++) {
-      final double wave = sin((i * 0.8) + (animationValue * 2 * pi));
-      final double dx = dots[i].dx + (sin(animationValue * 2 * pi + i) * 6.0);
-      final double dy = dots[i].dy + (cos(animationValue * 2 * pi + i) * 6.0);
-      final double radius = 1.8 + (wave * 0.8);
+        // Organic Pseudo-Random Jitter (Tidak beraturan)
+        final double jitterX = sin(c * 19.3 + r * 37.7) * (cellSize * 0.20);
+        final double jitterY = cos(c * 29.1 + r * 13.5) * (cellSize * 0.20);
 
-      if (i % 3 == 0) {
-        canvas.drawCircle(Offset(dx, dy), radius, dotPaint);
-      } else if (i % 3 == 1) {
-        canvas.drawCircle(Offset(dx, dy), radius * 0.7, softDotPaint);
-      } else {
-        // Small 4-point sparkle
-        final double s = radius * 1.5;
-        final spPaint = Paint()
-          ..color = Colors.white.withValues(alpha: isDark ? 0.25 : 0.30)
-          ..strokeWidth = 1.2
-          ..style = PaintingStyle.stroke;
-        canvas.drawLine(Offset(dx - s, dy), Offset(dx + s, dy), spPaint);
-        canvas.drawLine(Offset(dx, dy - s), Offset(dx, dy + s), spPaint);
+        // Gentle Floating Micro-Movement (Bergerak sedikit-sedikit secara halus)
+        final double phase = (c * 2.37 + r * 1.83);
+        final double floatX = sin(animationValue * 2 * pi + phase) * 4.0;
+        final double floatY = cos(animationValue * 2 * pi + phase * 1.3) * 5.0;
+
+        // Subtle Organic Tilt & Gentle Sway
+        final double baseAngle = sin(c * 11.2 + r * 17.8) * 0.25; // ~14 deg
+        final double swayAngle = sin(animationValue * 2 * pi + phase * 0.8) * 0.05;
+        final double totalAngle = baseAngle + swayAngle;
+
+        // Scale variation
+        final double scale = 0.90 + (sin(c * 7.1 + r * 5.3) + 1.0) * 0.09;
+
+        final double cx = baseX + jitterX + floatX;
+        final double cy = baseY + jitterY + floatY;
+
+        // Skip offscreen
+        if (cx < -50 || cx > size.width + 50 || cy < -50 || cy > size.height + 50) continue;
+
+        final int iconType = ((c + 10) * 7 + (r + 10) * 13) % 12;
+
+        canvas.save();
+        canvas.translate(cx, cy);
+        canvas.rotate(totalAngle);
+        canvas.scale(scale);
+
+        switch (iconType) {
+          case 0:
+            // 1. Chat Bubble
+            final rrect = RRect.fromRectAndRadius(
+              const Rect.fromLTWH(-12, -10, 24, 16),
+              const Radius.circular(5),
+            );
+            canvas.drawRRect(rrect, strokePaint);
+            final tail = Path()
+              ..moveTo(-6, 6)
+              ..lineTo(-10, 11)
+              ..lineTo(-2, 6);
+            canvas.drawPath(tail, strokePaint);
+            canvas.drawLine(const Offset(-7, -4), const Offset(7, -4), strokePaint);
+            canvas.drawLine(const Offset(-7, 0), const Offset(3, 0), strokePaint);
+            break;
+
+          case 1:
+            // 2. Pencil
+            final pencil = Path()
+              ..moveTo(-10, 8)
+              ..lineTo(-12, 12)
+              ..lineTo(-8, 10)
+              ..lineTo(8, -6)
+              ..lineTo(6, -8)
+              ..close();
+            canvas.drawPath(pencil, strokePaint);
+            canvas.drawLine(const Offset(4, -4), const Offset(2, -6), strokePaint);
+            break;
+
+          case 2:
+            // 3. Open Book / Notebook
+            final book = Path()
+              ..moveTo(0, -8)
+              ..quadraticBezierTo(-6, -10, -12, -8)
+              ..lineTo(-12, 6)
+              ..quadraticBezierTo(-6, 4, 0, 6)
+              ..quadraticBezierTo(6, 4, 12, 6)
+              ..lineTo(12, -8)
+              ..quadraticBezierTo(6, -10, 0, -8)
+              ..close();
+            canvas.drawPath(book, strokePaint);
+            canvas.drawLine(const Offset(0, -8), const Offset(0, 6), strokePaint);
+            break;
+
+          case 3:
+            // 4. Lightbulb
+            canvas.drawCircle(const Offset(0, -4), 7, strokePaint);
+            final base = Path()
+              ..moveTo(-3, 3)
+              ..lineTo(3, 3)
+              ..moveTo(-2.5, 6)
+              ..lineTo(2.5, 6)
+              ..moveTo(-1.5, 9)
+              ..lineTo(1.5, 9);
+            canvas.drawPath(base, strokePaint);
+            break;
+
+          case 4:
+            // 5. Heart
+            final heart = Path()
+              ..moveTo(0, 3)
+              ..cubicTo(-6, -4, -10, -1, -6, 5)
+              ..lineTo(0, 11)
+              ..lineTo(6, 5)
+              ..cubicTo(10, -1, 6, -4, 0, 3);
+            canvas.drawPath(heart, strokePaint);
+            break;
+
+          case 5:
+            // 6. Four-point Star / Sparkle
+            final star = Path()
+              ..moveTo(0, -10)
+              ..quadraticBezierTo(0, 0, 10, 0)
+              ..quadraticBezierTo(0, 0, 0, 10)
+              ..quadraticBezierTo(0, 0, -10, 0)
+              ..quadraticBezierTo(0, 0, 0, -10);
+            canvas.drawPath(star, strokePaint);
+            break;
+
+          case 6:
+            // 7. Paper Airplane
+            final plane = Path()
+              ..moveTo(-9, -9)
+              ..lineTo(11, 0)
+              ..lineTo(-9, 9)
+              ..lineTo(-4, 0)
+              ..close();
+            canvas.drawPath(plane, strokePaint);
+            canvas.drawLine(const Offset(-4, 0), const Offset(11, 0), strokePaint);
+            break;
+
+          case 7:
+            // 8. Headphones / Audio
+            final headArc = Path()
+              ..moveTo(-8, 3)
+              ..lineTo(-8, -2)
+              ..arcToPoint(const Offset(8, -2), radius: const Radius.circular(8))
+              ..lineTo(8, 3);
+            canvas.drawPath(headArc, strokePaint);
+            canvas.drawRRect(
+              RRect.fromRectAndRadius(const Rect.fromLTWH(-10, 0, 4, 8), const Radius.circular(2)),
+              strokePaint,
+            );
+            canvas.drawRRect(
+              RRect.fromRectAndRadius(const Rect.fromLTWH(6, 0, 4, 8), const Radius.circular(2)),
+              strokePaint,
+            );
+            break;
+
+          case 8:
+            // 9. Smiley / Emoji
+            canvas.drawCircle(Offset.zero, 9, strokePaint);
+            canvas.drawCircle(const Offset(-3.5, -2.5), 1.0, dotPaint);
+            canvas.drawCircle(const Offset(3.5, -2.5), 1.0, dotPaint);
+            final smile = Path()
+              ..moveTo(-4.5, 2)
+              ..quadraticBezierTo(0, 6, 4.5, 2);
+            canvas.drawPath(smile, strokePaint);
+            break;
+
+          case 9:
+            // 10. Cloud with Stars
+            final cloud = Path()
+              ..moveTo(-8, 4)
+              ..lineTo(8, 4)
+              ..arcToPoint(const Offset(8, -1), radius: const Radius.circular(3))
+              ..arcToPoint(const Offset(3, -6), radius: const Radius.circular(5))
+              ..arcToPoint(const Offset(-4, -5), radius: const Radius.circular(5))
+              ..arcToPoint(const Offset(-8, 4), radius: const Radius.circular(4));
+            canvas.drawPath(cloud, strokePaint);
+            break;
+
+          case 10:
+            // 11. Magnifying Glass
+            canvas.drawCircle(const Offset(-2, -2), 6, strokePaint);
+            canvas.drawLine(const Offset(3, 3), const Offset(9, 9), strokePaint);
+            break;
+
+          case 11:
+            // 12. Padlock / Key
+            final shackle = Path()
+              ..moveTo(-4, -1)
+              ..lineTo(-4, -6)
+              ..arcToPoint(const Offset(4, -6), radius: const Radius.circular(4))
+              ..lineTo(4, -1);
+            canvas.drawPath(shackle, strokePaint);
+            canvas.drawRRect(
+              RRect.fromRectAndRadius(const Rect.fromLTWH(-7, -1, 14, 10), const Radius.circular(3)),
+              strokePaint,
+            );
+            canvas.drawCircle(const Offset(0, 3), 1.2, dotPaint);
+            break;
+        }
+
+        // Floating Micro Accent Dot in corner
+        canvas.drawCircle(const Offset(22, -22), 1.2, dotPaint);
+        canvas.drawLine(const Offset(-22, 18), const Offset(-18, 18), strokePaint);
+        canvas.drawLine(const Offset(-20, 16), const Offset(-20, 20), strokePaint);
+
+        canvas.restore();
       }
     }
-
-    // 4. Tint Overlay (50% Putih untuk Light mode, 50% Hitam untuk Dark mode)
-    final overlayPaint = Paint()
-      ..color = isDark
-          ? Colors.black.withValues(alpha: 0.50)
-          : Colors.white.withValues(alpha: 0.50)
-      ..style = PaintingStyle.fill;
-    canvas.drawRect(rect, overlayPaint);
   }
 
   @override

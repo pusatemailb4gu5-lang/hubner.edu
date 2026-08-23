@@ -807,21 +807,21 @@ class _FluidIPhoneBottomNavBarState extends State<_FluidIPhoneBottomNavBar>
                                       top: -3,
                                       right: -7,
                                       child: Container(
-                                        padding: const EdgeInsets.all(3),
-                                        decoration: const BoxDecoration(
-                                          color: Color(0xFFEF4444),
-                                          shape: BoxShape.circle,
+                                        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1.5),
+                                        decoration: BoxDecoration(
+                                          color: const Color(0xFF7C3AED),
+                                          borderRadius: BorderRadius.circular(10),
                                         ),
                                         constraints: const BoxConstraints(
-                                          minWidth: 14,
-                                          minHeight: 14,
+                                          minWidth: 16,
+                                          minHeight: 16,
                                         ),
                                         child: Center(
                                           child: Text(
                                             '$unread',
                                             style: GoogleFonts.plusJakartaSans(
                                               color: Colors.white,
-                                              fontSize: 8.5,
+                                              fontSize: 9.5,
                                               fontWeight: FontWeight.bold,
                                             ),
                                           ),
@@ -1075,7 +1075,7 @@ class _DiscussionTabState extends State<DiscussionTab> {
   }
 
   void _showCreateDiscussionDialog(BuildContext context) {
-    final bool isDark = AppColors.isDarkMode;
+    final bool isDark = HubnerApp.themeNotifier.value == 'Gelap' || HubnerApp.themeNotifier.value == 'Hitam';
     final currentUid = FirebaseAuth.instance.currentUser?.uid ?? '';
 
     showModalBottomSheet(
@@ -1098,15 +1098,18 @@ class _DiscussionTabState extends State<DiscussionTab> {
 
   @override
   Widget build(BuildContext context) {
-    final currentUid = FirebaseAuth.instance.currentUser?.uid ?? '';
-    final safeBottomPadding = MediaQuery.of(context).padding.bottom;
-    final bool isDesktop = MediaQuery.of(context).size.width >= 700 && MediaQuery.of(context).size.shortestSide >= 700;
-    final bool isDark = AppColors.isDarkMode;
+    return ValueListenableBuilder<String>(
+      valueListenable: HubnerApp.themeNotifier,
+      builder: (context, themeMode, _) {
+        final bool isDark = themeMode == 'Gelap' || themeMode == 'Hitam';
+        final currentUid = FirebaseAuth.instance.currentUser?.uid ?? '';
+        final safeBottomPadding = MediaQuery.of(context).padding.bottom;
+        final bool isDesktop = MediaQuery.of(context).size.width >= 700 && MediaQuery.of(context).size.shortestSide >= 700;
 
-    final double bottomNavHeight = 64.0;
-    final double bottomNavOffset = safeBottomPadding > 0 ? safeBottomPadding + 14 : 26;
-    final double fabBottomPosition = bottomNavOffset + bottomNavHeight + 16;
-    final double listBottomPadding = fabBottomPosition + 60;
+        final double bottomNavHeight = 64.0;
+        final double bottomNavOffset = safeBottomPadding > 0 ? safeBottomPadding + 14 : 26;
+        final double fabBottomPosition = bottomNavOffset + bottomNavHeight + 16;
+        final double listBottomPadding = fabBottomPosition + 60;
 
     final Widget listContent = StreamBuilder<QuerySnapshot>(
       stream: FirebaseFirestore.instance
@@ -1576,10 +1579,10 @@ class _DiscussionTabState extends State<DiscussionTab> {
                                 if (unreadCount > 0) ...[
                                   const SizedBox(width: 10),
                                   Container(
-                                    padding: const EdgeInsets.all(6),
+                                    padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
                                     decoration: BoxDecoration(
-                                      color: isDark ? Colors.white : Colors.black,
-                                      shape: BoxShape.circle,
+                                      color: const Color(0xFF7C3AED),
+                                      borderRadius: BorderRadius.circular(12),
                                     ),
                                     constraints: const BoxConstraints(
                                       minWidth: 20,
@@ -1589,8 +1592,8 @@ class _DiscussionTabState extends State<DiscussionTab> {
                                       child: Text(
                                         '$unreadCount',
                                         style: GoogleFonts.plusJakartaSans(
-                                          color: isDark ? Colors.black : Colors.white,
-                                          fontSize: 11.7,
+                                          color: Colors.white,
+                                          fontSize: 11.5,
                                           fontWeight: FontWeight.bold,
                                         ),
                                       ),
@@ -1705,138 +1708,143 @@ class _DiscussionTabState extends State<DiscussionTab> {
       );
     }
 
-    return Align(
-      alignment: Alignment.topCenter,
-      child: Container(
-        constraints: BoxConstraints(
-          maxWidth: MediaQuery.of(context).size.width > 500 ? double.infinity : 500,
-        ),
-        child: Stack(
-          children: [
-            SafeArea(
-              bottom: false,
-              child: listContent,
-            ),
+    return Container(
+      color: isDark ? Colors.black : Colors.white,
+      child: Align(
+        alignment: Alignment.topCenter,
+        child: Container(
+          constraints: BoxConstraints(
+            maxWidth: MediaQuery.of(context).size.width > 500 ? double.infinity : 500,
+          ),
+          child: Stack(
+            children: [
+              SafeArea(
+                bottom: false,
+                child: listContent,
+              ),
 
-            // Sticky Header with blur/gradient when scrolling down (Like Home Page)
-            ValueListenableBuilder<double>(
-              valueListenable: _headerScrollOffsetNotifier,
-              builder: (context, scrollOffset, _) {
-                if (scrollOffset <= 20.0) {
-                  return const SizedBox.shrink();
-                }
-                final double t = ((scrollOffset - 20.0) / 40.0).clamp(0.0, 1.0);
+              // Sticky Header with blur/gradient when scrolling down (Like Home Page)
+              ValueListenableBuilder<double>(
+                valueListenable: _headerScrollOffsetNotifier,
+                builder: (context, scrollOffset, _) {
+                  if (scrollOffset <= 20.0) {
+                    return const SizedBox.shrink();
+                  }
+                  final double t = ((scrollOffset - 20.0) / 40.0).clamp(0.0, 1.0);
 
-                return Positioned(
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  child: Opacity(
-                    opacity: t,
-                    child: Container(
-                      padding: EdgeInsets.fromLTRB(
-                        16,
-                        MediaQuery.of(context).padding.top + 6,
-                        16,
-                        16,
-                      ),
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [
-                            (isDark ? Colors.black : Colors.white).withValues(alpha: t * 0.98),
-                            (isDark ? Colors.black : Colors.white).withValues(alpha: t * 0.95),
-                            (isDark ? Colors.black : Colors.white).withValues(alpha: t * 0.45),
-                            (isDark ? Colors.black : Colors.white).withValues(alpha: 0.0),
+                  return Positioned(
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    child: Opacity(
+                      opacity: t,
+                      child: Container(
+                        padding: EdgeInsets.fromLTRB(
+                          16,
+                          MediaQuery.of(context).padding.top + 6,
+                          16,
+                          16,
+                        ),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [
+                              (isDark ? Colors.black : Colors.white).withValues(alpha: t * 0.98),
+                              (isDark ? Colors.black : Colors.white).withValues(alpha: t * 0.95),
+                              (isDark ? Colors.black : Colors.white).withValues(alpha: t * 0.45),
+                              (isDark ? Colors.black : Colors.white).withValues(alpha: 0.0),
+                            ],
+                            stops: const [0.0, 0.48, 0.75, 1.0],
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            const SizedBox(width: 42),
+                            Text(
+                              'Diskusi',
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 16.0,
+                                fontWeight: FontWeight.w800,
+                                color: isDark ? Colors.white : const Color(0xFF0F172A),
+                              ),
+                            ),
+                            BouncyButton(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(builder: (_) => const ManageFriendsPage()),
+                                );
+                              },
+                              child: Container(
+                                width: 42,
+                                height: 42,
+                                decoration: BoxDecoration(
+                                  color: isDark ? const Color(0xFF18181B) : Colors.white,
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+                                    width: 1.2,
+                                  ),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.04),
+                                      blurRadius: 8,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ],
+                                ),
+                                child: Icon(
+                                  Icons.people_outline_rounded,
+                                  color: isDark ? Colors.white : Colors.black87,
+                                  size: 20,
+                                ),
+                              ),
+                            ),
                           ],
-                          stops: const [0.0, 0.48, 0.75, 1.0],
                         ),
                       ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          const SizedBox(width: 42),
-                          Text(
-                            'Diskusi',
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 16.0,
-                              fontWeight: FontWeight.w800,
-                              color: isDark ? Colors.white : const Color(0xFF0F172A),
-                            ),
-                          ),
-                          BouncyButton(
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(builder: (_) => const ManageFriendsPage()),
-                              );
-                            },
-                            child: Container(
-                              width: 42,
-                              height: 42,
-                              decoration: BoxDecoration(
-                                color: isDark ? const Color(0xFF18181B) : Colors.white,
-                                shape: BoxShape.circle,
-                                border: Border.all(
-                                  color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
-                                  width: 1.2,
-                                ),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.04),
-                                    blurRadius: 8,
-                                    offset: const Offset(0, 2),
-                                  ),
-                                ],
-                              ),
-                              child: Icon(
-                                Icons.people_outline_rounded,
-                                color: isDark ? Colors.white : Colors.black87,
-                                size: 20,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
                     ),
-                  ),
-                );
-              },
-            ),
+                  );
+                },
+              ),
 
-            // Elevated Floating Action Button (+), well above bottom navigation menu
-            Positioned(
-              bottom: fabBottomPosition,
-              right: 16,
-              child: BouncyButton(
-                onTap: () => _showCreateDiscussionDialog(context),
-                child: Container(
-                  width: 52,
-                  height: 52,
-                  decoration: BoxDecoration(
-                    color: isDark ? Colors.white : Colors.black,
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: isDark ? 0.4 : 0.25),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  child: Icon(
-                    Icons.add_rounded,
-                    color: isDark ? Colors.black : Colors.white,
-                    size: 28,
+              // Elevated Floating Action Button (+), well above bottom navigation menu
+              Positioned(
+                bottom: fabBottomPosition,
+                right: 16,
+                child: BouncyButton(
+                  onTap: () => _showCreateDiscussionDialog(context),
+                  child: Container(
+                    width: 52,
+                    height: 52,
+                    decoration: BoxDecoration(
+                      color: isDark ? Colors.white : Colors.black,
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: isDark ? 0.4 : 0.25),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Icon(
+                      Icons.add_rounded,
+                      color: isDark ? Colors.black : Colors.white,
+                      size: 28,
+                    ),
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
+    );
+      },
     );
   }
 }
@@ -1895,6 +1903,7 @@ class _WhatsAppStyleNewChatModalState extends State<_WhatsAppStyleNewChatModal> 
   bool _isLoadingMembers = false;
   bool _isLoadingFriends = false;
   bool _isCreating = false;
+  bool _createDriveFolder = false;
   List<String> _adminUids = [];
   bool _canAllMembersEditInfo = true;
   bool _canAllMembersInvite = true;
@@ -1939,7 +1948,7 @@ class _WhatsAppStyleNewChatModalState extends State<_WhatsAppStyleNewChatModal> 
                 color: Colors.transparent,
                 child: Container(
                   decoration: BoxDecoration(
-                    color: isDark ? const Color(0xFF141416) : Colors.white,
+                    color: isDark ? const Color(0xFF18181B) : Colors.white,
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
                       color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
@@ -1959,7 +1968,7 @@ class _WhatsAppStyleNewChatModalState extends State<_WhatsAppStyleNewChatModal> 
                       shrinkWrap: true,
                       padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 6),
                       itemCount: projects.length,
-                      separatorBuilder: (_, __) => Divider(
+                      separatorBuilder: (_, _) => Divider(
                         height: 1,
                         color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
                       ),
@@ -1991,23 +2000,9 @@ class _WhatsAppStyleNewChatModalState extends State<_WhatsAppStyleNewChatModal> 
                             });
                           },
                           child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                             child: Row(
                               children: [
-                                Container(
-                                  width: 28,
-                                  height: 28,
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFF0F766E).withValues(alpha: 0.15),
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: const Icon(
-                                    Icons.school_rounded,
-                                    color: Color(0xFF0F766E),
-                                    size: 16,
-                                  ),
-                                ),
-                                const SizedBox(width: 10),
                                 Expanded(
                                   child: Text(
                                     pName,
@@ -2015,13 +2010,17 @@ class _WhatsAppStyleNewChatModalState extends State<_WhatsAppStyleNewChatModal> 
                                       fontSize: 13.5,
                                       fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
                                       color: isSelected
-                                          ? const Color(0xFF0F766E)
+                                          ? (isDark ? const Color(0xFFD6A5F8) : const Color(0xFF7C3AED))
                                           : (isDark ? Colors.white : const Color(0xFF0F172A)),
                                     ),
                                   ),
                                 ),
                                 if (isSelected)
-                                  const Icon(Icons.check_rounded, color: Color(0xFF0F766E), size: 18),
+                                  Icon(
+                                    Icons.check_rounded,
+                                    color: isDark ? const Color(0xFFD6A5F8) : const Color(0xFF7C3AED),
+                                    size: 18,
+                                  ),
                               ],
                             ),
                           ),
@@ -2429,6 +2428,34 @@ class _WhatsAppStyleNewChatModalState extends State<_WhatsAppStyleNewChatModal> 
         }
       }
 
+      String? driveFolderId;
+      String? driveFolderUrl;
+      String? driveAccessToken;
+
+      if (_createDriveFolder) {
+        try {
+          var account = await GoogleSignIn.instance.attemptLightweightAuthentication();
+          account ??= await GoogleSignIn.instance.authenticate();
+          final auth = await account.authorizationClient.authorizeScopes([drive.DriveApi.driveFileScope]);
+          driveAccessToken = auth.accessToken;
+          driveFolderId = await GoogleDriveService.createClassroomFolder(driveAccessToken, ttl);
+          driveFolderUrl = 'https://drive.google.com/drive/folders/$driveFolderId';
+        } catch (_) {
+          try {
+            final userDoc = await FirebaseFirestore.instance.collection('users').doc(widget.currentUid).get();
+            final pubFolderId = userDoc.data()?['publicDriveFolderId'] as String?;
+            final pubFolderUrl = userDoc.data()?['publicDriveFolderUrl'] as String?;
+            if (pubFolderId != null && pubFolderId.isNotEmpty) {
+              driveFolderId = pubFolderId;
+              driveFolderUrl = pubFolderUrl ?? 'https://drive.google.com/drive/folders/$pubFolderId';
+            } else {
+              driveFolderId = 'hubner_${DateTime.now().millisecondsSinceEpoch}';
+              driveFolderUrl = 'https://drive.google.com/drive/folders/$driveFolderId';
+            }
+          } catch (_) {}
+        }
+      }
+
       final newDoc = await FirebaseFirestore.instance.collection('discussions').add({
         'projectId': isFriendMode ? '' : (_selectedProjectId ?? ''),
         'isFriendGroup': isFriendMode,
@@ -2443,6 +2470,13 @@ class _WhatsAppStyleNewChatModalState extends State<_WhatsAppStyleNewChatModal> 
         'creatorUid': widget.currentUid,
         'canAllMembersEditInfo': _canAllMembersEditInfo,
         'canAllMembersInvite': _canAllMembersInvite,
+        'createDriveFolder': _createDriveFolder,
+        if (driveFolderId != null && driveFolderId.isNotEmpty) ...{
+          'driveFolderId': driveFolderId,
+          'driveFolderUrl': driveFolderUrl,
+          'driveAccessToken': driveAccessToken,
+          'driveTokenExpiry': DateTime.now().add(const Duration(minutes: 55)).toIso8601String(),
+        },
         'createdAt': FieldValue.serverTimestamp(),
         'colorIndex': Random().nextInt(5),
         'unreadCounts': {
@@ -2804,10 +2838,10 @@ class _WhatsAppStyleNewChatModalState extends State<_WhatsAppStyleNewChatModal> 
                         height: 46,
                         decoration: const BoxDecoration(
                           shape: BoxShape.circle,
-                          color: Color(0xFF0F766E),
+                          color: Color(0xFF7C3AED),
                         ),
                         child: const Icon(
-                          Icons.group_add_rounded,
+                          Icons.groups_rounded,
                           color: Colors.white,
                           size: 22,
                         ),
@@ -2879,13 +2913,13 @@ class _WhatsAppStyleNewChatModalState extends State<_WhatsAppStyleNewChatModal> 
                       Container(
                         width: 46,
                         height: 46,
-                        decoration: BoxDecoration(
+                        decoration: const BoxDecoration(
                           shape: BoxShape.circle,
-                          color: const Color(0xFF6366F1).withValues(alpha: 0.15),
+                          color: Color(0xFF0D9488),
                         ),
                         child: const Icon(
                           Icons.diversity_3_rounded,
-                          color: Color(0xFF6366F1),
+                          color: Colors.white,
                           size: 22,
                         ),
                       ),
@@ -3107,6 +3141,7 @@ class _WhatsAppStyleNewChatModalState extends State<_WhatsAppStyleNewChatModal> 
                                                   fontWeight: FontWeight.bold,
                                                   color: isDark ? Colors.white : const Color(0xFF0F172A),
                                                 ),
+                                                overflow: TextOverflow.ellipsis,
                                               ),
                                               const SizedBox(height: 2),
                                               Text(
@@ -3514,20 +3549,6 @@ class _WhatsAppStyleNewChatModalState extends State<_WhatsAppStyleNewChatModal> 
                             ),
                             child: Row(
                               children: [
-                                Container(
-                                  width: 28,
-                                  height: 28,
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFF0F766E).withValues(alpha: 0.15),
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: const Icon(
-                                    Icons.school_rounded,
-                                    color: Color(0xFF0F766E),
-                                    size: 16,
-                                  ),
-                                ),
-                                const SizedBox(width: 10),
                                 Expanded(
                                   child: Text(
                                     _selectedProjectName.isNotEmpty
@@ -4067,6 +4088,69 @@ class _WhatsAppStyleNewChatModalState extends State<_WhatsAppStyleNewChatModal> 
                             color: isDark ? Colors.white : Colors.black,
                           ),
                         ),
+                      ),
+                    ),
+                    const SizedBox(height: 14),
+
+                    // Opsi Buat Folder Penyimpanan Data
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                      decoration: BoxDecoration(
+                        color: isDark ? const Color(0xFF18181B) : const Color(0xFFF8FAFC),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 38,
+                            height: 38,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF7C3AED).withValues(alpha: 0.12),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.folder_shared_rounded,
+                              color: Color(0xFF7C3AED),
+                              size: 20,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Folder Penyimpanan Data',
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontSize: 13.5,
+                                    fontWeight: FontWeight.bold,
+                                    color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                  ),
+                                ),
+                                Text(
+                                  'Buat folder arsip berkas grup otomatis',
+                                  style: GoogleFonts.dmSans(
+                                    fontSize: 11.5,
+                                    color: isDark ? Colors.white60 : const Color(0xFF64748B),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Switch(
+                            value: _createDriveFolder,
+                            activeThumbColor: Colors.white,
+                            activeTrackColor: const Color(0xFF7C3AED),
+                            onChanged: (val) {
+                              setState(() {
+                                _createDriveFolder = val;
+                              });
+                            },
+                          ),
+                        ],
                       ),
                     ),
                     const SizedBox(height: 18),

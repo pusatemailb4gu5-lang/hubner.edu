@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hubner/core/widgets/three_dots_loader.dart';
+import 'package:hubner/core/widgets/bouncy_button.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -442,23 +443,31 @@ class _ManageMembersPageState extends State<ManageMembersPage> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   if (!widget.isEmbedded)
-                    GestureDetector(
+                    BouncyButton(
+                      scaleDown: 0.85,
                       onTap: () => Navigator.pop(context),
                       child: Container(
-                        width: 46,
-                        height: 46,
+                        width: 42,
+                        height: 42,
                         decoration: BoxDecoration(
-                          color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+                          color: isDark ? const Color(0xFF18181B) : Colors.white,
                           shape: BoxShape.circle,
                           border: Border.all(
-                            color: isDark ? const Color(0xFF3F3F46) : const Color(0xFFE2E8F0),
-                            width: 1.0,
+                            color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+                            width: 1.2,
                           ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.04),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
                         ),
                         child: Icon(
                           Icons.arrow_back_rounded,
                           color: isDark ? Colors.white : Colors.black87,
-                          size: 22,
+                          size: 20,
                         ),
                       ),
                     ),
@@ -484,7 +493,7 @@ class _ManageMembersPageState extends State<ManageMembersPage> {
                     ),
                   ),
                   if (!widget.isEmbedded)
-                    const SizedBox(width: 46),
+                    const SizedBox(width: 42),
                 ],
               ),
             ),
