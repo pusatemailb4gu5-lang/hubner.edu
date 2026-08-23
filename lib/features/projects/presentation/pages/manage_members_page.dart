@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hubner/core/widgets/three_dots_loader.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -554,7 +555,7 @@ class _ManageMembersPageState extends State<ManageMembersPage> {
                               ? const SizedBox(
                                   width: 16,
                                   height: 16,
-                                  child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                                  child: const ThreeDotsLoader(),
                                 )
                               : Text(
                                   'Undang',
@@ -851,7 +852,7 @@ class _ManageMembersPageState extends State<ManageMembersPage> {
                     .snapshots(),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(child: CircularProgressIndicator());
+                    return const Center(child: ThreeDotsLoader());
                   }
 
                   final rawDocs = snapshot.data?.docs ?? [];

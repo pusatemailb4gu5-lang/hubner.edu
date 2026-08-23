@@ -1,4 +1,5 @@
 import 'dart:ui';
+import 'package:hubner/core/widgets/three_dots_loader.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -53,7 +54,7 @@ class _ClassLearningReportPageState extends State<ClassLearningReportPage>
             if (projectSnap.connectionState == ConnectionState.waiting && !projectSnap.hasData) {
               return Scaffold(
                 backgroundColor: isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
-                body: const Center(child: CircularProgressIndicator()),
+                body: const Center(child: ThreeDotsLoader()),
               );
             }
 
@@ -315,7 +316,7 @@ class _ClassLearningReportPageState extends State<ClassLearningReportPage>
                             Text(
                               '$studentCount Siswa',
                               style: GoogleFonts.plusJakartaSans(
-                                fontSize: 12,
+                                fontSize: 14.0,
                                 fontWeight: FontWeight.bold,
                                 color: const Color(0xFF0F172A),
                               ),
@@ -338,7 +339,7 @@ class _ClassLearningReportPageState extends State<ClassLearningReportPage>
                             Text(
                               '$totalStages Tahapan · $totalTasks Tugas',
                               style: GoogleFonts.plusJakartaSans(
-                                fontSize: 12,
+                                fontSize: 14.0,
                                 fontWeight: FontWeight.bold,
                                 color: const Color(0xFF0F172A),
                               ),
@@ -471,7 +472,7 @@ class _ClassLearningReportPageState extends State<ClassLearningReportPage>
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                             style: GoogleFonts.dmSans(
-                              fontSize: 12,
+                              fontSize: 14.0,
                               color: isDark ? Colors.white54 : Colors.black54,
                             ),
                           ),
@@ -488,7 +489,7 @@ class _ClassLearningReportPageState extends State<ClassLearningReportPage>
                     child: Text(
                       statusLabel,
                       style: GoogleFonts.plusJakartaSans(
-                        fontSize: 11,
+                        fontSize: 14.0,
                         fontWeight: FontWeight.bold,
                         color: isDark ? Colors.white : statusFg,
                       ),
@@ -629,7 +630,7 @@ class _ClassLearningReportPageState extends State<ClassLearningReportPage>
                         Text(
                           'ID: $userId',
                           style: GoogleFonts.dmSans(
-                            fontSize: 12.5,
+                            fontSize: 14.0,
                             color: isDark ? Colors.white54 : Colors.black45,
                           ),
                         ),
@@ -647,7 +648,7 @@ class _ClassLearningReportPageState extends State<ClassLearningReportPage>
                     child: Text(
                       '$completedCount/$totalTasks Selesai',
                       style: GoogleFonts.plusJakartaSans(
-                        fontSize: 11.5,
+                        fontSize: 14.0,
                         fontWeight: FontWeight.bold,
                         color: progress >= 1.0 ? const Color(0xFF10B981) : const Color(0xFF2563EB),
                       ),
@@ -699,7 +700,7 @@ class _ClassLearningReportPageState extends State<ClassLearningReportPage>
             Text(
               label,
               style: GoogleFonts.dmSans(
-                fontSize: 11,
+                fontSize: 14.0,
                 color: isDark ? Colors.white54 : Colors.black54,
               ),
             ),
@@ -751,8 +752,8 @@ class _SliverTabHeaderDelegate extends SliverPersistentHeaderDelegate {
           ),
           labelColor: isDark ? Colors.white : const Color(0xFF0F172A),
           unselectedLabelColor: isDark ? Colors.white54 : Colors.black54,
-          labelStyle: GoogleFonts.plusJakartaSans(fontSize: 13, fontWeight: FontWeight.bold),
-          unselectedLabelStyle: GoogleFonts.plusJakartaSans(fontSize: 13, fontWeight: FontWeight.w600),
+          labelStyle: GoogleFonts.plusJakartaSans(fontSize: 14.0, fontWeight: FontWeight.bold),
+          unselectedLabelStyle: GoogleFonts.plusJakartaSans(fontSize: 14.0, fontWeight: FontWeight.w600),
           tabs: const [
             Tab(text: 'Capaian Elemen CP'),
             Tab(text: 'Rekap Progres Siswa'),

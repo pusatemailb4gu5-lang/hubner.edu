@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hubner/core/widgets/three_dots_loader.dart';
 import 'package:flutter/services.dart';
 import 'package:hubner/features/home/presentation/widgets/animated_rainbow_background.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -246,7 +247,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
       showDialog(
         context: context,
         barrierDismissible: false,
-        builder: (_) => const Center(child: CircularProgressIndicator(color: Colors.white)),
+        builder: (_) => const Center(child: ThreeDotsLoader()),
       );
 
       final auth = await account.authorizationClient.authorizeScopes([drive.DriveApi.driveFileScope]);
@@ -336,7 +337,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                           showDialog(
                             context: context,
                             barrierDismissible: false,
-                            builder: (_) => const Center(child: CircularProgressIndicator(color: Colors.white)),
+                            builder: (_) => const Center(child: ThreeDotsLoader()),
                           );
 
                           try {
@@ -408,7 +409,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                     showDialog(
                                       context: context,
                                       barrierDismissible: false,
-                                      builder: (_) => const Center(child: CircularProgressIndicator(color: Colors.white)),
+                                      builder: (_) => const Center(child: ThreeDotsLoader()),
                                     );
 
                                     try {
@@ -469,7 +470,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
       showDialog(
         context: context,
         barrierDismissible: false,
-        builder: (_) => const Center(child: CircularProgressIndicator(color: Colors.white)),
+        builder: (_) => const Center(child: ThreeDotsLoader()),
       );
 
       String pId = widget.projectId ?? '';
@@ -806,7 +807,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
       context: context,
       barrierDismissible: false,
       builder: (context) => const Center(
-        child: CircularProgressIndicator(color: Colors.black),
+        child: const ThreeDotsLoader(),
       ),
     );
 
@@ -906,7 +907,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                               Text(
                                                 'Kelas',
                                                 style: GoogleFonts.dmSans(
-                                                  fontSize: 11.7,
+                                                  fontSize: 14.0,
                                                   fontWeight: FontWeight.w500,
                                                   color: Colors.black38,
                                                 ),
@@ -1014,7 +1015,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
 
                                   return ListTile(
                                     title: Text(m['name'], style: GoogleFonts.plusJakartaSans(fontSize: 14, fontWeight: FontWeight.w600)),
-                                    subtitle: Text('ID: ${m['userId']}', style: GoogleFonts.plusJakartaSans(fontSize: 11.7, color: Colors.black38)),
+                                    subtitle: Text('ID: ${m['userId']}', style: GoogleFonts.plusJakartaSans(fontSize: 14.0, color: Colors.black38)),
                                     leading: Container(
                                       width: 28,
                                       height: 28,
@@ -1335,7 +1336,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                 Text(
                                   subtitle,
                                   style: GoogleFonts.dmSans(
-                                    fontSize: 12.9,
+                                    fontSize: 14.0,
                                     color: Colors.black38,
                                     fontWeight: FontWeight.w500,
                                   ),
@@ -1663,7 +1664,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                               Text(
                                 '@mention ($_unreadMentionCount)',
                                 style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 12.9,
+                                  fontSize: 14.0,
                                   fontWeight: FontWeight.w600,
                                   color: const Color(0xFF9333EA),
                                 ),
@@ -1688,7 +1689,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                               builder: (context, snapshot) {
                                 // Only show spinner if no data at all (first load)
                                 if (snapshot.data == null && snapshot.connectionState == ConnectionState.waiting) {
-                                  return const Center(child: CircularProgressIndicator(color: Colors.black12, strokeWidth: 2));
+                                  return const Center(child: ThreeDotsLoader());
                                 }
                                 final messageDocs = snapshot.data?.docs ?? [];
 
@@ -1893,7 +1894,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                                                Text(
                                                                  msgData['replyToSender'] as String,
                                                                  style: GoogleFonts.plusJakartaSans(
-                                                                   fontSize: 11.7,
+                                                                   fontSize: 14.0,
                                                                    fontWeight: FontWeight.bold,
                                                                    color: isMe ? Colors.white : const Color(0xFF2563EB),
                                                                  ),
@@ -1906,7 +1907,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                                                  maxLines: 1,
                                                                  overflow: TextOverflow.ellipsis,
                                                                  style: GoogleFonts.dmSans(
-                                                                   fontSize: 11.2,
+                                                                   fontSize: 14.0,
                                                                    color: isMe ? Colors.white70 : Colors.black54,
                                                                  ),
                                                                ),
@@ -1918,7 +1919,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                                          Text(
                                                            displayName,
                                                            style: GoogleFonts.plusJakartaSans(
-                                                             fontSize: 11.7,
+                                                             fontSize: 14.0,
                                                              fontWeight: FontWeight.bold,
                                                              color: Colors.black54,
                                                            ),
@@ -1958,7 +1959,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                                                          const SizedBox(width: 6),
                                                                          Text(
                                                                            'Gagal memuat gambar',
-                                                                           style: GoogleFonts.dmSans(fontSize: 12.9, color: Colors.redAccent),
+                                                                           style: GoogleFonts.dmSans(fontSize: 14.0, color: Colors.redAccent),
                                                                          ),
                                                                        ],
                                                                      ),
@@ -1984,7 +1985,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                                        Text(
                                                          timeText,
                                                          style: GoogleFonts.dmSans(
-                                                           fontSize: 9.4,
+                                                           fontSize: 14.0,
                                                            color: isMe ? Colors.white60 : Colors.black38,
                                                          ),
                                                        ),
@@ -2068,7 +2069,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                             Text(
                                               m['uid'] == 'all' ? '@all' : '@${m['name']}',
                                               style: GoogleFonts.plusJakartaSans(
-                                                fontSize: 12.9,
+                                                fontSize: 14.0,
                                                 fontWeight: FontWeight.w600,
                                                 color: Colors.black,
                                               ),
@@ -2113,7 +2114,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                         Text(
                                           _replyingToMessage!['sender'] ?? 'User',
                                           style: GoogleFonts.plusJakartaSans(
-                                            fontSize: 12.9,
+                                            fontSize: 14.0,
                                             fontWeight: FontWeight.bold,
                                             color: const Color(0xFF2563EB),
                                           ),
@@ -2126,7 +2127,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                           maxLines: 1,
                                           overflow: TextOverflow.ellipsis,
                                           style: GoogleFonts.dmSans(
-                                            fontSize: 11.7,
+                                            fontSize: 14.0,
                                             color: Colors.black54,
                                           ),
                                         ),
@@ -2404,7 +2405,7 @@ class FullScreenImagePage extends StatelessWidget {
             fit: BoxFit.contain,
             loadingBuilder: (context, child, loadingProgress) {
               if (loadingProgress == null) return child;
-              return const Center(child: CircularProgressIndicator(color: Colors.white));
+              return const Center(child: ThreeDotsLoader());
             },
             errorBuilder: (context, error, stackTrace) {
               return const Center(

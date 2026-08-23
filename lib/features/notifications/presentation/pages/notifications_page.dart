@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hubner/core/widgets/three_dots_loader.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../projects/presentation/pages/class_page.dart';
@@ -90,7 +91,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                   builder: (context, projSnap) {
                     if (notifSnap.connectionState == ConnectionState.waiting &&
                         projSnap.connectionState == ConnectionState.waiting) {
-                      return const Center(child: CircularProgressIndicator(color: Colors.black));
+                      return const Center(child: ThreeDotsLoader());
                     }
 
                     final notifDocs = notifSnap.data?.docs ?? [];
@@ -257,7 +258,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                                 Text(
                                   _formatTime(item['createdAt']),
                                   style: GoogleFonts.dmSans(
-                                    fontSize: 12.9,
+                                    fontSize: 14.0,
                                     color: Colors.black38,
                                     fontWeight: FontWeight.w500,
                                   ),

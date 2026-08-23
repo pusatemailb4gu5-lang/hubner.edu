@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'package:hubner/core/widgets/three_dots_loader.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -502,7 +503,7 @@ class _RegisterPageState extends State<RegisterPage> {
                             Text(
                               'Terverifikasi Google',
                               style: GoogleFonts.plusJakartaSans(
-                                fontSize: 10.5,
+                                fontSize: 14.0,
                                 fontWeight: FontWeight.w600,
                                 color: const Color(0xFF16A34A),
                               ),
@@ -1015,7 +1016,7 @@ class _RegisterPageState extends State<RegisterPage> {
                         ? const SizedBox(
                             width: 22,
                             height: 22,
-                            child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                            child: const ThreeDotsLoader(),
                           )
                         : Text(
                             'Daftar',
@@ -1119,7 +1120,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 child: Text(
                   'edu',
                   style: GoogleFonts.plusJakartaSans(
-                    fontSize: 12.9,
+                    fontSize: 14.0,
                     fontWeight: FontWeight.bold,
                     color: Colors.white,
                   ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hubner/core/widgets/three_dots_loader.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -132,7 +133,7 @@ class _DesktopQuizTabState extends State<DesktopQuizTab> {
           .snapshots(),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
-          return const Center(child: CircularProgressIndicator());
+          return const Center(child: ThreeDotsLoader());
         }
 
         final data = snapshot.data!.data() as Map<String, dynamic>? ?? {};
@@ -394,7 +395,7 @@ class _DesktopQuizTabState extends State<DesktopQuizTab> {
                           child: Text(
                             '${sIndex + 1}',
                             style: GoogleFonts.plusJakartaSans(
-                              fontSize: 13.5,
+                              fontSize: 14.0,
                               fontWeight: FontWeight.bold,
                               color: Colors.white,
                             ),
@@ -416,7 +417,7 @@ class _DesktopQuizTabState extends State<DesktopQuizTab> {
                               Text(
                                 '${materis.length} Materi • ${stageTasks.length} Quiz',
                                 style: GoogleFonts.dmSans(
-                                  fontSize: 12,
+                                  fontSize: 14.0,
                                   color: const Color(0xFF64748B),
                                 ),
                               ),
@@ -442,7 +443,7 @@ class _DesktopQuizTabState extends State<DesktopQuizTab> {
                               child: Text(
                                 'Belum ada quiz di elemen ini.',
                                 style: GoogleFonts.dmSans(
-                                  fontSize: 12.5,
+                                  fontSize: 14.0,
                                   color: const Color(0xFF94A3B8),
                                 ),
                               ),
@@ -526,7 +527,7 @@ class _DesktopQuizTabState extends State<DesktopQuizTab> {
                                                   maxLines: 1,
                                                   overflow: TextOverflow.ellipsis,
                                                   style: GoogleFonts.plusJakartaSans(
-                                                    fontSize: 13.5,
+                                                    fontSize: 14.0,
                                                     fontWeight: isSelected
                                                         ? FontWeight.bold
                                                         : FontWeight.w500,
@@ -538,7 +539,7 @@ class _DesktopQuizTabState extends State<DesktopQuizTab> {
                                                 Text(
                                                   'Materi: ${t['materiTitle'] ?? '-'}',
                                                   style: GoogleFonts.dmSans(
-                                                    fontSize: 11.5,
+                                                    fontSize: 14.0,
                                                     color: const Color(0xFF64748B),
                                                   ),
                                                 ),
@@ -571,7 +572,7 @@ class _DesktopQuizTabState extends State<DesktopQuizTab> {
                                                   Text(
                                                     'Preview',
                                                     style: GoogleFonts.plusJakartaSans(
-                                                      fontSize: 11,
+                                                      fontSize: 14.0,
                                                       fontWeight: FontWeight.bold,
                                                       color: accentColor,
                                                     ),
@@ -678,7 +679,7 @@ class _DesktopQuizTabState extends State<DesktopQuizTab> {
               Text(
                 '$_selectedStageTitle • $materiTitle',
                 style: GoogleFonts.dmSans(
-                  fontSize: 13.5,
+                  fontSize: 14.0,
                   color: const Color(0xFF475569),
                 ),
               ),
@@ -693,7 +694,7 @@ class _DesktopQuizTabState extends State<DesktopQuizTab> {
                 Text(
                   'Tenggat: ${startDateStr.isNotEmpty ? startDateStr : '-'} s/d ${endDateStr.isNotEmpty ? endDateStr : 'Selesai'}',
                   style: GoogleFonts.dmSans(
-                    fontSize: 13.5,
+                    fontSize: 14.0,
                     color: const Color(0xFF475569),
                   ),
                 ),
@@ -731,7 +732,7 @@ class _DesktopQuizTabState extends State<DesktopQuizTab> {
                     label: Text(
                       'Edit Soal',
                       style: GoogleFonts.plusJakartaSans(
-                        fontSize: 13,
+                        fontSize: 14.0,
                         fontWeight: FontWeight.bold,
                         color: const Color(0xFF7C3AED),
                       ),
@@ -755,7 +756,7 @@ class _DesktopQuizTabState extends State<DesktopQuizTab> {
                     label: Text(
                       'Batal',
                       style: GoogleFonts.plusJakartaSans(
-                        fontSize: 13,
+                        fontSize: 14.0,
                         fontWeight: FontWeight.bold,
                         color: const Color(0xFFEF4444),
                       ),
@@ -768,7 +769,7 @@ class _DesktopQuizTabState extends State<DesktopQuizTab> {
                     label: Text(
                       'Simpan',
                       style: GoogleFonts.plusJakartaSans(
-                        fontSize: 13,
+                        fontSize: 14.0,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
                       ),
@@ -814,7 +815,7 @@ class _DesktopQuizTabState extends State<DesktopQuizTab> {
                         Text(
                           'Soal ${qIdx + 1}',
                           style: GoogleFonts.plusJakartaSans(
-                            fontSize: 13,
+                            fontSize: 14.0,
                             fontWeight: FontWeight.bold,
                             color: const Color(0xFF475569),
                           ),
@@ -869,7 +870,7 @@ class _DesktopQuizTabState extends State<DesktopQuizTab> {
                                     Expanded(
                                       child: Text(
                                         'Gambar: ${q['image']}',
-                                        style: GoogleFonts.dmSans(fontSize: 12, color: const Color(0xFF64748B)),
+                                        style: GoogleFonts.dmSans(fontSize: 14.0, color: const Color(0xFF64748B)),
                                       ),
                                     ),
                                   ],
@@ -888,7 +889,7 @@ class _DesktopQuizTabState extends State<DesktopQuizTab> {
                       TextFormField(
                         initialValue: qText,
                         onChanged: (val) => q['question'] = val,
-                        style: GoogleFonts.dmSans(fontSize: 13.5),
+                        style: GoogleFonts.dmSans(fontSize: 14.0),
                         decoration: InputDecoration(
                           hintText: 'Tulis pertanyaan soal...',
                           isDense: true,
@@ -926,7 +927,7 @@ class _DesktopQuizTabState extends State<DesktopQuizTab> {
                           Text(
                             'Jawaban Benar: ',
                             style: GoogleFonts.plusJakartaSans(
-                              fontSize: 12.5,
+                              fontSize: 14.0,
                               fontWeight: FontWeight.bold,
                               color: const Color(0xFF475569),
                             ),
@@ -940,7 +941,7 @@ class _DesktopQuizTabState extends State<DesktopQuizTab> {
                                 child: Text(
                                   opt,
                                   style: GoogleFonts.plusJakartaSans(
-                                    fontSize: 12.5,
+                                    fontSize: 14.0,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
@@ -985,7 +986,7 @@ class _DesktopQuizTabState extends State<DesktopQuizTab> {
                 label: Text(
                   'Tambah Pertanyaan Baru',
                   style: GoogleFonts.plusJakartaSans(
-                    fontSize: 13,
+                    fontSize: 14.0,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -1318,7 +1319,7 @@ class _DesktopQuizTabState extends State<DesktopQuizTab> {
             child: Text(
               key,
               style: GoogleFonts.plusJakartaSans(
-                fontSize: 11,
+                fontSize: 14.0,
                 fontWeight: FontWeight.bold,
                 color: isCorrect ? Colors.white : const Color(0xFF64748B),
               ),
@@ -1329,7 +1330,7 @@ class _DesktopQuizTabState extends State<DesktopQuizTab> {
             child: Text(
               text.isNotEmpty ? text : '(Opsi kosong)',
               style: GoogleFonts.dmSans(
-                fontSize: 13,
+                fontSize: 14.0,
                 color: isCorrect ? const Color(0xFF065F46) : const Color(0xFF475569),
               ),
             ),
@@ -1343,7 +1344,7 @@ class _DesktopQuizTabState extends State<DesktopQuizTab> {
     return TextFormField(
       initialValue: initialValue,
       onChanged: (val) => q[key.toLowerCase()] = val,
-      style: GoogleFonts.dmSans(fontSize: 13),
+      style: GoogleFonts.dmSans(fontSize: 14.0),
       decoration: InputDecoration(
         prefixText: '$key: ',
         prefixStyle: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, color: const Color(0xFF64748B)),
@@ -1647,7 +1648,7 @@ class _DesktopQuizTabState extends State<DesktopQuizTab> {
                                   Text(
                                     'Pilih Elemen Pembelajaran',
                                     style: GoogleFonts.plusJakartaSans(
-                                      fontSize: 13,
+                                      fontSize: 14.0,
                                       fontWeight: FontWeight.bold,
                                       color: const Color(0xFF475569),
                                     ),
@@ -1696,7 +1697,7 @@ class _DesktopQuizTabState extends State<DesktopQuizTab> {
                                   Text(
                                     'Pilih Materi',
                                     style: GoogleFonts.plusJakartaSans(
-                                      fontSize: 13,
+                                      fontSize: 14.0,
                                       fontWeight: FontWeight.bold,
                                       color: const Color(0xFF475569),
                                     ),
@@ -1745,7 +1746,7 @@ class _DesktopQuizTabState extends State<DesktopQuizTab> {
                                   Text(
                                     'Judul Quiz',
                                     style: GoogleFonts.plusJakartaSans(
-                                      fontSize: 13,
+                                      fontSize: 14.0,
                                       fontWeight: FontWeight.bold,
                                       color: const Color(0xFF475569),
                                     ),
@@ -1781,7 +1782,7 @@ class _DesktopQuizTabState extends State<DesktopQuizTab> {
                                           children: [
                                             Text(
                                               'Tanggal Mulai',
-                                              style: GoogleFonts.plusJakartaSans(fontSize: 13, fontWeight: FontWeight.bold, color: const Color(0xFF475569)),
+                                              style: GoogleFonts.plusJakartaSans(fontSize: 14.0, fontWeight: FontWeight.bold, color: const Color(0xFF475569)),
                                             ),
                                             const SizedBox(height: 6),
                                             TextField(
@@ -1817,7 +1818,7 @@ class _DesktopQuizTabState extends State<DesktopQuizTab> {
                                           children: [
                                             Text(
                                               'Tanggal Selesai / Tenggat',
-                                              style: GoogleFonts.plusJakartaSans(fontSize: 13, fontWeight: FontWeight.bold, color: const Color(0xFF475569)),
+                                              style: GoogleFonts.plusJakartaSans(fontSize: 14.0, fontWeight: FontWeight.bold, color: const Color(0xFF475569)),
                                             ),
                                             const SizedBox(height: 6),
                                             TextField(
@@ -1852,7 +1853,7 @@ class _DesktopQuizTabState extends State<DesktopQuizTab> {
 
                                   Text(
                                     'Batasan Waktu Pengerjaan',
-                                    style: GoogleFonts.plusJakartaSans(fontSize: 13, fontWeight: FontWeight.bold, color: const Color(0xFF475569)),
+                                    style: GoogleFonts.plusJakartaSans(fontSize: 14.0, fontWeight: FontWeight.bold, color: const Color(0xFF475569)),
                                   ),
                                   const SizedBox(height: 6),
                                   Row(
@@ -1951,7 +1952,7 @@ class _DesktopQuizTabState extends State<DesktopQuizTab> {
                                             Row(
                                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                               children: [
-                                                Text('Soal ${qIdx + 1}', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, fontSize: 13, color: const Color(0xFF475569))),
+                                                Text('Soal ${qIdx + 1}', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, fontSize: 14.0, color: const Color(0xFF475569))),
                                                 if (questionsList.length > 1)
                                                   GestureDetector(
                                                     onTap: () {
@@ -1969,7 +1970,7 @@ class _DesktopQuizTabState extends State<DesktopQuizTab> {
                                               maxLines: null,
                                               minLines: 1,
                                               keyboardType: TextInputType.multiline,
-                                              style: GoogleFonts.dmSans(fontSize: 13.5),
+                                              style: GoogleFonts.dmSans(fontSize: 14.0),
                                               decoration: InputDecoration(
                                                 hintText: 'Pertanyaan...',
                                                 isDense: true,
@@ -1991,11 +1992,11 @@ class _DesktopQuizTabState extends State<DesktopQuizTab> {
                                                     maxLines: null,
                                                     minLines: 1,
                                                     keyboardType: TextInputType.multiline,
-                                                    style: GoogleFonts.dmSans(fontSize: 13),
+                                                    style: GoogleFonts.dmSans(fontSize: 14.0),
                                                     decoration: InputDecoration(
                                                       hintText: 'Pilihan A',
                                                       prefixText: 'A. ',
-                                                      prefixStyle: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, color: const Color(0xFF0F172A), fontSize: 13),
+                                                      prefixStyle: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, color: const Color(0xFF0F172A), fontSize: 14.0),
                                                       isDense: true,
                                                       contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                                                       fillColor: (q['correct'] ?? 'A') == 'A' ? const Color(0xFFF0FDF4) : Colors.white,
@@ -2013,11 +2014,11 @@ class _DesktopQuizTabState extends State<DesktopQuizTab> {
                                                     maxLines: null,
                                                     minLines: 1,
                                                     keyboardType: TextInputType.multiline,
-                                                    style: GoogleFonts.dmSans(fontSize: 13),
+                                                    style: GoogleFonts.dmSans(fontSize: 14.0),
                                                     decoration: InputDecoration(
                                                       hintText: 'Pilihan B',
                                                       prefixText: 'B. ',
-                                                      prefixStyle: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, color: const Color(0xFF0F172A), fontSize: 13),
+                                                      prefixStyle: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, color: const Color(0xFF0F172A), fontSize: 14.0),
                                                       isDense: true,
                                                       contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                                                       fillColor: (q['correct'] ?? 'A') == 'B' ? const Color(0xFFF0FDF4) : Colors.white,
@@ -2039,11 +2040,11 @@ class _DesktopQuizTabState extends State<DesktopQuizTab> {
                                                     maxLines: null,
                                                     minLines: 1,
                                                     keyboardType: TextInputType.multiline,
-                                                    style: GoogleFonts.dmSans(fontSize: 13),
+                                                    style: GoogleFonts.dmSans(fontSize: 14.0),
                                                     decoration: InputDecoration(
                                                       hintText: 'Pilihan C',
                                                       prefixText: 'C. ',
-                                                      prefixStyle: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, color: const Color(0xFF0F172A), fontSize: 13),
+                                                      prefixStyle: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, color: const Color(0xFF0F172A), fontSize: 14.0),
                                                       isDense: true,
                                                       contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                                                       fillColor: (q['correct'] ?? 'A') == 'C' ? const Color(0xFFF0FDF4) : Colors.white,
@@ -2061,11 +2062,11 @@ class _DesktopQuizTabState extends State<DesktopQuizTab> {
                                                     maxLines: null,
                                                     minLines: 1,
                                                     keyboardType: TextInputType.multiline,
-                                                    style: GoogleFonts.dmSans(fontSize: 13),
+                                                    style: GoogleFonts.dmSans(fontSize: 14.0),
                                                     decoration: InputDecoration(
                                                       hintText: 'Pilihan D',
                                                       prefixText: 'D. ',
-                                                      prefixStyle: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, color: const Color(0xFF0F172A), fontSize: 13),
+                                                      prefixStyle: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, color: const Color(0xFF0F172A), fontSize: 14.0),
                                                       isDense: true,
                                                       contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                                                       fillColor: (q['correct'] ?? 'A') == 'D' ? const Color(0xFFF0FDF4) : Colors.white,
@@ -2085,7 +2086,7 @@ class _DesktopQuizTabState extends State<DesktopQuizTab> {
                                               children: [
                                                 Row(
                                                   children: [
-                                                    Text('Kunci Jawaban: ', style: GoogleFonts.plusJakartaSans(fontSize: 12.5, fontWeight: FontWeight.bold, color: const Color(0xFF64748B))),
+                                                    Text('Kunci Jawaban: ', style: GoogleFonts.plusJakartaSans(fontSize: 14.0, fontWeight: FontWeight.bold, color: const Color(0xFF64748B))),
                                                     const SizedBox(width: 8),
                                                     Container(
                                                       padding: const EdgeInsets.symmetric(horizontal: 10),
@@ -2127,7 +2128,7 @@ class _DesktopQuizTabState extends State<DesktopQuizTab> {
                                                         children: [
                                                           const Icon(Icons.add_photo_alternate_rounded, size: 16, color: Color(0xFF475569)),
                                                           const SizedBox(width: 6),
-                                                          Text('Upload Gambar', style: GoogleFonts.plusJakartaSans(fontSize: 12, fontWeight: FontWeight.bold, color: const Color(0xFF475569))),
+                                                          Text('Upload Gambar', style: GoogleFonts.plusJakartaSans(fontSize: 14.0, fontWeight: FontWeight.bold, color: const Color(0xFF475569))),
                                                         ],
                                                       ),
                                                     ),
@@ -2145,7 +2146,7 @@ class _DesktopQuizTabState extends State<DesktopQuizTab> {
                                                       children: [
                                                         const Icon(Icons.image_rounded, size: 15, color: Color(0xFF2563EB)),
                                                         const SizedBox(width: 6),
-                                                        Text('Gambar Ada', style: GoogleFonts.plusJakartaSans(fontSize: 12, fontWeight: FontWeight.bold, color: const Color(0xFF1D4ED8))),
+                                                        Text('Gambar Ada', style: GoogleFonts.plusJakartaSans(fontSize: 14.0, fontWeight: FontWeight.bold, color: const Color(0xFF1D4ED8))),
                                                         const SizedBox(width: 6),
                                                         InkWell(
                                                           onTap: () => setDialogState(() => q['image'] = ''),
@@ -2264,7 +2265,7 @@ class _DesktopQuizTabState extends State<DesktopQuizTab> {
                             Text(
                               '${submissions.length} Percobaan Siswa',
                               style: GoogleFonts.dmSans(
-                                fontSize: 13,
+                                fontSize: 14.0,
                                 color: Colors.white.withValues(alpha: 0.85),
                               ),
                             ),
@@ -2331,7 +2332,7 @@ class _DesktopQuizTabState extends State<DesktopQuizTab> {
                                           studentName,
                                           style: GoogleFonts.plusJakartaSans(fontSize: 16.4, fontWeight: FontWeight.bold, color: const Color(0xFF000000)),
                                         ),
-                                        Text('Dikerjakan pada: $completedAt', style: GoogleFonts.dmSans(fontSize: 12, color: const Color(0xFF64748B))),
+                                        Text('Dikerjakan pada: $completedAt', style: GoogleFonts.dmSans(fontSize: 14.0, color: const Color(0xFF64748B))),
                                       ],
                                     ),
                                   ),
@@ -2344,7 +2345,7 @@ class _DesktopQuizTabState extends State<DesktopQuizTab> {
                                     ),
                                     child: Text(
                                       'Skor: $score',
-                                      style: GoogleFonts.plusJakartaSans(fontSize: 13.5, fontWeight: FontWeight.bold, color: const Color(0xFF059669)),
+                                      style: GoogleFonts.plusJakartaSans(fontSize: 14.0, fontWeight: FontWeight.bold, color: const Color(0xFF059669)),
                                     ),
                                   ),
                                 ],
@@ -2416,7 +2417,7 @@ class _DesktopQuizTabState extends State<DesktopQuizTab> {
               child: Text(
                 key,
                 style: GoogleFonts.plusJakartaSans(
-                  fontSize: 13,
+                  fontSize: 14.0,
                   fontWeight: FontWeight.bold,
                   color: isSelected ? Colors.white : const Color(0xFF64748B),
                 ),
@@ -2508,13 +2509,13 @@ class _DesktopQuizTabState extends State<DesktopQuizTab> {
                 children: [
                   Text(
                     'Gambar Soal Terpasang',
-                    style: GoogleFonts.plusJakartaSans(fontSize: 12, fontWeight: FontWeight.bold, color: const Color(0xFF0F172A)),
+                    style: GoogleFonts.plusJakartaSans(fontSize: 14.0, fontWeight: FontWeight.bold, color: const Color(0xFF0F172A)),
                   ),
                   Text(
                     currentImage,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.dmSans(fontSize: 11, color: const Color(0xFF64748B)),
+                    style: GoogleFonts.dmSans(fontSize: 14.0, color: const Color(0xFF64748B)),
                   ),
                 ],
               ),
@@ -2563,7 +2564,7 @@ class _DesktopQuizTabState extends State<DesktopQuizTab> {
                 Text(
                   '+ Pilih / Upload Gambar Soal',
                   style: GoogleFonts.plusJakartaSans(
-                    fontSize: 13,
+                    fontSize: 14.0,
                     fontWeight: FontWeight.bold,
                     color: const Color(0xFF1E40AF),
                   ),
@@ -2571,7 +2572,7 @@ class _DesktopQuizTabState extends State<DesktopQuizTab> {
                 Text(
                   'Unggah berkas dari perangkat atau masukkan URL gambar',
                   style: GoogleFonts.dmSans(
-                    fontSize: 11.5,
+                    fontSize: 14.0,
                     color: const Color(0xFF64748B),
                   ),
                 ),
@@ -2611,7 +2612,7 @@ class _DesktopQuizTabState extends State<DesktopQuizTab> {
                   }
                 },
                 icon: const Icon(Icons.upload_file_rounded, size: 18),
-                label: Text('Upload Berkas Dari Komputer', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, fontSize: 13)),
+                label: Text('Upload Berkas Dari Komputer', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, fontSize: 14.0)),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF2563EB),
                   foregroundColor: Colors.white,
@@ -2620,7 +2621,7 @@ class _DesktopQuizTabState extends State<DesktopQuizTab> {
               ),
             ),
             const SizedBox(height: 16),
-            Text('Atau Tempelkan URL Gambar:', style: GoogleFonts.dmSans(fontSize: 12.5, color: Colors.black54)),
+            Text('Atau Tempelkan URL Gambar:', style: GoogleFonts.dmSans(fontSize: 14.0, color: Colors.black54)),
             const SizedBox(height: 6),
             TextField(
               controller: urlController,

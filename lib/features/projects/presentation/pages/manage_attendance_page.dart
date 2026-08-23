@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hubner/core/widgets/three_dots_loader.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:hubner/features/home/presentation/widgets/animated_rainbow_background.dart';
@@ -160,7 +161,7 @@ class _ManageAttendancePageState extends State<ManageAttendancePage> {
                     const SizedBox(height: 4),
                     Text(
                       'Tulis atau tempel daftar nama siswa (satu nama per baris). Sistem akan memproses nama-nama tersebut.',
-                      style: GoogleFonts.dmSans(fontSize: 12.3, color: Colors.black45, height: 1.4),
+                      style: GoogleFonts.dmSans(fontSize: 14.0, color: Colors.black45, height: 1.4),
                     ),
                     const SizedBox(height: 12),
                     Expanded(
@@ -225,7 +226,7 @@ class _ManageAttendancePageState extends State<ManageAttendancePage> {
                     ? const SizedBox(
                         width: 18,
                         height: 18,
-                        child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                        child: const ThreeDotsLoader(),
                       )
                     : Text(
                         'Simpan Perubahan',

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hubner/core/widgets/three_dots_loader.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_svg/flutter_svg.dart';
@@ -979,11 +980,7 @@ class _DiscussionTabState extends State<DiscussionTab> {
                           return Container(
                             height: 48,
                             alignment: Alignment.center,
-                            child: const SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFF7C3AED)),
-                            ),
+                            child: const ThreeDotsLoader(size: 6, bounceHeight: 3),
                           );
                         }
 
@@ -1103,7 +1100,7 @@ class _DiscussionTabState extends State<DiscussionTab> {
                       ),
                       const SizedBox(height: 8),
                       if (projectMembers.isEmpty)
-                        const Center(child: CircularProgressIndicator(color: Color(0xFF7C3AED)))
+                        const Center(child: ThreeDotsLoader())
                       else
                         Container(
                           constraints: const BoxConstraints(maxHeight: 180),
@@ -1466,8 +1463,8 @@ class _DiscussionTabState extends State<DiscussionTab> {
                 .orderBy('createdAt', descending: true)
                 .snapshots(),
             builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(child: CircularProgressIndicator(color: Color(0xFF7C3AED)));
+              if (snapshot.connectionState == ConnectionState.waiting && !snapshot.hasData) {
+                return const SizedBox.shrink();
               }
 
               final docs = snapshot.data?.docs ?? [];
@@ -2238,10 +2235,7 @@ Row(
                         if (_driveAccount != null) ...
                           [
                             if (_isUploading)
-                              const SizedBox(
-                                width: 22, height: 22,
-                                child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFF7C3AED)),
-                              )
+                              const ThreeDotsLoader(size: 6, bounceHeight: 3)
                             else ...[
                               // Create Folder Button
                               GestureDetector(
@@ -2326,8 +2320,8 @@ Row(
                             .orderBy('uploadedAt', descending: true)
                             .snapshots(),
                         builder: (context, snapshot) {
-                          if (snapshot.connectionState == ConnectionState.waiting) {
-                            return const Center(child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFF7C3AED)));
+                          if (snapshot.connectionState == ConnectionState.waiting && !snapshot.hasData) {
+                            return const SizedBox.shrink();
                           }
                           final docs = snapshot.data?.docs ?? [];
                           final filtered = docs.where((doc) {
@@ -2550,7 +2544,7 @@ Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     if (_isConnecting)
-                      const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.black54))
+                      const ThreeDotsLoader(size: 5, bounceHeight: 2)
                     else
                       const GoogleDriveLogoWidget(size: 20),
                     const SizedBox(width: 10),
@@ -3739,7 +3733,7 @@ class _EditNameFormState extends State<EditNameForm> {
               elevation: 0,
             ),
             child: _isLoading 
-                ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                ? const ThreeDotsLoader(size: 5, bounceHeight: 2, colors: [Colors.white, Colors.white70, Colors.white60])
                 : Text('Simpan Perubahan', style: GoogleFonts.plusJakartaSans(fontSize: 16.4, fontWeight: FontWeight.bold)),
           ),
         ),
@@ -3868,7 +3862,7 @@ class _ChangePasswordFormState extends State<ChangePasswordForm> {
               elevation: 0,
             ),
             child: _isLoading 
-                ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                ? const ThreeDotsLoader(size: 5, bounceHeight: 2, colors: [Colors.white, Colors.white70, Colors.white60])
                 : Text('Ubah Kata Sandi', style: GoogleFonts.plusJakartaSans(fontSize: 16.4, fontWeight: FontWeight.bold)),
           ),
         ),

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:hubner/core/widgets/three_dots_loader.dart';
 import 'package:hubner/features/home/presentation/pages/chat_room_page.dart';
 import 'package:hubner/features/home/presentation/pages/manage_friends_page.dart';
 import 'package:hubner/features/projects/presentation/pages/desktop_classroom_page.dart';
@@ -129,7 +130,7 @@ class _DesktopDiskusiTabState extends State<DesktopDiskusiTab> {
                                 Text(
                                   'Grup Kelas',
                                   style: GoogleFonts.dmSans(
-                                    fontSize: 11.7,
+                                    fontSize: 14.0,
                                     fontWeight: FontWeight.w500,
                                     color: Colors.white.withValues(alpha: 0.7),
                                   ),
@@ -221,7 +222,7 @@ class _DesktopDiskusiTabState extends State<DesktopDiskusiTab> {
 
                                   return ListTile(
                                     title: Text(m['name'], style: GoogleFonts.plusJakartaSans(fontSize: 14, fontWeight: FontWeight.w600)),
-                                    subtitle: Text('ID: ${m['userId']}', style: GoogleFonts.plusJakartaSans(fontSize: 11.7, color: Colors.black38)),
+                                    subtitle: Text('ID: ${m['userId']}', style: GoogleFonts.plusJakartaSans(fontSize: 14.0, color: Colors.black38)),
                                     leading: Container(
                                       width: 28,
                                       height: 28,
@@ -513,7 +514,7 @@ class _DesktopDiskusiTabState extends State<DesktopDiskusiTab> {
                     onChanged: (val) => setState(() => _searchQuery = val.trim().toLowerCase()),
                     decoration: InputDecoration(
                       hintText: 'Cari thread diskusi...',
-                      hintStyle: GoogleFonts.dmSans(fontSize: 13, color: const Color(0xFF94A3B8)),
+                      hintStyle: GoogleFonts.dmSans(fontSize: 14.0, color: const Color(0xFF94A3B8)),
                       prefixIcon: const Icon(Icons.search_rounded, size: 18, color: Color(0xFF64748B)),
                       isDense: true,
                       contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
@@ -541,8 +542,8 @@ class _DesktopDiskusiTabState extends State<DesktopDiskusiTab> {
                         .orderBy('createdAt', descending: true)
                         .snapshots(),
                     builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const Center(child: Padding(padding: EdgeInsets.all(24), child: ThreeDotsLoader()));
+                      if (snapshot.connectionState == ConnectionState.waiting && !snapshot.hasData) {
+                        return const SizedBox.shrink();
                       }
 
                       final docs = snapshot.data?.docs ?? [];
@@ -598,7 +599,7 @@ class _DesktopDiskusiTabState extends State<DesktopDiskusiTab> {
                                       : 'Thread diskusi tidak ditemukan.',
                                   textAlign: TextAlign.center,
                                   style: GoogleFonts.dmSans(
-                                    fontSize: 13.5,
+                                    fontSize: 14.0,
                                     color: const Color(0xFF94A3B8),
                                   ),
                                 ),
@@ -611,7 +612,7 @@ class _DesktopDiskusiTabState extends State<DesktopDiskusiTab> {
                                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                                   ),
                                   icon: const Icon(Icons.add_rounded, size: 18),
-                                  label: Text('Buat Diskusi Baru', style: GoogleFonts.plusJakartaSans(fontSize: 13.5, fontWeight: FontWeight.bold)),
+                                  label: Text('Buat Diskusi Baru', style: GoogleFonts.plusJakartaSans(fontSize: 14.0, fontWeight: FontWeight.bold)),
                                 ),
                               ],
                             ),
@@ -690,7 +691,7 @@ class _DesktopDiskusiTabState extends State<DesktopDiskusiTab> {
                                           maxLines: 1,
                                           overflow: TextOverflow.ellipsis,
                                           style: GoogleFonts.plusJakartaSans(
-                                            fontSize: 13,
+                                            fontSize: 14.0,
                                             fontWeight: FontWeight.w600,
                                             color: const Color(0xFF0F172A),
                                           ),
@@ -701,7 +702,7 @@ class _DesktopDiskusiTabState extends State<DesktopDiskusiTab> {
                                           maxLines: 1,
                                           overflow: TextOverflow.ellipsis,
                                           style: GoogleFonts.dmSans(
-                                            fontSize: 12,
+                                            fontSize: 14.0,
                                             color: const Color(0xFF64748B),
                                           ),
                                         ),
@@ -720,7 +721,7 @@ class _DesktopDiskusiTabState extends State<DesktopDiskusiTab> {
                                       child: Text(
                                         '$unreadCount',
                                         style: GoogleFonts.plusJakartaSans(
-                                          fontSize: 11,
+                                          fontSize: 14.0,
                                           fontWeight: FontWeight.bold,
                                           color: Colors.white,
                                         ),

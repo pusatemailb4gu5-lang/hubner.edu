@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hubner/core/widgets/three_dots_loader.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -52,7 +53,7 @@ class _DesktopKelolaAnggotaTabState extends State<DesktopKelolaAnggotaTab> {
           .snapshots(),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
-          return const Center(child: CircularProgressIndicator());
+          return const Center(child: ThreeDotsLoader());
         }
 
         final data = snapshot.data!.data() as Map<String, dynamic>? ?? {};
@@ -228,7 +229,7 @@ class _DesktopKelolaAnggotaTabState extends State<DesktopKelolaAnggotaTab> {
           Text(
             'Kode Akses Kelas',
             style: GoogleFonts.plusJakartaSans(
-              fontSize: 13.5,
+              fontSize: 14.0,
               fontWeight: FontWeight.w600,
               color: const Color(0xFF000000),
             ),
@@ -281,7 +282,7 @@ class _DesktopKelolaAnggotaTabState extends State<DesktopKelolaAnggotaTab> {
                         Text(
                           'Salin',
                           style: GoogleFonts.plusJakartaSans(
-                            fontSize: 12.9,
+                            fontSize: 14.0,
                             fontWeight: FontWeight.bold,
                             color: Colors.white,
                           ),
@@ -299,7 +300,7 @@ class _DesktopKelolaAnggotaTabState extends State<DesktopKelolaAnggotaTab> {
           Text(
             'Undang via Email Siswa',
             style: GoogleFonts.plusJakartaSans(
-              fontSize: 13.5,
+              fontSize: 14.0,
               fontWeight: FontWeight.w600,
               color: const Color(0xFF000000),
             ),
@@ -370,7 +371,7 @@ class _DesktopKelolaAnggotaTabState extends State<DesktopKelolaAnggotaTab> {
                 Text(
                   'Scan QR Code untuk Gabung Kelas',
                   style: GoogleFonts.dmSans(
-                    fontSize: 12.3,
+                    fontSize: 14.0,
                     color: const Color(0xFF000000),
                   ),
                 ),
@@ -442,7 +443,7 @@ class _DesktopKelolaAnggotaTabState extends State<DesktopKelolaAnggotaTab> {
                     child: Text(
                       '${docs.length}',
                       style: GoogleFonts.plusJakartaSans(
-                        fontSize: 12.9,
+                        fontSize: 14.0,
                         fontWeight: FontWeight.bold,
                         color: const Color(0xFF10B981),
                       ),
@@ -535,7 +536,7 @@ class _DesktopKelolaAnggotaTabState extends State<DesktopKelolaAnggotaTab> {
                                     Text(
                                       email,
                                       style: GoogleFonts.dmSans(
-                                        fontSize: 12.9,
+                                        fontSize: 14.0,
                                         color: const Color(0xFF000000),
                                       ),
                                     ),
@@ -565,7 +566,7 @@ class _DesktopKelolaAnggotaTabState extends State<DesktopKelolaAnggotaTab> {
                                     child: Text(
                                       'Setujui',
                                       style: GoogleFonts.plusJakartaSans(
-                                        fontSize: 13.5,
+                                        fontSize: 14.0,
                                         fontWeight: FontWeight.bold,
                                       ),
                                     ),
@@ -589,7 +590,7 @@ class _DesktopKelolaAnggotaTabState extends State<DesktopKelolaAnggotaTab> {
                                     child: Text(
                                       'Tolak',
                                       style: GoogleFonts.plusJakartaSans(
-                                        fontSize: 13.5,
+                                        fontSize: 14.0,
                                         fontWeight: FontWeight.bold,
                                       ),
                                     ),
@@ -740,7 +741,7 @@ class _DesktopKelolaAnggotaTabState extends State<DesktopKelolaAnggotaTab> {
                     child: Text(
                       '${filteredMembers.length} Anggota',
                       style: GoogleFonts.plusJakartaSans(
-                        fontSize: 12.9,
+                        fontSize: 14.0,
                         fontWeight: FontWeight.bold,
                         color: const Color(0xFF0284C7),
                       ),
@@ -893,7 +894,7 @@ class _DesktopKelolaAnggotaTabState extends State<DesktopKelolaAnggotaTab> {
                                   Text(
                                     'ID: $finalUserId',
                                     style: GoogleFonts.dmMono(
-                                      fontSize: 11.5,
+                                      fontSize: 14.0,
                                       color: const Color(0xFF64748B),
                                     ),
                                   ),
@@ -912,7 +913,7 @@ class _DesktopKelolaAnggotaTabState extends State<DesktopKelolaAnggotaTab> {
                               child: Text(
                                 role,
                                 style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 12.3,
+                                  fontSize: 14.0,
                                   fontWeight: FontWeight.bold,
                                   color: isTeacher
                                       ? accentColor

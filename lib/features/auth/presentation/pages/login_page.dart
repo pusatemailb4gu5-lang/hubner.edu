@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'package:hubner/core/widgets/three_dots_loader.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -477,7 +478,7 @@ class _LoginPageState extends State<LoginPage> {
                   ? const SizedBox(
                       width: 22,
                       height: 22,
-                      child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                      child: const ThreeDotsLoader(),
                     )
                   : Text(
                       'Masuk',
@@ -585,7 +586,7 @@ class _LoginPageState extends State<LoginPage> {
                 child: Text(
                   'edu',
                   style: GoogleFonts.plusJakartaSans(
-                    fontSize: 12.9,
+                    fontSize: 14.0,
                     fontWeight: FontWeight.bold,
                     color: Colors.white,
                   ),

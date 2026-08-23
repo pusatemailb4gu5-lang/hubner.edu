@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hubner/core/widgets/three_dots_loader.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -247,7 +248,7 @@ class _MonitoringPageState extends State<MonitoringPage> {
                               Text(
                                 'Target & Tujuan Pembelajaran (CP)',
                                 style: GoogleFonts.dmSans(
-                                  fontSize: 12.3,
+                                  fontSize: 14.0,
                                   color: Colors.black45,
                                 ),
                               ),
@@ -328,7 +329,7 @@ class _MonitoringPageState extends State<MonitoringPage> {
                                       child: Text(
                                         '${idx + 1}',
                                         style: GoogleFonts.plusJakartaSans(
-                                          fontSize: 12.9,
+                                          fontSize: 14.0,
                                           fontWeight: FontWeight.bold,
                                           color: itemAccentColor,
                                         ),
@@ -353,7 +354,7 @@ class _MonitoringPageState extends State<MonitoringPage> {
                                         Text(
                                           desc,
                                           style: GoogleFonts.dmSans(
-                                            fontSize: 12.9,
+                                            fontSize: 14.0,
                                             color: Colors.black54,
                                           ),
                                         ),
@@ -449,7 +450,7 @@ class _MonitoringPageState extends State<MonitoringPage> {
                               Text(
                                 'Hari & Jam Pertemuan Kelas',
                                 style: GoogleFonts.dmSans(
-                                  fontSize: 12.3,
+                                  fontSize: 14.0,
                                   color: Colors.black45,
                                 ),
                               ),
@@ -500,7 +501,7 @@ class _MonitoringPageState extends State<MonitoringPage> {
                                 Text(
                                   'Jadwal pelajaran belum diatur oleh guru pengajar.',
                                   style: GoogleFonts.dmSans(
-                                    fontSize: 12.9,
+                                    fontSize: 14.0,
                                     color: Colors.black45,
                                   ),
                                   textAlign: TextAlign.center,
@@ -557,7 +558,7 @@ class _MonitoringPageState extends State<MonitoringPage> {
                                     child: Text(
                                       dayStr.toUpperCase(),
                                       style: GoogleFonts.plusJakartaSans(
-                                        fontSize: 12.9,
+                                        fontSize: 14.0,
                                         fontWeight: FontWeight.bold,
                                         color: Colors.white,
                                         letterSpacing: 0.5,
@@ -600,7 +601,7 @@ class _MonitoringPageState extends State<MonitoringPage> {
                                             Text(
                                               room,
                                               style: GoogleFonts.dmSans(
-                                                fontSize: 12.9,
+                                                fontSize: 14.0,
                                                 color: Colors.black54,
                                               ),
                                             ),
@@ -746,7 +747,7 @@ class _MonitoringPageState extends State<MonitoringPage> {
                         Text(
                           'Guru pengajar & teman sekelas terdaftar',
                           style: GoogleFonts.dmSans(
-                            fontSize: 12.3,
+                            fontSize: 14.0,
                             color: Colors.black45,
                           ),
                         ),
@@ -826,7 +827,7 @@ class _MonitoringPageState extends State<MonitoringPage> {
                                           child: Text(
                                             'Guru',
                                             style: GoogleFonts.plusJakartaSans(
-                                              fontSize: 10,
+                                              fontSize: 14.0,
                                               fontWeight: FontWeight.bold,
                                               color: const Color(0xFFD97706),
                                             ),
@@ -837,7 +838,7 @@ class _MonitoringPageState extends State<MonitoringPage> {
                                     Text(
                                       'Pengajar Kelas',
                                       style: GoogleFonts.dmSans(
-                                        fontSize: 11.2,
+                                        fontSize: 14.0,
                                         color: Colors.black45,
                                       ),
                                     ),
@@ -860,7 +861,7 @@ class _MonitoringPageState extends State<MonitoringPage> {
                                     child: Text(
                                       'Teman',
                                       style: GoogleFonts.plusJakartaSans(
-                                        fontSize: 11.2,
+                                        fontSize: 14.0,
                                         fontWeight: FontWeight.bold,
                                         color: const Color(0xFF15803D),
                                       ),
@@ -895,7 +896,7 @@ class _MonitoringPageState extends State<MonitoringPage> {
                                           Text(
                                             'Tambah',
                                             style: GoogleFonts.plusJakartaSans(
-                                              fontSize: 11.2,
+                                              fontSize: 14.0,
                                               fontWeight: FontWeight.bold,
                                               color: const Color(0xFF1D4ED8),
                                             ),
@@ -927,7 +928,7 @@ class _MonitoringPageState extends State<MonitoringPage> {
                             Text(
                               '${masterList.length} Siswa',
                               style: GoogleFonts.dmSans(
-                                fontSize: 12.9,
+                                fontSize: 14.0,
                                 color: Colors.black45,
                               ),
                             ),
@@ -1034,7 +1035,7 @@ class _MonitoringPageState extends State<MonitoringPage> {
                                                 child: Text(
                                                   'Saya',
                                                   style: GoogleFonts.plusJakartaSans(
-                                                    fontSize: 10,
+                                                    fontSize: 14.0,
                                                     fontWeight: FontWeight.bold,
                                                     color: const Color(
                                                       0xFF2563EB,
@@ -1049,7 +1050,7 @@ class _MonitoringPageState extends State<MonitoringPage> {
                                           Text(
                                             'NIS: $sNis',
                                             style: GoogleFonts.dmSans(
-                                              fontSize: 11.2,
+                                              fontSize: 14.0,
                                               color: Colors.black45,
                                             ),
                                           ),
@@ -1088,7 +1089,7 @@ class _MonitoringPageState extends State<MonitoringPage> {
                                             Text(
                                               'Keluar',
                                               style: GoogleFonts.plusJakartaSans(
-                                                fontSize: 11.2,
+                                                fontSize: 14.0,
                                                 fontWeight: FontWeight.bold,
                                                 color: const Color(0xFFEF4444),
                                               ),
@@ -1110,7 +1111,7 @@ class _MonitoringPageState extends State<MonitoringPage> {
                                       child: Text(
                                         'Teman',
                                         style: GoogleFonts.plusJakartaSans(
-                                          fontSize: 11.2,
+                                          fontSize: 14.0,
                                           fontWeight: FontWeight.bold,
                                           color: const Color(0xFF15803D),
                                         ),
@@ -1144,7 +1145,7 @@ class _MonitoringPageState extends State<MonitoringPage> {
                                             Text(
                                               'Tambah',
                                               style: GoogleFonts.plusJakartaSans(
-                                                fontSize: 11.2,
+                                                fontSize: 14.0,
                                                 fontWeight: FontWeight.bold,
                                                 color: const Color(0xFF1D4ED8),
                                               ),
@@ -1484,7 +1485,7 @@ class _MonitoringPageState extends State<MonitoringPage> {
                     Text(
                       subtitle,
                       style: GoogleFonts.dmSans(
-                        fontSize: 11.2,
+                        fontSize: 14.0,
                         color: Colors.black45,
                       ),
                     ),
@@ -1524,7 +1525,7 @@ class _MonitoringPageState extends State<MonitoringPage> {
                     Text(
                       'Selesai',
                       style: GoogleFonts.plusJakartaSans(
-                        fontSize: 11.7,
+                        fontSize: 14.0,
                         fontWeight: FontWeight.bold,
                         color: const Color(0xFF059669),
                       ),
@@ -1555,7 +1556,7 @@ class _MonitoringPageState extends State<MonitoringPage> {
                 label: Text(
                   buttonText,
                   style: GoogleFonts.plusJakartaSans(
-                    fontSize: 11.2,
+                    fontSize: 14.0,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -1571,7 +1572,7 @@ class _MonitoringPageState extends State<MonitoringPage> {
     if (_isLoadingProjects) {
       return const Scaffold(
         backgroundColor: Colors.transparent,
-        body: Center(child: CircularProgressIndicator(color: Colors.black87)),
+        body: const Center(child: ThreeDotsLoader()),
       );
     }
 
@@ -1722,7 +1723,7 @@ class _MonitoringPageState extends State<MonitoringPage> {
                                               child: Text(
                                                 'Ganti',
                                                 style: GoogleFonts.plusJakartaSans(
-                                                  fontSize: 13.5,
+                                                  fontSize: 14.0,
                                                   fontWeight: FontWeight.bold,
                                                   color: Colors.black87,
                                                 ),
@@ -1733,7 +1734,7 @@ class _MonitoringPageState extends State<MonitoringPage> {
                                     hint: Text(
                                       'Pilih Classroom',
                                       style: GoogleFonts.dmSans(
-                                        fontSize: 12.9,
+                                        fontSize: 14.0,
                                         color: Colors.black54,
                                       ),
                                     ),
@@ -1764,7 +1765,7 @@ class _MonitoringPageState extends State<MonitoringPage> {
                                         child: Text(
                                           pName,
                                           style: GoogleFonts.dmSans(
-                                            fontSize: 13.5,
+                                            fontSize: 14.0,
                                             fontWeight: FontWeight.w500,
                                             color: Colors.black87,
                                           ),
@@ -2151,7 +2152,7 @@ class _MonitoringPageState extends State<MonitoringPage> {
                                                                           Text(
                                                                             'Kelola Kelas',
                                                                             style: GoogleFonts.plusJakartaSans(
-                                                                              fontSize: 12.3,
+                                                                              fontSize: 14.0,
                                                                               fontWeight: FontWeight.bold,
                                                                               color: accentColor,
                                                                             ),
@@ -2223,7 +2224,7 @@ class _MonitoringPageState extends State<MonitoringPage> {
                                                                         Text(
                                                                           'Lihat Kelas',
                                                                           style: GoogleFonts.plusJakartaSans(
-                                                                            fontSize: 12.3,
+                                                                            fontSize: 14.0,
                                                                             fontWeight:
                                                                                 FontWeight.bold,
                                                                             color:
@@ -2345,7 +2346,7 @@ class _MonitoringPageState extends State<MonitoringPage> {
                                                               'Pengajar Kelas',
                                                               style:
                                                                   GoogleFonts.dmSans(
-                                                                    fontSize: 11.7,
+                                                                    fontSize: 14.0,
                                                                     color: Colors
                                                                         .black54,
                                                                   ),
@@ -2451,7 +2452,7 @@ class _MonitoringPageState extends State<MonitoringPage> {
                                                               Text(
                                                                 'Lihat Elemen',
                                                                 style: GoogleFonts.dmSans(
-                                                                  fontSize: 12.9,
+                                                                  fontSize: 14.0,
                                                                   fontWeight:
                                                                       FontWeight
                                                                           .bold,
@@ -2508,7 +2509,7 @@ class _MonitoringPageState extends State<MonitoringPage> {
                                                               Text(
                                                                 'Lihat Jadwal',
                                                                 style: GoogleFonts.dmSans(
-                                                                  fontSize: 12.9,
+                                                                  fontSize: 14.0,
                                                                   fontWeight:
                                                                       FontWeight
                                                                           .bold,
@@ -2733,7 +2734,7 @@ class _MonitoringPageState extends State<MonitoringPage> {
                     Text(
                       label,
                       style: GoogleFonts.dmSans(
-                        fontSize: 13.5,
+                        fontSize: 14.0,
                         fontWeight: FontWeight.w500,
                         color: Colors.black87,
                       ),
@@ -2881,7 +2882,7 @@ class _MonitoringPageState extends State<MonitoringPage> {
                             Text(
                               '$totalMateris Materi · ${totalTasksCount + totalQuizCount} Tugas & Quiz',
                               style: GoogleFonts.dmSans(
-                                fontSize: 13.5,
+                                fontSize: 14.0,
                                 color: Colors.black54,
                               ),
                             ),
@@ -2890,7 +2891,7 @@ class _MonitoringPageState extends State<MonitoringPage> {
                               Text(
                                 stageDesc,
                                 style: GoogleFonts.dmSans(
-                                  fontSize: 13.5,
+                                  fontSize: 14.0,
                                   color: Colors.black87.withValues(alpha: 0.75),
                                   height: 1.4,
                                 ),
@@ -2957,7 +2958,7 @@ class _MonitoringPageState extends State<MonitoringPage> {
                                 child: Text(
                                   'Selesai',
                                   style: GoogleFonts.plusJakartaSans(
-                                    fontSize: 11.7,
+                                    fontSize: 14.0,
                                     fontWeight: FontWeight.bold,
                                     color: const Color(0xFF059669),
                                   ),
@@ -2974,7 +2975,7 @@ class _MonitoringPageState extends State<MonitoringPage> {
                                 child: Text(
                                   'Proses Pembelajaran',
                                   style: GoogleFonts.plusJakartaSans(
-                                    fontSize: 11.7,
+                                    fontSize: 14.0,
                                     fontWeight: FontWeight.bold,
                                     color: const Color(0xFF1D4ED8),
                                   ),
@@ -2991,7 +2992,7 @@ class _MonitoringPageState extends State<MonitoringPage> {
                                 child: Text(
                                   'Akan Datang',
                                   style: GoogleFonts.plusJakartaSans(
-                                    fontSize: 11.7,
+                                    fontSize: 14.0,
                                     fontWeight: FontWeight.bold,
                                     color: Colors.black54,
                                   ),
@@ -3015,7 +3016,7 @@ class _MonitoringPageState extends State<MonitoringPage> {
                       child: Text(
                         statusLabel,
                         style: GoogleFonts.plusJakartaSans(
-                          fontSize: 11.2,
+                          fontSize: 14.0,
                           fontWeight: FontWeight.bold,
                           color: statusFg,
                         ),
@@ -3134,7 +3135,7 @@ class _MonitoringPageState extends State<MonitoringPage> {
                                             ? '$tugasCount Tugas · $quizCount Quiz · $pdfCount PDF'
                                             : 'Materi Pembelajaran',
                                         style: GoogleFonts.dmSans(
-                                          fontSize: 12.3,
+                                          fontSize: 14.0,
                                           color: Colors.black45,
                                         ),
                                       ),

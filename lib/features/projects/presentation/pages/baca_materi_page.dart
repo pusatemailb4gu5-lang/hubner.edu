@@ -104,7 +104,7 @@ class _BacaMateriPageState extends State<BacaMateriPage> {
                           Text(
                             'Modul Materi PDF',
                             style: GoogleFonts.plusJakartaSans(
-                              fontSize: 12.3,
+                              fontSize: 14.0,
                               fontWeight: FontWeight.bold,
                               color: const Color(0xFF0D9488),
                             ),

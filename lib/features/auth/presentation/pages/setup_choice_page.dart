@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hubner/core/widgets/three_dots_loader.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:hubner/features/projects/presentation/pages/add_class_page.dart';
@@ -242,10 +243,7 @@ class _SetupChoicePageState extends State<SetupChoicePage> {
                               ? const SizedBox(
                                   width: 20,
                                   height: 20,
-                                  child: CircularProgressIndicator(
-                                    color: Colors.white,
-                                    strokeWidth: 2,
-                                  ),
+                                  child: const ThreeDotsLoader(),
                                 )
                               : Text(
                                   'Periksa',

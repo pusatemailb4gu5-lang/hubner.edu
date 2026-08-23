@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hubner/core/widgets/three_dots_loader.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -216,7 +217,7 @@ class _DetailCpPageState extends State<DetailCpPage> {
                           child: Text(
                             'Mode Edit',
                             style: GoogleFonts.plusJakartaSans(
-                              fontSize: 12.5,
+                              fontSize: 14.0,
                               fontWeight: FontWeight.w800,
                               color: Colors.black,
                             ),
@@ -241,7 +242,7 @@ class _DetailCpPageState extends State<DetailCpPage> {
             .snapshots(),
         builder: (context, snapshot) {
           if (!snapshot.hasData || !snapshot.data!.exists) {
-            return const Center(child: CircularProgressIndicator());
+            return const Center(child: ThreeDotsLoader());
           }
 
           final projectData = snapshot.data!.data() as Map<String, dynamic>;
@@ -446,7 +447,7 @@ class _DetailCpPageState extends State<DetailCpPage> {
                                         Text(
                                           widget.projectTitle,
                                           style: GoogleFonts.dmSans(
-                                            fontSize: 13.5,
+                                            fontSize: 14.0,
                                             fontWeight: FontWeight.w600,
                                             color: const Color(0xFF334155).withValues(alpha: 0.8),
                                             height: 1.3,
@@ -496,7 +497,7 @@ class _DetailCpPageState extends State<DetailCpPage> {
                                                 isDense: true,
                                                 contentPadding: EdgeInsets.zero,
                                                 hintText: 'Tulis ringkasan capaian pembelajaran di sini...',
-                                                hintStyle: GoogleFonts.dmSans(color: Colors.black38, fontSize: 13.5),
+                                                hintStyle: GoogleFonts.dmSans(color: Colors.black38, fontSize: 14.0),
                                               ),
                                               onChanged: (v) => _debouncedAutoSave(stages),
                                             )
@@ -631,7 +632,7 @@ class _DetailCpPageState extends State<DetailCpPage> {
                                     style: GoogleFonts.plusJakartaSans(
                                       color: const Color(0xFFEF4444),
                                       fontWeight: FontWeight.bold,
-                                      fontSize: 13,
+                                      fontSize: 14.0,
                                     ),
                                   ),
                                 ],
@@ -726,7 +727,7 @@ class _DetailCpPageState extends State<DetailCpPage> {
                                                                ? '$tugasCount tugas · $quizCount quiz · $pdfCount materi'
                                                                : '$tugasCount tugas · $pdfCount materi',
                                                            style: GoogleFonts.dmSans(
-                                                             fontSize: 12,
+                                                             fontSize: 14.0,
                                                              color: Colors.black54,
                                                            ),
                                                          ),
@@ -872,7 +873,7 @@ class _DetailCpPageState extends State<DetailCpPage> {
                                                       Text(
                                                         displayTitle,
                                                         style: GoogleFonts.plusJakartaSans(
-                                                          fontSize: 13,
+                                                          fontSize: 14.0,
                                                           fontWeight: FontWeight.w600,
                                                           color: isDark ? Colors.white : const Color(0xFF0F172A),
                                                           decoration: isTaskDone ? TextDecoration.lineThrough : null,
@@ -1010,7 +1011,7 @@ class _DetailCpPageState extends State<DetailCpPage> {
         child: Text(
           displayLabel,
           style: GoogleFonts.plusJakartaSans(
-            fontSize: 12,
+            fontSize: 14.0,
             fontWeight: FontWeight.bold,
             color: statusFg,
           ),
@@ -1064,7 +1065,7 @@ class _DetailCpPageState extends State<DetailCpPage> {
             child: Text(
               'Proses',
               style: GoogleFonts.plusJakartaSans(
-                fontSize: 13,
+                fontSize: 14.0,
                 fontWeight: FontWeight.bold,
                 color: isDark ? Colors.white : const Color(0xFF0F172A),
               ),
@@ -1090,7 +1091,7 @@ class _DetailCpPageState extends State<DetailCpPage> {
             child: Text(
               'Selesai',
               style: GoogleFonts.plusJakartaSans(
-                fontSize: 13,
+                fontSize: 14.0,
                 fontWeight: FontWeight.bold,
                 color: isDark ? Colors.white : const Color(0xFF0F172A),
               ),
@@ -1108,7 +1109,7 @@ class _DetailCpPageState extends State<DetailCpPage> {
             child: Text(
               'Akan Datang',
               style: GoogleFonts.plusJakartaSans(
-                fontSize: 13,
+                fontSize: 14.0,
                 fontWeight: FontWeight.bold,
                 color: isDark ? Colors.white : const Color(0xFF0F172A),
               ),
@@ -1139,7 +1140,7 @@ class _DetailCpPageState extends State<DetailCpPage> {
             Text(
               displayLabel,
               style: GoogleFonts.plusJakartaSans(
-                fontSize: 12,
+                fontSize: 14.0,
                 fontWeight: FontWeight.bold,
                 color: statusFg,
               ),
@@ -1332,7 +1333,7 @@ class _DetailCpPageState extends State<DetailCpPage> {
             Text(
               label,
               style: GoogleFonts.plusJakartaSans(
-                fontSize: 12,
+                fontSize: 14.0,
                 fontWeight: FontWeight.w800,
                 color: contentFg,
                 letterSpacing: -0.2,
@@ -1606,7 +1607,7 @@ class _DetailCpPageState extends State<DetailCpPage> {
                                 Text(
                                   'Atur tugas, tenggat waktu & instruksi',
                                   style: GoogleFonts.dmSans(
-                                    fontSize: 12,
+                                    fontSize: 14.0,
                                     color: const Color(0xFF334155),
                                   ),
                                   maxLines: 1,
@@ -1649,7 +1650,7 @@ class _DetailCpPageState extends State<DetailCpPage> {
                             Text(
                               'Pilih Elemen Pembelajaran',
                               style: GoogleFonts.plusJakartaSans(
-                                fontSize: 13,
+                                fontSize: 14.0,
                                 fontWeight: FontWeight.bold,
                                 color: isDark ? Colors.white70 : const Color(0xFF475569),
                               ),
@@ -1697,7 +1698,7 @@ class _DetailCpPageState extends State<DetailCpPage> {
                                     child: Text(
                                       st['name'] ?? st['title'] ?? 'Elemen ${idx + 1}',
                                       style: GoogleFonts.plusJakartaSans(
-                                        fontSize: 13.5,
+                                        fontSize: 14.0,
                                         fontWeight: FontWeight.bold,
                                         color: selectedStageIdx == idx
                                             ? const Color(0xFF2563EB)
@@ -1733,7 +1734,7 @@ class _DetailCpPageState extends State<DetailCpPage> {
                             Text(
                               'Pilih Materi',
                               style: GoogleFonts.plusJakartaSans(
-                                fontSize: 13,
+                                fontSize: 14.0,
                                 fontWeight: FontWeight.bold,
                                 color: isDark ? Colors.white70 : const Color(0xFF475569),
                               ),
@@ -1780,7 +1781,7 @@ class _DetailCpPageState extends State<DetailCpPage> {
                                     child: Text(
                                       m['title'] ?? 'Materi ${mIdx + 1}',
                                       style: GoogleFonts.plusJakartaSans(
-                                        fontSize: 13.5,
+                                        fontSize: 14.0,
                                         fontWeight: FontWeight.bold,
                                         color: selectedMateriIdx == mIdx
                                             ? const Color(0xFF2563EB)
@@ -1816,7 +1817,7 @@ class _DetailCpPageState extends State<DetailCpPage> {
                             Text(
                               'Judul Tugas',
                               style: GoogleFonts.plusJakartaSans(
-                                fontSize: 13,
+                                fontSize: 14.0,
                                 fontWeight: FontWeight.bold,
                                 color: isDark ? Colors.white70 : const Color(0xFF475569),
                               ),
@@ -1853,7 +1854,7 @@ class _DetailCpPageState extends State<DetailCpPage> {
                                     children: [
                                       Text(
                                         'Tanggal Mulai',
-                                        style: GoogleFonts.plusJakartaSans(fontSize: 13, fontWeight: FontWeight.bold, color: isDark ? Colors.white70 : const Color(0xFF475569)),
+                                        style: GoogleFonts.plusJakartaSans(fontSize: 14.0, fontWeight: FontWeight.bold, color: isDark ? Colors.white70 : const Color(0xFF475569)),
                                       ),
                                       const SizedBox(height: 6),
                                       TextField(
@@ -1889,7 +1890,7 @@ class _DetailCpPageState extends State<DetailCpPage> {
                                     children: [
                                       Text(
                                         'Tanggal Selesai / Tenggat',
-                                        style: GoogleFonts.plusJakartaSans(fontSize: 13, fontWeight: FontWeight.bold, color: isDark ? Colors.white70 : const Color(0xFF475569)),
+                                        style: GoogleFonts.plusJakartaSans(fontSize: 14.0, fontWeight: FontWeight.bold, color: isDark ? Colors.white70 : const Color(0xFF475569)),
                                       ),
                                       const SizedBox(height: 6),
                                       TextField(
@@ -1925,7 +1926,7 @@ class _DetailCpPageState extends State<DetailCpPage> {
                             // 5. Pengaturan Jenis Tugas
                             Text(
                               'Jenis Penugasan',
-                              style: GoogleFonts.plusJakartaSans(fontSize: 13, fontWeight: FontWeight.bold, color: isDark ? Colors.white70 : const Color(0xFF475569)),
+                              style: GoogleFonts.plusJakartaSans(fontSize: 14.0, fontWeight: FontWeight.bold, color: isDark ? Colors.white70 : const Color(0xFF475569)),
                             ),
                             const SizedBox(height: 8),
                             Row(
@@ -1944,7 +1945,7 @@ class _DetailCpPageState extends State<DetailCpPage> {
                                       child: Center(
                                         child: Text(
                                           'Tugas Individu',
-                                          style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, fontSize: 13, color: assignmentType == 'individu' ? const Color(0xFF1D4ED8) : (isDark ? Colors.white70 : const Color(0xFF475569))),
+                                          style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, fontSize: 14.0, color: assignmentType == 'individu' ? const Color(0xFF1D4ED8) : (isDark ? Colors.white70 : const Color(0xFF475569))),
                                         ),
                                       ),
                                     ),
@@ -1965,7 +1966,7 @@ class _DetailCpPageState extends State<DetailCpPage> {
                                       child: Center(
                                         child: Text(
                                           'Tugas Kelompok',
-                                          style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, fontSize: 13, color: assignmentType == 'kelompok' ? const Color(0xFF1D4ED8) : (isDark ? Colors.white70 : const Color(0xFF475569))),
+                                          style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, fontSize: 14.0, color: assignmentType == 'kelompok' ? const Color(0xFF1D4ED8) : (isDark ? Colors.white70 : const Color(0xFF475569))),
                                         ),
                                       ),
                                     ),
@@ -1978,7 +1979,7 @@ class _DetailCpPageState extends State<DetailCpPage> {
                             // Mode Pengumpulan Tugas
                             Text(
                               'Mode Pengumpulan Tugas',
-                              style: GoogleFonts.plusJakartaSans(fontSize: 13, fontWeight: FontWeight.bold, color: isDark ? Colors.white70 : const Color(0xFF475569)),
+                              style: GoogleFonts.plusJakartaSans(fontSize: 14.0, fontWeight: FontWeight.bold, color: isDark ? Colors.white70 : const Color(0xFF475569)),
                             ),
                             const SizedBox(height: 8),
                             Row(
@@ -2000,7 +2001,7 @@ class _DetailCpPageState extends State<DetailCpPage> {
                                           children: [
                                             Icon(Icons.notes_rounded, size: 16, color: tugasMode == 'text' ? const Color(0xFF1D4ED8) : (isDark ? Colors.white70 : const Color(0xFF475569))),
                                             const SizedBox(width: 6),
-                                            Text('Jawaban Teks', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, fontSize: 13, color: tugasMode == 'text' ? const Color(0xFF1D4ED8) : (isDark ? Colors.white70 : const Color(0xFF475569)))),
+                                            Text('Jawaban Teks', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, fontSize: 14.0, color: tugasMode == 'text' ? const Color(0xFF1D4ED8) : (isDark ? Colors.white70 : const Color(0xFF475569)))),
                                           ],
                                         ),
                                       ),
@@ -2025,7 +2026,7 @@ class _DetailCpPageState extends State<DetailCpPage> {
                                           children: [
                                             Icon(Icons.picture_as_pdf_rounded, size: 16, color: tugasMode == 'pdf' ? const Color(0xFF1D4ED8) : (isDark ? Colors.white70 : const Color(0xFF475569))),
                                             const SizedBox(width: 6),
-                                            Text('File PDF', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, fontSize: 13, color: tugasMode == 'pdf' ? const Color(0xFF1D4ED8) : (isDark ? Colors.white70 : const Color(0xFF475569)))),
+                                            Text('File PDF', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, fontSize: 14.0, color: tugasMode == 'pdf' ? const Color(0xFF1D4ED8) : (isDark ? Colors.white70 : const Color(0xFF475569)))),
                                           ],
                                         ),
                                       ),
@@ -2039,7 +2040,7 @@ class _DetailCpPageState extends State<DetailCpPage> {
                             if (tugasMode == 'text') ...[
                               Text(
                                 'Teks Soal / Pertanyaan Tugas',
-                                style: GoogleFonts.plusJakartaSans(fontSize: 13, fontWeight: FontWeight.bold, color: isDark ? Colors.white70 : const Color(0xFF475569)),
+                                style: GoogleFonts.plusJakartaSans(fontSize: 14.0, fontWeight: FontWeight.bold, color: isDark ? Colors.white70 : const Color(0xFF475569)),
                               ),
                               const SizedBox(height: 6),
                               TextField(
@@ -2065,7 +2066,7 @@ class _DetailCpPageState extends State<DetailCpPage> {
                             ] else ...[
                               Text(
                                 'File / Nama Dokumen Modul Soal PDF',
-                                style: GoogleFonts.plusJakartaSans(fontSize: 13, fontWeight: FontWeight.bold, color: isDark ? Colors.white70 : const Color(0xFF475569)),
+                                style: GoogleFonts.plusJakartaSans(fontSize: 14.0, fontWeight: FontWeight.bold, color: isDark ? Colors.white70 : const Color(0xFF475569)),
                               ),
                               const SizedBox(height: 6),
                               TextField(
@@ -2121,7 +2122,7 @@ class _DetailCpPageState extends State<DetailCpPage> {
                                   style: GoogleFonts.plusJakartaSans(
                                     color: Colors.white,
                                     fontWeight: FontWeight.bold,
-                                    fontSize: 12.5,
+                                    fontSize: 14.0,
                                   ),
                                 ),
                               ],
@@ -2166,7 +2167,7 @@ class _DetailCpPageState extends State<DetailCpPage> {
                             ? const SizedBox(
                                 width: 20,
                                 height: 20,
-                                child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                                child: const ThreeDotsLoader(),
                               )
                             : Text(
                                 isEditMode ? 'Perbarui Tugas' : 'Simpan Tugas',
@@ -2448,7 +2449,7 @@ int? taskIdxToEdit,
                                 Text(
                                   'Atur soal pilihan ganda, durasi & waktu',
                                   style: GoogleFonts.dmSans(
-                                    fontSize: 12,
+                                    fontSize: 14.0,
                                     color: const Color(0xFF334155),
                                   ),
                                   maxLines: 1,
@@ -2491,7 +2492,7 @@ int? taskIdxToEdit,
                             Text(
                               'Pilih Elemen Pembelajaran',
                               style: GoogleFonts.plusJakartaSans(
-                                fontSize: 13,
+                                fontSize: 14.0,
                                 fontWeight: FontWeight.bold,
                                 color: isDark ? Colors.white70 : const Color(0xFF475569),
                               ),
@@ -2539,7 +2540,7 @@ int? taskIdxToEdit,
                                     child: Text(
                                       st['name'] ?? st['title'] ?? 'Elemen ${idx + 1}',
                                       style: GoogleFonts.plusJakartaSans(
-                                        fontSize: 13.5,
+                                        fontSize: 14.0,
                                         fontWeight: FontWeight.bold,
                                         color: selectedStageIdx == idx
                                             ? const Color(0xFFD97706)
@@ -2575,7 +2576,7 @@ int? taskIdxToEdit,
                             Text(
                               'Pilih Materi',
                               style: GoogleFonts.plusJakartaSans(
-                                fontSize: 13,
+                                fontSize: 14.0,
                                 fontWeight: FontWeight.bold,
                                 color: isDark ? Colors.white70 : const Color(0xFF475569),
                               ),
@@ -2622,7 +2623,7 @@ int? taskIdxToEdit,
                                     child: Text(
                                       m['title'] ?? 'Materi ${mIdx + 1}',
                                       style: GoogleFonts.plusJakartaSans(
-                                        fontSize: 13.5,
+                                        fontSize: 14.0,
                                         fontWeight: FontWeight.bold,
                                         color: selectedMateriIdx == mIdx
                                             ? const Color(0xFFD97706)
@@ -2658,7 +2659,7 @@ int? taskIdxToEdit,
                             Text(
                               'Judul Quiz',
                               style: GoogleFonts.plusJakartaSans(
-                                fontSize: 13,
+                                fontSize: 14.0,
                                 fontWeight: FontWeight.bold,
                                 color: isDark ? Colors.white70 : const Color(0xFF475569),
                               ),
@@ -2695,7 +2696,7 @@ int? taskIdxToEdit,
                                     children: [
                                       Text(
                                         'Tanggal Mulai',
-                                        style: GoogleFonts.plusJakartaSans(fontSize: 13, fontWeight: FontWeight.bold, color: isDark ? Colors.white70 : const Color(0xFF475569)),
+                                        style: GoogleFonts.plusJakartaSans(fontSize: 14.0, fontWeight: FontWeight.bold, color: isDark ? Colors.white70 : const Color(0xFF475569)),
                                       ),
                                       const SizedBox(height: 6),
                                       TextField(
@@ -2731,7 +2732,7 @@ int? taskIdxToEdit,
                                     children: [
                                       Text(
                                         'Tanggal Selesai / Tenggat',
-                                        style: GoogleFonts.plusJakartaSans(fontSize: 13, fontWeight: FontWeight.bold, color: isDark ? Colors.white70 : const Color(0xFF475569)),
+                                        style: GoogleFonts.plusJakartaSans(fontSize: 14.0, fontWeight: FontWeight.bold, color: isDark ? Colors.white70 : const Color(0xFF475569)),
                                       ),
                                       const SizedBox(height: 6),
                                       TextField(
@@ -2767,7 +2768,7 @@ int? taskIdxToEdit,
                             // 5. Batasan Waktu Pengerjaan
                             Text(
                               'Batasan Waktu Pengerjaan',
-                              style: GoogleFonts.plusJakartaSans(fontSize: 13, fontWeight: FontWeight.bold, color: isDark ? Colors.white70 : const Color(0xFF475569)),
+                              style: GoogleFonts.plusJakartaSans(fontSize: 14.0, fontWeight: FontWeight.bold, color: isDark ? Colors.white70 : const Color(0xFF475569)),
                             ),
                             const SizedBox(height: 8),
                             Row(
@@ -2786,7 +2787,7 @@ int? taskIdxToEdit,
                                       child: Center(
                                         child: Text(
                                           'Tanpa Batas',
-                                          style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, fontSize: 13, color: quizTimeMode == 'no_limit' ? const Color(0xFFB45309) : (isDark ? Colors.white70 : const Color(0xFF475569))),
+                                          style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, fontSize: 14.0, color: quizTimeMode == 'no_limit' ? const Color(0xFFB45309) : (isDark ? Colors.white70 : const Color(0xFF475569))),
                                         ),
                                       ),
                                     ),
@@ -2807,7 +2808,7 @@ int? taskIdxToEdit,
                                       child: Center(
                                         child: Text(
                                           'Set Batas Waktu',
-                                          style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, fontSize: 13, color: quizTimeMode == 'set_time' ? const Color(0xFFB45309) : (isDark ? Colors.white70 : const Color(0xFF475569))),
+                                          style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, fontSize: 14.0, color: quizTimeMode == 'set_time' ? const Color(0xFFB45309) : (isDark ? Colors.white70 : const Color(0xFF475569))),
                                         ),
                                       ),
                                     ),
@@ -2855,8 +2856,8 @@ int? taskIdxToEdit,
                                         dropdownColor: isDark ? const Color(0xFF1E1E24) : Colors.white,
                                         borderRadius: BorderRadius.circular(16),
                                         items: [
-                                          DropdownMenuItem(value: 'per_quiz', child: Text('Menit / Quiz', style: GoogleFonts.dmSans(fontSize: 13, color: isDark ? Colors.white : Colors.black87))),
-                                          DropdownMenuItem(value: 'per_question', child: Text('Detik / Soal', style: GoogleFonts.dmSans(fontSize: 13, color: isDark ? Colors.white : Colors.black87))),
+                                          DropdownMenuItem(value: 'per_quiz', child: Text('Menit / Quiz', style: GoogleFonts.dmSans(fontSize: 14.0, color: isDark ? Colors.white : Colors.black87))),
+                                          DropdownMenuItem(value: 'per_question', child: Text('Detik / Soal', style: GoogleFonts.dmSans(fontSize: 14.0, color: isDark ? Colors.white : Colors.black87))),
                                         ],
                                         onChanged: (val) {
                                           if (val != null) setDialogState(() => quizTimeType = val);
@@ -2896,7 +2897,7 @@ int? taskIdxToEdit,
                                       Row(
                                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                         children: [
-                                          Text('Soal ${qIdx + 1}', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, fontSize: 13.5, color: const Color(0xFFD97706))),
+                                          Text('Soal ${qIdx + 1}', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, fontSize: 14.0, color: const Color(0xFFD97706))),
                                           if (questionsList.length > 1)
                                             GestureDetector(
                                               onTap: () {
@@ -2914,7 +2915,7 @@ int? taskIdxToEdit,
                                         maxLines: null,
                                         minLines: 2,
                                         keyboardType: TextInputType.multiline,
-                                        style: GoogleFonts.dmSans(fontSize: 13.5, color: isDark ? Colors.white : Colors.black87),
+                                        style: GoogleFonts.dmSans(fontSize: 14.0, color: isDark ? Colors.white : Colors.black87),
                                         decoration: InputDecoration(
                                           hintText: 'Tulis pertanyaan soal quiz...',
                                           isDense: true,
@@ -3007,7 +3008,7 @@ int? taskIdxToEdit,
                                               children: [
                                                 Icon(Icons.add_photo_alternate_rounded, size: 16, color: isDark ? Colors.white70 : const Color(0xFF2563EB)),
                                                 const SizedBox(width: 6),
-                                                Text('Tambah Gambar Soal', style: GoogleFonts.plusJakartaSans(fontSize: 12, fontWeight: FontWeight.bold, color: isDark ? Colors.white70 : const Color(0xFF2563EB))),
+                                                Text('Tambah Gambar Soal', style: GoogleFonts.plusJakartaSans(fontSize: 14.0, fontWeight: FontWeight.bold, color: isDark ? Colors.white70 : const Color(0xFF2563EB))),
                                               ],
                                             ),
                                           ),
@@ -3024,11 +3025,11 @@ int? taskIdxToEdit,
                                               maxLines: null,
                                               minLines: 1,
                                               keyboardType: TextInputType.multiline,
-                                              style: GoogleFonts.dmSans(fontSize: 13, color: isDark ? Colors.white : Colors.black87),
+                                              style: GoogleFonts.dmSans(fontSize: 14.0, color: isDark ? Colors.white : Colors.black87),
                                               decoration: InputDecoration(
                                                 hintText: 'Pilihan A',
                                                 prefixText: 'A. ',
-                                                prefixStyle: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, color: (q['correct'] ?? 'A') == 'A' ? const Color(0xFF15803D) : (isDark ? Colors.white : const Color(0xFF0F172A)), fontSize: 13),
+                                                prefixStyle: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, color: (q['correct'] ?? 'A') == 'A' ? const Color(0xFF15803D) : (isDark ? Colors.white : const Color(0xFF0F172A)), fontSize: 14.0),
                                                 isDense: true,
                                                 contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                                                 fillColor: (q['correct'] ?? 'A') == 'A' ? (isDark ? const Color(0xFF143825) : const Color(0xFFDCFCE7)) : (isDark ? const Color(0xFF141416) : Colors.white),
@@ -3046,11 +3047,11 @@ int? taskIdxToEdit,
                                               maxLines: null,
                                               minLines: 1,
                                               keyboardType: TextInputType.multiline,
-                                              style: GoogleFonts.dmSans(fontSize: 13, color: isDark ? Colors.white : Colors.black87),
+                                              style: GoogleFonts.dmSans(fontSize: 14.0, color: isDark ? Colors.white : Colors.black87),
                                               decoration: InputDecoration(
                                                 hintText: 'Pilihan B',
                                                 prefixText: 'B. ',
-                                                prefixStyle: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, color: (q['correct'] ?? 'A') == 'B' ? const Color(0xFF15803D) : (isDark ? Colors.white : const Color(0xFF0F172A)), fontSize: 13),
+                                                prefixStyle: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, color: (q['correct'] ?? 'A') == 'B' ? const Color(0xFF15803D) : (isDark ? Colors.white : const Color(0xFF0F172A)), fontSize: 14.0),
                                                 isDense: true,
                                                 contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                                                 fillColor: (q['correct'] ?? 'A') == 'B' ? (isDark ? const Color(0xFF143825) : const Color(0xFFDCFCE7)) : (isDark ? const Color(0xFF141416) : Colors.white),
@@ -3072,11 +3073,11 @@ int? taskIdxToEdit,
                                               maxLines: null,
                                               minLines: 1,
                                               keyboardType: TextInputType.multiline,
-                                              style: GoogleFonts.dmSans(fontSize: 13, color: isDark ? Colors.white : Colors.black87),
+                                              style: GoogleFonts.dmSans(fontSize: 14.0, color: isDark ? Colors.white : Colors.black87),
                                               decoration: InputDecoration(
                                                 hintText: 'Pilihan C',
                                                 prefixText: 'C. ',
-                                                prefixStyle: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, color: (q['correct'] ?? 'A') == 'C' ? const Color(0xFF15803D) : (isDark ? Colors.white : const Color(0xFF0F172A)), fontSize: 13),
+                                                prefixStyle: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, color: (q['correct'] ?? 'A') == 'C' ? const Color(0xFF15803D) : (isDark ? Colors.white : const Color(0xFF0F172A)), fontSize: 14.0),
                                                 isDense: true,
                                                 contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                                                 fillColor: (q['correct'] ?? 'A') == 'C' ? (isDark ? const Color(0xFF143825) : const Color(0xFFDCFCE7)) : (isDark ? const Color(0xFF141416) : Colors.white),
@@ -3094,11 +3095,11 @@ int? taskIdxToEdit,
                                               maxLines: null,
                                               minLines: 1,
                                               keyboardType: TextInputType.multiline,
-                                              style: GoogleFonts.dmSans(fontSize: 13, color: isDark ? Colors.white : Colors.black87),
+                                              style: GoogleFonts.dmSans(fontSize: 14.0, color: isDark ? Colors.white : Colors.black87),
                                               decoration: InputDecoration(
                                                 hintText: 'Pilihan D',
                                                 prefixText: 'D. ',
-                                                prefixStyle: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, color: (q['correct'] ?? 'A') == 'D' ? const Color(0xFF15803D) : (isDark ? Colors.white : const Color(0xFF0F172A)), fontSize: 13),
+                                                prefixStyle: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, color: (q['correct'] ?? 'A') == 'D' ? const Color(0xFF15803D) : (isDark ? Colors.white : const Color(0xFF0F172A)), fontSize: 14.0),
                                                 isDense: true,
                                                 contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                                                 fillColor: (q['correct'] ?? 'A') == 'D' ? (isDark ? const Color(0xFF143825) : const Color(0xFFDCFCE7)) : (isDark ? const Color(0xFF141416) : Colors.white),
@@ -3118,7 +3119,7 @@ int? taskIdxToEdit,
                                         children: [
                                           Row(
                                             children: [
-                                              Text('Kunci Jawaban: ', style: GoogleFonts.plusJakartaSans(fontSize: 12.5, fontWeight: FontWeight.bold, color: isDark ? Colors.white70 : const Color(0xFF64748B))),
+                                              Text('Kunci Jawaban: ', style: GoogleFonts.plusJakartaSans(fontSize: 14.0, fontWeight: FontWeight.bold, color: isDark ? Colors.white70 : const Color(0xFF64748B))),
                                               const SizedBox(width: 8),
                                               Row(
                                                 children: ['A', 'B', 'C', 'D'].map((opt) {
@@ -3136,7 +3137,7 @@ int? taskIdxToEdit,
                                                       child: Text(
                                                         opt,
                                                         style: GoogleFonts.plusJakartaSans(
-                                                          fontSize: 12,
+                                                          fontSize: 14.0,
                                                           fontWeight: FontWeight.bold,
                                                           color: isSelected ? Colors.white : (isDark ? Colors.white70 : const Color(0xFF0F172A)),
                                                         ),
@@ -3244,7 +3245,7 @@ int? taskIdxToEdit,
                                       style: GoogleFonts.plusJakartaSans(
                                         color: const Color(0xFFD97706),
                                         fontWeight: FontWeight.bold,
-                                        fontSize: 12.5,
+                                        fontSize: 14.0,
                                       ),
                                     ),
                                   ],
@@ -3277,7 +3278,7 @@ int? taskIdxToEdit,
                                       style: GoogleFonts.plusJakartaSans(
                                         color: Colors.white,
                                         fontWeight: FontWeight.bold,
-                                        fontSize: 12.5,
+                                        fontSize: 14.0,
                                       ),
                                     ),
                                   ],
@@ -3324,7 +3325,7 @@ int? taskIdxToEdit,
                             ? const SizedBox(
                                 width: 20,
                                 height: 20,
-                                child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                                child: const ThreeDotsLoader(),
                               )
                             : Text(
                                 isEditMode ? 'Perbarui Quiz' : 'Simpan Quiz',
@@ -3538,7 +3539,7 @@ int? taskIdxToEdit,
                                 Text(
                                   'Bagikan materi bacaan & modul pembelajaran',
                                   style: GoogleFonts.dmSans(
-                                    fontSize: 12,
+                                    fontSize: 14.0,
                                     color: const Color(0xFF334155),
                                   ),
                                   maxLines: 1,
@@ -3581,7 +3582,7 @@ int? taskIdxToEdit,
                             Text(
                               'Pilih Elemen Pembelajaran',
                               style: GoogleFonts.plusJakartaSans(
-                                fontSize: 13,
+                                fontSize: 14.0,
                                 fontWeight: FontWeight.bold,
                                 color: isDark ? Colors.white70 : const Color(0xFF475569),
                               ),
@@ -3629,7 +3630,7 @@ int? taskIdxToEdit,
                                     child: Text(
                                       st['name'] ?? st['title'] ?? 'Elemen ${idx + 1}',
                                       style: GoogleFonts.plusJakartaSans(
-                                        fontSize: 13.5,
+                                        fontSize: 14.0,
                                         fontWeight: FontWeight.bold,
                                         color: selectedStageIdx == idx
                                             ? const Color(0xFF059669)
@@ -3665,7 +3666,7 @@ int? taskIdxToEdit,
                             Text(
                               'Pilih Materi',
                               style: GoogleFonts.plusJakartaSans(
-                                fontSize: 13,
+                                fontSize: 14.0,
                                 fontWeight: FontWeight.bold,
                                 color: isDark ? Colors.white70 : const Color(0xFF475569),
                               ),
@@ -3712,7 +3713,7 @@ int? taskIdxToEdit,
                                     child: Text(
                                       m['title'] ?? 'Materi ${mIdx + 1}',
                                       style: GoogleFonts.plusJakartaSans(
-                                        fontSize: 13.5,
+                                        fontSize: 14.0,
                                         fontWeight: FontWeight.bold,
                                         color: selectedMateriIdx == mIdx
                                             ? const Color(0xFF059669)
@@ -3748,7 +3749,7 @@ int? taskIdxToEdit,
                             Text(
                               'Judul Materi',
                               style: GoogleFonts.plusJakartaSans(
-                                fontSize: 13,
+                                fontSize: 14.0,
                                 fontWeight: FontWeight.bold,
                                 color: isDark ? Colors.white70 : const Color(0xFF475569),
                               ),
@@ -3780,7 +3781,7 @@ int? taskIdxToEdit,
                             Text(
                               'Ringkasan / Konten Materi',
                               style: GoogleFonts.plusJakartaSans(
-                                fontSize: 13,
+                                fontSize: 14.0,
                                 fontWeight: FontWeight.bold,
                                 color: isDark ? Colors.white70 : const Color(0xFF475569),
                               ),
@@ -3812,7 +3813,7 @@ int? taskIdxToEdit,
                             Text(
                               'File Dokumen / Modul PDF (Opsional)',
                               style: GoogleFonts.plusJakartaSans(
-                                fontSize: 13,
+                                fontSize: 14.0,
                                 fontWeight: FontWeight.bold,
                                 color: isDark ? Colors.white70 : const Color(0xFF475569),
                               ),
@@ -3870,7 +3871,7 @@ int? taskIdxToEdit,
                                   style: GoogleFonts.plusJakartaSans(
                                     color: Colors.white,
                                     fontWeight: FontWeight.bold,
-                                    fontSize: 12.5,
+                                    fontSize: 14.0,
                                   ),
                                 ),
                               ],
@@ -3915,7 +3916,7 @@ int? taskIdxToEdit,
                             ? const SizedBox(
                                 width: 20,
                                 height: 20,
-                                child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                                child: const ThreeDotsLoader(),
                               )
                             : Text(
                                 isEditMode ? 'Perbarui Materi' : 'Simpan Materi',

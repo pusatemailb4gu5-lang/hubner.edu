@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hubner/core/widgets/three_dots_loader.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -278,7 +279,7 @@ class _DesktopTahapanPembelajaranTabState
           .snapshots(),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
-          return const Center(child: CircularProgressIndicator());
+          return const Center(child: ThreeDotsLoader());
         }
 
         final data = snapshot.data!.data() as Map<String, dynamic>? ?? {};
@@ -431,7 +432,7 @@ class _DesktopTahapanPembelajaranTabState
                                           child: Text(
                                             'Kelola',
                                             style: GoogleFonts.plusJakartaSans(
-                                              fontSize: 11.5,
+                                              fontSize: 14.0,
                                               fontWeight: FontWeight.bold,
                                               color: const Color(0xFF334155),
                                             ),
@@ -466,7 +467,7 @@ class _DesktopTahapanPembelajaranTabState
                                                 'Tambah',
                                                 style:
                                                     GoogleFonts.plusJakartaSans(
-                                                      fontSize: 11.5,
+                                                      fontSize: 14.0,
                                                       fontWeight:
                                                           FontWeight.bold,
                                                       color: Colors.white,
@@ -499,7 +500,7 @@ class _DesktopTahapanPembelajaranTabState
                                       child: Text(
                                         'Selesai',
                                         style: GoogleFonts.plusJakartaSans(
-                                          fontSize: 11.5,
+                                          fontSize: 14.0,
                                           fontWeight: FontWeight.bold,
                                           color: Colors.white,
                                         ),
@@ -564,7 +565,7 @@ class _DesktopTahapanPembelajaranTabState
                                         Text(
                                           'Pilih Semua (${_selectedManageIndices.length}/${stages.length})',
                                           style: GoogleFonts.plusJakartaSans(
-                                            fontSize: 12.5,
+                                            fontSize: 14.0,
                                             fontWeight: FontWeight.bold,
                                             color: const Color(0xFF1E293B),
                                           ),
@@ -603,7 +604,7 @@ class _DesktopTahapanPembelajaranTabState
                                           child: Text(
                                             'Hapus',
                                             style: GoogleFonts.plusJakartaSans(
-                                              fontSize: 11,
+                                              fontSize: 14.0,
                                               fontWeight: FontWeight.bold,
                                             ),
                                           ),
@@ -637,7 +638,7 @@ class _DesktopTahapanPembelajaranTabState
                                           child: Text(
                                             'Akan Datang',
                                             style: GoogleFonts.plusJakartaSans(
-                                              fontSize: 11,
+                                              fontSize: 14.0,
                                               fontWeight: FontWeight.bold,
                                             ),
                                           ),
@@ -671,7 +672,7 @@ class _DesktopTahapanPembelajaranTabState
                                           child: Text(
                                             'Proses Pembelajaran',
                                             style: GoogleFonts.plusJakartaSans(
-                                              fontSize: 11,
+                                              fontSize: 14.0,
                                               fontWeight: FontWeight.bold,
                                             ),
                                           ),
@@ -705,7 +706,7 @@ class _DesktopTahapanPembelajaranTabState
                                           child: Text(
                                             'Selesai',
                                             style: GoogleFonts.plusJakartaSans(
-                                              fontSize: 11,
+                                              fontSize: 14.0,
                                               fontWeight: FontWeight.bold,
                                             ),
                                           ),
@@ -822,7 +823,7 @@ class _DesktopTahapanPembelajaranTabState
                                                 '${index + 1}',
                                                 style:
                                                     GoogleFonts.plusJakartaSans(
-                                                      fontSize: 12,
+                                                      fontSize: 14.0,
                                                       fontWeight:
                                                           FontWeight.bold,
                                                       color: Colors.white, // Teks selalu PUTIH!
@@ -854,7 +855,7 @@ class _DesktopTahapanPembelajaranTabState
                                                 Text(
                                                   '${materis.length} Materi',
                                                   style: GoogleFonts.dmSans(
-                                                    fontSize: 11.8,
+                                                    fontSize: 14.0,
                                                     color: const Color(
                                                       0xFF64748B,
                                                     ),
@@ -964,7 +965,7 @@ class _DesktopTahapanPembelajaranTabState
                 child: Text(
                   'Klik 2x pada Judul, Deskripsi Elemen, atau Materi untuk mengedit langsung. Tekan tombol hijau atau Enter untuk menyimpan.',
                   style: GoogleFonts.plusJakartaSans(
-                    fontSize: 13.5,
+                    fontSize: 14.0,
                     fontWeight: FontWeight.w600,
                     color: const Color(0xFF0369A1),
                   ),
@@ -1010,7 +1011,7 @@ class _DesktopTahapanPembelajaranTabState
                         child: Text(
                           'Elemen ke-${selectedIndex + 1}',
                           style: GoogleFonts.plusJakartaSans(
-                            fontSize: 12.9,
+                            fontSize: 14.0,
                             fontWeight: FontWeight.bold,
                             color: activeElemColor,
                           ),
@@ -1078,7 +1079,7 @@ class _DesktopTahapanPembelajaranTabState
                                   Text(
                                     statusText,
                                     style: GoogleFonts.plusJakartaSans(
-                                      fontSize: 12,
+                                      fontSize: 14.0,
                                       fontWeight: FontWeight.w600,
                                       color: const Color(0xFF1E293B),
                                     ),
@@ -1124,7 +1125,7 @@ class _DesktopTahapanPembelajaranTabState
                                     ? selectedStage['status']
                                     : 'Proses Pembelajaran',
                                 style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 12,
+                                  fontSize: 14.0,
                                   fontWeight: FontWeight.w600,
                                   color: const Color(0xFF1E293B),
                                 ),
@@ -1144,7 +1145,7 @@ class _DesktopTahapanPembelajaranTabState
                   Text(
                     '${materis.length} Materi Terlampir',
                     style: GoogleFonts.dmSans(
-                      fontSize: 13.5,
+                      fontSize: 14.0,
                       fontWeight: FontWeight.w500,
                       color: const Color(0xFF000000),
                     ),
@@ -1308,7 +1309,7 @@ class _DesktopTahapanPembelajaranTabState
                               vertical: 4,
                             ),
                             textStyle: GoogleFonts.plusJakartaSans(
-                              fontSize: 12,
+                              fontSize: 14.0,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -1323,7 +1324,7 @@ class _DesktopTahapanPembelajaranTabState
                           style: TextButton.styleFrom(
                             foregroundColor: const Color(0xFFEF4444),
                             textStyle: GoogleFonts.plusJakartaSans(
-                              fontSize: 12,
+                              fontSize: 14.0,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -1399,7 +1400,7 @@ class _DesktopTahapanPembelajaranTabState
                       Text(
                         'Materi Baru',
                         style: GoogleFonts.plusJakartaSans(
-                          fontSize: 12.5,
+                          fontSize: 14.0,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
                         ),
@@ -1613,7 +1614,7 @@ class _DesktopTahapanPembelajaranTabState
                                         Text(
                                           '${pdfs.length} File PDF',
                                           style: GoogleFonts.plusJakartaSans(
-                                            fontSize: 12,
+                                            fontSize: 14.0,
                                             fontWeight: FontWeight.bold,
                                             color: const Color(0xFF0284C7),
                                           ),
@@ -1645,7 +1646,7 @@ class _DesktopTahapanPembelajaranTabState
                                         Text(
                                           '${tasks.length} Tugas/Quiz',
                                           style: GoogleFonts.plusJakartaSans(
-                                            fontSize: 12,
+                                            fontSize: 14.0,
                                             fontWeight: FontWeight.bold,
                                             color: const Color(0xFFE11D48),
                                           ),

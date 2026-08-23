@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hubner/core/widgets/three_dots_loader.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -163,10 +164,7 @@ class _NoteEditorPageState extends State<NoteEditorPage> {
                                 child: SizedBox(
                                   width: 20,
                                   height: 20,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    color: isDark ? Colors.white : Colors.black,
-                                  ),
+                                  child: const ThreeDotsLoader(),
                                 ),
                               ),
                             )

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hubner/core/widgets/three_dots_loader.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -131,7 +132,7 @@ class _DesktopTugasTabState extends State<DesktopTugasTab> {
           .snapshots(),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
-          return const Center(child: CircularProgressIndicator());
+          return const Center(child: ThreeDotsLoader());
         }
 
         final data = snapshot.data!.data() as Map<String, dynamic>? ?? {};
@@ -393,7 +394,7 @@ class _DesktopTugasTabState extends State<DesktopTugasTab> {
                           child: Text(
                             '${sIndex + 1}',
                             style: GoogleFonts.plusJakartaSans(
-                              fontSize: 13.5,
+                              fontSize: 14.0,
                               fontWeight: FontWeight.bold,
                               color: Colors.white,
                             ),
@@ -415,7 +416,7 @@ class _DesktopTugasTabState extends State<DesktopTugasTab> {
                               Text(
                                 '${materis.length} Materi • ${stageTasks.length} Tugas',
                                 style: GoogleFonts.dmSans(
-                                  fontSize: 12,
+                                  fontSize: 14.0,
                                   color: const Color(0xFF64748B),
                                 ),
                               ),
@@ -441,7 +442,7 @@ class _DesktopTugasTabState extends State<DesktopTugasTab> {
                               child: Text(
                                 'Belum ada tugas di elemen ini.',
                                 style: GoogleFonts.dmSans(
-                                  fontSize: 12.5,
+                                  fontSize: 14.0,
                                   color: const Color(0xFF94A3B8),
                                 ),
                               ),
@@ -526,7 +527,7 @@ class _DesktopTugasTabState extends State<DesktopTugasTab> {
                                               maxLines: 1,
                                               overflow: TextOverflow.ellipsis,
                                               style: GoogleFonts.plusJakartaSans(
-                                                fontSize: 13.5,
+                                                fontSize: 14.0,
                                                 fontWeight: isSelected
                                                     ? FontWeight.bold
                                                     : FontWeight.w500,
@@ -538,7 +539,7 @@ class _DesktopTugasTabState extends State<DesktopTugasTab> {
                                             Text(
                                               'Materi: ${t['materiTitle'] ?? '-'}',
                                               style: GoogleFonts.dmSans(
-                                                fontSize: 11.5,
+                                                fontSize: 14.0,
                                                 color: const Color(0xFF64748B),
                                               ),
                                             ),
@@ -642,7 +643,7 @@ class _DesktopTugasTabState extends State<DesktopTugasTab> {
               Text(
                 '$_selectedStageTitle • $materiTitle',
                 style: GoogleFonts.dmSans(
-                  fontSize: 13.5,
+                  fontSize: 14.0,
                   color: const Color(0xFF475569),
                 ),
               ),
@@ -657,7 +658,7 @@ class _DesktopTugasTabState extends State<DesktopTugasTab> {
                 Text(
                   'Tenggat: ${startDateStr.isNotEmpty ? startDateStr : '-'} s/d ${endDateStr.isNotEmpty ? endDateStr : 'Selesai'}',
                   style: GoogleFonts.dmSans(
-                    fontSize: 13.5,
+                    fontSize: 14.0,
                     color: const Color(0xFF475569),
                   ),
                 ),
@@ -697,7 +698,7 @@ class _DesktopTugasTabState extends State<DesktopTugasTab> {
                         Text(
                           docName.isNotEmpty ? docName : 'tugas_soal.pdf',
                           style: GoogleFonts.dmSans(
-                            fontSize: 13,
+                            fontSize: 14.0,
                             color: const Color(0xFFBE123C),
                           ),
                           maxLines: 1,
@@ -735,7 +736,7 @@ class _DesktopTugasTabState extends State<DesktopTugasTab> {
                   Text(
                     'Pertanyaan / Instruksi Tugas:',
                     style: GoogleFonts.plusJakartaSans(
-                      fontSize: 13,
+                      fontSize: 14.0,
                       fontWeight: FontWeight.bold,
                       color: const Color(0xFF64748B),
                     ),
@@ -1224,7 +1225,7 @@ class _DesktopTugasTabState extends State<DesktopTugasTab> {
                                   Text(
                                     'Pilih Elemen Pembelajaran',
                                     style: GoogleFonts.plusJakartaSans(
-                                      fontSize: 13,
+                                      fontSize: 14.0,
                                       fontWeight: FontWeight.bold,
                                       color: const Color(0xFF475569),
                                     ),
@@ -1273,7 +1274,7 @@ class _DesktopTugasTabState extends State<DesktopTugasTab> {
                                   Text(
                                     'Pilih Materi',
                                     style: GoogleFonts.plusJakartaSans(
-                                      fontSize: 13,
+                                      fontSize: 14.0,
                                       fontWeight: FontWeight.bold,
                                       color: const Color(0xFF475569),
                                     ),
@@ -1322,7 +1323,7 @@ class _DesktopTugasTabState extends State<DesktopTugasTab> {
                                   Text(
                                     'Judul Tugas',
                                     style: GoogleFonts.plusJakartaSans(
-                                      fontSize: 13,
+                                      fontSize: 14.0,
                                       fontWeight: FontWeight.bold,
                                       color: const Color(0xFF475569),
                                     ),
@@ -1358,7 +1359,7 @@ class _DesktopTugasTabState extends State<DesktopTugasTab> {
                                           children: [
                                             Text(
                                               'Tanggal Mulai',
-                                              style: GoogleFonts.plusJakartaSans(fontSize: 13, fontWeight: FontWeight.bold, color: const Color(0xFF475569)),
+                                              style: GoogleFonts.plusJakartaSans(fontSize: 14.0, fontWeight: FontWeight.bold, color: const Color(0xFF475569)),
                                             ),
                                             const SizedBox(height: 6),
                                             TextField(
@@ -1394,7 +1395,7 @@ class _DesktopTugasTabState extends State<DesktopTugasTab> {
                                           children: [
                                             Text(
                                               'Tanggal Selesai / Tenggat',
-                                              style: GoogleFonts.plusJakartaSans(fontSize: 13, fontWeight: FontWeight.bold, color: const Color(0xFF475569)),
+                                              style: GoogleFonts.plusJakartaSans(fontSize: 14.0, fontWeight: FontWeight.bold, color: const Color(0xFF475569)),
                                             ),
                                             const SizedBox(height: 6),
                                             TextField(
@@ -1456,7 +1457,7 @@ class _DesktopTugasTabState extends State<DesktopTugasTab> {
                                               border: Border.all(color: assignmentType == 'individu' ? mainThemeColor : const Color(0xFFE2E8F0)),
                                             ),
                                             child: Center(
-                                              child: Text('Tugas Individu', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, fontSize: 13.5, color: assignmentType == 'individu' ? mainThemeColor : const Color(0xFF475569))),
+                                              child: Text('Tugas Individu', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, fontSize: 14.0, color: assignmentType == 'individu' ? mainThemeColor : const Color(0xFF475569))),
                                             ),
                                           ),
                                         ),
@@ -1473,7 +1474,7 @@ class _DesktopTugasTabState extends State<DesktopTugasTab> {
                                               border: Border.all(color: assignmentType == 'kelompok' ? mainThemeColor : const Color(0xFFE2E8F0)),
                                             ),
                                             child: Center(
-                                              child: Text('Tugas Kelompok', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, fontSize: 13.5, color: assignmentType == 'kelompok' ? mainThemeColor : const Color(0xFF475569))),
+                                              child: Text('Tugas Kelompok', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, fontSize: 14.0, color: assignmentType == 'kelompok' ? mainThemeColor : const Color(0xFF475569))),
                                             ),
                                           ),
                                         ),
@@ -1486,7 +1487,7 @@ class _DesktopTugasTabState extends State<DesktopTugasTab> {
                                     children: [
                                       Text(
                                         'Mode Pengumpulan Tugas: ',
-                                        style: GoogleFonts.plusJakartaSans(fontSize: 13, fontWeight: FontWeight.bold, color: const Color(0xFF475569)),
+                                        style: GoogleFonts.plusJakartaSans(fontSize: 14.0, fontWeight: FontWeight.bold, color: const Color(0xFF475569)),
                                       ),
                                       const SizedBox(width: 14),
                                       Row(
@@ -1499,7 +1500,7 @@ class _DesktopTugasTabState extends State<DesktopTugasTab> {
                                               if (v != null) setDialogState(() => tugasMode = v);
                                             },
                                           ),
-                                          Text('Jawaban Teks', style: GoogleFonts.dmSans(fontSize: 13.5)),
+                                          Text('Jawaban Teks', style: GoogleFonts.dmSans(fontSize: 14.0)),
                                         ],
                                       ),
                                       const SizedBox(width: 14),
@@ -1513,7 +1514,7 @@ class _DesktopTugasTabState extends State<DesktopTugasTab> {
                                               if (v != null) setDialogState(() => tugasMode = v);
                                             },
                                           ),
-                                          Text('File PDF', style: GoogleFonts.dmSans(fontSize: 13.5)),
+                                          Text('File PDF', style: GoogleFonts.dmSans(fontSize: 14.0)),
                                         ],
                                       ),
                                     ],
@@ -1523,7 +1524,7 @@ class _DesktopTugasTabState extends State<DesktopTugasTab> {
                                   if (tugasMode == 'text') ...[
                                     Text(
                                       'Teks Soal / Pertanyaan Tugas',
-                                      style: GoogleFonts.plusJakartaSans(fontSize: 13, fontWeight: FontWeight.bold, color: const Color(0xFF475569)),
+                                      style: GoogleFonts.plusJakartaSans(fontSize: 14.0, fontWeight: FontWeight.bold, color: const Color(0xFF475569)),
                                     ),
                                     const SizedBox(height: 6),
                                     TextField(
@@ -1549,7 +1550,7 @@ class _DesktopTugasTabState extends State<DesktopTugasTab> {
                                   ] else ...[
                                     Text(
                                       'Link / Berkas Soal PDF',
-                                      style: GoogleFonts.plusJakartaSans(fontSize: 13, fontWeight: FontWeight.bold, color: const Color(0xFF475569)),
+                                      style: GoogleFonts.plusJakartaSans(fontSize: 14.0, fontWeight: FontWeight.bold, color: const Color(0xFF475569)),
                                     ),
                                     const SizedBox(height: 6),
                                     Row(
@@ -1557,10 +1558,10 @@ class _DesktopTugasTabState extends State<DesktopTugasTab> {
                                         Expanded(
                                           child: TextField(
                                             controller: taskPdfController,
-                                            style: GoogleFonts.dmSans(fontSize: 13.5),
+                                            style: GoogleFonts.dmSans(fontSize: 14.0),
                                             decoration: InputDecoration(
                                               hintText: 'Masukkan link/nama file PDF tugas...',
-                                              hintStyle: GoogleFonts.dmSans(fontSize: 13, color: const Color(0xFF94A3B8)),
+                                              hintStyle: GoogleFonts.dmSans(fontSize: 14.0, color: const Color(0xFF94A3B8)),
                                               prefixIcon: const Icon(Icons.picture_as_pdf_rounded, size: 18, color: Color(0xFFE11D48)),
                                               isDense: true,
                                               contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
@@ -1581,7 +1582,7 @@ class _DesktopTugasTabState extends State<DesktopTugasTab> {
                                         ElevatedButton.icon(
                                           onPressed: () => _uploadTugasPdfToDrive(context, taskPdfController, setDialogState),
                                           icon: const Icon(Icons.upload_file_rounded, size: 18, color: Colors.white),
-                                          label: Text('Upload PDF', style: GoogleFonts.plusJakartaSans(fontSize: 13, fontWeight: FontWeight.bold)),
+                                          label: Text('Upload PDF', style: GoogleFonts.plusJakartaSans(fontSize: 14.0, fontWeight: FontWeight.bold)),
                                           style: ElevatedButton.styleFrom(
                                             backgroundColor: const Color(0xFFE11D48),
                                             foregroundColor: Colors.white,
@@ -1669,7 +1670,7 @@ class _DesktopTugasTabState extends State<DesktopTugasTab> {
                             Text(
                               '${submissions.length} Pengumpulan Siswa',
                               style: GoogleFonts.dmSans(
-                                fontSize: 13,
+                                fontSize: 14.0,
                                 color: Colors.white.withValues(alpha: 0.85),
                               ),
                             ),
@@ -1750,12 +1751,12 @@ class _DesktopTugasTabState extends State<DesktopTugasTab> {
                                               ),
                                               child: Text(
                                                 'Nilai: $score',
-                                                style: GoogleFonts.plusJakartaSans(fontSize: 12.9, fontWeight: FontWeight.bold, color: const Color(0xFF059669)),
+                                                style: GoogleFonts.plusJakartaSans(fontSize: 14.0, fontWeight: FontWeight.bold, color: const Color(0xFF059669)),
                                               ),
                                             ),
                                           ],
                                         ),
-                                        Text('Dikumpulkan: $submittedAt', style: GoogleFonts.dmSans(fontSize: 12, color: const Color(0xFF64748B))),
+                                        Text('Dikumpulkan: $submittedAt', style: GoogleFonts.dmSans(fontSize: 14.0, color: const Color(0xFF64748B))),
                                         const SizedBox(height: 8),
 
                                         if (fileUrl != null && fileUrl.isNotEmpty) ...[
@@ -1780,7 +1781,7 @@ class _DesktopTugasTabState extends State<DesktopTugasTab> {
                                                   const SizedBox(width: 6),
                                                   Text(
                                                     'Buka File Lampiran Tugas',
-                                                    style: GoogleFonts.plusJakartaSans(fontSize: 12.5, fontWeight: FontWeight.bold, color: const Color(0xFF0284C7)),
+                                                    style: GoogleFonts.plusJakartaSans(fontSize: 14.0, fontWeight: FontWeight.bold, color: const Color(0xFF0284C7)),
                                                   ),
                                                 ],
                                               ),

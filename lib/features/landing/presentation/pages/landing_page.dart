@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:hubner/core/widgets/three_dots_loader.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hubner/features/projects/presentation/pages/class_page.dart'
@@ -558,7 +559,7 @@ class _LandingPageState extends State<LandingPage> {
                           Text(
                             'KODE KELAS',
                             style: GoogleFonts.plusJakartaSans(
-                              fontSize: 11.7,
+                              fontSize: 14.0,
                               fontWeight: FontWeight.bold,
                               color: const Color(0xFF7C3AED),
                             ),
@@ -631,7 +632,7 @@ class _LandingPageState extends State<LandingPage> {
           Text(
             text,
             style: GoogleFonts.plusJakartaSans(
-              fontSize: 13,
+              fontSize: 14.0,
               fontWeight: FontWeight.bold,
               color: Colors.white,
             ),
@@ -664,7 +665,7 @@ class _LandingPageState extends State<LandingPage> {
                   Text(
                     'SMA Kelas 11 • IPA 2',
                     style: GoogleFonts.plusJakartaSans(
-                      fontSize: 13,
+                      fontSize: 14.0,
                       fontWeight: FontWeight.bold,
                       color: Colors.black87,
                     ),
@@ -696,7 +697,7 @@ class _LandingPageState extends State<LandingPage> {
                     Text(
                       'FIS-11A',
                       style: GoogleFonts.plusJakartaSans(
-                        fontSize: 12.4,
+                        fontSize: 14.0,
                         fontWeight: FontWeight.bold,
                         color: Colors.black87,
                       ),
@@ -852,7 +853,7 @@ class _LandingPageState extends State<LandingPage> {
         Text(
           'Progress Pembelajaran Kelas',
           style: GoogleFonts.plusJakartaSans(
-            fontSize: 13,
+            fontSize: 14.0,
             fontWeight: FontWeight.bold,
             color: Colors.white.withOpacity(0.8),
           ),
@@ -1156,13 +1157,13 @@ class _LandingPageState extends State<LandingPage> {
                                 ),
                                 child: Text(
                                   _t('elemen_status_2'),
-                                  style: GoogleFonts.plusJakartaSans(fontSize: 12.4, fontWeight: FontWeight.bold, color: Colors.black87),
+                                  style: GoogleFonts.plusJakartaSans(fontSize: 14.0, fontWeight: FontWeight.bold, color: Colors.black87),
                                 ),
                               ),
                             ],
                           ),
                           const SizedBox(height: 4),
-                          Text('3 Materi • 1 Kuis Evaluasi', style: GoogleFonts.dmSans(fontSize: 13, color: Colors.white70)),
+                          Text('3 Materi • 1 Kuis Evaluasi', style: GoogleFonts.dmSans(fontSize: 14.0, color: Colors.white70)),
                           const SizedBox(height: 10),
 
                           // Materi Sub-Cards (Item 3 animates between unchecked and checked!)
@@ -1314,7 +1315,7 @@ class _LandingPageState extends State<LandingPage> {
                 Text(
                   statusLabel,
                   style: GoogleFonts.plusJakartaSans(
-                    fontSize: 12.4,
+                    fontSize: 14.0,
                     fontWeight: FontWeight.bold,
                     color: displayBadgeFg,
                   ),
@@ -1349,7 +1350,7 @@ class _LandingPageState extends State<LandingPage> {
                 ),
                 Text(
                   subtitle,
-                  style: GoogleFonts.dmSans(fontSize: 12.4, color: Colors.black45),
+                  style: GoogleFonts.dmSans(fontSize: 14.0, color: Colors.black45),
                 ),
               ],
             ),
@@ -1434,7 +1435,7 @@ class _LandingPageState extends State<LandingPage> {
                           ),
                           child: Text(
                             _t('monitoring_kelas_selesai'),
-                            style: GoogleFonts.plusJakartaSans(fontSize: 13.7, fontWeight: FontWeight.bold, color: const Color(0xFF10B981)),
+                            style: GoogleFonts.plusJakartaSans(fontSize: 14.0, fontWeight: FontWeight.bold, color: const Color(0xFF10B981)),
                           ),
                         ),
                       ],
@@ -1569,7 +1570,7 @@ class _LandingPageState extends State<LandingPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(label, style: GoogleFonts.plusJakartaSans(fontSize: 12.4, color: labelColor, fontWeight: FontWeight.w500)),
+                Text(label, style: GoogleFonts.plusJakartaSans(fontSize: 14.0, color: labelColor, fontWeight: FontWeight.w500)),
                 Text(value, style: GoogleFonts.plusJakartaSans(fontSize: 15, fontWeight: FontWeight.bold, color: textColor)),
               ],
             ),
@@ -1608,13 +1609,13 @@ class _LandingPageState extends State<LandingPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(sender, style: GoogleFonts.plusJakartaSans(fontSize: 12.4, fontWeight: FontWeight.bold, color: Colors.black54)),
+                  Text(sender, style: GoogleFonts.plusJakartaSans(fontSize: 14.0, fontWeight: FontWeight.bold, color: Colors.black54)),
                   const SizedBox(height: 2),
-                  Text(text, style: GoogleFonts.plusJakartaSans(fontSize: 13.7, color: Colors.black87)),
+                  Text(text, style: GoogleFonts.plusJakartaSans(fontSize: 14.0, color: Colors.black87)),
                   const SizedBox(height: 2),
                   Align(
                     alignment: Alignment.bottomRight,
-                    child: Text(time, style: GoogleFonts.dmSans(fontSize: 11.1, color: Colors.black45)),
+                    child: Text(time, style: GoogleFonts.dmSans(fontSize: 14.0, color: Colors.black45)),
                   ),
                 ],
               ),
@@ -1651,11 +1652,11 @@ class _LandingPageState extends State<LandingPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  Text(sender, style: GoogleFonts.plusJakartaSans(fontSize: 12.4, fontWeight: FontWeight.bold, color: Colors.white70)),
+                  Text(sender, style: GoogleFonts.plusJakartaSans(fontSize: 14.0, fontWeight: FontWeight.bold, color: Colors.white70)),
                   const SizedBox(height: 2),
-                  Text(text, style: GoogleFonts.plusJakartaSans(fontSize: 13.7, color: Colors.white)),
+                  Text(text, style: GoogleFonts.plusJakartaSans(fontSize: 14.0, color: Colors.white)),
                   const SizedBox(height: 2),
-                  Text(time, style: GoogleFonts.dmSans(fontSize: 11.1, color: Colors.white60)),
+                  Text(time, style: GoogleFonts.dmSans(fontSize: 14.0, color: Colors.white60)),
                 ],
               ),
             ),
@@ -1728,7 +1729,7 @@ class _LandingPageState extends State<LandingPage> {
                               ),
                               child: Text(
                                 _t('quiz_sisa_waktu'),
-                                style: GoogleFonts.plusJakartaSans(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.white),
+                                style: GoogleFonts.plusJakartaSans(fontSize: 14.0, fontWeight: FontWeight.bold, color: Colors.white),
                               ),
                             ),
                           ],
@@ -1839,7 +1840,7 @@ class _LandingPageState extends State<LandingPage> {
                                 children: [
                                   Text(
                                     'Skor Evaluasi',
-                                    style: GoogleFonts.dmSans(fontSize: 13, color: Colors.white70),
+                                    style: GoogleFonts.dmSans(fontSize: 14.0, color: Colors.white70),
                                   ),
                                   const SizedBox(height: 2),
                                   Row(
@@ -1885,7 +1886,7 @@ class _LandingPageState extends State<LandingPage> {
                                   const SizedBox(height: 6),
                                   Text(
                                     'Mendekati target kelulusan',
-                                    style: GoogleFonts.dmSans(fontSize: 11.7, color: Colors.white70),
+                                    style: GoogleFonts.dmSans(fontSize: 14.0, color: Colors.white70),
                                   ),
                                 ],
                               ),
@@ -1922,13 +1923,13 @@ class _LandingPageState extends State<LandingPage> {
                                   const SizedBox(height: 6),
                                   Text(
                                     'Predikat',
-                                    style: GoogleFonts.plusJakartaSans(fontSize: 11.1, color: Colors.black45),
+                                    style: GoogleFonts.plusJakartaSans(fontSize: 14.0, color: Colors.black45),
                                   ),
                                   const SizedBox(height: 2),
                                   Text(
                                     _liveScore >= 70 ? 'Sangat Baik' : 'Baik',
                                     style: GoogleFonts.plusJakartaSans(
-                                      fontSize: 13.7,
+                                      fontSize: 14.0,
                                       fontWeight: FontWeight.bold,
                                       color: _liveScore >= 70 ? const Color(0xFFD97706) : const Color(0xFFB45309), // Non-contrast warm amber
                                     ),
@@ -1965,7 +1966,7 @@ class _LandingPageState extends State<LandingPage> {
                               children: [
                                 Text(
                                   'Lembar Jawaban Kuis',
-                                  style: GoogleFonts.plusJakartaSans(fontSize: 12.4, fontWeight: FontWeight.bold, color: Colors.black45),
+                                  style: GoogleFonts.plusJakartaSans(fontSize: 14.0, fontWeight: FontWeight.bold, color: Colors.black45),
                                 ),
                                 const SizedBox(height: 8),
                                 Row(
@@ -2019,7 +2020,7 @@ class _LandingPageState extends State<LandingPage> {
                                       Text(
                                         '7/10 Soal',
                                         style: GoogleFonts.plusJakartaSans(
-                                          fontSize: 13.7,
+                                          fontSize: 14.0,
                                           fontWeight: FontWeight.bold,
                                           color: Colors.black87,
                                         ),
@@ -2030,7 +2031,7 @@ class _LandingPageState extends State<LandingPage> {
                                   Text(
                                     'Sudah dijawab',
                                     style: GoogleFonts.dmSans(
-                                      fontSize: 11.7,
+                                      fontSize: 14.0,
                                       fontWeight: FontWeight.w500,
                                       color: Colors.black45,
                                     ),
@@ -2077,7 +2078,7 @@ class _LandingPageState extends State<LandingPage> {
       child: Text(
         '$num',
         style: GoogleFonts.plusJakartaSans(
-          fontSize: 12.4,
+          fontSize: 14.0,
           fontWeight: FontWeight.bold,
           color: textColor,
         ),
@@ -2163,7 +2164,7 @@ class _LandingPageState extends State<LandingPage> {
               child: Text(
                 letter,
                 style: GoogleFonts.plusJakartaSans(
-                  fontSize: 13,
+                  fontSize: 14.0,
                   fontWeight: FontWeight.bold,
                   color: keyTextColor,
                 ),
@@ -2314,7 +2315,7 @@ class _LandingPageState extends State<LandingPage> {
                   child: Text(
                     tag,
                     style: GoogleFonts.plusJakartaSans(
-                      fontSize: 12.4,
+                      fontSize: 14.0,
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
                     ),
@@ -2458,7 +2459,7 @@ class _LandingPageState extends State<LandingPage> {
                             ? const SizedBox(
                                 width: 14,
                                 height: 14,
-                                child: CircularProgressIndicator(strokeWidth: 2, color: Colors.black),
+                                child: const ThreeDotsLoader(),
                               )
                             : Row(
                                 children: [
@@ -2494,7 +2495,7 @@ class _LandingPageState extends State<LandingPage> {
                             padding: const EdgeInsets.symmetric(vertical: 16),
                             child: Row(
                               children: [
-                                const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFF14B8A6))),
+                                const ThreeDotsLoader(size: 6, bounceHeight: 3),
                                 const SizedBox(width: 8),
                                 Text('AI sedang merancang 3-5 materi per elemen...', style: GoogleFonts.dmSans(fontSize: 14.3, color: Colors.black54)),
                               ],
@@ -2569,7 +2570,7 @@ class _LandingPageState extends State<LandingPage> {
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Text('${materis.length} Materi', style: GoogleFonts.plusJakartaSans(fontSize: 11.1, fontWeight: FontWeight.bold, color: accent)),
+                child: Text('${materis.length} Materi', style: GoogleFonts.plusJakartaSans(fontSize: 14.0, fontWeight: FontWeight.bold, color: accent)),
               ),
             ],
           ),
@@ -2585,7 +2586,7 @@ class _LandingPageState extends State<LandingPage> {
                     Expanded(
                       child: Text(
                         materi,
-                        style: GoogleFonts.dmSans(fontSize: 12.4, color: Colors.black87),
+                        style: GoogleFonts.dmSans(fontSize: 14.0, color: Colors.black87),
                       ),
                     ),
                   ],
@@ -2697,7 +2698,7 @@ class _LandingPageState extends State<LandingPage> {
               Text(
                 '© 2026 Hubner Ecosystem. Hak Cipta Dilindungi.',
                 style: GoogleFonts.dmSans(
-                  fontSize: 13.7,
+                  fontSize: 14.0,
                   color: Colors.black45,
                 ),
               ),

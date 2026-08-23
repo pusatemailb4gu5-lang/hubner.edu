@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+import 'package:hubner/core/widgets/three_dots_loader.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -61,7 +62,7 @@ class _ClassStatisticsPageState extends State<ClassStatisticsPage>
         if (projectSnap.connectionState == ConnectionState.waiting && !projectSnap.hasData) {
           return Scaffold(
             backgroundColor: isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
-            body: const Center(child: CircularProgressIndicator()),
+            body: const Center(child: ThreeDotsLoader()),
           );
         }
 
@@ -203,7 +204,7 @@ class _ClassStatisticsPageState extends State<ClassStatisticsPage>
                                     Text(
                                       '$classLabel · $totalSiswa Siswa',
                                       style: GoogleFonts.plusJakartaSans(
-                                        fontSize: 12.5,
+                                        fontSize: 14.0,
                                         fontWeight: FontWeight.bold,
                                         color: isDark ? Colors.white70 : const Color(0xFF0F172A),
                                       ),
@@ -577,7 +578,7 @@ class _ClassStatisticsPageState extends State<ClassStatisticsPage>
                                               Text(
                                                 '${rawMateris.length} Materi · $stageTasks Tugas/Kuis',
                                                 style: GoogleFonts.dmSans(
-                                                  fontSize: 12.5,
+                                                  fontSize: 14.0,
                                                   color: isDark ? Colors.white54 : Colors.black54,
                                                 ),
                                               ),
@@ -595,7 +596,7 @@ class _ClassStatisticsPageState extends State<ClassStatisticsPage>
                                           child: Text(
                                             status == 'selesai' ? 'Selesai' : 'Aktif',
                                             style: GoogleFonts.plusJakartaSans(
-                                              fontSize: 11.5,
+                                              fontSize: 14.0,
                                               fontWeight: FontWeight.bold,
                                               color: status == 'selesai'
                                                   ? const Color(0xFF10B981)
@@ -656,7 +657,7 @@ class _ClassStatisticsPageState extends State<ClassStatisticsPage>
             child: Text(
               label,
               style: GoogleFonts.plusJakartaSans(
-                fontSize: 13.5,
+                fontSize: 14.0,
                 fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
                 color: isSelected
                     ? (isDark ? const Color(0xFF0F172A) : Colors.white)
@@ -777,7 +778,7 @@ class _BouncyCardState extends State<_BouncyCard> with SingleTickerProviderState
                         child: Text(
                           widget.title,
                           style: GoogleFonts.plusJakartaSans(
-                            fontSize: 13.5,
+                            fontSize: 14.0,
                             fontWeight: FontWeight.w800,
                             color: const Color(0xFF0F172A),
                           ),

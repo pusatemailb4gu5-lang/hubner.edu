@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hubner/core/widgets/three_dots_loader.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -307,7 +308,7 @@ class _JoinClassRegistrationPageState extends State<JoinClassRegistrationPage> {
                         Expanded(
                           child: Text(
                             'Anda akan masuk dashboard dengan status pending. Classroom aktif setelah Guru menyetujui.',
-                            style: GoogleFonts.dmSans(fontSize: 12.9, color: Color(0xFFD97706), height: 1.5),
+                            style: GoogleFonts.dmSans(fontSize: 14.0, color: Color(0xFFD97706), height: 1.5),
                           ),
                         ),
                       ],
@@ -416,7 +417,7 @@ class _JoinClassRegistrationPageState extends State<JoinClassRegistrationPage> {
                             ? const SizedBox(
                                 width: 18,
                                 height: 18,
-                                child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                                child: const ThreeDotsLoader(),
                               )
                             : const Icon(Icons.search_rounded, size: 18),
                         label: Text(
@@ -442,7 +443,7 @@ class _JoinClassRegistrationPageState extends State<JoinClassRegistrationPage> {
                               children: [
                                 Text(
                                   'Nama Kelas',
-                                  style: GoogleFonts.plusJakartaSans(fontSize: 11.7, color: Colors.black45),
+                                  style: GoogleFonts.plusJakartaSans(fontSize: 14.0, color: Colors.black45),
                                 ),
                                 Text(
                                   _classroomName ?? '',
@@ -565,7 +566,7 @@ class _JoinClassRegistrationPageState extends State<JoinClassRegistrationPage> {
                                   ? const SizedBox(
                                       width: 18,
                                       height: 18,
-                                      child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                                      child: const ThreeDotsLoader(),
                                     )
                                   : const Icon(Icons.group_add_rounded, size: 18),
                               label: Text(

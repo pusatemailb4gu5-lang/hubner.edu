@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hubner/core/widgets/three_dots_loader.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -86,7 +87,7 @@ class _MengerjakanTugasPageState extends State<MengerjakanTugasPage> {
       showDialog(
         context: context,
         barrierDismissible: false,
-        builder: (_) => const Center(child: CircularProgressIndicator(color: Colors.white)),
+        builder: (_) => const Center(child: ThreeDotsLoader()),
       );
 
       final doc = await FirebaseFirestore.instance.collection('projects').doc(widget.projectId).get();
@@ -377,7 +378,7 @@ class _MengerjakanTugasPageState extends State<MengerjakanTugasPage> {
                               Text(
                                 isKelompok ? 'Tugas Kelompok' : 'Tugas Mandiri',
                                 style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 12.3,
+                                  fontSize: 14.0,
                                   fontWeight: FontWeight.bold,
                                   color: const Color(0xFF2563EB),
                                 ),
@@ -396,7 +397,7 @@ class _MengerjakanTugasPageState extends State<MengerjakanTugasPage> {
                             child: Text(
                               'Sudah Terkumpul',
                               style: GoogleFonts.plusJakartaSans(
-                                fontSize: 11.7,
+                                fontSize: 14.0,
                                 fontWeight: FontWeight.bold,
                                 color: const Color(0xFF059669),
                               ),
@@ -457,7 +458,7 @@ class _MengerjakanTugasPageState extends State<MengerjakanTugasPage> {
                                 widget.docName!.startsWith('http')
                                     ? '📄 Buka Lampiran Berkas (Google Drive)'
                                     : widget.docName!,
-                                style: GoogleFonts.plusJakartaSans(fontSize: 12.9, color: const Color(0xFF1E40AF), fontWeight: FontWeight.bold),
+                                style: GoogleFonts.plusJakartaSans(fontSize: 14.0, color: const Color(0xFF1E40AF), fontWeight: FontWeight.bold),
                               ),
                             ],
                           ),
@@ -492,7 +493,7 @@ class _MengerjakanTugasPageState extends State<MengerjakanTugasPage> {
                     children: [
                       Text(
                         'Pilih anggota kelompok yang mengerjakan tugas ini:',
-                        style: GoogleFonts.dmSans(fontSize: 12.9, color: Colors.black54),
+                        style: GoogleFonts.dmSans(fontSize: 14.0, color: Colors.black54),
                       ),
                       const SizedBox(height: 10),
                       Wrap(
@@ -505,7 +506,7 @@ class _MengerjakanTugasPageState extends State<MengerjakanTugasPage> {
                             selected: isSelected,
                             label: Text(name),
                             labelStyle: GoogleFonts.plusJakartaSans(
-                              fontSize: 12.9,
+                              fontSize: 14.0,
                               color: isSelected ? Colors.white : Colors.black87,
                               fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                             ),
@@ -602,7 +603,7 @@ class _MengerjakanTugasPageState extends State<MengerjakanTugasPage> {
                     const SizedBox(height: 14),
                     Text(
                       'Atau tempelkan tautan berkas (Google Drive / GitHub / URL):',
-                      style: GoogleFonts.dmSans(fontSize: 12.5, color: Colors.black54),
+                      style: GoogleFonts.dmSans(fontSize: 14.0, color: Colors.black54),
                     ),
                     const SizedBox(height: 6),
                     Container(
@@ -618,7 +619,7 @@ class _MengerjakanTugasPageState extends State<MengerjakanTugasPage> {
                         decoration: InputDecoration(
                           icon: const Icon(Icons.link_rounded, color: Color(0xFF2563EB), size: 18),
                           hintText: 'https://drive.google.com/...',
-                          hintStyle: GoogleFonts.dmSans(fontSize: 13.5, color: Colors.black38),
+                          hintStyle: GoogleFonts.dmSans(fontSize: 14.0, color: Colors.black38),
                           border: InputBorder.none,
                         ),
                         onChanged: (val) => setState(() {}),
@@ -644,13 +645,13 @@ class _MengerjakanTugasPageState extends State<MengerjakanTugasPage> {
                                 children: [
                                   Text(
                                     'Berkas Terlampir:',
-                                    style: GoogleFonts.plusJakartaSans(fontSize: 11, fontWeight: FontWeight.bold, color: const Color(0xFF1E40AF)),
+                                    style: GoogleFonts.plusJakartaSans(fontSize: 14.0, fontWeight: FontWeight.bold, color: const Color(0xFF1E40AF)),
                                   ),
                                   Text(
                                     _linkController.text,
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
-                                    style: GoogleFonts.dmSans(fontSize: 12.5, color: const Color(0xFF2563EB)),
+                                    style: GoogleFonts.dmSans(fontSize: 14.0, color: const Color(0xFF2563EB)),
                                   ),
                                 ],
                               ),
@@ -691,7 +692,7 @@ class _MengerjakanTugasPageState extends State<MengerjakanTugasPage> {
                       ? const SizedBox(
                           width: 24,
                           height: 24,
-                          child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5),
+                          child: const ThreeDotsLoader(),
                         )
                       : Text(
                           _hasSubmitted ? 'Perbarui Pengiriman' : 'Kirim Tugas',

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hubner/core/widgets/three_dots_loader.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -236,7 +237,7 @@ class _TodoPageState extends State<TodoPage> {
                                 child: Text(
                                   _getDayName(day.weekday),
                                   style: GoogleFonts.plusJakartaSans(
-                                    fontSize: 11.7,
+                                    fontSize: 14.0,
                                     fontWeight: FontWeight.bold,
                                     color: isSelected ? Colors.white : dayTextColor,
                                   ),
@@ -267,7 +268,7 @@ class _TodoPageState extends State<TodoPage> {
                     stream: _userStream,
                     builder: (context, userSnapshot) {
                       if (userSnapshot.connectionState == ConnectionState.waiting && !userSnapshot.hasData) {
-                        return const Center(child: CircularProgressIndicator(color: Colors.black));
+                        return const Center(child: ThreeDotsLoader());
                       }
                       final userData = userSnapshot.data?.data() as Map<String, dynamic>?;
                       final projectIds = List<String>.from(userData?['projectIds'] ?? []);
@@ -290,7 +291,7 @@ class _TodoPageState extends State<TodoPage> {
                         stream: _projectsStream,
                         builder: (context, projectsSnapshot) {
                           if (projectsSnapshot.connectionState == ConnectionState.waiting && !projectsSnapshot.hasData) {
-                            return const Center(child: CircularProgressIndicator(color: Colors.black));
+                            return const Center(child: ThreeDotsLoader());
                           }
 
                           final projectDocs = projectsSnapshot.data?.docs ?? [];
@@ -451,7 +452,7 @@ class _TodoPageState extends State<TodoPage> {
                                                 Text(
                                                   'Classroom: ${task['projectName']} | Materi: ${task['stageName']}',
                                                   style: GoogleFonts.dmSans(
-                                                    fontSize: 12.9,
+                                                    fontSize: 14.0,
                                                     color: cardTextColor.withOpacity(0.8),
                                                   ),
                                                 ),
@@ -461,7 +462,7 @@ class _TodoPageState extends State<TodoPage> {
                                                       ? 'Status: Menunggu Acc Guru'
                                                       : 'Status: $progressStr',
                                                   style: GoogleFonts.plusJakartaSans(
-                                                    fontSize: 11.7,
+                                                    fontSize: 14.0,
                                                     fontWeight: FontWeight.bold,
                                                     color: cardTextColor.withOpacity(0.6),
                                                   ),
@@ -579,7 +580,7 @@ class _TodoPageState extends State<TodoPage> {
                                 return Text(
                                   '$v%',
                                   style: GoogleFonts.plusJakartaSans(
-                                    fontSize: 11.7,
+                                    fontSize: 14.0,
                                     color: isSelected ? dynamicColor : Colors.black26,
                                     fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                                   ),

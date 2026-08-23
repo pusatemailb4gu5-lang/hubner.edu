@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:hubner/core/widgets/three_dots_loader.dart';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -299,7 +300,7 @@ class _MengerjakanQuizPageState extends State<MengerjakanQuizPage> with TickerPr
                           Text(
                             '$_answeredCount/${_questions.length} Soal Dijawab',
                             style: GoogleFonts.plusJakartaSans(
-                              fontSize: 13,
+                              fontSize: 14.0,
                               fontWeight: FontWeight.bold,
                               color: kThemePurple,
                             ),
@@ -833,7 +834,7 @@ class _MengerjakanQuizPageState extends State<MengerjakanQuizPage> with TickerPr
                         '${_currentQuestionIdx + 1} dari ${_questions.length}',
                         style: GoogleFonts.plusJakartaSans(
                           color: Colors.white,
-                          fontSize: 13,
+                          fontSize: 14.0,
                           fontWeight: FontWeight.bold,
                           shadows: [
                             Shadow(
@@ -917,7 +918,7 @@ class _MengerjakanQuizPageState extends State<MengerjakanQuizPage> with TickerPr
                               style: GoogleFonts.plusJakartaSans(
                                 color: kTextDark,
                                 fontWeight: FontWeight.bold,
-                                fontSize: 13.5,
+                                fontSize: 14.0,
                               ),
                             ),
                           ],
@@ -997,7 +998,7 @@ class _MengerjakanQuizPageState extends State<MengerjakanQuizPage> with TickerPr
                           'Sebelumnya',
                           style: GoogleFonts.plusJakartaSans(
                             fontWeight: FontWeight.bold,
-                            fontSize: 13,
+                            fontSize: 14.0,
                             color: _currentQuestionIdx > 0 ? kTextDark : Colors.black26,
                           ),
                         ),
@@ -1054,7 +1055,7 @@ class _MengerjakanQuizPageState extends State<MengerjakanQuizPage> with TickerPr
                                   '$_hintsLeft',
                                   style: GoogleFonts.plusJakartaSans(
                                     color: Colors.white,
-                                    fontSize: 10,
+                                    fontSize: 14.0,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
@@ -1086,7 +1087,7 @@ class _MengerjakanQuizPageState extends State<MengerjakanQuizPage> with TickerPr
                               _currentQuestionIdx < _questions.length - 1 ? 'Selanjutnya' : 'Selesai',
                               style: GoogleFonts.plusJakartaSans(
                                 fontWeight: FontWeight.bold,
-                                fontSize: 13.5,
+                                fontSize: 14.0,
                                 color: kTextDark,
                               ),
                             ),
@@ -1343,7 +1344,7 @@ class _MengerjakanQuizPageState extends State<MengerjakanQuizPage> with TickerPr
                               Text(
                                 'POIN',
                                 style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 13,
+                                  fontSize: 14.0,
                                   fontWeight: FontWeight.w900,
                                   color: kTextDark,
                                   letterSpacing: 2,
@@ -1380,7 +1381,7 @@ class _MengerjakanQuizPageState extends State<MengerjakanQuizPage> with TickerPr
                       child: Text(
                         'Predikat: $_predikat',
                         style: GoogleFonts.plusJakartaSans(
-                          fontSize: 13,
+                          fontSize: 14.0,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
                         ),
@@ -1550,7 +1551,7 @@ class _MengerjakanQuizPageState extends State<MengerjakanQuizPage> with TickerPr
                 // ─── SCROLLABLE CONTENT (PODIUM + RANKINGS LIST) ──────────
                 Expanded(
                   child: _isLoadingLeaderboard
-                      ? const Center(child: CircularProgressIndicator(color: kThemePurple))
+                      ? const Center(child: ThreeDotsLoader())
                       : activeList.isEmpty
                           ? Center(
                               child: Text(
@@ -1652,7 +1653,7 @@ class _MengerjakanQuizPageState extends State<MengerjakanQuizPage> with TickerPr
                                                       '$rankNum',
                                                       style: GoogleFonts.plusJakartaSans(
                                                         color: badgeTextColor,
-                                                        fontSize: 9.5,
+                                                        fontSize: 14.0,
                                                         fontWeight: FontWeight.w900,
                                                       ),
                                                     ),
@@ -1683,7 +1684,7 @@ class _MengerjakanQuizPageState extends State<MengerjakanQuizPage> with TickerPr
                                                 Text(
                                                   subText,
                                                   style: GoogleFonts.dmSans(
-                                                    fontSize: 12,
+                                                    fontSize: 14.0,
                                                     color: const Color(0xFF64748B),
                                                   ),
                                                 ),
@@ -1711,7 +1712,7 @@ class _MengerjakanQuizPageState extends State<MengerjakanQuizPage> with TickerPr
                                                 Text(
                                                   '${item['points']} Poin',
                                                   style: GoogleFonts.plusJakartaSans(
-                                                    fontSize: 13,
+                                                    fontSize: 14.0,
                                                     fontWeight: FontWeight.w900,
                                                     color: const Color(0xFFB45309),
                                                   ),
@@ -1751,7 +1752,7 @@ class _MengerjakanQuizPageState extends State<MengerjakanQuizPage> with TickerPr
             child: Text(
               tabName,
               style: GoogleFonts.plusJakartaSans(
-                fontSize: 13,
+                fontSize: 14.0,
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
                 color: isSelected ? Colors.white : const Color(0xFF475569),
               ),
@@ -1863,7 +1864,7 @@ class _MengerjakanQuizPageState extends State<MengerjakanQuizPage> with TickerPr
         Text(
           hasScore ? sName : '',
           style: GoogleFonts.plusJakartaSans(
-            fontSize: 12.5,
+            fontSize: 14.0,
             fontWeight: FontWeight.bold,
             color: kTextDark,
           ),
@@ -1874,7 +1875,7 @@ class _MengerjakanQuizPageState extends State<MengerjakanQuizPage> with TickerPr
         Text(
           hasScore ? '$points Poin' : '0 Poin',
           style: GoogleFonts.plusJakartaSans(
-            fontSize: 11.5,
+            fontSize: 14.0,
             fontWeight: FontWeight.w700,
             color: hasScore ? const Color(0xFFD97706) : const Color(0xFF94A3B8),
           ),
@@ -1940,7 +1941,7 @@ class _MengerjakanQuizPageState extends State<MengerjakanQuizPage> with TickerPr
                       child: Text(
                         '$rank',
                         style: GoogleFonts.plusJakartaSans(
-                          fontSize: 9,
+                          fontSize: 14.0,
                           fontWeight: FontWeight.w900,
                           color: kTextDark,
                         ),

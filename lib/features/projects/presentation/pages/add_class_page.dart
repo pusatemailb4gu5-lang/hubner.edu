@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:hubner/core/widgets/three_dots_loader.dart';
 import 'dart:async';
 import 'dart:ui';
 import 'package:http/http.dart' as http;
@@ -181,7 +182,7 @@ class _AddClassPageState extends State<AddClassPage> {
               .snapshots(),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return const SizedBox(height: 200, child: Center(child: CircularProgressIndicator()));
+              return const SizedBox(height: 200, child: const Center(child: ThreeDotsLoader()));
             }
             final docs = snapshot.data?.docs ?? [];
             if (docs.isEmpty) {
@@ -194,7 +195,7 @@ class _AddClassPageState extends State<AddClassPage> {
                     const SizedBox(height: 12),
                     Text('Belum ada classroom yang dapat disalin', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, fontSize: 16)),
                     const SizedBox(height: 6),
-                    Text('Buat classroom pertama Anda atau lengkapi data di formulir.', textAlign: TextAlign.center, style: GoogleFonts.dmSans(color: Colors.black54, fontSize: 13)),
+                    Text('Buat classroom pertama Anda atau lengkapi data di formulir.', textAlign: TextAlign.center, style: GoogleFonts.dmSans(color: Colors.black54, fontSize: 14.0)),
                   ],
                 ),
               );
@@ -213,7 +214,7 @@ class _AddClassPageState extends State<AddClassPage> {
                     ],
                   ),
                   const SizedBox(height: 4),
-                  Text('Pilih salah satu classroom untuk menyalin seluruh struktur materi & elemen ke form ini.', style: GoogleFonts.dmSans(color: Colors.black54, fontSize: 13)),
+                  Text('Pilih salah satu classroom untuk menyalin seluruh struktur materi & elemen ke form ini.', style: GoogleFonts.dmSans(color: Colors.black54, fontSize: 14.0)),
                   const SizedBox(height: 14),
                   Expanded(
                     child: ListView.separated(
@@ -249,7 +250,7 @@ class _AddClassPageState extends State<AddClassPage> {
                             errorBuilder: (_, __, ___) => const Icon(Icons.school_rounded, color: Color(0xFF7C3AED)),
                           ),
                           title: Text(pName, style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, fontSize: 14)),
-                          subtitle: Text('$pStages Elemen ${pMajor.isNotEmpty ? '· $pMajor' : ''}', style: GoogleFonts.dmSans(fontSize: 12, color: Colors.black54)),
+                          subtitle: Text('$pStages Elemen ${pMajor.isNotEmpty ? '· $pMajor' : ''}', style: GoogleFonts.dmSans(fontSize: 14.0, color: Colors.black54)),
                           trailing: const Icon(Icons.content_copy_rounded, size: 18, color: Color(0xFF7C3AED)),
                         );
                       },
@@ -325,7 +326,7 @@ class _AddClassPageState extends State<AddClassPage> {
                         headerForegroundColor: Colors.white,
                         dayStyle: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w500),
                         headerHeadlineStyle: GoogleFonts.plusJakartaSans(fontSize: 23.4, fontWeight: FontWeight.bold, color: Colors.white),
-                        headerHelpStyle: GoogleFonts.plusJakartaSans(fontSize: 11.7, color: Colors.white70),
+                        headerHelpStyle: GoogleFonts.plusJakartaSans(fontSize: 14.0, color: Colors.white70),
                       ),
                     ),
                     child: child!,
@@ -922,7 +923,7 @@ class _AddClassPageState extends State<AddClassPage> {
       showDialog(
         context: context,
         barrierDismissible: false,
-        builder: (context) => const Center(child: CircularProgressIndicator()),
+        builder: (context) => const Center(child: ThreeDotsLoader()),
       );
 
       final userName = widget.registrationData!['name']!;
@@ -1320,7 +1321,7 @@ class _AddClassPageState extends State<AddClassPage> {
               'Sedang merancang elemen pembelajaran & materi secara otomatis...',
               textAlign: TextAlign.center,
               style: GoogleFonts.dmSans(
-                fontSize: 12.5,
+                fontSize: 14.0,
                 color: const Color(0xFF475569),
               ),
             ),
@@ -1360,7 +1361,7 @@ class _AddClassPageState extends State<AddClassPage> {
           Text(
             'Buat materi & tugas otomatis secara instan berdasarkan Capaian Pembelajaran (CP) kelas Anda.',
             style: GoogleFonts.dmSans(
-              fontSize: 12.9,
+              fontSize: 14.0,
               color: Colors.black45,
               height: 1.4,
             ),
@@ -1441,7 +1442,7 @@ class _AddClassPageState extends State<AddClassPage> {
                     Text(
                       'Elemen',
                       style: GoogleFonts.plusJakartaSans(
-                        fontSize: 12.9,
+                        fontSize: 14.0,
                         color: Colors.black,
                         fontWeight: FontWeight.w600,
                       ),
@@ -1617,7 +1618,7 @@ class _AddClassPageState extends State<AddClassPage> {
                                   Text(
                                     'Tampilkan ke siswa',
                                     style: GoogleFonts.plusJakartaSans(
-                                      fontSize: 12.3,
+                                      fontSize: 14.0,
                                       fontWeight: FontWeight.w600,
                                       color: Colors.black54,
                                     ),
@@ -1693,7 +1694,7 @@ class _AddClassPageState extends State<AddClassPage> {
                       maxLines: 2,
                       decoration: InputDecoration(
                         hintText: 'Ringkasan / deskripsi elemen...',
-                        hintStyle: GoogleFonts.dmSans(fontSize: 12.9, color: Colors.black38),
+                        hintStyle: GoogleFonts.dmSans(fontSize: 14.0, color: Colors.black38),
                         filled: true,
                         fillColor: const Color(0xFFF8FAFC),
                         contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -1706,14 +1707,14 @@ class _AddClassPageState extends State<AddClassPage> {
                           borderSide: const BorderSide(color: Colors.black87),
                         ),
                       ),
-                      style: GoogleFonts.plusJakartaSans(fontSize: 12.9, color: Colors.black87),
+                      style: GoogleFonts.plusJakartaSans(fontSize: 14.0, color: Colors.black87),
                       onChanged: (val) {
                         _stages[index]['summary'] = val;
                       },
                     ),
                     const SizedBox(height: 12),
 
-                    Text('Daftar Materi', style: GoogleFonts.plusJakartaSans(fontSize: 12.9, fontWeight: FontWeight.bold, color: Colors.black54)),
+                    Text('Daftar Materi', style: GoogleFonts.plusJakartaSans(fontSize: 14.0, fontWeight: FontWeight.bold, color: Colors.black54)),
                     const SizedBox(height: 8),
                     ...List.generate(materis.length, (mIdx) {
                       return Padding(
@@ -1775,7 +1776,7 @@ class _AddClassPageState extends State<AddClassPage> {
                           Text(
                             'Tambah Materi',
                             style: GoogleFonts.plusJakartaSans(
-                              fontSize: 12.9,
+                              fontSize: 14.0,
                               fontWeight: FontWeight.bold,
                               color: const Color(0xFF2563EB),
                             ),
@@ -1879,7 +1880,7 @@ class _AddClassPageState extends State<AddClassPage> {
                                 Text(
                                   'Salin Data',
                                   style: GoogleFonts.plusJakartaSans(
-                                    fontSize: 13,
+                                    fontSize: 14.0,
                                     fontWeight: FontWeight.bold,
                                     color: const Color(0xFF7C3AED),
                                   ),
@@ -2057,7 +2058,7 @@ class _AddClassPageState extends State<AddClassPage> {
                                   Text(
                                     'Salin Data',
                                     style: GoogleFonts.plusJakartaSans(
-                                      fontSize: 12.5,
+                                      fontSize: 14.0,
                                       fontWeight: FontWeight.bold,
                                       color: const Color(0xFF7C3AED),
                                     ),
@@ -2442,7 +2443,7 @@ Sertakan HANYA JSON tersebut tanpa penjelasan markdown apa pun di luar JSON.
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Nama Elemen', style: GoogleFonts.plusJakartaSans(fontSize: 12.9, fontWeight: FontWeight.bold, color: Colors.black54)),
+                  Text('Nama Elemen', style: GoogleFonts.plusJakartaSans(fontSize: 14.0, fontWeight: FontWeight.bold, color: Colors.black54)),
                   const SizedBox(height: 6),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -2458,7 +2459,7 @@ Sertakan HANYA JSON tersebut tanpa penjelasan markdown apa pun di luar JSON.
                     ),
                   ),
                   const SizedBox(height: 12),
-                  Text('Summary / Deskripsi', style: GoogleFonts.plusJakartaSans(fontSize: 12.9, fontWeight: FontWeight.bold, color: Colors.black54)),
+                  Text('Summary / Deskripsi', style: GoogleFonts.plusJakartaSans(fontSize: 14.0, fontWeight: FontWeight.bold, color: Colors.black54)),
                   const SizedBox(height: 6),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -2484,7 +2485,7 @@ Sertakan HANYA JSON tersebut tanpa penjelasan markdown apa pun di luar JSON.
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Text('Nama Materi ${mIdx + 1}', style: GoogleFonts.plusJakartaSans(fontSize: 12.9, fontWeight: FontWeight.bold, color: Colors.black54)),
+                                Text('Nama Materi ${mIdx + 1}', style: GoogleFonts.plusJakartaSans(fontSize: 14.0, fontWeight: FontWeight.bold, color: Colors.black54)),
                                 GestureDetector(
                                   onTap: () {
                                     _removeMateri(stageIdx, mIdx);
@@ -2493,7 +2494,7 @@ Sertakan HANYA JSON tersebut tanpa penjelasan markdown apa pun di luar JSON.
                                   },
                                   child: Text(
                                     'Hapus',
-                                    style: GoogleFonts.plusJakartaSans(fontSize: 12.9, color: Colors.redAccent, fontWeight: FontWeight.bold),
+                                    style: GoogleFonts.plusJakartaSans(fontSize: 14.0, color: Colors.redAccent, fontWeight: FontWeight.bold),
                                   ),
                                 ),
                               ],
@@ -2572,7 +2573,7 @@ Sertakan HANYA JSON tersebut tanpa penjelasan markdown apa pun di luar JSON.
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Judul Materi', style: GoogleFonts.plusJakartaSans(fontSize: 12.9, fontWeight: FontWeight.bold, color: Colors.black54)),
+            Text('Judul Materi', style: GoogleFonts.plusJakartaSans(fontSize: 14.0, fontWeight: FontWeight.bold, color: Colors.black54)),
             const SizedBox(height: 6),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -2650,7 +2651,7 @@ Sertakan HANYA JSON tersebut tanpa penjelasan markdown apa pun di luar JSON.
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text('Judul Kegiatan', style: GoogleFonts.plusJakartaSans(fontSize: 12.9, fontWeight: FontWeight.bold, color: Colors.black54)),
+                    Text('Judul Kegiatan', style: GoogleFonts.plusJakartaSans(fontSize: 14.0, fontWeight: FontWeight.bold, color: Colors.black54)),
                     const SizedBox(height: 6),
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -2667,7 +2668,7 @@ Sertakan HANYA JSON tersebut tanpa penjelasan markdown apa pun di luar JSON.
                     ),
                     const SizedBox(height: 12),
                     
-                    Text('Tipe Kegiatan', style: GoogleFonts.plusJakartaSans(fontSize: 12.9, fontWeight: FontWeight.bold, color: Colors.black54)),
+                    Text('Tipe Kegiatan', style: GoogleFonts.plusJakartaSans(fontSize: 14.0, fontWeight: FontWeight.bold, color: Colors.black54)),
                     const SizedBox(height: 6),
                     Container(
                       width: double.infinity,
@@ -2689,7 +2690,7 @@ Sertakan HANYA JSON tersebut tanpa penjelasan markdown apa pun di luar JSON.
                     const SizedBox(height: 12),
 
                     if (selectedType == 'tugas') ...[
-                      Text('Opsi Pengerjaan', style: GoogleFonts.plusJakartaSans(fontSize: 12.9, fontWeight: FontWeight.bold, color: Colors.black54)),
+                      Text('Opsi Pengerjaan', style: GoogleFonts.plusJakartaSans(fontSize: 14.0, fontWeight: FontWeight.bold, color: Colors.black54)),
                       const SizedBox(height: 6),
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -2737,7 +2738,7 @@ Sertakan HANYA JSON tersebut tanpa penjelasan markdown apa pun di luar JSON.
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text('Mulai', style: GoogleFonts.plusJakartaSans(fontSize: 11.7, fontWeight: FontWeight.bold, color: Colors.black54)),
+                              Text('Mulai', style: GoogleFonts.plusJakartaSans(fontSize: 14.0, fontWeight: FontWeight.bold, color: Colors.black54)),
                               const SizedBox(height: 6),
                               GestureDetector(
                                 onTap: () async {
@@ -2759,7 +2760,7 @@ Sertakan HANYA JSON tersebut tanpa penjelasan markdown apa pun di luar JSON.
                                   ),
                                   child: Text(
                                     startDate == null ? 'Mulai' : '${startDate!.day}/${startDate!.month}/${startDate!.year}',
-                                    style: GoogleFonts.dmSans(fontSize: 12.9),
+                                    style: GoogleFonts.dmSans(fontSize: 14.0),
                                   ),
                                 ),
                               ),
@@ -2771,7 +2772,7 @@ Sertakan HANYA JSON tersebut tanpa penjelasan markdown apa pun di luar JSON.
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text('Selesai', style: GoogleFonts.plusJakartaSans(fontSize: 11.7, fontWeight: FontWeight.bold, color: Colors.black54)),
+                              Text('Selesai', style: GoogleFonts.plusJakartaSans(fontSize: 14.0, fontWeight: FontWeight.bold, color: Colors.black54)),
                               const SizedBox(height: 6),
                               GestureDetector(
                                 onTap: () async {
@@ -2793,7 +2794,7 @@ Sertakan HANYA JSON tersebut tanpa penjelasan markdown apa pun di luar JSON.
                                   ),
                                   child: Text(
                                     endDate == null ? 'Selesai' : '${endDate!.day}/${endDate!.month}/${endDate!.year}',
-                                    style: GoogleFonts.dmSans(fontSize: 12.9),
+                                    style: GoogleFonts.dmSans(fontSize: 14.0),
                                   ),
                                 ),
                               ),
@@ -2804,7 +2805,7 @@ Sertakan HANYA JSON tersebut tanpa penjelasan markdown apa pun di luar JSON.
                     ),
                     const SizedBox(height: 12),
 
-                    Text('Lampiran / Link Modul', style: GoogleFonts.plusJakartaSans(fontSize: 12.9, fontWeight: FontWeight.bold, color: Colors.black54)),
+                    Text('Lampiran / Link Modul', style: GoogleFonts.plusJakartaSans(fontSize: 14.0, fontWeight: FontWeight.bold, color: Colors.black54)),
                     const SizedBox(height: 6),
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 12),

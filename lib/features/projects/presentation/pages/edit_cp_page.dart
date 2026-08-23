@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hubner/core/widgets/three_dots_loader.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -131,7 +132,7 @@ class _EditCpPageState extends State<EditCpPage> {
                             Text(
                               widget.projectName,
                               style: GoogleFonts.dmSans(
-                                fontSize: 12,
+                                fontSize: 14.0,
                                 color: isDark ? Colors.white54 : Colors.black45,
                               ),
                               maxLines: 1,
@@ -149,12 +150,8 @@ class _EditCpPageState extends State<EditCpPage> {
                       ? const SizedBox(
                           width: 44,
                           height: 44,
-                          child: Padding(
-                            padding: EdgeInsets.all(12.0),
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: Color(0xFF10B981),
-                            ),
+                          child: Center(
+                            child: ThreeDotsLoader(size: 5, bounceHeight: 3),
                           ),
                         )
                       : GestureDetector(
@@ -235,7 +232,7 @@ class _EditCpPageState extends State<EditCpPage> {
                                 Text(
                                   'Tuliskan kompetensi pembelajaran dan materi inti fase kelas ini.',
                                   style: GoogleFonts.dmSans(
-                                    fontSize: 12,
+                                    fontSize: 14.0,
                                     color: const Color(0xFF334155),
                                   ),
                                 ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hubner/core/widgets/three_dots_loader.dart';
 import 'package:flutter/services.dart';
 import 'dart:ui';
 import 'package:google_fonts/google_fonts.dart';
@@ -343,7 +344,7 @@ class _DesktopClassroomPageState extends State<DesktopClassroomPage>
                   Text(
                     'Kode: ${widget.projectId}',
                     style: GoogleFonts.plusJakartaSans(
-                      fontSize: 12.9,
+                      fontSize: 14.0,
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
                     ),
@@ -372,7 +373,7 @@ class _DesktopClassroomPageState extends State<DesktopClassroomPage>
             child: Text(
               _userRole,
               style: GoogleFonts.plusJakartaSans(
-                fontSize: 12.9,
+                fontSize: 14.0,
                 fontWeight: FontWeight.w600,
                 color: Colors.white,
               ),
@@ -427,7 +428,7 @@ class _DesktopClassroomPageState extends State<DesktopClassroomPage>
       painter: CutoutTextPainter(
         text: 'edu',
         textStyle: GoogleFonts.plusJakartaSans(
-          fontSize: 12.9,
+          fontSize: 14.0,
           fontWeight: FontWeight.bold,
         ),
       ),
@@ -719,68 +720,4 @@ class CutoutTextPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
-
-// ─── Custom 3-Dot Bouncing Animation Widget ───
-class ThreeDotsLoader extends StatefulWidget {
-  const ThreeDotsLoader({super.key});
-
-  @override
-  State<ThreeDotsLoader> createState() => _ThreeDotsLoaderState();
-}
-
-class _ThreeDotsLoaderState extends State<ThreeDotsLoader>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 900),
-    )..repeat();
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _controller,
-      builder: (context, child) {
-        return Row(
-          mainAxisSize: MainAxisSize.min,
-          children: List.generate(3, (index) {
-            final double value = (_controller.value - (index * 0.2)) % 1.0;
-            final double offset =
-                -6.0 * (1.0 - (value - 0.5).abs() * 2.0).clamp(0.0, 1.0);
-
-            final List<Color> dotColors = [
-              const Color(0xFF3B82F6),
-              const Color(0xFFEF4444),
-              const Color(0xFFF97316),
-            ];
-
-            return Transform.translate(
-              offset: Offset(0, offset),
-              child: Container(
-                margin: const EdgeInsets.symmetric(horizontal: 4),
-                width: 9,
-                height: 9,
-                decoration: BoxDecoration(
-                  color: dotColors[index],
-                  shape: BoxShape.circle,
-                ),
-              ),
-            );
-          }),
-        );
-      },
-    );
-  }
 }

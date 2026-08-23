@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hubner/core/widgets/three_dots_loader.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -49,7 +50,7 @@ class _DesktopJadwalPembelajaranTabState
           .snapshots(),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
-          return const Center(child: CircularProgressIndicator());
+          return const Center(child: ThreeDotsLoader());
         }
 
         final data = snapshot.data!.data() as Map<String, dynamic>? ?? {};
@@ -394,7 +395,7 @@ class _DesktopJadwalPembelajaranTabState
                 child: Text(
                   day,
                   style: GoogleFonts.plusJakartaSans(
-                    fontSize: 13.5,
+                    fontSize: 14.0,
                     fontWeight: FontWeight.bold,
                     color: accentColor,
                   ),
@@ -419,7 +420,7 @@ class _DesktopJadwalPembelajaranTabState
                     Text(
                       time,
                       style: GoogleFonts.plusJakartaSans(
-                        fontSize: 13.5,
+                        fontSize: 14.0,
                         fontWeight: FontWeight.bold,
                         color: const Color(0xFF0284C7),
                       ),
@@ -555,7 +556,7 @@ class _DesktopJadwalPembelajaranTabState
                   child: Text(
                     'Seluruh jadwal tersinkronisasi otomatis dengan siswa.',
                     style: GoogleFonts.dmSans(
-                      fontSize: 13.5,
+                      fontSize: 14.0,
                       fontWeight: FontWeight.w500,
                       color: const Color(0xFF000000),
                     ),
@@ -690,7 +691,7 @@ class _DesktopJadwalPembelajaranTabState
                             Text(
                               'Hari Belajar',
                               style: GoogleFonts.plusJakartaSans(
-                                fontSize: 12.5,
+                                fontSize: 14.0,
                                 fontWeight: FontWeight.w600,
                                 color: const Color(0xFF475569),
                               ),
@@ -713,7 +714,7 @@ class _DesktopJadwalPembelajaranTabState
                                   dropdownColor: Colors.white,
                                   borderRadius: BorderRadius.circular(14),
                                   style: GoogleFonts.plusJakartaSans(
-                                    fontSize: 13,
+                                    fontSize: 14.0,
                                     fontWeight: FontWeight.w600,
                                     color: const Color(0xFF1E293B),
                                   ),
@@ -737,7 +738,7 @@ class _DesktopJadwalPembelajaranTabState
                             Text(
                               'Jam Pelajaran',
                               style: GoogleFonts.plusJakartaSans(
-                                fontSize: 12.5,
+                                fontSize: 14.0,
                                 fontWeight: FontWeight.w600,
                                 color: const Color(0xFF475569),
                               ),
@@ -746,7 +747,7 @@ class _DesktopJadwalPembelajaranTabState
                             TextField(
                               controller: timeController,
                               style: GoogleFonts.plusJakartaSans(
-                                fontSize: 13.5,
+                                fontSize: 14.0,
                                 color: const Color(0xFF1E293B),
                               ),
                               decoration: InputDecoration(
@@ -805,7 +806,7 @@ class _DesktopJadwalPembelajaranTabState
                                     borderRadius: BorderRadius.circular(12),
                                   ),
                                   textStyle: GoogleFonts.plusJakartaSans(
-                                    fontSize: 12.5,
+                                    fontSize: 14.0,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
@@ -823,7 +824,7 @@ class _DesktopJadwalPembelajaranTabState
                           Text(
                             'Daftar Jadwal (${tempSchedules.length})',
                             style: GoogleFonts.plusJakartaSans(
-                              fontSize: 13.5,
+                              fontSize: 14.0,
                               fontWeight: FontWeight.bold,
                               color: const Color(0xFF1E293B),
                             ),
@@ -838,7 +839,7 @@ class _DesktopJadwalPembelajaranTabState
                               child: Text(
                                 'Hapus Semua',
                                 style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 11.5,
+                                  fontSize: 14.0,
                                   fontWeight: FontWeight.bold,
                                   color: const Color(0xFFEF4444),
                                 ),
@@ -859,7 +860,7 @@ class _DesktopJadwalPembelajaranTabState
                             child: Text(
                               'Belum ada jadwal yang ditambahkan.',
                               style: GoogleFonts.dmSans(
-                                fontSize: 13,
+                                fontSize: 14.0,
                                 color: const Color(0xFF64748B),
                               ),
                             ),
@@ -925,7 +926,7 @@ class _DesktopJadwalPembelajaranTabState
                                       child: Text(
                                         dayName,
                                         style: GoogleFonts.plusJakartaSans(
-                                          fontSize: 11.5,
+                                          fontSize: 14.0,
                                           fontWeight: FontWeight.bold,
                                           color: dayBadgeColor,
                                         ),
@@ -936,7 +937,7 @@ class _DesktopJadwalPembelajaranTabState
                                       child: Text(
                                         timeVal,
                                         style: GoogleFonts.plusJakartaSans(
-                                          fontSize: 13,
+                                          fontSize: 14.0,
                                           fontWeight: FontWeight.w600,
                                           color: const Color(0xFF1E293B),
                                         ),
@@ -977,7 +978,7 @@ class _DesktopJadwalPembelajaranTabState
                   style: TextButton.styleFrom(
                     foregroundColor: const Color(0xFFEF4444),
                     textStyle: GoogleFonts.plusJakartaSans(
-                      fontSize: 13,
+                      fontSize: 14.0,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -1009,7 +1010,7 @@ class _DesktopJadwalPembelajaranTabState
                   child: Text(
                     'Simpan Jadwal',
                     style: GoogleFonts.plusJakartaSans(
-                      fontSize: 13,
+                      fontSize: 14.0,
                       fontWeight: FontWeight.bold,
                     ),
                   ),

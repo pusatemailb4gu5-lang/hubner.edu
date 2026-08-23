@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:hubner/core/widgets/three_dots_loader.dart';
 import 'package:flutter/services.dart';
+import 'dart:math' as math;
 import 'dart:ui' as ui;
 import 'dart:ui';
 import 'dart:async';
@@ -107,7 +109,7 @@ class _HomePageState extends State<HomePage> {
                       Expanded(
                         child: Text(
                           'Google Drive terhubung. Salinan data akan tersimpan di folder Hubner_Backups.',
-                          style: GoogleFonts.plusJakartaSans(fontSize: 12, color: const Color(0xFF047857), fontWeight: FontWeight.w600),
+                          style: GoogleFonts.plusJakartaSans(fontSize: 14.0, color: const Color(0xFF047857), fontWeight: FontWeight.w600),
                         ),
                       ),
                     ],
@@ -213,7 +215,7 @@ class _HomePageState extends State<HomePage> {
                         child: Text(
                           'Google Drive belum terhubung! Data classroom "$title" TIDAK DAPAT DIPULIHKAN jika dihapus sekarang.',
                           style: GoogleFonts.plusJakartaSans(
-                            fontSize: 12.5,
+                            fontSize: 14.0,
                             color: const Color(0xFFB91C1C),
                             fontWeight: FontWeight.w600,
                             height: 1.3,
@@ -226,7 +228,7 @@ class _HomePageState extends State<HomePage> {
                 const SizedBox(height: 12),
                 Text(
                   'Hubungkan akun Google Drive untuk mencadangkan data secara otomatis sebelum menghapus, atau tetap hapus secara permanen.',
-                  style: GoogleFonts.dmSans(fontSize: 13.5, color: Colors.black87),
+                  style: GoogleFonts.dmSans(fontSize: 14.0, color: Colors.black87),
                 ),
               ],
             ),
@@ -409,7 +411,7 @@ class _HomePageState extends State<HomePage> {
                 Text(
                   'Gunakan barcode ini atau salin kode kelas untuk bergabung.',
                   style: GoogleFonts.dmSans(
-                    fontSize: 13,
+                    fontSize: 14.0,
                     color: isDark ? Colors.white60 : Colors.black87,
                   ),
                 ),
@@ -474,7 +476,7 @@ class _HomePageState extends State<HomePage> {
                             Text(
                               'KODE KELAS',
                               style: GoogleFonts.plusJakartaSans(
-                                fontSize: 10,
+                                fontSize: 14.0,
                                 fontWeight: FontWeight.w800,
                                 color: isDark ? const Color(0xFFC084FC) : const Color(0xFF7E22CE),
                                 letterSpacing: 0.5,
@@ -515,7 +517,7 @@ class _HomePageState extends State<HomePage> {
                             style: GoogleFonts.plusJakartaSans(
                               color: Colors.white,
                               fontWeight: FontWeight.bold,
-                              fontSize: 13,
+                              fontSize: 14.0,
                             ),
                           ),
                         ),
@@ -611,7 +613,7 @@ class _HomePageState extends State<HomePage> {
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: GoogleFonts.plusJakartaSans(
-                  fontSize: 12.3,
+                  fontSize: 14.0,
                   fontWeight: FontWeight.w600,
                   color: Colors.black87,
                   height: 1.2,
@@ -647,7 +649,7 @@ class _HomePageState extends State<HomePage> {
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: GoogleFonts.plusJakartaSans(
-                fontSize: 11.7,
+                fontSize: 14.0,
                 fontWeight: FontWeight.w600,
                 color: Colors.black87,
                 height: 1.25,
@@ -674,7 +676,7 @@ class _HomePageState extends State<HomePage> {
             child: Text(
               text,
               style: GoogleFonts.dmSans(
-                fontSize: 11.2,
+                fontSize: 14.0,
                 fontStyle: FontStyle.italic,
                 color: Colors.black45,
                 height: 1.25,
@@ -816,7 +818,7 @@ class _HomePageState extends State<HomePage> {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => const Center(child: CircularProgressIndicator(color: Color(0xFF7C3AED))),
+      builder: (context) => const Center(child: ThreeDotsLoader()),
     );
 
     try {
@@ -1116,10 +1118,7 @@ class _HomePageState extends State<HomePage> {
                               ? const SizedBox(
                                   width: 20,
                                   height: 20,
-                                  child: CircularProgressIndicator(
-                                    color: Colors.white,
-                                    strokeWidth: 2,
-                                  ),
+                                  child: const ThreeDotsLoader(),
                                 )
                               : Text(
                                   'Periksa Kelas',
@@ -1152,7 +1151,7 @@ class _HomePageState extends State<HomePage> {
                                   Text(
                                     'Nama Kelas',
                                     style: GoogleFonts.dmSans(
-                                      fontSize: 11.7,
+                                      fontSize: 14.0,
                                       color: Colors.black45,
                                     ),
                                   ),
@@ -2177,7 +2176,7 @@ class _HomePageState extends State<HomePage> {
                                                   child: Text(
                                                     selectedDayName,
                                                     style: GoogleFonts.plusJakartaSans(
-                                                      fontSize: 11.7,
+                                                      fontSize: 14.0,
                                                       fontWeight:
                                                           FontWeight.w600,
                                                       color: const Color(
@@ -2479,7 +2478,7 @@ class _HomePageState extends State<HomePage> {
                                                           'tercapai',
                                                           style:
                                                               GoogleFonts.dmSans(
-                                                                fontSize: 10.5,
+                                                                fontSize: 14.0,
                                                                 fontWeight:
                                                                     FontWeight
                                                                         .w500,
@@ -2686,7 +2685,7 @@ class _HomePageState extends State<HomePage> {
                                                               : 'Rata-rata Nilai Kuis',
                                                           style:
                                                               GoogleFonts.dmSans(
-                                                                fontSize: 10.5,
+                                                                fontSize: 14.0,
                                                                 fontWeight:
                                                                     FontWeight
                                                                         .bold,
@@ -2771,7 +2770,7 @@ class _HomePageState extends State<HomePage> {
                                                                   Text(
                                                                     'poin',
                                                                     style: GoogleFonts.dmSans(
-                                                                      fontSize: 12.9,
+                                                                      fontSize: 14.0,
                                                                       fontWeight:
                                                                           FontWeight
                                                                               .w700,
@@ -2810,7 +2809,7 @@ class _HomePageState extends State<HomePage> {
                                                                   Text(
                                                                     'poin',
                                                                     style: GoogleFonts.dmSans(
-                                                                      fontSize: 12.9,
+                                                                      fontSize: 14.0,
                                                                       fontWeight:
                                                                           FontWeight
                                                                               .w700,
@@ -2847,7 +2846,7 @@ class _HomePageState extends State<HomePage> {
                                                                       ? 'Diambil dari kuis yang baru saja Anda selesaikan'
                                                                       : 'Berdasarkan total nilai kuis yang Anda miliki',
                                                                   style: GoogleFonts.dmSans(
-                                                                    fontSize: 10,
+                                                                    fontSize: 14.0,
                                                                     fontWeight:
                                                                         FontWeight
                                                                             .w500,
@@ -3019,7 +3018,7 @@ class _HomePageState extends State<HomePage> {
                                               'Gabung Kelas',
                                               style:
                                                   GoogleFonts.plusJakartaSans(
-                                                    fontSize: 12.9,
+                                                    fontSize: 14.0,
                                                     fontWeight: FontWeight.bold,
                                                     color: Colors.white,
                                                   ),
@@ -3058,7 +3057,7 @@ class _HomePageState extends State<HomePage> {
                                                 Text(
                                                   'Selesai',
                                                   style: GoogleFonts.plusJakartaSans(
-                                                    fontSize: 13.5,
+                                                    fontSize: 14.0,
                                                     fontWeight: FontWeight.bold,
                                                     color: Color(0xFF009688), // Text Hijau
                                                   ),
@@ -3210,88 +3209,92 @@ class _HomePageState extends State<HomePage> {
                                   final bool isDark = AppColors.isDarkMode;
                                   final q = searchQuery.toLowerCase().trim();
 
-                                  // SEARCH FOR ELEMEN CP & MATERI JIKA SEARCH AKTIF
+                                  // SEARCH FOR ELEMEN CP & MATERI JIKA SEARCH AKTIF (SAFE PARSING)
                                   if (q.isNotEmpty) {
                                     final List<Map<String, dynamic>> matchedElements = [];
 
                                     for (int pIdx = 0; pIdx < projectDocs.length; pIdx++) {
-                                      final projDoc = projectDocs[pIdx];
-                                      final pData = projDoc.data() as Map<String, dynamic>;
-                                      final projId = projDoc.id;
-                                      final projTitle = pData['name'] ?? 'Classroom';
-                                      final gradeLevel = pData['gradeLevel'] ?? '';
-                                      final major = pData['major'] ?? '';
-                                      final stages = pData['stages'] as List? ?? [];
-                                      final dynamic rawColorIdx = pData['colorIndex'];
-                                      int patternIndex = 0;
-                                      if (rawColorIdx is int) {
-                                        patternIndex = rawColorIdx;
-                                      } else if (rawColorIdx is String) {
-                                        patternIndex = int.tryParse(rawColorIdx) ?? 0;
-                                      } else {
-                                        patternIndex = pIdx;
-                                      }
-
-                                      final Color cardColor = isDark
-                                          ? _classroomCardDarkColors[patternIndex % _classroomCardDarkColors.length]
-                                          : _classroomCardColors[patternIndex % _classroomCardColors.length];
-                                      final Color accentColor = _classroomAccentColors[patternIndex % _classroomAccentColors.length];
-                                      final bool isOwner = (pData['ownerUid'] ?? '') == (FirebaseAuth.instance.currentUser?.uid ?? '');
-
-                                      for (int sIdx = 0; sIdx < stages.length; sIdx++) {
-                                        final stage = stages[sIdx];
-                                        if (stage is! Map) continue;
-
-                                        final stageTitle = (stage['title'] ?? stage['name'] ?? 'Elemen ${sIdx + 1}').toString();
-                                        final stageDesc = (stage['description'] ?? stage['desc'] ?? '').toString();
-                                        final materis = stage['materis'] as List? ?? [];
-                                        final stageTasks = stage['tasks'] as List? ?? [];
-
-                                        bool isMatch = stageTitle.toLowerCase().contains(q) || stageDesc.toLowerCase().contains(q);
-                                        String? matchedMateriName;
-
-                                        for (var m in materis) {
-                                          if (m is Map) {
-                                            final mTitle = (m['title'] ?? '').toString();
-                                            if (mTitle.toLowerCase().contains(q)) {
-                                              isMatch = true;
-                                              matchedMateriName = mTitle;
-                                              break;
-                                            }
-                                          }
+                                      try {
+                                        final projDoc = projectDocs[pIdx];
+                                        final pData = projDoc.data() as Map<String, dynamic>? ?? {};
+                                        final projId = projDoc.id;
+                                        final projTitle = (pData['name'] ?? 'Classroom').toString();
+                                        final gradeLevel = (pData['gradeLevel'] ?? '').toString();
+                                        final major = (pData['major'] ?? '').toString();
+                                        final stages = pData['stages'] as List? ?? [];
+                                        final dynamic rawColorIdx = pData['colorIndex'];
+                                        int patternIndex = 0;
+                                        if (rawColorIdx is int) {
+                                          patternIndex = rawColorIdx;
+                                        } else if (rawColorIdx is String) {
+                                          patternIndex = int.tryParse(rawColorIdx) ?? 0;
+                                        } else {
+                                          patternIndex = pIdx;
                                         }
 
-                                        if (!isMatch) {
-                                          for (var t in stageTasks) {
-                                            if (t is Map) {
-                                              final tTitle = (t['title'] ?? '').toString();
-                                              if (tTitle.toLowerCase().contains(q)) {
-                                                isMatch = true;
-                                                matchedMateriName = tTitle;
-                                                break;
+                                        final Color cardColor = isDark
+                                            ? _classroomCardDarkColors[patternIndex % _classroomCardDarkColors.length]
+                                            : _classroomCardColors[patternIndex % _classroomCardColors.length];
+                                        final Color accentColor = _classroomAccentColors[patternIndex % _classroomAccentColors.length];
+                                        final bool isOwner = (pData['ownerUid']?.toString() ?? '') == (FirebaseAuth.instance.currentUser?.uid ?? '');
+
+                                        for (int sIdx = 0; sIdx < stages.length; sIdx++) {
+                                          try {
+                                            final stage = stages[sIdx];
+                                            if (stage is! Map) continue;
+
+                                            final stageTitle = (stage['title'] ?? stage['name'] ?? 'Elemen ${sIdx + 1}').toString();
+                                            final stageDesc = (stage['description'] ?? stage['desc'] ?? '').toString();
+                                            final materis = stage['materis'] as List? ?? [];
+                                            final stageTasks = stage['tasks'] as List? ?? [];
+
+                                            bool isMatch = stageTitle.toLowerCase().contains(q) || stageDesc.toLowerCase().contains(q);
+                                            String? matchedMateriName;
+
+                                            for (var m in materis) {
+                                              if (m is Map) {
+                                                final mTitle = (m['title'] ?? '').toString();
+                                                if (mTitle.toLowerCase().contains(q)) {
+                                                  isMatch = true;
+                                                  matchedMateriName = mTitle;
+                                                  break;
+                                                }
                                               }
                                             }
-                                          }
-                                        }
 
-                                        if (isMatch) {
-                                          matchedElements.add({
-                                            'projectId': projId,
-                                            'projectTitle': projTitle,
-                                            'gradeLevel': gradeLevel,
-                                            'major': major,
-                                            'stageIdx': sIdx,
-                                            'stageTitle': stageTitle,
-                                            'stageDesc': stageDesc,
-                                            'materiCount': materis.length,
-                                            'taskCount': stageTasks.length,
-                                            'cardColor': cardColor,
-                                            'accentColor': accentColor,
-                                            'isOwner': isOwner,
-                                            'matchedMateri': matchedMateriName,
-                                          });
+                                            if (!isMatch) {
+                                              for (var t in stageTasks) {
+                                                if (t is Map) {
+                                                  final tTitle = (t['title'] ?? '').toString();
+                                                  if (tTitle.toLowerCase().contains(q)) {
+                                                    isMatch = true;
+                                                    matchedMateriName = tTitle;
+                                                    break;
+                                                  }
+                                                }
+                                              }
+                                            }
+
+                                            if (isMatch) {
+                                              matchedElements.add({
+                                                'projectId': projId,
+                                                'projectTitle': projTitle,
+                                                'gradeLevel': gradeLevel,
+                                                'major': major,
+                                                'stageIdx': sIdx,
+                                                'stageTitle': stageTitle,
+                                                'stageDesc': stageDesc,
+                                                'materiCount': materis.length,
+                                                'taskCount': stageTasks.length,
+                                                'cardColor': cardColor,
+                                                'accentColor': accentColor,
+                                                'isOwner': isOwner,
+                                                'matchedMateri': matchedMateriName,
+                                              });
+                                            }
+                                          } catch (_) {}
                                         }
-                                      }
+                                      } catch (_) {}
                                     }
 
                                     if (matchedElements.isEmpty) {
@@ -3327,7 +3330,7 @@ class _HomePageState extends State<HomePage> {
                                               'Tidak ada elemen atau materi yang cocok dengan "$searchQuery"',
                                               textAlign: TextAlign.center,
                                               style: GoogleFonts.dmSans(
-                                                fontSize: 13,
+                                                fontSize: 14.0,
                                                 color: isDark ? Colors.white54 : Colors.black45,
                                               ),
                                             ),
@@ -3344,7 +3347,7 @@ class _HomePageState extends State<HomePage> {
                                           child: Text(
                                             'Daftar Elemen Ditemukan (${matchedElements.length})',
                                             style: GoogleFonts.plusJakartaSans(
-                                              fontSize: 13.5,
+                                              fontSize: 14.0,
                                               fontWeight: FontWeight.w700,
                                               color: isDark ? Colors.white70 : const Color(0xFF475569),
                                             ),
@@ -3361,13 +3364,13 @@ class _HomePageState extends State<HomePage> {
                                            ),
                                            itemBuilder: (context, index) {
                                              final elem = matchedElements[index];
-                                             final String stageTitle = elem['stageTitle'];
-                                             final String projTitle = elem['projectTitle'];
-                                             final String gradeLevel = elem['gradeLevel'];
-                                             final String major = elem['major'];
-                                             final Color cardColor = elem['cardColor'];
-                                             final Color accentColor = elem['accentColor'];
-                                             final String? matchedMateri = elem['matchedMateri'];
+                                             final String stageTitle = elem['stageTitle']?.toString() ?? 'Elemen';
+                                             final String projTitle = elem['projectTitle']?.toString() ?? 'Classroom';
+                                             final String gradeLevel = elem['gradeLevel']?.toString() ?? '';
+                                             final String major = elem['major']?.toString() ?? '';
+                                             final Color cardColor = elem['cardColor'] as Color? ?? Colors.white;
+                                             final Color accentColor = elem['accentColor'] as Color? ?? const Color(0xFF7F52FC);
+                                             final String? matchedMateri = elem['matchedMateri']?.toString();
 
                                              return InkWell(
                                                borderRadius: BorderRadius.circular(12),
@@ -3407,7 +3410,7 @@ class _HomePageState extends State<HomePage> {
                                                            Text(
                                                              '$projTitle · $gradeLevel $major',
                                                              style: GoogleFonts.dmSans(
-                                                               fontSize: 12.5,
+                                                               fontSize: 14.0,
                                                                fontWeight: FontWeight.w500,
                                                                color: isDark ? Colors.white60 : const Color(0xFF64748B),
                                                              ),
@@ -3425,7 +3428,7 @@ class _HomePageState extends State<HomePage> {
                                                                child: Text(
                                                                  'Materi: $matchedMateri',
                                                                  style: GoogleFonts.dmSans(
-                                                                   fontSize: 11,
+                                                                   fontSize: 14.0,
                                                                    fontWeight: FontWeight.bold,
                                                                    color: isDark ? const Color(0xFFFCD34D) : const Color(0xFFB45309),
                                                                  ),
@@ -3473,7 +3476,7 @@ class _HomePageState extends State<HomePage> {
                                                              Text(
                                                                'Buka CP',
                                                                style: GoogleFonts.plusJakartaSans(
-                                                                 fontSize: 11.5,
+                                                                 fontSize: 14.0,
                                                                  fontWeight: FontWeight.bold,
                                                                  color: isDark ? Colors.black : Colors.white,
                                                                ),
@@ -3778,7 +3781,7 @@ class _HomePageState extends State<HomePage> {
                                                                   style: GoogleFonts.plusJakartaSans(
                                                                     fontWeight: FontWeight.w800,
                                                                     color: isDark ? Colors.white : Colors.black,
-                                                                    fontSize: 13,
+                                                                    fontSize: 14.0,
                                                                   ),
                                                                 ),
                                                               ),
@@ -3794,7 +3797,7 @@ class _HomePageState extends State<HomePage> {
                                                                   style: GoogleFonts.plusJakartaSans(
                                                                     fontWeight: FontWeight.w800,
                                                                     color: isDark ? Colors.white : Colors.black,
-                                                                    fontSize: 13,
+                                                                    fontSize: 14.0,
                                                                   ),
                                                                 ),
                                                               ),
@@ -3814,7 +3817,7 @@ class _HomePageState extends State<HomePage> {
                                                           ? 'Pengajar · ${schoolLevel.isNotEmpty ? schoolLevel.toUpperCase() : 'SMA/SMK'}'
                                                           : 'Siswa · ${schoolLevel.isNotEmpty ? schoolLevel.toUpperCase() : 'SMA/SMK'}',
                                                       style: GoogleFonts.plusJakartaSans(
-                                                        fontSize: 11.0,
+                                                        fontSize: 14.0,
                                                         fontWeight: FontWeight.w600,
                                                         color: isDark ? Colors.white60 : const Color(0xFF64748B),
                                                       ),
@@ -4152,7 +4155,7 @@ class _HomePageState extends State<HomePage> {
                                     Text(
                                       'Statistik',
                                       style: GoogleFonts.plusJakartaSans(
-                                        fontSize: 12.3,
+                                        fontSize: 14.0,
                                         fontWeight: FontWeight.bold,
                                         color: isDark ? Colors.white : Colors.black,
                                       ),
@@ -4315,19 +4318,26 @@ class _HomePageState extends State<HomePage> {
                   cardColor: backgroundColor,
                 ),
                 const SizedBox(height: 4),
-                // Middle: Complete Subject Title (Enlarged 2x, bold, black/white)
+                // Middle: Complete Subject Title (Flexible, full size for 1-2 lines, max 3 lines, NEVER TRUNCATED)
                 Padding(
                   padding: const EdgeInsets.only(left: 10.0, right: 96.0),
-                  child: Text(
-                    title,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 19.5,
-                      fontWeight: FontWeight.w800,
-                      color: Colors.black87,
-                      height: 1.15,
-                    ),
+                  child: Builder(
+                    builder: (context) {
+                      double calculatedFontSize = 19.5;
+                      if (title.length > 55) {
+                        calculatedFontSize = 16.0;
+                      }
+                      return Text(
+                        title,
+                        maxLines: 3,
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: calculatedFontSize,
+                          fontWeight: FontWeight.w800,
+                          color: Colors.black87,
+                          height: 1.15,
+                        ),
+                      );
+                    },
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -4360,7 +4370,7 @@ class _HomePageState extends State<HomePage> {
                           Text(
                             majorText,
                             style: GoogleFonts.dmSans(
-                              fontSize: 12.5,
+                              fontSize: 14.0,
                               fontWeight: FontWeight.bold,
                               color: Colors.black87,
                             ),
@@ -4392,7 +4402,7 @@ class _HomePageState extends State<HomePage> {
                           Text(
                             '$totalStudents Siswa',
                             style: GoogleFonts.dmSans(
-                              fontSize: 12.5,
+                              fontSize: 14.0,
                               fontWeight: FontWeight.bold,
                               color: Colors.black87,
                             ),
@@ -4486,7 +4496,7 @@ class _HomePageState extends State<HomePage> {
                     Text(
                       majorText,
                       style: GoogleFonts.plusJakartaSans(
-                        fontSize: 12.9,
+                        fontSize: 14.0,
                         fontWeight: FontWeight.bold,
                         color: textColor,
                       ),
@@ -4519,13 +4529,12 @@ class _HomePageState extends State<HomePage> {
               ],
             ),
             const SizedBox(height: 8),
-            // Title
+            // Title (Max 3 lines, flexible font size, never truncated)
             Text(
               title,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
+              maxLines: 3,
               style: GoogleFonts.plusJakartaSans(
-                fontSize: 16.4,
+                fontSize: title.length > 55 ? 14.5 : 16.4,
                 fontWeight: FontWeight.bold,
                 color: textColor,
                 height: 1.2,
@@ -4555,7 +4564,7 @@ class _HomePageState extends State<HomePage> {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: GoogleFonts.dmSans(
-                        fontSize: 12.3,
+                        fontSize: 14.0,
                         fontWeight: FontWeight.w500,
                         color: textColor,
                       ),
@@ -4571,7 +4580,7 @@ class _HomePageState extends State<HomePage> {
                   Text(
                     'Total $totalStudents Siswa Aktif',
                     style: GoogleFonts.dmSans(
-                      fontSize: 12.3,
+                      fontSize: 14.0,
                       fontWeight: FontWeight.w500,
                       color: textColor,
                     ),
@@ -4717,7 +4726,7 @@ class _HomePageState extends State<HomePage> {
                   Text(
                     'Progress Pembelajaran Kelas',
                     style: GoogleFonts.plusJakartaSans(
-                      fontSize: 12.3,
+                      fontSize: 14.0,
                       fontWeight: FontWeight.bold,
                       color: Colors.black87,
                     ),
@@ -4725,7 +4734,7 @@ class _HomePageState extends State<HomePage> {
                   Text(
                     percentText,
                     style: GoogleFonts.plusJakartaSans(
-                      fontSize: 12.9,
+                      fontSize: 14.0,
                       fontWeight: FontWeight.bold,
                       color: const Color(0xFFEF4444),
                     ),
@@ -4776,7 +4785,7 @@ class _HomePageState extends State<HomePage> {
           Text(
             text,
             style: GoogleFonts.plusJakartaSans(
-              fontSize: 11.7,
+              fontSize: 14.0,
               fontWeight: FontWeight.bold,
               color: const Color(0xFFD97706),
             ),
@@ -4971,7 +4980,7 @@ class _HomePageState extends State<HomePage> {
                             Text(
                               'Poin Keaktifan Kelas',
                               style: GoogleFonts.dmSans(
-                                fontSize: 12,
+                                fontSize: 14.0,
                                 color: isDark ? Colors.white60 : Colors.black54,
                                 fontWeight: FontWeight.w500,
                               ),
@@ -5062,7 +5071,7 @@ class _HomePageState extends State<HomePage> {
         child: Text(
           text,
           style: GoogleFonts.plusJakartaSans(
-            fontSize: 13,
+            fontSize: 14.0,
             fontWeight: FontWeight.bold,
             color: isActive
                 ? (isDark ? Colors.black : Colors.white)
@@ -5152,7 +5161,7 @@ class _HomePageState extends State<HomePage> {
           Text(
             title,
             style: GoogleFonts.plusJakartaSans(
-              fontSize: 11.5,
+              fontSize: 14.0,
               fontWeight: FontWeight.bold,
               color: isDark ? Colors.white : Colors.black87,
             ),
@@ -5161,7 +5170,7 @@ class _HomePageState extends State<HomePage> {
           Text(
             duration,
             style: GoogleFonts.dmSans(
-              fontSize: 10,
+              fontSize: 14.0,
               color: isDark ? Colors.white54 : Colors.black45,
             ),
           ),
@@ -5352,7 +5361,7 @@ class _HomePageState extends State<HomePage> {
                                     Text(
                                       'Statistik',
                                       style: GoogleFonts.plusJakartaSans(
-                                        fontSize: 12.3,
+                                        fontSize: 14.0,
                                         fontWeight: FontWeight.bold,
                                         color: Colors.black,
                                       ),
@@ -5490,7 +5499,7 @@ class _HomePageState extends State<HomePage> {
                     Text(
                       majorText,
                       style: GoogleFonts.plusJakartaSans(
-                        fontSize: 12.9,
+                        fontSize: 14.0,
                         fontWeight: FontWeight.bold,
                         color: textColor,
                       ),
@@ -5500,13 +5509,12 @@ class _HomePageState extends State<HomePage> {
               ],
             ),
             const SizedBox(height: 8),
-            // Title
+            // Title (Max 3 lines, flexible font size, never truncated)
             Text(
               title,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
+              maxLines: 3,
               style: GoogleFonts.plusJakartaSans(
-                fontSize: 16.4,
+                fontSize: title.length > 55 ? 14.5 : 16.4,
                 fontWeight: FontWeight.bold,
                 color: textColor,
                 height: 1.2,
@@ -5535,7 +5543,7 @@ class _HomePageState extends State<HomePage> {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: GoogleFonts.dmSans(
-                        fontSize: 12.3,
+                        fontSize: 14.0,
                         fontWeight: FontWeight.w500,
                         color: textColor,
                       ),
@@ -5567,7 +5575,7 @@ class _HomePageState extends State<HomePage> {
                         Text(
                           'Statistik',
                           style: GoogleFonts.plusJakartaSans(
-                            fontSize: 12.3,
+                            fontSize: 14.0,
                             fontWeight: FontWeight.bold,
                             color: Colors.black,
                           ),
@@ -5669,7 +5677,7 @@ class _HomePageState extends State<HomePage> {
                   Text(
                     'Progress Belajar Mandiri',
                     style: GoogleFonts.plusJakartaSans(
-                      fontSize: 12.3,
+                      fontSize: 14.0,
                       fontWeight: FontWeight.bold,
                       color: Colors.black87,
                     ),
@@ -5677,7 +5685,7 @@ class _HomePageState extends State<HomePage> {
                   Text(
                     percentText,
                     style: GoogleFonts.plusJakartaSans(
-                      fontSize: 12.9,
+                      fontSize: 14.0,
                       fontWeight: FontWeight.bold,
                       color: const Color(0xFFEF4444),
                     ),
@@ -5797,7 +5805,7 @@ class _HomePageState extends State<HomePage> {
                   Text(
                     'KODE KELAS',
                     style: GoogleFonts.plusJakartaSans(
-                      fontSize: 10.5,
+                      fontSize: 14.0,
                       fontWeight: FontWeight.bold,
                       color: subtextColor,
                     ),
@@ -5813,7 +5821,7 @@ class _HomePageState extends State<HomePage> {
                     child: Text(
                       projectId,
                       style: GoogleFonts.plusJakartaSans(
-                        fontSize: 11.7,
+                        fontSize: 14.0,
                         fontWeight: FontWeight.bold,
                         color: textColor,
                       ),
@@ -5847,7 +5855,7 @@ class _HomePageState extends State<HomePage> {
                           Text(
                             'Salin Kode',
                             style: GoogleFonts.plusJakartaSans(
-                              fontSize: 11.7,
+                              fontSize: 14.0,
                               fontWeight: FontWeight.bold,
                               color: Colors.black,
                             ),
@@ -6072,7 +6080,7 @@ class _HomePageState extends State<HomePage> {
                   w,
                   textAlign: TextAlign.center,
                   style: GoogleFonts.plusJakartaSans(
-                    fontSize: 12.9,
+                    fontSize: 14.0,
                     fontWeight: FontWeight.w600,
                     color: Colors.black45,
                   ),
@@ -6189,7 +6197,7 @@ class _HomePageState extends State<HomePage> {
                         child: Text(
                           _getDayName(day.weekday),
                           style: GoogleFonts.plusJakartaSans(
-                            fontSize: 11.7,
+                            fontSize: 14.0,
                             fontWeight: FontWeight.bold,
                             color: isSelected ? Colors.white : dayTextColor,
                           ),
@@ -6296,42 +6304,85 @@ class _HomePageState extends State<HomePage> {
       offset = renderBox.localToGlobal(Offset.zero);
     }
 
-    final double top = offset.dy + size.height + 6;
-    final double left = offset.dx;
+    final double screenWidth = MediaQuery.of(context).size.width;
+    final double top = offset.dy + size.height - 10;
 
     showDialog(
       context: context,
       barrierColor: Colors.transparent,
       builder: (dialogCtx) {
-        return Stack(
-          children: [
-            Positioned(
-              top: top,
-              left: left,
-              width: 320,
-              child: Material(
-                color: Colors.transparent,
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: isDark ? const Color(0xFF18181B) : Colors.white,
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
-                      width: 1.2,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: isDark ? 0.45 : 0.12),
-                        blurRadius: 16,
-                        offset: const Offset(0, 6),
+        return StreamBuilder<QuerySnapshot>(
+          stream: FirebaseFirestore.instance
+              .collection('notes')
+              .orderBy('updatedAt', descending: true)
+              .snapshots(),
+          builder: (context, snapshot) {
+            final docs = snapshot.data?.docs ?? [];
+
+            // Tentukan lebar dinamis secara otomatis:
+            // Jika semua judul catatan pendek (<= 10 char) -> 240px
+            // Jika ada yang sedang (11-20 char) -> 275px
+            // Jika ada yang panjang (> 20 char) -> 315px (batas maksimal)
+            int maxTitleLength = 0;
+            for (var doc in docs) {
+              final data = doc.data() as Map<String, dynamic>;
+              final t = (data['title'] ?? '').toString();
+              if (t.length > maxTitleLength) {
+                maxTitleLength = t.length;
+              }
+            }
+
+            double calculatedWidth = 240.0;
+            if (maxTitleLength > 20) {
+              calculatedWidth = 315.0;
+            } else if (maxTitleLength > 10) {
+              calculatedWidth = 275.0;
+            }
+
+            final double width = math.min(calculatedWidth, screenWidth - 32.0);
+            double left = offset.dx;
+            if (left + width > screenWidth - 16.0) {
+              left = screenWidth - width - 16.0;
+            }
+            if (left < 16.0) {
+              left = 16.0;
+            }
+
+            return Stack(
+              children: [
+                Positioned(
+                  top: top,
+                  left: left,
+                  width: width,
+                  child: Material(
+                    color: Colors.transparent,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: isDark ? const Color(0xFF18181B) : Colors.white,
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                          width: 1.2,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: isDark ? 0.45 : 0.12),
+                            blurRadius: 16,
+                            offset: const Offset(0, 6),
+                          ),
+                        ],
                       ),
-                    ],
+                      child: _QuickNotesDropdownContent(
+                        isDark: isDark,
+                        docs: docs,
+                        isLoading: snapshot.connectionState == ConnectionState.waiting && !snapshot.hasData,
+                      ),
+                    ),
                   ),
-                  child: _QuickNotesDropdownContent(isDark: isDark),
                 ),
-              ),
-            ),
-          ],
+              ],
+            );
+          },
         );
       },
     );
@@ -6340,7 +6391,14 @@ class _HomePageState extends State<HomePage> {
 
 class _QuickNotesDropdownContent extends StatelessWidget {
   final bool isDark;
-  const _QuickNotesDropdownContent({required this.isDark});
+  final List<QueryDocumentSnapshot> docs;
+  final bool isLoading;
+
+  const _QuickNotesDropdownContent({
+    required this.isDark,
+    required this.docs,
+    required this.isLoading,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -6392,7 +6450,7 @@ class _QuickNotesDropdownContent extends StatelessWidget {
                         Text(
                           'Tambah',
                           style: GoogleFonts.plusJakartaSans(
-                            fontSize: 12.5,
+                            fontSize: 14.0,
                             color: isDark ? const Color(0xFF38BDF8) : const Color(0xFF2563EB),
                             fontWeight: FontWeight.bold,
                           ),
@@ -6406,171 +6464,137 @@ class _QuickNotesDropdownContent extends StatelessWidget {
           ),
           Divider(height: 1, color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9)),
           Flexible(
-            child: StreamBuilder<QuerySnapshot>(
-              stream: FirebaseFirestore.instance
-                  .collection('notes')
-                  .orderBy('updatedAt', descending: true)
-                  .snapshots(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(
+            child: isLoading
+                ? const Center(
                     child: Padding(
                       padding: EdgeInsets.all(24.0),
-                      child: SizedBox(
-                        width: 22,
-                        height: 22,
-                        child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFF7C3AED)),
-                      ),
+                      child: ThreeDotsLoader(size: 6, bounceHeight: 3),
                     ),
-                  );
-                }
-
-                final docs = snapshot.data?.docs ?? [];
-                if (docs.isEmpty) {
-                  return Padding(
-                    padding: const EdgeInsets.all(24.0),
-                    child: Center(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            Icons.note_alt_outlined,
-                            size: 36,
-                            color: isDark ? Colors.white30 : Colors.black26,
+                  )
+                : docs.isEmpty
+                    ? Padding(
+                        padding: const EdgeInsets.all(24.0),
+                        child: Center(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.note_alt_outlined,
+                                size: 36,
+                                color: isDark ? Colors.white30 : Colors.black26,
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                'Belum ada catatan',
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 14.0,
+                                  color: isDark ? Colors.white54 : Colors.black45,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
                           ),
-                          const SizedBox(height: 8),
-                          Text(
-                            'Belum ada catatan',
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 13,
-                              color: isDark ? Colors.white54 : Colors.black45,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                }
+                        ),
+                      )
+                    : ListView.separated(
+                        shrinkWrap: true,
+                        padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 4),
+                        itemCount: docs.length > 5 ? 5 : docs.length,
+                        separatorBuilder: (_, __) => Divider(
+                          height: 1,
+                          color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF8FAFC),
+                        ),
+                        itemBuilder: (context, index) {
+                          final noteData = docs[index].data() as Map<String, dynamic>;
+                          final noteId = docs[index].id;
+                          final title = (noteData['title'] ?? 'Tanpa Judul').toString();
+                          final content = (noteData['content'] ?? '').toString();
 
-                return ListView.separated(
-                  shrinkWrap: true,
-                  padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 4),
-                  itemCount: docs.length > 5 ? 5 : docs.length,
-                  separatorBuilder: (_, __) => Divider(
-                    height: 1,
-                    color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF8FAFC),
-                  ),
-                  itemBuilder: (context, index) {
-                    final noteData = docs[index].data() as Map<String, dynamic>;
-                    final noteId = docs[index].id;
-                    final title = (noteData['title'] ?? 'Tanpa Judul').toString();
-                    final content = (noteData['content'] ?? '').toString();
+                          String formatDate(dynamic ts) {
+                            if (ts == null) return '-';
+                            DateTime? dt;
+                            if (ts is Timestamp) {
+                              dt = ts.toDate();
+                            } else if (ts is DateTime) {
+                              dt = ts;
+                            }
+                            if (dt == null) return '-';
+                            return '${dt.day.toString().padLeft(2, '0')}/${dt.month.toString().padLeft(2, '0')}/${dt.year}';
+                          }
 
-                    String formatDate(dynamic ts) {
-                      if (ts == null) return '-';
-                      DateTime? dt;
-                      if (ts is Timestamp) {
-                        dt = ts.toDate();
-                      } else if (ts is DateTime) {
-                        dt = ts;
-                      }
-                      if (dt == null) return '-';
-                      return '${dt.day.toString().padLeft(2, '0')}/${dt.month.toString().padLeft(2, '0')}/${dt.year}';
-                    }
+                          final dynamic rawUpdated = noteData['updatedAt'];
+                          final dynamic rawCreated = noteData['createdAt'];
+                          final bool isEdited = rawUpdated != null &&
+                              rawCreated != null &&
+                              (rawUpdated is Timestamp && rawCreated is Timestamp
+                                  ? rawUpdated.seconds != rawCreated.seconds
+                                  : rawUpdated.toString() != rawCreated.toString());
 
-                    // Tampilkan tanggal diubah / diedit jika ada, atau tanggal dibuat
-                    final dynamic rawUpdated = noteData['updatedAt'];
-                    final dynamic rawCreated = noteData['createdAt'];
-                    final bool isEdited = rawUpdated != null &&
-                        rawCreated != null &&
-                        (rawUpdated is Timestamp && rawCreated is Timestamp
-                            ? rawUpdated.seconds != rawCreated.seconds
-                            : rawUpdated.toString() != rawCreated.toString());
+                          final String prefix = isEdited ? 'Diubah ' : 'Dibuat ';
+                          final String dateStr = '$prefix${formatDate(isEdited ? rawUpdated : (rawUpdated ?? rawCreated))}';
 
-                    final String prefix = isEdited ? 'Diubah ' : 'Dibuat ';
-                    final String dateStr = '$prefix${formatDate(isEdited ? rawUpdated : (rawUpdated ?? rawCreated))}';
-
-                    return InkWell(
-                      borderRadius: BorderRadius.circular(10),
-                      onTap: () {
-                        Navigator.pop(context);
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (_) => NoteEditorPage(
-                              noteId: noteId,
-                              initialTitle: title,
-                              initialContent: content,
-                            ),
-                          ),
-                        );
-                      },
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            // Judul dan Isi Catatan di Kiri
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text(
-                                    title.isNotEmpty ? title : 'Tanpa Judul',
-                                    style: GoogleFonts.plusJakartaSans(
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w600,
-                                      color: isDark ? Colors.white : const Color(0xFF0F172A),
-                                    ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
+                          return InkWell(
+                            borderRadius: BorderRadius.circular(10),
+                            onTap: () {
+                              Navigator.pop(context);
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (_) => NoteEditorPage(
+                                    noteId: noteId,
+                                    initialTitle: title,
+                                    initialContent: content,
                                   ),
-                                  if (content.isNotEmpty) ...[
-                                    const SizedBox(height: 2),
-                                    Text(
-                                      content,
-                                      style: GoogleFonts.dmSans(
-                                        fontSize: 11.5,
-                                        color: isDark ? Colors.white54 : const Color(0xFF64748B),
+                                ),
+                              );
+                            },
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  // Judul Catatan di Kiri (Bigger & Bolder, Max 2 Baris, SoftWrap)
+                                  Expanded(
+                                    child: Text(
+                                      title.isNotEmpty ? title : 'Tanpa Judul',
+                                      style: GoogleFonts.plusJakartaSans(
+                                        fontSize: 15.0,
+                                        fontWeight: FontWeight.w700,
+                                        color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                        height: 1.2,
                                       ),
-                                      maxLines: 1,
+                                      maxLines: 2,
+                                      softWrap: true,
                                       overflow: TextOverflow.ellipsis,
                                     ),
-                                  ],
+                                  ),
+                                  const SizedBox(width: 8),
+                                  // Tanggal di atas tombol > (Tanpa Card)
+                                  Column(
+                                    crossAxisAlignment: CrossAxisAlignment.end,
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text(
+                                        dateStr,
+                                        style: GoogleFonts.dmSans(
+                                          fontSize: 14.0,
+                                          fontWeight: FontWeight.w500,
+                                          color: isDark ? Colors.white38 : const Color(0xFF94A3B8),
+                                        ),
+                                      ),
+                                      const SizedBox(height: 2),
+                                      Icon(
+                                        Icons.chevron_right_rounded,
+                                        size: 16,
+                                        color: isDark ? Colors.white30 : Colors.black26,
+                                      ),
+                                    ],
+                                  ),
                                 ],
                               ),
                             ),
-                            const SizedBox(width: 8),
-                            // Tanggal di atas tombol > (Tanpa Card)
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  dateStr,
-                                  style: GoogleFonts.dmSans(
-                                    fontSize: 10.0,
-                                    fontWeight: FontWeight.w500,
-                                    color: isDark ? Colors.white38 : const Color(0xFF94A3B8),
-                                  ),
-                                ),
-                                const SizedBox(height: 2),
-                                Icon(
-                                  Icons.chevron_right_rounded,
-                                  size: 16,
-                                  color: isDark ? Colors.white30 : Colors.black26,
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
+                          );
+                        },
                       ),
-                    );
-                  },
-                );
-              },
-            ),
           ),
         ],
       ),
@@ -7197,7 +7221,7 @@ class _AnimatedScheduleCapsuleState extends State<_AnimatedScheduleCapsule> {
             Text(
               'Jadwal belum diatur',
               style: GoogleFonts.plusJakartaSans(
-                fontSize: 13.5,
+                fontSize: 14.0,
                 fontWeight: FontWeight.w700,
                 color: isDark ? Colors.white : Colors.black87,
                 letterSpacing: -0.2,
@@ -7258,7 +7282,7 @@ class _AnimatedScheduleCapsuleState extends State<_AnimatedScheduleCapsule> {
             Text(
               '$dayStr, $timeStr',
               style: GoogleFonts.plusJakartaSans(
-                fontSize: 13.5,
+                fontSize: 14.0,
                 fontWeight: FontWeight.w700,
                 color: isDark ? Colors.white : Colors.black87,
                 letterSpacing: -0.2,
@@ -7294,7 +7318,6 @@ class _HomeSearchAndNotesRowState extends State<_HomeSearchAndNotesRow> {
   late final TextEditingController _controller;
   late final FocusNode _focusNode;
   Timer? _debounceTimer;
-  DateTime _expandedTime = DateTime.now();
 
   @override
   void initState() {
@@ -7312,25 +7335,17 @@ class _HomeSearchAndNotesRowState extends State<_HomeSearchAndNotesRow> {
   }
 
   void _expand() {
-    _expandedTime = DateTime.now();
     setState(() {
       _isExpanded = true;
     });
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
-        Future.delayed(const Duration(milliseconds: 60), () {
-          if (mounted) {
-            _focusNode.requestFocus();
-          }
-        });
+        _focusNode.requestFocus();
       }
     });
   }
 
   void _collapse() {
-    if (DateTime.now().difference(_expandedTime).inMilliseconds < 450) {
-      return; // Cegah touch release / ghost tap dari tombol search yang berada di koordinat yang sama
-    }
     _focusNode.unfocus();
     _debounceTimer?.cancel();
     setState(() {
@@ -7342,8 +7357,10 @@ class _HomeSearchAndNotesRowState extends State<_HomeSearchAndNotesRow> {
 
   void _onChanged(String val) {
     _debounceTimer?.cancel();
-    _debounceTimer = Timer(const Duration(milliseconds: 250), () {
-      widget.onSearchChanged(val.trim().toLowerCase());
+    _debounceTimer = Timer(const Duration(milliseconds: 200), () {
+      if (mounted) {
+        widget.onSearchChanged(val.trim().toLowerCase());
+      }
     });
   }
 
@@ -7351,169 +7368,167 @@ class _HomeSearchAndNotesRowState extends State<_HomeSearchAndNotesRow> {
   Widget build(BuildContext context) {
     final isDark = widget.isDark;
 
-    if (_isExpanded) {
-      return Container(
-        height: 48,
-        padding: const EdgeInsets.symmetric(horizontal: 14),
-        decoration: BoxDecoration(
-          color: isDark ? const Color(0xFF18181B) : Colors.white,
-          borderRadius: BorderRadius.circular(28),
-          border: Border.all(
-            color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
-            width: 1.2,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.05),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            Icon(
-              Icons.search_rounded,
-              color: isDark ? Colors.white60 : Colors.black45,
-              size: 20,
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: TextField(
-                key: const ValueKey('home_search_input'),
-                controller: _controller,
-                focusNode: _focusNode,
-                keyboardType: TextInputType.text,
-                textInputAction: TextInputAction.search,
-                autofocus: false,
-                onChanged: _onChanged,
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 14,
-                  color: isDark ? Colors.white : Colors.black87,
-                ),
-                decoration: InputDecoration(
-                  hintText: 'Cari kelas atau materi...',
-                  hintStyle: GoogleFonts.dmSans(
-                    color: isDark ? Colors.white38 : Colors.black38,
-                    fontSize: 14,
-                  ),
-                  border: InputBorder.none,
-                  isDense: true,
-                ),
-              ),
-            ),
-            GestureDetector(
-              onTap: _collapse,
-              behavior: HitTestBehavior.opaque,
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 250),
+      transitionBuilder: (child, animation) {
+        return FadeTransition(
+          opacity: animation,
+          child: child,
+        );
+      },
+      child: _isExpanded
+          ? TapRegion(
+              onTapOutside: (_) => _collapse(),
               child: Container(
-                padding: const EdgeInsets.all(4),
+                key: const ValueKey('home_search_bar_expanded'),
+                height: 48,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
                 decoration: BoxDecoration(
-                  color: isDark ? Colors.white12 : const Color(0xFFF1F5F9),
-                  shape: BoxShape.circle,
+                  color: isDark ? const Color(0xFF18181B) : Colors.white,
+                  borderRadius: BorderRadius.circular(28),
+                  border: Border.all(
+                    color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                    width: 1.2,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.05),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
                 ),
-                child: Icon(
-                  Icons.close_rounded,
-                  color: isDark ? Colors.white70 : Colors.black87,
-                  size: 18,
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.search_rounded,
+                      color: isDark ? Colors.white60 : Colors.black45,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: TextField(
+                        key: const ValueKey('home_search_input'),
+                        controller: _controller,
+                        focusNode: _focusNode,
+                        keyboardType: TextInputType.text,
+                        textInputAction: TextInputAction.search,
+                        autofocus: false,
+                        onChanged: _onChanged,
+                        onTapOutside: (_) => _collapse(),
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 14,
+                          color: isDark ? Colors.white : Colors.black87,
+                        ),
+                        decoration: InputDecoration(
+                          hintText: 'Cari kelas atau materi...',
+                          hintStyle: GoogleFonts.dmSans(
+                            color: isDark ? Colors.white38 : Colors.black38,
+                            fontSize: 14,
+                          ),
+                          border: InputBorder.none,
+                          isDense: true,
+                          contentPadding: const EdgeInsets.symmetric(vertical: 10),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ),
-          ],
-        ),
-      );
-    }
-
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        // Tombol Catatan (Pill Frameless Netral)
-        BouncyButton(
-          key: widget.notesKey,
-          onTap: widget.onNotesTap,
-          child: Container(
-            padding: const EdgeInsets.fromLTRB(6, 6, 16, 6),
-            decoration: BoxDecoration(
-              color: isDark ? const Color(0xFF18181B) : Colors.white,
-              borderRadius: BorderRadius.circular(30),
-              border: Border.all(
-                color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
-                width: 1.2,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.04),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
+            )
+          : Row(
+              key: const ValueKey('home_search_bar_collapsed'),
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Container(
-                  width: 36,
-                  height: 36,
-                  decoration: const BoxDecoration(
-                    color: Color(0xFFFEF3C7),
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(
-                    Icons.auto_stories_rounded,
-                    color: Color(0xFFEA580C),
-                    size: 18,
+                // Tombol Catatan (Pill Frameless Netral)
+                BouncyButton(
+                  key: widget.notesKey,
+                  onTap: widget.onNotesTap,
+                  child: Container(
+                    padding: const EdgeInsets.fromLTRB(6, 6, 16, 6),
+                    decoration: BoxDecoration(
+                      color: isDark ? const Color(0xFF18181B) : Colors.white,
+                      borderRadius: BorderRadius.circular(30),
+                      border: Border.all(
+                        color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+                        width: 1.2,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.04),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          width: 36,
+                          height: 36,
+                          decoration: const BoxDecoration(
+                            color: Color(0xFFFEF3C7),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.auto_stories_rounded,
+                            color: Color(0xFFEA580C),
+                            size: 18,
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Text(
+                          'Catatan',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: isDark ? Colors.white : Colors.black87,
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        Icon(
+                          Icons.keyboard_arrow_down_rounded,
+                          size: 18,
+                          color: isDark ? Colors.white60 : Colors.black45,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-                const SizedBox(width: 10),
-                Text(
-                  'Catatan',
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                    color: isDark ? Colors.white : Colors.black87,
-                  ),
-                ),
-                const SizedBox(width: 6),
-                Icon(
-                  Icons.keyboard_arrow_down_rounded,
-                  size: 18,
-                  color: isDark ? Colors.white60 : Colors.black45,
-                ),
-              ],
-            ),
-          ),
-        ),
 
-        // Tombol Cari Lingkaran Netral
-        BouncyButton(
-          onTap: _expand,
-          child: Container(
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(
-              color: isDark ? const Color(0xFF18181B) : Colors.white,
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
-                width: 1.2,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.04),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
+                // Tombol Cari Lingkaran Netral
+                BouncyButton(
+                  onTap: _expand,
+                  child: Container(
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      color: isDark ? const Color(0xFF18181B) : Colors.white,
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+                        width: 1.2,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.04),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Center(
+                      child: Icon(
+                        Icons.search_rounded,
+                        color: isDark ? Colors.white70 : Colors.black87,
+                        size: 22,
+                      ),
+                    ),
+                  ),
                 ),
               ],
             ),
-            child: Center(
-              child: Icon(
-                Icons.search_rounded,
-                color: isDark ? Colors.white70 : Colors.black87,
-                size: 22,
-              ),
-            ),
-          ),
-        ),
-      ],
     );
   }
 }

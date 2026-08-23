@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hubner/core/widgets/three_dots_loader.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -86,7 +87,7 @@ class _OnboardingPageState extends State<OnboardingPage> with SingleTickerProvid
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _completeOnboarding();
       });
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      return const Scaffold(body: const Center(child: ThreeDotsLoader()));
     }
 
     final double statusBarHeight = MediaQuery.of(context).padding.top;

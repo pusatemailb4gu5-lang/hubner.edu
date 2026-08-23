@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hubner/core/widgets/three_dots_loader.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -30,7 +31,7 @@ class _ManageFriendsPageState extends State<ManageFriendsPage> {
       context: context,
       barrierDismissible: false,
       builder: (context) => const Center(
-        child: CircularProgressIndicator(color: Colors.black),
+        child: const ThreeDotsLoader(),
       ),
     );
 
@@ -312,7 +313,7 @@ class _ManageFriendsPageState extends State<ManageFriendsPage> {
                                   ? const SizedBox(
                                       width: 18,
                                       height: 18,
-                                      child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                                      child: const ThreeDotsLoader(),
                                     )
                                   : Text(
                                       'Tambah',
@@ -347,7 +348,7 @@ class _ManageFriendsPageState extends State<ManageFriendsPage> {
                     stream: FirebaseFirestore.instance.collection('users').doc(currentUid).snapshots(),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const Center(child: CircularProgressIndicator());
+                        return const Center(child: ThreeDotsLoader());
                       }
                       if (!snapshot.hasData || !snapshot.data!.exists) {
                         return Center(
@@ -374,7 +375,7 @@ class _ManageFriendsPageState extends State<ManageFriendsPage> {
                             .snapshots(),
                         builder: (context, friendsSnapshot) {
                           if (friendsSnapshot.connectionState == ConnectionState.waiting) {
-                            return const Center(child: CircularProgressIndicator());
+                            return const Center(child: ThreeDotsLoader());
                           }
 
                           final friendDocs = friendsSnapshot.data?.docs ?? [];
@@ -430,7 +431,7 @@ class _ManageFriendsPageState extends State<ManageFriendsPage> {
                                             ),
                                             Text(
                                               'ID User: $fUserId',
-                                              style: GoogleFonts.dmSans(fontSize: 12.9, color: Colors.black45),
+                                              style: GoogleFonts.dmSans(fontSize: 14.0, color: Colors.black45),
                                             ),
                                           ],
                                         ),

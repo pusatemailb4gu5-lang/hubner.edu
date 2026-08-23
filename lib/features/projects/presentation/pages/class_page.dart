@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hubner/core/widgets/three_dots_loader.dart';
 import 'dart:async';
 import 'dart:ui';
 import 'package:google_fonts/google_fonts.dart';
@@ -189,7 +190,7 @@ class _ClassPageState extends State<ClassPage> {
                     child: Text(
                       '+$extraCount',
                       style: GoogleFonts.plusJakartaSans(
-                        fontSize: 13,
+                        fontSize: 14.0,
                         fontWeight: FontWeight.w900,
                         color: Colors.white,
                       ),
@@ -406,14 +407,14 @@ class _ClassPageState extends State<ClassPage> {
               focusNode: _quickInviteFocusNode,
               controller: _quickInviteController,
               style: GoogleFonts.plusJakartaSans(
-                fontSize: 13,
+                fontSize: 14.0,
                 fontWeight: FontWeight.w600,
                 color: isDark ? Colors.white : Colors.black87,
               ),
               decoration: InputDecoration(
                 hintText: _isQuickInviteFocused ? 'Ketik ID pengguna...' : 'Masukkan ID...',
                 hintStyle: GoogleFonts.dmSans(
-                  fontSize: 13,
+                  fontSize: 14.0,
                   color: isDark ? Colors.white38 : Colors.black38,
                 ),
                 isDense: true,
@@ -447,12 +448,12 @@ class _ClassPageState extends State<ClassPage> {
                     ? const SizedBox(
                         width: 12,
                         height: 12,
-                        child: CircularProgressIndicator(strokeWidth: 1.5, color: Colors.white),
+                        child: const ThreeDotsLoader(),
                       )
                     : Text(
                         'Undang',
                         style: GoogleFonts.plusJakartaSans(
-                          fontSize: 12.5,
+                          fontSize: 14.0,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
                         ),
@@ -665,7 +666,7 @@ class _ClassPageState extends State<ClassPage> {
                         Text(
                           projectName,
                           style: GoogleFonts.dmSans(
-                            fontSize: 13,
+                            fontSize: 14.0,
                             color: isDark ? Colors.white54 : Colors.black45,
                           ),
                         ),
@@ -773,7 +774,7 @@ class _ClassPageState extends State<ClassPage> {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: GoogleFonts.dmSans(
-                    fontSize: 12,
+                    fontSize: 14.0,
                     color: isDark ? Colors.white54 : Colors.black54,
                   ),
                 ),
@@ -850,7 +851,7 @@ class _ClassPageState extends State<ClassPage> {
                         Text(
                           projectName,
                           style: GoogleFonts.dmSans(
-                            fontSize: 13,
+                            fontSize: 14.0,
                             color: isDark ? Colors.white54 : Colors.black45,
                           ),
                         ),
@@ -867,7 +868,7 @@ class _ClassPageState extends State<ClassPage> {
                     child: Text(
                       'Belum ada data pembelajaran untuk ditampilkan.',
                       style: GoogleFonts.dmSans(
-                        fontSize: 13.5,
+                        fontSize: 14.0,
                         color: isDark ? Colors.white54 : Colors.black45,
                       ),
                     ),
@@ -898,7 +899,7 @@ class _ClassPageState extends State<ClassPage> {
                           child: Text(
                             '${idx + 1}',
                             style: GoogleFonts.plusJakartaSans(
-                              fontSize: 12,
+                              fontSize: 14.0,
                               fontWeight: FontWeight.bold,
                               color: const Color(0xFF0369A1),
                             ),
@@ -912,7 +913,7 @@ class _ClassPageState extends State<ClassPage> {
                               Text(
                                 name,
                                 style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 13.5,
+                                  fontSize: 14.0,
                                   fontWeight: FontWeight.bold,
                                   color: isDark ? Colors.white : Colors.black87,
                                 ),
@@ -920,7 +921,7 @@ class _ClassPageState extends State<ClassPage> {
                               Text(
                                 '${materis.length} Materi Terdaftar',
                                 style: GoogleFonts.dmSans(
-                                  fontSize: 12,
+                                  fontSize: 14.0,
                                   color: isDark ? Colors.white54 : Colors.black45,
                                 ),
                               ),
@@ -938,7 +939,7 @@ class _ClassPageState extends State<ClassPage> {
                           child: Text(
                             status == 'selesai' ? 'Selesai' : 'Aktif',
                             style: GoogleFonts.plusJakartaSans(
-                              fontSize: 11,
+                              fontSize: 14.0,
                               fontWeight: FontWeight.bold,
                               color: status == 'selesai'
                                   ? const Color(0xFF047857)
@@ -1196,7 +1197,7 @@ class _ClassPageState extends State<ClassPage> {
                 child: Text(
                   label,
                   style: GoogleFonts.plusJakartaSans(
-                    fontSize: 11.5,
+                    fontSize: 14.0,
                     fontWeight: FontWeight.bold,
                     color: isSelected ? Colors.white : (isDark ? Colors.white : const Color(0xFF0F172A)),
                   ),
@@ -1263,7 +1264,7 @@ class _ClassPageState extends State<ClassPage> {
       showDialog(
         context: context,
         barrierDismissible: false,
-        builder: (context) => const Center(child: CircularProgressIndicator()),
+        builder: (context) => const Center(child: ThreeDotsLoader()),
       );
       loaderShown = true;
       final userDocSnapshot = await FirebaseFirestore.instance
@@ -1339,7 +1340,7 @@ class _ClassPageState extends State<ClassPage> {
             context: context,
             barrierDismissible: false,
             builder: (context) =>
-                const Center(child: CircularProgressIndicator()),
+                const Center(child: ThreeDotsLoader()),
           );
           loaderShown = true;
           await FirebaseFirestore.instance
@@ -1390,7 +1391,7 @@ class _ClassPageState extends State<ClassPage> {
       showDialog(
         context: context,
         barrierDismissible: false,
-        builder: (context) => const Center(child: CircularProgressIndicator()),
+        builder: (context) => const Center(child: ThreeDotsLoader()),
       );
       await FirebaseFirestore.instance
           .collection('users')
@@ -1732,7 +1733,7 @@ class _ClassPageState extends State<ClassPage> {
                                   Text(
                                     'Buat materi pembelajaran baru',
                                     style: GoogleFonts.dmSans(
-                                      fontSize: 11.7,
+                                      fontSize: 14.0,
                                       color: Colors.black45,
                                     ),
                                   ),
@@ -1759,7 +1760,7 @@ class _ClassPageState extends State<ClassPage> {
                           Text(
                             'Judul/Nama Materi',
                             style: GoogleFonts.plusJakartaSans(
-                              fontSize: 12.9,
+                              fontSize: 14.0,
                               fontWeight: FontWeight.bold,
                               color: Colors.black54,
                             ),
@@ -2108,7 +2109,7 @@ class _ClassPageState extends State<ClassPage> {
                             Text(
                               'Pilih jenis aktivitas pembelajaran',
                               style: GoogleFonts.dmSans(
-                                fontSize: 11.7,
+                                fontSize: 14.0,
                                 color: Colors.black45,
                               ),
                             ),
@@ -2286,7 +2287,7 @@ class _ClassPageState extends State<ClassPage> {
                       Text(
                         description,
                         style: GoogleFonts.dmSans(
-                          fontSize: 11.2,
+                          fontSize: 14.0,
                           color: const Color(0xFF000000), // Slate 500
                           fontWeight: FontWeight.w400,
                         ),
@@ -2659,7 +2660,7 @@ class _ClassPageState extends State<ClassPage> {
                               Text(
                                 'Ubah rincian elemen pembelajaran',
                                 style: GoogleFonts.dmSans(
-                                  fontSize: 11.7,
+                                  fontSize: 14.0,
                                   color: Colors.black45,
                                 ),
                               ),
@@ -2692,7 +2693,7 @@ class _ClassPageState extends State<ClassPage> {
                         Text(
                           'Nama Elemen',
                           style: GoogleFonts.plusJakartaSans(
-                            fontSize: 12.9,
+                            fontSize: 14.0,
                             fontWeight: FontWeight.bold,
                             color: Colors.black54,
                           ),
@@ -2724,7 +2725,7 @@ class _ClassPageState extends State<ClassPage> {
                         Text(
                           'Ringkasan / Ruang Lingkup',
                           style: GoogleFonts.plusJakartaSans(
-                            fontSize: 12.9,
+                            fontSize: 14.0,
                             fontWeight: FontWeight.bold,
                             color: Colors.black54,
                           ),
@@ -2760,7 +2761,7 @@ class _ClassPageState extends State<ClassPage> {
                                   Text(
                                     'Nama Materi ${mIdx + 1}',
                                     style: GoogleFonts.plusJakartaSans(
-                                      fontSize: 12.9,
+                                      fontSize: 14.0,
                                       fontWeight: FontWeight.bold,
                                       color: Colors.black54,
                                     ),
@@ -2981,7 +2982,7 @@ class _ClassPageState extends State<ClassPage> {
                             Text(
                               'Target & Tujuan Kompetensi Siswa',
                               style: GoogleFonts.dmSans(
-                                fontSize: 12,
+                                fontSize: 14.0,
                                 color: const Color(0xFF334155),
                               ),
                               maxLines: 1,
@@ -3030,7 +3031,7 @@ class _ClassPageState extends State<ClassPage> {
                                   Text(
                                     'Deskripsi CP',
                                     style: GoogleFonts.plusJakartaSans(
-                                      fontSize: 13,
+                                      fontSize: 14.0,
                                       fontWeight: FontWeight.bold,
                                       color: dark ? Colors.white60 : Colors.black54,
                                     ),
@@ -3124,7 +3125,7 @@ class _ClassPageState extends State<ClassPage> {
                                 Text(
                                   'Target & capaian pembelajaran belum diatur untuk kelas ini.',
                                   style: GoogleFonts.dmSans(
-                                    fontSize: 12,
+                                    fontSize: 14.0,
                                     color: dark ? Colors.white38 : Colors.black45,
                                   ),
                                   textAlign: TextAlign.center,
@@ -3160,7 +3161,7 @@ class _ClassPageState extends State<ClassPage> {
                                           Text(
                                             'Tambah CP Sekarang',
                                             style: GoogleFonts.plusJakartaSans(
-                                              fontSize: 12.5,
+                                              fontSize: 14.0,
                                               fontWeight: FontWeight.bold,
                                               color: Colors.white,
                                             ),
@@ -3293,7 +3294,7 @@ class _ClassPageState extends State<ClassPage> {
                                 Text(
                                   'Hari & Jam Pertemuan Kelas',
                                   style: GoogleFonts.dmSans(
-                                    fontSize: 12,
+                                    fontSize: 14.0,
                                     color: const Color(0xFF334155),
                                   ),
                                   maxLines: 1,
@@ -3394,7 +3395,7 @@ class _ClassPageState extends State<ClassPage> {
                                     Text(
                                       'Jadwal pembelajaran belum diatur untuk kelas ini.',
                                       style: GoogleFonts.dmSans(
-                                        fontSize: 12,
+                                        fontSize: 14.0,
                                         color: dark ? Colors.white38 : Colors.black45,
                                       ),
                                       textAlign: TextAlign.center,
@@ -3429,7 +3430,7 @@ class _ClassPageState extends State<ClassPage> {
                                               Text(
                                                 'Atur Jadwal Sekarang',
                                                 style: GoogleFonts.plusJakartaSans(
-                                                  fontSize: 12.5,
+                                                  fontSize: 14.0,
                                                   fontWeight: FontWeight.bold,
                                                   color: Colors.white,
                                                 ),
@@ -3501,7 +3502,7 @@ class _ClassPageState extends State<ClassPage> {
                                                   color: dark ? Colors.white70 : Colors.black87,
                                                 ),
                                                 style: GoogleFonts.plusJakartaSans(
-                                                  fontSize: 12.5,
+                                                  fontSize: 14.0,
                                                   color: dark ? Colors.white : Colors.black87,
                                                   fontWeight: FontWeight.bold,
                                                 ),
@@ -3531,7 +3532,7 @@ class _ClassPageState extends State<ClassPage> {
                                                       child: Text(
                                                         d,
                                                         style: GoogleFonts.plusJakartaSans(
-                                                          fontSize: 13,
+                                                          fontSize: 14.0,
                                                           fontWeight: FontWeight.w600,
                                                         ),
                                                       ),
@@ -3561,14 +3562,14 @@ class _ClassPageState extends State<ClassPage> {
                                                 }
                                               },
                                               style: GoogleFonts.plusJakartaSans(
-                                                fontSize: 13,
+                                                fontSize: 14.0,
                                                 fontWeight: FontWeight.w600,
                                                 color: dark ? Colors.white : Colors.black87,
                                               ),
                                               decoration: InputDecoration(
                                                 hintText: '08:00 - 09:30',
                                                 hintStyle: GoogleFonts.dmSans(
-                                                  fontSize: 13,
+                                                  fontSize: 14.0,
                                                   color: dark ? Colors.white30 : Colors.black38,
                                                 ),
                                                 isDense: true,
@@ -3668,7 +3669,7 @@ class _ClassPageState extends State<ClassPage> {
                                             child: Text(
                                               dayStr.toUpperCase(),
                                               style: GoogleFonts.plusJakartaSans(
-                                                fontSize: 11.5,
+                                                fontSize: 14.0,
                                                 fontWeight: FontWeight.w800,
                                                 color: dFg,
                                                 letterSpacing: 0.5,
@@ -3687,7 +3688,7 @@ class _ClassPageState extends State<ClassPage> {
                                           child: Text(
                                             displayTime,
                                             style: GoogleFonts.plusJakartaSans(
-                                              fontSize: 13.5,
+                                              fontSize: 14.0,
                                               fontWeight: FontWeight.bold,
                                               color: dark ? Colors.white : const Color(0xFF0F172A),
                                             ),
@@ -3737,7 +3738,7 @@ class _ClassPageState extends State<ClassPage> {
                                       Text(
                                         'Tambah Hari / Jam Baru',
                                         style: GoogleFonts.plusJakartaSans(
-                                          fontSize: 13,
+                                          fontSize: 14.0,
                                           fontWeight: FontWeight.bold,
                                           color: dark ? Colors.white70 : Colors.black87,
                                         ),
@@ -3793,7 +3794,7 @@ class _ClassPageState extends State<ClassPage> {
                                       'Simpan Jadwal',
                                       style: GoogleFonts.plusJakartaSans(
                                         fontWeight: FontWeight.bold,
-                                        fontSize: 13.5,
+                                        fontSize: 14.0,
                                         color: Colors.white,
                                       ),
                                     ),
@@ -3830,7 +3831,7 @@ class _ClassPageState extends State<ClassPage> {
             !snapshot.hasData) {
           return const Scaffold(
             backgroundColor: Colors.white,
-            body: Center(child: CircularProgressIndicator()),
+            body: const Center(child: ThreeDotsLoader()),
           );
         }
         if (!snapshot.hasData || !snapshot.data!.exists) {
@@ -3959,7 +3960,7 @@ class _ClassPageState extends State<ClassPage> {
                   Text(
                     'Semua identitas siswa dalam daftar induk telah terpakai atau terhubung. Silakan hubungi guru Anda untuk menambahkan nama Anda ke daftar induk.',
                     style: GoogleFonts.dmSans(
-                      fontSize: 12.9,
+                      fontSize: 14.0,
                       color: Colors.redAccent,
                       height: 1.4,
                     ),
@@ -4219,7 +4220,7 @@ class _ClassPageState extends State<ClassPage> {
                             Text(
                               title,
                               style: GoogleFonts.dmSans(
-                                fontSize: 12,
+                                fontSize: 14.0,
                                 color: const Color(0xFF334155),
                               ),
                               maxLines: 1,
@@ -4256,7 +4257,7 @@ class _ClassPageState extends State<ClassPage> {
                       Text(
                         'Pindai QR code di bawah ini atau salin kode kelas untuk bergabung ke dalam kelas.',
                         style: GoogleFonts.dmSans(
-                          fontSize: 13,
+                          fontSize: 14.0,
                           color: isDark ? Colors.white60 : Colors.black87,
                         ),
                         textAlign: TextAlign.center,
@@ -4322,7 +4323,7 @@ class _ClassPageState extends State<ClassPage> {
                                   Text(
                                     'KODE KELAS',
                                     style: GoogleFonts.plusJakartaSans(
-                                      fontSize: 10,
+                                      fontSize: 14.0,
                                       fontWeight: FontWeight.w800,
                                       color: isDark ? const Color(0xFFC084FC) : const Color(0xFF7E22CE),
                                       letterSpacing: 0.5,
@@ -4363,7 +4364,7 @@ class _ClassPageState extends State<ClassPage> {
                                   style: GoogleFonts.plusJakartaSans(
                                     color: Colors.white,
                                     fontWeight: FontWeight.bold,
-                                    fontSize: 13,
+                                    fontSize: 14.0,
                                   ),
                                 ),
                               ),
@@ -4402,7 +4403,7 @@ class _ClassPageState extends State<ClassPage> {
           ),
           content: Text(
             'Semua status tahapan pembelajaran akan diatur ulang ke status awal (Akan Datang). Apakah Anda yakin?',
-            style: GoogleFonts.dmSans(fontSize: 13.5),
+            style: GoogleFonts.dmSans(fontSize: 14.0),
           ),
           actions: [
             TextButton(
@@ -4529,7 +4530,7 @@ class _ClassPageState extends State<ClassPage> {
             !snapshot.hasData) {
           return const Scaffold(
             backgroundColor: Colors.white,
-            body: Center(child: CircularProgressIndicator()),
+            body: const Center(child: ThreeDotsLoader()),
           );
         }
         if (!snapshot.hasData || !snapshot.data!.exists) {
@@ -4779,7 +4780,7 @@ class _ClassPageState extends State<ClassPage> {
                                 style: GoogleFonts.plusJakartaSans(
                                   color: const Color(0xFFEF4444),
                                   fontWeight: FontWeight.bold,
-                                  fontSize: 13,
+                                  fontSize: 14.0,
                                 ),
                               ),
                             ],
@@ -4872,7 +4873,7 @@ class _ClassPageState extends State<ClassPage> {
                                               Text(
                                                 stageName,
                                                 style: GoogleFonts.plusJakartaSans(
-                                                  fontSize: 13.5,
+                                                  fontSize: 14.0,
                                                   fontWeight: FontWeight.bold,
                                                   color: stageTitleColor,
                                                   height: 1.25,
@@ -4888,7 +4889,7 @@ class _ClassPageState extends State<ClassPage> {
                                                 maxLines: 1,
                                                 overflow: TextOverflow.ellipsis,
                                                 style: GoogleFonts.dmSans(
-                                                  fontSize: 11.5,
+                                                  fontSize: 14.0,
                                                   color: stageSubtitleColor,
                                                 ),
                                               ),
@@ -4933,7 +4934,7 @@ class _ClassPageState extends State<ClassPage> {
                                                 child: Text(
                                                   'Proses',
                                                   style: GoogleFonts.plusJakartaSans(
-                                                    fontSize: 11.5,
+                                                    fontSize: 14.0,
                                                     fontWeight: FontWeight.w700,
                                                     color: isDark ? Colors.white : const Color(0xFF0F172A),
                                                   ),
@@ -4959,7 +4960,7 @@ class _ClassPageState extends State<ClassPage> {
                                                 child: Text(
                                                   'Selesai',
                                                   style: GoogleFonts.plusJakartaSans(
-                                                    fontSize: 11.5,
+                                                    fontSize: 14.0,
                                                     fontWeight: FontWeight.w700,
                                                     color: isDark ? Colors.white : const Color(0xFF0F172A),
                                                   ),
@@ -4977,7 +4978,7 @@ class _ClassPageState extends State<ClassPage> {
                                                 child: Text(
                                                   'Akan Datang',
                                                   style: GoogleFonts.plusJakartaSans(
-                                                    fontSize: 11.5,
+                                                    fontSize: 14.0,
                                                     fontWeight: FontWeight.w700,
                                                     color: isDark ? Colors.white : const Color(0xFF0F172A),
                                                   ),
@@ -5007,7 +5008,7 @@ class _ClassPageState extends State<ClassPage> {
                                                 Text(
                                                   statusLabel,
                                                   style: GoogleFonts.plusJakartaSans(
-                                                    fontSize: 11,
+                                                    fontSize: 14.0,
                                                     fontWeight: FontWeight.w700,
                                                     color: (stageStatus == 'proses')
                                                         ? const Color(0xFF9A3412)
@@ -5173,7 +5174,7 @@ class _ClassPageState extends State<ClassPage> {
                                                         Text(
                                                           'ID: $projectId',
                                                           style: GoogleFonts.dmSans(
-                                                            fontSize: 11,
+                                                            fontSize: 14.0,
                                                             fontWeight: FontWeight.w700,
                                                             color: Colors.black87,
                                                           ),
@@ -5242,7 +5243,7 @@ class _ClassPageState extends State<ClassPage> {
                                                       classLabel,
                                                       maxLines: 2,
                                                       style: GoogleFonts.plusJakartaSans(
-                                                        fontSize: 12.5,
+                                                        fontSize: 14.0,
                                                         fontWeight: FontWeight.bold,
                                                         color: isDark ? Colors.white : Colors.black87,
                                                         height: 1.15,
@@ -5307,7 +5308,7 @@ class _ClassPageState extends State<ClassPage> {
                                                         '$studentCount Siswa',
                                                         maxLines: 1,
                                                         style: GoogleFonts.plusJakartaSans(
-                                                          fontSize: 12.5,
+                                                          fontSize: 14.0,
                                                           fontWeight: FontWeight.bold,
                                                           color: isDark ? Colors.white : Colors.black87,
                                                         ),
@@ -5610,7 +5611,7 @@ class _ClassPageState extends State<ClassPage> {
                                         Text(
                                           'Edit',
                                           style: GoogleFonts.plusJakartaSans(
-                                            fontSize: 13,
+                                            fontSize: 14.0,
                                             fontWeight: FontWeight.w600,
                                             color: isDark ? Colors.white : const Color(0xFF0F172A),
                                           ),
@@ -5632,7 +5633,7 @@ class _ClassPageState extends State<ClassPage> {
                                         Text(
                                           'Hapus',
                                           style: GoogleFonts.plusJakartaSans(
-                                            fontSize: 13,
+                                            fontSize: 14.0,
                                             fontWeight: FontWeight.w600,
                                             color: const Color(0xFFEF4444),
                                           ),
@@ -5654,7 +5655,7 @@ class _ClassPageState extends State<ClassPage> {
                                         Text(
                                           'Export',
                                           style: GoogleFonts.plusJakartaSans(
-                                            fontSize: 13,
+                                            fontSize: 14.0,
                                             fontWeight: FontWeight.w600,
                                             color: isDark ? Colors.white : const Color(0xFF0F172A),
                                           ),
@@ -5740,7 +5741,7 @@ class _ClassPageState extends State<ClassPage> {
                     Text(
                       subtitle,
                       style: GoogleFonts.dmSans(
-                        fontSize: 11.2,
+                        fontSize: 14.0,
                         color: Colors.black45,
                       ),
                     ),
@@ -5792,7 +5793,7 @@ class _ClassPageState extends State<ClassPage> {
                     Text(
                       'Selesai',
                       style: GoogleFonts.plusJakartaSans(
-                        fontSize: 11.7,
+                        fontSize: 14.0,
                         fontWeight: FontWeight.bold,
                         color: const Color(0xFF059669),
                       ),
@@ -5822,7 +5823,7 @@ class _ClassPageState extends State<ClassPage> {
                 label: Text(
                   buttonText,
                   style: GoogleFonts.plusJakartaSans(
-                    fontSize: 11.2,
+                    fontSize: 14.0,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -5902,7 +5903,7 @@ class _ClassPageState extends State<ClassPage> {
                 Text(
                   'Nama Elemen',
                   style: GoogleFonts.plusJakartaSans(
-                    fontSize: 12.9,
+                    fontSize: 14.0,
                     fontWeight: FontWeight.bold,
                     color: Colors.black54,
                   ),
@@ -5931,7 +5932,7 @@ class _ClassPageState extends State<ClassPage> {
                 Text(
                   'Ringkasan / Ruang Lingkup',
                   style: GoogleFonts.plusJakartaSans(
-                    fontSize: 12.9,
+                    fontSize: 14.0,
                     fontWeight: FontWeight.bold,
                     color: Colors.black54,
                   ),
@@ -6069,7 +6070,7 @@ class _ClassPageState extends State<ClassPage> {
                 Text(
                   typeLabel,
                   style: GoogleFonts.plusJakartaSans(
-                    fontSize: 10.5,
+                    fontSize: 14.0,
                     fontWeight: FontWeight.bold,
                     color: badgeText,
                   ),
@@ -6136,7 +6137,7 @@ class _ClassPageState extends State<ClassPage> {
                 child: Text(
                   'Butuh Acc',
                   style: GoogleFonts.plusJakartaSans(
-                    fontSize: 9.4,
+                    fontSize: 14.0,
                     fontWeight: FontWeight.bold,
                     color: Colors.orange,
                   ),
@@ -6336,7 +6337,7 @@ class _ClassPageState extends State<ClassPage> {
         const SizedBox(height: 2),
         Text(
           'Target & Tujuan Pembelajaran (CP) untuk kelas ini.',
-          style: GoogleFonts.dmSans(fontSize: 12.9, color: Colors.black45),
+          style: GoogleFonts.dmSans(fontSize: 14.0, color: Colors.black45),
         ),
         const SizedBox(height: 16),
         Expanded(
@@ -6489,7 +6490,7 @@ class _ClassPageState extends State<ClassPage> {
                     Text(
                       'Tentukan hari dan jam mengajar kelas ini.',
                       style: GoogleFonts.dmSans(
-                        fontSize: 12.9,
+                        fontSize: 14.0,
                         color: Colors.black45,
                       ),
                     ),
@@ -6556,7 +6557,7 @@ class _ClassPageState extends State<ClassPage> {
                                 child: Text(
                                   day.toUpperCase(),
                                   style: GoogleFonts.plusJakartaSans(
-                                    fontSize: 11.7,
+                                    fontSize: 14.0,
                                     fontWeight: FontWeight.bold,
                                     color: colors['fg'],
                                   ),
@@ -6567,7 +6568,7 @@ class _ClassPageState extends State<ClassPage> {
                                 child: Text(
                                   timeStr,
                                   style: GoogleFonts.plusJakartaSans(
-                                    fontSize: 13.5,
+                                    fontSize: 14.0,
                                     fontWeight: FontWeight.w600,
                                     color: Colors.black87,
                                   ),
@@ -6934,7 +6935,7 @@ class _ClassPageState extends State<ClassPage> {
                             Text(
                               'Buat materi pembelajaran baru',
                               style: GoogleFonts.dmSans(
-                                fontSize: 11.7,
+                                fontSize: 14.0,
                                 color: Colors.black45,
                               ),
                             ),
@@ -7106,7 +7107,7 @@ class _ClassPageState extends State<ClassPage> {
                         Text(
                           'Pilih jenis aktivitas pembelajaran',
                           style: GoogleFonts.dmSans(
-                            fontSize: 11.7,
+                            fontSize: 14.0,
                             color: Colors.black45,
                           ),
                         ),
@@ -7236,7 +7237,7 @@ class _ClassPageState extends State<ClassPage> {
                             Text(
                               'Ubah rincian elemen pembelajaran',
                               style: GoogleFonts.dmSans(
-                                fontSize: 11.7,
+                                fontSize: 14.0,
                                 color: Colors.black45,
                               ),
                             ),
@@ -7269,7 +7270,7 @@ class _ClassPageState extends State<ClassPage> {
                       Text(
                         'Nama Elemen',
                         style: GoogleFonts.plusJakartaSans(
-                          fontSize: 12.9,
+                          fontSize: 14.0,
                           fontWeight: FontWeight.bold,
                           color: Colors.black54,
                         ),
@@ -7301,7 +7302,7 @@ class _ClassPageState extends State<ClassPage> {
                       Text(
                         'Ringkasan / Ruang Lingkup',
                         style: GoogleFonts.plusJakartaSans(
-                          fontSize: 12.9,
+                          fontSize: 14.0,
                           fontWeight: FontWeight.bold,
                           color: Colors.black54,
                         ),
@@ -7335,7 +7336,7 @@ class _ClassPageState extends State<ClassPage> {
                                 Text(
                                   'Nama Materi ${mIdx + 1}',
                                   style: GoogleFonts.plusJakartaSans(
-                                    fontSize: 12.9,
+                                    fontSize: 14.0,
                                     fontWeight: FontWeight.bold,
                                     color: Colors.black54,
                                   ),
@@ -7521,7 +7522,7 @@ class _ClassPageState extends State<ClassPage> {
                             Text(
                               'Buat elemen pembelajaran baru',
                               style: GoogleFonts.dmSans(
-                                fontSize: 11.7,
+                                fontSize: 14.0,
                                 color: Colors.black45,
                               ),
                             ),
@@ -7550,7 +7551,7 @@ class _ClassPageState extends State<ClassPage> {
                     Text(
                       'Nama Elemen',
                       style: GoogleFonts.plusJakartaSans(
-                        fontSize: 12.9,
+                        fontSize: 14.0,
                         fontWeight: FontWeight.bold,
                         color: Colors.black54,
                       ),
@@ -7579,7 +7580,7 @@ class _ClassPageState extends State<ClassPage> {
                     Text(
                       'Ringkasan / Ruang Lingkup',
                       style: GoogleFonts.plusJakartaSans(
-                        fontSize: 12.9,
+                        fontSize: 14.0,
                         fontWeight: FontWeight.bold,
                         color: Colors.black54,
                       ),
@@ -7776,7 +7777,7 @@ class ProjectChatCountWidget extends StatelessWidget {
                 Text(
                   '0',
                   style: GoogleFonts.dmSans(
-                    fontSize: 12.9,
+                    fontSize: 14.0,
                     color: Colors.black45,
                   ),
                 ),
@@ -7821,7 +7822,7 @@ class ProjectChatCountWidget extends StatelessWidget {
                   Text(
                     '$count',
                     style: GoogleFonts.dmSans(
-                      fontSize: 12.9,
+                      fontSize: 14.0,
                       color: Colors.black45,
                     ),
                   ),
@@ -7890,7 +7891,7 @@ class _AddActivityOverlayPageState extends State<AddActivityOverlayPage> {
         context: context,
         barrierDismissible: false,
         builder: (_) =>
-            const Center(child: CircularProgressIndicator(color: Colors.white)),
+            const Center(child: ThreeDotsLoader()),
       );
       final doc = await FirebaseFirestore.instance
           .collection('projects')
@@ -8237,7 +8238,7 @@ class _AddActivityOverlayPageState extends State<AddActivityOverlayPage> {
               Text(
                 'Judul $typeLabel',
                 style: GoogleFonts.plusJakartaSans(
-                  fontSize: 12.9,
+                  fontSize: 14.0,
                   fontWeight: FontWeight.bold,
                   color: Colors.black54,
                 ),
@@ -8277,7 +8278,7 @@ class _AddActivityOverlayPageState extends State<AddActivityOverlayPage> {
                           Text(
                             'Tanggal Mulai',
                             style: GoogleFonts.plusJakartaSans(
-                              fontSize: 12.9,
+                              fontSize: 14.0,
                               fontWeight: FontWeight.bold,
                               color: Colors.black54,
                             ),
@@ -8322,7 +8323,7 @@ class _AddActivityOverlayPageState extends State<AddActivityOverlayPage> {
                                               color: Colors.white,
                                             ),
                                         headerHelpStyle: GoogleFonts.plusJakartaSans(
-                                          fontSize: 11.7,
+                                          fontSize: 14.0,
                                           color: Colors.white70,
                                         ),
                                       ),
@@ -8362,7 +8363,7 @@ class _AddActivityOverlayPageState extends State<AddActivityOverlayPage> {
                           Text(
                             'Tanggal Selesai',
                             style: GoogleFonts.plusJakartaSans(
-                              fontSize: 12.9,
+                              fontSize: 14.0,
                               fontWeight: FontWeight.bold,
                               color: Colors.black54,
                             ),
@@ -8407,7 +8408,7 @@ class _AddActivityOverlayPageState extends State<AddActivityOverlayPage> {
                                               color: Colors.white,
                                             ),
                                         headerHelpStyle: GoogleFonts.plusJakartaSans(
-                                          fontSize: 11.7,
+                                          fontSize: 14.0,
                                           color: Colors.white70,
                                         ),
                                       ),
@@ -8447,7 +8448,7 @@ class _AddActivityOverlayPageState extends State<AddActivityOverlayPage> {
                 Text(
                   'Berkas Materi (PDF)',
                   style: GoogleFonts.plusJakartaSans(
-                    fontSize: 12.9,
+                    fontSize: 14.0,
                     fontWeight: FontWeight.bold,
                     color: Colors.black54,
                   ),
@@ -8467,7 +8468,7 @@ class _AddActivityOverlayPageState extends State<AddActivityOverlayPage> {
                 Text(
                   'Opsi Pengerjaan',
                   style: GoogleFonts.plusJakartaSans(
-                    fontSize: 12.9,
+                    fontSize: 14.0,
                     fontWeight: FontWeight.bold,
                     color: Colors.black54,
                   ),
@@ -8496,7 +8497,7 @@ class _AddActivityOverlayPageState extends State<AddActivityOverlayPage> {
                           child: Text(
                             '📝 Individu',
                             style: GoogleFonts.plusJakartaSans(
-                              fontSize: 12.9,
+                              fontSize: 14.0,
                               fontWeight: FontWeight.bold,
                               color: _assignmentType == 'individu'
                                   ? Colors.white
@@ -8528,7 +8529,7 @@ class _AddActivityOverlayPageState extends State<AddActivityOverlayPage> {
                           child: Text(
                             '👥 Kelompok',
                             style: GoogleFonts.plusJakartaSans(
-                              fontSize: 12.9,
+                              fontSize: 14.0,
                               fontWeight: FontWeight.bold,
                               color: _assignmentType == 'kelompok'
                                   ? Colors.white
@@ -8544,7 +8545,7 @@ class _AddActivityOverlayPageState extends State<AddActivityOverlayPage> {
                 Text(
                   'Metode Tugas',
                   style: GoogleFonts.plusJakartaSans(
-                    fontSize: 12.9,
+                    fontSize: 14.0,
                     fontWeight: FontWeight.bold,
                     color: Colors.black54,
                   ),
@@ -8572,7 +8573,7 @@ class _AddActivityOverlayPageState extends State<AddActivityOverlayPage> {
                           child: Text(
                             'Teks Pertanyaan',
                             style: GoogleFonts.plusJakartaSans(
-                              fontSize: 12.9,
+                              fontSize: 14.0,
                               fontWeight: FontWeight.bold,
                               color: _tugasMode == 'text'
                                   ? Colors.white
@@ -8603,7 +8604,7 @@ class _AddActivityOverlayPageState extends State<AddActivityOverlayPage> {
                           child: Text(
                             'Berkas PDF',
                             style: GoogleFonts.plusJakartaSans(
-                              fontSize: 12.9,
+                              fontSize: 14.0,
                               fontWeight: FontWeight.bold,
                               color: _tugasMode == 'pdf'
                                   ? Colors.white
@@ -8620,7 +8621,7 @@ class _AddActivityOverlayPageState extends State<AddActivityOverlayPage> {
                   Text(
                     'Teks Soal / Pertanyaan',
                     style: GoogleFonts.plusJakartaSans(
-                      fontSize: 12.9,
+                      fontSize: 14.0,
                       fontWeight: FontWeight.bold,
                       color: Colors.black54,
                     ),
@@ -8651,7 +8652,7 @@ class _AddActivityOverlayPageState extends State<AddActivityOverlayPage> {
                   Text(
                     'Berkas Soal PDF',
                     style: GoogleFonts.plusJakartaSans(
-                      fontSize: 12.9,
+                      fontSize: 14.0,
                       fontWeight: FontWeight.bold,
                       color: Colors.black54,
                     ),
@@ -8673,7 +8674,7 @@ class _AddActivityOverlayPageState extends State<AddActivityOverlayPage> {
                 Text(
                   'Waktu Pengerjaan',
                   style: GoogleFonts.plusJakartaSans(
-                    fontSize: 12.9,
+                    fontSize: 14.0,
                     fontWeight: FontWeight.bold,
                     color: Colors.black54,
                   ),
@@ -8840,7 +8841,7 @@ class _AddActivityOverlayPageState extends State<AddActivityOverlayPage> {
                               Text(
                                 'menit',
                                 style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 12.9,
+                                  fontSize: 14.0,
                                   color: Colors.black45,
                                   fontWeight: FontWeight.w600,
                                 ),
@@ -8856,7 +8857,7 @@ class _AddActivityOverlayPageState extends State<AddActivityOverlayPage> {
                 Text(
                   'Metode Pembuatan Kuis',
                   style: GoogleFonts.plusJakartaSans(
-                    fontSize: 12.9,
+                    fontSize: 14.0,
                     fontWeight: FontWeight.bold,
                     color: Colors.black54,
                   ),
@@ -8884,7 +8885,7 @@ class _AddActivityOverlayPageState extends State<AddActivityOverlayPage> {
                           child: Text(
                             'Isi Manual',
                             style: GoogleFonts.plusJakartaSans(
-                              fontSize: 12.9,
+                              fontSize: 14.0,
                               fontWeight: FontWeight.bold,
                               color: _quizMode == 'manual'
                                   ? Colors.white
@@ -8915,7 +8916,7 @@ class _AddActivityOverlayPageState extends State<AddActivityOverlayPage> {
                           child: Text(
                             'Mass Upload',
                             style: GoogleFonts.plusJakartaSans(
-                              fontSize: 12.9,
+                              fontSize: 14.0,
                               fontWeight: FontWeight.bold,
                               color: _quizMode == 'mass'
                                   ? Colors.white
@@ -8946,7 +8947,7 @@ class _AddActivityOverlayPageState extends State<AddActivityOverlayPage> {
                         label: Text(
                           'Pertanyaan',
                           style: GoogleFonts.plusJakartaSans(
-                            fontSize: 12.9,
+                            fontSize: 14.0,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -8976,7 +8977,7 @@ class _AddActivityOverlayPageState extends State<AddActivityOverlayPage> {
                               Text(
                                 'No. ${qIdx + 1}',
                                 style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 12.9,
+                                  fontSize: 14.0,
                                   fontWeight: FontWeight.bold,
                                   color: Colors.black45,
                                 ),
@@ -8999,7 +9000,7 @@ class _AddActivityOverlayPageState extends State<AddActivityOverlayPage> {
                           Text(
                             'Pertanyaan',
                             style: GoogleFonts.plusJakartaSans(
-                              fontSize: 11.7,
+                              fontSize: 14.0,
                               fontWeight: FontWeight.bold,
                               color: Colors.black54,
                             ),
@@ -9041,7 +9042,7 @@ class _AddActivityOverlayPageState extends State<AddActivityOverlayPage> {
                                     Text(
                                       'Pilihan A',
                                       style: GoogleFonts.plusJakartaSans(
-                                        fontSize: 10.5,
+                                        fontSize: 14.0,
                                         fontWeight: FontWeight.bold,
                                         color: Colors.black45,
                                       ),
@@ -9070,7 +9071,7 @@ class _AddActivityOverlayPageState extends State<AddActivityOverlayPage> {
                                                   ),
                                         onChanged: (val) => q['a'] = val,
                                         style: GoogleFonts.dmSans(
-                                          fontSize: 12.9,
+                                          fontSize: 14.0,
                                         ),
                                         decoration: const InputDecoration(
                                           border: InputBorder.none,
@@ -9088,7 +9089,7 @@ class _AddActivityOverlayPageState extends State<AddActivityOverlayPage> {
                                     Text(
                                       'Pilihan B',
                                       style: GoogleFonts.plusJakartaSans(
-                                        fontSize: 10.5,
+                                        fontSize: 14.0,
                                         fontWeight: FontWeight.bold,
                                         color: Colors.black45,
                                       ),
@@ -9117,7 +9118,7 @@ class _AddActivityOverlayPageState extends State<AddActivityOverlayPage> {
                                                   ),
                                         onChanged: (val) => q['b'] = val,
                                         style: GoogleFonts.dmSans(
-                                          fontSize: 12.9,
+                                          fontSize: 14.0,
                                         ),
                                         decoration: const InputDecoration(
                                           border: InputBorder.none,
@@ -9139,7 +9140,7 @@ class _AddActivityOverlayPageState extends State<AddActivityOverlayPage> {
                                     Text(
                                       'Pilihan C',
                                       style: GoogleFonts.plusJakartaSans(
-                                        fontSize: 10.5,
+                                        fontSize: 14.0,
                                         fontWeight: FontWeight.bold,
                                         color: Colors.black45,
                                       ),
@@ -9168,7 +9169,7 @@ class _AddActivityOverlayPageState extends State<AddActivityOverlayPage> {
                                                   ),
                                         onChanged: (val) => q['c'] = val,
                                         style: GoogleFonts.dmSans(
-                                          fontSize: 12.9,
+                                          fontSize: 14.0,
                                         ),
                                         decoration: const InputDecoration(
                                           border: InputBorder.none,
@@ -9186,7 +9187,7 @@ class _AddActivityOverlayPageState extends State<AddActivityOverlayPage> {
                                     Text(
                                       'Pilihan D',
                                       style: GoogleFonts.plusJakartaSans(
-                                        fontSize: 10.5,
+                                        fontSize: 14.0,
                                         fontWeight: FontWeight.bold,
                                         color: Colors.black45,
                                       ),
@@ -9215,7 +9216,7 @@ class _AddActivityOverlayPageState extends State<AddActivityOverlayPage> {
                                                   ),
                                         onChanged: (val) => q['d'] = val,
                                         style: GoogleFonts.dmSans(
-                                          fontSize: 12.9,
+                                          fontSize: 14.0,
                                         ),
                                         decoration: const InputDecoration(
                                           border: InputBorder.none,
@@ -9237,7 +9238,7 @@ class _AddActivityOverlayPageState extends State<AddActivityOverlayPage> {
                                     Text(
                                       'Jawaban Benar',
                                       style: GoogleFonts.plusJakartaSans(
-                                        fontSize: 10.5,
+                                        fontSize: 14.0,
                                         fontWeight: FontWeight.bold,
                                         color: Colors.black45,
                                       ),
@@ -9303,7 +9304,7 @@ class _AddActivityOverlayPageState extends State<AddActivityOverlayPage> {
                                     Text(
                                       'Gambar Pertanyaan (Opsional)',
                                       style: GoogleFonts.plusJakartaSans(
-                                        fontSize: 10.5,
+                                        fontSize: 14.0,
                                         fontWeight: FontWeight.bold,
                                         color: Colors.black45,
                                       ),
@@ -9348,7 +9349,7 @@ class _AddActivityOverlayPageState extends State<AddActivityOverlayPage> {
                                                     ? 'Unggah Gambar'
                                                     : q['image'].toString(),
                                                 style: GoogleFonts.dmSans(
-                                                  fontSize: 11.7,
+                                                  fontSize: 14.0,
                                                   color: Colors.black54,
                                                 ),
                                                 overflow: TextOverflow.ellipsis,
@@ -9371,7 +9372,7 @@ class _AddActivityOverlayPageState extends State<AddActivityOverlayPage> {
                   Text(
                     'Salin & Tempel Sesuai Template',
                     style: GoogleFonts.plusJakartaSans(
-                      fontSize: 12.9,
+                      fontSize: 14.0,
                       fontWeight: FontWeight.bold,
                       color: Colors.black54,
                     ),
@@ -9399,7 +9400,7 @@ class _AddActivityOverlayPageState extends State<AddActivityOverlayPage> {
                             Text(
                               'Format Template Mass Upload:',
                               style: GoogleFonts.plusJakartaSans(
-                                fontSize: 12.9,
+                                fontSize: 14.0,
                                 fontWeight: FontWeight.bold,
                                 color: const Color(0xFFC2410C),
                               ),
@@ -9417,7 +9418,7 @@ class _AddActivityOverlayPageState extends State<AddActivityOverlayPage> {
                           'Gambar: opt-link-gambar-jika-ada.png\n\n'
                           'Pertanyaan: ... (pisahkan tiap soal dengan baris kosong)',
                           style: GoogleFonts.sourceCodePro(
-                            fontSize: 11.7,
+                            fontSize: 14.0,
                             color: const Color(0xFF9A3412),
                           ),
                         ),
@@ -9443,7 +9444,7 @@ class _AddActivityOverlayPageState extends State<AddActivityOverlayPage> {
                           label: Text(
                             'Salin Contoh Data',
                             style: GoogleFonts.plusJakartaSans(
-                              fontSize: 11.7,
+                              fontSize: 14.0,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -9474,7 +9475,7 @@ class _AddActivityOverlayPageState extends State<AddActivityOverlayPage> {
                         border: InputBorder.none,
                         hintText: 'Tempel teks template di sini...',
                         hintStyle: GoogleFonts.dmSans(
-                          fontSize: 12.9,
+                          fontSize: 14.0,
                           color: Colors.black26,
                         ),
                       ),
@@ -9550,7 +9551,7 @@ class _AddActivityOverlayPageState extends State<AddActivityOverlayPage> {
               const SizedBox(height: 6),
               Text(
                 'Berkas siap diunggah',
-                style: GoogleFonts.dmSans(fontSize: 11.7, color: Colors.black26),
+                style: GoogleFonts.dmSans(fontSize: 14.0, color: Colors.black26),
               ),
             ],
           ],
@@ -9859,7 +9860,7 @@ class _BouncyMenuSliderCardState extends State<_BouncyMenuSliderCard>
                   widget.title,
                   maxLines: 2,
                   style: GoogleFonts.plusJakartaSans(
-                    fontSize: 12.5,
+                    fontSize: 14.0,
                     fontWeight: FontWeight.w800,
                     color: Colors.black,
                     height: 1.15,

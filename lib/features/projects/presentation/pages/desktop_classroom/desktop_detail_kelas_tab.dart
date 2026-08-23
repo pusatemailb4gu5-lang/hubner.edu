@@ -555,7 +555,7 @@ class DesktopDetailKelasTab extends StatelessWidget {
                   Text(
                     tagLabel,
                     style: GoogleFonts.plusJakartaSans(
-                      fontSize: 12.9,
+                      fontSize: 14.0,
                       fontWeight: FontWeight.bold,
                       color: accentColor,
                     ),
@@ -576,7 +576,7 @@ class DesktopDetailKelasTab extends StatelessWidget {
             Text(
               subtitle,
               style: GoogleFonts.dmSans(
-                fontSize: 13.5,
+                fontSize: 14.0,
                 color: const Color(0xFF000000),
                 height: 1.3,
               ),
@@ -724,7 +724,7 @@ class DesktopDetailKelasTab extends StatelessWidget {
                               child: Text(
                                 badgeText,
                                 style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 12.9,
+                                  fontSize: 14.0,
                                   fontWeight: FontWeight.bold,
                                   color: accentColor,
                                 ),
@@ -859,7 +859,7 @@ class DesktopDetailKelasTab extends StatelessWidget {
                         Text(
                           'Aktivitas akan muncul saat ada perubahan di kelas ini.',
                           style: GoogleFonts.dmSans(
-                            fontSize: 12.5,
+                            fontSize: 14.0,
                             color: const Color(0xFF94A3B8),
                           ),
                         ),
@@ -991,7 +991,7 @@ class DesktopDetailKelasTab extends StatelessWidget {
               Text(
                 timeStr,
                 style: GoogleFonts.dmSans(
-                  fontSize: 12.3,
+                  fontSize: 14.0,
                   color: const Color(0xFF000000),
                 ),
               ),
