@@ -91,7 +91,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                   builder: (context, projSnap) {
                     if (notifSnap.connectionState == ConnectionState.waiting &&
                         projSnap.connectionState == ConnectionState.waiting) {
-                      return const Center(child: ThreeDotsLoader());
+                      return const SizedBox.shrink();
                     }
 
                     final notifDocs = notifSnap.data?.docs ?? [];

@@ -3831,7 +3831,7 @@ class _ClassPageState extends State<ClassPage> {
             !snapshot.hasData) {
           return const Scaffold(
             backgroundColor: Colors.white,
-            body: const Center(child: ThreeDotsLoader()),
+            body: SizedBox.shrink(),
           );
         }
         if (!snapshot.hasData || !snapshot.data!.exists) {
@@ -4530,7 +4530,7 @@ class _ClassPageState extends State<ClassPage> {
             !snapshot.hasData) {
           return const Scaffold(
             backgroundColor: Colors.white,
-            body: const Center(child: ThreeDotsLoader()),
+            body: SizedBox.shrink(),
           );
         }
         if (!snapshot.hasData || !snapshot.data!.exists) {
@@ -5041,7 +5041,7 @@ class _ClassPageState extends State<ClassPage> {
               value: SystemUiOverlayStyle(
                 statusBarColor: Colors.transparent,
                 statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
-                systemNavigationBarColor: isDark ? Colors.black : Colors.white,
+                systemNavigationBarColor: Colors.transparent,
                 systemNavigationBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
                 systemNavigationBarDividerColor: Colors.transparent,
                 systemNavigationBarContrastEnforced: false,

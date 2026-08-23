@@ -1689,7 +1689,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                               builder: (context, snapshot) {
                                 // Only show spinner if no data at all (first load)
                                 if (snapshot.data == null && snapshot.connectionState == ConnectionState.waiting) {
-                                  return const Center(child: ThreeDotsLoader());
+                                  return const SizedBox.shrink();
                                 }
                                 final messageDocs = snapshot.data?.docs ?? [];
 

@@ -42,6 +42,7 @@ class _HomePageState extends State<HomePage> {
   String? _selectedClassroomTitle;
   bool _isClassPageFullScreen = false;
   final Set<String> _flippedClassroomIds = {};
+  final Set<String> _deletedProjectIds = {};
   final ValueNotifier<bool> _isManagingClassesNotifier = ValueNotifier<bool>(false);
   final ValueNotifier<String> _searchQueryNotifier = ValueNotifier<String>('');
   final GlobalKey _notesButtonKey = GlobalKey();
@@ -138,41 +139,37 @@ class _HomePageState extends State<HomePage> {
       );
 
       if (confirm == true && context.mounted) {
+        // Instant removal from local UI
+        if (mounted) {
+          setState(() {
+            _deletedProjectIds.add(projectId);
+          });
+        }
+
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Mencadangkan data ke Google Drive...'),
-            backgroundColor: Color(0xFF2563EB),
-            duration: Duration(seconds: 2),
+          SnackBar(
+            content: Text('Classroom "$title" dihapus & dicadangkan di latar belakang.'),
+            backgroundColor: const Color(0xFF10B981),
             behavior: SnackBarBehavior.floating,
+            duration: const Duration(seconds: 3),
           ),
         );
 
-        final backupResult = await GoogleDriveService.backupClassroomToDrive(projectData);
+        // Run deletion and cloud backup silently in the background
+        Future.microtask(() async {
+          try {
+            await GoogleDriveService.backupClassroomToDrive(projectData);
+            await FirebaseFirestore.instance.collection('projects').doc(projectId).delete();
+            final uid = FirebaseAuth.instance.currentUser?.uid;
+            if (uid != null) {
+              await FirebaseFirestore.instance.collection('users').doc(uid).update({
+                'projectIds': FieldValue.arrayRemove([projectId]),
+              }).catchError((_) {});
+            }
+          } catch (_) {}
+        });
 
-        try {
-          await FirebaseFirestore.instance.collection('projects').doc(projectId).delete();
-          if (context.mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                  backupResult != null
-                      ? 'Classroom "$title" berhasil dicadangkan ke Google Drive & dihapus.'
-                      : 'Classroom "$title" berhasil dihapus.',
-                ),
-                backgroundColor: const Color(0xFF10B981),
-                behavior: SnackBarBehavior.floating,
-              ),
-            );
-          }
-          return true;
-        } catch (e) {
-          if (context.mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Gagal menghapus: $e'), backgroundColor: Colors.redAccent),
-            );
-          }
-          return false;
-        }
+        return true;
       }
     } else {
       final int? choice = await showDialog<int>(
@@ -280,26 +277,36 @@ class _HomePageState extends State<HomePage> {
           );
         }
       } else if (choice == 2 && context.mounted) {
-        try {
-          await FirebaseFirestore.instance.collection('projects').doc(projectId).delete();
-          if (context.mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('Classroom "$title" dihapus permanen (tanpa cadangan cloud).'),
-                backgroundColor: Colors.black87,
-                behavior: SnackBarBehavior.floating,
-              ),
-            );
-          }
-          return true;
-        } catch (e) {
-          if (context.mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Gagal menghapus: $e'), backgroundColor: Colors.redAccent),
-            );
-          }
-          return false;
+        // Instant removal from local UI
+        if (mounted) {
+          setState(() {
+            _deletedProjectIds.add(projectId);
+          });
         }
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Classroom "$title" berhasil dihapus.'),
+            backgroundColor: const Color(0xFF10B981),
+            behavior: SnackBarBehavior.floating,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+
+        // Run Firestore deletion in background
+        Future.microtask(() async {
+          try {
+            await FirebaseFirestore.instance.collection('projects').doc(projectId).delete();
+            final uid = FirebaseAuth.instance.currentUser?.uid;
+            if (uid != null) {
+              await FirebaseFirestore.instance.collection('users').doc(uid).update({
+                'projectIds': FieldValue.arrayRemove([projectId]),
+              }).catchError((_) {});
+            }
+          } catch (_) {}
+        });
+
+        return true;
       }
     }
     return false;
@@ -575,6 +582,71 @@ class _HomePageState extends State<HomePage> {
     }
 
     // Emit initial empty state so it doesn't block waiting
+    emitLatest();
+
+    controller.onCancel = () {
+      for (final sub in subscriptions) {
+        sub.cancel();
+      }
+      controller.close();
+    };
+
+    return controller.stream;
+  }
+
+  Stream<List<DocumentSnapshot>> _combineProjectsStreams(
+    String currentUid,
+    List<String> projectIds,
+  ) {
+    final controller = StreamController<List<DocumentSnapshot>>();
+    final Map<String, DocumentSnapshot> latestDocs = {};
+    final List<StreamSubscription> subscriptions = [];
+
+    void emitLatest() {
+      if (!controller.isClosed) {
+        controller.add(latestDocs.values.toList());
+      }
+    }
+
+    if (currentUid.isNotEmpty) {
+      final subOwner = FirebaseFirestore.instance
+          .collection('projects')
+          .where('ownerUid', isEqualTo: currentUid)
+          .snapshots()
+          .listen(
+            (snap) {
+              for (var doc in snap.docs) {
+                latestDocs[doc.id] = doc;
+              }
+              emitLatest();
+            },
+            onError: (_) {},
+          );
+      subscriptions.add(subOwner);
+    }
+
+    if (projectIds.isNotEmpty) {
+      final safeIds = projectIds.take(30).toList();
+      final subJoined = FirebaseFirestore.instance
+          .collection('projects')
+          .where(FieldPath.documentId, whereIn: safeIds)
+          .snapshots()
+          .listen(
+            (snap) {
+              for (var doc in snap.docs) {
+                latestDocs[doc.id] = doc;
+              }
+              emitLatest();
+            },
+            onError: (_) {},
+          );
+      subscriptions.add(subJoined);
+    }
+
+    if (currentUid.isEmpty && projectIds.isEmpty) {
+      return Stream.value([]);
+    }
+
     emitLatest();
 
     controller.onCancel = () {
@@ -1405,10 +1477,10 @@ class _HomePageState extends State<HomePage> {
                     .doc(FirebaseAuth.instance.currentUser?.uid)
                     .snapshots(),
                 builder: (context, userSnapshot) {
-                  if (userSnapshot.connectionState == ConnectionState.waiting) {
+                  if (userSnapshot.connectionState == ConnectionState.waiting && !userSnapshot.hasData) {
                     return Scaffold(
                       backgroundColor: isDark ? Colors.black : Colors.white,
-                      body: const Center(child: ThreeDotsLoader()),
+                      body: const SizedBox.shrink(),
                     );
                   }
                   if (!userSnapshot.hasData || !userSnapshot.data!.exists) {
@@ -1458,15 +1530,14 @@ class _HomePageState extends State<HomePage> {
                 subtitleText = 'Siswa tingkat ${schoolLevel.toUpperCase()}';
               }
 
-              return StreamBuilder<QuerySnapshot?>(
-                stream: projectIds.isEmpty
-                    ? Stream<QuerySnapshot?>.value(null)
-                    : FirebaseFirestore.instance
-                          .collection('projects')
-                          .where(FieldPath.documentId, whereIn: projectIds)
-                          .snapshots(),
+              final String currentUserId = FirebaseAuth.instance.currentUser?.uid ?? '';
+              return StreamBuilder<List<DocumentSnapshot>>(
+                stream: _combineProjectsStreams(
+                  currentUserId,
+                  projectIds,
+                ),
                 builder: (context, projectsSnapshot) {
-                  final projectDocs = projectsSnapshot.data?.docs ?? [];
+                  final projectDocs = projectsSnapshot.data ?? [];
                   final List<Map<String, dynamic>> allUserTasks = [];
 
                   for (var projDoc in projectDocs) {
@@ -1911,8 +1982,8 @@ class _HomePageState extends State<HomePage> {
                             // Grid Layout for Today & Task States with student progress
                             StreamBuilder<Map<String, Map<String, dynamic>>>(
                               stream: _combineStudentProgressStreams(
-                                projectIds,
-                                FirebaseAuth.instance.currentUser?.uid ?? '',
+                                projectDocs.map((d) => d.id).toList(),
+                                currentUserId,
                               ),
                               builder: (context, progressMapSnapshot) {
                                 final progressMap =
@@ -3501,7 +3572,11 @@ class _HomePageState extends State<HomePage> {
                                     );
                                   }
 
-                                  final activeProjectDocs = projectDocs;
+                                  final activeProjectDocs = projectDocs.where((doc) {
+                                      final pData = doc.data() as Map<String, dynamic>? ?? {};
+                                      final pId = (pData['projectId'] ?? doc.id).toString();
+                                      return !_deletedProjectIds.contains(doc.id) && !_deletedProjectIds.contains(pId);
+                                    }).toList();
 
                                 final List<Widget> projectCards = List.generate(
                                   activeProjectDocs.length,
@@ -4012,6 +4087,13 @@ class _HomePageState extends State<HomePage> {
               direction: DismissDirection.endToStart,
               confirmDismiss: (direction) async {
                 return await _confirmDeleteProject(context, projectId, title);
+              },
+              onDismissed: (direction) {
+                if (mounted) {
+                  setState(() {
+                    _deletedProjectIds.add(projectId);
+                  });
+                }
               },
               background: Container(
                 alignment: Alignment.centerRight,
@@ -7318,6 +7400,7 @@ class _HomeSearchAndNotesRowState extends State<_HomeSearchAndNotesRow> {
   late final TextEditingController _controller;
   late final FocusNode _focusNode;
   Timer? _debounceTimer;
+  bool _canCollapseOnTapOutside = false;
 
   @override
   void initState() {
@@ -7335,11 +7418,13 @@ class _HomeSearchAndNotesRowState extends State<_HomeSearchAndNotesRow> {
   }
 
   void _expand() {
+    _canCollapseOnTapOutside = false;
     setState(() {
       _isExpanded = true;
     });
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    Future.delayed(const Duration(milliseconds: 250), () {
       if (mounted) {
+        _canCollapseOnTapOutside = true;
         _focusNode.requestFocus();
       }
     });
@@ -7350,6 +7435,7 @@ class _HomeSearchAndNotesRowState extends State<_HomeSearchAndNotesRow> {
     _debounceTimer?.cancel();
     setState(() {
       _isExpanded = false;
+      _canCollapseOnTapOutside = false;
       _controller.clear();
     });
     widget.onSearchChanged('');
@@ -7378,7 +7464,11 @@ class _HomeSearchAndNotesRowState extends State<_HomeSearchAndNotesRow> {
       },
       child: _isExpanded
           ? TapRegion(
-              onTapOutside: (_) => _collapse(),
+              onTapOutside: (_) {
+                if (_canCollapseOnTapOutside) {
+                  _collapse();
+                }
+              },
               child: Container(
                 key: const ValueKey('home_search_bar_expanded'),
                 height: 48,
@@ -7415,7 +7505,6 @@ class _HomeSearchAndNotesRowState extends State<_HomeSearchAndNotesRow> {
                         textInputAction: TextInputAction.search,
                         autofocus: false,
                         onChanged: _onChanged,
-                        onTapOutside: (_) => _collapse(),
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 14,
                           color: isDark ? Colors.white : Colors.black87,

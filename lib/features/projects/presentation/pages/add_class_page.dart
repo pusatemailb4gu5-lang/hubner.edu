@@ -181,8 +181,8 @@ class _AddClassPageState extends State<AddClassPage> {
               .where('ownerUid', isEqualTo: uid)
               .snapshots(),
           builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const SizedBox(height: 200, child: const Center(child: ThreeDotsLoader()));
+            if (snapshot.connectionState == ConnectionState.waiting && !snapshot.hasData) {
+              return const SizedBox(height: 200, child: SizedBox.shrink());
             }
             final docs = snapshot.data?.docs ?? [];
             if (docs.isEmpty) {

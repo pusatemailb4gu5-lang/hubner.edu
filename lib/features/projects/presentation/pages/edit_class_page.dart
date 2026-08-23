@@ -2130,7 +2130,7 @@ Sertakan HANYA JSON tersebut tanpa penjelasan markdown apa pun di luar JSON.
     if (_isLoading) {
       return const Scaffold(
         backgroundColor: Colors.white,
-        body: const Center(child: ThreeDotsLoader()),
+        body: SizedBox.shrink(),
       );
     }
 

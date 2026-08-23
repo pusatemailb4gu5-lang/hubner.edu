@@ -87,7 +87,7 @@ class _OnboardingPageState extends State<OnboardingPage> with SingleTickerProvid
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _completeOnboarding();
       });
-      return const Scaffold(body: const Center(child: ThreeDotsLoader()));
+      return const Scaffold(body: SizedBox.shrink());
     }
 
     final double statusBarHeight = MediaQuery.of(context).padding.top;
@@ -98,7 +98,7 @@ class _OnboardingPageState extends State<OnboardingPage> with SingleTickerProvid
       value: SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
         statusBarIconBrightness: Brightness.light,
-        systemNavigationBarColor: isDark ? Colors.black : Colors.white,
+        systemNavigationBarColor: Colors.transparent,
         systemNavigationBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
         systemNavigationBarDividerColor: Colors.transparent,
         systemNavigationBarContrastEnforced: false,

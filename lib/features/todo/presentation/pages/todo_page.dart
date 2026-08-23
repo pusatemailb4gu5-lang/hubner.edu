@@ -268,7 +268,7 @@ class _TodoPageState extends State<TodoPage> {
                     stream: _userStream,
                     builder: (context, userSnapshot) {
                       if (userSnapshot.connectionState == ConnectionState.waiting && !userSnapshot.hasData) {
-                        return const Center(child: ThreeDotsLoader());
+                        return const SizedBox.shrink();
                       }
                       final userData = userSnapshot.data?.data() as Map<String, dynamic>?;
                       final projectIds = List<String>.from(userData?['projectIds'] ?? []);
@@ -291,7 +291,7 @@ class _TodoPageState extends State<TodoPage> {
                         stream: _projectsStream,
                         builder: (context, projectsSnapshot) {
                           if (projectsSnapshot.connectionState == ConnectionState.waiting && !projectsSnapshot.hasData) {
-                            return const Center(child: ThreeDotsLoader());
+                            return const SizedBox.shrink();
                           }
 
                           final projectDocs = projectsSnapshot.data?.docs ?? [];

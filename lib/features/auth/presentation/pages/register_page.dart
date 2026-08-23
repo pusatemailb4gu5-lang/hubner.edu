@@ -1204,7 +1204,7 @@ class _RegisterPageState extends State<RegisterPage> {
         value: SystemUiOverlayStyle(
           statusBarColor: Colors.transparent,
           statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
-          systemNavigationBarColor: isDark ? Colors.black : Colors.white,
+          systemNavigationBarColor: Colors.transparent,
           systemNavigationBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
           systemNavigationBarDividerColor: Colors.transparent,
           systemNavigationBarContrastEnforced: false,

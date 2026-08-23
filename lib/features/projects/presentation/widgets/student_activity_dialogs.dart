@@ -453,10 +453,7 @@ class _TugasSubmissionDialogContentState extends State<TugasSubmissionDialogCont
             ] else ...[
               if (widget.assignmentType == 'kelompok') ...[
                 if (_loadingProgress)
-                  const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 12),
-                    child: const Center(child: ThreeDotsLoader()),
-                  )
+                  const SizedBox.shrink()
                 else ...[
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -977,7 +974,7 @@ class _QuizViewDialogContentState extends State<QuizViewDialogContent> with Widg
     if (_isLoading) {
       return const SizedBox(
         height: 300,
-        child: const Center(child: ThreeDotsLoader()),
+        child: SizedBox.shrink(),
       );
     }
 

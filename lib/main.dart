@@ -55,7 +55,7 @@ void main() async {
   SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
     statusBarColor: Colors.transparent,
     statusBarIconBrightness: initialIsDark ? Brightness.light : Brightness.dark,
-    systemNavigationBarColor: initialIsDark ? Colors.black : Colors.white,
+    systemNavigationBarColor: Colors.transparent,
     systemNavigationBarIconBrightness: initialIsDark ? Brightness.light : Brightness.dark,
     systemNavigationBarDividerColor: Colors.transparent,
     systemNavigationBarContrastEnforced: false,
@@ -66,7 +66,7 @@ void main() async {
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
       statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
-      systemNavigationBarColor: isDark ? Colors.black : Colors.white,
+      systemNavigationBarColor: Colors.transparent,
       systemNavigationBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
       systemNavigationBarDividerColor: Colors.transparent,
       systemNavigationBarContrastEnforced: false,
@@ -99,7 +99,7 @@ class HubnerApp extends StatelessWidget {
         final overlayStyle = SystemUiOverlayStyle(
           statusBarColor: Colors.transparent,
           statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
-          systemNavigationBarColor: isDark ? Colors.black : Colors.white,
+          systemNavigationBarColor: Colors.transparent,
           systemNavigationBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
           systemNavigationBarDividerColor: Colors.transparent,
           systemNavigationBarContrastEnforced: false,

@@ -1572,7 +1572,7 @@ class _MonitoringPageState extends State<MonitoringPage> {
     if (_isLoadingProjects) {
       return const Scaffold(
         backgroundColor: Colors.transparent,
-        body: const Center(child: ThreeDotsLoader()),
+        body: SizedBox.shrink(),
       );
     }
 

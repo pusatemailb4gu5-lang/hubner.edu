@@ -242,7 +242,7 @@ class _DetailCpPageState extends State<DetailCpPage> {
             .snapshots(),
         builder: (context, snapshot) {
           if (!snapshot.hasData || !snapshot.data!.exists) {
-            return const Center(child: ThreeDotsLoader());
+            return const SizedBox.shrink();
           }
 
           final projectData = snapshot.data!.data() as Map<String, dynamic>;

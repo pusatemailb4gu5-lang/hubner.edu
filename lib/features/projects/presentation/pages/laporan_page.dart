@@ -1475,11 +1475,11 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                       // LAYER 1: DRAGGABLE SCROLLABLE SHEET PUTIH FULL KE BAWAH (Seperti Detail Classroom)
                       // ==========================================
                       DraggableScrollableSheet(
-                        initialChildSize: 0.58,
-                        minChildSize: 0.58,
+                        initialChildSize: 0.50,
+                        minChildSize: 0.50,
                         maxChildSize: 0.96,
                         snap: true,
-                        snapSizes: const [0.58, 0.96],
+                        snapSizes: const [0.50, 0.96],
                         builder: (context, scrollController) {
                           final bool showTugas = _selectedTypeFilter == 'all' || _selectedTypeFilter == 'tugas';
                           final bool showQuiz = _selectedTypeFilter == 'all' || _selectedTypeFilter == 'quiz';
@@ -1619,20 +1619,19 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                 // TABEL LAPORAN: STICKY HEADER & SCROLLABLE BODY
                                 // ==========================================
                                 Expanded(
-                                  child: Padding(
-                                    padding: const EdgeInsets.only(left: 16, right: 0, bottom: 0),
+                                  child: SingleChildScrollView(
+                                    scrollDirection: Axis.horizontal,
+                                    physics: const ClampingScrollPhysics(),
+                                    padding: const EdgeInsets.symmetric(horizontal: 16),
                                     child: Container(
+                                      width: tableWidth + 2.0,
                                       decoration: BoxDecoration(
                                         color: isDark ? const Color(0xFF1E1E24) : Colors.white,
-                                        border: Border(
-                                          top: BorderSide(color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0), width: 1),
-                                          bottom: BorderSide(color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0), width: 1),
-                                          left: BorderSide(color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0), width: 1),
+                                        border: Border.all(
+                                          color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                                          width: 1,
                                         ),
-                                        borderRadius: const BorderRadius.only(
-                                          topLeft: Radius.circular(12),
-                                          bottomLeft: Radius.circular(12),
-                                        ),
+                                        borderRadius: BorderRadius.circular(12),
                                         boxShadow: [
                                           BoxShadow(
                                             color: Colors.black.withValues(alpha: 0.03),
@@ -1642,17 +1641,11 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                         ],
                                       ),
                                       child: ClipRRect(
-                                        borderRadius: const BorderRadius.only(
-                                          topLeft: Radius.circular(12),
-                                          bottomLeft: Radius.circular(12),
-                                        ),
-                                        child: SingleChildScrollView(
-                                          scrollDirection: Axis.horizontal,
-                                          physics: const ClampingScrollPhysics(),
-                                          child: SizedBox(
-                                            width: tableWidth,
-                                            child: Column(
-                                              children: [
+                                        borderRadius: BorderRadius.circular(11),
+                                        child: SizedBox(
+                                          width: tableWidth,
+                                          child: Column(
+                                            children: [
                                                 // Table Header: STICKY
                                                 Container(
                                                   decoration: BoxDecoration(
@@ -2140,7 +2133,6 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                       ),
                                     ),
                                   ),
-                                ),
                               ],
                             ),
                           );

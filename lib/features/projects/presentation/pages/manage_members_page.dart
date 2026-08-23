@@ -851,8 +851,8 @@ class _ManageMembersPageState extends State<ManageMembersPage> {
                     .where('projectIds', arrayContains: widget.projectId)
                     .snapshots(),
                 builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(child: ThreeDotsLoader());
+                  if (snapshot.connectionState == ConnectionState.waiting && !snapshot.hasData) {
+                    return const SizedBox.shrink();
                   }
 
                   final rawDocs = snapshot.data?.docs ?? [];

@@ -62,7 +62,7 @@ class _ClassStatisticsPageState extends State<ClassStatisticsPage>
         if (projectSnap.connectionState == ConnectionState.waiting && !projectSnap.hasData) {
           return Scaffold(
             backgroundColor: isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
-            body: const Center(child: ThreeDotsLoader()),
+            body: const SizedBox.shrink(),
           );
         }
 

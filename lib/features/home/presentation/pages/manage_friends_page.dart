@@ -347,8 +347,8 @@ class _ManageFriendsPageState extends State<ManageFriendsPage> {
                   child: StreamBuilder<DocumentSnapshot>(
                     stream: FirebaseFirestore.instance.collection('users').doc(currentUid).snapshots(),
                     builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const Center(child: ThreeDotsLoader());
+                      if (snapshot.connectionState == ConnectionState.waiting && !snapshot.hasData) {
+                        return const SizedBox.shrink();
                       }
                       if (!snapshot.hasData || !snapshot.data!.exists) {
                         return Center(
@@ -374,8 +374,8 @@ class _ManageFriendsPageState extends State<ManageFriendsPage> {
                             .where(FieldPath.documentId, whereIn: friendUids)
                             .snapshots(),
                         builder: (context, friendsSnapshot) {
-                          if (friendsSnapshot.connectionState == ConnectionState.waiting) {
-                            return const Center(child: ThreeDotsLoader());
+                          if (friendsSnapshot.connectionState == ConnectionState.waiting && !friendsSnapshot.hasData) {
+                            return const SizedBox.shrink();
                           }
 
                           final friendDocs = friendsSnapshot.data?.docs ?? [];
