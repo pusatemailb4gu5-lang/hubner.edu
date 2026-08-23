@@ -1,7 +1,10 @@
+import 'package:image/image.dart' as img;
+import 'dart:ui' as ui;
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:hubner/core/widgets/three_dots_loader.dart';
 import 'package:flutter/services.dart';
-import 'package:hubner/features/home/presentation/widgets/animated_rainbow_background.dart';
+// Animated Purple Micro Pattern Background
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -14,6 +17,7 @@ import 'package:googleapis/drive/v3.dart' as drive;
 import 'package:url_launcher/url_launcher.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:hubner/core/theme/app_colors.dart';
+import 'home_page.dart' show BouncyButton;
 
 class ChatRoomPage extends StatefulWidget {
   final String discussionId;
@@ -34,6 +38,7 @@ class ChatRoomPage extends StatefulWidget {
 }
 
 class _ChatRoomPageState extends State<ChatRoomPage> {
+  final Set<String> _expandedMessageIds = {};
   final TextEditingController _messageController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
 
@@ -54,6 +59,34 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
   final Map<String, GlobalKey> _messageKeys = {};
   final AudioPlayer _audioPlayer = AudioPlayer();
   Map<String, dynamic>? _replyingToMessage;
+  final FocusNode _inputFocusNode = FocusNode();
+  bool _showScrollToBottom = false;
+
+  void _onScroll() {
+    if (!_scrollController.hasClients) return;
+    final maxScroll = _scrollController.position.maxScrollExtent;
+    final currentScroll = _scrollController.offset;
+    final bool shouldShow = (maxScroll - currentScroll) > 180;
+    if (shouldShow != _showScrollToBottom) {
+      setState(() {
+        _showScrollToBottom = shouldShow;
+      });
+    }
+  }
+
+  void _scrollToBottom({bool animate = true}) {
+    if (!_scrollController.hasClients) return;
+    final target = _scrollController.position.maxScrollExtent;
+    if (animate) {
+      _scrollController.animateTo(
+        target,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOut,
+      );
+    } else {
+      _scrollController.jumpTo(target);
+    }
+  }
 
   Future<void> _playNotificationSound() async {
     try {
@@ -67,6 +100,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
   void initState() {
     super.initState();
     _messageController.addListener(_onTextChanged);
+    _scrollController.addListener(_onScroll);
     _loadCurrentUserName();
   }
 
@@ -200,7 +234,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
       spans.add(TextSpan(
         text: mention,
         style: GoogleFonts.plusJakartaSans(
-          fontSize: 15.2,
+          fontSize: 13.5,
           fontWeight: FontWeight.bold,
           // Pastel purple for mentions that include you; subtle purple for others
           color: isMeMentioned
@@ -288,7 +322,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                         Text(
                           'Pilih Folder Google Drive Kelas',
                           style: GoogleFonts.plusJakartaSans(
-                            fontSize: 18.7,
+                            fontSize: 16.0,
                             fontWeight: FontWeight.bold,
                             color: Colors.black87,
                           ),
@@ -379,7 +413,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                       ),
                       icon: const Icon(Icons.create_new_folder_outlined, size: 18),
-                      label: Text('Buat Folder Baru', style: GoogleFonts.plusJakartaSans(fontSize: 15.2, fontWeight: FontWeight.w600)),
+                      label: Text('Buat Folder Baru', style: GoogleFonts.plusJakartaSans(fontSize: 13.5, fontWeight: FontWeight.w600)),
                     ),
                     const SizedBox(height: 16),
                     Expanded(
@@ -387,7 +421,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                           ? Center(
                               child: Text(
                                 'Tidak ada folder ditemukan di Google Drive.',
-                                style: GoogleFonts.dmSans(color: Colors.black38, fontSize: 15.2),
+                                style: GoogleFonts.dmSans(color: Colors.black38, fontSize: 13.5),
                               ),
                             )
                           : ListView.separated(
@@ -399,7 +433,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                   leading: const Icon(Icons.folder, color: Color(0xFFF59E0B)),
                                   title: Text(
                                     folder.name ?? 'Folder Tanpa Nama',
-                                    style: GoogleFonts.dmSans(fontSize: 15.2, fontWeight: FontWeight.w500),
+                                    style: GoogleFonts.dmSans(fontSize: 13.5, fontWeight: FontWeight.w500),
                                   ),
                                   trailing: const Icon(Icons.chevron_right, size: 18),
                                   onTap: () async {
@@ -460,7 +494,140 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
     }
   }
 
+  
+  Future<Uint8List> _compressImageToMax200Kb(Uint8List rawBytes) async {
+    const int maxSizeBytes = 200 * 1024; // 200 KB
+    if (rawBytes.lengthInBytes <= maxSizeBytes) {
+      return rawBytes;
+    }
+
+    try {
+      final img.Image? decodedNullable = img.decodeImage(rawBytes);
+      if (decodedNullable == null) return rawBytes;
+      img.Image currentImg = decodedNullable;
+
+      // Resize if very large
+      if (currentImg.width > 1280 || currentImg.height > 1280) {
+        currentImg = img.copyResize(
+          currentImg,
+          width: currentImg.width > currentImg.height ? 1280 : null,
+          height: currentImg.height >= currentImg.width ? 1280 : null,
+        );
+      }
+
+      int quality = 85;
+      Uint8List compressed = Uint8List.fromList(img.encodeJpg(currentImg, quality: quality));
+
+      while (compressed.lengthInBytes > maxSizeBytes && quality > 15) {
+        quality -= 15;
+        if (quality <= 40 && (currentImg.width > 800 || currentImg.height > 800)) {
+          currentImg = img.copyResize(
+            currentImg,
+            width: (currentImg.width * 0.75).round(),
+            height: (currentImg.height * 0.75).round(),
+          );
+        }
+        compressed = Uint8List.fromList(img.encodeJpg(currentImg, quality: quality));
+      }
+
+      return compressed;
+    } catch (e) {
+      debugPrint('Error compressing image: $e');
+      return rawBytes;
+    }
+  }
+
+  void _showDriveUploadErrorDialog(BuildContext context, String folderUrl) {
+    showDialog(
+      context: context,
+      builder: (dialogCtx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Row(
+          children: [
+            const Icon(Icons.cloud_off_rounded, color: Colors.orange, size: 28),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                'Google Drive Belum Tersambung',
+                style: GoogleFonts.plusJakartaSans(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+            ),
+          ],
+        ),
+        content: Text(
+          'Fitur kirim gambar memerlukan Google Drive Classroom yang aktif.',
+          style: GoogleFonts.dmSans(fontSize: 14, color: Colors.black87),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogCtx),
+            child: Text('Tutup', style: GoogleFonts.plusJakartaSans(color: Colors.black54)),
+          ),
+          if (folderUrl.isNotEmpty)
+            ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF2563EB),
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+              onPressed: () async {
+                Navigator.pop(dialogCtx);
+                final uri = Uri.parse(folderUrl);
+                if (await canLaunchUrl(uri)) {
+                  await launchUrl(uri, mode: LaunchMode.externalApplication);
+                }
+              },
+              icon: const Icon(Icons.open_in_new_rounded, size: 16),
+              label: Text('Buka Folder', style: GoogleFonts.plusJakartaSans(fontSize: 13, fontWeight: FontWeight.w600)),
+            ),
+        ],
+      ),
+    );
+  }
+
   Future<void> _pickAndSendImage() async {
+    String pId = widget.projectId ?? '';
+    if (pId.isEmpty) {
+      final discDoc = await FirebaseFirestore.instance.collection('discussions').doc(widget.discussionId).get();
+      if (discDoc.exists) {
+        pId = discDoc.data()?['projectId'] as String? ?? '';
+      }
+    }
+
+    if (pId.isEmpty) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Fitur kirim gambar tidak tersedia pada obrolan yang tidak terhubung ke kelas.'),
+            backgroundColor: Colors.orange,
+          ),
+        );
+      }
+      return;
+    }
+
+    final doc = await FirebaseFirestore.instance.collection('projects').doc(pId).get();
+    final driveFolderId = doc.data()?['driveFolderId'] as String?;
+    final driveAccessToken = doc.data()?['driveAccessToken'] as String?;
+    final driveFolderUrl = doc.data()?['driveFolderUrl'] as String? ?? (driveFolderId != null ? 'https://drive.google.com/drive/folders/$driveFolderId' : '');
+
+    // Jika akun belum terhubung ke folder google drive maka fitur kirim gambar tidak berfungsi
+    if (driveFolderId == null || driveFolderId.isEmpty || driveAccessToken == null || driveAccessToken.isEmpty) {
+      if (mounted) {
+        if (driveFolderUrl.isNotEmpty) {
+          _showDriveUploadErrorDialog(context, driveFolderUrl);
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Fitur kirim gambar tidak berfungsi karena classroom ini belum terhubung ke folder Google Drive.'),
+              backgroundColor: Colors.redAccent,
+            ),
+          );
+        }
+      }
+      return;
+    }
+
     try {
       final result = await FilePicker.pickFiles(type: FileType.image);
       if (result == null || result.files.isEmpty) return;
@@ -473,57 +640,23 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
         builder: (_) => const Center(child: ThreeDotsLoader()),
       );
 
-      String pId = widget.projectId ?? '';
-      if (pId.isEmpty) {
-        final discDoc = await FirebaseFirestore.instance.collection('discussions').doc(widget.discussionId).get();
-        if (discDoc.exists) {
-          pId = discDoc.data()?['projectId'] as String? ?? '';
-        }
-      }
-      if (pId.isEmpty) {
-        if (mounted) {
-          Navigator.pop(context);
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Error: Chat ini tidak terhubung dengan Google Drive Kelas.')),
-          );
-        }
-        return;
-      }
-
-      final doc = await FirebaseFirestore.instance.collection('projects').doc(pId).get();
-      final driveFolderId = doc.data()?['driveFolderId'] as String?;
-      final driveFolderUrl = doc.data()?['driveFolderUrl'] as String? ?? (driveFolderId != null ? 'https://drive.google.com/drive/folders/$driveFolderId' : '');
-      final driveAccessToken = doc.data()?['driveAccessToken'] as String?;
-
-      if (driveFolderId == null || driveFolderId.isEmpty || driveAccessToken == null || driveAccessToken.isEmpty) {
-        if (mounted) {
-          Navigator.pop(context);
-          if (driveFolderUrl.isNotEmpty) {
-            _showDriveUploadErrorDialog(context, driveFolderUrl);
-          } else {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Gagal: Google Drive Guru belum tersinkronisasi. Pastikan Guru telah masuk kelas untuk mengaktifkan Google Drive.'),
-                backgroundColor: Colors.redAccent,
-              ),
-            );
-          }
-        }
-        return;
-      }
-
-      List<int> fileBytes;
+      Uint8List rawBytes;
       if (kIsWeb) {
-        fileBytes = pickedFile.bytes!;
+        rawBytes = pickedFile.bytes!;
       } else {
-        fileBytes = await File(pickedFile.path!).readAsBytes();
+        rawBytes = await File(pickedFile.path!).readAsBytes();
       }
+
+      // Kompresi data gambar hingga maksimal 200KB
+      final Uint8List compressedBytes = await _compressImageToMax200Kb(rawBytes);
 
       final uploadResult = await GoogleDriveService.uploadFile(
         accessToken: driveAccessToken,
         folderId: driveFolderId,
-        fileName: pickedFile.name,
-        bytes: fileBytes,
+        fileName: pickedFile.name.endsWith('.jpg') || pickedFile.name.endsWith('.jpeg')
+            ? pickedFile.name
+            : '${pickedFile.name.split('.').first}.jpg',
+        bytes: compressedBytes,
       );
 
       final user = FirebaseAuth.instance.currentUser;
@@ -564,7 +697,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
       // Update last message in discussion
       final discDoc = await FirebaseFirestore.instance.collection('discussions').doc(widget.discussionId).get();
       final memberUids = List<String>.from(discDoc.data()?['memberUids'] ?? []);
-      
+
       final Map<String, dynamic> updates = {
         'lastMessage': '$senderName mengirim gambar',
         'time': _formatCurrentTime(),
@@ -577,92 +710,19 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
           updates['unreadCounts.$mUid'] = FieldValue.increment(1);
         }
       }
-      await FirebaseFirestore.instance
-          .collection('discussions')
-          .doc(widget.discussionId)
-          .update(updates);
+      await FirebaseFirestore.instance.collection('discussions').doc(widget.discussionId).update(updates);
 
       if (mounted) {
-        Navigator.pop(context); // Dismiss loader
-        _scrollToBottom();
+        Navigator.pop(context); // Close loading dialog
       }
     } catch (e) {
       if (mounted) {
-        Navigator.pop(context); // Dismiss loader
-        String pId = widget.projectId ?? '';
-        if (pId.isEmpty) {
-          final discDoc = await FirebaseFirestore.instance.collection('discussions').doc(widget.discussionId).get();
-          if (discDoc.exists) {
-            pId = discDoc.data()?['projectId'] as String? ?? '';
-          }
-        }
-        if (pId.isNotEmpty) {
-          final doc = await FirebaseFirestore.instance.collection('projects').doc(pId).get();
-          final driveFolderId = doc.data()?['driveFolderId'] as String?;
-          final driveFolderUrl = doc.data()?['driveFolderUrl'] as String? ?? (driveFolderId != null ? 'https://drive.google.com/drive/folders/$driveFolderId' : '');
-          if (driveFolderUrl.isNotEmpty) {
-            _showDriveUploadErrorDialog(context, driveFolderUrl);
-            return;
-          }
-        }
+        Navigator.pop(context); // Close loading dialog
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Gagal mengirim gambar: $e'),
-            backgroundColor: Colors.redAccent,
-          ),
+          SnackBar(content: Text('Gagal mengirim gambar: $e'), backgroundColor: Colors.redAccent),
         );
       }
     }
-  }
-
-  void _showDriveUploadErrorDialog(BuildContext context, String folderUrl) {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: Colors.white,
-        title: Text(
-          'Gagal Mengunggah Otomatis',
-          style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, color: Colors.redAccent),
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Koneksi Google Drive Guru kedaluwarsa atau belum disinkronisasi.',
-              style: GoogleFonts.plusJakartaSans(fontSize: 15.2, fontWeight: FontWeight.bold, color: Colors.black87),
-            ),
-            const SizedBox(height: 10),
-            Text(
-              'Anda dapat mengunggah berkas secara manual ke folder kelas (Akses Bebas) berikut, lalu menyalin dan menempelkan tautan berkas Anda di kolom input pesan.',
-              style: GoogleFonts.dmSans(fontSize: 14, color: Colors.black54),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: Text('Tutup', style: GoogleFonts.dmSans(color: Colors.black54)),
-          ),
-          ElevatedButton.icon(
-            onPressed: () async {
-              Navigator.pop(ctx);
-              final uri = Uri.parse(folderUrl);
-              if (await canLaunchUrl(uri)) {
-                await launchUrl(uri, mode: LaunchMode.externalApplication);
-              }
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF2563EB),
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            ),
-            icon: const Icon(Icons.open_in_new_rounded, size: 16),
-            label: Text('Buka Folder Google Drive', style: GoogleFonts.plusJakartaSans(fontSize: 14, fontWeight: FontWeight.w600)),
-          ),
-        ],
-      ),
-    );
   }
 
   Future<void> _sendMessage() async {
@@ -740,15 +800,12 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
     return '$hour:$minute';
   }
 
-  void _scrollToBottom() {
-    if (!_scrollController.hasClients) return;
-    _scrollController.jumpTo(
-      _scrollController.position.maxScrollExtent,
-    );
-  }
+
 
   @override
   void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _inputFocusNode.dispose();
     _audioPlayer.dispose();
     _messageController.removeListener(_onTextChanged);
     _messageController.dispose();
@@ -869,7 +926,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                     Text(
                       'Pengaturan Diskusi',
                       style: GoogleFonts.plusJakartaSans(
-                        fontSize: 21.1,
+                        fontSize: 17.5,
                         fontWeight: FontWeight.bold,
                         color: Colors.black,
                       ),
@@ -921,7 +978,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                               Text(
                                                 projectName,
                                                 style: GoogleFonts.plusJakartaSans(
-                                                  fontSize: 16.4,
+                                                  fontSize: 14.5,
                                                   fontWeight: FontWeight.w600,
                                                   color: Colors.black87,
                                                 ),
@@ -1079,10 +1136,10 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                     const SizedBox(height: 8),
                     TextField(
                       controller: channelController,
-                      style: GoogleFonts.dmSans(fontSize: 15.2),
+                      style: GoogleFonts.dmSans(fontSize: 13.5),
                       decoration: InputDecoration(
                         hintText: 'Contoh: #ui-design',
-                        hintStyle: GoogleFonts.dmSans(color: Colors.black26, fontSize: 15.2),
+                        hintStyle: GoogleFonts.dmSans(color: Colors.black26, fontSize: 13.5),
                         filled: true,
                         fillColor: const Color(0xFFF8FAFC),
                         contentPadding: const EdgeInsets.all(16),
@@ -1104,10 +1161,10 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                     const SizedBox(height: 8),
                     TextField(
                       controller: titleController,
-                      style: GoogleFonts.dmSans(fontSize: 15.2),
+                      style: GoogleFonts.dmSans(fontSize: 13.5),
                       decoration: InputDecoration(
                         hintText: 'Contoh: Saluran Masukan Desain UI',
-                        hintStyle: GoogleFonts.dmSans(color: Colors.black26, fontSize: 15.2),
+                        hintStyle: GoogleFonts.dmSans(color: Colors.black26, fontSize: 13.5),
                         filled: true,
                         fillColor: const Color(0xFFF8FAFC),
                         contentPadding: const EdgeInsets.all(16),
@@ -1201,7 +1258,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                         ),
                         child: Text(
                           'Simpan Perubahan',
-                          style: GoogleFonts.plusJakartaSans(fontSize: 16.4, fontWeight: FontWeight.bold),
+                          style: GoogleFonts.plusJakartaSans(fontSize: 14.5, fontWeight: FontWeight.bold),
                         ),
                       ),
                     ),
@@ -1279,6 +1336,8 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                 final Color softBgColor = stageColorsList[colorIdx % stageColorsList.length];
                 final Color accentColor = stageAccentColorsList[colorIdx % stageAccentColorsList.length];
 
+                final bool isDark = Theme.of(context).brightness == Brightness.dark;
+
                 return Scaffold(
                   backgroundColor: Colors.transparent,
                   body: Align(
@@ -1287,140 +1346,209 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                       constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width > 500 ? double.infinity : 500),
                       child: Stack(
                         children: [
-                          const Positioned.fill(
-                            child: AnimatedRainbowBackground(
-                              child: SizedBox.shrink(),
+                          Positioned.fill(
+                            child: AnimatedPurpleMicroPatternBackground(
+                              isDark: isDark,
+                              child: const SizedBox.shrink(),
                             ),
                           ),
                           Column(
                             children: [
-                              // Custom Chat AppBar (Solid White Header, blends with status bar)
-                              Container(
-                                color: Colors.white,
-                                width: double.infinity,
-                                padding: EdgeInsets.fromLTRB(
-                                  20.0,
-                                  MediaQuery.of(context).padding.top + 10.0,
-                                  20.0,
-                                  10.0,
-                                ),
-                      child: Row(
-                        children: [
-                          if (!widget.isEmbedded) ...[
-                            GestureDetector(
-                              onTap: () => Navigator.pop(context),
-                              child: Container(
-                                width: 44,
-                                height: 44,
-                                decoration: const BoxDecoration(
-                                  color: Color(0xFFF1F5F9),
-                                  shape: BoxShape.circle,
-                                ),
-                                child: const Icon(
-                                  Icons.arrow_back_rounded,
-                                  color: Colors.black,
-                                  size: 18,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 14),
-                          ],
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  channelTitle,
-                                  style: GoogleFonts.plusJakartaSans(
-                                    fontSize: 18.7,
-                                    fontWeight: FontWeight.w600,
-                                    color: Colors.black87,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                Text(
-                                  subtitle,
-                                  style: GoogleFonts.dmSans(
-                                    fontSize: 14.0,
-                                    color: Colors.black38,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          if (projectId.isNotEmpty) ...[
-                            // Open Drive folder button (Visible to everyone if connected)
-                            if (projData?['driveFolderId'] != null && projData!['driveFolderId'].toString().isNotEmpty)
-                              GestureDetector(
-                                onTap: () async {
-                                  final String folderId = projData['driveFolderId'].toString();
-                                  final String folderUrl = projData['driveFolderUrl']?.toString() ?? 'https://drive.google.com/drive/folders/$folderId';
-                                  final Uri uri = Uri.parse(folderUrl);
-                                  if (await canLaunchUrl(uri)) {
-                                    await launchUrl(uri, mode: LaunchMode.externalApplication);
-                                  } else {
-                                    if (context.mounted) {
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        const SnackBar(content: Text('Tidak dapat membuka Google Drive.')),
-                                      );
-                                    }
-                                  }
-                                },
-                                child: Container(
-                                  padding: const EdgeInsets.all(8),
-                                  margin: const EdgeInsets.only(right: 8),
-                                  decoration: const BoxDecoration(
-                                    color: Color(0xFFEFF6FF), // soft blue background
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: const Icon(
-                                    Icons.folder_shared_rounded,
-                                    color: Color(0xFF2563EB),
-                                    size: 20,
-                                  ),
-                                ),
-                              ),
-                            // Connect/Change folder button (Only visible to guru)
-                            if (_userRole == 'guru')
-                              GestureDetector(
-                                onTap: () => _showFolderSelectorDialog(projectId),
-                                child: Container(
-                                  padding: const EdgeInsets.all(8),
-                                  margin: const EdgeInsets.only(right: 8),
-                                  decoration: const BoxDecoration(
-                                    color: Color(0xFFF1F5F9),
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: const Icon(
-                                    Icons.add_to_drive_rounded,
-                                    color: Colors.black87,
-                                    size: 20,
-                                  ),
-                                ),
-                              ),
-                          ],
-                          PopupMenuButton<String>(
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            elevation: 8,
-                            shadowColor: Colors.black.withOpacity(0.15),
-                            color: Colors.white,
-                            icon: Container(
-                              padding: const EdgeInsets.all(8),
-                              decoration: const BoxDecoration(
-                                color: Color(0xFFF1F5F9),
-                                shape: BoxShape.circle,
-                              ),
-                              child: const Icon(
-                                Icons.more_vert_rounded,
-                                color: Colors.black,
-                                size: 20,
-                              ),
-                            ),
-                            onSelected: (val) async {
+                              // Custom Chat AppBar (Glassmorphic Transparan Blur dengan Garis Batas Bawah)
+                              ClipRect(
+                                child: BackdropFilter(
+                                  filter: ui.ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+                                  child: Container(
+                                    width: double.infinity,
+                                    padding: EdgeInsets.fromLTRB(
+                                      14.0,
+                                      MediaQuery.of(context).padding.top + 10.0,
+                                      14.0,
+                                      12.0,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: isDark
+                                          ? const Color(0xFF0F0B1E).withValues(alpha: 0.85)
+                                          : Colors.white.withValues(alpha: 0.85),
+                                      border: Border(
+                                        bottom: BorderSide(
+                                          color: isDark
+                                              ? Colors.white.withValues(alpha: 0.08)
+                                              : Colors.black.withValues(alpha: 0.06),
+                                          width: 1.0,
+                                        ),
+                                      ),
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        if (!widget.isEmbedded) ...[
+                                          BouncyButton(
+                                            onTap: () => Navigator.pop(context),
+                                            child: Container(
+                                              width: 42,
+                                              height: 42,
+                                              decoration: BoxDecoration(
+                                                color: isDark ? const Color(0xFF18181B) : Colors.white,
+                                                shape: BoxShape.circle,
+                                                border: Border.all(
+                                                  color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+                                                  width: 1.2,
+                                                ),
+                                                boxShadow: [
+                                                  BoxShadow(
+                                                    color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.04),
+                                                    blurRadius: 8,
+                                                    offset: const Offset(0, 2),
+                                                  ),
+                                                ],
+                                              ),
+                                              child: Icon(
+                                                Icons.arrow_back_rounded,
+                                                color: isDark ? Colors.white : Colors.black,
+                                                size: 20,
+                                              ),
+                                            ),
+                                          ),
+                                          const SizedBox(width: 14),
+                                        ],
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                channelTitle,
+                                                style: GoogleFonts.plusJakartaSans(
+                                                  fontSize: 15.5,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: isDark ? Colors.white : Colors.black87,
+                                                ),
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                              const SizedBox(height: 2),
+                                              Text(
+                                                subtitle,
+                                                style: GoogleFonts.dmSans(
+                                                  fontSize: 12.5,
+                                                  color: isDark ? Colors.white60 : Colors.black45,
+                                                  fontWeight: FontWeight.w500,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        if (projectId.isNotEmpty) ...[
+                                          // Open Drive folder button (Visible to everyone if connected)
+                                          if (projData?['driveFolderId'] != null && projData!['driveFolderId'].toString().isNotEmpty)
+                                            Container(
+                                              margin: const EdgeInsets.only(right: 8),
+                                              child: BouncyButton(
+                                                onTap: () async {
+                                                  final String folderId = projData['driveFolderId'].toString();
+                                                  final String folderUrl = projData['driveFolderUrl']?.toString() ?? 'https://drive.google.com/drive/folders/$folderId';
+                                                  final Uri uri = Uri.parse(folderUrl);
+                                                  if (await canLaunchUrl(uri)) {
+                                                    await launchUrl(uri, mode: LaunchMode.externalApplication);
+                                                  } else {
+                                                    if (context.mounted) {
+                                                      ScaffoldMessenger.of(context).showSnackBar(
+                                                        const SnackBar(content: Text('Tidak dapat membuka Google Drive.')),
+                                                      );
+                                                    }
+                                                  }
+                                                },
+                                                child: Container(
+                                                  width: 42,
+                                                  height: 42,
+                                                  decoration: BoxDecoration(
+                                                    color: isDark ? const Color(0xFF1E293B) : const Color(0xFFEFF6FF),
+                                                    shape: BoxShape.circle,
+                                                    border: Border.all(
+                                                      color: isDark ? const Color(0xFF334155) : const Color(0xFFDBEAFE),
+                                                      width: 1.2,
+                                                    ),
+                                                    boxShadow: [
+                                                      BoxShadow(
+                                                        color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.04),
+                                                        blurRadius: 8,
+                                                        offset: const Offset(0, 2),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  child: const Icon(
+                                                    Icons.folder_shared_rounded,
+                                                    color: Color(0xFF2563EB),
+                                                    size: 20,
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          // Connect/Change folder button (Only visible to guru)
+                                          if (_userRole == 'guru')
+                                            Container(
+                                              margin: const EdgeInsets.only(right: 8),
+                                              child: BouncyButton(
+                                                onTap: () => _showFolderSelectorDialog(projectId),
+                                                child: Container(
+                                                  width: 42,
+                                                  height: 42,
+                                                  decoration: BoxDecoration(
+                                                    color: isDark ? const Color(0xFF18181B) : Colors.white,
+                                                    shape: BoxShape.circle,
+                                                    border: Border.all(
+                                                      color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+                                                      width: 1.2,
+                                                    ),
+                                                    boxShadow: [
+                                                      BoxShadow(
+                                                        color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.04),
+                                                        blurRadius: 8,
+                                                        offset: const Offset(0, 2),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  child: Icon(
+                                                    Icons.add_to_drive_rounded,
+                                                    color: isDark ? Colors.white70 : Colors.black87,
+                                                    size: 20,
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                        ],
+                                        PopupMenuButton<String>(
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(20),
+                                          ),
+                                          elevation: 8,
+                                          shadowColor: Colors.black.withValues(alpha: 0.15),
+                                          color: isDark ? const Color(0xFF1E293B) : Colors.white,
+                                          padding: EdgeInsets.zero,
+                                          icon: Container(
+                                            width: 42,
+                                            height: 42,
+                                            decoration: BoxDecoration(
+                                              color: isDark ? const Color(0xFF18181B) : Colors.white,
+                                              shape: BoxShape.circle,
+                                              border: Border.all(
+                                                color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+                                                width: 1.2,
+                                              ),
+                                              boxShadow: [
+                                                BoxShadow(
+                                                  color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.04),
+                                                  blurRadius: 8,
+                                                  offset: const Offset(0, 2),
+                                                ),
+                                              ],
+                                            ),
+                                            child: Icon(
+                                              Icons.more_horiz_rounded,
+                                              color: isDark ? Colors.white : Colors.black,
+                                              size: 20,
+                                            ),
+                                          ),
+                                          onSelected: (val) async {
                               if (val == 'edit') {
                                 if (discData != null) {
                                   _openEditDiscussionSettings(context, discData);
@@ -1561,7 +1689,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                         const SizedBox(width: 12),
                                         Text(
                                           'Bersihkan Chat',
-                                          style: GoogleFonts.dmSans(fontSize: 15.2, fontWeight: FontWeight.w500),
+                                          style: GoogleFonts.dmSans(fontSize: 13.5, fontWeight: FontWeight.w500),
                                         ),
                                       ],
                                     ),
@@ -1574,7 +1702,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                         const SizedBox(width: 12),
                                         Text(
                                           'Hapus Obrolan',
-                                          style: GoogleFonts.plusJakartaSans(fontSize: 15.2, color: Colors.redAccent, fontWeight: FontWeight.w600),
+                                          style: GoogleFonts.plusJakartaSans(fontSize: 13.5, color: Colors.redAccent, fontWeight: FontWeight.w600),
                                         ),
                                       ],
                                     ),
@@ -1592,7 +1720,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                         const SizedBox(width: 12),
                                         Text(
                                           'Pengaturan Diskusi',
-                                          style: GoogleFonts.dmSans(fontSize: 15.2, fontWeight: FontWeight.w500),
+                                          style: GoogleFonts.dmSans(fontSize: 13.5, fontWeight: FontWeight.w500),
                                         ),
                                       ],
                                     ),
@@ -1606,7 +1734,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                       const SizedBox(width: 12),
                                       Text(
                                         'Keluar dari Grup',
-                                        style: GoogleFonts.dmSans(fontSize: 15.2, fontWeight: FontWeight.w500),
+                                        style: GoogleFonts.dmSans(fontSize: 13.5, fontWeight: FontWeight.w500),
                                       ),
                                     ],
                                   ),
@@ -1620,7 +1748,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                         const SizedBox(width: 12),
                                         Text(
                                           'Hapus Diskusi',
-                                          style: GoogleFonts.plusJakartaSans(fontSize: 15.2, color: Colors.redAccent, fontWeight: FontWeight.w600),
+                                          style: GoogleFonts.plusJakartaSans(fontSize: 13.5, color: Colors.redAccent, fontWeight: FontWeight.w600),
                                         ),
                                       ],
                                     ),
@@ -1632,8 +1760,9 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                         ],
                       ),
                     ),
-                    const Divider(color: Color(0xFFF1F5F9), height: 1),
-                    Expanded(
+                  ),
+                ),
+                Expanded(
                       child: SafeArea(
                         top: false,
                         child: Column(
@@ -1777,21 +1906,19 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
 
                                 return ListView.builder(
                                   controller: _scrollController,
-                                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
                                   itemCount: messageDocs.length,
                                   itemBuilder: (context, index) {
                                     final msgDoc = messageDocs[index];
                                     final msgData = msgDoc.data() as Map<String, dynamic>;
                                     final msgId = msgDoc.id;
-                                    // Ensure a GlobalKey exists for each message
                                     if (!_messageKeys.containsKey(msgId)) {
                                       _messageKeys[msgId] = GlobalKey();
                                     }
                                     final msgKey = _messageKeys[msgId];
                                     final sender = msgData['sender'] ?? 'User';
                                     final senderUid = msgData['senderUid'] ?? '';
-                                    
-                                    // Dynamically lookup current avatar & name of the sender
+
                                     final member = _discussionMembers.firstWhere(
                                       (m) => m['uid'] == senderUid,
                                       orElse: () => <String, dynamic>{},
@@ -1812,212 +1939,285 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                     final isMe = senderUid == currentUid;
                                     final String displayName = senderName.trim().isEmpty ? 'User' : senderName.trim().split(' ')[0];
 
-                                     return SwipeToReply(
-                                       isMe: isMe,
-                                       onReply: () {
-                                         setState(() {
-                                           _replyingToMessage = {
-                                             'sender': senderName,
-                                             'message': message,
-                                             'imageUrl': imageUrl,
-                                           };
-                                         });
-                                       },
-                                       child: Container(
-                                         key: msgKey,
-                                         margin: const EdgeInsets.only(bottom: 12),
-                                         child: Row(
-                                           mainAxisAlignment: isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
-                                           crossAxisAlignment: CrossAxisAlignment.start,
-                                           children: [
-                                             if (!isMe) ...[
-                                               Container(
-                                                 width: 32,
-                                                 height: 32,
-                                                 decoration: BoxDecoration(
-                                                   shape: BoxShape.circle,
-                                                   border: Border.all(color: Colors.black54, width: 1),
-                                                 ),
-                                                 child: ClipOval(
-                                                   child: Image.asset(avatar, fit: BoxFit.cover),
-                                                 ),
-                                               ),
-                                               const SizedBox(width: 8),
-                                             ],
-                                             Flexible(
-                                               child: GestureDetector(
-                                               onLongPress: () {
-                                                 setState(() {
-                                                   _replyingToMessage = {
-                                                     'sender': senderName,
-                                                     'message': message,
-                                                     'imageUrl': imageUrl,
-                                                   };
-                                                 });
-                                                 ScaffoldMessenger.of(context).showSnackBar(
-                                                   SnackBar(
-                                                     content: Text('Membalas pesan dari $senderName'),
-                                                     duration: const Duration(milliseconds: 1000),
-                                                     behavior: SnackBarBehavior.floating,
-                                                     shape: RoundedRectangleBorder(
-                                                       borderRadius: BorderRadius.circular(12),
-                                                     ),
-                                                   ),
-                                                 );
-                                               },
-                                               child: Container(
-                                                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                                                 decoration: BoxDecoration(
-                                                   color: isMe ? Colors.black : const Color(0xFFF1F5F9),
-                                                   borderRadius: BorderRadius.only(
-                                                     topLeft: const Radius.circular(16),
-                                                     topRight: const Radius.circular(16),
-                                                       bottomLeft: Radius.circular(isMe ? 16 : 4),
-                                                       bottomRight: Radius.circular(isMe ? 4 : 16),
-                                                     ),
-                                                   ),
-                                                   child: Column(
-                                                     crossAxisAlignment: isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
-                                                     children: [
-                                                       if (msgData['replyToSender'] != null) ...[
-                                                         Container(
-                                                           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                                                           margin: const EdgeInsets.only(bottom: 6),
-                                                           decoration: BoxDecoration(
-                                                             color: isMe ? Colors.white.withOpacity(0.15) : Colors.black.withOpacity(0.05),
-                                                             borderRadius: BorderRadius.circular(8),
-                                                             border: Border(
-                                                               left: BorderSide(
-                                                                 color: isMe ? Colors.white70 : const Color(0xFF2563EB),
-                                                                 width: 3,
-                                                               ),
-                                                             ),
-                                                           ),
-                                                           child: Column(
-                                                             crossAxisAlignment: CrossAxisAlignment.start,
-                                                             mainAxisSize: MainAxisSize.min,
-                                                             children: [
-                                                               Text(
-                                                                 msgData['replyToSender'] as String,
-                                                                 style: GoogleFonts.plusJakartaSans(
-                                                                   fontSize: 14.0,
-                                                                   fontWeight: FontWeight.bold,
-                                                                   color: isMe ? Colors.white : const Color(0xFF2563EB),
-                                                                 ),
-                                                               ),
-                                                               const SizedBox(height: 2),
-                                                               Text(
-                                                                 msgData['replyToText'] == '[Gambar Lampiran]'
-                                                                     ? '📷 Foto'
-                                                                     : (msgData['replyToText'] as String? ?? ''),
-                                                                 maxLines: 1,
-                                                                 overflow: TextOverflow.ellipsis,
-                                                                 style: GoogleFonts.dmSans(
-                                                                   fontSize: 14.0,
-                                                                   color: isMe ? Colors.white70 : Colors.black54,
-                                                                 ),
-                                                               ),
-                                                             ],
-                                                           ),
-                                                         ),
-                                                       ],
-                                                       if (!isMe)
-                                                         Text(
-                                                           displayName,
-                                                           style: GoogleFonts.plusJakartaSans(
-                                                             fontSize: 14.0,
-                                                             fontWeight: FontWeight.bold,
-                                                             color: Colors.black54,
-                                                           ),
-                                                         ),
-                                                       const SizedBox(height: 2),
-                                                       if (imageUrl.isNotEmpty) ...[
-                                                          const SizedBox(height: 4),
-                                                          GestureDetector(
-                                                            onTap: () {
-                                                              Navigator.push(
-                                                                context,
-                                                                MaterialPageRoute(
-                                                                  builder: (context) => FullScreenImagePage(imageUrl: imageUrl),
+                                    // Check if message exceeds 15 lines
+                                    final lines = message.split('\n');
+                                    final bool isLongMessage = lines.length > 15;
+                                    final bool isExpanded = _expandedMessageIds.contains(msgId);
+                                    final String displayMessage = (isLongMessage && !isExpanded)
+                                        ? lines.take(15).join('\n')
+                                        : message;
+
+                                    // Colorful random/deterministic sender name colors
+                                    final List<Color> senderColors = isDark
+                                        ? const [
+                                            Color(0xFFF87171), // Red
+                                            Color(0xFF34D399), // Emerald
+                                            Color(0xFF60A5FA), // Blue
+                                            Color(0xFFFBBF24), // Amber
+                                            Color(0xFFA78BFA), // Purple
+                                            Color(0xFFF472B6), // Pink
+                                            Color(0xFF22D3EE), // Cyan
+                                            Color(0xFFFB923C), // Orange
+                                            Color(0xFF2DD4BF), // Teal
+                                          ]
+                                        : const [
+                                            Color(0xFFDC2626), // Red
+                                            Color(0xFF059669), // Emerald
+                                            Color(0xFF2563EB), // Blue
+                                            Color(0xFFD97706), // Amber
+                                            Color(0xFF7C3AED), // Purple
+                                            Color(0xFFDB2777), // Pink
+                                            Color(0xFF0891B2), // Cyan
+                                            Color(0xFFEA580C), // Orange
+                                            Color(0xFF0D9488), // Teal
+                                          ];
+                                    final Color nameColor = senderColors[(senderUid.hashCode.abs() + senderName.hashCode.abs()) % senderColors.length];
+
+                                    return SwipeToReply(
+                                      isMe: isMe,
+                                      onReply: () {
+                                        setState(() {
+                                          _replyingToMessage = {
+                                            'sender': senderName,
+                                            'message': message,
+                                            'imageUrl': imageUrl,
+                                          };
+                                        });
+                                      },
+                                      child: Container(
+                                        key: msgKey,
+                                        margin: const EdgeInsets.only(bottom: 5), // Jarak antar chat lebih dekat
+                                        child: Row(
+                                          mainAxisAlignment: isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
+                                          crossAxisAlignment: CrossAxisAlignment.end,
+                                          children: [
+                                            if (!isMe) ...[
+                                              ClipOval(
+                                                child: Image.asset(
+                                                  avatar,
+                                                  width: 28,
+                                                  height: 28,
+                                                  fit: BoxFit.cover,
+                                                ),
+                                              ),
+                                              const SizedBox(width: 8),
+                                            ],
+                                            Flexible(
+                                              child: GestureDetector(
+                                                onLongPress: () {
+                                                  setState(() {
+                                                    _replyingToMessage = {
+                                                      'sender': senderName,
+                                                      'message': message,
+                                                      'imageUrl': imageUrl,
+                                                    };
+                                                  });
+                                                  ScaffoldMessenger.of(context).showSnackBar(
+                                                    SnackBar(
+                                                      content: Text('Membalas pesan dari $senderName'),
+                                                      duration: const Duration(milliseconds: 1000),
+                                                      behavior: SnackBarBehavior.floating,
+                                                      shape: RoundedRectangleBorder(
+                                                        borderRadius: BorderRadius.circular(12),
+                                                      ),
+                                                    ),
+                                                  );
+                                                },
+                                                child: Container(
+                                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                                  decoration: BoxDecoration(
+                                                    color: isMe
+                                                        ? (isDark ? const Color(0xFF1E293B) : Colors.black)
+                                                        : (isDark ? const Color(0xFF1E1438) : Colors.white),
+                                                    borderRadius: BorderRadius.only(
+                                                      topLeft: const Radius.circular(16),
+                                                      topRight: const Radius.circular(16),
+                                                      bottomLeft: Radius.circular(isMe ? 16 : 4),
+                                                      bottomRight: Radius.circular(isMe ? 4 : 16),
+                                                    ),
+                                                    boxShadow: [
+                                                      BoxShadow(
+                                                        color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.05),
+                                                        blurRadius: 4,
+                                                        offset: const Offset(0, 2),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  child: Column(
+                                                    crossAxisAlignment: isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+                                                    mainAxisSize: MainAxisSize.min,
+                                                    children: [
+                                                      // Reply Preview
+                                                      if (msgData['replyToSender'] != null) ...[
+                                                        Container(
+                                                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                                          margin: const EdgeInsets.only(bottom: 5),
+                                                          decoration: BoxDecoration(
+                                                            color: isMe
+                                                                ? Colors.white.withValues(alpha: 0.18)
+                                                                : (isDark ? Colors.white.withValues(alpha: 0.08) : const Color(0xFFF1F5F9)),
+                                                            borderRadius: BorderRadius.circular(12),
+                                                          ),
+                                                          child: Column(
+                                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                                            mainAxisSize: MainAxisSize.min,
+                                                            children: [
+                                                              Text(
+                                                                msgData['replyToSender'] as String,
+                                                                style: GoogleFonts.plusJakartaSans(
+                                                                  fontSize: 12.0,
+                                                                  fontWeight: FontWeight.bold,
+                                                                  color: isMe ? Colors.white : const Color(0xFF2563EB),
                                                                 ),
-                                                              );
-                                                            },
-                                                            child: Container(
-                                                             constraints: const BoxConstraints(
-                                                               maxWidth: 180,
-                                                               maxHeight: 180,
-                                                             ),
-                                                             child: ClipRRect(
-                                                               borderRadius: BorderRadius.circular(12),
-                                                               child: Image.network(
-                                                                 imageUrl,
-                                                                 width: 180,
-                                                                 height: 180,
-                                                                 fit: BoxFit.cover,
-                                                                 errorBuilder: (context, error, stackTrace) {
-                                                                   return Container(
-                                                                     padding: const EdgeInsets.all(12),
-                                                                     color: Colors.red[50],
-                                                                     child: Row(
-                                                                       mainAxisSize: MainAxisSize.min,
-                                                                       children: [
-                                                                         const Icon(Icons.error_outline, color: Colors.redAccent, size: 16),
-                                                                         const SizedBox(width: 6),
-                                                                         Text(
-                                                                           'Gagal memuat gambar',
-                                                                           style: GoogleFonts.dmSans(fontSize: 14.0, color: Colors.redAccent),
-                                                                         ),
-                                                                       ],
-                                                                     ),
-                                                                   );
-                                                                 },
-                                                               ),
-                                                             ),
-                                                           ),
-                                                         ),
-                                                         const SizedBox(height: 4),
-                                                       ],
-                                                       RichText(
-                                                         text: TextSpan(
-                                                           style: GoogleFonts.dmSans(
-                                                             fontSize: 15.2,
-                                                             color: isMe ? Colors.white : Colors.black87,
-                                                             fontWeight: FontWeight.w500,
-                                                           ),
-                                                           children: _buildMessageSpans(message, _currentUserName, context, isMe),
-                                                         ),
-                                                       ),
-                                                       const SizedBox(height: 2),
-                                                       Text(
-                                                         timeText,
-                                                         style: GoogleFonts.dmSans(
-                                                           fontSize: 14.0,
-                                                           color: isMe ? Colors.white60 : Colors.black38,
-                                                         ),
-                                                       ),
-                                                     ],
-                                                   ),
-                                                 ),
-                                               ),
-                                             ),
-                                             if (isMe) ...[
-                                               const SizedBox(width: 8),
-                                               Container(
-                                                 width: 32,
-                                                 height: 32,
-                                                 decoration: BoxDecoration(
-                                                   shape: BoxShape.circle,
-                                                   border: Border.all(color: Colors.black54, width: 1),
-                                                 ),
-                                                 child: ClipOval(
-                                                   child: Image.asset(avatar, fit: BoxFit.cover),
-                                                 ),
-                                               ),
-                                             ],
-                                           ],
-                                         ),
-                                       ),
-                                     );
+                                                              ),
+                                                              const SizedBox(height: 1),
+                                                              Text(
+                                                                msgData['replyToText'] == '[Gambar Lampiran]'
+                                                                    ? '📷 Foto'
+                                                                    : (msgData['replyToText'] as String? ?? ''),
+                                                                maxLines: 1,
+                                                                overflow: TextOverflow.ellipsis,
+                                                                style: GoogleFonts.dmSans(
+                                                                  fontSize: 11.5,
+                                                                  color: isMe ? Colors.white70 : Colors.black54,
+                                                                ),
+                                                              ),
+                                                            ],
+                                                          ),
+                                                        ),
+                                                      ],
+
+                                                      // Sender Name (Warna-warni acak per nama/akun)
+                                                      if (!isMe)
+                                                        Padding(
+                                                          padding: const EdgeInsets.only(bottom: 2),
+                                                          child: Text(
+                                                            displayName,
+                                                            style: GoogleFonts.plusJakartaSans(
+                                                              fontSize: 12.0,
+                                                              fontWeight: FontWeight.bold,
+                                                              color: nameColor,
+                                                            ),
+                                                          ),
+                                                        ),
+
+                                                      // Image attachment
+                                                      if (imageUrl.isNotEmpty) ...[
+                                                        const SizedBox(height: 2),
+                                                        GestureDetector(
+                                                          onTap: () {
+                                                            Navigator.push(
+                                                              context,
+                                                              MaterialPageRoute(
+                                                                builder: (context) => FullScreenImagePage(imageUrl: imageUrl),
+                                                              ),
+                                                            );
+                                                          },
+                                                          child: ClipRRect(
+                                                            borderRadius: BorderRadius.circular(10),
+                                                            child: Image.network(
+                                                              imageUrl,
+                                                              width: 180,
+                                                              height: 180,
+                                                              fit: BoxFit.cover,
+                                                            ),
+                                                          ),
+                                                        ),
+                                                        const SizedBox(height: 4),
+                                                      ],
+
+                                                      // Message text + time side by side (setelah chat, bukan dibawah)
+                                                      Wrap(
+                                                        alignment: WrapAlignment.end,
+                                                        crossAxisAlignment: WrapCrossAlignment.end,
+                                                        spacing: 8,
+                                                        runSpacing: 2,
+                                                        children: [
+                                                          RichText(
+                                                            text: TextSpan(
+                                                              style: GoogleFonts.dmSans(
+                                                                fontSize: 13.5,
+                                                                color: isMe ? Colors.white : (isDark ? Colors.white : Colors.black87),
+                                                                fontWeight: FontWeight.w500,
+                                                                height: 1.35,
+                                                              ),
+                                                              children: _buildMessageSpans(displayMessage, _currentUserName, context, isMe),
+                                                            ),
+                                                          ),
+                                                          if (timeText.isNotEmpty)
+                                                            Padding(
+                                                              padding: const EdgeInsets.only(top: 2),
+                                                              child: Text(
+                                                                timeText,
+                                                                style: GoogleFonts.dmSans(
+                                                                  fontSize: 10.0,
+                                                                  fontWeight: FontWeight.w500,
+                                                                  color: isMe
+                                                                      ? Colors.white.withValues(alpha: 0.70)
+                                                                      : (isDark ? Colors.white.withValues(alpha: 0.45) : Colors.black38),
+                                                                ),
+                                                              ),
+                                                            ),
+                                                        ],
+                                                      ),
+                                                      if (isLongMessage) ...[
+                                                        const SizedBox(height: 3),
+                                                        GestureDetector(
+                                                          onTap: () {
+                                                            setState(() {
+                                                              if (isExpanded) {
+                                                                _expandedMessageIds.remove(msgId);
+                                                              } else {
+                                                                _expandedMessageIds.add(msgId);
+                                                              }
+                                                            });
+                                                          },
+                                                          child: Row(
+                                                            mainAxisSize: MainAxisSize.min,
+                                                            children: [
+                                                              Text(
+                                                                isExpanded ? 'Lebih sedikit' : 'Selengkapnya...',
+                                                                style: GoogleFonts.plusJakartaSans(
+                                                                  fontSize: 11.5,
+                                                                  fontWeight: FontWeight.bold,
+                                                                  color: isMe
+                                                                      ? Colors.white.withValues(alpha: 0.9)
+                                                                      : const Color(0xFF2563EB),
+                                                                  decoration: TextDecoration.underline,
+                                                                ),
+                                                              ),
+                                                              const SizedBox(width: 3),
+                                                              Icon(
+                                                                isExpanded ? Icons.keyboard_arrow_up_rounded : Icons.keyboard_arrow_down_rounded,
+                                                                size: 13,
+                                                                color: isMe
+                                                                    ? Colors.white.withValues(alpha: 0.9)
+                                                                    : const Color(0xFF2563EB),
+                                                              ),
+                                                            ],
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ],
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                            if (isMe) ...[
+                                              const SizedBox(width: 8),
+                                              ClipOval(
+                                                child: Image.asset(
+                                                  avatar,
+                                                  width: 28,
+                                                  height: 28,
+                                                  fit: BoxFit.cover,
+                                                ),
+                                              ),
+                                            ],
+                                          ],
+                                        ),
+                                      ),
+                                    );
                                   },
                                 );
                               },
@@ -2025,47 +2225,50 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                           ),
                           if (_filteredMentionMembers.isNotEmpty)
                             Positioned(
-                              left: 16,
-                              right: 16,
+                              left: 14,
+                              right: 14,
                               bottom: 8,
                               child: Container(
-                                height: 54,
+                                height: 50,
                                 decoration: BoxDecoration(
-                                  color: Colors.white,
+                                  color: isDark ? const Color(0xFF1E293B) : Colors.white,
                                   borderRadius: BorderRadius.circular(16),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: Colors.black.withOpacity(0.05),
+                                      color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.08),
                                       blurRadius: 10,
-                                      offset: const Offset(0, -4),
+                                      offset: const Offset(0, -3),
                                     ),
                                   ],
-                                  border: Border.all(color: const Color(0xFFF1F5F9)),
+                                  border: Border.all(
+                                    color: isDark ? const Color(0xFF334155) : const Color(0xFFF1F5F9),
+                                  ),
                                 ),
                                 child: ListView.builder(
                                   scrollDirection: Axis.horizontal,
-                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                                   itemCount: _filteredMentionMembers.length,
                                   itemBuilder: (context, idx) {
                                     final m = _filteredMentionMembers[idx];
                                     return GestureDetector(
                                       onTap: () => _selectMention(m),
                                       child: Container(
-                                        margin: const EdgeInsets.only(right: 12),
-                                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                        margin: const EdgeInsets.only(right: 10),
+                                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                                         decoration: BoxDecoration(
-                                          color: const Color(0xFFF8FAFC),
+                                          color: isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
                                           borderRadius: BorderRadius.circular(12),
-                                          border: Border.all(color: const Color(0xFFE2E8F0)),
+                                          border: Border.all(
+                                            color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                                          ),
                                         ),
                                         child: Row(
                                           children: [
                                             Container(
-                                              width: 20,
-                                              height: 20,
-                                              decoration: BoxDecoration(
+                                              width: 22,
+                                              height: 22,
+                                              decoration: const BoxDecoration(
                                                 shape: BoxShape.circle,
-                                                border: Border.all(color: Colors.black, width: 0.5),
                                               ),
                                               child: ClipOval(
                                                 child: Image.asset(m['avatar'], fit: BoxFit.cover),
@@ -2075,9 +2278,9 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                             Text(
                                               m['uid'] == 'all' ? '@all' : '@${m['name']}',
                                               style: GoogleFonts.plusJakartaSans(
-                                                fontSize: 14.0,
+                                                fontSize: 13.0,
                                                 fontWeight: FontWeight.w600,
-                                                color: Colors.black,
+                                                color: isDark ? Colors.white : Colors.black87,
                                               ),
                                             ),
                                           ],
@@ -2092,40 +2295,97 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                       ),
                     ),
 
-                    // Chat Input Field
+                    // Floating Scroll-To-Bottom Button (Di sebelah kanan lurus tombol kirim, kecil & transparan glassmorphic)
+                    if (_showScrollToBottom)
+                      Positioned(
+                        right: 14,
+                        bottom: 68,
+                        child: BouncyButton(
+                          onTap: () => _scrollToBottom(animate: true),
+                          child: ClipOval(
+                            child: BackdropFilter(
+                              filter: ui.ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+                              child: Container(
+                                width: 30,
+                                height: 30,
+                                decoration: BoxDecoration(
+                                  color: isDark
+                                      ? Colors.black.withValues(alpha: 0.35)
+                                      : Colors.white.withValues(alpha: 0.40),
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: isDark
+                                        ? Colors.white.withValues(alpha: 0.15)
+                                        : Colors.white.withValues(alpha: 0.60),
+                                    width: 1.0,
+                                  ),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withValues(alpha: 0.08),
+                                      blurRadius: 4,
+                                      offset: const Offset(0, 1),
+                                    ),
+                                  ],
+                                ),
+                                child: Icon(
+                                  Icons.keyboard_arrow_down_rounded,
+                                  color: isDark ? Colors.white70 : Colors.black87,
+                                  size: 18,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+
+                    // Chat Input Field (Lurus horizontal & vertikal sejajar, tombol kirim & gambar terpusat)
                     Padding(
-                      padding: const EdgeInsets.all(16.0),
+                      padding: const EdgeInsets.fromLTRB(14.0, 4.0, 14.0, 14.0),
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           if (_replyingToMessage != null) ...[
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                              margin: const EdgeInsets.only(bottom: 10),
+                              height: 38,
+                              margin: const EdgeInsets.only(bottom: 6),
                               decoration: BoxDecoration(
-                                color: const Color(0xFFF1F5F9),
-                                borderRadius: BorderRadius.circular(16),
-                                border: const Border(
-                                  left: BorderSide(color: Color(0xFF2563EB), width: 4),
-                                ),
+                                color: isDark ? const Color(0xFF1E293B) : Colors.white,
+                                borderRadius: BorderRadius.circular(19),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.06),
+                                    blurRadius: 6,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
                               ),
                               child: Row(
                                 children: [
+                                  // Lingkaran ikon mepet dengan card kiri, atas, dan bawah (Frameless)
+                                  Container(
+                                    width: 38,
+                                    height: 38,
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFF2563EB).withValues(alpha: 0.12),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: const Icon(Icons.reply_rounded, color: Color(0xFF2563EB), size: 16),
+                                  ),
+                                  const SizedBox(width: 8),
                                   Expanded(
                                     child: Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
-                                      mainAxisSize: MainAxisSize.min,
+                                      mainAxisAlignment: MainAxisAlignment.center,
                                       children: [
                                         Text(
                                           _replyingToMessage!['sender'] ?? 'User',
                                           style: GoogleFonts.plusJakartaSans(
-                                            fontSize: 14.0,
+                                            fontSize: 12.0,
                                             fontWeight: FontWeight.bold,
                                             color: const Color(0xFF2563EB),
                                           ),
                                         ),
-                                        const SizedBox(height: 2),
                                         Text(
                                           _replyingToMessage!['message'] == '[Gambar Lampiran]'
                                               ? '📷 Foto'
@@ -2133,8 +2393,8 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                           maxLines: 1,
                                           overflow: TextOverflow.ellipsis,
                                           style: GoogleFonts.dmSans(
-                                            fontSize: 14.0,
-                                            color: Colors.black54,
+                                            fontSize: 11.0,
+                                            color: isDark ? Colors.white70 : Colors.black54,
                                           ),
                                         ),
                                       ],
@@ -2146,10 +2406,18 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                         _replyingToMessage = null;
                                       });
                                     },
-                                    child: const Icon(
-                                      Icons.close_rounded,
-                                      size: 16,
-                                      color: Colors.black54,
+                                    child: Container(
+                                      margin: const EdgeInsets.only(right: 8),
+                                      padding: const EdgeInsets.all(4),
+                                      decoration: BoxDecoration(
+                                        color: isDark ? const Color(0xFF334155) : const Color(0xFFF1F5F9),
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: Icon(
+                                        Icons.close_rounded,
+                                        size: 13,
+                                        color: isDark ? Colors.white70 : Colors.black54,
+                                      ),
                                     ),
                                   ),
                                 ],
@@ -2157,59 +2425,107 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                             ),
                           ],
                           Row(
+                            crossAxisAlignment: CrossAxisAlignment.center, // Lurus sejajar vertikal di tengah
                             children: [
-                              GestureDetector(
+                              // Tombol Gambar (36x36 terpusat)
+                              BouncyButton(
                                 onTap: _pickAndSendImage,
                                 child: Container(
-                                  width: 44,
-                                  height: 44,
-                                  margin: const EdgeInsets.only(right: 8),
+                                  width: 36,
+                                  height: 36,
+                                  margin: const EdgeInsets.only(right: 6),
                                   decoration: BoxDecoration(
-                                    color: const Color(0xFFF1F5F9),
-                                    borderRadius: BorderRadius.circular(16),
+                                    color: isDark ? const Color(0xFF18181B) : Colors.white,
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                      color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+                                      width: 1.2,
+                                    ),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.05),
+                                        blurRadius: 6,
+                                        offset: const Offset(0, 2),
+                                      ),
+                                    ],
                                   ),
-                                  child: const Icon(
+                                  child: Icon(
                                     Icons.image_rounded,
-                                    color: Colors.black87,
-                                    size: 20,
+                                    color: isDark ? Colors.white70 : const Color(0xFF4F46E5),
+                                    size: 18,
                                   ),
                                 ),
                               ),
+                              // Text Field (1 Baris lurus sejajar)
                               Expanded(
-                                child: TextField(
-                                  controller: _messageController,
-                                  decoration: InputDecoration(
-                                    hintText: 'Tulis pesan...',
-                                    hintStyle: GoogleFonts.dmSans(color: Colors.black26, fontSize: 15.2),
-                                    filled: true,
-                                    fillColor: const Color(0xFFF8FAFC),
-                                    contentPadding: const EdgeInsets.symmetric(
-                                      horizontal: 16,
-                                      vertical: 12,
+                                child: Container(
+                                  constraints: const BoxConstraints(minHeight: 36),
+                                  alignment: Alignment.center,
+                                  decoration: BoxDecoration(
+                                    color: isDark ? const Color(0xFF18181B) : Colors.white,
+                                    borderRadius: BorderRadius.circular(18),
+                                    border: Border.all(
+                                      color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                                      width: 1.2,
                                     ),
-                                    enabledBorder: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(24),
-                                      borderSide: const BorderSide(color: Color(0xFFF1F5F9)),
-                                    ),
-                                    focusedBorder: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(24),
-                                      borderSide: const BorderSide(color: Colors.black87),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.04),
+                                        blurRadius: 6,
+                                        offset: const Offset(0, 2),
+                                      ),
+                                    ],
+                                  ),
+                                  child: KeyboardListener(
+                                    focusNode: _inputFocusNode,
+                                    onKeyEvent: (event) {
+                                      if (event is KeyDownEvent && event.logicalKey == LogicalKeyboardKey.enter) {
+                                        if (!HardwareKeyboard.instance.isShiftPressed) {
+                                          _sendMessage();
+                                        }
+                                      }
+                                    },
+                                    child: TextField(
+                                      controller: _messageController,
+                                      minLines: 1,
+                                      maxLines: 4,
+                                      keyboardType: TextInputType.multiline,
+                                      textInputAction: TextInputAction.send,
+                                      onSubmitted: (_) => _sendMessage(),
+                                      style: GoogleFonts.dmSans(
+                                        fontSize: 13.5,
+                                        color: isDark ? Colors.white : Colors.black87,
+                                      ),
+                                      decoration: InputDecoration(
+                                        hintText: 'Tulis pesan...',
+                                        hintStyle: GoogleFonts.dmSans(
+                                          color: isDark ? Colors.white38 : Colors.black26,
+                                          fontSize: 13.5,
+                                        ),
+                                        border: InputBorder.none,
+                                        isDense: true,
+                                        contentPadding: const EdgeInsets.symmetric(
+                                          horizontal: 14,
+                                          vertical: 8,
+                                        ),
+                                      ),
                                     ),
                                   ),
-                                  onSubmitted: (_) => _sendMessage(),
                                 ),
                               ),
-                              const SizedBox(width: 10),
-                              GestureDetector(
+                              const SizedBox(width: 4),
+                              // Tombol Kirim: Ikon saja warna hitam lurus sejajar
+                              BouncyButton(
                                 onTap: _sendMessage,
                                 child: Container(
-                                  width: 48,
-                                  height: 48,
-                                  decoration: const BoxDecoration(
-                                    color: Colors.black,
-                                    shape: BoxShape.circle,
+                                  width: 36,
+                                  height: 36,
+                                  alignment: Alignment.center,
+                                  child: Icon(
+                                    Icons.send_rounded,
+                                    color: isDark ? Colors.white : Colors.black,
+                                    size: 21,
                                   ),
-                                  child: const Icon(Icons.send_rounded, color: Colors.white, size: 18),
                                 ),
                               ),
                             ],
@@ -2217,23 +2533,23 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                         ],
                       ),
                     ),
-                    ],
-                  ),
+                  ],
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
+        ),
         ],
       ),
     ),
   ),
 );
-  },
-);
-  },
-);
-  },
-);
+                },
+              );
+            },
+          );
+        },
+      );
   }
 }
 
@@ -2547,5 +2863,238 @@ class _SwipeToReplyState extends State<SwipeToReply> with SingleTickerProviderSt
         ],
       ),
     );
+  }
+}
+
+
+// ============================================================================
+// ANIMATED PURPLE MICRO PATTERN BACKGROUND (SUBTLE GENTLE MOTION)
+// ============================================================================
+class AnimatedPurpleMicroPatternBackground extends StatefulWidget {
+  final Widget child;
+  final bool isDark;
+
+  const AnimatedPurpleMicroPatternBackground({
+    super.key,
+    required this.child,
+    this.isDark = false,
+  });
+
+  @override
+  State<AnimatedPurpleMicroPatternBackground> createState() => _AnimatedPurpleMicroPatternBackgroundState();
+}
+
+class _AnimatedPurpleMicroPatternBackgroundState extends State<AnimatedPurpleMicroPatternBackground>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 35),
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
+        return CustomPaint(
+          painter: _PurpleMicroPatternPainter(
+            animationValue: _controller.value,
+            isDark: widget.isDark,
+          ),
+          child: widget.child,
+        );
+      },
+      child: widget.child,
+    );
+  }
+}
+
+class _PurpleMicroPatternPainter extends CustomPainter {
+  final double animationValue;
+  final bool isDark;
+
+  _PurpleMicroPatternPainter({
+    required this.animationValue,
+    required this.isDark,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final Rect rect = Offset.zero & size;
+
+    // 1. Hero Purple Gradient (Persis warna hero Laporan: #7F52FC / #6D28D9)
+    final bgGradient = LinearGradient(
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      colors: isDark
+          ? const [
+              Color(0xFF140D2B),
+              Color(0xFF1F1242),
+              Color(0xFF120A24),
+            ]
+          : const [
+              Color(0xFF7F52FC),
+              Color(0xFF6D28D9),
+              Color(0xFF8B5CF6),
+            ],
+    );
+    canvas.drawRect(rect, Paint()..shader = bgGradient.createShader(rect));
+
+    // 2. Animated Abstract Flowing Shapes & Curves (Card Classroom & Hero Laporan Style)
+    final double anim1 = sin(animationValue * 2 * pi);
+    final double anim2 = cos(animationValue * 2 * pi);
+
+    // Large Soft Abstract Wave 1 (Top-Right to Center)
+    final wavePaint1 = Paint()
+      ..color = Colors.white.withValues(alpha: isDark ? 0.06 : 0.10)
+      ..style = PaintingStyle.fill;
+    final wavePath1 = Path();
+    wavePath1.moveTo(size.width * 0.3 + anim1 * 12, 0);
+    wavePath1.quadraticBezierTo(
+      size.width * 0.7 + anim2 * 15,
+      size.height * 0.25 + anim1 * 10,
+      size.width,
+      size.height * 0.35 + anim2 * 12,
+    );
+    wavePath1.lineTo(size.width, 0);
+    wavePath1.close();
+    canvas.drawPath(wavePath1, wavePaint1);
+
+    // Large Soft Abstract Wave 2 (Bottom-Left to Right)
+    final wavePaint2 = Paint()
+      ..color = Colors.white.withValues(alpha: isDark ? 0.05 : 0.08)
+      ..style = PaintingStyle.fill;
+    final wavePath2 = Path();
+    wavePath2.moveTo(0, size.height * 0.65 + anim2 * 14);
+    wavePath2.quadraticBezierTo(
+      size.width * 0.4 + anim1 * 18,
+      size.height * 0.8 + anim2 * 12,
+      size.width * 0.85 + anim1 * 10,
+      size.height,
+    );
+    wavePath2.lineTo(0, size.height);
+    wavePath2.close();
+    canvas.drawPath(wavePath2, wavePaint2);
+
+    // Abstract Floating Rings (Like Laporan Hero & Classroom Card Pattern)
+    final ringPaint = Paint()
+      ..color = Colors.white.withValues(alpha: isDark ? 0.14 : 0.16)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.0;
+
+    final ringPaintThin = Paint()
+      ..color = Colors.white.withValues(alpha: isDark ? 0.08 : 0.11)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.2;
+
+    canvas.drawCircle(
+      Offset(size.width * 0.15 + anim1 * 10, size.height * 0.22 + anim2 * 8),
+      36,
+      ringPaint,
+    );
+    canvas.drawCircle(
+      Offset(size.width * 0.88 - anim2 * 12, size.height * 0.45 + anim1 * 14),
+      48,
+      ringPaintThin,
+    );
+    canvas.drawCircle(
+      Offset(size.width * 0.32 + anim2 * 14, size.height * 0.78 - anim1 * 10),
+      28,
+      ringPaint,
+    );
+    canvas.drawCircle(
+      Offset(size.width * 0.75 + anim1 * 8, size.height * 0.88 + anim2 * 12),
+      56,
+      ringPaintThin,
+    );
+
+    // Dynamic Abstract Curves & Strokes
+    final strokePaint = Paint()
+      ..color = Colors.white.withValues(alpha: isDark ? 0.10 : 0.12)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 5.0
+      ..strokeCap = StrokeCap.round;
+
+    final arcPath = Path();
+    arcPath.moveTo(size.width * 0.05, size.height * 0.48 + anim1 * 10);
+    arcPath.quadraticBezierTo(
+      size.width * 0.25 + anim2 * 12,
+      size.height * 0.55 + anim1 * 15,
+      size.width * 0.45,
+      size.height * 0.42 + anim2 * 8,
+    );
+    canvas.drawPath(arcPath, strokePaint);
+
+    // 3. Scattered Abstract Dots & Micro Shapes (Bentuk Abstrak Tidak Teratur)
+    final dotPaint = Paint()
+      ..color = Colors.white.withValues(alpha: isDark ? 0.22 : 0.28)
+      ..style = PaintingStyle.fill;
+
+    final softDotPaint = Paint()
+      ..color = Colors.white.withValues(alpha: isDark ? 0.12 : 0.16)
+      ..style = PaintingStyle.fill;
+
+    final List<Offset> dots = [
+      Offset(size.width * 0.12, size.height * 0.10),
+      Offset(size.width * 0.45, size.height * 0.14),
+      Offset(size.width * 0.78, size.height * 0.08),
+      Offset(size.width * 0.25, size.height * 0.34),
+      Offset(size.width * 0.62, size.height * 0.28),
+      Offset(size.width * 0.92, size.height * 0.24),
+      Offset(size.width * 0.18, size.height * 0.60),
+      Offset(size.width * 0.50, size.height * 0.52),
+      Offset(size.width * 0.82, size.height * 0.64),
+      Offset(size.width * 0.08, size.height * 0.82),
+      Offset(size.width * 0.40, size.height * 0.90),
+      Offset(size.width * 0.70, size.height * 0.76),
+      Offset(size.width * 0.90, size.height * 0.92),
+    ];
+
+    for (int i = 0; i < dots.length; i++) {
+      final double wave = sin((i * 0.8) + (animationValue * 2 * pi));
+      final double dx = dots[i].dx + (sin(animationValue * 2 * pi + i) * 6.0);
+      final double dy = dots[i].dy + (cos(animationValue * 2 * pi + i) * 6.0);
+      final double radius = 1.8 + (wave * 0.8);
+
+      if (i % 3 == 0) {
+        canvas.drawCircle(Offset(dx, dy), radius, dotPaint);
+      } else if (i % 3 == 1) {
+        canvas.drawCircle(Offset(dx, dy), radius * 0.7, softDotPaint);
+      } else {
+        // Small 4-point sparkle
+        final double s = radius * 1.5;
+        final spPaint = Paint()
+          ..color = Colors.white.withValues(alpha: isDark ? 0.25 : 0.30)
+          ..strokeWidth = 1.2
+          ..style = PaintingStyle.stroke;
+        canvas.drawLine(Offset(dx - s, dy), Offset(dx + s, dy), spPaint);
+        canvas.drawLine(Offset(dx, dy - s), Offset(dx, dy + s), spPaint);
+      }
+    }
+
+    // 4. Tint Overlay (50% Putih untuk Light mode, 50% Hitam untuk Dark mode)
+    final overlayPaint = Paint()
+      ..color = isDark
+          ? Colors.black.withValues(alpha: 0.50)
+          : Colors.white.withValues(alpha: 0.50)
+      ..style = PaintingStyle.fill;
+    canvas.drawRect(rect, overlayPaint);
+  }
+
+  @override
+  bool shouldRepaint(covariant _PurpleMicroPatternPainter oldDelegate) {
+    return oldDelegate.animationValue != animationValue || oldDelegate.isDark != isDark;
   }
 }

@@ -910,6 +910,8 @@ class _DiscussionTabState extends State<DiscussionTab> {
       projectMap[doc.id] = {
         'id': doc.id,
         'name': doc.data()['name'] ?? 'Proyek Tanpa Nama',
+        'iconPath': doc.data()['iconPath'] ?? '',
+        'avatar': doc.data()['avatar'] ?? '',
       };
     }
 
@@ -923,6 +925,8 @@ class _DiscussionTabState extends State<DiscussionTab> {
         projectMap[doc.id] = {
           'id': doc.id,
           'name': doc.data()['name'] ?? 'Proyek Tanpa Nama',
+          'iconPath': doc.data()['iconPath'] ?? '',
+          'avatar': doc.data()['avatar'] ?? '',
         };
       }
     }
@@ -1879,9 +1883,12 @@ class _WhatsAppStyleNewChatModalState extends State<_WhatsAppStyleNewChatModal> 
 
   String? _selectedProjectId;
   String _selectedProjectName = '';
+  Map<String, dynamic> _selectedProjectData = {};
   List<Map<String, dynamic>> _projectMembers = [];
   List<String> _selectedMemberUids = []; // Non-checklist by default
   String _selectedAvatar = 'assets/icon_pack/chat/chat_1.png';
+  bool _isDefaultGroupIcon = true;
+  bool _showAvatarSlider = false;
   bool _isLoadingMembers = false;
   bool _isCreating = false;
 
@@ -1962,6 +1969,7 @@ class _WhatsAppStyleNewChatModalState extends State<_WhatsAppStyleNewChatModal> 
                             setState(() {
                               _selectedProjectId = pId;
                               _selectedProjectName = pName;
+                              _selectedProjectData = p;
                               _projectMembers = [];
                               _selectedMemberUids = []; // Non checklist by default
                               _isLoadingMembers = true;
@@ -2023,59 +2031,89 @@ class _WhatsAppStyleNewChatModalState extends State<_WhatsAppStyleNewChatModal> 
     );
   }
 
+  Widget _buildClassroomIcon(Map<String, dynamic> projectData, {double size = 36}) {
+    final rawIcon = (projectData['icon'] ?? projectData['iconPath'] ?? '').toString();
+    String iconPath = 'assets/icon_pack/project/project_1.png';
+    if (rawIcon.isNotEmpty) {
+      if (rawIcon.startsWith('assets/')) {
+        iconPath = rawIcon;
+      } else {
+        iconPath = 'assets/icon_pack/project/$rawIcon';
+      }
+    }
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: const Color(0xFF0F766E).withValues(alpha: 0.15),
+      ),
+      child: ClipOval(
+        child: Image.asset(
+          iconPath,
+          fit: BoxFit.cover,
+          errorBuilder: (_, __, ___) => Icon(
+            Icons.school_rounded,
+            color: const Color(0xFF0F766E),
+            size: size * 0.55,
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildStackedAvatars(List<Map<String, dynamic>> selectedMembers, bool isDark) {
     if (selectedMembers.isEmpty) return const SizedBox.shrink();
-    final int maxDisplay = 5;
+    final int maxDisplay = 4;
     final int displayCount = selectedMembers.length > maxDisplay ? maxDisplay : selectedMembers.length;
     final int remaining = selectedMembers.length - displayCount;
+    const double avatarSize = 38.0;
+    const double overlap = 26.0;
 
     return SizedBox(
-      height: 38,
+      height: avatarSize,
+      width: (displayCount + (remaining > 0 ? 1 : 0)) * overlap + 20,
       child: Stack(
+        clipBehavior: Clip.none,
         children: [
           for (int i = 0; i < displayCount; i++)
             Positioned(
-              left: i * 24.0,
+              left: i * overlap,
               child: Container(
-                width: 36,
-                height: 36,
+                width: avatarSize,
+                height: avatarSize,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  border: Border.all(
-                    color: isDark ? const Color(0xFF1E293B) : Colors.white,
-                    width: 2.0,
-                  ),
-                  color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+                  color: isDark ? const Color(0xFF18181B) : const Color(0xFFF1F5F9),
                 ),
                 child: ClipOval(
-                  child: Image.asset(
-                    selectedMembers[i]['avatar'] ?? 'assets/icon_pack/avatar/avatar_2.png',
-                    fit: BoxFit.cover,
+                  child: Transform.scale(
+                    scale: 1.35,
+                    child: Image.asset(
+                      selectedMembers[i]['avatar'] ?? 'assets/icon_pack/avatar/avatar_2.png',
+                      fit: BoxFit.cover,
+                    ),
                   ),
                 ),
               ),
             ),
           if (remaining > 0)
             Positioned(
-              left: displayCount * 24.0,
+              left: displayCount * overlap,
               child: Container(
-                width: 36,
-                height: 36,
-                decoration: BoxDecoration(
+                width: avatarSize,
+                height: avatarSize,
+                decoration: const BoxDecoration(
                   shape: BoxShape.circle,
-                  color: isDark ? const Color(0xFF3F3F46) : const Color(0xFFE2E8F0),
-                  border: Border.all(
-                    color: isDark ? const Color(0xFF1E293B) : Colors.white,
-                    width: 2.0,
-                  ),
+                  color: Color(0xFF181E2C),
                 ),
                 child: Center(
                   child: Text(
                     '+$remaining',
                     style: GoogleFonts.plusJakartaSans(
-                      fontSize: 11.5,
+                      fontSize: 12.0,
                       fontWeight: FontWeight.bold,
-                      color: isDark ? Colors.white : Colors.black87,
+                      color: Colors.white,
                     ),
                   ),
                 ),
@@ -2085,13 +2123,112 @@ class _WhatsAppStyleNewChatModalState extends State<_WhatsAppStyleNewChatModal> 
       ),
     );
   }
+  void _showAvatarPickerModal(BuildContext context) {
+    final isDark = widget.isDark;
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: isDark ? const Color(0xFF1E293B) : Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (modalCtx) {
+        return Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: isDark ? Colors.white24 : const Color(0xFFE2E8F0),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Pilih Ikon / Avatar Grup',
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: isDark ? Colors.white : Colors.black87,
+                ),
+              ),
+              const SizedBox(height: 16),
+              GridView.builder(
+                shrinkWrap: true,
+                itemCount: 11,
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 4,
+                  crossAxisSpacing: 14,
+                  mainAxisSpacing: 14,
+                ),
+                itemBuilder: (ctx, i) {
+                  final isDefaultGroup = i == 0;
+                  final avatarPath = isDefaultGroup ? '' : 'assets/icon_pack/chat/chat_$i.png';
+                  final isSelected = isDefaultGroup
+                      ? _isDefaultGroupIcon
+                      : (!_isDefaultGroupIcon && _selectedAvatar == avatarPath);
+
+                  return GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        if (isDefaultGroup) {
+                          _isDefaultGroupIcon = true;
+                          _selectedAvatar = 'assets/icon_pack/chat/chat_1.png';
+                        } else {
+                          _isDefaultGroupIcon = false;
+                          _selectedAvatar = avatarPath;
+                        }
+                      });
+                      Navigator.pop(modalCtx);
+                    },
+                    child: Container(
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: isSelected
+                              ? (isDark ? Colors.white : Colors.black)
+                              : (isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0)),
+                          width: isSelected ? 2.5 : 1.0,
+                        ),
+                        color: isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
+                      ),
+                      child: isDefaultGroup
+                          ? const Center(
+                              child: Icon(
+                                Icons.groups_rounded,
+                                color: Color(0xFF0F766E),
+                                size: 28,
+                              ),
+                            )
+                          : ClipOval(
+                              child: Transform.scale(
+                                scale: 1.35,
+                                child: Image.asset(avatarPath, fit: BoxFit.cover),
+                              ),
+                            ),
+                    ),
+                  );
+                },
+              ),
+              const SizedBox(height: 10),
+            ],
+          ),
+        );
+      },
+    );
+  }
 
   Future<void> _createDiscussionGroup() async {
     final chan = _channelController.text.trim();
     final ttl = _titleController.text.trim();
-    if (chan.isEmpty || ttl.isEmpty || _selectedProjectId == null) {
+    if (ttl.isEmpty || _selectedProjectId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Silakan lengkapi nama grup dan saluran.')),
+        const SnackBar(content: Text('Nama diskusi wajib diisi.')),
       );
       return;
     }
@@ -2106,7 +2243,10 @@ class _WhatsAppStyleNewChatModalState extends State<_WhatsAppStyleNewChatModal> 
         finalMembers.add(widget.currentUid);
       }
 
-      final channelName = chan.startsWith('#') ? chan : '#$chan';
+      final cleanTitle = ttl.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]+'), '-').replaceAll(RegExp(r'^-|-$'), '');
+      final channelName = chan.isNotEmpty
+          ? (chan.startsWith('#') ? chan : '#$chan')
+          : '#${cleanTitle.isNotEmpty ? cleanTitle : 'diskusi'}';
       final newDoc = await FirebaseFirestore.instance.collection('discussions').add({
         'projectId': _selectedProjectId,
         'channel': channelName,
@@ -2206,17 +2346,28 @@ class _WhatsAppStyleNewChatModalState extends State<_WhatsAppStyleNewChatModal> 
                           });
                         },
                         child: Container(
-                          width: 36,
-                          height: 36,
+                          width: 42,
+                          height: 42,
                           margin: const EdgeInsets.only(right: 10),
                           decoration: BoxDecoration(
-                            color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+                            color: isDark ? const Color(0xFF18181B) : Colors.white,
                             shape: BoxShape.circle,
+                            border: Border.all(
+                              color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+                              width: 1.2,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.04),
+                                blurRadius: 8,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
                           ),
                           child: Icon(
                             Icons.close_rounded,
-                            color: isDark ? Colors.white70 : Colors.black87,
-                            size: 19,
+                            color: isDark ? Colors.white : Colors.black,
+                            size: 20,
                           ),
                         ),
                       )
@@ -2228,17 +2379,28 @@ class _WhatsAppStyleNewChatModalState extends State<_WhatsAppStyleNewChatModal> 
                           });
                         },
                         child: Container(
-                          width: 36,
-                          height: 36,
+                          width: 42,
+                          height: 42,
                           margin: const EdgeInsets.only(right: 10),
                           decoration: BoxDecoration(
-                            color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+                            color: isDark ? const Color(0xFF18181B) : Colors.white,
                             shape: BoxShape.circle,
+                            border: Border.all(
+                              color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+                              width: 1.2,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.04),
+                                blurRadius: 8,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
                           ),
                           child: Icon(
                             Icons.arrow_back_rounded,
-                            color: isDark ? Colors.white70 : Colors.black87,
-                            size: 19,
+                            color: isDark ? Colors.white : Colors.black,
+                            size: 20,
                           ),
                         ),
                       ),
@@ -2260,16 +2422,27 @@ class _WhatsAppStyleNewChatModalState extends State<_WhatsAppStyleNewChatModal> 
                   BouncyButton(
                     onTap: () => Navigator.pop(context),
                     child: Container(
-                      width: 36,
-                      height: 36,
+                      width: 42,
+                      height: 42,
                       decoration: BoxDecoration(
-                        color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+                        color: isDark ? const Color(0xFF18181B) : Colors.white,
                         shape: BoxShape.circle,
+                        border: Border.all(
+                          color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+                          width: 1.2,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.04),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
                       ),
                       child: Icon(
                         Icons.close_rounded,
-                        color: isDark ? Colors.white70 : Colors.black87,
-                        size: 19,
+                        color: isDark ? Colors.white : Colors.black,
+                        size: 20,
                       ),
                     ),
                   )
@@ -3060,159 +3233,235 @@ class _WhatsAppStyleNewChatModalState extends State<_WhatsAppStyleNewChatModal> 
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Avatar Preview & Horizontal Selector
-                    Center(
-                      child: Container(
-                        width: 72,
-                        height: 72,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: isDark ? Colors.white : Colors.black,
-                            width: 2.5,
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: isDark ? 0.4 : 0.1),
-                              blurRadius: 10,
-                              offset: const Offset(0, 4),
-                            ),
-                          ],
-                        ),
-                        child: ClipOval(
-                          child: Transform.scale(
-                            scale: 1.25,
-                            child: Image.asset(_selectedAvatar, fit: BoxFit.cover),
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    Center(
-                      child: Text(
-                        'Pilih Avatar Diskusi',
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 13.0,
-                          fontWeight: FontWeight.w600,
-                          color: isDark ? Colors.white60 : Colors.black54,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    SizedBox(
-                      height: 48,
-                      child: ListView.builder(
-                        scrollDirection: Axis.horizontal,
-                        itemCount: 10,
-                        itemBuilder: (context, i) {
-                          final avatarPath = 'assets/icon_pack/chat/chat_${i + 1}.png';
-                          final isSelected = _selectedAvatar == avatarPath;
-                          return GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                _selectedAvatar = avatarPath;
-                              });
-                            },
-                            child: Center(
-                              child: Container(
-                                margin: const EdgeInsets.only(right: 10),
-                                width: 42,
-                                height: 42,
+                    // Layout 35% - 65% (Kiri Avatar Grup, Kanan Nama Diskusi)
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        // Kiri (35%): Avatar Preview (Tap to toggle frameless slider overlay)
+                        GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              _showAvatarSlider = !_showAvatarSlider;
+                            });
+                          },
+                          child: Stack(
+                            children: [
+                              Container(
+                                width: 72,
+                                height: 72,
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
-                                  border: Border.all(
-                                    color: isSelected
-                                        ? (isDark ? Colors.white : Colors.black)
-                                        : (isDark ? const Color(0xFF3F3F46) : const Color(0xFFE2E8F0)),
-                                    width: isSelected ? 2.2 : 1.0,
-                                  ),
+                                  color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.06),
+                                      blurRadius: 8,
+                                      offset: const Offset(0, 3),
+                                    ),
+                                  ],
                                 ),
-                                child: ClipOval(
-                                  child: Transform.scale(
-                                    scale: 1.25,
-                                    child: Image.asset(avatarPath, fit: BoxFit.cover),
+                                child: _isDefaultGroupIcon
+                                    ? const Center(
+                                        child: Icon(
+                                          Icons.groups_rounded,
+                                          color: Color(0xFF0F766E),
+                                          size: 38,
+                                        ),
+                                      )
+                                    : ClipOval(
+                                        child: Transform.scale(
+                                          scale: 1.35,
+                                          child: Image.asset(_selectedAvatar, fit: BoxFit.cover),
+                                        ),
+                                      ),
+                              ),
+                              Positioned(
+                                bottom: 0,
+                                right: 0,
+                                child: Container(
+                                  padding: const EdgeInsets.all(4),
+                                  decoration: BoxDecoration(
+                                    color: isDark ? Colors.white : Colors.black,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Icon(
+                                    _showAvatarSlider ? Icons.check_rounded : Icons.camera_alt_rounded,
+                                    size: 12,
+                                    color: isDark ? Colors.black : Colors.white,
                                   ),
                                 ),
                               ),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                    const SizedBox(height: 18),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 14),
 
-                    Text(
-                      'Nama Diskusi / Judul Grup',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 13.5,
-                        fontWeight: FontWeight.w600,
-                        color: isDark ? Colors.white70 : Colors.black54,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    TextField(
-                      controller: _titleController,
-                      style: GoogleFonts.dmSans(
-                        fontSize: 14.5,
-                        color: isDark ? Colors.white : Colors.black87,
-                      ),
-                      decoration: InputDecoration(
-                        hintText: 'Contoh: Kelompok Diskusi Bab 1',
-                        hintStyle: GoogleFonts.dmSans(
-                          color: isDark ? Colors.white38 : Colors.black26,
-                          fontSize: 14.5,
-                        ),
-                        filled: true,
-                        fillColor: isDark ? const Color(0xFF27272A) : const Color(0xFFF8FAFC),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(14),
-                          borderSide: BorderSide(
-                            color: isDark ? const Color(0xFF3F3F46) : const Color(0xFFE2E8F0),
+                        // Kanan (65%): Nama Diskusi (Wajib Diisi, Fully Rounded)
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Nama Diskusi',
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 13.0,
+                                  fontWeight: FontWeight.bold,
+                                  color: isDark ? Colors.white70 : Colors.black87,
+                                ),
+                              ),
+                              const SizedBox(height: 6),
+                              TextField(
+                                controller: _titleController,
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 14.0,
+                                  fontWeight: FontWeight.w600,
+                                  color: isDark ? Colors.white : Colors.black87,
+                                ),
+                                decoration: InputDecoration(
+                                  hintText: 'Nama Diskusi (Wajib)',
+                                  hintStyle: GoogleFonts.dmSans(
+                                    color: isDark ? Colors.white38 : Colors.black38,
+                                    fontSize: 13.5,
+                                  ),
+                                  filled: true,
+                                  fillColor: isDark ? const Color(0xFF1E293B) : const Color(0xFFF8FAFC),
+                                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                  enabledBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(24),
+                                    borderSide: BorderSide(
+                                      color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                                    ),
+                                  ),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(24),
+                                    borderSide: BorderSide(
+                                      color: isDark ? Colors.white : Colors.black,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(14),
-                          borderSide: BorderSide(
-                            color: isDark ? Colors.white : Colors.black,
+                      ],
+                    ),
+
+                    // Overlay Slider Full-Width Frameless 50% Transparan (Mepet, Tanpa Teks, Tanpa X)
+                    if (_showAvatarSlider) ...[
+                      const SizedBox(height: 12),
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(32),
+                        child: BackdropFilter(
+                          filter: ui.ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                          child: Container(
+                            width: double.infinity,
+                            height: 56,
+                            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 3),
+                            decoration: BoxDecoration(
+                              color: isDark
+                                  ? Colors.black.withValues(alpha: 0.50)
+                                  : Colors.white.withValues(alpha: 0.50),
+                              borderRadius: BorderRadius.circular(32),
+                              border: Border.all(
+                                color: isDark
+                                    ? Colors.white.withValues(alpha: 0.12)
+                                    : Colors.black.withValues(alpha: 0.08),
+                                width: 1.0,
+                              ),
+                            ),
+                            child: ListView.separated(
+                              scrollDirection: Axis.horizontal,
+                              padding: const EdgeInsets.symmetric(horizontal: 2),
+                              itemCount: 11,
+                              separatorBuilder: (_, __) => const SizedBox(width: 6),
+                              itemBuilder: (ctx, i) {
+                                final isDefaultGroup = i == 0;
+                                final avatarPath = isDefaultGroup ? '' : 'assets/icon_pack/chat/chat_$i.png';
+                                final isSelected = isDefaultGroup
+                                    ? _isDefaultGroupIcon
+                                    : (!_isDefaultGroupIcon && _selectedAvatar == avatarPath);
+
+                                return GestureDetector(
+                                  onTap: () {
+                                    setState(() {
+                                      if (isDefaultGroup) {
+                                        _isDefaultGroupIcon = true;
+                                        _selectedAvatar = 'assets/icon_pack/chat/chat_1.png';
+                                      } else {
+                                        _isDefaultGroupIcon = false;
+                                        _selectedAvatar = avatarPath;
+                                      }
+                                      _showAvatarSlider = false;
+                                    });
+                                  },
+                                  child: Container(
+                                    width: 48,
+                                    height: 48,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      border: isSelected
+                                          ? Border.all(color: const Color(0xFF0F766E), width: 2.2)
+                                          : Border.all(color: Colors.transparent, width: 2.2),
+                                      color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
+                                    ),
+                                    child: isDefaultGroup
+                                        ? const Center(
+                                            child: Icon(
+                                              Icons.groups_rounded,
+                                              color: Color(0xFF0F766E),
+                                              size: 26,
+                                            ),
+                                          )
+                                        : ClipOval(
+                                            child: Transform.scale(
+                                              scale: 1.35,
+                                              child: Image.asset(avatarPath, fit: BoxFit.cover),
+                                            ),
+                                          ),
+                                  ),
+                                );
+                              },
+                            ),
                           ),
                         ),
                       ),
-                    ),
+                    ],
+
                     const SizedBox(height: 14),
 
+                    // Saluran / Channel (Opsional, Full Width di bawahnya, Fully Rounded)
                     Text(
-                      'Nama Saluran (Channel)',
+                      'Saluran (Channel)',
                       style: GoogleFonts.plusJakartaSans(
-                        fontSize: 13.5,
-                        fontWeight: FontWeight.w600,
-                        color: isDark ? Colors.white70 : Colors.black54,
+                        fontSize: 13.0,
+                        fontWeight: FontWeight.bold,
+                        color: isDark ? Colors.white70 : Colors.black87,
                       ),
                     ),
                     const SizedBox(height: 6),
                     TextField(
                       controller: _channelController,
-                      style: GoogleFonts.dmSans(
-                        fontSize: 14.5,
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 14.0,
                         color: isDark ? Colors.white : Colors.black87,
                       ),
                       decoration: InputDecoration(
-                        hintText: 'Contoh: #diskusi-materi',
+                        hintText: 'Saluran (Opsional, contoh: #diskusi)',
                         hintStyle: GoogleFonts.dmSans(
-                          color: isDark ? Colors.white38 : Colors.black26,
-                          fontSize: 14.5,
+                          color: isDark ? Colors.white38 : Colors.black38,
+                          fontSize: 13.5,
                         ),
                         filled: true,
-                        fillColor: isDark ? const Color(0xFF27272A) : const Color(0xFFF8FAFC),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                        fillColor: isDark ? const Color(0xFF1E293B) : const Color(0xFFF8FAFC),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                         enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(14),
+                          borderRadius: BorderRadius.circular(24),
                           borderSide: BorderSide(
-                            color: isDark ? const Color(0xFF3F3F46) : const Color(0xFFE2E8F0),
+                            color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
                           ),
                         ),
                         focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(14),
+                          borderRadius: BorderRadius.circular(24),
                           borderSide: BorderSide(
                             color: isDark ? Colors.white : Colors.black,
                           ),
@@ -3221,12 +3470,12 @@ class _WhatsAppStyleNewChatModalState extends State<_WhatsAppStyleNewChatModal> 
                     ),
                     const SizedBox(height: 18),
 
-                    // Detail Classroom & Tumpukan Avatar Anggota
+                    // Detail Classroom Card & Anggota Terpilih
                     Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
                         color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF8FAFC),
-                        borderRadius: BorderRadius.circular(18),
+                        borderRadius: BorderRadius.circular(20),
                         border: Border.all(
                           color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
                         ),
@@ -3236,20 +3485,9 @@ class _WhatsAppStyleNewChatModalState extends State<_WhatsAppStyleNewChatModal> 
                         children: [
                           Row(
                             children: [
-                              Container(
-                                width: 32,
-                                height: 32,
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFF0F766E).withValues(alpha: 0.15),
-                                  shape: BoxShape.circle,
-                                ),
-                                child: const Icon(
-                                  Icons.school_rounded,
-                                  color: Color(0xFF0F766E),
-                                  size: 17,
-                                ),
-                              ),
-                              const SizedBox(width: 10),
+                              // Avatar / Icon Classroom yang sesuai
+                              _buildClassroomIcon(_selectedProjectData, size: 38),
+                              const SizedBox(width: 12),
                               Expanded(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -3262,8 +3500,9 @@ class _WhatsAppStyleNewChatModalState extends State<_WhatsAppStyleNewChatModal> 
                                         color: isDark ? Colors.white : const Color(0xFF0F172A),
                                       ),
                                     ),
+                                    const SizedBox(height: 2),
                                     Text(
-                                      '${_selectedMemberUids.length} Anggota Terpilih',
+                                      '${_selectedMemberUids.length} Anggota',
                                       style: GoogleFonts.dmSans(
                                         fontSize: 12.0,
                                         color: isDark ? Colors.white60 : const Color(0xFF64748B),
@@ -3276,14 +3515,14 @@ class _WhatsAppStyleNewChatModalState extends State<_WhatsAppStyleNewChatModal> 
                           ),
                           const SizedBox(height: 14),
                           Text(
-                            'Tumpukan Anggota:',
+                            'Anggota',
                             style: GoogleFonts.plusJakartaSans(
-                              fontSize: 12.0,
-                              fontWeight: FontWeight.w600,
-                              color: isDark ? Colors.white60 : Colors.black54,
+                              fontSize: 12.5,
+                              fontWeight: FontWeight.bold,
+                              color: isDark ? Colors.white70 : Colors.black87,
                             ),
                           ),
-                          const SizedBox(height: 6),
+                          const SizedBox(height: 8),
                           Builder(
                             builder: (context) {
                               final selectedMembers = _projectMembers
