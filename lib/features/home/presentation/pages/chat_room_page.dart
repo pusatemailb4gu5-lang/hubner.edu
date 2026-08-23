@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:image/image.dart' as img;
 import 'dart:ui' as ui;
 import 'dart:math';
@@ -915,60 +916,6 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
   }
 
   Future<void> _pickAndSendMedia({required bool isImage}) async {
-    final driveInfo = await _getDiscussionDriveInfo();
-    String? driveFolderId = driveInfo['folderId'];
-    String? driveAccessToken = driveInfo['accessToken'];
-    final driveFolderUrl = driveInfo['folderUrl'] ?? '';
-
-    // If no drive connected yet, prompt to connect
-    if (driveFolderId == null || driveFolderId.isEmpty) {
-      if (mounted) {
-        final shouldConnect = await showDialog<bool>(
-          context: context,
-          builder: (ctx) => AlertDialog(
-            backgroundColor: AppColors.isDarkMode ? const Color(0xFF18181B) : Colors.white,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-            title: Row(
-              children: [
-                const Icon(Icons.add_to_drive_rounded, color: Color(0xFF2563EB), size: 24),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Text(
-                    'Hubungkan Google Drive',
-                    style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, fontSize: 16),
-                  ),
-                ),
-              ],
-            ),
-            content: Text(
-              'Obrolan ini belum memiliki folder Google Drive untuk menyimpan lampiran. Hubungkan folder Google Drive sekarang?',
-              style: GoogleFonts.dmSans(fontSize: 13.5),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(ctx, false),
-                child: Text('Nanti', style: GoogleFonts.plusJakartaSans(color: Colors.black54)),
-              ),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF2563EB),
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                ),
-                onPressed: () => Navigator.pop(ctx, true),
-                child: Text('Hubungkan', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold)),
-              ),
-            ],
-          ),
-        );
-
-        if (shouldConnect == true) {
-          await _showFolderSelectorDialog(widget.projectId);
-        }
-      }
-      return;
-    }
-
     try {
       final result = await FilePicker.pickFiles(
         type: isImage ? FileType.image : FileType.any,
@@ -1000,29 +947,47 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
         }
       }
 
-      // Ensure access token is available
-      if (driveAccessToken == null || driveAccessToken.isEmpty) {
-        try {
-          var account = await GoogleSignIn.instance.attemptLightweightAuthentication();
-          account ??= await GoogleSignIn.instance.authenticate();
-          final auth = await account.authorizationClient.authorizeScopes([drive.DriveApi.driveFileScope]);
-          driveAccessToken = auth.accessToken;
-        } catch (_) {}
+      final driveInfo = await _getDiscussionDriveInfo();
+      String? driveFolderId = driveInfo['folderId'];
+      String? driveAccessToken = driveInfo['accessToken'];
+      final driveFolderUrl = driveInfo['folderUrl'] ?? '';
+
+      String imageLink = '';
+      String fileLink = '';
+
+      if (isImage) {
+        imageLink = 'data:image/jpeg;base64,${base64Encode(uploadBytes)}';
       }
 
-      Map<String, String> uploadResult;
-      if (driveAccessToken != null && driveAccessToken.isNotEmpty) {
-        uploadResult = await GoogleDriveService.uploadFile(
-          accessToken: driveAccessToken,
-          folderId: driveFolderId,
-          fileName: uploadFileName,
-          bytes: uploadBytes,
-        );
-      } else {
-        uploadResult = {
-          'directLink': driveFolderUrl,
-          'viewLink': driveFolderUrl,
-        };
+      // Try Google Drive upload if connected and access token available
+      if (driveFolderId != null && driveFolderId.isNotEmpty) {
+        if (driveAccessToken == null || driveAccessToken.isEmpty) {
+          try {
+            var account = await GoogleSignIn.instance.attemptLightweightAuthentication();
+            account ??= await GoogleSignIn.instance.authenticate();
+            final auth = await account.authorizationClient.authorizeScopes([drive.DriveApi.driveFileScope]);
+            driveAccessToken = auth.accessToken;
+          } catch (_) {}
+        }
+
+        if (driveAccessToken != null && driveAccessToken.isNotEmpty) {
+          try {
+            final uploadResult = await GoogleDriveService.uploadFile(
+              accessToken: driveAccessToken,
+              folderId: driveFolderId,
+              fileName: uploadFileName,
+              bytes: uploadBytes,
+            );
+            if (isImage && uploadResult['directLink'] != null && uploadResult['directLink']!.isNotEmpty) {
+              imageLink = uploadResult['directLink']!;
+            }
+            fileLink = uploadResult['directLink'] ?? uploadResult['viewLink'] ?? driveFolderUrl;
+          } catch (_) {}
+        }
+      }
+
+      if (!isImage && fileLink.isEmpty) {
+        fileLink = driveFolderUrl;
       }
 
       final user = FirebaseAuth.instance.currentUser;
@@ -1045,8 +1010,8 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
           'memberUids': [user.uid, widget.targetUserUid ?? ''],
           'lastMessage': isImage ? '$senderName mengirim gambar' : '$senderName mengirim berkas',
           'time': 'Sekarang',
-          'driveFolderId': driveFolderId,
-          'driveFolderUrl': driveFolderUrl,
+          if (driveFolderId != null && driveFolderId.isNotEmpty) 'driveFolderId': driveFolderId,
+          if (driveFolderUrl.isNotEmpty) 'driveFolderUrl': driveFolderUrl,
           'createdAt': FieldValue.serverTimestamp(),
           'colorIndex': Random().nextInt(5),
         });
@@ -1068,9 +1033,9 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
         'senderUid': user.uid,
         'avatar': senderAvatar,
         'message': isImage ? '[Gambar Lampiran]' : '[Berkas: $uploadFileName]',
-        if (isImage) 'imageUrl': uploadResult['directLink'] ?? driveFolderUrl,
+        if (isImage) 'imageUrl': imageLink,
         if (!isImage) ...{
-          'fileUrl': uploadResult['directLink'] ?? uploadResult['viewLink'] ?? driveFolderUrl,
+          'fileUrl': fileLink,
           'fileName': uploadFileName,
           'fileSize': formattedSize,
           'fileExtension': fileExt,
@@ -3040,97 +3005,6 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                 ],
                               ),
                             ),
-                            Builder(
-                              builder: (context) {
-                                final String? activeDriveFolderId = (discData?['driveFolderId'] as String?)?.isNotEmpty == true
-                                    ? (discData!['driveFolderId'] as String)
-                                    : (projData?['driveFolderId'] as String?);
-                                final String? activeDriveFolderUrl = (discData?['driveFolderUrl'] as String?)?.isNotEmpty == true
-                                    ? (discData!['driveFolderUrl'] as String)
-                                    : ((projData?['driveFolderUrl'] as String?) ?? (activeDriveFolderId != null ? 'https://drive.google.com/drive/folders/$activeDriveFolderId' : null));
-                                final bool hasDriveFolder = activeDriveFolderId != null && activeDriveFolderId.isNotEmpty;
-
-                                return Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    if (hasDriveFolder)
-                                      Container(
-                                        margin: const EdgeInsets.only(right: 8),
-                                        child: BouncyButton(
-                                          onTap: () async {
-                                            final String folderUrl = activeDriveFolderUrl ?? 'https://drive.google.com/drive/folders/$activeDriveFolderId';
-                                            final Uri uri = Uri.parse(folderUrl);
-                                            if (await canLaunchUrl(uri)) {
-                                              await launchUrl(uri, mode: LaunchMode.externalApplication);
-                                            } else {
-                                              if (context.mounted) {
-                                                ScaffoldMessenger.of(context).showSnackBar(
-                                                  const SnackBar(content: Text('Tidak dapat membuka Google Drive.')),
-                                                );
-                                              }
-                                            }
-                                          },
-                                          child: Container(
-                                            width: 42,
-                                            height: 42,
-                                            decoration: BoxDecoration(
-                                              color: isDark ? const Color(0xFF000000) : const Color(0xFFEFF6FF),
-                                              shape: BoxShape.circle,
-                                              border: Border.all(
-                                                color: isDark ? const Color(0xFF27272A) : const Color(0xFFDBEAFE),
-                                                width: 1.2,
-                                              ),
-                                              boxShadow: [
-                                                BoxShadow(
-                                                  color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.04),
-                                                  blurRadius: 8,
-                                                  offset: const Offset(0, 2),
-                                                ),
-                                              ],
-                                            ),
-                                            child: const Icon(
-                                              Icons.folder_shared_rounded,
-                                              color: Color(0xFF2563EB),
-                                              size: 20,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    if (!hasDriveFolder && (projectId.isEmpty || _userRole == 'guru'))
-                                      Container(
-                                        margin: const EdgeInsets.only(right: 8),
-                                        child: BouncyButton(
-                                          onTap: () => _showFolderSelectorDialog(projectId),
-                                          child: Container(
-                                            width: 42,
-                                            height: 42,
-                                            decoration: BoxDecoration(
-                                              color: isDark ? const Color(0xFF18181B) : Colors.white,
-                                              shape: BoxShape.circle,
-                                              border: Border.all(
-                                                color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
-                                                width: 1.2,
-                                              ),
-                                              boxShadow: [
-                                                BoxShadow(
-                                                  color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.04),
-                                                  blurRadius: 8,
-                                                  offset: const Offset(0, 2),
-                                                ),
-                                              ],
-                                            ),
-                                            child: Icon(
-                                              Icons.add_to_drive_rounded,
-                                              color: isDark ? Colors.white70 : Colors.black87,
-                                              size: 20,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                  ],
-                                );
-                              },
-                            ),
                             PopupMenuButton<String>(
                               tooltip: '',
                               padding: EdgeInsets.zero,
@@ -3838,32 +3712,43 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                                                     borderRadius: BorderRadius.circular(10),
                                                                     child: Container(
                                                                       constraints: const BoxConstraints(maxHeight: 200, maxWidth: 240),
-                                                                      child: Image.network(
-                                                                        imageUrl,
-                                                                        fit: BoxFit.cover,
-                                                                        loadingBuilder: (context, child, progress) {
-                                                                          if (progress == null) return child;
-                                                                          return Container(
-                                                                            height: 120,
-                                                                            width: 200,
-                                                                            color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
-                                                                            child: const Center(
-                                                                              child: SizedBox(
-                                                                                width: 20,
-                                                                                height: 20,
-                                                                                child: CircularProgressIndicator(strokeWidth: 2),
+                                                                      child: Builder(
+                                                                        builder: (context) {
+                                                                          if (imageUrl.startsWith('data:image') && imageUrl.contains(',')) {
+                                                                            try {
+                                                                              final b64 = imageUrl.split(',').last;
+                                                                              final bytes = base64Decode(b64);
+                                                                              return Image.memory(bytes, fit: BoxFit.cover);
+                                                                            } catch (_) {}
+                                                                          }
+                                                                          return Image.network(
+                                                                            imageUrl,
+                                                                            fit: BoxFit.cover,
+                                                                            loadingBuilder: (context, child, progress) {
+                                                                              if (progress == null) return child;
+                                                                              return Container(
+                                                                                height: 120,
+                                                                                width: 200,
+                                                                                color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                                                                                child: const Center(
+                                                                                  child: SizedBox(
+                                                                                    width: 20,
+                                                                                    height: 20,
+                                                                                    child: CircularProgressIndicator(strokeWidth: 2),
+                                                                                  ),
+                                                                                ),
+                                                                              );
+                                                                            },
+                                                                            errorBuilder: (_, __, ___) => Container(
+                                                                              height: 80,
+                                                                              width: 140,
+                                                                              color: Colors.red.withValues(alpha: 0.1),
+                                                                              child: const Center(
+                                                                                child: Icon(Icons.broken_image_rounded, color: Colors.redAccent),
                                                                               ),
                                                                             ),
                                                                           );
                                                                         },
-                                                                        errorBuilder: (_, __, ___) => Container(
-                                                                          height: 80,
-                                                                          width: 140,
-                                                                          color: Colors.red.withValues(alpha: 0.1),
-                                                                          child: const Center(
-                                                                            child: Icon(Icons.broken_image_rounded, color: Colors.redAccent),
-                                                                          ),
-                                                                        ),
                                                                       ),
                                                                     ),
                                                                   ),
@@ -4619,25 +4504,36 @@ class FullScreenImagePage extends StatelessWidget {
         child: InteractiveViewer(
           minScale: 0.5,
           maxScale: 4.0,
-          child: Image.network(
-            imageUrl,
-            fit: BoxFit.contain,
-            loadingBuilder: (context, child, loadingProgress) {
-              if (loadingProgress == null) return child;
-              return const Center(
-                child: SizedBox(
-                  width: 24,
-                  height: 24,
-                  child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white70),
-                ),
-              );
-            },
-            errorBuilder: (context, error, stackTrace) {
-              return const Center(
-                child: Text(
-                  'Gagal memuat gambar',
-                  style: TextStyle(color: Colors.white),
-                ),
+          child: Builder(
+            builder: (context) {
+              if (imageUrl.startsWith('data:image') && imageUrl.contains(',')) {
+                try {
+                  final b64 = imageUrl.split(',').last;
+                  final bytes = base64Decode(b64);
+                  return Image.memory(bytes, fit: BoxFit.contain);
+                } catch (_) {}
+              }
+              return Image.network(
+                imageUrl,
+                fit: BoxFit.contain,
+                loadingBuilder: (context, child, loadingProgress) {
+                  if (loadingProgress == null) return child;
+                  return const Center(
+                    child: SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white70),
+                    ),
+                  );
+                },
+                errorBuilder: (context, error, stackTrace) {
+                  return const Center(
+                    child: Text(
+                      'Gagal memuat gambar',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  );
+                },
               );
             },
           ),
