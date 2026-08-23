@@ -10,8 +10,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:hubner/features/home/presentation/pages/main_navigation_page.dart';
 import 'package:hubner/features/notifications/domain/notification_service.dart';
-import 'package:hubner/features/home/presentation/widgets/animated_rainbow_background.dart';
-import 'package:hubner/core/services/classroom_export_service.dart';
+import 'package:hubner/core/theme/app_colors.dart';
 
 class AddClassPage extends StatefulWidget {
   final Map<String, String>? registrationData;
@@ -56,13 +55,29 @@ class _AddClassPageState extends State<AddClassPage> {
   int _selectedIconIndex = 0; // Default icon
   int _selectedColorIndex = 0; // Default color index
   final List<Color> _classroomAccentColors = const [
-    Color(0xFF009688), // Teal
-    Color(0xFF448AFF), // Blue
-    Color(0xFFE040FB), // Purple
-    Color(0xFFFF4081), // Pink
-    Color(0xFFFFAB40), // Orange
-    Color(0xFF536DFE), // Indigo
-    Color(0xFF607D8B), // Blue Grey
+    Color(0xFFD6A5F8), // 01. Lilac Purple
+    Color(0xFF9CC8FC), // 02. Sky Blue
+    Color(0xFF7DE3D0), // 03. Emerald Mint / Tosca
+    Color(0xFFF7BD84), // 04. Amber Peach / Orange
+    Color(0xFFF794BE), // 05. Rose Magenta / Pink
+    Color(0xFFA5B4FC), // 06. Indigo Violet
+    Color(0xFFBEF264), // 07. Fresh Lime
+    Color(0xFF67E8F9), // 08. Ocean Cyan
+    Color(0xFFFDE047), // 09. Amber Gold
+    Color(0xFFCBD5E1), // 10. Steel Slate
+  ];
+
+  final List<Color> _classroomDarkColors = const [
+    Color(0xFF6B3BA3), // 01. Deep Lilac
+    Color(0xFF2864A8), // 02. Deep Sky Blue
+    Color(0xFF147D75), // 03. Deep Teal / Tosca
+    Color(0xFFC76D10), // 04. Deep Amber / Orange
+    Color(0xFFA82658), // 05. Deep Rose / Magenta
+    Color(0xFF4338CA), // 06. Deep Indigo
+    Color(0xFF4D7C0F), // 07. Deep Olive Lime
+    Color(0xFF0E7490), // 08. Deep Ocean Cyan
+    Color(0xFFA16207), // 09. Deep Amber Gold
+    Color(0xFF334155), // 10. Deep Slate Steel
   ];
   final List<Map<String, dynamic>> _stages = [];
 
@@ -162,6 +177,7 @@ class _AddClassPageState extends State<AddClassPage> {
 
   Future<void> _showCopyDataBottomSheet() async {
     final uid = FirebaseAuth.instance.currentUser?.uid ?? '';
+    final bool isDark = AppColors.isDarkMode;
     if (uid.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Silakan login terlebih dahulu untuk menyalin data kelas.')),
@@ -170,7 +186,7 @@ class _AddClassPageState extends State<AddClassPage> {
     }
     showModalBottomSheet(
       context: context,
-      backgroundColor: Colors.white,
+      backgroundColor: isDark ? const Color(0xFF18181B) : Colors.white,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
@@ -191,11 +207,25 @@ class _AddClassPageState extends State<AddClassPage> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.folder_open_rounded, size: 48, color: Colors.black26),
+                    Icon(Icons.folder_open_rounded, size: 48, color: isDark ? Colors.white24 : Colors.black26),
                     const SizedBox(height: 12),
-                    Text('Belum ada classroom yang dapat disalin', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, fontSize: 16)),
+                    Text(
+                      'Belum ada classroom yang dapat disalin',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 15.5,
+                        color: isDark ? Colors.white : Colors.black87,
+                      ),
+                    ),
                     const SizedBox(height: 6),
-                    Text('Buat classroom pertama Anda atau lengkapi data di formulir.', textAlign: TextAlign.center, style: GoogleFonts.dmSans(color: Colors.black54, fontSize: 14.0)),
+                    Text(
+                      'Buat classroom pertama Anda atau lengkapi data di formulir.',
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.dmSans(
+                        color: isDark ? Colors.white60 : Colors.black54,
+                        fontSize: 13.5,
+                      ),
+                    ),
                   ],
                 ),
               );
@@ -209,12 +239,28 @@ class _AddClassPageState extends State<AddClassPage> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text('Salin Data dari Classroom Lain', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, fontSize: 17)),
-                      IconButton(icon: const Icon(Icons.close_rounded), onPressed: () => Navigator.pop(sheetContext)),
+                      Text(
+                        'Salin Data dari Classroom Lain',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16.0,
+                          color: isDark ? Colors.white : Colors.black87,
+                        ),
+                      ),
+                      IconButton(
+                        icon: Icon(Icons.close_rounded, color: isDark ? Colors.white70 : Colors.black87),
+                        onPressed: () => Navigator.pop(sheetContext),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 4),
-                  Text('Pilih salah satu classroom untuk menyalin seluruh struktur materi & elemen ke form ini.', style: GoogleFonts.dmSans(color: Colors.black54, fontSize: 14.0)),
+                  Text(
+                    'Pilih salah satu classroom untuk menyalin seluruh struktur materi & elemen ke form ini.',
+                    style: GoogleFonts.dmSans(
+                      color: isDark ? Colors.white60 : Colors.black54,
+                      fontSize: 13.5,
+                    ),
+                  ),
                   const SizedBox(height: 14),
                   Expanded(
                     child: ListView.separated(
@@ -238,10 +284,10 @@ class _AddClassPageState extends State<AddClassPage> {
                               ),
                             );
                           },
-                          tileColor: const Color(0xFFF8FAFC),
+                          tileColor: isDark ? const Color(0xFF121215) : const Color(0xFFF8FAFC),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(16),
-                            side: const BorderSide(color: Color(0xFFE2E8F0)),
+                            side: BorderSide(color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0)),
                           ),
                           leading: Image.asset(
                             'assets/icon_pack/project/$pIcon',
@@ -249,8 +295,21 @@ class _AddClassPageState extends State<AddClassPage> {
                             height: 36,
                             errorBuilder: (_, __, ___) => const Icon(Icons.school_rounded, color: Color(0xFF7C3AED)),
                           ),
-                          title: Text(pName, style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, fontSize: 14)),
-                          subtitle: Text('$pStages Elemen ${pMajor.isNotEmpty ? '· $pMajor' : ''}', style: GoogleFonts.dmSans(fontSize: 14.0, color: Colors.black54)),
+                          title: Text(
+                            pName,
+                            style: GoogleFonts.plusJakartaSans(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                              color: isDark ? Colors.white : Colors.black87,
+                            ),
+                          ),
+                          subtitle: Text(
+                            '$pStages Elemen ${pMajor.isNotEmpty ? '· $pMajor' : ''}',
+                            style: GoogleFonts.dmSans(
+                              fontSize: 13.0,
+                              color: isDark ? Colors.white60 : Colors.black54,
+                            ),
+                          ),
                           trailing: const Icon(Icons.content_copy_rounded, size: 18, color: Color(0xFF7C3AED)),
                         );
                       },
@@ -1092,6 +1151,7 @@ class _AddClassPageState extends State<AddClassPage> {
   }
 
     Widget buildLeftColumn({bool isDesktop = false}) {
+    final bool isDark = AppColors.isDarkMode;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -1099,9 +1159,9 @@ class _AddClassPageState extends State<AddClassPage> {
         Text(
           'Pilih Icon Classroom',
           style: GoogleFonts.plusJakartaSans(
-            fontSize: 14,
+            fontSize: 13.5,
             fontWeight: FontWeight.w600,
-            color: Colors.black87,
+            color: isDark ? Colors.white70 : Colors.black87,
           ),
         ),
         const SizedBox(height: 10),
@@ -1126,7 +1186,7 @@ class _AddClassPageState extends State<AddClassPage> {
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       border: Border.all(
-                        color: isSelected ? Colors.black : Colors.transparent,
+                        color: isSelected ? (isDark ? Colors.white : Colors.black) : Colors.transparent,
                         width: 2,
                       ),
                     ),
@@ -1149,49 +1209,54 @@ class _AddClassPageState extends State<AddClassPage> {
         Text(
           'Pilih Warna Card Classroom',
           style: GoogleFonts.plusJakartaSans(
-            fontSize: 14,
+            fontSize: 13.5,
             fontWeight: FontWeight.w600,
-            color: Colors.black87,
+            color: isDark ? Colors.white70 : Colors.black87,
           ),
         ),
         const SizedBox(height: 10),
-        SizedBox(
-          height: 44,
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            itemCount: _classroomAccentColors.length,
-            itemBuilder: (context, idx) {
-              final isSelected = _selectedColorIndex == idx;
-              final Color color = _classroomAccentColors[idx];
-              return GestureDetector(
-                onTap: () {
-                  setState(() {
-                    _selectedColorIndex = idx;
-                  });
-                },
-                child: Container(
-                  margin: const EdgeInsets.only(right: 12),
-                  width: 36,
-                  height: 36,
-                  decoration: BoxDecoration(
-                    color: color,
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: isSelected ? Colors.black : Colors.transparent,
-                      width: 2.5,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: color.withOpacity(0.2),
-                        blurRadius: 6,
-                        offset: const Offset(0, 2),
+        Builder(
+          builder: (context) {
+            final activeColors = isDark ? _classroomDarkColors : _classroomAccentColors;
+            return SizedBox(
+              height: 44,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: activeColors.length,
+                itemBuilder: (context, idx) {
+                  final isSelected = _selectedColorIndex == idx;
+                  final Color color = activeColors[idx];
+                  return GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        _selectedColorIndex = idx;
+                      });
+                    },
+                    child: Container(
+                      margin: const EdgeInsets.only(right: 12),
+                      width: 36,
+                      height: 36,
+                      decoration: BoxDecoration(
+                        color: color,
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: isSelected ? (isDark ? Colors.white : Colors.black87) : Colors.transparent,
+                          width: 2.5,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: color.withOpacity(isDark ? 0.35 : 0.2),
+                            blurRadius: 6,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                ),
-              );
-            },
-          ),
+                    ),
+                  );
+                },
+              ),
+            );
+          },
         ),
         const SizedBox(height: 16),
 
@@ -1208,34 +1273,34 @@ class _AddClassPageState extends State<AddClassPage> {
                   Text(
                     'Tingkat Kelas',
                     style: GoogleFonts.plusJakartaSans(
-                      fontSize: 14,
+                      fontSize: 13.5,
                       fontWeight: FontWeight.w600,
-                      color: Colors.black87,
+                      color: isDark ? Colors.white70 : Colors.black87,
                     ),
                   ),
                   const SizedBox(height: 6),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    padding: const EdgeInsets.symmetric(horizontal: 14),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFF8FAFC),
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: const Color(0xFFF1F5F9)),
+                      color: isDark ? const Color(0xFF18181B) : const Color(0xFFF8FAFC),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0), width: 1.2),
                     ),
                     child: DropdownButtonHideUnderline(
                       child: DropdownButton<String>(
-                        dropdownColor: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
+                        dropdownColor: isDark ? const Color(0xFF18181B) : Colors.white,
+                        borderRadius: BorderRadius.circular(16),
                         itemHeight: null,
                         value: _selectedGradeLevel,
                         isExpanded: true,
-                        icon: const Icon(Icons.keyboard_arrow_down_rounded, color: Colors.black45, size: 18),
-                        style: GoogleFonts.plusJakartaSans(fontSize: 15.2, fontWeight: FontWeight.bold, color: Colors.black87),
+                        icon: Icon(Icons.keyboard_arrow_down_rounded, color: isDark ? Colors.white60 : Colors.black45, size: 18),
+                        style: GoogleFonts.plusJakartaSans(fontSize: 14.5, fontWeight: FontWeight.w600, color: isDark ? Colors.white : Colors.black87),
                         items: _gradeOptions.map((String grade) {
                           return DropdownMenuItem<String>(
                             value: grade,
                             child: Padding(
                               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                              child: Text(grade, style: GoogleFonts.dmSans(fontSize: 14)),
+                              child: Text(grade, style: GoogleFonts.dmSans(fontSize: 14, color: isDark ? Colors.white : Colors.black87)),
                             ),
                           );
                         }).toList(),
@@ -1250,7 +1315,7 @@ class _AddClassPageState extends State<AddClassPage> {
             ),
             const SizedBox(width: 12),
             Expanded(
-              child: _buildInputField('Kelas', _majorController, hint: 'contoh: 10 RPL 1 / 11 IPA 2 / Umum'),
+              child: _buildInputField('Kelas', _majorController, hint: 'contoh: 10 RPL 1 / Umum'),
             ),
           ],
         ),
@@ -1258,9 +1323,9 @@ class _AddClassPageState extends State<AddClassPage> {
         Text(
           'Capaian Pembelajaran (CP) / Tujuan',
           style: GoogleFonts.plusJakartaSans(
-            fontSize: 14,
+            fontSize: 13.5,
             fontWeight: FontWeight.w600,
-            color: Colors.black87,
+            color: isDark ? Colors.white70 : Colors.black87,
           ),
         ),
         const SizedBox(height: 6),
@@ -1271,19 +1336,20 @@ class _AddClassPageState extends State<AddClassPage> {
               maxLines: null,
               expands: true,
               textAlignVertical: TextAlignVertical.top,
+              style: GoogleFonts.dmSans(fontSize: 14.5, color: isDark ? Colors.white : Colors.black87),
               decoration: InputDecoration(
                 hintText: 'Tuliskan Capaian Pembelajaran (CP) yang ingin dicapai dalam kelas ini...',
-                hintStyle: GoogleFonts.dmSans(fontSize: 14, color: Colors.black26),
+                hintStyle: GoogleFonts.dmSans(fontSize: 13.5, color: isDark ? Colors.white38 : Colors.black26),
                 filled: true,
-                fillColor: const Color(0xFFF8FAFC),
+                fillColor: isDark ? const Color(0xFF18181B) : const Color(0xFFF8FAFC),
                 contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(24),
-                  borderSide: const BorderSide(color: Color(0xFFE2E8F0), width: 1.5),
+                  borderRadius: BorderRadius.circular(20),
+                  borderSide: BorderSide(color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0), width: 1.2),
                 ),
                 focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(24),
-                  borderSide: const BorderSide(color: Colors.black, width: 1.5),
+                  borderRadius: BorderRadius.circular(20),
+                  borderSide: BorderSide(color: isDark ? Colors.white : Colors.black, width: 1.5),
                 ),
               ),
             ),
@@ -1295,6 +1361,7 @@ class _AddClassPageState extends State<AddClassPage> {
   }
 
   Widget _buildGeminiCard() {
+    final bool isDark = AppColors.isDarkMode;
     if (widget.editProjectId != null) {
       return const SizedBox.shrink();
     }
@@ -1303,11 +1370,11 @@ class _AddClassPageState extends State<AddClassPage> {
         width: double.infinity,
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: const Color(0xFFF8FAFC),
+          color: isDark ? const Color(0xFF18181B) : const Color(0xFFF8FAFC),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: const Color(0xFFE2E8F0),
-            width: 1.5,
+            color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+            width: 1.2,
           ),
         ),
         child: Column(
@@ -1321,8 +1388,8 @@ class _AddClassPageState extends State<AddClassPage> {
               'Sedang merancang elemen pembelajaran & materi secara otomatis...',
               textAlign: TextAlign.center,
               style: GoogleFonts.dmSans(
-                fontSize: 14.0,
-                color: const Color(0xFF475569),
+                fontSize: 13.5,
+                color: isDark ? Colors.white70 : const Color(0xFF475569),
               ),
             ),
           ],
@@ -1331,13 +1398,13 @@ class _AddClassPageState extends State<AddClassPage> {
     }
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: const Color(0xFFF8FAFC),
+        color: isDark ? const Color(0xFF18181B) : const Color(0xFFF8FAFC),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: const Color(0xFFE2E8F0),
-          width: 1.5,
+          color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+          width: 1.2,
         ),
       ),
       child: Column(
@@ -1350,9 +1417,9 @@ class _AddClassPageState extends State<AddClassPage> {
               Text(
                 'Rancang dengan Gemini AI',
                 style: GoogleFonts.plusJakartaSans(
-                  fontSize: 15.2,
+                  fontSize: 15.0,
                   fontWeight: FontWeight.bold,
-                  color: Colors.black87,
+                  color: isDark ? Colors.white : Colors.black87,
                 ),
               ),
             ],
@@ -1361,14 +1428,14 @@ class _AddClassPageState extends State<AddClassPage> {
           Text(
             'Buat materi & tugas otomatis secara instan berdasarkan Capaian Pembelajaran (CP) kelas Anda.',
             style: GoogleFonts.dmSans(
-              fontSize: 14.0,
-              color: Colors.black45,
+              fontSize: 13.5,
+              color: isDark ? Colors.white60 : Colors.black45,
               height: 1.4,
             ),
           ),
           const SizedBox(height: 12),
           SizedBox(
-            height: 40,
+            height: 42,
             child: OutlinedButton.icon(
               onPressed: () {
                 final cp = _cpController.text.trim();
@@ -1383,20 +1450,21 @@ class _AddClassPageState extends State<AddClassPage> {
                 }
                 _runAiGeneration(cp);
               },
-              icon: const GeminiIcon(size: 12),
+              icon: const GeminiIcon(size: 14),
               label: Text(
                 'Buat Materi dengan AI',
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.black87,
+                  fontWeight: FontWeight.bold,
+                  color: isDark ? Colors.white : Colors.black87,
                 ),
               ),
               style: OutlinedButton.styleFrom(
-                side: const BorderSide(color: Colors.black87, width: 1.2),
+                side: BorderSide(color: isDark ? const Color(0xFF3F3F46) : Colors.black87, width: 1.2),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(16),
                 ),
+                backgroundColor: isDark ? const Color(0xFF27272A).withOpacity(0.4) : Colors.transparent,
                 padding: EdgeInsets.zero,
               ),
             ),
@@ -1407,6 +1475,7 @@ class _AddClassPageState extends State<AddClassPage> {
   }
 
   Widget buildRightColumn(bool isDesktop) {
+    final bool isDark = AppColors.isDarkMode;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -1421,9 +1490,9 @@ class _AddClassPageState extends State<AddClassPage> {
             Text(
               'Elemen Pembelajaran & Materi',
               style: GoogleFonts.plusJakartaSans(
-                fontSize: 16.4,
-                fontWeight: FontWeight.w600,
-                color: Colors.black87,
+                fontSize: 15.5,
+                fontWeight: FontWeight.bold,
+                color: isDark ? Colors.white : Colors.black87,
               ),
             ),
             GestureDetector(
@@ -1431,20 +1500,20 @@ class _AddClassPageState extends State<AddClassPage> {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF3E8FF),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: const Color(0xFF7C3AED), width: 1.5),
+                  color: isDark ? const Color(0xFF7C3AED).withOpacity(0.2) : const Color(0xFFF3E8FF),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: const Color(0xFF7C3AED), width: 1.2),
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.add_rounded, color: Color(0xFF7C3AED), size: 14),
+                    const Icon(Icons.add_rounded, color: Color(0xFF7C3AED), size: 16),
                     const SizedBox(width: 4),
                     Text(
                       'Elemen',
                       style: GoogleFonts.plusJakartaSans(
-                        fontSize: 14.0,
-                        color: Colors.black,
-                        fontWeight: FontWeight.w600,
+                        fontSize: 13.5,
+                        color: isDark ? Colors.white : const Color(0xFF7C3AED),
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                   ],
@@ -1464,9 +1533,9 @@ class _AddClassPageState extends State<AddClassPage> {
                 padding: const EdgeInsets.all(16),
                 margin: const EdgeInsets.only(bottom: 16),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF8FAFC),
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: const Color(0xFFE2E8F0)),
+                  color: isDark ? const Color(0xFF18181B) : const Color(0xFFF8FAFC),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0)),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -1495,9 +1564,9 @@ class _AddClassPageState extends State<AddClassPage> {
                 padding: const EdgeInsets.all(16),
                 margin: const EdgeInsets.only(bottom: 16),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF8FAFC),
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: const Color(0xFFE2E8F0)),
+                  color: isDark ? const Color(0xFF18181B) : const Color(0xFFF8FAFC),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0)),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -1523,9 +1592,9 @@ class _AddClassPageState extends State<AddClassPage> {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF8FAFC),
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: const Color(0xFFE2E8F0)),
+                  color: isDark ? const Color(0xFF18181B) : const Color(0xFFF8FAFC),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0)),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -1555,8 +1624,8 @@ class _AddClassPageState extends State<AddClassPage> {
               child: Text(
                 'Belum ada elemen pembelajaran. Tap + Elemen untuk memulai.',
                 style: GoogleFonts.dmSans(
-                  fontSize: 14,
-                  color: Colors.black38,
+                  fontSize: 13.5,
+                  color: isDark ? Colors.white38 : Colors.black38,
                 ),
               ),
             ),
@@ -1576,9 +1645,12 @@ class _AddClassPageState extends State<AddClassPage> {
               return Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: stageIsVisible ? Colors.white : const Color(0xFFF8FAFC),
-                  borderRadius: BorderRadius.circular(24),
-                  border: Border.all(color: const Color(0xFFE2E8F0), width: 1.5),
+                  color: isDark ? const Color(0xFF18181B) : (stageIsVisible ? Colors.white : const Color(0xFFF8FAFC)),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                    width: 1.2,
+                  ),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -1597,7 +1669,7 @@ class _AddClassPageState extends State<AddClassPage> {
                           child: Text(
                             '${index + 1}',
                             style: GoogleFonts.plusJakartaSans(
-                              fontSize: 16.4,
+                              fontSize: 15.0,
                               fontWeight: FontWeight.bold,
                               color: Colors.black87,
                             ),
@@ -1618,9 +1690,9 @@ class _AddClassPageState extends State<AddClassPage> {
                                   Text(
                                     'Tampilkan ke siswa',
                                     style: GoogleFonts.plusJakartaSans(
-                                      fontSize: 14.0,
+                                      fontSize: 13.0,
                                       fontWeight: FontWeight.w600,
-                                      color: Colors.black54,
+                                      color: isDark ? Colors.white60 : Colors.black54,
                                     ),
                                   ),
                                   const SizedBox(width: 6),
@@ -1631,14 +1703,14 @@ class _AddClassPageState extends State<AddClassPage> {
                                     padding: const EdgeInsets.all(2),
                                     decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(9),
-                                      color: stageIsVisible ? Colors.black : const Color(0xFFCCCCCC),
+                                      color: stageIsVisible ? (isDark ? Colors.white : Colors.black) : (isDark ? const Color(0xFF3F3F46) : const Color(0xFFCCCCCC)),
                                     ),
                                     alignment: stageIsVisible ? Alignment.centerRight : Alignment.centerLeft,
                                     child: Container(
                                       width: 14,
                                       height: 14,
-                                      decoration: const BoxDecoration(
-                                        color: Colors.white,
+                                      decoration: BoxDecoration(
+                                        color: stageIsVisible ? (isDark ? Colors.black : Colors.white) : Colors.white,
                                         shape: BoxShape.circle,
                                       ),
                                     ),
@@ -1664,24 +1736,24 @@ class _AddClassPageState extends State<AddClassPage> {
                     TextField(
                       controller: _stageNameControllers[index],
                       decoration: InputDecoration(
-                        hintText: 'Nama Elemen (contoh: Elemen 1: Proses Bisnis IT)...',
-                        hintStyle: GoogleFonts.dmSans(fontSize: 15.2, color: Colors.black26),
+                        hintText: 'Nama Elemen (contoh: Proses Bisnis TI)...',
+                        hintStyle: GoogleFonts.dmSans(fontSize: 14.0, color: isDark ? Colors.white38 : Colors.black26),
                         filled: true,
-                        fillColor: const Color(0xFFF8FAFC),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                        fillColor: isDark ? const Color(0xFF121215) : const Color(0xFFF8FAFC),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                         enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                          borderSide: const BorderSide(color: Color(0xFFF1F5F9)),
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: BorderSide(color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9)),
                         ),
                         focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                          borderSide: const BorderSide(color: Colors.black87),
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: BorderSide(color: isDark ? Colors.white : Colors.black87),
                         ),
                       ),
                       style: GoogleFonts.plusJakartaSans(
-                        fontSize: 15.8,
+                        fontSize: 14.5,
                         fontWeight: FontWeight.w600,
-                        color: Colors.black87,
+                        color: isDark ? Colors.white : Colors.black87,
                       ),
                       onChanged: (val) {
                         _stages[index]['name'] = val;
@@ -1694,27 +1766,34 @@ class _AddClassPageState extends State<AddClassPage> {
                       maxLines: 2,
                       decoration: InputDecoration(
                         hintText: 'Ringkasan / deskripsi elemen...',
-                        hintStyle: GoogleFonts.dmSans(fontSize: 14.0, color: Colors.black38),
+                        hintStyle: GoogleFonts.dmSans(fontSize: 13.5, color: isDark ? Colors.white38 : Colors.black38),
                         filled: true,
-                        fillColor: const Color(0xFFF8FAFC),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        fillColor: isDark ? const Color(0xFF121215) : const Color(0xFFF8FAFC),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                         enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                          borderSide: const BorderSide(color: Color(0xFFF1F5F9)),
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: BorderSide(color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9)),
                         ),
                         focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                          borderSide: const BorderSide(color: Colors.black87),
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: BorderSide(color: isDark ? Colors.white : Colors.black87),
                         ),
                       ),
-                      style: GoogleFonts.plusJakartaSans(fontSize: 14.0, color: Colors.black87),
+                      style: GoogleFonts.dmSans(fontSize: 13.5, color: isDark ? Colors.white70 : Colors.black87),
                       onChanged: (val) {
                         _stages[index]['summary'] = val;
                       },
                     ),
                     const SizedBox(height: 12),
 
-                    Text('Daftar Materi', style: GoogleFonts.plusJakartaSans(fontSize: 14.0, fontWeight: FontWeight.bold, color: Colors.black54)),
+                    Text(
+                      'Daftar Materi',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 13.5,
+                        fontWeight: FontWeight.bold,
+                        color: isDark ? Colors.white70 : Colors.black54,
+                      ),
+                    ),
                     const SizedBox(height: 8),
                     ...List.generate(materis.length, (mIdx) {
                       return Padding(
@@ -1726,20 +1805,20 @@ class _AddClassPageState extends State<AddClassPage> {
                                 controller: _materiTitleControllers[index][mIdx],
                                 decoration: InputDecoration(
                                   hintText: 'Nama materi...',
-                                  hintStyle: GoogleFonts.dmSans(fontSize: 14, color: Colors.black26),
+                                  hintStyle: GoogleFonts.dmSans(fontSize: 13.5, color: isDark ? Colors.white38 : Colors.black26),
                                   filled: true,
-                                  fillColor: const Color(0xFFF8FAFC),
-                                  contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                                  fillColor: isDark ? const Color(0xFF121215) : const Color(0xFFF8FAFC),
+                                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                                   enabledBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                    borderSide: const BorderSide(color: Color(0xFFF1F5F9)),
+                                    borderRadius: BorderRadius.circular(14),
+                                    borderSide: BorderSide(color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9)),
                                   ),
                                   focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                    borderSide: const BorderSide(color: Colors.black87),
+                                    borderRadius: BorderRadius.circular(14),
+                                    borderSide: BorderSide(color: isDark ? Colors.white : Colors.black87),
                                   ),
                                 ),
-                                style: GoogleFonts.dmSans(fontSize: 14, color: Colors.black87),
+                                style: GoogleFonts.dmSans(fontSize: 14, color: isDark ? Colors.white : Colors.black87),
                                 onChanged: (val) {
                                   _stages[index]['materis'][mIdx]['title'] = val;
                                 },
@@ -1749,7 +1828,7 @@ class _AddClassPageState extends State<AddClassPage> {
                             GestureDetector(
                               onTap: () => _removeMateri(index, mIdx),
                               child: Container(
-                                padding: const EdgeInsets.all(4),
+                                padding: const EdgeInsets.all(5),
                                 decoration: const BoxDecoration(
                                   color: Colors.redAccent,
                                   shape: BoxShape.circle,
@@ -1757,7 +1836,7 @@ class _AddClassPageState extends State<AddClassPage> {
                                 child: const Icon(
                                   Icons.close_rounded,
                                   color: Colors.white,
-                                  size: 14,
+                                  size: 13,
                                 ),
                               ),
                             ),
@@ -1771,12 +1850,12 @@ class _AddClassPageState extends State<AddClassPage> {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(Icons.add_rounded, size: 14, color: Color(0xFF2563EB)),
+                          const Icon(Icons.add_rounded, size: 15, color: Color(0xFF2563EB)),
                           const SizedBox(width: 4),
                           Text(
                             'Tambah Materi',
                             style: GoogleFonts.plusJakartaSans(
-                              fontSize: 14.0,
+                              fontSize: 13.5,
                               fontWeight: FontWeight.bold,
                               color: const Color(0xFF2563EB),
                             ),
@@ -1791,17 +1870,17 @@ class _AddClassPageState extends State<AddClassPage> {
           ),
         const SizedBox(height: 28),
 
-        // 4. Large "Buat Classroom" Action Button at the bottom (for both desktop and mobile!)
+        // 4. Large "Buat Classroom" Action Button at the bottom
         Align(
           alignment: Alignment.centerRight,
           child: FractionallySizedBox(
-            widthFactor: 0.5,
+            widthFactor: isDesktop ? 0.5 : 1.0,
             child: SizedBox(
-              height: 52,
+              height: 50,
               child: ElevatedButton(
                 onPressed: _createProject,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF7C3AED), // Soft purple color
+                  backgroundColor: const Color(0xFF7C3AED),
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(24),
@@ -1811,8 +1890,8 @@ class _AddClassPageState extends State<AddClassPage> {
                 child: Text(
                   widget.editProjectId != null ? 'Simpan Perubahan' : 'Buat Classroom',
                   style: GoogleFonts.plusJakartaSans(
-                    fontSize: 16.4,
-                    fontWeight: FontWeight.w600,
+                    fontSize: 15.5,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
               ),
@@ -1823,10 +1902,11 @@ class _AddClassPageState extends State<AddClassPage> {
     );
   }
 
-    @override
+  @override
   Widget build(BuildContext context) {
     final bool isDesktop = MediaQuery.of(context).size.width >= 700 && MediaQuery.of(context).size.shortestSide >= 700;
     final Animation<double>? routeAnimation = ModalRoute.of(context)?.animation;
+    final bool isDark = AppColors.isDarkMode;
 
     Widget buildDesktopPopup() {
       final popupContent = Container(
@@ -1834,11 +1914,15 @@ class _AddClassPageState extends State<AddClassPage> {
         height: MediaQuery.of(context).size.height * 0.85,
         margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: isDark ? const Color(0xFF18181B) : Colors.white,
           borderRadius: BorderRadius.circular(28),
+          border: Border.all(
+            color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+            width: 1.2,
+          ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.15),
+              color: Colors.black.withOpacity(0.2),
               blurRadius: 24,
               offset: const Offset(0, 8),
             ),
@@ -1855,9 +1939,9 @@ class _AddClassPageState extends State<AddClassPage> {
                   Text(
                     widget.editProjectId != null ? 'Edit Classroom' : 'Buat Classroom Baru',
                     style: GoogleFonts.plusJakartaSans(
-                      fontSize: 23.4,
+                      fontSize: 22.0,
                       fontWeight: FontWeight.bold,
-                      color: Colors.black,
+                      color: isDark ? Colors.white : Colors.black87,
                     ),
                   ),
                   Row(
@@ -1869,8 +1953,9 @@ class _AddClassPageState extends State<AddClassPage> {
                           child: Container(
                             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                             decoration: BoxDecoration(
-                              color: const Color(0xFFF1F5F9),
-                              borderRadius: BorderRadius.circular(12),
+                              color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+                              borderRadius: BorderRadius.circular(14),
+                              border: Border.all(color: isDark ? const Color(0xFF3F3F46) : const Color(0xFFE2E8F0)),
                             ),
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
@@ -1880,7 +1965,7 @@ class _AddClassPageState extends State<AddClassPage> {
                                 Text(
                                   'Salin Data',
                                   style: GoogleFonts.plusJakartaSans(
-                                    fontSize: 14.0,
+                                    fontSize: 13.5,
                                     fontWeight: FontWeight.bold,
                                     color: const Color(0xFF7C3AED),
                                   ),
@@ -1896,14 +1981,15 @@ class _AddClassPageState extends State<AddClassPage> {
                         child: Container(
                           width: 38,
                           height: 38,
-                          decoration: const BoxDecoration(
-                            color: Color(0xFFF1F5F9),
+                          decoration: BoxDecoration(
+                            color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
                             shape: BoxShape.circle,
+                            border: Border.all(color: isDark ? const Color(0xFF3F3F46) : const Color(0xFFE2E8F0)),
                           ),
-                          child: const Icon(
+                          child: Icon(
                             Icons.close_rounded,
-                            color: Colors.black87,
-                            size: 20,
+                            color: isDark ? Colors.white70 : Colors.black87,
+                            size: 18,
                           ),
                         ),
                       ),
@@ -1912,7 +1998,7 @@ class _AddClassPageState extends State<AddClassPage> {
                 ],
               ),
             ),
-            const Divider(color: Color(0xFFF1F5F9), height: 1),
+            Divider(color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9), height: 1),
 
             // Pop-up Body (2 columns - Column 1 is Sticky/Fixed, Column 2 is Scrollable)
             Expanded(
@@ -1963,17 +2049,16 @@ class _AddClassPageState extends State<AddClassPage> {
 
     if (isDesktop) {
       return Scaffold(
-        backgroundColor: Colors.transparent, // Completely transparent Scaffold background
+        backgroundColor: Colors.transparent,
         body: Stack(
           children: [
-            // Barrier Dismissible Backdrop Overlay
             GestureDetector(
               onTap: () => Navigator.pop(context),
               child: AnimatedBuilder(
                 animation: routeAnimation ?? const AlwaysStoppedAnimation(1.0),
                 builder: (context, child) {
                   return Container(
-                    color: Colors.black.withOpacity(0.25 * (routeAnimation?.value ?? 1.0)),
+                    color: Colors.black.withOpacity(0.4 * (routeAnimation?.value ?? 1.0)),
                   );
                 },
               ),
@@ -1989,107 +2074,112 @@ class _AddClassPageState extends State<AddClassPage> {
       );
     }
 
-    // Mobile View (original vertical stacked layout)
+    // Mobile View
     return Scaffold(
-      backgroundColor: Colors.transparent,
-      body: AnimatedRainbowBackground(
-        child: Align(
-          alignment: Alignment.topCenter,
-          child: Container(
-            constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width > 500 ? double.infinity : 500),
-            child: SafeArea(
-              child: Column(
-                children: [
-                  // Custom AppBar (Clean top)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 8.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
+      backgroundColor: isDark ? const Color(0xFF000000) : const Color(0xFFFAF8FF),
+      body: Align(
+        alignment: Alignment.topCenter,
+        child: Container(
+          constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width > 500 ? double.infinity : 500),
+          child: SafeArea(
+            child: Column(
+              children: [
+                // Custom AppBar
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      GestureDetector(
+                        onTap: () => Navigator.pop(context),
+                        child: Container(
+                          width: 42,
+                          height: 42,
+                          decoration: BoxDecoration(
+                            color: isDark ? const Color(0xFF18181B) : const Color(0xFFF1F5F9),
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                            ),
+                          ),
+                          child: Icon(
+                            Icons.arrow_back_rounded,
+                            color: isDark ? Colors.white : Colors.black87,
+                            size: 18,
+                          ),
+                        ),
+                      ),
+                      Text(
+                        widget.editProjectId != null ? 'Edit Classroom' : 'Buat Classroom Baru',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 18.5,
+                          fontWeight: FontWeight.bold,
+                          color: isDark ? Colors.white : Colors.black87,
+                        ),
+                      ),
+                      if (widget.registrationData != null)
+                        TextButton(
+                          onPressed: _skipClassroomSetup,
+                          child: Text(
+                            'Atur Nanti',
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 14.0,
+                              fontWeight: FontWeight.w600,
+                              color: const Color(0xFF2563EB),
+                            ),
+                          ),
+                        )
+                      else if (widget.editProjectId == null)
                         GestureDetector(
-                          onTap: () => Navigator.pop(context),
+                          onTap: _showCopyDataBottomSheet,
                           child: Container(
-                            width: 44,
-                            height: 44,
-                            decoration: const BoxDecoration(
-                              color: Color(0xFFF1F5F9),
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(
-                              Icons.arrow_back_rounded,
-                              color: Colors.black,
-                              size: 18,
-                            ),
-                          ),
-                        ),
-                        Text(
-                          widget.editProjectId != null ? 'Edit Classroom' : 'Buat Classroom Baru',
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 21.1,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.black,
-                          ),
-                        ),
-                        if (widget.registrationData != null)
-                          TextButton(
-                            onPressed: _skipClassroomSetup,
-                            child: Text(
-                              'Atur Nanti',
-                              style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 15.2,
-                                  fontWeight: FontWeight.w600,
-                                  color: const Color(0xFF2563EB)),
-                            ),
-                          )
-                        else if (widget.editProjectId == null)
-                          GestureDetector(
-                            onTap: _showCopyDataBottomSheet,
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFF1F5F9),
-                                borderRadius: BorderRadius.circular(12),
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                            decoration: BoxDecoration(
+                              color: isDark ? const Color(0xFF18181B) : const Color(0xFFF1F5F9),
+                              borderRadius: BorderRadius.circular(14),
+                              border: Border.all(
+                                color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
                               ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  const Icon(Icons.content_copy_rounded, size: 15, color: Color(0xFF7C3AED)),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    'Salin Data',
-                                    style: GoogleFonts.plusJakartaSans(
-                                      fontSize: 14.0,
-                                      fontWeight: FontWeight.bold,
-                                      color: const Color(0xFF7C3AED),
-                                    ),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(Icons.content_copy_rounded, size: 14, color: Color(0xFF7C3AED)),
+                                const SizedBox(width: 4),
+                                Text(
+                                  'Salin Data',
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontSize: 13.0,
+                                    fontWeight: FontWeight.bold,
+                                    color: const Color(0xFF7C3AED),
                                   ),
-                                ],
-                              ),
+                                ),
+                              ],
                             ),
-                          )
-                        else
-                          const SizedBox(width: 44),
+                          ),
+                        )
+                      else
+                        const SizedBox(width: 42),
+                    ],
+                  ),
+                ),
+                Divider(color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9), height: 1),
+
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 20.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        buildLeftColumn(),
+                        const SizedBox(height: 24),
+                        buildRightColumn(false),
+                        const SizedBox(height: 20),
                       ],
                     ),
                   ),
-                  const Divider(color: Color(0xFFF1F5F9), height: 1),
-
-                  Expanded(
-                    child: SingleChildScrollView(
-                      padding: const EdgeInsets.all(24.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          buildLeftColumn(),
-                          const SizedBox(height: 24),
-                          buildRightColumn(false),
-                          const SizedBox(height: 16),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ),
@@ -2098,35 +2188,48 @@ class _AddClassPageState extends State<AddClassPage> {
   }
 
   Widget _buildInputField(String label, TextEditingController controller, {int maxLines = 1, String? hint, int? maxLength}) {
+    final bool isDark = AppColors.isDarkMode;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: GoogleFonts.plusJakartaSans(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-            color: Colors.black87,
+        if (label.isNotEmpty) ...[
+          Text(
+            label,
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 13.5,
+              fontWeight: FontWeight.w600,
+              color: isDark ? Colors.white70 : Colors.black87,
+            ),
           ),
-        ),
-        const SizedBox(height: 6),
+          const SizedBox(height: 6),
+        ],
         TextField(
           controller: controller,
           maxLines: maxLines,
           maxLength: maxLength,
+          style: GoogleFonts.dmSans(
+            fontSize: 14.5,
+            color: isDark ? Colors.white : Colors.black87,
+          ),
           decoration: InputDecoration(
             hintText: hint,
-            hintStyle: GoogleFonts.dmSans(fontSize: 14, color: Colors.black26),
+            hintStyle: GoogleFonts.dmSans(fontSize: 13.5, color: isDark ? Colors.white38 : Colors.black26),
             filled: true,
-            fillColor: const Color(0xFFF8FAFC),
+            fillColor: isDark ? const Color(0xFF18181B) : const Color(0xFFF8FAFC),
             contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(24),
-              borderSide: const BorderSide(color: Color(0xFFE2E8F0), width: 1.5),
+              borderRadius: BorderRadius.circular(20),
+              borderSide: BorderSide(
+                color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                width: 1.2,
+              ),
             ),
             focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(24),
-              borderSide: const BorderSide(color: Colors.black, width: 1.5),
+              borderRadius: BorderRadius.circular(20),
+              borderSide: BorderSide(
+                color: isDark ? Colors.white : Colors.black,
+                width: 1.5,
+              ),
             ),
           ),
         ),
@@ -2421,6 +2524,7 @@ Sertakan HANYA JSON tersebut tanpa penjelasan markdown apa pun di luar JSON.
   }
 
   void _showEditStageDialog(int stageIdx) {
+    final bool isDark = AppColors.isDarkMode;
     final nameController = TextEditingController(text: _stages[stageIdx]['name']);
     final summaryController = TextEditingController(text: _stages[stageIdx]['summary']);
 
@@ -2435,44 +2539,73 @@ Sertakan HANYA JSON tersebut tanpa penjelasan markdown apa pun di luar JSON.
           }).toList();
 
           return AlertDialog(
-            backgroundColor: Colors.white,
+            backgroundColor: isDark ? const Color(0xFF18181B) : Colors.white,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-            title: Text('Edit Elemen / Tahap', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, fontSize: 18.7)),
+            title: Text(
+              'Edit Elemen / Tahap',
+              style: GoogleFonts.plusJakartaSans(
+                fontWeight: FontWeight.bold,
+                fontSize: 17.5,
+                color: isDark ? Colors.white : Colors.black87,
+              ),
+            ),
             content: SingleChildScrollView(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Nama Elemen', style: GoogleFonts.plusJakartaSans(fontSize: 14.0, fontWeight: FontWeight.bold, color: Colors.black54)),
+                  Text(
+                    'Nama Elemen',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 13.5,
+                      fontWeight: FontWeight.w600,
+                      color: isDark ? Colors.white70 : Colors.black54,
+                    ),
+                  ),
                   const SizedBox(height: 6),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    padding: const EdgeInsets.symmetric(horizontal: 14),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFF8FAFC),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: const Color(0xFFE2E8F0)),
+                      color: isDark ? const Color(0xFF121215) : const Color(0xFFF8FAFC),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0)),
                     ),
                     child: TextField(
                       controller: nameController,
-                      style: GoogleFonts.plusJakartaSans(fontSize: 15.2),
-                      decoration: const InputDecoration(border: InputBorder.none, hintText: 'Nama Elemen...'),
+                      style: GoogleFonts.plusJakartaSans(fontSize: 14.5, color: isDark ? Colors.white : Colors.black87),
+                      decoration: InputDecoration(
+                        border: InputBorder.none,
+                        hintText: 'Nama Elemen...',
+                        hintStyle: GoogleFonts.dmSans(fontSize: 13.5, color: isDark ? Colors.white38 : Colors.black38),
+                      ),
                     ),
                   ),
                   const SizedBox(height: 12),
-                  Text('Summary / Deskripsi', style: GoogleFonts.plusJakartaSans(fontSize: 14.0, fontWeight: FontWeight.bold, color: Colors.black54)),
+                  Text(
+                    'Summary / Deskripsi',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 13.5,
+                      fontWeight: FontWeight.w600,
+                      color: isDark ? Colors.white70 : Colors.black54,
+                    ),
+                  ),
                   const SizedBox(height: 6),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    padding: const EdgeInsets.symmetric(horizontal: 14),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFF8FAFC),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: const Color(0xFFE2E8F0)),
+                      color: isDark ? const Color(0xFF121215) : const Color(0xFFF8FAFC),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0)),
                     ),
                     child: TextField(
                       controller: summaryController,
                       maxLines: 3,
-                      style: GoogleFonts.dmSans(fontSize: 15.2),
-                      decoration: const InputDecoration(border: InputBorder.none, hintText: 'Deskripsi elemen...'),
+                      style: GoogleFonts.dmSans(fontSize: 14.0, color: isDark ? Colors.white : Colors.black87),
+                      decoration: InputDecoration(
+                        border: InputBorder.none,
+                        hintText: 'Deskripsi elemen...',
+                        hintStyle: GoogleFonts.dmSans(fontSize: 13.5, color: isDark ? Colors.white38 : Colors.black38),
+                      ),
                     ),
                   ),
                   if (materiControllers.isNotEmpty) ...[
@@ -2485,7 +2618,14 @@ Sertakan HANYA JSON tersebut tanpa penjelasan markdown apa pun di luar JSON.
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Text('Nama Materi ${mIdx + 1}', style: GoogleFonts.plusJakartaSans(fontSize: 14.0, fontWeight: FontWeight.bold, color: Colors.black54)),
+                                Text(
+                                  'Nama Materi ${mIdx + 1}',
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontSize: 13.5,
+                                    fontWeight: FontWeight.w600,
+                                    color: isDark ? Colors.white70 : Colors.black54,
+                                  ),
+                                ),
                                 GestureDetector(
                                   onTap: () {
                                     _removeMateri(stageIdx, mIdx);
@@ -2494,23 +2634,31 @@ Sertakan HANYA JSON tersebut tanpa penjelasan markdown apa pun di luar JSON.
                                   },
                                   child: Text(
                                     'Hapus',
-                                    style: GoogleFonts.plusJakartaSans(fontSize: 14.0, color: Colors.redAccent, fontWeight: FontWeight.bold),
+                                    style: GoogleFonts.plusJakartaSans(
+                                      fontSize: 13.0,
+                                      color: Colors.redAccent,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
                                 ),
                               ],
                             ),
                             const SizedBox(height: 6),
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 12),
+                              padding: const EdgeInsets.symmetric(horizontal: 14),
                               decoration: BoxDecoration(
-                                color: const Color(0xFFF8FAFC),
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(color: const Color(0xFFE2E8F0)),
+                                color: isDark ? const Color(0xFF121215) : const Color(0xFFF8FAFC),
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0)),
                               ),
                               child: TextField(
                                 controller: materiControllers[mIdx],
-                                style: GoogleFonts.dmSans(fontSize: 15.2),
-                                decoration: const InputDecoration(border: InputBorder.none, hintText: 'Nama materi...'),
+                                style: GoogleFonts.dmSans(fontSize: 14.0, color: isDark ? Colors.white : Colors.black87),
+                                decoration: InputDecoration(
+                                  border: InputBorder.none,
+                                  hintText: 'Nama materi...',
+                                  hintStyle: GoogleFonts.dmSans(fontSize: 13.5, color: isDark ? Colors.white38 : Colors.black38),
+                                ),
                               ),
                             ),
                           ],
@@ -2529,7 +2677,13 @@ Sertakan HANYA JSON tersebut tanpa penjelasan markdown apa pun di luar JSON.
                   }
                   Navigator.pop(ctx);
                 },
-                child: Text('Batal', style: GoogleFonts.plusJakartaSans(color: Colors.black54, fontWeight: FontWeight.bold)),
+                child: Text(
+                  'Batal',
+                  style: GoogleFonts.plusJakartaSans(
+                    color: isDark ? Colors.white60 : Colors.black54,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
               ),
               ElevatedButton(
                 onPressed: () {
@@ -2551,7 +2705,11 @@ Sertakan HANYA JSON tersebut tanpa penjelasan markdown apa pun di luar JSON.
                   }
                   Navigator.pop(ctx);
                 },
-                style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF4F46E5), foregroundColor: Colors.white),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF7C3AED),
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                ),
                 child: Text('Simpan', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold)),
               ),
             ],
@@ -2562,30 +2720,49 @@ Sertakan HANYA JSON tersebut tanpa penjelasan markdown apa pun di luar JSON.
   }
 
   void _showEditMateriTitleDialog(int stageIdx, int materiIdx) {
+    final bool isDark = AppColors.isDarkMode;
     final titleController = TextEditingController(text: _stages[stageIdx]['materis'][materiIdx]['title']);
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: Colors.white,
+        backgroundColor: isDark ? const Color(0xFF18181B) : Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        title: Text('Edit Nama Materi', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, fontSize: 18.7)),
+        title: Text(
+          'Edit Nama Materi',
+          style: GoogleFonts.plusJakartaSans(
+            fontWeight: FontWeight.bold,
+            fontSize: 17.5,
+            color: isDark ? Colors.white : Colors.black87,
+          ),
+        ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Judul Materi', style: GoogleFonts.plusJakartaSans(fontSize: 14.0, fontWeight: FontWeight.bold, color: Colors.black54)),
+            Text(
+              'Judul Materi',
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 13.5,
+                fontWeight: FontWeight.w600,
+                color: isDark ? Colors.white70 : Colors.black54,
+              ),
+            ),
             const SizedBox(height: 6),
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 14),
               decoration: BoxDecoration(
-                color: const Color(0xFFF8FAFC),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: const Color(0xFFE2E8F0)),
+                color: isDark ? const Color(0xFF121215) : const Color(0xFFF8FAFC),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0)),
               ),
               child: TextField(
                 controller: titleController,
-                style: GoogleFonts.dmSans(fontSize: 15.2),
-                decoration: const InputDecoration(border: InputBorder.none, hintText: 'Judul materi...'),
+                style: GoogleFonts.dmSans(fontSize: 14.0, color: isDark ? Colors.white : Colors.black87),
+                decoration: InputDecoration(
+                  border: InputBorder.none,
+                  hintText: 'Judul materi...',
+                  hintStyle: GoogleFonts.dmSans(fontSize: 13.5, color: isDark ? Colors.white38 : Colors.black38),
+                ),
               ),
             ),
           ],
@@ -2602,7 +2779,13 @@ Sertakan HANYA JSON tersebut tanpa penjelasan markdown apa pun di luar JSON.
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: Text('Batal', style: GoogleFonts.plusJakartaSans(color: Colors.black54, fontWeight: FontWeight.bold)),
+            child: Text(
+              'Batal',
+              style: GoogleFonts.plusJakartaSans(
+                color: isDark ? Colors.white60 : Colors.black54,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
           ),
           ElevatedButton(
             onPressed: () {
@@ -2612,7 +2795,11 @@ Sertakan HANYA JSON tersebut tanpa penjelasan markdown apa pun di luar JSON.
               });
               Navigator.pop(ctx);
             },
-            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF4F46E5), foregroundColor: Colors.white),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF7C3AED),
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+            ),
             child: Text('Simpan', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold)),
           ),
         ],
@@ -2627,6 +2814,7 @@ Sertakan HANYA JSON tersebut tanpa penjelasan markdown apa pun di luar JSON.
     required int taskIdx,
     required Map<String, dynamic> task,
   }) {
+    final bool isDark = AppColors.isDarkMode;
     showDialog(
       context: context,
       builder: (ctx) {
@@ -2640,43 +2828,61 @@ Sertakan HANYA JSON tersebut tanpa penjelasan markdown apa pun di luar JSON.
         return StatefulBuilder(
           builder: (ctx, setModalState) {
             return AlertDialog(
-              backgroundColor: Colors.white,
+              backgroundColor: isDark ? const Color(0xFF18181B) : Colors.white,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
               title: Text(
                 'Edit Detail Kegiatan',
-                style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, fontSize: 18.7),
+                style: GoogleFonts.plusJakartaSans(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 17.5,
+                  color: isDark ? Colors.white : Colors.black87,
+                ),
               ),
               content: SingleChildScrollView(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text('Judul Kegiatan', style: GoogleFonts.plusJakartaSans(fontSize: 14.0, fontWeight: FontWeight.bold, color: Colors.black54)),
+                    Text(
+                      'Judul Kegiatan',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 13.5,
+                        fontWeight: FontWeight.w600,
+                        color: isDark ? Colors.white70 : Colors.black54,
+                      ),
+                    ),
                     const SizedBox(height: 6),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      padding: const EdgeInsets.symmetric(horizontal: 14),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFF8FAFC),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: const Color(0xFFE2E8F0)),
+                        color: isDark ? const Color(0xFF121215) : const Color(0xFFF8FAFC),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0)),
                       ),
                       child: TextField(
                         controller: titleController,
-                        style: GoogleFonts.plusJakartaSans(fontSize: 15.2),
+                        style: GoogleFonts.plusJakartaSans(fontSize: 14.5, color: isDark ? Colors.white : Colors.black87),
                         decoration: const InputDecoration(border: InputBorder.none),
                       ),
                     ),
                     const SizedBox(height: 12),
                     
-                    Text('Tipe Kegiatan', style: GoogleFonts.plusJakartaSans(fontSize: 14.0, fontWeight: FontWeight.bold, color: Colors.black54)),
+                    Text(
+                      'Tipe Kegiatan',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 13.5,
+                        fontWeight: FontWeight.w600,
+                        color: isDark ? Colors.white70 : Colors.black54,
+                      ),
+                    ),
                     const SizedBox(height: 6),
                     Container(
                       width: double.infinity,
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFF1F5F9),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: const Color(0xFFE2E8F0)),
+                        color: isDark ? const Color(0xFF121215) : const Color(0xFFF1F5F9),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0)),
                       ),
                       child: Text(
                         selectedType == 'tugas'
@@ -2684,29 +2890,40 @@ Sertakan HANYA JSON tersebut tanpa penjelasan markdown apa pun di luar JSON.
                             : selectedType == 'quiz'
                                 ? '❓ Kuis (Quiz)'
                                 : '📄 Materi Pembelajaran (PDF)',
-                        style: GoogleFonts.plusJakartaSans(fontSize: 14, color: Colors.black54, fontWeight: FontWeight.w600),
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 13.5,
+                          color: isDark ? Colors.white70 : Colors.black54,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
                     const SizedBox(height: 12),
 
                     if (selectedType == 'tugas') ...[
-                      Text('Opsi Pengerjaan', style: GoogleFonts.plusJakartaSans(fontSize: 14.0, fontWeight: FontWeight.bold, color: Colors.black54)),
+                      Text(
+                        'Opsi Pengerjaan',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 13.5,
+                          fontWeight: FontWeight.w600,
+                          color: isDark ? Colors.white70 : Colors.black54,
+                        ),
+                      ),
                       const SizedBox(height: 6),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        padding: const EdgeInsets.symmetric(horizontal: 14),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFF8FAFC),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: const Color(0xFFE2E8F0)),
+                          color: isDark ? const Color(0xFF121215) : const Color(0xFFF8FAFC),
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0)),
                         ),
                         child: DropdownButtonHideUnderline(
                           child: DropdownButton<String>(
-                            dropdownColor: Colors.white,
-                            borderRadius: BorderRadius.circular(12),
+                            dropdownColor: isDark ? const Color(0xFF18181B) : Colors.white,
+                            borderRadius: BorderRadius.circular(16),
                             itemHeight: null,
                             value: selectedAssignmentType,
                             isExpanded: true,
-                            style: GoogleFonts.dmSans(fontSize: 15.2, color: Colors.black87),
+                            style: GoogleFonts.dmSans(fontSize: 14.0, color: isDark ? Colors.white : Colors.black87),
                             items: const [
                               DropdownMenuItem(
                                 value: 'individu',
@@ -2738,7 +2955,14 @@ Sertakan HANYA JSON tersebut tanpa penjelasan markdown apa pun di luar JSON.
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text('Mulai', style: GoogleFonts.plusJakartaSans(fontSize: 14.0, fontWeight: FontWeight.bold, color: Colors.black54)),
+                              Text(
+                                'Mulai',
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 13.5,
+                                  fontWeight: FontWeight.w600,
+                                  color: isDark ? Colors.white70 : Colors.black54,
+                                ),
+                              ),
                               const SizedBox(height: 6),
                               GestureDetector(
                                 onTap: () async {
@@ -2752,15 +2976,18 @@ Sertakan HANYA JSON tersebut tanpa penjelasan markdown apa pun di luar JSON.
                                   if (picked != null) setModalState(() => startDate = picked);
                                 },
                                 child: Container(
-                                  padding: const EdgeInsets.all(10),
+                                  padding: const EdgeInsets.all(12),
                                   decoration: BoxDecoration(
-                                    color: const Color(0xFFF8FAFC),
-                                    borderRadius: BorderRadius.circular(10),
-                                    border: Border.all(color: const Color(0xFFE2E8F0)),
+                                    color: isDark ? const Color(0xFF121215) : const Color(0xFFF8FAFC),
+                                    borderRadius: BorderRadius.circular(14),
+                                    border: Border.all(color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0)),
                                   ),
                                   child: Text(
                                     startDate == null ? 'Mulai' : '${startDate!.day}/${startDate!.month}/${startDate!.year}',
-                                    style: GoogleFonts.dmSans(fontSize: 14.0),
+                                    style: GoogleFonts.dmSans(
+                                      fontSize: 13.5,
+                                      color: isDark ? Colors.white : Colors.black87,
+                                    ),
                                   ),
                                 ),
                               ),
@@ -2772,7 +2999,14 @@ Sertakan HANYA JSON tersebut tanpa penjelasan markdown apa pun di luar JSON.
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text('Selesai', style: GoogleFonts.plusJakartaSans(fontSize: 14.0, fontWeight: FontWeight.bold, color: Colors.black54)),
+                              Text(
+                                'Selesai',
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 13.5,
+                                  fontWeight: FontWeight.w600,
+                                  color: isDark ? Colors.white70 : Colors.black54,
+                                ),
+                              ),
                               const SizedBox(height: 6),
                               GestureDetector(
                                 onTap: () async {
@@ -2786,15 +3020,18 @@ Sertakan HANYA JSON tersebut tanpa penjelasan markdown apa pun di luar JSON.
                                   if (picked != null) setModalState(() => endDate = picked);
                                 },
                                 child: Container(
-                                  padding: const EdgeInsets.all(10),
+                                  padding: const EdgeInsets.all(12),
                                   decoration: BoxDecoration(
-                                    color: const Color(0xFFF8FAFC),
-                                    borderRadius: BorderRadius.circular(10),
-                                    border: Border.all(color: const Color(0xFFE2E8F0)),
+                                    color: isDark ? const Color(0xFF121215) : const Color(0xFFF8FAFC),
+                                    borderRadius: BorderRadius.circular(14),
+                                    border: Border.all(color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0)),
                                   ),
                                   child: Text(
                                     endDate == null ? 'Selesai' : '${endDate!.day}/${endDate!.month}/${endDate!.year}',
-                                    style: GoogleFonts.dmSans(fontSize: 14.0),
+                                    style: GoogleFonts.dmSans(
+                                      fontSize: 13.5,
+                                      color: isDark ? Colors.white : Colors.black87,
+                                    ),
                                   ),
                                 ),
                               ),
@@ -2805,19 +3042,30 @@ Sertakan HANYA JSON tersebut tanpa penjelasan markdown apa pun di luar JSON.
                     ),
                     const SizedBox(height: 12),
 
-                    Text('Lampiran / Link Modul', style: GoogleFonts.plusJakartaSans(fontSize: 14.0, fontWeight: FontWeight.bold, color: Colors.black54)),
+                    Text(
+                      'Lampiran / Link Modul',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 13.5,
+                        fontWeight: FontWeight.w600,
+                        color: isDark ? Colors.white70 : Colors.black54,
+                      ),
+                    ),
                     const SizedBox(height: 6),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      padding: const EdgeInsets.symmetric(horizontal: 14),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFF8FAFC),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: const Color(0xFFE2E8F0)),
+                        color: isDark ? const Color(0xFF121215) : const Color(0xFFF8FAFC),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0)),
                       ),
                       child: TextField(
                         controller: docController,
-                        style: GoogleFonts.dmSans(fontSize: 15.2),
-                        decoration: const InputDecoration(border: InputBorder.none, hintText: 'modul.pdf atau link gdrive...'),
+                        style: GoogleFonts.dmSans(fontSize: 14.0, color: isDark ? Colors.white : Colors.black87),
+                        decoration: InputDecoration(
+                          border: InputBorder.none,
+                          hintText: 'modul.pdf atau link gdrive...',
+                          hintStyle: GoogleFonts.dmSans(fontSize: 13.5, color: isDark ? Colors.white38 : Colors.black26),
+                        ),
                       ),
                     ),
                   ],
@@ -2835,7 +3083,13 @@ Sertakan HANYA JSON tersebut tanpa penjelasan markdown apa pun di luar JSON.
                 ),
                 TextButton(
                   onPressed: () => Navigator.pop(ctx),
-                  child: Text('Batal', style: GoogleFonts.plusJakartaSans(color: Colors.black54, fontWeight: FontWeight.bold)),
+                  child: Text(
+                    'Batal',
+                    style: GoogleFonts.plusJakartaSans(
+                      color: isDark ? Colors.white60 : Colors.black54,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
                 ),
                 ElevatedButton(
                   onPressed: () {
@@ -2850,7 +3104,11 @@ Sertakan HANYA JSON tersebut tanpa penjelasan markdown apa pun di luar JSON.
                     });
                     Navigator.pop(ctx);
                   },
-                  style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF4F46E5), foregroundColor: Colors.white),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF7C3AED),
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                  ),
                   child: Text('Simpan', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold)),
                 ),
               ],

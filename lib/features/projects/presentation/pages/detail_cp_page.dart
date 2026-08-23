@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:hubner/core/widgets/three_dots_loader.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -39,20 +38,43 @@ class _DetailCpPageState extends State<DetailCpPage> {
   final Map<int, TextEditingController> _materiControllers = {};
   Timer? _debounceTimer;
 
-  final List<Color> _sliderColors = const [
-    Color(0xFFD6A5F8), // 1. Ungu Slider
-    Color(0xFF9CC8FC), // 2. Biru Slider
-    Color(0xFF7DE3D0), // 3. Tosca Slider
-    Color(0xFFF7BD84), // 4. Orange Slider
-    Color(0xFFF794BE), // 5. Pink Slider
+  final List<Color> _classroomCardColors = const [
+    Color(0xFFD6A5F8), // 01. Lilac Purple (Core)
+    Color(0xFF9CC8FC), // 02. Sky Blue
+    Color(0xFF7DE3D0), // 03. Emerald Mint / Tosca
+    Color(0xFFF7BD84), // 04. Amber Peach / Orange
+    Color(0xFFF794BE), // 05. Rose Magenta / Pink
+    Color(0xFFA5B4FC), // 06. Indigo Violet
+    Color(0xFFBEF264), // 07. Fresh Lime
+    Color(0xFF67E8F9), // 08. Ocean Cyan
+    Color(0xFFFDE047), // 09. Amber Gold
+    Color(0xFFCBD5E1), // 10. Steel Slate
   ];
 
-  final List<Color> _softPastelColors = const [
-    Color(0xFFEDE9FE), // Soft Lavender
-    Color(0xFFE0F2FE), // Soft Blue
-    Color(0xFFD1FAE5), // Soft Mint
-    Color(0xFFFEF3C7), // Soft Kuning/Peach
-    Color(0xFFFFE4E6), // Soft Pink
+  final List<Color> _classroomCardDarkColors = const [
+    Color(0xFF6B3BA3), // 01. Deep Lilac (Core)
+    Color(0xFF2864A8), // 02. Deep Sky Blue
+    Color(0xFF147D75), // 03. Deep Teal / Tosca
+    Color(0xFFC76D10), // 04. Deep Amber / Orange
+    Color(0xFFA82658), // 05. Deep Rose / Magenta
+    Color(0xFF4338CA), // 06. Deep Indigo
+    Color(0xFF4D7C0F), // 07. Deep Olive Lime
+    Color(0xFF0E7490), // 08. Deep Ocean Cyan
+    Color(0xFFA16207), // 09. Deep Amber Gold
+    Color(0xFF334155), // 10. Deep Slate Steel
+  ];
+
+  final List<Color> _classroomAccentColors = const [
+    Color(0xFF7C3AED), // 01. Purple (Core)
+    Color(0xFF2563EB), // 02. Blue
+    Color(0xFF059669), // 03. Teal
+    Color(0xFFD97706), // 04. Amber / Orange
+    Color(0xFFDB2777), // 05. Pink / Rose
+    Color(0xFF4F46E5), // 06. Indigo
+    Color(0xFF65A30D), // 07. Lime
+    Color(0xFF0891B2), // 08. Cyan
+    Color(0xFFCA8A04), // 09. Gold
+    Color(0xFF475569), // 10. Slate
   ];
 
   @override
@@ -112,26 +134,21 @@ class _DetailCpPageState extends State<DetailCpPage> {
   @override
   Widget build(BuildContext context) {
     final bool isDark = AppColors.isDarkMode;
-    final int badgeColorIdx = widget.stageIdx % _sliderColors.length;
+    final int badgeColorIdx = widget.stageIdx % _classroomCardColors.length;
     final Color cpCardBg = isDark
-        ? _softPastelColors[badgeColorIdx]
-        : _sliderColors[badgeColorIdx];
-    final Color badgeTextCol = (badgeColorIdx == 0
-        ? const Color(0xFF7C3AED)
-        : badgeColorIdx == 1
-            ? const Color(0xFF2563EB)
-            : badgeColorIdx == 2
-                ? const Color(0xFF059669)
-                : badgeColorIdx == 3
-                    ? const Color(0xFFC2410C)
-                    : const Color(0xFFE11D48));
+        ? _classroomCardDarkColors[badgeColorIdx]
+        : _classroomCardColors[badgeColorIdx];
+    final Color accentCol = _classroomAccentColors[badgeColorIdx];
+    final Color badgeTextCol = isDark
+        ? Colors.white.withValues(alpha: 0.16)
+        : accentCol.withValues(alpha: 0.25);
 
-    final Color materiTopColor = Color.lerp(cpCardBg, Colors.white, 0.40)!;
+    final Color materiTopColor = isDark ? const Color(0xFF27272A) : Color.lerp(cpCardBg, Colors.white, 0.40)!;
 
     return Scaffold(
       backgroundColor: isDark ? const Color(0xFF000000) : const Color(0xFFF8FAFC),
       appBar: AppBar(
-        backgroundColor: isDark ? const Color(0xFF141416) : Colors.white,
+        backgroundColor: isDark ? const Color(0xFF1C1C1E) : Colors.white,
         elevation: 0,
         scrolledUnderElevation: 0,
         toolbarHeight: 64,
@@ -204,11 +221,14 @@ class _DetailCpPageState extends State<DetailCpPage> {
                         child: Container(
                           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFF7BD84),
+                            color: isDark ? const Color(0xFF27272A) : const Color(0xFF1E293B),
                             borderRadius: BorderRadius.circular(20),
+                            border: isDark
+                                ? Border.all(color: const Color(0xFF3F3F46), width: 1.0)
+                                : null,
                             boxShadow: [
                               BoxShadow(
-                                color: const Color(0xFFF7BD84).withValues(alpha: 0.35),
+                                color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.1),
                                 blurRadius: 6,
                                 offset: const Offset(0, 2),
                               ),
@@ -217,9 +237,9 @@ class _DetailCpPageState extends State<DetailCpPage> {
                           child: Text(
                             'Mode Edit',
                             style: GoogleFonts.plusJakartaSans(
-                              fontSize: 14.0,
-                              fontWeight: FontWeight.w800,
-                              color: Colors.black,
+                              fontSize: 13.5,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
                             ),
                           ),
                         ),
@@ -409,16 +429,16 @@ class _DetailCpPageState extends State<DetailCpPage> {
                                             style: GoogleFonts.plusJakartaSans(
                                               fontSize: 23,
                                               fontWeight: FontWeight.w800,
-                                              color: const Color(0xFF0F172A),
+                                              color: isDark ? Colors.white : const Color(0xFF0F172A),
                                               height: 1.25,
                                               letterSpacing: -0.4,
                                             ),
                                             decoration: InputDecoration(
                                               isDense: true,
                                               filled: true,
-                                              fillColor: Colors.white,
+                                              fillColor: isDark ? const Color(0xFF1C1C1E) : Colors.white,
                                               hintText: 'Nama Capaian Pembelajaran',
-                                              hintStyle: GoogleFonts.dmSans(color: Colors.black38, fontSize: 14),
+                                              hintStyle: GoogleFonts.dmSans(color: isDark ? Colors.white38 : Colors.black38, fontSize: 14),
                                               contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                                               border: OutlineInputBorder(
                                                 borderRadius: BorderRadius.circular(14),
@@ -437,7 +457,7 @@ class _DetailCpPageState extends State<DetailCpPage> {
                                             style: GoogleFonts.plusJakartaSans(
                                               fontSize: 23,
                                               fontWeight: FontWeight.w800,
-                                              color: const Color(0xFF0F172A),
+                                              color: isDark ? Colors.white : const Color(0xFF0F172A),
                                               height: 1.25,
                                               letterSpacing: -0.4,
                                             ),
@@ -449,7 +469,7 @@ class _DetailCpPageState extends State<DetailCpPage> {
                                           style: GoogleFonts.dmSans(
                                             fontSize: 14.0,
                                             fontWeight: FontWeight.w600,
-                                            color: const Color(0xFF334155).withValues(alpha: 0.8),
+                                            color: isDark ? Colors.white70 : const Color(0xFF334155).withValues(alpha: 0.8),
                                             height: 1.3,
                                           ),
                                         ),
@@ -466,17 +486,21 @@ class _DetailCpPageState extends State<DetailCpPage> {
                                         vertical: _isEditMode ? 12 : 16,
                                       ),
                                       decoration: BoxDecoration(
-                                        color: Colors.white.withValues(alpha: 0.90),
+                                        color: isDark
+                                            ? const Color(0xFF141416).withValues(alpha: 0.65)
+                                            : Colors.white.withValues(alpha: 0.90),
                                         borderRadius: BorderRadius.circular(22),
                                         border: Border.all(
                                           color: _isEditMode
                                               ? const Color(0xFF7C3AED)
-                                              : Colors.white.withValues(alpha: 0.95),
+                                              : (isDark
+                                                  ? Colors.white.withValues(alpha: 0.18)
+                                                  : Colors.white.withValues(alpha: 0.95)),
                                           width: _isEditMode ? 1.5 : 1.0,
                                         ),
                                         boxShadow: [
                                           BoxShadow(
-                                            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.03),
+                                            color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.03),
                                             blurRadius: 8,
                                             offset: const Offset(0, 2),
                                           ),
@@ -489,7 +513,7 @@ class _DetailCpPageState extends State<DetailCpPage> {
                                               style: GoogleFonts.dmSans(
                                                 fontSize: 14,
                                                 fontWeight: FontWeight.w500,
-                                                color: const Color(0xFF0F172A),
+                                                color: isDark ? Colors.white : const Color(0xFF0F172A),
                                                 height: 1.5,
                                               ),
                                               decoration: InputDecoration(
@@ -497,7 +521,7 @@ class _DetailCpPageState extends State<DetailCpPage> {
                                                 isDense: true,
                                                 contentPadding: EdgeInsets.zero,
                                                 hintText: 'Tulis ringkasan capaian pembelajaran di sini...',
-                                                hintStyle: GoogleFonts.dmSans(color: Colors.black38, fontSize: 14.0),
+                                                hintStyle: GoogleFonts.dmSans(color: isDark ? Colors.white38 : Colors.black38, fontSize: 14.0),
                                               ),
                                               onChanged: (v) => _debouncedAutoSave(stages),
                                             )
@@ -506,7 +530,7 @@ class _DetailCpPageState extends State<DetailCpPage> {
                                               style: GoogleFonts.dmSans(
                                                 fontSize: 14,
                                                 fontWeight: FontWeight.w400,
-                                                color: const Color(0xFF0F172A),
+                                                color: isDark ? Colors.white : const Color(0xFF0F172A),
                                                 height: 1.5,
                                               ),
                                             ),
@@ -640,7 +664,7 @@ class _DetailCpPageState extends State<DetailCpPage> {
                             ),
                             child: Container(
                               decoration: BoxDecoration(
-                                color: isDark ? const Color(0xFF141416) : Colors.white,
+                                color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
                                 borderRadius: BorderRadius.circular(30),
                                 border: Border.all(
                                   color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
@@ -656,7 +680,7 @@ class _DetailCpPageState extends State<DetailCpPage> {
                               ),
                               child: Column(
                                 children: [
-                                  // Materi Header (Solid Soft Pastel)
+                                  // Materi Header (Solid Soft Pastel / Dark Container)
                                   Container(
                                     decoration: BoxDecoration(
                                       color: materiTopColor,
@@ -690,15 +714,16 @@ class _DetailCpPageState extends State<DetailCpPage> {
                                                       style: GoogleFonts.plusJakartaSans(
                                                         fontSize: 14,
                                                         fontWeight: FontWeight.bold,
-                                                        color: Colors.black87,
+                                                        color: isDark ? Colors.white : Colors.black87,
                                                         height: 1.3,
                                                       ),
                                                       decoration: InputDecoration(
                                                         isDense: true,
                                                         filled: true,
-                                                        fillColor: Colors.white.withValues(alpha: 0.8),
+                                                        fillColor: isDark ? const Color(0xFF1C1C1E) : Colors.white.withValues(alpha: 0.8),
                                                         contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                                                         hintText: 'Judul Materi...',
+                                                        hintStyle: GoogleFonts.dmSans(color: isDark ? Colors.white38 : Colors.black38),
                                                         border: OutlineInputBorder(
                                                           borderRadius: BorderRadius.circular(10),
                                                           borderSide: const BorderSide(color: Color(0xFF7C3AED)),
@@ -713,32 +738,32 @@ class _DetailCpPageState extends State<DetailCpPage> {
                                                   : Column(
                                                       crossAxisAlignment: CrossAxisAlignment.start,
                                                       children: [
-                                                         Text(
-                                                           mTitle,
-                                                           style: GoogleFonts.plusJakartaSans(
-                                                             fontSize: 15,
-                                                             fontWeight: FontWeight.bold,
-                                                             color: Colors.black87,
-                                                           ),
-                                                         ),
-                                                         const SizedBox(height: 2),
-                                                         Text(
-                                                           quizCount > 0
-                                                               ? '$tugasCount tugas · $quizCount quiz · $pdfCount materi'
-                                                               : '$tugasCount tugas · $pdfCount materi',
-                                                           style: GoogleFonts.dmSans(
-                                                             fontSize: 14.0,
-                                                             color: Colors.black54,
-                                                           ),
-                                                         ),
-                                                       ],
-                                                     ),
+                                                        Text(
+                                                          mTitle,
+                                                          style: GoogleFonts.plusJakartaSans(
+                                                            fontSize: 15,
+                                                            fontWeight: FontWeight.bold,
+                                                            color: isDark ? Colors.white : Colors.black87,
+                                                          ),
+                                                        ),
+                                                        const SizedBox(height: 2),
+                                                        Text(
+                                                          quizCount > 0
+                                                              ? '$tugasCount tugas · $quizCount quiz · $pdfCount materi'
+                                                              : '$tugasCount tugas · $pdfCount materi',
+                                                          style: GoogleFonts.dmSans(
+                                                            fontSize: 14.0,
+                                                            color: isDark ? Colors.white60 : Colors.black54,
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
                                             ),
                                             Icon(
                                               isExpanded
                                                   ? Icons.keyboard_arrow_up_rounded
                                                   : Icons.keyboard_arrow_down_rounded,
-                                              color: Colors.black54,
+                                              color: isDark ? Colors.white70 : Colors.black54,
                                             ),
                                           ],
                                         ),
@@ -754,7 +779,7 @@ class _DetailCpPageState extends State<DetailCpPage> {
                                     ),
                                     Container(
                                       decoration: BoxDecoration(
-                                        color: isDark ? const Color(0xFF141416) : Colors.white,
+                                        color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
                                         borderRadius: const BorderRadius.vertical(bottom: Radius.circular(28)),
                                       ),
                                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
@@ -783,16 +808,16 @@ class _DetailCpPageState extends State<DetailCpPage> {
                                               Color iconBg;
                                               if (type == 'quiz') {
                                                 typeIcon = Icons.quiz_outlined;
-                                                iconCol = const Color(0xFFD97706);
-                                                iconBg = const Color(0xFFFEF3C7);
+                                                iconCol = isDark ? const Color(0xFFFBBF24) : const Color(0xFFD97706);
+                                                iconBg = isDark ? const Color(0xFF451A03) : const Color(0xFFFEF3C7);
                                               } else if (type == 'pdf') {
                                                 typeIcon = Icons.menu_book_rounded;
-                                                iconCol = const Color(0xFF059669);
-                                                iconBg = const Color(0xFFD1FAE5);
+                                                iconCol = isDark ? const Color(0xFF6EE7B7) : const Color(0xFF059669);
+                                                iconBg = isDark ? const Color(0xFF064E3B) : const Color(0xFFD1FAE5);
                                               } else {
                                                 typeIcon = Icons.assignment_outlined;
-                                                iconCol = const Color(0xFF2563EB);
-                                                iconBg = const Color(0xFFDBEAFE);
+                                                iconCol = isDark ? const Color(0xFF93C5FD) : const Color(0xFF2563EB);
+                                                iconBg = isDark ? const Color(0xFF172554) : const Color(0xFFDBEAFE);
                                               }
 
                                               return GestureDetector(
@@ -847,6 +872,9 @@ class _DetailCpPageState extends State<DetailCpPage> {
                                                   decoration: BoxDecoration(
                                                     color: isDark ? const Color(0xFF27272A) : Colors.white,
                                                     borderRadius: BorderRadius.circular(30),
+                                                    border: isDark
+                                                        ? Border.all(color: const Color(0xFF3F3F46), width: 1.0)
+                                                        : null,
                                                     boxShadow: [
                                                       BoxShadow(
                                                         color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.05),
@@ -1247,36 +1275,36 @@ class _DetailCpPageState extends State<DetailCpPage> {
                   mainAxisSize: MainAxisSize.min,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    // 1. Tugas (Solid Biru Slider / Dark Soft Pastel Blue)
+                    // 1. Tugas (Deep Blue / Pastel Blue)
                     _buildFramelessCircleItem(
                       label: 'Tugas',
                       icon: Icons.assignment_outlined,
-                      circleBg: isDark ? const Color(0xFFE0F2FE) : const Color(0xFF9CC8FC),
-                      contentFg: isDark ? const Color(0xFF0284C7) : const Color(0xFF1E3A8A),
+                      circleBg: isDark ? const Color(0xFF2864A8) : const Color(0xFF9CC8FC),
+                      contentFg: isDark ? Colors.white : const Color(0xFF1E3A8A),
                       onTap: () {
                         Navigator.pop(dialogCtx);
                         _showCreateTugasDialog(context, materiIdx, currentStages);
                       },
                     ),
                     const SizedBox(width: 18),
-                    // 2. Quiz (Solid Kuning-Orange Slider / Dark Soft Pastel Kuning)
+                    // 2. Quiz (Deep Orange / Pastel Orange)
                     _buildFramelessCircleItem(
                       label: 'Quiz',
                       icon: Icons.quiz_outlined,
-                      circleBg: isDark ? const Color(0xFFFEF3C7) : const Color(0xFFF7BD84),
-                      contentFg: isDark ? const Color(0xFFD97706) : const Color(0xFF7C2D12),
+                      circleBg: isDark ? const Color(0xFFC76D10) : const Color(0xFFF7BD84),
+                      contentFg: isDark ? Colors.white : const Color(0xFF7C2D12),
                       onTap: () {
                         Navigator.pop(dialogCtx);
                         _showCreateQuizDialog(context, materiIdx, currentStages);
                       },
                     ),
                     const SizedBox(width: 18),
-                    // 3. Materi (Solid Tosca Slider / Dark Soft Pastel Mint)
+                    // 3. Materi (Deep Tosca / Pastel Tosca)
                     _buildFramelessCircleItem(
                       label: 'Materi',
                       icon: Icons.menu_book_rounded,
-                      circleBg: isDark ? const Color(0xFFD1FAE5) : const Color(0xFF7DE3D0),
-                      contentFg: isDark ? const Color(0xFF059669) : const Color(0xFF064E3B),
+                      circleBg: isDark ? const Color(0xFF147D75) : const Color(0xFF7DE3D0),
+                      contentFg: isDark ? Colors.white : const Color(0xFF064E3B),
                       onTap: () {
                         Navigator.pop(dialogCtx);
                         _showCreateMateriDialog(context, materiIdx, currentStages);
@@ -1546,13 +1574,13 @@ class _DetailCpPageState extends State<DetailCpPage> {
             return Dialog(
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
               clipBehavior: Clip.antiAlias,
-              backgroundColor: isDark ? const Color(0xFF141416) : Colors.white,
+              backgroundColor: isDark ? const Color(0xFF1C1C1E) : Colors.white,
               insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
               child: Container(
                 width: screenWidth > 680 ? 640 : screenWidth * 0.94,
                 constraints: BoxConstraints(maxHeight: screenHeight * 0.88),
                 decoration: BoxDecoration(
-                  color: isDark ? const Color(0xFF141416) : Colors.white,
+                  color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
                   borderRadius: BorderRadius.circular(28),
                 ),
                 child: Column(
@@ -1562,7 +1590,7 @@ class _DetailCpPageState extends State<DetailCpPage> {
                       width: double.infinity,
                       padding: const EdgeInsets.fromLTRB(20, 20, 16, 16),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF9CC8FC), // Soft Blue matching Tugas
+                        color: isDark ? const Color(0xFF2864A8) : const Color(0xFF9CC8FC), // Matching Tugas
                         border: Border(
                           bottom: BorderSide(
                             color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
@@ -1598,7 +1626,7 @@ class _DetailCpPageState extends State<DetailCpPage> {
                                   style: GoogleFonts.plusJakartaSans(
                                     fontSize: 16.5,
                                     fontWeight: FontWeight.bold,
-                                    color: const Color(0xFF0F172A),
+                                    color: isDark ? Colors.white : const Color(0xFF0F172A),
                                   ),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
@@ -1608,7 +1636,7 @@ class _DetailCpPageState extends State<DetailCpPage> {
                                   'Atur tugas, tenggat waktu & instruksi',
                                   style: GoogleFonts.dmSans(
                                     fontSize: 14.0,
-                                    color: const Color(0xFF334155),
+                                    color: isDark ? Colors.white70 : const Color(0xFF334155),
                                   ),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
@@ -1623,12 +1651,14 @@ class _DetailCpPageState extends State<DetailCpPage> {
                               width: 36,
                               height: 36,
                               decoration: BoxDecoration(
-                                color: Colors.white.withValues(alpha: 0.85),
+                                color: isDark
+                                    ? const Color(0xFF27272A)
+                                    : Colors.white.withValues(alpha: 0.85),
                                 shape: BoxShape.circle,
                               ),
-                              child: const Icon(
+                              child: Icon(
                                 Icons.close_rounded,
-                                color: Colors.black87,
+                                color: isDark ? Colors.white : Colors.black87,
                                 size: 18,
                               ),
                             ),
@@ -2133,54 +2163,6 @@ class _DetailCpPageState extends State<DetailCpPage> {
                     ],
                   ),
                 ),
-
-                // Bottom Action Persis Round
-                Container(
-                  padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
-                  decoration: BoxDecoration(
-                    color: isDark ? const Color(0xFF141416) : Colors.white,
-                    border: Border(
-                      top: BorderSide(
-                        color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
-                        width: 1,
-                      ),
-                    ),
-                  ),
-                  child: GestureDetector(
-                    onTap: submitTask,
-                    child: Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF4F92F7),
-                        borderRadius: BorderRadius.circular(28),
-                        boxShadow: [
-                          BoxShadow(
-                            color: const Color(0xFF4F92F7).withValues(alpha: 0.35),
-                            blurRadius: 10,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: Center(
-                        child: isSubmitting
-                            ? const SizedBox(
-                                width: 20,
-                                height: 20,
-                                child: const ThreeDotsLoader(),
-                              )
-                            : Text(
-                                isEditMode ? 'Perbarui Tugas' : 'Simpan Tugas',
-                                style: GoogleFonts.plusJakartaSans(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 15,
-                                ),
-                              ),
-                      ),
-                    ),
-                  ),
-                ),
               ],
             ),
           ),
@@ -2388,13 +2370,13 @@ int? taskIdxToEdit,
             return Dialog(
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
               clipBehavior: Clip.antiAlias,
-              backgroundColor: isDark ? const Color(0xFF141416) : Colors.white,
+              backgroundColor: isDark ? const Color(0xFF1C1C1E) : Colors.white,
               insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
               child: Container(
                 width: screenWidth > 680 ? 640 : screenWidth * 0.94,
                 constraints: BoxConstraints(maxHeight: screenHeight * 0.88),
                 decoration: BoxDecoration(
-                  color: isDark ? const Color(0xFF141416) : Colors.white,
+                  color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
                   borderRadius: BorderRadius.circular(28),
                 ),
                 child: Column(
@@ -2404,7 +2386,7 @@ int? taskIdxToEdit,
                       width: double.infinity,
                       padding: const EdgeInsets.fromLTRB(20, 20, 16, 16),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFF7BD84), // Soft Peach/Orange matching Quiz
+                        color: isDark ? const Color(0xFFC76D10) : const Color(0xFFF7BD84), // Matching Quiz
                         border: Border(
                           bottom: BorderSide(
                             color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
@@ -2440,17 +2422,17 @@ int? taskIdxToEdit,
                                   style: GoogleFonts.plusJakartaSans(
                                     fontSize: 16.5,
                                     fontWeight: FontWeight.bold,
-                                    color: const Color(0xFF0F172A),
+                                    color: isDark ? Colors.white : const Color(0xFF0F172A),
                                   ),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                 ),
                                 const SizedBox(height: 2),
                                 Text(
-                                  'Atur soal pilihan ganda, durasi & waktu',
+                                  'Atur soal quiz, batas waktu & jadwal pengerjaan',
                                   style: GoogleFonts.dmSans(
                                     fontSize: 14.0,
-                                    color: const Color(0xFF334155),
+                                    color: isDark ? Colors.white70 : const Color(0xFF334155),
                                   ),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
@@ -2465,12 +2447,14 @@ int? taskIdxToEdit,
                               width: 36,
                               height: 36,
                               decoration: BoxDecoration(
-                                color: Colors.white.withValues(alpha: 0.85),
+                                color: isDark
+                                    ? const Color(0xFF27272A)
+                                    : Colors.white.withValues(alpha: 0.85),
                                 shape: BoxShape.circle,
                               ),
-                              child: const Icon(
+                              child: Icon(
                                 Icons.close_rounded,
-                                color: Colors.black87,
+                                color: isDark ? Colors.white : Colors.black87,
                                 size: 18,
                               ),
                             ),
@@ -3283,71 +3267,23 @@ int? taskIdxToEdit,
                                     ),
                                   ],
                                 ),
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                // Bottom Action Persis Round
-                Container(
-                  padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
-                  decoration: BoxDecoration(
-                    color: isDark ? const Color(0xFF141416) : Colors.white,
-                    border: Border(
-                      top: BorderSide(
-                        color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
-                        width: 1,
-                      ),
-                    ),
-                  ),
-                  child: GestureDetector(
-                    onTap: submitQuiz,
-                    child: Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF59E0B),
-                        borderRadius: BorderRadius.circular(28),
-                        boxShadow: [
-                          BoxShadow(
-                            color: const Color(0xFFF59E0B).withValues(alpha: 0.35),
-                            blurRadius: 10,
-                            offset: const Offset(0, 4),
-                          ),
                         ],
                       ),
-                      child: Center(
-                        child: isSubmitting
-                            ? const SizedBox(
-                                width: 20,
-                                height: 20,
-                                child: const ThreeDotsLoader(),
-                              )
-                            : Text(
-                                isEditMode ? 'Perbarui Quiz' : 'Simpan Quiz',
-                                style: GoogleFonts.plusJakartaSans(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 15,
-                                ),
-                              ),
-                      ),
                     ),
-                  ),
+                  ],
                 ),
-              ],
-            ),
-          ),
+              ),
+            );
+          },
         );
       },
     );
-  },
-);
-}
+  }
 
   // -------------------------------------------------------------
   // 3. POPUP FORM BUAT / EDIT MATERI (EXACT DESKTOP CLASSROOM MATCH)
@@ -3478,13 +3414,13 @@ int? taskIdxToEdit,
             return Dialog(
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
               clipBehavior: Clip.antiAlias,
-              backgroundColor: isDark ? const Color(0xFF141416) : Colors.white,
+              backgroundColor: isDark ? const Color(0xFF1C1C1E) : Colors.white,
               insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
               child: Container(
                 width: screenWidth > 680 ? 640 : screenWidth * 0.94,
                 constraints: BoxConstraints(maxHeight: screenHeight * 0.88),
                 decoration: BoxDecoration(
-                  color: isDark ? const Color(0xFF141416) : Colors.white,
+                  color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
                   borderRadius: BorderRadius.circular(28),
                 ),
                 child: Column(
@@ -3494,7 +3430,7 @@ int? taskIdxToEdit,
                       width: double.infinity,
                       padding: const EdgeInsets.fromLTRB(20, 20, 16, 16),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF7DE3D0), // Soft Mint/Tosca matching Materi
+                        color: isDark ? const Color(0xFF147D75) : const Color(0xFF7DE3D0), // Matching Materi
                         border: Border(
                           bottom: BorderSide(
                             color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
@@ -3530,7 +3466,7 @@ int? taskIdxToEdit,
                                   style: GoogleFonts.plusJakartaSans(
                                     fontSize: 16.5,
                                     fontWeight: FontWeight.bold,
-                                    color: const Color(0xFF0F172A),
+                                    color: isDark ? Colors.white : const Color(0xFF0F172A),
                                   ),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
@@ -3540,7 +3476,7 @@ int? taskIdxToEdit,
                                   'Bagikan materi bacaan & modul pembelajaran',
                                   style: GoogleFonts.dmSans(
                                     fontSize: 14.0,
-                                    color: const Color(0xFF334155),
+                                    color: isDark ? Colors.white70 : const Color(0xFF334155),
                                   ),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
@@ -3555,12 +3491,14 @@ int? taskIdxToEdit,
                               width: 36,
                               height: 36,
                               decoration: BoxDecoration(
-                                color: Colors.white.withValues(alpha: 0.85),
+                                color: isDark
+                                    ? const Color(0xFF27272A)
+                                    : Colors.white.withValues(alpha: 0.85),
                                 shape: BoxShape.circle,
                               ),
-                              child: const Icon(
+                              child: Icon(
                                 Icons.close_rounded,
-                                color: Colors.black87,
+                                color: isDark ? Colors.white : Colors.black87,
                                 size: 18,
                               ),
                             ),
@@ -3880,54 +3818,6 @@ int? taskIdxToEdit,
                         ),
                       ),
                     ],
-                  ),
-                ),
-
-                // Bottom Action Persis Round
-                Container(
-                  padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
-                  decoration: BoxDecoration(
-                    color: isDark ? const Color(0xFF141416) : Colors.white,
-                    border: Border(
-                      top: BorderSide(
-                        color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
-                        width: 1,
-                      ),
-                    ),
-                  ),
-                  child: GestureDetector(
-                    onTap: submitMateri,
-                    child: Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF059669),
-                        borderRadius: BorderRadius.circular(28),
-                        boxShadow: [
-                          BoxShadow(
-                            color: const Color(0xFF059669).withValues(alpha: 0.35),
-                            blurRadius: 10,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: Center(
-                        child: isSubmitting
-                            ? const SizedBox(
-                                width: 20,
-                                height: 20,
-                                child: const ThreeDotsLoader(),
-                              )
-                            : Text(
-                                isEditMode ? 'Perbarui Materi' : 'Simpan Materi',
-                                style: GoogleFonts.plusJakartaSans(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 15,
-                                ),
-                              ),
-                      ),
-                    ),
                   ),
                 ),
               ],

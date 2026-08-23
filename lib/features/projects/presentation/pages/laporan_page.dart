@@ -1116,7 +1116,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                                    child: Text(
                                                      className,
                                                      style: GoogleFonts.plusJakartaSans(
-                                                       fontSize: 14.0,
+                                                       fontSize: 13.0,
                                                        fontWeight: FontWeight.bold,
                                                        color: isDark ? Colors.white : Colors.black87,
                                                        height: 1.15,
@@ -1375,7 +1375,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                                             .replaceFirst(RegExp(r'^Materi\s*\d*:\s*', caseSensitive: false), '')
                                                             .trim()),
                                                     style: GoogleFonts.plusJakartaSans(
-                                                      fontSize: 14.0,
+                                                      fontSize: 13.0,
                                                       fontWeight: FontWeight.bold,
                                                       color: isDark ? Colors.white : Colors.black87,
                                                       height: 1.15,
@@ -1439,7 +1439,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                                       return 'Materi';
                                                     })(),
                                                     style: GoogleFonts.plusJakartaSans(
-                                                      fontSize: 14.0,
+                                                      fontSize: 13.0,
                                                       fontWeight: FontWeight.bold,
                                                       color: isDark
                                                           ? (_selectedStageFilterIdx == null ? Colors.white38 : Colors.white)
@@ -1785,8 +1785,26 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                                           ),
                                                         )
                                                       : StreamBuilder<QuerySnapshot>(
-                                                          stream: _getProgressStream(_selectedProjectId!),
-                                                          builder: (context, progressSnapshot) {
+                                                          stream: FirebaseFirestore.instance
+                                                              .collection('users')
+                                                              .where('projectIds', arrayContains: _selectedProjectId)
+                                                              .snapshots(),
+                                                          builder: (context, usersSnapshot) {
+                                                            final Map<String, String> userAccountIds = {};
+                                                            if (usersSnapshot.hasData) {
+                                                              for (var uDoc in usersSnapshot.data!.docs) {
+                                                                final uData = uDoc.data() as Map<String, dynamic>;
+                                                                final String uid = uDoc.id;
+                                                                final String accId = (uData['userId'] ?? uData['id'] ?? uData['username'] ?? '').toString();
+                                                                if (accId.isNotEmpty) {
+                                                                  userAccountIds[uid] = accId;
+                                                                }
+                                                              }
+                                                            }
+
+                                                            return StreamBuilder<QuerySnapshot>(
+                                                                stream: _getProgressStream(_selectedProjectId!),
+                                                                builder: (context, progressSnapshot) {
                                                             final progressDocs = progressSnapshot.data?.docs ?? [];
                                                             final Map<String, Map<String, dynamic>> studentProgressData = {};
 
@@ -1817,6 +1835,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                                                   final String sName = student['name'] ?? 'Siswa';
                                                                   final String sUid = student['uid'] ?? '';
                                                                   final bool joined = student['joined'] ?? false;
+                                                                  final String defaultId = (student['id'] ?? student['studentId'] ?? student['nis'] ?? student['nisn'] ?? (index + 1).toString().padLeft(2, '0')).toString();
 
                                                                   final Map<String, dynamic> studentData = joined ? (studentProgressData[sUid] ?? {}) : {};
                                                                   final List<String> completed = joined ? List<String>.from(studentData['completedTasks'] ?? []) : [];
@@ -1926,7 +1945,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                                                                       const SizedBox(height: 2),
                                                                                       Text(
                                                                                         joined
-                                                                                            ? (sUid.isNotEmpty ? 'UID: ${sUid.length > 6 ? sUid.substring(0, 6) : sUid}' : 'Telah Terhubung')
+                                                                                            ? 'ID: ${userAccountIds[sUid] ?? studentData['userId'] ?? student['userId'] ?? (sUid.isNotEmpty ? (sUid.length > 6 ? sUid.substring(0, 6) : sUid) : defaultId)}'
                                                                                             : 'Belum Bergabung',
                                                                                         style: GoogleFonts.dmSans(
                                                                                           fontSize: 14.0,
@@ -2124,7 +2143,9 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                                               ),
                                                             );
                                                           },
-                                                        ),
+                                                        );
+                                                      },
+                                                    ),
                                                 ),
                                               ],
                                             ),
@@ -2270,7 +2291,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const SizedBox(
                 height: 250,
-                child: const Center(child: ThreeDotsLoader()),
+                child: Center(child: ThreeDotsLoader()),
               );
             }
 

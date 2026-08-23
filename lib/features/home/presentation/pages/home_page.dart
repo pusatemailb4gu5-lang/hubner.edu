@@ -815,33 +815,42 @@ class _HomePageState extends State<HomePage> {
   ];
 
   final List<Color> _classroomCardColors = const [
-    Color(0xFF7DE3D0), // 1. Fresh Teal/Mint
-    Color(0xFF9CC8FC), // 2. Periwinkle Sky Blue
-    Color(0xFFD6A5F8), // 3. Lilac Purple
-    Color(0xFFF794BE), // 4. Bubblegum Pink
-    Color(0xFFF7BD84), // 5. Warm Apricot Orange
-    Color(0xFFAEB8FD), // 6. Soft Violet/Indigo
-    Color(0xFFB5E284), // 7. Fresh Lime Green
+    Color(0xFFD6A5F8), // 01. Lilac Purple (Core)
+    Color(0xFF9CC8FC), // 02. Sky Blue
+    Color(0xFF7DE3D0), // 03. Emerald Mint / Tosca
+    Color(0xFFF7BD84), // 04. Amber Peach / Orange
+    Color(0xFFF794BE), // 05. Rose Magenta / Pink
+    Color(0xFFA5B4FC), // 06. Indigo Violet
+    Color(0xFFBEF264), // 07. Fresh Lime
+    Color(0xFF67E8F9), // 08. Ocean Cyan
+    Color(0xFFFDE047), // 09. Amber Gold
+    Color(0xFFCBD5E1), // 10. Steel Slate
   ];
 
   final List<Color> _classroomCardDarkColors = const [
-    Color(0xFFA4EBE0), // 1. Fresh Teal/Mint (30% softer)
-    Color(0xFFBAD8FD), // 2. Periwinkle Sky Blue (30% softer)
-    Color(0xFFE2C0FA), // 3. Lilac Purple (30% softer)
-    Color(0xFFF9B5D2), // 4. Bubblegum Pink (30% softer)
-    Color(0xFFF9D2A9), // 5. Warm Apricot Orange (30% softer)
-    Color(0xFFC7CEFE), // 6. Soft Violet/Indigo (30% softer)
-    Color(0xFFCCEAA9), // 7. Fresh Lime Green (30% softer)
+    Color(0xFF6B3BA3), // 01. Deep Lilac (Core)
+    Color(0xFF2864A8), // 02. Deep Sky Blue
+    Color(0xFF147D75), // 03. Deep Teal / Tosca
+    Color(0xFFC76D10), // 04. Deep Amber / Orange
+    Color(0xFFA82658), // 05. Deep Rose / Magenta
+    Color(0xFF4338CA), // 06. Deep Indigo
+    Color(0xFF4D7C0F), // 07. Deep Olive Lime
+    Color(0xFF0E7490), // 08. Deep Ocean Cyan
+    Color(0xFFA16207), // 09. Deep Amber Gold
+    Color(0xFF334155), // 10. Deep Slate Steel
   ];
 
   final List<Color> _classroomAccentColors = const [
-    Color(0xFF009688), // 1. Teal (ID User & School Level)
-    Color(0xFF448AFF), // 2. Blue (Nama Lengkap)
-    Color(0xFFE040FB), // 3. Purple/Magenta (Email)
-    Color(0xFFFF4081), // 4. Pink/Rose (Jenis Kelamin & Password)
-    Color(0xFFFFAB40), // 5. Orange/Amber (Zona Waktu)
-    Color(0xFF536DFE), // 6. Indigo (Bahasa)
-    Color(0xFF607D8B), // 7. Blue Grey (Role)
+    Color(0xFF7C3AED), // 01. Purple (Core)
+    Color(0xFF2563EB), // 02. Blue
+    Color(0xFF059669), // 03. Teal
+    Color(0xFFD97706), // 04. Amber / Orange
+    Color(0xFFDB2777), // 05. Pink / Rose
+    Color(0xFF4F46E5), // 06. Indigo
+    Color(0xFF65A30D), // 07. Lime
+    Color(0xFF0891B2), // 08. Cyan
+    Color(0xFFCA8A04), // 09. Gold
+    Color(0xFF475569), // 10. Slate
   ];
 
   DateTime? _parseDateString(String dateStr) {
@@ -1812,20 +1821,20 @@ class _HomePageState extends State<HomePage> {
                                               children: [
                                                 Text(
                                                   teacherRoleTitle,
-                                                  style: GoogleFonts.plusJakartaSans(
-                                                    fontSize: 14,
+                                                  style: GoogleFonts.dmSans(
+                                                    fontSize: 13.5,
                                                     fontWeight: FontWeight.w600,
-                                                    color: const Color(0xFF94A3B8),
+                                                    color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
                                                   ),
                                                 ),
                                                 const SizedBox(height: 3),
                                                 Text(
                                                   fullName,
                                                   style: GoogleFonts.plusJakartaSans(
-                                                    fontSize: 28.5,
-                                                    fontWeight: FontWeight.w900,
+                                                    fontSize: 28.0,
+                                                    fontWeight: FontWeight.bold,
                                                     color: isDark ? Colors.white : Colors.black,
-                                                    height: 1.12,
+                                                    height: 1.15,
                                                   ),
                                                 ),
                                               ],
@@ -1913,9 +1922,9 @@ class _HomePageState extends State<HomePage> {
                                             Text(
                                               'Siswa · ${schoolLevel.isNotEmpty ? schoolLevel.toUpperCase() : 'SMA/SMK'}',
                                               style: GoogleFonts.dmSans(
-                                                fontSize: 14,
-                                                color: Colors.black45,
-                                                fontWeight: FontWeight.normal,
+                                                fontSize: 13.5,
+                                                color: isDark ? Colors.white60 : const Color(0xFF64748B),
+                                                fontWeight: FontWeight.w500,
                                               ),
                                             ),
                                             Text(
@@ -1923,9 +1932,10 @@ class _HomePageState extends State<HomePage> {
                                               maxLines: 1,
                                               overflow: TextOverflow.ellipsis,
                                               style: GoogleFonts.plusJakartaSans(
-                                                fontSize: 28.5,
-                                                fontWeight: FontWeight.w900,
+                                                fontSize: 28.0,
+                                                fontWeight: FontWeight.bold,
                                                 color: isDark ? Colors.white : Colors.black,
+                                                height: 1.15,
                                               ),
                                             ),
                                           ],
@@ -1944,7 +1954,7 @@ class _HomePageState extends State<HomePage> {
                                                   height: 42,
                                                   decoration: BoxDecoration(
                                                     color: currentIsDark
-                                                        ? const Color(0xFF18181B)
+                                                        ? const Color(0xFF1C1C1E)
                                                         : Colors.white,
                                                     shape: BoxShape.circle,
                                                     border: Border.all(
@@ -3124,7 +3134,7 @@ class _HomePageState extends State<HomePage> {
                                               children: [
                                                 const Icon(
                                                   Icons.check_circle_rounded,
-                                                  color: Color(0xFF009688), // Warna Hijau
+                                                  color: Color(0xFF7C3AED), // Warna Ungu Hubner
                                                   size: 18,
                                                 ),
                                                 const SizedBox(width: 5),
@@ -3133,7 +3143,7 @@ class _HomePageState extends State<HomePage> {
                                                   style: GoogleFonts.plusJakartaSans(
                                                     fontSize: 14.0,
                                                     fontWeight: FontWeight.bold,
-                                                    color: Color(0xFF009688), // Text Hijau
+                                                    color: Color(0xFF7C3AED), // Text Ungu
                                                   ),
                                                 ),
                                               ],
@@ -3149,7 +3159,7 @@ class _HomePageState extends State<HomePage> {
                                           width: 44,
                                           height: 44,
                                           decoration: BoxDecoration(
-                                            color: isDark ? const Color(0xFF18181B) : Colors.white,
+                                            color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
                                             shape: BoxShape.circle,
                                             border: Border.all(
                                               color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
@@ -3845,39 +3855,57 @@ class _HomePageState extends State<HomePage> {
                                                   child: ClipOval(
                                                     child: Transform.scale(
                                                       scale: 1.45,
-                                                      child: userPhoto.startsWith('http')
-                                                          ? Image.network(
-                                                              userPhoto,
-                                                              fit: BoxFit.cover,
-                                                              errorBuilder: (_, __, ___) => Center(
+                                                      child: ColorFiltered(
+                                                        colorFilter: isDark
+                                                            ? ColorFilter.mode(Colors.black.withValues(alpha: 0.10), BlendMode.darken)
+                                                            : const ColorFilter.mode(Colors.transparent, BlendMode.dst),
+                                                        child: userPhoto.isNotEmpty
+                                                            ? (userPhoto.startsWith('http')
+                                                                ? Image.network(
+                                                                    userPhoto,
+                                                                    fit: BoxFit.cover,
+                                                                    errorBuilder: (_, __, ___) => Center(
+                                                                      child: Text(
+                                                                        userName.isNotEmpty
+                                                                            ? userName.substring(0, (userName.length >= 2 ? 2 : 1)).toUpperCase()
+                                                                            : 'P',
+                                                                        style: GoogleFonts.plusJakartaSans(
+                                                                          fontWeight: FontWeight.w800,
+                                                                          color: isDark ? Colors.white : Colors.black,
+                                                                          fontSize: 20,
+                                                                        ),
+                                                                      ),
+                                                                    ),
+                                                                  )
+                                                                : Image.asset(
+                                                                    userPhoto,
+                                                                    fit: BoxFit.cover,
+                                                                    errorBuilder: (_, __, ___) => Center(
+                                                                      child: Text(
+                                                                        userName.isNotEmpty
+                                                                            ? userName.substring(0, (userName.length >= 2 ? 2 : 1)).toUpperCase()
+                                                                            : 'P',
+                                                                        style: GoogleFonts.plusJakartaSans(
+                                                                          fontWeight: FontWeight.w800,
+                                                                          color: isDark ? Colors.white : Colors.black,
+                                                                          fontSize: 20,
+                                                                        ),
+                                                                      ),
+                                                                    ),
+                                                                  ))
+                                                            : Center(
                                                                 child: Text(
                                                                   userName.isNotEmpty
                                                                       ? userName.substring(0, (userName.length >= 2 ? 2 : 1)).toUpperCase()
-                                                                      : 'U',
+                                                                      : 'P',
                                                                   style: GoogleFonts.plusJakartaSans(
                                                                     fontWeight: FontWeight.w800,
                                                                     color: isDark ? Colors.white : Colors.black,
-                                                                    fontSize: 14.0,
+                                                                    fontSize: 20,
                                                                   ),
                                                                 ),
                                                               ),
-                                                            )
-                                                          : Image.asset(
-                                                              userPhoto,
-                                                              fit: BoxFit.cover,
-                                                              errorBuilder: (_, __, ___) => Center(
-                                                                child: Text(
-                                                                  userName.isNotEmpty
-                                                                      ? userName.substring(0, (userName.length >= 2 ? 2 : 1)).toUpperCase()
-                                                                      : 'U',
-                                                                  style: GoogleFonts.plusJakartaSans(
-                                                                    fontWeight: FontWeight.w800,
-                                                                    color: isDark ? Colors.white : Colors.black,
-                                                                    fontSize: 14.0,
-                                                                  ),
-                                                                ),
-                                                              ),
-                                                            ),
+                                                      ),
                                                     ),
                                                   ),
                                                 ),
@@ -3932,7 +3960,7 @@ class _HomePageState extends State<HomePage> {
                                                     height: 42,
                                                     decoration: BoxDecoration(
                                                       color: currentIsDark
-                                                          ? const Color(0xFF18181B)
+                                                          ? const Color(0xFF1C1C1E)
                                                           : Colors.white,
                                                       shape: BoxShape.circle,
                                                       border: Border.all(
@@ -3973,7 +4001,7 @@ class _HomePageState extends State<HomePage> {
                                                 height: 42,
                                                 decoration: BoxDecoration(
                                                   color: isDark
-                                                      ? const Color(0xFF18181B)
+                                                      ? const Color(0xFF1C1C1E)
                                                       : Colors.white,
                                                   shape: BoxShape.circle,
                                                   border: Border.all(
@@ -4373,16 +4401,22 @@ class _HomePageState extends State<HomePage> {
         children: [
           // Illustration placed on right more centered and bigger (aligned with top controls)!
           Positioned(
-            right: 16,
+            right: 12,
             top: 0,
             bottom: 0,
             child: Center(
               child: SizedBox(
-                height: 78,
-                child: Image.asset(
-                  iconPath,
-                  fit: BoxFit.contain,
-                  errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
+                height: 102,
+                width: 102,
+                child: ColorFiltered(
+                  colorFilter: isDark
+                      ? ColorFilter.mode(Colors.black.withValues(alpha: 0.12), BlendMode.darken)
+                      : const ColorFilter.mode(Colors.transparent, BlendMode.dst),
+                  child: Image.asset(
+                    iconPath,
+                    fit: BoxFit.contain,
+                    errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
+                  ),
                 ),
               ),
             ),
@@ -4403,7 +4437,7 @@ class _HomePageState extends State<HomePage> {
                 const SizedBox(height: 4),
                 // Middle: Complete Subject Title (Flexible, full size for 1-2 lines, max 3 lines, NEVER TRUNCATED)
                 Padding(
-                  padding: const EdgeInsets.only(left: 10.0, right: 96.0),
+                  padding: const EdgeInsets.only(left: 10.0, right: 110.0),
                   child: Builder(
                     builder: (context) {
                       double calculatedFontSize = 19.5;
@@ -4416,7 +4450,7 @@ class _HomePageState extends State<HomePage> {
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: calculatedFontSize,
                           fontWeight: FontWeight.w800,
-                          color: Colors.black87,
+                          color: isDark ? Colors.white : Colors.black87,
                           height: 1.15,
                         ),
                       );
@@ -4435,19 +4469,23 @@ class _HomePageState extends State<HomePage> {
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4.5),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(24),
-                        color: Colors.black.withValues(alpha: 0.08),
+                        color: isDark
+                            ? Colors.black.withValues(alpha: 0.25)
+                            : Colors.black.withValues(alpha: 0.08),
                         border: Border.all(
-                          color: Colors.black.withValues(alpha: 0.18),
+                          color: isDark
+                              ? Colors.white.withValues(alpha: 0.2)
+                              : Colors.black.withValues(alpha: 0.18),
                           width: 1.2,
                         ),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(
+                          Icon(
                             Icons.flash_on_rounded,
                             size: 13,
-                            color: Colors.black87,
+                            color: isDark ? Colors.white : Colors.black87,
                           ),
                           const SizedBox(width: 4),
                           Text(
@@ -4455,7 +4493,7 @@ class _HomePageState extends State<HomePage> {
                             style: GoogleFonts.dmSans(
                               fontSize: 14.0,
                               fontWeight: FontWeight.bold,
-                              color: Colors.black87,
+                              color: isDark ? Colors.white : Colors.black87,
                             ),
                           ),
                         ],
@@ -4467,19 +4505,23 @@ class _HomePageState extends State<HomePage> {
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4.5),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(24),
-                        color: Colors.black.withValues(alpha: 0.08),
+                        color: isDark
+                            ? Colors.black.withValues(alpha: 0.25)
+                            : Colors.black.withValues(alpha: 0.08),
                         border: Border.all(
-                          color: Colors.black.withValues(alpha: 0.18),
+                          color: isDark
+                              ? Colors.white.withValues(alpha: 0.2)
+                              : Colors.black.withValues(alpha: 0.18),
                           width: 1.2,
                         ),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(
+                          Icon(
                             Icons.group_outlined,
                             size: 13,
-                            color: Colors.black87,
+                            color: isDark ? Colors.white : Colors.black87,
                           ),
                           const SizedBox(width: 4),
                           Text(
@@ -4487,7 +4529,7 @@ class _HomePageState extends State<HomePage> {
                             style: GoogleFonts.dmSans(
                               fontSize: 14.0,
                               fontWeight: FontWeight.bold,
-                              color: Colors.black87,
+                              color: isDark ? Colors.white : Colors.black87,
                             ),
                           ),
                         ],
@@ -5998,6 +6040,7 @@ class _HomePageState extends State<HomePage> {
     List<Map<String, dynamic>> allTasks,
     String role,
   ) {
+    final bool isDark = AppColors.isDarkMode;
     final int year = _currentCalendarMonth.year;
     final int month = _currentCalendarMonth.month;
     final String currentMonthYearStr = ' ';
@@ -6118,17 +6161,17 @@ class _HomePageState extends State<HomePage> {
               Text(
                 currentMonthYearStr,
                 style: GoogleFonts.plusJakartaSans(
-                  fontSize: 17.6,
+                  fontSize: 16.5,
                   fontWeight: FontWeight.bold,
-                  color: Colors.black87,
+                  color: isDark ? Colors.white : Colors.black87,
                 ),
               ),
               Row(
                 children: [
                   IconButton(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.chevron_left_rounded,
-                      color: Colors.black54,
+                      color: isDark ? Colors.white60 : Colors.black54,
                       size: 20,
                     ),
                     onPressed: () {
@@ -6138,9 +6181,9 @@ class _HomePageState extends State<HomePage> {
                     },
                   ),
                   IconButton(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.chevron_right_rounded,
-                      color: Colors.black54,
+                      color: isDark ? Colors.white60 : Colors.black54,
                       size: 20,
                     ),
                     onPressed: () {
@@ -6163,9 +6206,9 @@ class _HomePageState extends State<HomePage> {
                   w,
                   textAlign: TextAlign.center,
                   style: GoogleFonts.plusJakartaSans(
-                    fontSize: 14.0,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.black45,
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.bold,
+                    color: isDark ? Colors.white38 : Colors.black45,
                   ),
                 ),
               );
@@ -6189,6 +6232,7 @@ class _HomePageState extends State<HomePage> {
     List<Map<String, dynamic>> allTasks,
     String role,
   ) {
+    final bool isDark = AppColors.isDarkMode;
     final DateTime now = DateTime.now();
     final DateTime todayDate = DateTime(now.year, now.month, now.day);
     final List<DateTime> calendarDays = List.generate(14, (index) {
@@ -6211,15 +6255,15 @@ class _HomePageState extends State<HomePage> {
               Text(
                 currentMonthYearStr,
                 style: GoogleFonts.plusJakartaSans(
-                  fontSize: 18.7,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.black87,
+                  fontSize: 16.5,
+                  fontWeight: FontWeight.bold,
+                  color: isDark ? Colors.white : Colors.black87,
                 ),
               ),
-              const Icon(
+              Icon(
                 Icons.calendar_month_outlined,
                 size: 18,
-                color: Colors.black45,
+                color: isDark ? Colors.white54 : Colors.black45,
               ),
             ],
           ),
@@ -6260,8 +6304,16 @@ class _HomePageState extends State<HomePage> {
                   duration: const Duration(milliseconds: 200),
                   width: 52,
                   decoration: BoxDecoration(
-                    color: isSelected ? activeBgColor : const Color(0xFFF8FAFC),
+                    color: isSelected
+                        ? activeBgColor
+                        : (isDark ? const Color(0xFF18181B) : const Color(0xFFF8FAFC)),
                     borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: isSelected
+                          ? Colors.transparent
+                          : (isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0)),
+                      width: 1,
+                    ),
                   ),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -6280,7 +6332,7 @@ class _HomePageState extends State<HomePage> {
                         child: Text(
                           _getDayName(day.weekday),
                           style: GoogleFonts.plusJakartaSans(
-                            fontSize: 14.0,
+                            fontSize: 12.0,
                             fontWeight: FontWeight.bold,
                             color: isSelected ? Colors.white : dayTextColor,
                           ),
@@ -6290,9 +6342,11 @@ class _HomePageState extends State<HomePage> {
                       Text(
                         day.day.toString(),
                         style: GoogleFonts.plusJakartaSans(
-                          fontSize: 18.7,
-                          fontWeight: FontWeight.w700,
-                          color: isSelected ? Colors.black : Colors.black87,
+                          fontSize: 17.5,
+                          fontWeight: FontWeight.bold,
+                          color: isSelected
+                              ? Colors.black
+                              : (isDark ? Colors.white : Colors.black87),
                         ),
                       ),
                       if (hasTasks) ...[
@@ -7465,7 +7519,7 @@ class _HomeSearchAndNotesRowState extends State<_HomeSearchAndNotesRow> {
               height: 54,
               padding: const EdgeInsets.fromLTRB(16, 0, 6, 0),
               decoration: BoxDecoration(
-                color: isDark ? const Color(0xFF18181B) : Colors.white,
+                color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
                 borderRadius: BorderRadius.circular(32),
                 border: Border.all(
                   color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
@@ -7512,26 +7566,9 @@ class _HomeSearchAndNotesRowState extends State<_HomeSearchAndNotesRow> {
                         ),
                         border: InputBorder.none,
                         isDense: true,
-                        contentPadding: EdgeInsets.zero,
                       ),
                     ),
                   ),
-                  if (_controller.text.isNotEmpty)
-                    GestureDetector(
-                      onTap: () {
-                        _controller.clear();
-                        setState(() {});
-                        widget.onSearchChanged('');
-                      },
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 6),
-                        child: Icon(
-                          Icons.clear_rounded,
-                          color: isDark ? Colors.white60 : Colors.black45,
-                          size: 18,
-                        ),
-                      ),
-                    ),
                   const SizedBox(width: 6),
                   GestureDetector(
                     onTap: _collapse,
@@ -7578,7 +7615,7 @@ class _HomeSearchAndNotesRowState extends State<_HomeSearchAndNotesRow> {
                   child: Container(
                     padding: const EdgeInsets.fromLTRB(6, 6, 16, 6),
                     decoration: BoxDecoration(
-                      color: isDark ? const Color(0xFF18181B) : Colors.white,
+                      color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
                       borderRadius: BorderRadius.circular(30),
                       border: Border.all(
                         color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
@@ -7598,13 +7635,13 @@ class _HomeSearchAndNotesRowState extends State<_HomeSearchAndNotesRow> {
                         Container(
                           width: 36,
                           height: 36,
-                          decoration: const BoxDecoration(
-                            color: Color(0xFFFEF3C7),
+                          decoration: BoxDecoration(
+                            color: isDark ? const Color(0xFF2E1065) : const Color(0xFFFEF3C7),
                             shape: BoxShape.circle,
                           ),
-                          child: const Icon(
+                          child: Icon(
                             Icons.auto_stories_rounded,
-                            color: Color(0xFFEA580C),
+                            color: isDark ? const Color(0xFFD6A5F8) : const Color(0xFFEA580C),
                             size: 18,
                           ),
                         ),
@@ -7635,7 +7672,7 @@ class _HomeSearchAndNotesRowState extends State<_HomeSearchAndNotesRow> {
                     width: 48,
                     height: 48,
                     decoration: BoxDecoration(
-                      color: isDark ? const Color(0xFF18181B) : Colors.white,
+                      color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
                       shape: BoxShape.circle,
                       border: Border.all(
                         color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),

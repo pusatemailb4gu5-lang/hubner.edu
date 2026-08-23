@@ -77,7 +77,7 @@ class _EditCpPageState extends State<EditCpPage> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: isDark ? const Color(0xFF141416) : Colors.white,
+      backgroundColor: isDark ? const Color(0xFF000000) : Colors.white,
       body: SafeArea(
         child: Column(
           children: [
@@ -188,7 +188,7 @@ class _EditCpPageState extends State<EditCpPage> {
                     Container(
                       padding: const EdgeInsets.all(14),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFD6A5F8),
+                        color: isDark ? const Color(0xFF6B3BA3) : const Color(0xFFD6A5F8),
                         borderRadius: BorderRadius.circular(24),
                         boxShadow: [
                           BoxShadow(
@@ -225,7 +225,7 @@ class _EditCpPageState extends State<EditCpPage> {
                                   style: GoogleFonts.plusJakartaSans(
                                     fontSize: 14,
                                     fontWeight: FontWeight.bold,
-                                    color: const Color(0xFF0F172A),
+                                    color: isDark ? Colors.white : const Color(0xFF0F172A),
                                   ),
                                 ),
                                 const SizedBox(height: 2),
@@ -233,7 +233,7 @@ class _EditCpPageState extends State<EditCpPage> {
                                   'Tuliskan kompetensi pembelajaran dan materi inti fase kelas ini.',
                                   style: GoogleFonts.dmSans(
                                     fontSize: 14.0,
-                                    color: const Color(0xFF334155),
+                                    color: isDark ? Colors.white70 : const Color(0xFF334155),
                                   ),
                                 ),
                               ],

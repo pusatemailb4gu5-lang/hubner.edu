@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:hubner/core/theme/app_colors.dart';
 import 'add_class_page.dart';
 import 'package:hubner/features/home/presentation/widgets/animated_rainbow_background.dart';
 
@@ -36,13 +37,29 @@ class _EditClassPageState extends State<EditClassPage> {
   int _selectedIconIndex = 0;
   int _selectedColorIndex = 0;
   final List<Color> _classroomAccentColors = const [
-    Color(0xFF009688), // Teal
-    Color(0xFF448AFF), // Blue
-    Color(0xFFE040FB), // Purple
-    Color(0xFFFF4081), // Pink
-    Color(0xFFFFAB40), // Orange
-    Color(0xFF536DFE), // Indigo
-    Color(0xFF607D8B), // Blue Grey
+    Color(0xFFD6A5F8), // 01. Lilac Purple
+    Color(0xFF9CC8FC), // 02. Sky Blue
+    Color(0xFF7DE3D0), // 03. Emerald Mint / Tosca
+    Color(0xFFF7BD84), // 04. Amber Peach / Orange
+    Color(0xFFF794BE), // 05. Rose Magenta / Pink
+    Color(0xFFA5B4FC), // 06. Indigo Violet
+    Color(0xFFBEF264), // 07. Fresh Lime
+    Color(0xFF67E8F9), // 08. Ocean Cyan
+    Color(0xFFFDE047), // 09. Amber Gold
+    Color(0xFFCBD5E1), // 10. Steel Slate
+  ];
+
+  final List<Color> _classroomDarkColors = const [
+    Color(0xFF6B3BA3), // 01. Deep Lilac
+    Color(0xFF2864A8), // 02. Deep Sky Blue
+    Color(0xFF147D75), // 03. Deep Teal / Tosca
+    Color(0xFFC76D10), // 04. Deep Amber / Orange
+    Color(0xFFA82658), // 05. Deep Rose / Magenta
+    Color(0xFF4338CA), // 06. Deep Indigo
+    Color(0xFF4D7C0F), // 07. Deep Olive Lime
+    Color(0xFF0E7490), // 08. Deep Ocean Cyan
+    Color(0xFFA16207), // 09. Deep Amber Gold
+    Color(0xFF334155), // 10. Deep Slate Steel
   ];
   final List<Map<String, dynamic>> _stages = [];
 
@@ -1501,43 +1518,49 @@ Sertakan HANYA JSON tersebut tanpa penjelasan markdown apa pun di luar JSON.
           ),
         ),
         const SizedBox(height: 10),
-        SizedBox(
-          height: 44,
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            itemCount: _classroomAccentColors.length,
-            itemBuilder: (context, idx) {
-              final isSelected = _selectedColorIndex == idx;
-              final Color color = _classroomAccentColors[idx];
-              return GestureDetector(
-                onTap: () {
-                  setState(() {
-                    _selectedColorIndex = idx;
-                  });
-                },
-                child: Container(
-                  margin: const EdgeInsets.only(right: 12),
-                  width: 36,
-                  height: 36,
-                  decoration: BoxDecoration(
-                    color: color,
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: isSelected ? Colors.black : Colors.transparent,
-                      width: 2.5,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: color.withOpacity(0.2),
-                        blurRadius: 6,
-                        offset: const Offset(0, 2),
+        Builder(
+          builder: (context) {
+            final bool isDark = AppColors.isDarkMode;
+            final activeColors = isDark ? _classroomDarkColors : _classroomAccentColors;
+            return SizedBox(
+              height: 44,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: activeColors.length,
+                itemBuilder: (context, idx) {
+                  final isSelected = _selectedColorIndex == idx;
+                  final Color color = activeColors[idx];
+                  return GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        _selectedColorIndex = idx;
+                      });
+                    },
+                    child: Container(
+                      margin: const EdgeInsets.only(right: 12),
+                      width: 36,
+                      height: 36,
+                      decoration: BoxDecoration(
+                        color: color,
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: isSelected ? (isDark ? Colors.white : Colors.black87) : Colors.transparent,
+                          width: 2.5,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: color.withOpacity(isDark ? 0.35 : 0.2),
+                            blurRadius: 6,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                ),
-              );
-            },
-          ),
+                    ),
+                  );
+                },
+              ),
+            );
+          },
         ),
         const SizedBox(height: 16),
 

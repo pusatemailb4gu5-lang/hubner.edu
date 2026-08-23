@@ -60,6 +60,45 @@ class _ClassPageState extends State<ClassPage> {
   int? _inlineElemenStageIdx;
   String? _inlineElemenMode; // 'edit_elemen' or 'add_elemen'
 
+  final List<Color> _classroomCardColors = const [
+    Color(0xFFD6A5F8), // 01. Lilac Purple (Core)
+    Color(0xFF9CC8FC), // 02. Sky Blue
+    Color(0xFF7DE3D0), // 03. Emerald Mint / Tosca
+    Color(0xFFF7BD84), // 04. Amber Peach / Orange
+    Color(0xFFF794BE), // 05. Rose Magenta / Pink
+    Color(0xFFA5B4FC), // 06. Indigo Violet
+    Color(0xFFBEF264), // 07. Fresh Lime
+    Color(0xFF67E8F9), // 08. Ocean Cyan
+    Color(0xFFFDE047), // 09. Amber Gold
+    Color(0xFFCBD5E1), // 10. Steel Slate
+  ];
+
+  final List<Color> _classroomCardDarkColors = const [
+    Color(0xFF6B3BA3), // 01. Deep Lilac (Core)
+    Color(0xFF2864A8), // 02. Deep Sky Blue
+    Color(0xFF147D75), // 03. Deep Teal / Tosca
+    Color(0xFFC76D10), // 04. Deep Amber / Orange
+    Color(0xFFA82658), // 05. Deep Rose / Magenta
+    Color(0xFF4338CA), // 06. Deep Indigo
+    Color(0xFF4D7C0F), // 07. Deep Olive Lime
+    Color(0xFF0E7490), // 08. Deep Ocean Cyan
+    Color(0xFFA16207), // 09. Deep Amber Gold
+    Color(0xFF334155), // 10. Deep Slate Steel
+  ];
+
+  final List<Color> _classroomAccentColors = const [
+    Color(0xFF7C3AED), // 01. Purple (Core)
+    Color(0xFF2563EB), // 02. Blue
+    Color(0xFF059669), // 03. Teal
+    Color(0xFFD97706), // 04. Amber / Orange
+    Color(0xFFDB2777), // 05. Pink / Rose
+    Color(0xFF4F46E5), // 06. Indigo
+    Color(0xFF65A30D), // 07. Lime
+    Color(0xFF0891B2), // 08. Cyan
+    Color(0xFFCA8A04), // 09. Gold
+    Color(0xFF475569), // 10. Slate
+  ];
+
 
   Widget _buildMembersAvatarStack(
     BuildContext context,
@@ -1083,33 +1122,6 @@ class _ClassPageState extends State<ClassPage> {
   final Set<int> _expandedStageIndices = {};
   final Set<String> _expandedMateriKeys = {};
   int? _activeStatusPickerIdx;
-  final List<Color> _classroomCardColors = const [
-    Color(0xFF7DE3D0), // 1. Fresh Teal/Mint
-    Color(0xFF9CC8FC), // 2. Periwinkle Sky Blue
-    Color(0xFFD6A5F8), // 3. Lilac Purple
-    Color(0xFFF794BE), // 4. Bubblegum Pink
-    Color(0xFFF7BD84), // 5. Warm Apricot Orange
-    Color(0xFFAEB8FD), // 6. Soft Violet/Indigo
-    Color(0xFFB5E284), // 7. Fresh Lime Green
-  ];
-  final List<Color> _classroomCardDarkColors = const [
-    Color(0xFFA4EBE0), // 1. Fresh Teal/Mint (30% softer)
-    Color(0xFFBAD8FD), // 2. Periwinkle Sky Blue (30% softer)
-    Color(0xFFE2C0FA), // 3. Lilac Purple (30% softer)
-    Color(0xFFF9B5D2), // 4. Bubblegum Pink (30% softer)
-    Color(0xFFF9D2A9), // 5. Warm Apricot Orange (30% softer)
-    Color(0xFFC7CEFE), // 6. Soft Violet/Indigo (30% softer)
-    Color(0xFFCCEAA9), // 7. Fresh Lime Green (30% softer)
-  ];
-  final List<Color> _classroomAccentColors = const [
-    Color(0xFF009688), // 1. Teal (ID User & School Level)
-    Color(0xFF448AFF), // 2. Blue (Nama Lengkap)
-    Color(0xFFE040FB), // 3. Purple/Magenta (Email)
-    Color(0xFFFF4081), // 4. Pink/Rose (Jenis Kelamin & Password)
-    Color(0xFFFFAB40), // 5. Orange/Amber (Zona Waktu)
-    Color(0xFF536DFE), // 6. Indigo (Bahasa)
-    Color(0xFF607D8B), // 7. Blue Grey (Level Akses)
-  ];
   Future<void> _updateStageStatus(
     int stageIdx,
     String newStatus,
@@ -2052,11 +2064,12 @@ class _ClassPageState extends State<ClassPage> {
       _setEditingStage(stageIdx, activityType: null, materiIdx: materiIdx);
       return;
     }
+    final bool isDark = AppColors.isDarkMode;
     showDialog(
       context: context,
-      barrierColor: Colors.black.withValues(alpha: 0.35),
+      barrierColor: Colors.black.withValues(alpha: isDark ? 0.6 : 0.35),
       builder: (ctx) => Dialog(
-        backgroundColor: Colors.white,
+        backgroundColor: isDark ? const Color(0xFF1C1C1E) : Colors.white,
         insetPadding: const EdgeInsets.symmetric(
           horizontal: 16.0,
           vertical: 24.0,
@@ -2065,7 +2078,7 @@ class _ClassPageState extends State<ClassPage> {
         clipBehavior: Clip.antiAlias,
         child: Container(
           constraints: const BoxConstraints(maxWidth: 420),
-          color: Colors.white,
+          color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -2075,7 +2088,7 @@ class _ClassPageState extends State<ClassPage> {
                 width: double.infinity,
                 padding: const EdgeInsets.fromLTRB(20, 20, 16, 16),
                 decoration: BoxDecoration(
-                  color: accentColor.withValues(alpha: 0.1),
+                  color: accentColor.withValues(alpha: isDark ? 0.18 : 0.1),
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -2085,7 +2098,7 @@ class _ClassPageState extends State<ClassPage> {
                         Container(
                           padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
-                            color: accentColor.withValues(alpha: 0.18),
+                            color: accentColor.withValues(alpha: isDark ? 0.25 : 0.18),
                             shape: BoxShape.circle,
                           ),
                           child: Icon(
@@ -2103,14 +2116,14 @@ class _ClassPageState extends State<ClassPage> {
                               style: GoogleFonts.plusJakartaSans(
                                 fontSize: 16.4,
                                 fontWeight: FontWeight.bold,
-                                color: Colors.black87,
+                                color: isDark ? Colors.white : Colors.black87,
                               ),
                             ),
                             Text(
                               'Pilih jenis aktivitas pembelajaran',
                               style: GoogleFonts.dmSans(
                                 fontSize: 14.0,
-                                color: Colors.black45,
+                                color: isDark ? Colors.white60 : Colors.black45,
                               ),
                             ),
                           ],
@@ -2119,9 +2132,9 @@ class _ClassPageState extends State<ClassPage> {
                     ),
                     GestureDetector(
                       onTap: () => Navigator.pop(ctx),
-                      child: const Icon(
+                      child: Icon(
                         Icons.close_rounded,
-                        color: Colors.black54,
+                        color: isDark ? Colors.white60 : Colors.black54,
                       ),
                     ),
                   ],
@@ -2139,6 +2152,7 @@ class _ClassPageState extends State<ClassPage> {
                       description: 'Penugasan individu atau kolaboratif siswa',
                       color: const Color(0xFFEFF6FF),
                       iconColor: const Color(0xFF2563EB),
+                      isDark: isDark,
                       onTap: () {
                         Navigator.pop(ctx);
                         _openAddActivityOverlay(
@@ -2158,6 +2172,7 @@ class _ClassPageState extends State<ClassPage> {
                       description: 'Latihan evaluasi pemahaman interaktif',
                       color: const Color(0xFFFFF7ED),
                       iconColor: const Color(0xFFEA580C),
+                      isDark: isDark,
                       onTap: () {
                         Navigator.pop(ctx);
                         _openAddActivityOverlay(
@@ -2178,6 +2193,7 @@ class _ClassPageState extends State<ClassPage> {
                           'Bahan modul bacaan, slide presentasi, atau PDF',
                       color: const Color(0xFFF0FDF4),
                       iconColor: const Color(0xFF16A34A),
+                      isDark: isDark,
                       onTap: () {
                         Navigator.pop(ctx);
                         _openAddActivityOverlay(
@@ -2204,7 +2220,9 @@ class _ClassPageState extends State<ClassPage> {
                       padding: const EdgeInsets.symmetric(vertical: 12),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
-                        side: const BorderSide(color: Color(0xFFE2E8F0)),
+                        side: BorderSide(
+                          color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                        ),
                       ),
                     ),
                     child: Text(
@@ -2212,7 +2230,7 @@ class _ClassPageState extends State<ClassPage> {
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
-                        color: const Color(0xFF000000),
+                        color: isDark ? Colors.white70 : const Color(0xFF000000),
                       ),
                     ),
                   ),
@@ -2233,16 +2251,20 @@ class _ClassPageState extends State<ClassPage> {
     required Color color,
     required Color iconColor,
     required VoidCallback onTap,
+    bool isDark = false,
   }) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? const Color(0xFF27272A) : Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFF1F5F9), width: 1.5),
+        border: Border.all(
+          color: isDark ? const Color(0xFF3F3F46) : const Color(0xFFF1F5F9),
+          width: 1.5,
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.02),
+            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.02),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -2264,7 +2286,7 @@ class _ClassPageState extends State<ClassPage> {
                   width: 42,
                   height: 42,
                   decoration: BoxDecoration(
-                    color: iconColor.withValues(alpha: 0.08),
+                    color: iconColor.withValues(alpha: isDark ? 0.2 : 0.08),
                     shape: BoxShape.circle,
                   ),
                   child: Icon(icon, color: iconColor, size: 20),
@@ -2280,7 +2302,7 @@ class _ClassPageState extends State<ClassPage> {
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 14.7,
                           fontWeight: FontWeight.bold,
-                          color: const Color(0xFF000000), // Slate 900
+                          color: isDark ? Colors.white : const Color(0xFF000000),
                         ),
                       ),
                       const SizedBox(height: 2),
@@ -2288,7 +2310,7 @@ class _ClassPageState extends State<ClassPage> {
                         description,
                         style: GoogleFonts.dmSans(
                           fontSize: 14.0,
-                          color: const Color(0xFF000000), // Slate 500
+                          color: isDark ? Colors.white60 : Colors.black54,
                           fontWeight: FontWeight.w400,
                         ),
                       ),
@@ -2300,9 +2322,11 @@ class _ClassPageState extends State<ClassPage> {
                 Container(
                   padding: const EdgeInsets.all(4),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFF8FAFC),
+                    color: isDark ? const Color(0xFF18181B) : const Color(0xFFF8FAFC),
                     shape: BoxShape.circle,
-                    border: Border.all(color: const Color(0xFFF1F5F9)),
+                    border: Border.all(
+                      color: isDark ? const Color(0xFF3F3F46) : const Color(0xFFF1F5F9),
+                    ),
                   ),
                   child: Icon(
                     Icons.chevron_right_rounded,
@@ -2916,11 +2940,11 @@ class _ClassPageState extends State<ClassPage> {
             borderRadius: BorderRadius.circular(36),
           ),
           clipBehavior: Clip.antiAlias,
-          backgroundColor: dark ? const Color(0xFF141416) : Colors.white,
+          backgroundColor: dark ? const Color(0xFF1C1C1E) : Colors.white,
           child: Container(
             constraints: const BoxConstraints(maxWidth: 440),
             decoration: BoxDecoration(
-              color: dark ? const Color(0xFF141416) : Colors.white,
+              color: dark ? const Color(0xFF1C1C1E) : Colors.white,
               borderRadius: BorderRadius.circular(36),
               border: Border.all(
                 color: dark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
@@ -2935,7 +2959,7 @@ class _ClassPageState extends State<ClassPage> {
                   width: double.infinity,
                   padding: const EdgeInsets.fromLTRB(20, 20, 16, 16),
                   decoration: BoxDecoration(
-                    color: cpThemeColor,
+                    color: dark ? const Color(0xFF6B3BA3) : cpThemeColor,
                     border: Border(
                       bottom: BorderSide(
                         color: dark
@@ -2950,14 +2974,14 @@ class _ClassPageState extends State<ClassPage> {
                       Container(
                         width: 42,
                         height: 42,
-                        decoration: const BoxDecoration(
-                          color: Colors.white,
+                        decoration: BoxDecoration(
+                          color: dark ? Colors.white.withValues(alpha: 0.15) : Colors.white,
                           shape: BoxShape.circle,
                         ),
-                        child: const Center(
+                        child: Center(
                           child: Icon(
                             Icons.auto_stories_rounded,
-                            color: Colors.black,
+                            color: dark ? Colors.white : Colors.black,
                             size: 22,
                           ),
                         ),
@@ -2973,7 +2997,7 @@ class _ClassPageState extends State<ClassPage> {
                               style: GoogleFonts.plusJakartaSans(
                                 fontSize: 16.5,
                                 fontWeight: FontWeight.bold,
-                                color: const Color(0xFF0F172A),
+                                color: dark ? Colors.white : const Color(0xFF0F172A),
                               ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
@@ -2983,7 +3007,7 @@ class _ClassPageState extends State<ClassPage> {
                               'Target & Tujuan Kompetensi Siswa',
                               style: GoogleFonts.dmSans(
                                 fontSize: 14.0,
-                                color: const Color(0xFF334155),
+                                color: dark ? Colors.white70 : const Color(0xFF334155),
                               ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
@@ -2998,12 +3022,14 @@ class _ClassPageState extends State<ClassPage> {
                           width: 36,
                           height: 36,
                           decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.8),
+                            color: dark
+                                ? const Color(0xFF27272A)
+                                : Colors.white.withValues(alpha: 0.8),
                             shape: BoxShape.circle,
                           ),
-                          child: const Icon(
+                          child: Icon(
                             Icons.close_rounded,
-                            color: Colors.black87,
+                            color: dark ? Colors.white : Colors.black87,
                             size: 18,
                           ),
                         ),
@@ -3228,11 +3254,11 @@ class _ClassPageState extends State<ClassPage> {
                 borderRadius: BorderRadius.circular(36),
               ),
               clipBehavior: Clip.antiAlias,
-              backgroundColor: dark ? const Color(0xFF141416) : Colors.white,
+              backgroundColor: dark ? const Color(0xFF1C1C1E) : Colors.white,
               child: Container(
                 constraints: const BoxConstraints(maxWidth: 460),
                 decoration: BoxDecoration(
-                  color: dark ? const Color(0xFF141416) : Colors.white,
+                  color: dark ? const Color(0xFF1C1C1E) : Colors.white,
                   borderRadius: BorderRadius.circular(36),
                   border: Border.all(
                     color: dark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
@@ -3247,7 +3273,7 @@ class _ClassPageState extends State<ClassPage> {
                       width: double.infinity,
                       padding: const EdgeInsets.fromLTRB(20, 20, 16, 16),
                       decoration: BoxDecoration(
-                        color: scheduleThemeColor,
+                        color: dark ? const Color(0xFF2864A8) : scheduleThemeColor,
                         border: Border(
                           bottom: BorderSide(
                             color: dark
@@ -3262,14 +3288,14 @@ class _ClassPageState extends State<ClassPage> {
                           Container(
                             width: 42,
                             height: 42,
-                            decoration: const BoxDecoration(
-                              color: Colors.white,
+                            decoration: BoxDecoration(
+                              color: dark ? Colors.white.withValues(alpha: 0.15) : Colors.white,
                               shape: BoxShape.circle,
                             ),
-                            child: const Center(
+                            child: Center(
                               child: Icon(
                                 Icons.calendar_month_rounded,
-                                color: Colors.black,
+                                color: dark ? Colors.white : Colors.black,
                                 size: 22,
                               ),
                             ),
@@ -3285,7 +3311,7 @@ class _ClassPageState extends State<ClassPage> {
                                   style: GoogleFonts.plusJakartaSans(
                                     fontSize: 16.5,
                                     fontWeight: FontWeight.bold,
-                                    color: const Color(0xFF0F172A),
+                                    color: dark ? Colors.white : const Color(0xFF0F172A),
                                   ),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
@@ -3295,7 +3321,7 @@ class _ClassPageState extends State<ClassPage> {
                                   'Hari & Jam Pertemuan Kelas',
                                   style: GoogleFonts.dmSans(
                                     fontSize: 14.0,
-                                    color: const Color(0xFF334155),
+                                    color: dark ? Colors.white70 : const Color(0xFF334155),
                                   ),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
@@ -3315,13 +3341,15 @@ class _ClassPageState extends State<ClassPage> {
                                 width: 36,
                                 height: 36,
                                 decoration: BoxDecoration(
-                                  color: Colors.white.withValues(alpha: 0.8),
+                                  color: dark
+                                      ? const Color(0xFF27272A)
+                                      : Colors.white.withValues(alpha: 0.8),
                                   shape: BoxShape.circle,
                                 ),
                                 child: Icon(
                                   isEditing ? Icons.visibility_rounded : Icons.edit_rounded,
                                   size: 18,
-                                  color: Colors.black87,
+                                  color: dark ? Colors.white : Colors.black87,
                                 ),
                               ),
                             ),
@@ -3332,12 +3360,14 @@ class _ClassPageState extends State<ClassPage> {
                               width: 36,
                               height: 36,
                               decoration: BoxDecoration(
-                                color: Colors.white.withValues(alpha: 0.8),
-                                shape: BoxShape.circle,
+                                color: dark
+                                    ? const Color(0xFF27272A)
+                                    : Colors.white.withValues(alpha: 0.8),
+                                  shape: BoxShape.circle,
                               ),
-                              child: const Icon(
+                              child: Icon(
                                 Icons.close_rounded,
-                                color: Colors.black87,
+                                color: dark ? Colors.white : Colors.black87,
                                 size: 18,
                               ),
                             ),
@@ -4155,11 +4185,11 @@ class _ClassPageState extends State<ClassPage> {
             borderRadius: BorderRadius.circular(36),
           ),
           clipBehavior: Clip.antiAlias,
-          backgroundColor: isDark ? const Color(0xFF141416) : Colors.white,
+          backgroundColor: isDark ? const Color(0xFF1C1C1E) : Colors.white,
           child: Container(
             constraints: const BoxConstraints(maxWidth: 460),
             decoration: BoxDecoration(
-              color: isDark ? const Color(0xFF141416) : Colors.white,
+              color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
               borderRadius: BorderRadius.circular(36),
               border: Border.all(
                 color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
@@ -4175,7 +4205,7 @@ class _ClassPageState extends State<ClassPage> {
                   width: double.infinity,
                   padding: const EdgeInsets.fromLTRB(20, 20, 16, 16),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFD6A5F8),
+                    color: isDark ? const Color(0xFF6B3BA3) : const Color(0xFFD6A5F8),
                     border: Border(
                       bottom: BorderSide(
                         color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
@@ -4188,14 +4218,14 @@ class _ClassPageState extends State<ClassPage> {
                       Container(
                         width: 42,
                         height: 42,
-                        decoration: const BoxDecoration(
-                          color: Colors.white,
+                        decoration: BoxDecoration(
+                          color: isDark ? Colors.white.withValues(alpha: 0.15) : Colors.white,
                           shape: BoxShape.circle,
                         ),
-                        child: const Center(
+                        child: Center(
                           child: Icon(
                             Icons.qr_code_2_rounded,
-                            color: Colors.black,
+                            color: isDark ? Colors.white : Colors.black,
                             size: 22,
                           ),
                         ),
@@ -4211,7 +4241,7 @@ class _ClassPageState extends State<ClassPage> {
                               style: GoogleFonts.plusJakartaSans(
                                 fontSize: 16.5,
                                 fontWeight: FontWeight.bold,
-                                color: const Color(0xFF0F172A),
+                                color: isDark ? Colors.white : const Color(0xFF0F172A),
                               ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
@@ -4221,7 +4251,7 @@ class _ClassPageState extends State<ClassPage> {
                               title,
                               style: GoogleFonts.dmSans(
                                 fontSize: 14.0,
-                                color: const Color(0xFF334155),
+                                color: isDark ? Colors.white70 : const Color(0xFF334155),
                               ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
@@ -4236,13 +4266,15 @@ class _ClassPageState extends State<ClassPage> {
                           width: 36,
                           height: 36,
                           decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.8),
+                            color: isDark
+                                ? const Color(0xFF27272A)
+                                : Colors.white.withValues(alpha: 0.8),
                             shape: BoxShape.circle,
                           ),
-                          child: const Icon(
+                          child: Icon(
                             Icons.close_rounded,
                             size: 18,
-                            color: Colors.black87,
+                            color: isDark ? Colors.white : Colors.black87,
                           ),
                         ),
                       ),
@@ -4706,20 +4738,28 @@ class _ClassPageState extends State<ClassPage> {
 
                       final int bIdx = index % sliderColors.length;
                       // Mode Terang: Latar = Warna Slider, Angka = Putih
-                      // Mode Gelap: Latar = Warna Soft Pastel Asli Terang, Angka = Warna Slider
+                      // Mode Gelap: Latar = Deep Tinted Container, Angka = Warna Aksen Terang
                       final Color bBg = isDark
-                          ? softPastelColors[bIdx]
+                          ? (bIdx == 0
+                              ? const Color(0xFF2E1065)
+                              : bIdx == 1
+                                  ? const Color(0xFF172554)
+                                  : bIdx == 2
+                                      ? const Color(0xFF064E3B)
+                                      : bIdx == 3
+                                          ? const Color(0xFF451A03)
+                                          : const Color(0xFF4C0519))
                           : sliderColors[bIdx];
                       final Color bFg = isDark
                           ? (bIdx == 0
-                              ? const Color(0xFF7C3AED)
+                              ? const Color(0xFFD6A5F8)
                               : bIdx == 1
-                                  ? const Color(0xFF2563EB)
+                                  ? const Color(0xFF93C5FD)
                                   : bIdx == 2
-                                      ? const Color(0xFF059669)
+                                      ? const Color(0xFF6EE7B7)
                                       : bIdx == 3
-                                          ? const Color(0xFFEA580C)
-                                          : const Color(0xFFE11D48))
+                                          ? const Color(0xFFFDBA74)
+                                          : const Color(0xFFF472B6))
                           : Colors.white;
 
                       final List rawMateris = stage['materis'] as List? ?? [];
@@ -4743,21 +4783,21 @@ class _ClassPageState extends State<ClassPage> {
                         statusFg = isDark ? Colors.white70 : Colors.black54;
                       }
 
-                      Color stageCardBg = isDark ? const Color(0xFF141416) : Colors.white;
+                      Color stageCardBg = isDark ? const Color(0xFF27272A) : Colors.white;
                       if (stageStatus == 'proses') {
-                        stageCardBg = const Color(0xFFF7BD84); // Kuning/Orange Slider (soft light tone)
+                        stageCardBg = isDark ? const Color(0xFFC76D10) : const Color(0xFFF7BD84); // Kuning/Orange Slider
                       } else if (stageStatus == 'selesai') {
-                        stageCardBg = const Color(0xFF7DE3D0); // Hijau/Tosca Slider (soft light tone)
+                        stageCardBg = isDark ? const Color(0xFF147D75) : const Color(0xFF7DE3D0); // Hijau/Tosca Slider
                       }
 
                       final Color stageTitleColor = (stageStatus == 'proses' || stageStatus == 'selesai')
-                          ? const Color(0xFF0F172A)
+                          ? (isDark ? Colors.white : const Color(0xFF0F172A))
                           : (isDark ? Colors.white : Colors.black87);
 
                       final Color stageSubtitleColor = (stageStatus == 'proses')
-                          ? const Color(0xFF7C2D12).withValues(alpha: 0.85)
+                          ? (isDark ? Colors.white70 : const Color(0xFF7C2D12).withValues(alpha: 0.85))
                           : (stageStatus == 'selesai')
-                              ? const Color(0xFF064E3B).withValues(alpha: 0.85)
+                              ? (isDark ? Colors.white70 : const Color(0xFF064E3B).withValues(alpha: 0.85))
                               : (isDark ? Colors.white54 : Colors.black45);
 
                       return Dismissible(
@@ -5103,251 +5143,260 @@ class _ClassPageState extends State<ClassPage> {
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
                                       // Row: Icon Class + Nama Mapel Lengkap & ID Kelas
-                                      Row(
-                                        crossAxisAlignment: CrossAxisAlignment.center,
-                                        children: [
-                                          Padding(
-                                            padding: const EdgeInsets.only(top: 2),
-                                            child: SizedBox(
-                                              width: 68,
-                                              height: 68,
-                                              child: Image.asset(
-                                                iconPath,
-                                                fit: BoxFit.contain,
-                                                errorBuilder: (ctx, err, st) => const Icon(
-                                                  Icons.school_rounded,
-                                                  size: 48,
-                                                  color: Colors.black38,
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                          const SizedBox(width: 14),
-                                          Expanded(
-                                            child: Column(
-                                              crossAxisAlignment: CrossAxisAlignment.start,
-                                              mainAxisSize: MainAxisSize.min,
-                                              children: [
-                                                Text(
-                                                  name,
-                                                  maxLines: 3,
-                                                  overflow: TextOverflow.ellipsis,
-                                                  style: GoogleFonts.plusJakartaSans(
-                                                    fontSize: () {
-                                                      final len = name.length;
-                                                      if (len > 60) return 16.0;
-                                                      if (len > 40) return 18.5;
-                                                      if (len > 25) return 21.0;
-                                                      if (len > 15) return 23.5;
-                                                      return 26.0;
-                                                    }(),
-                                                    fontWeight: FontWeight.w900,
-                                                    color: const Color(0xFF0F172A),
-                                                    height: 1.15,
-                                                    letterSpacing: -0.5,
-                                                  ),
-                                                ),
-                                                const SizedBox(height: 4),
-                                                GestureDetector(
-                                                  onTap: () {
-                                                    Clipboard.setData(ClipboardData(text: projectId));
-                                                    ScaffoldMessenger.of(context).showSnackBar(
-                                                      const SnackBar(content: Text('ID Kelas berhasil disalin!')),
-                                                    );
-                                                  },
-                                                  behavior: HitTestBehavior.opaque,
-                                                  child: Container(
-                                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3.5),
-                                                    decoration: BoxDecoration(
-                                                      color: Colors.black.withValues(alpha: 0.08),
-                                                      borderRadius: BorderRadius.circular(12),
-                                                    ),
-                                                    child: Row(
-                                                      mainAxisSize: MainAxisSize.min,
-                                                      children: [
-                                                        const Icon(
-                                                          Icons.copy_rounded,
-                                                          size: 11,
-                                                          color: Colors.black87,
-                                                        ),
-                                                        const SizedBox(width: 4),
-                                                        Text(
-                                                          'ID: $projectId',
-                                                          style: GoogleFonts.dmSans(
-                                                            fontSize: 14.0,
-                                                            fontWeight: FontWeight.w700,
-                                                            color: Colors.black87,
-                                                          ),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      const SizedBox(height: 10),
+                                       Row(
+                                         crossAxisAlignment: CrossAxisAlignment.center,
+                                         children: [
+                                           Padding(
+                                             padding: const EdgeInsets.only(top: 2),
+                                             child: SizedBox(
+                                               width: 78,
+                                               height: 78,
+                                               child: ColorFiltered(
+                                                 colorFilter: isDark
+                                                     ? ColorFilter.mode(Colors.black.withValues(alpha: 0.12), BlendMode.darken)
+                                                     : const ColorFilter.mode(Colors.transparent, BlendMode.dst),
+                                                 child: Image.asset(
+                                                   iconPath,
+                                                   fit: BoxFit.contain,
+                                                   errorBuilder: (ctx, err, st) => const Icon(
+                                                     Icons.school_rounded,
+                                                     size: 48,
+                                                     color: Colors.black38,
+                                                   ),
+                                                 ),
+                                               ),
+                                             ),
+                                           ),
+                                           const SizedBox(width: 14),
+                                           Expanded(
+                                             child: Column(
+                                               crossAxisAlignment: CrossAxisAlignment.start,
+                                               mainAxisSize: MainAxisSize.min,
+                                               children: [
+                                                 Text(
+                                                   name,
+                                                   maxLines: 3,
+                                                   overflow: TextOverflow.ellipsis,
+                                                   style: GoogleFonts.plusJakartaSans(
+                                                     fontSize: () {
+                                                       final len = name.length;
+                                                       if (len > 60) return 16.0;
+                                                       if (len > 40) return 18.5;
+                                                       if (len > 25) return 21.0;
+                                                       if (len > 15) return 23.5;
+                                                       return 26.0;
+                                                     }(),
+                                                     fontWeight: FontWeight.w900,
+                                                     color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                                     height: 1.15,
+                                                     letterSpacing: -0.5,
+                                                   ),
+                                                 ),
+                                                 const SizedBox(height: 4),
+                                                 GestureDetector(
+                                                   onTap: () {
+                                                     Clipboard.setData(ClipboardData(text: projectId));
+                                                     ScaffoldMessenger.of(context).showSnackBar(
+                                                       const SnackBar(content: Text('ID Kelas berhasil disalin!')),
+                                                     );
+                                                   },
+                                                   behavior: HitTestBehavior.opaque,
+                                                   child: Container(
+                                                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3.5),
+                                                     decoration: BoxDecoration(
+                                                       color: isDark ? Colors.black.withValues(alpha: 0.3) : Colors.black.withValues(alpha: 0.08),
+                                                       borderRadius: BorderRadius.circular(12),
+                                                     ),
+                                                     child: Row(
+                                                       mainAxisSize: MainAxisSize.min,
+                                                       children: [
+                                                         Icon(
+                                                           Icons.copy_rounded,
+                                                           size: 11,
+                                                           color: isDark ? Colors.white70 : Colors.black87,
+                                                         ),
+                                                         const SizedBox(width: 4),
+                                                         Text(
+                                                           'ID: $projectId',
+                                                           style: GoogleFonts.dmSans(
+                                                             fontSize: 14.0,
+                                                             fontWeight: FontWeight.w700,
+                                                             color: isDark ? Colors.white : Colors.black87,
+                                                           ),
+                                                         ),
+                                                       ],
+                                                     ),
+                                                   ),
+                                                 ),
+                                               ],
+                                             ),
+                                           ),
+                                         ],
+                                       ),
+                                       const SizedBox(height: 10),
 
-                                      // Middle Row: Slider Horizontal (Kelas, Siswa, Scanner)
-                                      SizedBox(
-                                        width: double.infinity,
-                                        child: SingleChildScrollView(
-                                          scrollDirection: Axis.horizontal,
-                                          physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
-                                          clipBehavior: Clip.none,
-                                          child: Row(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              Container(
-                                                height: 46,
-                                                padding: const EdgeInsets.fromLTRB(6, 6, 16, 6),
-                                                decoration: BoxDecoration(
-                                                  color: isDark ? const Color(0xFF18181B) : Colors.white,
-                                                  borderRadius: BorderRadius.circular(30),
-                                                  border: Border.all(
-                                                    color: isDark
-                                                        ? const Color(0xFF27272A)
-                                                        : const Color(0xFFF1F5F9),
-                                                    width: 1.2,
-                                                  ),
-                                                  boxShadow: [
-                                                    BoxShadow(
-                                                      color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.05),
-                                                      blurRadius: 8,
-                                                      offset: const Offset(0, 2),
-                                                    ),
-                                                  ],
-                                                ),
-                                                child: Row(
-                                                  mainAxisSize: MainAxisSize.min,
-                                                  children: [
-                                                    Container(
-                                                      width: 34,
-                                                      height: 34,
-                                                      decoration: const BoxDecoration(
-                                                        color: Color(0xFFFEF3C7),
-                                                        shape: BoxShape.circle,
-                                                      ),
-                                                      child: const Center(
-                                                        child: Icon(
-                                                          Icons.school_rounded,
-                                                          size: 17,
-                                                          color: Color(0xFFD97706),
-                                                        ),
-                                                      ),
-                                                    ),
-                                                    const SizedBox(width: 8),
-                                                    Text(
-                                                      classLabel,
-                                                      maxLines: 2,
-                                                      style: GoogleFonts.plusJakartaSans(
-                                                        fontSize: 14.0,
-                                                        fontWeight: FontWeight.bold,
-                                                        color: isDark ? Colors.white : Colors.black87,
-                                                        height: 1.15,
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                              const SizedBox(width: 8),
-                                              GestureDetector(
-                                                onTap: () {
-                                                  Navigator.of(context).push(
-                                                    MaterialPageRoute(
-                                                      builder: (_) => ManageMembersPage(
-                                                        projectId: projectId,
-                                                        projectName: name,
-                                                        ownerUid: ownerUid,
-                                                      ),
-                                                    ),
-                                                  );
-                                                },
-                                                child: Container(
-                                                  height: 46,
-                                                  padding: const EdgeInsets.fromLTRB(6, 6, 16, 6),
-                                                  decoration: BoxDecoration(
-                                                    color: isDark ? const Color(0xFF18181B) : Colors.white,
-                                                    borderRadius: BorderRadius.circular(30),
-                                                    border: Border.all(
-                                                      color: isDark
-                                                          ? const Color(0xFF27272A)
-                                                          : const Color(0xFFF1F5F9),
-                                                      width: 1.2,
-                                                    ),
-                                                    boxShadow: [
-                                                      BoxShadow(
-                                                        color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.05),
-                                                        blurRadius: 8,
-                                                        offset: const Offset(0, 2),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                  child: Row(
-                                                    mainAxisSize: MainAxisSize.min,
-                                                    children: [
-                                                      Container(
-                                                        width: 34,
-                                                        height: 34,
-                                                        decoration: const BoxDecoration(
-                                                          color: Color(0xFFE0F2FE),
-                                                          shape: BoxShape.circle,
-                                                        ),
-                                                        child: Center(
-                                                          child: Icon(
-                                                            Icons.people_alt_rounded,
-                                                            size: 17,
-                                                            color: accentColor,
-                                                          ),
-                                                        ),
-                                                      ),
-                                                      const SizedBox(width: 8),
-                                                      Text(
-                                                        '$studentCount Siswa',
-                                                        maxLines: 1,
-                                                        style: GoogleFonts.plusJakartaSans(
-                                                          fontSize: 14.0,
-                                                          fontWeight: FontWeight.bold,
-                                                          color: isDark ? Colors.white : Colors.black87,
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ),
-                                              ),
-                                              const SizedBox(width: 8),
-                                              GestureDetector(
-                                                onTap: () => _showBarcodeDialog(context, projectId, name, isDark),
-                                                behavior: HitTestBehavior.opaque,
-                                                child: Container(
-                                                  width: 46,
-                                                  height: 46,
-                                                  decoration: BoxDecoration(
-                                                    color: isDark ? const Color(0xFF18181B) : Colors.white,
-                                                    shape: BoxShape.circle,
-                                                    boxShadow: [
-                                                      BoxShadow(
-                                                        color: Colors.black.withValues(alpha: isDark ? 0.30 : 0.08),
-                                                        blurRadius: 8,
-                                                        offset: const Offset(0, 2),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                  child: Center(
-                                                    child: Icon(
-                                                      Icons.qr_code_scanner_rounded,
-                                                      color: isDark ? Colors.white : Colors.black,
-                                                      size: 22,
-                                                    ),
-                                                  ),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
+                                       // Middle Row: Slider Horizontal (Kelas, Siswa, Scanner)
+                                       SizedBox(
+                                         width: double.infinity,
+                                         child: SingleChildScrollView(
+                                           scrollDirection: Axis.horizontal,
+                                           physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+                                           clipBehavior: Clip.none,
+                                           child: Row(
+                                             mainAxisSize: MainAxisSize.min,
+                                             children: [
+                                               Container(
+                                                 height: 46,
+                                                 padding: const EdgeInsets.fromLTRB(6, 6, 16, 6),
+                                                 decoration: BoxDecoration(
+                                                   color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
+                                                   borderRadius: BorderRadius.circular(30),
+                                                   border: Border.all(
+                                                     color: isDark
+                                                         ? const Color(0xFF27272A)
+                                                         : const Color(0xFFF1F5F9),
+                                                     width: 1.2,
+                                                   ),
+                                                   boxShadow: [
+                                                     BoxShadow(
+                                                       color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.05),
+                                                       blurRadius: 8,
+                                                       offset: const Offset(0, 2),
+                                                     ),
+                                                   ],
+                                                 ),
+                                                 child: Row(
+                                                   mainAxisSize: MainAxisSize.min,
+                                                   children: [
+                                                     Container(
+                                                       width: 34,
+                                                       height: 34,
+                                                       decoration: BoxDecoration(
+                                                         color: isDark ? const Color(0xFF451A03) : const Color(0xFFFEF3C7),
+                                                         shape: BoxShape.circle,
+                                                       ),
+                                                       child: Center(
+                                                         child: Icon(
+                                                           Icons.school_rounded,
+                                                           size: 17,
+                                                           color: isDark ? const Color(0xFFFBBF24) : const Color(0xFFD97706),
+                                                         ),
+                                                       ),
+                                                     ),
+                                                     const SizedBox(width: 8),
+                                                     Text(
+                                                       classLabel,
+                                                       maxLines: 2,
+                                                       style: GoogleFonts.plusJakartaSans(
+                                                         fontSize: 14.0,
+                                                         fontWeight: FontWeight.bold,
+                                                         color: isDark ? Colors.white : Colors.black87,
+                                                         height: 1.15,
+                                                       ),
+                                                     ),
+                                                   ],
+                                                 ),
+                                               ),
+                                               const SizedBox(width: 8),
+                                               GestureDetector(
+                                                 onTap: () {
+                                                   Navigator.of(context).push(
+                                                     MaterialPageRoute(
+                                                       builder: (_) => ManageMembersPage(
+                                                         projectId: projectId,
+                                                         projectName: name,
+                                                         ownerUid: ownerUid,
+                                                       ),
+                                                     ),
+                                                   );
+                                                 },
+                                                 child: Container(
+                                                   height: 46,
+                                                   padding: const EdgeInsets.fromLTRB(6, 6, 16, 6),
+                                                   decoration: BoxDecoration(
+                                                     color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
+                                                     borderRadius: BorderRadius.circular(30),
+                                                     border: Border.all(
+                                                       color: isDark
+                                                           ? const Color(0xFF27272A)
+                                                           : const Color(0xFFF1F5F9),
+                                                       width: 1.2,
+                                                     ),
+                                                     boxShadow: [
+                                                       BoxShadow(
+                                                         color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.05),
+                                                         blurRadius: 8,
+                                                         offset: const Offset(0, 2),
+                                                       ),
+                                                     ],
+                                                   ),
+                                                   child: Row(
+                                                     mainAxisSize: MainAxisSize.min,
+                                                     children: [
+                                                       Container(
+                                                         width: 34,
+                                                         height: 34,
+                                                         decoration: BoxDecoration(
+                                                           color: isDark ? const Color(0xFF172554) : const Color(0xFFE0F2FE),
+                                                           shape: BoxShape.circle,
+                                                         ),
+                                                         child: Center(
+                                                           child: Icon(
+                                                             Icons.people_alt_rounded,
+                                                             size: 17,
+                                                             color: isDark ? const Color(0xFF93C5FD) : accentColor,
+                                                           ),
+                                                         ),
+                                                       ),
+                                                       const SizedBox(width: 8),
+                                                       Text(
+                                                         '$studentCount Siswa',
+                                                         maxLines: 1,
+                                                         style: GoogleFonts.plusJakartaSans(
+                                                           fontSize: 14.0,
+                                                           fontWeight: FontWeight.bold,
+                                                           color: isDark ? Colors.white : Colors.black87,
+                                                         ),
+                                                       ),
+                                                     ],
+                                                   ),
+                                                 ),
+                                               ),
+                                               const SizedBox(width: 8),
+                                               GestureDetector(
+                                                 onTap: () => _showBarcodeDialog(context, projectId, name, isDark),
+                                                 behavior: HitTestBehavior.opaque,
+                                                 child: Container(
+                                                   width: 46,
+                                                   height: 46,
+                                                   decoration: BoxDecoration(
+                                                     color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
+                                                     shape: BoxShape.circle,
+                                                     border: Border.all(
+                                                       color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+                                                       width: 1.2,
+                                                     ),
+                                                     boxShadow: [
+                                                       BoxShadow(
+                                                         color: Colors.black.withValues(alpha: isDark ? 0.30 : 0.08),
+                                                         blurRadius: 8,
+                                                         offset: const Offset(0, 2),
+                                                       ),
+                                                     ],
+                                                   ),
+                                                   child: Center(
+                                                     child: Icon(
+                                                       Icons.qr_code_scanner_rounded,
+                                                       color: isDark ? Colors.white : Colors.black,
+                                                       size: 22,
+                                                     ),
+                                                   ),
+                                                 ),
+                                               ),
+                                             ],
+                                           ),
+                                         ),
+                                       ),
                                       const SizedBox(height: 8),
 
                                       // Bottom Row: Members Avatar Stack + Quick Invite Box
@@ -5401,7 +5450,7 @@ class _ClassPageState extends State<ClassPage> {
                     builder: (context, scrollController) {
                       return Container(
                         decoration: BoxDecoration(
-                          color: isDark ? const Color(0xFF141416) : Colors.white,
+                          color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
                           borderRadius: const BorderRadius.vertical(
                             top: Radius.circular(32),
                           ),
@@ -9805,6 +9854,20 @@ class _BouncyMenuSliderCardState extends State<_BouncyMenuSliderCard>
 
   @override
   Widget build(BuildContext context) {
+    final Color actualCardBg = widget.isDark
+        ? (widget.cardBg == const Color(0xFFD6A5F8)
+            ? const Color(0xFF6B3BA3)
+            : widget.cardBg == const Color(0xFF9CC8FC)
+                ? const Color(0xFF2864A8)
+                : widget.cardBg == const Color(0xFF7DE3D0)
+                    ? const Color(0xFF147D75)
+                    : widget.cardBg == const Color(0xFFF7BD84)
+                        ? const Color(0xFFC76D10)
+                        : widget.cardBg == const Color(0xFFF794BE)
+                            ? const Color(0xFFA82658)
+                            : const Color(0xFF27272A))
+        : widget.cardBg;
+
     return AnimatedBuilder(
       animation: _scaleAnimation,
       builder: (context, child) => Transform.scale(
@@ -9827,11 +9890,11 @@ class _BouncyMenuSliderCardState extends State<_BouncyMenuSliderCard>
             height: 54,
             padding: const EdgeInsets.fromLTRB(6, 6, 16, 6),
             decoration: BoxDecoration(
-              color: widget.cardBg,
+              color: actualCardBg,
               borderRadius: BorderRadius.circular(32),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: widget.isDark ? 0.25 : 0.08),
+                  color: Colors.black.withValues(alpha: widget.isDark ? 0.35 : 0.08),
                   blurRadius: 8,
                   offset: const Offset(0, 2),
                 ),
@@ -9843,15 +9906,15 @@ class _BouncyMenuSliderCardState extends State<_BouncyMenuSliderCard>
                 Container(
                   width: 42,
                   height: 42,
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
+                  decoration: BoxDecoration(
+                    color: widget.isDark ? Colors.black.withValues(alpha: 0.25) : Colors.white,
                     shape: BoxShape.circle,
                   ),
                   child: Center(
                     child: Icon(
                       widget.icon,
                       size: 22,
-                      color: Colors.black,
+                      color: widget.isDark ? Colors.white : Colors.black,
                     ),
                   ),
                 ),
@@ -9862,7 +9925,7 @@ class _BouncyMenuSliderCardState extends State<_BouncyMenuSliderCard>
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 14.0,
                     fontWeight: FontWeight.w800,
-                    color: Colors.black,
+                    color: widget.isDark ? Colors.white : Colors.black,
                     height: 1.15,
                   ),
                 ),

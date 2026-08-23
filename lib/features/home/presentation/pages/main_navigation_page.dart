@@ -16,6 +16,7 @@ import 'package:hubner/features/notifications/presentation/pages/notifications_p
 import 'package:hubner/features/projects/presentation/pages/laporan_page.dart' hide BouncyButton;
 import 'package:hubner/features/projects/presentation/pages/monitoring_page.dart';
 import 'package:hubner/features/splash/presentation/pages/splash_page.dart';
+import 'package:hubner/features/auth/presentation/pages/login_page.dart';
 import 'package:hubner/core/services/google_drive_service.dart';
 import 'package:hubner/features/home/presentation/widgets/in_app_file_viewer_dialog.dart';
 import 'package:hubner/main.dart';
@@ -4765,17 +4766,17 @@ class _DocumentsTabState extends State<DocumentsTab> {
   }
 
   IconData _getFileIcon(String? mimeType, bool isFolder) {
-    if (isFolder || (mimeType != null && mimeType.contains('folder'))) return Icons.folder_rounded;
-    if (mimeType == null) return Icons.insert_drive_file_rounded;
-    if (mimeType.contains('pdf')) return Icons.picture_as_pdf_rounded;
-    if (mimeType.contains('image')) return Icons.image_rounded;
-    if (mimeType.contains('video')) return Icons.videocam_rounded;
-    if (mimeType.contains('audio')) return Icons.audiotrack_rounded;
-    if (mimeType.contains('spreadsheet') || mimeType.contains('excel')) return Icons.table_chart_rounded;
-    if (mimeType.contains('presentation') || mimeType.contains('powerpoint')) return Icons.slideshow_rounded;
-    if (mimeType.contains('document') || mimeType.contains('word')) return Icons.description_rounded;
-    if (mimeType.contains('zip') || mimeType.contains('compressed')) return Icons.folder_zip_rounded;
-    return Icons.insert_drive_file_rounded;
+    if (isFolder || (mimeType != null && mimeType.contains('folder'))) return Icons.folder;
+    if (mimeType == null) return Icons.insert_drive_file;
+    if (mimeType.contains('pdf')) return Icons.picture_as_pdf;
+    if (mimeType.contains('image')) return Icons.image;
+    if (mimeType.contains('video')) return Icons.videocam;
+    if (mimeType.contains('audio')) return Icons.audiotrack;
+    if (mimeType.contains('spreadsheet') || mimeType.contains('excel')) return Icons.table_chart;
+    if (mimeType.contains('presentation') || mimeType.contains('powerpoint')) return Icons.slideshow;
+    if (mimeType.contains('document') || mimeType.contains('word')) return Icons.description;
+    if (mimeType.contains('zip') || mimeType.contains('compressed')) return Icons.folder;
+    return Icons.insert_drive_file;
   }
 
   Color _getFileColor(String? mimeType, bool isFolder) {
@@ -4823,376 +4824,400 @@ class _DocumentsTabState extends State<DocumentsTab> {
         final userData = userSnap.data?.data() as Map<String, dynamic>?;
         final String publicDriveUrl = userData?['publicDriveFolderUrl'] ?? '';
         final String publicDriveFolderId = userData?['publicDriveFolderId'] ?? '';
-        final String publicDriveEmail = userData?['publicDriveConnectedEmail'] ?? _driveEmail;
         final bool hasPublicDrive = publicDriveUrl.isNotEmpty;
 
-        return Align(
-          alignment: Alignment.topCenter,
-          child: Container(
-            constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width > 500 ? double.infinity : 500),
-            child: SafeArea(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Top Main Header
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'File Manager',
-                              style: GoogleFonts.plusJakartaSans(
-                                fontSize: 23.4,
-                                fontWeight: FontWeight.bold,
-                                color: isDark ? Colors.white : Colors.black,
-                              ),
-                            ),
-                            Text(
-                              'Repositori Dokumen Bersama',
-                              style: GoogleFonts.dmSans(
-                                fontSize: 13,
-                                color: isDark ? Colors.white60 : Colors.black45,
-                              ),
-                            ),
-                          ],
-                        ),
-                        Row(
-                          children: [
-                            if (_isUploading)
-                              const ThreeDotsLoader(size: 6, bounceHeight: 3)
-                            else ...[
-                              // Toggle Grid / List
-                              GestureDetector(
-                                onTap: () => setState(() => _isGridView = !_isGridView),
-                                child: Container(
-                                  width: 40,
-                                  height: 40,
-                                  decoration: BoxDecoration(
-                                    color: isDark ? const Color(0xFF18181B) : const Color(0xFFF1F5F9),
-                                    borderRadius: BorderRadius.circular(12),
-                                    border: Border.all(color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0)),
-                                  ),
-                                  child: Icon(
-                                    _isGridView ? Icons.view_list_rounded : Icons.grid_view_rounded,
-                                    color: isDark ? Colors.white70 : Colors.black87,
-                                    size: 18,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              // Create Folder Button
-                              GestureDetector(
-                                onTap: () => _createFolderInDrive(parentFolderId: publicDriveFolderId),
-                                child: Container(
-                                  width: 40,
-                                  height: 40,
-                                  decoration: BoxDecoration(
-                                    color: isDark ? const Color(0xFF18181B) : const Color(0xFFF1F5F9),
-                                    borderRadius: BorderRadius.circular(12),
-                                    border: Border.all(color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0)),
-                                  ),
-                                  child: Icon(
-                                    Icons.create_new_folder_outlined,
-                                    color: isDark ? Colors.white70 : Colors.black87,
-                                    size: 18,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              // Upload File Button
-                              GestureDetector(
-                                onTap: () => _uploadFileToDrive(targetFolderId: publicDriveFolderId),
-                                child: Container(
-                                  width: 40,
-                                  height: 40,
-                                  decoration: BoxDecoration(
-                                    color: isDark ? Colors.white : Colors.black,
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  child: Icon(
-                                    Icons.drive_folder_upload_rounded,
-                                    color: isDark ? Colors.black : Colors.white,
-                                    size: 18,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
+        return StreamBuilder<QuerySnapshot>(
+          stream: FirebaseFirestore.instance
+              .collection('driveDocuments')
+              .orderBy('uploadedAt', descending: true)
+              .snapshots(),
+          builder: (context, docSnap) {
+            final docs = docSnap.data?.docs ?? [];
+            // If repository has publicDriveFolder or already has any files/folders, consider it created
+            final bool hasExistingRepo = hasPublicDrive || docs.isNotEmpty || _driveAccount != null;
 
-                  // Drive Banner (Only when not connected at all)
-                  if (!hasPublicDrive && _driveAccount == null)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 4.0),
-                      child: _buildDriveNotConnectedCard(isDark),
-                    ),
-
-                  // Breadcrumb Navigation Bar
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 8.0),
-                    child: SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: Row(
-                        children: [
-                          // Back Arrow if deep inside
-                          if (_folderCrumbs.isNotEmpty) ...[
-                            GestureDetector(
-                              onTap: () {
-                                setState(() {
-                                  _folderCrumbs.removeLast();
-                                });
-                              },
-                              child: Container(
-                                padding: const EdgeInsets.all(6),
-                                margin: const EdgeInsets.only(right: 8),
-                                decoration: BoxDecoration(
-                                  color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
-                                  shape: BoxShape.circle,
-                                ),
-                                child: Icon(Icons.arrow_back_rounded, size: 14, color: isDark ? Colors.white : Colors.black87),
-                              ),
-                            ),
-                          ],
-                          // Root Crumb
-                          GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                _folderCrumbs.clear();
-                              });
-                            },
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
+            return Align(
+              alignment: Alignment.topCenter,
+              child: Container(
+                constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width > 500 ? double.infinity : 500),
+                child: SafeArea(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Top Main Header
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Icon(
-                                  Icons.home_rounded,
-                                  size: 16,
-                                  color: _folderCrumbs.isEmpty ? const Color(0xFF2563EB) : (isDark ? Colors.white60 : Colors.black45),
-                                ),
-                                const SizedBox(width: 4),
                                 Text(
-                                  'Root',
+                                  'Dokumen',
                                   style: GoogleFonts.plusJakartaSans(
-                                    fontSize: 13.5,
-                                    fontWeight: _folderCrumbs.isEmpty ? FontWeight.bold : FontWeight.w500,
-                                    color: _folderCrumbs.isEmpty ? const Color(0xFF2563EB) : (isDark ? Colors.white60 : Colors.black45),
+                                    fontSize: 23.4,
+                                    fontWeight: FontWeight.bold,
+                                    color: isDark ? Colors.white : Colors.black,
                                   ),
                                 ),
-                              ],
-                            ),
-                          ),
-                          // Subfolder Crumbs
-                          for (int i = 0; i < _folderCrumbs.length; i++) ...[
-                            Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 6),
-                              child: Icon(Icons.chevron_right_rounded, size: 16, color: isDark ? Colors.white38 : Colors.black26),
-                            ),
-                            GestureDetector(
-                              onTap: () {
-                                setState(() {
-                                  _folderCrumbs.removeRange(i + 1, _folderCrumbs.length);
-                                });
-                              },
-                              child: Text(
-                                _folderCrumbs[i].name,
-                                style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 13.5,
-                                  fontWeight: i == _folderCrumbs.length - 1 ? FontWeight.bold : FontWeight.w500,
-                                  color: i == _folderCrumbs.length - 1 ? const Color(0xFF2563EB) : (isDark ? Colors.white60 : Colors.black45),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ],
-                      ),
-                    ),
-                  ),
-
-                  // Search Bar & Filter Row
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 6.0),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: TextField(
-                            onChanged: (v) => setState(() => _searchQuery = v.toLowerCase()),
-                            style: GoogleFonts.dmSans(color: isDark ? Colors.white : Colors.black87),
-                            decoration: InputDecoration(
-                              hintText: 'Cari berkas di $_currentFolderName...',
-                              hintStyle: GoogleFonts.dmSans(color: isDark ? Colors.white38 : Colors.black26, fontSize: 14),
-                              filled: true,
-                              fillColor: isDark ? const Color(0xFF18181B) : const Color(0xFFF8FAFC),
-                              prefixIcon: Icon(Icons.search_rounded, color: isDark ? Colors.white38 : Colors.black38, size: 18),
-                              contentPadding: const EdgeInsets.symmetric(vertical: 10),
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(14),
-                                borderSide: BorderSide(color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9)),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(14),
-                                borderSide: BorderSide(color: isDark ? Colors.white : Colors.black),
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        PopupMenuButton<String>(
-                          icon: Container(
-                            width: 42,
-                            height: 42,
-                            decoration: BoxDecoration(
-                              color: isDark ? const Color(0xFF18181B) : const Color(0xFFF8FAFC),
-                              borderRadius: BorderRadius.circular(14),
-                              border: Border.all(color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0)),
-                            ),
-                            child: Icon(Icons.sort_rounded, color: isDark ? Colors.white70 : Colors.black54, size: 20),
-                          ),
-                          color: isDark ? const Color(0xFF18181B) : Colors.white,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                          onSelected: (val) => setState(() => _sortBy = val),
-                          itemBuilder: (ctx) => [
-                            PopupMenuItem(
-                              value: 'date_desc',
-                              child: Text('Terbaru', style: GoogleFonts.plusJakartaSans(fontWeight: _sortBy == 'date_desc' ? FontWeight.bold : FontWeight.normal)),
-                            ),
-                            PopupMenuItem(
-                              value: 'name_asc',
-                              child: Text('Nama (A - Z)', style: GoogleFonts.plusJakartaSans(fontWeight: _sortBy == 'name_asc' ? FontWeight.bold : FontWeight.normal)),
-                            ),
-                            PopupMenuItem(
-                              value: 'size_desc',
-                              child: Text('Ukuran Terbesar', style: GoogleFonts.plusJakartaSans(fontWeight: _sortBy == 'size_desc' ? FontWeight.bold : FontWeight.normal)),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  // File Explorer List / Grid from Firestore
-                  Expanded(
-                    child: StreamBuilder<QuerySnapshot>(
-                      stream: FirebaseFirestore.instance
-                          .collection('driveDocuments')
-                          .orderBy('uploadedAt', descending: true)
-                          .snapshots(),
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState == ConnectionState.waiting && !snapshot.hasData) {
-                          return const SizedBox.shrink();
-                        }
-                        final docs = snapshot.data?.docs ?? [];
-
-                        // Filter by current folder (or search globally if query is not empty)
-                        final filtered = docs.where((doc) {
-                          final data = doc.data() as Map<String, dynamic>;
-                          final name = (data['name'] ?? '').toString().toLowerCase();
-                          final parentId = (data['parentFolderId'] ?? '').toString();
-
-                          if (_searchQuery.isNotEmpty) {
-                            return name.contains(_searchQuery);
-                          }
-                          // Hierarchy matching:
-                          if (_currentFolderId.isEmpty) {
-                            return parentId.isEmpty || parentId == 'root';
-                          } else {
-                            return parentId == _currentFolderId;
-                          }
-                        }).toList();
-
-                        // Sorting
-                        filtered.sort((a, b) {
-                          final dataA = a.data() as Map<String, dynamic>;
-                          final dataB = b.data() as Map<String, dynamic>;
-                          final isFolderA = dataA['isFolder'] == true || (dataA['mimeType'] ?? '').toString().contains('folder');
-                          final isFolderB = dataB['isFolder'] == true || (dataB['mimeType'] ?? '').toString().contains('folder');
-
-                          // Folders always on top
-                          if (isFolderA && !isFolderB) return -1;
-                          if (!isFolderA && isFolderB) return 1;
-
-                          if (_sortBy == 'name_asc') {
-                            return (dataA['name'] ?? '').toString().compareTo((dataB['name'] ?? '').toString());
-                          } else if (_sortBy == 'size_desc') {
-                            final sizeA = (dataA['fileSize'] ?? 0) as num;
-                            final sizeB = (dataB['fileSize'] ?? 0) as num;
-                            return sizeB.compareTo(sizeA);
-                          } else {
-                            final timeA = dataA['uploadedAt'] as Timestamp?;
-                            final timeB = dataB['uploadedAt'] as Timestamp?;
-                            if (timeA == null) return 1;
-                            if (timeB == null) return -1;
-                            return timeB.compareTo(timeA);
-                          }
-                        });
-
-                        if (filtered.isEmpty) {
-                          return Center(
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  Icons.folder_open_outlined,
-                                  size: 48,
-                                  color: isDark ? Colors.white12 : Colors.black12,
-                                ),
-                                const SizedBox(height: 12),
                                 Text(
-                                  _searchQuery.isNotEmpty
-                                      ? 'Tidak ada berkas cocok dengan pencarian.'
-                                      : 'Folder ini masih kosong.\nUpload berkas atau buat folder baru!',
-                                  textAlign: TextAlign.center,
+                                  'Kelola & pratinjau berkas bersama',
                                   style: GoogleFonts.dmSans(
-                                    fontSize: 14.5,
-                                    color: isDark ? Colors.white38 : Colors.black38,
+                                    fontSize: 13,
+                                    color: isDark ? Colors.white60 : Colors.black45,
                                   ),
                                 ),
                               ],
                             ),
-                          );
-                        }
-
-                        if (_isGridView) {
-                          return GridView.builder(
-                            padding: const EdgeInsets.only(left: 24.0, right: 24.0, bottom: 120.0, top: 8),
-                            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 2,
-                              crossAxisSpacing: 12,
-                              mainAxisSpacing: 12,
-                              childAspectRatio: 1.1,
+                            Row(
+                              children: [
+                                if (_isUploading)
+                                  const ThreeDotsLoader(size: 6, bounceHeight: 3)
+                                else ...[
+                                  // Toggle Grid / List (Round Button)
+                                  BouncyButton(
+                                    onTap: () => setState(() => _isGridView = !_isGridView),
+                                    child: Container(
+                                      width: 42,
+                                      height: 42,
+                                      decoration: BoxDecoration(
+                                        color: isDark ? const Color(0xFF18181B) : const Color(0xFFF1F5F9),
+                                        shape: BoxShape.circle,
+                                        border: Border.all(color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0)),
+                                      ),
+                                      child: Icon(
+                                        _isGridView ? Icons.view_list : Icons.grid_view,
+                                        color: isDark ? Colors.white70 : Colors.black87,
+                                        size: 18,
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  // Create Folder Button (Round Button)
+                                  BouncyButton(
+                                    onTap: () => _createFolderInDrive(parentFolderId: publicDriveFolderId),
+                                    child: Container(
+                                      width: 42,
+                                      height: 42,
+                                      decoration: BoxDecoration(
+                                        color: isDark ? const Color(0xFF18181B) : const Color(0xFFF1F5F9),
+                                        shape: BoxShape.circle,
+                                        border: Border.all(color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0)),
+                                      ),
+                                      child: Icon(
+                                        Icons.create_new_folder,
+                                        color: isDark ? Colors.white70 : Colors.black87,
+                                        size: 18,
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  // Upload File Button (Round Black/White Button)
+                                  BouncyButton(
+                                    onTap: () => _uploadFileToDrive(targetFolderId: publicDriveFolderId),
+                                    child: Container(
+                                      width: 42,
+                                      height: 42,
+                                      decoration: BoxDecoration(
+                                        color: isDark ? Colors.white : Colors.black,
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: Icon(
+                                        Icons.file_upload,
+                                        color: isDark ? Colors.black : Colors.white,
+                                        size: 18,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ],
                             ),
-                            itemCount: filtered.length,
-                            itemBuilder: (context, index) {
-                              final docSnap = filtered[index];
-                              final data = docSnap.data() as Map<String, dynamic>;
-                              return _buildGridItem(context, docSnap.id, data, currentUid, isDark);
-                            },
-                          );
-                        }
+                          ],
+                        ),
+                      ),
 
-                        return ListView.separated(
-                          padding: const EdgeInsets.only(left: 24.0, right: 24.0, bottom: 120.0, top: 8),
-                          itemCount: filtered.length,
-                          separatorBuilder: (context, index) => const SizedBox(height: 10),
-                          itemBuilder: (context, index) {
-                            final docSnap = filtered[index];
-                            final data = docSnap.data() as Map<String, dynamic>;
-                            return _buildListItem(context, docSnap.id, data, currentUid, isDark);
+                      // Drive Banner (ONLY when repository doesn't exist and not connected)
+                      if (!hasExistingRepo)
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 4.0),
+                          child: _buildDriveNotConnectedCard(isDark),
+                        ),
+
+                      // Breadcrumb Navigation Bar
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 8.0),
+                        child: SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: Row(
+                            children: [
+                              // Back Arrow if deep inside
+                              if (_folderCrumbs.isNotEmpty) ...[
+                                GestureDetector(
+                                  onTap: () {
+                                    setState(() {
+                                      _folderCrumbs.removeLast();
+                                    });
+                                  },
+                                  child: Container(
+                                    padding: const EdgeInsets.all(6),
+                                    margin: const EdgeInsets.only(right: 8),
+                                    decoration: BoxDecoration(
+                                      color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: Icon(Icons.arrow_back, size: 14, color: isDark ? Colors.white : Colors.black87),
+                                  ),
+                                ),
+                              ],
+                              // Root Crumb
+                              GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    _folderCrumbs.clear();
+                                  });
+                                },
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                  decoration: BoxDecoration(
+                                    color: _folderCrumbs.isEmpty
+                                        ? const Color(0xFF2563EB).withValues(alpha: 0.1)
+                                        : Colors.transparent,
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        Icons.home,
+                                        size: 16,
+                                        color: _folderCrumbs.isEmpty ? const Color(0xFF2563EB) : (isDark ? Colors.white60 : Colors.black45),
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        'Root',
+                                        style: GoogleFonts.plusJakartaSans(
+                                          fontSize: 13,
+                                          fontWeight: _folderCrumbs.isEmpty ? FontWeight.bold : FontWeight.w500,
+                                          color: _folderCrumbs.isEmpty ? const Color(0xFF2563EB) : (isDark ? Colors.white60 : Colors.black45),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              // Subfolder Crumbs
+                              for (int i = 0; i < _folderCrumbs.length; i++) ...[
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                                  child: Icon(Icons.chevron_right, size: 16, color: isDark ? Colors.white38 : Colors.black26),
+                                ),
+                                GestureDetector(
+                                  onTap: () {
+                                    setState(() {
+                                      _folderCrumbs.removeRange(i + 1, _folderCrumbs.length);
+                                    });
+                                  },
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                    decoration: BoxDecoration(
+                                      color: i == _folderCrumbs.length - 1
+                                          ? const Color(0xFF2563EB).withValues(alpha: 0.1)
+                                          : Colors.transparent,
+                                      borderRadius: BorderRadius.circular(16),
+                                    ),
+                                    child: Text(
+                                      _folderCrumbs[i].name,
+                                      style: GoogleFonts.plusJakartaSans(
+                                        fontSize: 13,
+                                        fontWeight: i == _folderCrumbs.length - 1 ? FontWeight.bold : FontWeight.w500,
+                                        color: i == _folderCrumbs.length - 1 ? const Color(0xFF2563EB) : (isDark ? Colors.white60 : Colors.black45),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
+                        ),
+                      ),
+
+                      // Search Bar & Filter Row (Round styling)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 6.0),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: TextField(
+                                onChanged: (v) => setState(() => _searchQuery = v.toLowerCase()),
+                                style: GoogleFonts.dmSans(color: isDark ? Colors.white : Colors.black87),
+                                decoration: InputDecoration(
+                                  hintText: 'Cari berkas di $_currentFolderName...',
+                                  hintStyle: GoogleFonts.dmSans(color: isDark ? Colors.white38 : Colors.black26, fontSize: 13.5),
+                                  filled: true,
+                                  fillColor: isDark ? const Color(0xFF18181B) : const Color(0xFFF8FAFC),
+                                  prefixIcon: Icon(Icons.search, color: isDark ? Colors.white38 : Colors.black38, size: 18),
+                                  contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+                                  enabledBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(24),
+                                    borderSide: BorderSide(color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9)),
+                                  ),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(24),
+                                    borderSide: BorderSide(color: isDark ? Colors.white : Colors.black),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            PopupMenuButton<String>(
+                              icon: Container(
+                                width: 42,
+                                height: 42,
+                                decoration: BoxDecoration(
+                                  color: isDark ? const Color(0xFF18181B) : const Color(0xFFF8FAFC),
+                                  shape: BoxShape.circle,
+                                  border: Border.all(color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0)),
+                                ),
+                                child: Icon(Icons.filter_list, color: isDark ? Colors.white70 : Colors.black54, size: 18),
+                              ),
+                              color: isDark ? const Color(0xFF18181B) : Colors.white,
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                              onSelected: (val) => setState(() => _sortBy = val),
+                              itemBuilder: (ctx) => [
+                                PopupMenuItem(
+                                  value: 'date_desc',
+                                  child: Text('Terbaru', style: GoogleFonts.plusJakartaSans(fontWeight: _sortBy == 'date_desc' ? FontWeight.bold : FontWeight.normal)),
+                                ),
+                                PopupMenuItem(
+                                  value: 'name_asc',
+                                  child: Text('Nama (A - Z)', style: GoogleFonts.plusJakartaSans(fontWeight: _sortBy == 'name_asc' ? FontWeight.bold : FontWeight.normal)),
+                                ),
+                                PopupMenuItem(
+                                  value: 'size_desc',
+                                  child: Text('Ukuran Terbesar', style: GoogleFonts.plusJakartaSans(fontWeight: _sortBy == 'size_desc' ? FontWeight.bold : FontWeight.normal)),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      // File Explorer List / Grid from Firestore
+                      Expanded(
+                        child: Builder(
+                          builder: (context) {
+                            if (docSnap.connectionState == ConnectionState.waiting && !docSnap.hasData) {
+                              return const SizedBox.shrink();
+                            }
+
+                            // Filter by current folder (or search globally if query is not empty)
+                            final filtered = docs.where((doc) {
+                              final data = doc.data() as Map<String, dynamic>;
+                              final name = (data['name'] ?? '').toString().toLowerCase();
+                              final parentId = (data['parentFolderId'] ?? '').toString();
+
+                              if (_searchQuery.isNotEmpty) {
+                                return name.contains(_searchQuery);
+                              }
+                              // Hierarchy matching:
+                              if (_currentFolderId.isEmpty) {
+                                return parentId.isEmpty || parentId == 'root';
+                              } else {
+                                return parentId == _currentFolderId;
+                              }
+                            }).toList();
+
+                            // Sorting
+                            filtered.sort((a, b) {
+                              final dataA = a.data() as Map<String, dynamic>;
+                              final dataB = b.data() as Map<String, dynamic>;
+                              final isFolderA = dataA['isFolder'] == true || (dataA['mimeType'] ?? '').toString().contains('folder');
+                              final isFolderB = dataB['isFolder'] == true || (dataB['mimeType'] ?? '').toString().contains('folder');
+
+                              // Folders always on top
+                              if (isFolderA && !isFolderB) return -1;
+                              if (!isFolderA && isFolderB) return 1;
+
+                              if (_sortBy == 'name_asc') {
+                                return (dataA['name'] ?? '').toString().compareTo((dataB['name'] ?? '').toString());
+                              } else if (_sortBy == 'size_desc') {
+                                final sizeA = (dataA['fileSize'] ?? 0) as num;
+                                final sizeB = (dataB['fileSize'] ?? 0) as num;
+                                return sizeB.compareTo(sizeA);
+                              } else {
+                                final timeA = dataA['uploadedAt'] as Timestamp?;
+                                final timeB = dataB['uploadedAt'] as Timestamp?;
+                                if (timeA == null) return 1;
+                                if (timeB == null) return -1;
+                                return timeB.compareTo(timeA);
+                              }
+                            });
+
+                            if (filtered.isEmpty) {
+                              return Center(
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      Icons.folder_open,
+                                      size: 48,
+                                      color: isDark ? Colors.white12 : Colors.black12,
+                                    ),
+                                    const SizedBox(height: 12),
+                                    Text(
+                                      _searchQuery.isNotEmpty
+                                          ? 'Tidak ada berkas cocok dengan pencarian.'
+                                          : 'Folder ini masih kosong.\nUpload berkas atau buat folder baru!',
+                                      textAlign: TextAlign.center,
+                                      style: GoogleFonts.dmSans(
+                                        fontSize: 14.5,
+                                        color: isDark ? Colors.white38 : Colors.black38,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            }
+
+                            if (_isGridView) {
+                              return GridView.builder(
+                                padding: const EdgeInsets.only(left: 24.0, right: 24.0, bottom: 120.0, top: 8),
+                                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: 2,
+                                  crossAxisSpacing: 12,
+                                  mainAxisSpacing: 12,
+                                  childAspectRatio: 1.1,
+                                ),
+                                itemCount: filtered.length,
+                                itemBuilder: (context, index) {
+                                  final docSnap = filtered[index];
+                                  final data = docSnap.data() as Map<String, dynamic>;
+                                  return _buildGridItem(context, docSnap.id, data, currentUid, isDark);
+                                },
+                              );
+                            }
+
+                            return ListView.separated(
+                              padding: const EdgeInsets.only(left: 24.0, right: 24.0, bottom: 120.0, top: 8),
+                              itemCount: filtered.length,
+                              separatorBuilder: (context, index) => const SizedBox(height: 10),
+                              itemBuilder: (context, index) {
+                                final docSnap = filtered[index];
+                                final data = docSnap.data() as Map<String, dynamic>;
+                                return _buildListItem(context, docSnap.id, data, currentUid, isDark);
+                              },
+                            );
                           },
-                        );
-                      },
-                    ),
+                        ),
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
-            ),
-          ),
+            );
+          },
         );
       },
     );
@@ -5327,7 +5352,7 @@ class _DocumentsTabState extends State<DocumentsTab> {
               ),
             ),
             PopupMenuButton<String>(
-              icon: Icon(Icons.more_vert_rounded, size: 18, color: isDark ? Colors.white38 : Colors.black38),
+              icon: Icon(Icons.more_vert, size: 18, color: isDark ? Colors.white38 : Colors.black38),
               color: isDark ? const Color(0xFF18181B) : Colors.white,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
               onSelected: (val) async {
@@ -5393,7 +5418,7 @@ class _DocumentsTabState extends State<DocumentsTab> {
                   value: 'view',
                   child: Row(
                     children: [
-                      Icon(isFolder ? Icons.folder_open_rounded : Icons.visibility_rounded, size: 16),
+                      Icon(isFolder ? Icons.folder_open : Icons.visibility, size: 16),
                       const SizedBox(width: 8),
                       Text(isFolder ? 'Buka Folder' : 'Buka / Pratinjau', style: GoogleFonts.plusJakartaSans()),
                     ],
@@ -5403,7 +5428,7 @@ class _DocumentsTabState extends State<DocumentsTab> {
                   value: 'rename',
                   child: Row(
                     children: [
-                      const Icon(Icons.edit_outlined, size: 16),
+                      const Icon(Icons.edit, size: 16),
                       const SizedBox(width: 8),
                       Text('Ganti Nama', style: GoogleFonts.plusJakartaSans()),
                     ],
@@ -5413,7 +5438,7 @@ class _DocumentsTabState extends State<DocumentsTab> {
                   value: 'copy',
                   child: Row(
                     children: [
-                      const Icon(Icons.link_rounded, size: 16),
+                      const Icon(Icons.link, size: 16),
                       const SizedBox(width: 8),
                       Text('Salin Tautan', style: GoogleFonts.plusJakartaSans()),
                     ],
@@ -5424,7 +5449,7 @@ class _DocumentsTabState extends State<DocumentsTab> {
                     value: 'delete',
                     child: Row(
                       children: [
-                        const Icon(Icons.delete_outline_rounded, size: 16, color: Colors.redAccent),
+                        const Icon(Icons.delete_outline, size: 16, color: Colors.redAccent),
                         const SizedBox(width: 8),
                         Text('Hapus', style: GoogleFonts.plusJakartaSans(color: Colors.redAccent)),
                       ],
@@ -5505,7 +5530,7 @@ class _DocumentsTabState extends State<DocumentsTab> {
                   child: Icon(fileIcon, color: fileColor, size: 20),
                 ),
                 PopupMenuButton<String>(
-                  icon: Icon(Icons.more_horiz_rounded, size: 16, color: isDark ? Colors.white38 : Colors.black38),
+                  icon: Icon(Icons.more_horiz, size: 16, color: isDark ? Colors.white38 : Colors.black38),
                   color: isDark ? const Color(0xFF18181B) : Colors.white,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                   onSelected: (val) async {
@@ -5532,7 +5557,38 @@ class _DocumentsTabState extends State<DocumentsTab> {
                         const SnackBar(content: Text('Tautan berhasil disalin!')),
                       );
                     } else if (val == 'delete') {
-                      await FirebaseFirestore.instance.collection('driveDocuments').doc(docId).delete();
+                      final confirm = await showDialog<bool>(
+                        context: context,
+                        builder: (ctx) => AlertDialog(
+                          backgroundColor: isDark ? const Color(0xFF18181B) : Colors.white,
+                          title: Text(
+                            'Hapus ${isFolder ? "Folder" : "Berkas"}',
+                            style: GoogleFonts.plusJakartaSans(
+                              fontWeight: FontWeight.bold,
+                              color: isDark ? Colors.white : Colors.black87,
+                            ),
+                          ),
+                          content: Text(
+                            'Hapus "$fileName" dari repositori?',
+                            style: GoogleFonts.plusJakartaSans(
+                              color: isDark ? Colors.white70 : Colors.black87,
+                            ),
+                          ),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(ctx, false),
+                              child: Text('Batal', style: GoogleFonts.plusJakartaSans(color: Colors.black54)),
+                            ),
+                            TextButton(
+                              onPressed: () => Navigator.pop(ctx, true),
+                              child: Text('Hapus', style: GoogleFonts.plusJakartaSans(color: Colors.redAccent, fontWeight: FontWeight.bold)),
+                            ),
+                          ],
+                        ),
+                      );
+                      if (confirm == true) {
+                        await FirebaseFirestore.instance.collection('driveDocuments').doc(docId).delete();
+                      }
                     }
                   },
                   itemBuilder: (ctx) => [
@@ -5590,7 +5646,6 @@ class _DocumentsTabState extends State<DocumentsTab> {
   Widget _buildDriveNotConnectedCard(bool isDark) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         color: const Color(0xFF8B5CF6), // Ungu seperti di halaman laporan
         borderRadius: BorderRadius.circular(28), // Round sesuai tema
@@ -5602,88 +5657,125 @@ class _DocumentsTabState extends State<DocumentsTab> {
           ),
         ],
       ),
-      child: Column(
-        children: [
-          Container(
-            width: 54,
-            height: 54,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(18),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.1),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(28),
+        child: CustomPaint(
+          painter: _PurplePatternPainter(patternColor: Colors.white.withValues(alpha: 0.16)),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 24),
+            child: Column(
+              children: [
+                Container(
+                  width: 52,
+                  height: 52,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.12),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: const Center(
+                    child: GoogleDriveLogoWidget(size: 26),
+                  ),
                 ),
-              ],
-            ),
-            child: const Center(
-              child: GoogleDriveLogoWidget(size: 28),
-            ),
-          ),
-          const SizedBox(height: 14),
-          Text(
-            'Sambungkan Google Drive',
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: 17,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            'Sambungkan 1x untuk membuat repositori bersama. Berkas otomatis bisa diakses dan diedit bersama tanpa perlu login ulang.',
-            textAlign: TextAlign.center,
-            style: GoogleFonts.dmSans(
-              fontSize: 13,
-              color: Colors.white.withValues(alpha: 0.9),
-              height: 1.4,
-            ),
-          ),
-          const SizedBox(height: 18),
-          if (kIsWeb && _driveAccount == null)
-            const GoogleSignInWebButton()
-          else
-            BouncyButton(
-              onTap: _isConnecting ? null : _connectGoogleDrive,
-              child: Container(
-                height: 48,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF7BD84), // Warna orange sesuai menu slider detail classroom
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.12),
-                      blurRadius: 8,
-                      offset: const Offset(0, 3),
-                    ),
-                  ],
+                const SizedBox(height: 14),
+                Text(
+                  'Sinkronisasi Google Drive',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 16.5,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
                 ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    if (_isConnecting)
-                      const ThreeDotsLoader(size: 5, bounceHeight: 2)
-                    else
-                      const Icon(Icons.link_rounded, color: Colors.black87, size: 20),
-                    const SizedBox(width: 8),
-                    Text(
-                      _isConnecting ? 'Menghubungkan...' : 'Sambungkan Google Drive',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 14.5,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black87,
+                const SizedBox(height: 6),
+                Text(
+                  'Hubungkan sekali untuk mengaktifkan folder bersama seluruh anggota.',
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.dmSans(
+                    fontSize: 12.5,
+                    color: Colors.white.withValues(alpha: 0.9),
+                    height: 1.35,
+                  ),
+                ),
+                const SizedBox(height: 18),
+                if (kIsWeb && _driveAccount == null)
+                  const GoogleSignInWebButton()
+                else
+                  BouncyButton(
+                    onTap: _isConnecting ? null : _connectGoogleDrive,
+                    child: Container(
+                      height: 46,
+                      decoration: BoxDecoration(
+                        color: Colors.black, // Tombol round warna hitam
+                        borderRadius: BorderRadius.circular(24), // Round
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.25),
+                            blurRadius: 8,
+                            offset: const Offset(0, 3),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          if (_isConnecting)
+                            const ThreeDotsLoader(size: 5, bounceHeight: 2)
+                          else
+                            const GoogleDriveLogoWidget(size: 18),
+                          const SizedBox(width: 10),
+                          Text(
+                            _isConnecting ? 'Menghubungkan...' : 'Hubungkan Google Drive',
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 13.5,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                  ],
-                ),
-              ),
+                  ),
+              ],
             ),
-        ],
+          ),
+        ),
       ),
     );
   }
+}
+
+class _PurplePatternPainter extends CustomPainter {
+  final Color patternColor;
+  _PurplePatternPainter({required this.patternColor});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final strokePaint = Paint()
+      ..color = patternColor
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.2;
+
+    final fillPaint = Paint()
+      ..color = patternColor.withValues(alpha: 0.05)
+      ..style = PaintingStyle.fill;
+
+    canvas.drawCircle(Offset(size.width * 0.92, -15), 75, fillPaint);
+    canvas.drawCircle(Offset(size.width * 0.92, -15), 75, strokePaint);
+    canvas.drawCircle(Offset(size.width * 0.92, -15), 105, strokePaint);
+
+    canvas.drawCircle(Offset(10, size.height + 25), 85, fillPaint);
+    canvas.drawCircle(Offset(10, size.height + 25), 85, strokePaint);
+    canvas.drawCircle(Offset(10, size.height + 25), 115, strokePaint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
 // --- Dynamic Profile Page Tab ---
@@ -5951,9 +6043,10 @@ class _ProfilePageState extends State<ProfilePage> {
         final prefs = await SharedPreferences.getInstance();
         await prefs.remove('isLoggedIn');
         await prefs.remove('seenOnboarding');
+        await FirebaseAuth.instance.signOut();
         if (context.mounted) {
           Navigator.of(context).pushAndRemoveUntil(
-            MaterialPageRoute(builder: (_) => const SplashPage()),
+            MaterialPageRoute(builder: (_) => const LoginPage()),
             (route) => false,
           );
         }
@@ -6061,12 +6154,73 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   Widget build(BuildContext context) {
     Future<void> logOut() async {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.remove('isLoggedIn');
-      await prefs.remove('seenOnboarding');
+      final bool isDark = AppColors.isDarkMode;
+      final confirm = await showDialog<bool>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          backgroundColor: isDark ? const Color(0xFF18181B) : Colors.white,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          title: Text(
+            'Keluar dari Akun',
+            style: GoogleFonts.plusJakartaSans(
+              fontWeight: FontWeight.bold,
+              color: isDark ? Colors.white : Colors.black87,
+            ),
+          ),
+          content: Text(
+            'Apakah Anda yakin ingin keluar dari akun ini?',
+            style: GoogleFonts.plusJakartaSans(
+              color: isDark ? Colors.white70 : Colors.black87,
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: Text(
+                'Batal',
+                style: GoogleFonts.plusJakartaSans(
+                  color: isDark ? Colors.white60 : Colors.black54,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFEF4444),
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                elevation: 0,
+              ),
+              child: Text(
+                'Keluar',
+                style: GoogleFonts.plusJakartaSans(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+
+      if (confirm != true) return;
+
+      try {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.remove('isLoggedIn');
+        await FirebaseAuth.instance.signOut();
+        try {
+          await GoogleSignIn.instance.signOut();
+        } catch (_) {}
+      } catch (e) {
+        debugPrint('Logout error: $e');
+      }
+
       if (context.mounted) {
         Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (_) => const SplashPage()),
+          MaterialPageRoute(builder: (_) => const LoginPage()),
           (route) => false,
         );
       }
