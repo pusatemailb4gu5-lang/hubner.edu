@@ -767,53 +767,118 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
     String? driveFolderId;
     String? driveAccessToken;
     String? driveFolderUrl;
+    String? rootFolderId;
 
-    if (_currentDiscussionId.isNotEmpty && !_isDraft) {
-      final discDoc = await FirebaseFirestore.instance.collection('discussions').doc(_currentDiscussionId).get();
-      if (discDoc.exists) {
-        final dData = discDoc.data();
-        driveFolderId = dData?['driveFolderId'] as String?;
-        driveAccessToken = dData?['driveAccessToken'] as String?;
-        driveFolderUrl = dData?['driveFolderUrl'] as String?;
-        final pId = dData?['projectId'] as String? ?? '';
-        if ((driveFolderId == null || driveFolderId.isEmpty) && pId.isNotEmpty) {
-          final projDoc = await FirebaseFirestore.instance.collection('projects').doc(pId).get();
-          if (projDoc.exists) {
-            driveFolderId = projDoc.data()?['driveFolderId'] as String?;
-            driveAccessToken = projDoc.data()?['driveAccessToken'] as String?;
-            driveFolderUrl = projDoc.data()?['driveFolderUrl'] as String?;
-          }
+    final String activeDiscId = _currentDiscussionId.isNotEmpty
+        ? _currentDiscussionId
+        : (widget.discussionId.isNotEmpty ? widget.discussionId : 'diskusi_${DateTime.now().millisecondsSinceEpoch}');
+    final String pId = widget.projectId ?? '';
+
+    // 1. Cek apakah ini Chat Diskusi Kelas (terikat Project)
+    bool isClassDiscussion = false;
+    String? teacherUid;
+
+    if (pId.isNotEmpty) {
+      isClassDiscussion = true;
+      try {
+        final projDoc = await FirebaseFirestore.instance.collection('projects').doc(pId).get();
+        if (projDoc.exists) {
+          final pData = projDoc.data();
+          rootFolderId = pData?['driveFolderId'] as String?;
+          driveAccessToken = pData?['driveAccessToken'] as String?;
+          teacherUid = (pData?['teacherUid'] ?? pData?['guruUid'] ?? pData?['creatorUid']) as String?;
         }
-      }
-    } else if (widget.projectId != null && widget.projectId!.isNotEmpty) {
-      final projDoc = await FirebaseFirestore.instance.collection('projects').doc(widget.projectId).get();
-      if (projDoc.exists) {
-        driveFolderId = projDoc.data()?['driveFolderId'] as String?;
-        driveAccessToken = projDoc.data()?['driveAccessToken'] as String?;
-        driveFolderUrl = projDoc.data()?['driveFolderUrl'] as String?;
-      }
+      } catch (_) {}
     }
 
-    // Check current user's public drive folder if still empty
-    if (driveFolderId == null || driveFolderId.isEmpty) {
+    if (!isClassDiscussion && _currentDiscussionId.isNotEmpty && !_isDraft) {
+      try {
+        final discDoc = await FirebaseFirestore.instance.collection('discussions').doc(_currentDiscussionId).get();
+        if (discDoc.exists) {
+          final dData = discDoc.data();
+          final String discProjId = dData?['projectId'] as String? ?? '';
+          if (discProjId.isNotEmpty) {
+            isClassDiscussion = true;
+            final projDoc = await FirebaseFirestore.instance.collection('projects').doc(discProjId).get();
+            if (projDoc.exists) {
+              final pData = projDoc.data();
+              rootFolderId = pData?['driveFolderId'] as String?;
+              driveAccessToken = pData?['driveAccessToken'] as String?;
+              teacherUid = (pData?['teacherUid'] ?? pData?['guruUid'] ?? pData?['creatorUid']) as String?;
+            }
+          } else {
+            // Chat pribadi / teman
+            rootFolderId = dData?['driveFolderId'] as String?;
+            driveAccessToken = dData?['driveAccessToken'] as String?;
+          }
+        }
+      } catch (_) {}
+    }
+
+    // Jika chat kelas dan rootFolderId belum terdeteksi di project, cari di dokumen Guru (publicDriveFolderId guru)
+    if (isClassDiscussion && (rootFolderId == null || rootFolderId.isEmpty) && teacherUid != null && teacherUid.isNotEmpty) {
+      try {
+        final guruDoc = await FirebaseFirestore.instance.collection('users').doc(teacherUid).get();
+        if (guruDoc.exists) {
+          rootFolderId = guruDoc.data()?['publicDriveFolderId'] as String?;
+        }
+      } catch (_) {}
+    }
+
+    // Jika chat pribadi / teman dan root belum ada, ambil dari Google Drive user saat ini (menu Dokumen)
+    if (!isClassDiscussion && (rootFolderId == null || rootFolderId.isEmpty)) {
       final curUser = FirebaseAuth.instance.currentUser;
       if (curUser != null) {
         try {
           final uDoc = await FirebaseFirestore.instance.collection('users').doc(curUser.uid).get();
-          final pubId = uDoc.data()?['publicDriveFolderId'] as String?;
-          final pubUrl = uDoc.data()?['publicDriveFolderUrl'] as String?;
-          if (pubId != null && pubId.isNotEmpty) {
-            driveFolderId = pubId;
-            driveFolderUrl = pubUrl;
-          }
+          rootFolderId = uDoc.data()?['publicDriveFolderId'] as String?;
         } catch (_) {}
       }
+    }
+
+    // Coba dapatkan access token aktif jika belum ada
+    if (driveAccessToken == null || driveAccessToken.isEmpty) {
+      try {
+        var account = await GoogleSignIn.instance.attemptLightweightAuthentication();
+        account ??= await GoogleSignIn.instance.authenticate();
+        final auth = await account.authorizationClient.authorizeScopes([drive.DriveApi.driveFileScope]);
+        driveAccessToken = auth.accessToken;
+      } catch (_) {}
+    }
+
+    // Jika rootFolderId dan driveAccessToken tersedia, pastikan struktur subfolder Data/diskusi/{Id diskusi} dibuat
+    if (rootFolderId != null && rootFolderId.isNotEmpty && driveAccessToken != null && driveAccessToken.isNotEmpty) {
+      try {
+        final subFolderId = await GoogleDriveService.getOrCreateNestedPath(
+          accessToken: driveAccessToken,
+          rootFolderId: rootFolderId,
+          pathSegments: ['Data', 'diskusi', activeDiscId],
+        );
+        driveFolderId = subFolderId;
+        driveFolderUrl = 'https://drive.google.com/drive/folders/$subFolderId';
+
+        // Simpan ke dokumen diskusi jika sudah ada
+        if (_currentDiscussionId.isNotEmpty && !_isDraft) {
+          await FirebaseFirestore.instance.collection('discussions').doc(_currentDiscussionId).update({
+            'driveFolderId': driveFolderId,
+            'driveFolderUrl': driveFolderUrl,
+            'discussionSubFolderId': driveFolderId,
+            'discussionSubFolderUrl': driveFolderUrl,
+          });
+        }
+      } catch (_) {
+        driveFolderId = rootFolderId;
+        driveFolderUrl = 'https://drive.google.com/drive/folders/$rootFolderId';
+      }
+    } else {
+      driveFolderId = rootFolderId;
+      driveFolderUrl = rootFolderId != null ? 'https://drive.google.com/drive/folders/$rootFolderId' : null;
     }
 
     return {
       'folderId': driveFolderId,
       'accessToken': driveAccessToken,
-      'folderUrl': driveFolderUrl ?? (driveFolderId != null ? 'https://drive.google.com/drive/folders/$driveFolderId' : null),
+      'folderUrl': driveFolderUrl,
     };
   }
 

@@ -2434,26 +2434,41 @@ class _WhatsAppStyleNewChatModalState extends State<_WhatsAppStyleNewChatModal> 
 
       if (_createDriveFolder) {
         try {
-          var account = await GoogleSignIn.instance.attemptLightweightAuthentication();
-          account ??= await GoogleSignIn.instance.authenticate();
-          final auth = await account.authorizationClient.authorizeScopes([drive.DriveApi.driveFileScope]);
-          driveAccessToken = auth.accessToken;
-          driveFolderId = await GoogleDriveService.createClassroomFolder(driveAccessToken, ttl);
-          driveFolderUrl = 'https://drive.google.com/drive/folders/$driveFolderId';
-        } catch (_) {
-          try {
-            final userDoc = await FirebaseFirestore.instance.collection('users').doc(widget.currentUid).get();
-            final pubFolderId = userDoc.data()?['publicDriveFolderId'] as String?;
-            final pubFolderUrl = userDoc.data()?['publicDriveFolderUrl'] as String?;
-            if (pubFolderId != null && pubFolderId.isNotEmpty) {
-              driveFolderId = pubFolderId;
-              driveFolderUrl = pubFolderUrl ?? 'https://drive.google.com/drive/folders/$pubFolderId';
-            } else {
-              driveFolderId = 'hubner_${DateTime.now().millisecondsSinceEpoch}';
-              driveFolderUrl = 'https://drive.google.com/drive/folders/$driveFolderId';
+          // Jika kelas: ambil dari folder kelas atau dokumen guru
+          if (!isFriendMode && _selectedProjectId != null && _selectedProjectId!.isNotEmpty) {
+            final pDoc = await FirebaseFirestore.instance.collection('projects').doc(_selectedProjectId).get();
+            if (pDoc.exists) {
+              final pFolderId = pDoc.data()?['driveFolderId'] as String?;
+              final pFolderUrl = pDoc.data()?['driveFolderUrl'] as String?;
+              final pToken = pDoc.data()?['driveAccessToken'] as String?;
+              if (pFolderId != null && pFolderId.isNotEmpty) {
+                driveFolderId = pFolderId;
+                driveFolderUrl = pFolderUrl ?? 'https://drive.google.com/drive/folders/$pFolderId';
+                driveAccessToken = pToken;
+              }
             }
-          } catch (_) {}
-        }
+          }
+
+          // Jika belum terisi, coba dari sesi akun Google / menu Dokumen user
+          if (driveFolderId == null || driveFolderId.isEmpty) {
+            try {
+              var account = await GoogleSignIn.instance.attemptLightweightAuthentication();
+              account ??= await GoogleSignIn.instance.authenticate();
+              final auth = await account.authorizationClient.authorizeScopes([drive.DriveApi.driveFileScope]);
+              driveAccessToken = auth.accessToken;
+              driveFolderId = await GoogleDriveService.createClassroomFolder(driveAccessToken, ttl);
+              driveFolderUrl = 'https://drive.google.com/drive/folders/$driveFolderId';
+            } catch (_) {
+              final userDoc = await FirebaseFirestore.instance.collection('users').doc(widget.currentUid).get();
+              final pubFolderId = userDoc.data()?['publicDriveFolderId'] as String?;
+              final pubFolderUrl = userDoc.data()?['publicDriveFolderUrl'] as String?;
+              if (pubFolderId != null && pubFolderId.isNotEmpty) {
+                driveFolderId = pubFolderId;
+                driveFolderUrl = pubFolderUrl ?? 'https://drive.google.com/drive/folders/$pubFolderId';
+              }
+            }
+          }
+        } catch (_) {}
       }
 
       final newDoc = await FirebaseFirestore.instance.collection('discussions').add({

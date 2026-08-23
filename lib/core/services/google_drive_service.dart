@@ -297,6 +297,69 @@ class GoogleDriveService {
     }
   }
 
+  /// Mencari atau membuat hierarki subfolder (misal: ['Data', 'diskusi', discussionId]) di dalam folder root
+  static Future<String> getOrCreateNestedPath({
+    required String accessToken,
+    required String rootFolderId,
+    required List<String> pathSegments,
+  }) async {
+    try {
+      final driveApi = getDriveApi(accessToken);
+      String currentParentId = rootFolderId;
+
+      for (final segment in pathSegments) {
+        if (segment.trim().isEmpty) continue;
+        final cleanSegment = segment.replaceAll("'", "\\'");
+
+        final query = "mimeType = 'application/vnd.google-apps.folder' and name = '$cleanSegment' and '$currentParentId' in parents and trashed = false";
+        final res = await driveApi.files.list(
+          q: query,
+          spaces: 'drive',
+          $fields: 'files(id, name)',
+        );
+
+        if (res.files != null && res.files!.isNotEmpty) {
+          currentParentId = res.files!.first.id!;
+        } else {
+          final folderMetadata = drive.File()
+            ..name = segment
+            ..mimeType = 'application/vnd.google-apps.folder'
+            ..parents = [currentParentId];
+
+          final created = await driveApi.files.create(
+            folderMetadata,
+            $fields: 'id, name',
+          );
+          currentParentId = created.id!;
+
+          // Berikan hak akses publik writer agar seluruh anggota dapat menambahkan berkas
+          try {
+            await driveApi.permissions.create(
+              drive.Permission()
+                ..type = 'anyone'
+                ..role = 'writer',
+              currentParentId,
+            );
+          } catch (_) {
+            try {
+              await driveApi.permissions.create(
+                drive.Permission()
+                  ..type = 'anyone'
+                  ..role = 'reader',
+                currentParentId,
+              );
+            } catch (_) {}
+          }
+        }
+      }
+
+      return currentParentId;
+    } catch (e) {
+      debugPrint('Error getOrCreateNestedPath: $e');
+      return rootFolderId;
+    }
+  }
+
   /// Mengunggah berkas umum ke Google Drive (digunakan untuk pengumpulan tugas, dsb.)
   static Future<Map<String, String>> uploadFile({
     required String accessToken,
@@ -324,6 +387,18 @@ class GoogleDriveService {
 
       final fileId = uploadedFile.id ?? '';
       final link = uploadedFile.webViewLink ?? 'https://drive.google.com/file/d/$fileId/view';
+
+      // Pastikan file dapat dibuka oleh siapa saja dengan link
+      if (fileId.isNotEmpty) {
+        try {
+          await driveApi.permissions.create(
+            drive.Permission()
+              ..type = 'anyone'
+              ..role = 'reader',
+            fileId,
+          );
+        } catch (_) {}
+      }
 
       return {
         'fileId': fileId,
