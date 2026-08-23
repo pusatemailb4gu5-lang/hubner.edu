@@ -469,6 +469,7 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
               ),
               child: Scaffold(
                 backgroundColor: isDark ? Colors.black : Colors.white,
+                resizeToAvoidBottomInset: false,
                 body: Stack(
                   children: [
                     Positioned.fill(
@@ -898,17 +899,35 @@ class _DiscussionTabState extends State<DiscussionTab> {
   Future<List<Map<String, dynamic>>> _loadProjects(String currentUid) async {
     final userDoc = await FirebaseFirestore.instance.collection('users').doc(currentUid).get();
     final List<String> projectIds = List<String>.from(userDoc.data()?['projectIds'] ?? []);
-    if (projectIds.isEmpty) return [];
 
-    final query = await FirebaseFirestore.instance
+    final ownedQuery = await FirebaseFirestore.instance
         .collection('projects')
-        .where(FieldPath.documentId, whereIn: projectIds)
+        .where('ownerUid', isEqualTo: currentUid)
         .get();
 
-    return query.docs.map((doc) => {
-      'id': doc.id,
-      'name': doc.data()['name'] ?? 'Proyek Tanpa Nama',
-    }).toList();
+    final Map<String, Map<String, dynamic>> projectMap = {};
+    for (var doc in ownedQuery.docs) {
+      projectMap[doc.id] = {
+        'id': doc.id,
+        'name': doc.data()['name'] ?? 'Proyek Tanpa Nama',
+      };
+    }
+
+    if (projectIds.isNotEmpty) {
+      final safeIds = projectIds.take(30).toList();
+      final query = await FirebaseFirestore.instance
+          .collection('projects')
+          .where(FieldPath.documentId, whereIn: safeIds)
+          .get();
+      for (var doc in query.docs) {
+        projectMap[doc.id] = {
+          'id': doc.id,
+          'name': doc.data()['name'] ?? 'Proyek Tanpa Nama',
+        };
+      }
+    }
+
+    return projectMap.values.toList();
   }
 
   Future<List<Map<String, dynamic>>> _loadProjectMembers(String projectId) async {
@@ -925,566 +944,140 @@ class _DiscussionTabState extends State<DiscussionTab> {
     }).toList();
   }
 
+  Future<List<Map<String, dynamic>>> _loadAllContacts(String currentUid) async {
+    final projects = await _loadProjects(currentUid);
+    final Set<String> memberUids = {};
+    for (var p in projects) {
+      final pId = p['id'] as String;
+      final members = await _loadProjectMembers(pId);
+      for (var m in members) {
+        if (m['uid'] != currentUid) {
+          memberUids.add(m['uid'] as String);
+        }
+      }
+    }
+
+    if (memberUids.isEmpty) {
+      final query = await FirebaseFirestore.instance.collection('users').limit(20).get();
+      return query.docs
+          .where((d) => d.id != currentUid)
+          .map((doc) => {
+                'uid': doc.id,
+                'name': doc.data()['name'] ?? 'User',
+                'userId': doc.data()['userId'] ?? '',
+                'avatar': doc.data()['avatar'] ?? 'assets/icon_pack/avatar/avatar_2.png',
+                'role': doc.data()['role'] ?? 'Siswa',
+              })
+          .toList();
+    }
+
+    final query = await FirebaseFirestore.instance
+        .collection('users')
+        .where(FieldPath.documentId, whereIn: memberUids.take(30).toList())
+        .get();
+
+    return query.docs.map((doc) => {
+      'uid': doc.id,
+      'name': doc.data()['name'] ?? 'User',
+      'userId': doc.data()['userId'] ?? '',
+      'avatar': doc.data()['avatar'] ?? 'assets/icon_pack/avatar/avatar_2.png',
+      'role': doc.data()['role'] ?? 'Siswa',
+    }).toList();
+  }
+
   Future<String?> _loadProjectName(String projectId) async {
     if (projectId.isEmpty) return null;
     final doc = await FirebaseFirestore.instance.collection('projects').doc(projectId).get();
     return doc.data()?['name'] as String?;
   }
 
-  void _showCreateDiscussionDialog(BuildContext context) {
-    final channelController = TextEditingController();
-    final titleController = TextEditingController();
-    String? selectedProjectId;
-    List<Map<String, dynamic>> projectMembers = [];
-    List<String> selectedMemberUids = [];
-    String selectedAvatar = 'assets/icon_pack/chat/chat_1.png';
+  Future<void> _openDirectChatWithContact(BuildContext context, String currentUid, Map<String, dynamic> contact) async {
+    final String targetUid = contact['uid'];
+    final String targetName = contact['name'];
+    final String targetAvatar = contact['avatar'] ?? 'assets/icon_pack/chat/chat_1.png';
 
-    final currentUid = FirebaseAuth.instance.currentUser?.uid ?? '';
-    selectedMemberUids.add(currentUid);
+    final existingQuery = await FirebaseFirestore.instance
+        .collection('discussions')
+        .where('memberUids', arrayContains: currentUid)
+        .get();
+
+    String? existingDocId;
+    String? existingChannel;
+    for (var doc in existingQuery.docs) {
+      final data = doc.data();
+      final List members = data['memberUids'] as List? ?? [];
+      final bool isDirect = data['isDirect'] == true || (data['projectId'] ?? '').toString().isEmpty;
+      if (isDirect && members.contains(targetUid) && members.length == 2) {
+        existingDocId = doc.id;
+        existingChannel = data['channel'] ?? targetName;
+        break;
+      }
+    }
+
+    if (existingDocId != null) {
+      if (context.mounted) {
+        Navigator.pop(context);
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => ChatRoomPage(
+              discussionId: existingDocId!,
+              channelName: existingChannel ?? targetName,
+            ),
+          ),
+        );
+      }
+      return;
+    }
+
+    final newDoc = await FirebaseFirestore.instance.collection('discussions').add({
+      'projectId': '',
+      'isDirect': true,
+      'channel': targetName,
+      'title': targetName,
+      'avatar': targetAvatar,
+      'lastMessage': 'Mulai percakapan langsung...',
+      'time': 'Sekarang',
+      'memberUids': [currentUid, targetUid],
+      'creatorUid': currentUid,
+      'createdAt': FieldValue.serverTimestamp(),
+      'colorIndex': Random().nextInt(5),
+      'unreadCounts': {
+        currentUid: 0,
+        targetUid: 0,
+      },
+    });
+
+    if (context.mounted) {
+      Navigator.pop(context);
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => ChatRoomPage(
+            discussionId: newDoc.id,
+            channelName: targetName,
+          ),
+        ),
+      );
+    }
+  }
+
+  void _showCreateDiscussionDialog(BuildContext context) {
     final bool isDark = AppColors.isDarkMode;
+    final currentUid = FirebaseAuth.instance.currentUser?.uid ?? '';
 
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: isDark ? const Color(0xFF18181B) : Colors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
-      ),
-      builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setModalState) {
-            return Padding(
-              padding: EdgeInsets.only(
-                top: 24,
-                left: 24,
-                right: 24,
-                bottom: MediaQuery.of(context).viewInsets.bottom +
-                    (MediaQuery.of(context).viewInsets.bottom > 0 ? 16 : 16 + MediaQuery.of(context).padding.bottom),
-              ),
-              child: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Center(
-                      child: Container(
-                        width: 48,
-                        height: 5,
-                        decoration: BoxDecoration(
-                          color: isDark ? Colors.white24 : const Color(0xFFE2E8F0),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    Text(
-                      'Buat Diskusi Baru',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 21.1,
-                        fontWeight: FontWeight.bold,
-                        color: isDark ? Colors.white : Colors.black,
-                      ),
-                    ),
-                    const SizedBox(height: 18),
-
-                    // Project selection dropdown
-                    Text(
-                      'Terkait Kelas',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: isDark ? Colors.white70 : Colors.black54,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    FutureBuilder<List<Map<String, dynamic>>>(
-                      future: _loadProjects(currentUid),
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState == ConnectionState.waiting) {
-                          return Container(
-                            height: 48,
-                            alignment: Alignment.center,
-                            child: const ThreeDotsLoader(size: 6, bounceHeight: 3),
-                          );
-                        }
-
-                        final projects = snapshot.data ?? [];
-                        if (projects.isEmpty) {
-                          return Text(
-                            'Anda tidak tergabung dalam kelas apapun untuk membuat diskusi.',
-                            style: GoogleFonts.dmSans(fontSize: 14, color: Colors.redAccent),
-                          );
-                        }
-
-                        return DropdownButtonFormField<String>(
-                          initialValue: selectedProjectId,
-                          hint: Text(
-                            'Pilih Kelas...',
-                            style: GoogleFonts.dmSans(
-                              fontSize: 15.2,
-                              color: isDark ? Colors.white38 : Colors.black26,
-                            ),
-                          ),
-                          dropdownColor: isDark ? const Color(0xFF27272A) : Colors.white,
-                          decoration: InputDecoration(
-                            filled: true,
-                            fillColor: isDark ? const Color(0xFF27272A) : const Color(0xFFF8FAFC),
-                            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(16),
-                              borderSide: BorderSide(
-                                color: isDark ? const Color(0xFF3F3F46) : const Color(0xFFF1F5F9),
-                              ),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(16),
-                              borderSide: BorderSide(
-                                color: isDark ? Colors.white : Colors.black,
-                              ),
-                            ),
-                          ),
-                          items: projects.map((p) {
-                            return DropdownMenuItem<String>(
-                              value: p['id'],
-                              child: Text(
-                                p['name'],
-                                style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 15.2,
-                                  fontWeight: FontWeight.w600,
-                                  color: isDark ? Colors.white : Colors.black87,
-                                ),
-                              ),
-                            );
-                          }).toList(),
-                          onChanged: (val) {
-                            setModalState(() {
-                              selectedProjectId = val;
-                              projectMembers = [];
-                              selectedMemberUids = [currentUid];
-                            });
-                            if (val != null) {
-                              _loadProjectMembers(val).then((members) {
-                                setModalState(() {
-                                  projectMembers = members;
-                                  selectedMemberUids = members.map((m) => m['uid'] as String).toList();
-                                  if (!selectedMemberUids.contains(currentUid)) {
-                                    selectedMemberUids.add(currentUid);
-                                  }
-                                });
-                              });
-                            }
-                          },
-                        );
-                      },
-                    ),
-
-                    if (selectedProjectId != null) ...[
-                      const SizedBox(height: 16),
-                      FutureBuilder<String?>(
-                        future: _loadProjectName(selectedProjectId!),
-                        builder: (context, projectSnapshot) {
-                          final projectName = projectSnapshot.data ?? '';
-                          return Container(
-                            padding: const EdgeInsets.all(14),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFF0F766E),
-                              borderRadius: BorderRadius.circular(14),
-                            ),
-                            child: Row(
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.all(8),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white.withValues(alpha: 0.2),
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: const Icon(Icons.folder_open_rounded, color: Colors.white, size: 20),
-                                ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        'Kelas Terpilih',
-                                        style: GoogleFonts.dmSans(
-                                          fontSize: 11.7,
-                                          fontWeight: FontWeight.w500,
-                                          color: Colors.white.withValues(alpha: 0.7),
-                                        ),
-                                      ),
-                                      const SizedBox(height: 2),
-                                      Text(
-                                        projectName,
-                                        style: GoogleFonts.plusJakartaSans(
-                                          fontSize: 16.4,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.white,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          );
-                        },
-                      ),
-
-                      const SizedBox(height: 16),
-                      Text(
-                        'Penerima Diskusi',
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: isDark ? Colors.white70 : Colors.black54,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      if (projectMembers.isEmpty)
-                        const Center(child: ThreeDotsLoader())
-                      else
-                        Container(
-                          constraints: const BoxConstraints(maxHeight: 180),
-                          decoration: BoxDecoration(
-                            color: isDark ? const Color(0xFF27272A) : const Color(0xFFF8FAFC),
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(
-                              color: isDark ? const Color(0xFF3F3F46) : const Color(0xFFF1F5F9),
-                            ),
-                          ),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              ListTile(
-                                title: Text(
-                                  'Pilih Semua',
-                                  style: GoogleFonts.plusJakartaSans(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.bold,
-                                    color: isDark ? Colors.white : Colors.black,
-                                  ),
-                                ),
-                                contentPadding: const EdgeInsets.symmetric(horizontal: 14),
-                                trailing: AnimatedContainer(
-                                  duration: const Duration(milliseconds: 200),
-                                  width: 22,
-                                  height: 22,
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    color: (selectedMemberUids.length - 1 >=
-                                            projectMembers.where((m) => m['uid'] != currentUid).length)
-                                        ? (isDark ? Colors.white : Colors.black)
-                                        : Colors.transparent,
-                                    border: Border.all(
-                                      color: (selectedMemberUids.length - 1 >=
-                                              projectMembers.where((m) => m['uid'] != currentUid).length)
-                                          ? (isDark ? Colors.white : Colors.black)
-                                          : (isDark ? Colors.white38 : Colors.black26),
-                                      width: 2,
-                                    ),
-                                  ),
-                                  child: (selectedMemberUids.length - 1 >=
-                                          projectMembers.where((m) => m['uid'] != currentUid).length)
-                                      ? Icon(
-                                          Icons.check_rounded,
-                                          color: isDark ? Colors.black : Colors.white,
-                                          size: 14,
-                                        )
-                                      : null,
-                                ),
-                                onTap: () {
-                                  setModalState(() {
-                                    final bool isAll = selectedMemberUids.length - 1 >=
-                                        projectMembers.where((m) => m['uid'] != currentUid).length;
-                                    if (!isAll) {
-                                      selectedMemberUids = projectMembers.map((m) => m['uid'] as String).toList();
-                                      if (!selectedMemberUids.contains(currentUid)) {
-                                        selectedMemberUids.add(currentUid);
-                                      }
-                                    } else {
-                                      selectedMemberUids = [currentUid];
-                                    }
-                                  });
-                                },
-                              ),
-                              Divider(
-                                color: isDark ? const Color(0xFF3F3F46) : const Color(0xFFF1F5F9),
-                                height: 1,
-                              ),
-                              Expanded(
-                                child: ListView.separated(
-                                  shrinkWrap: true,
-                                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
-                                  itemCount: projectMembers.length,
-                                  separatorBuilder: (context, index) => Divider(
-                                    color: isDark ? const Color(0xFF3F3F46) : const Color(0xFFF1F5F9),
-                                    height: 1,
-                                  ),
-                                  itemBuilder: (context, idx) {
-                                    final m = projectMembers[idx];
-                                    final mUid = m['uid'] as String;
-                                    if (mUid == currentUid) return const SizedBox();
-                                    final isChecked = selectedMemberUids.contains(mUid);
-
-                                    return ListTile(
-                                      title: Text(
-                                        m['name'],
-                                        style: GoogleFonts.plusJakartaSans(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w600,
-                                          color: isDark ? Colors.white : Colors.black87,
-                                        ),
-                                      ),
-                                      subtitle: Text(
-                                        'ID: ${m['userId']}',
-                                        style: GoogleFonts.plusJakartaSans(
-                                          fontSize: 11.7,
-                                          color: isDark ? Colors.white38 : Colors.black38,
-                                        ),
-                                      ),
-                                      leading: Container(
-                                        width: 28,
-                                        height: 28,
-                                        decoration: BoxDecoration(
-                                          shape: BoxShape.circle,
-                                          border: Border.all(
-                                            color: isDark ? Colors.white54 : Colors.black,
-                                            width: 1,
-                                          ),
-                                        ),
-                                        child: ClipOval(
-                                          child: Image.asset(m['avatar']),
-                                        ),
-                                      ),
-                                      contentPadding: EdgeInsets.zero,
-                                      trailing: AnimatedContainer(
-                                        duration: const Duration(milliseconds: 200),
-                                        width: 22,
-                                        height: 22,
-                                        decoration: BoxDecoration(
-                                          shape: BoxShape.circle,
-                                          color: isChecked
-                                              ? (isDark ? Colors.white : Colors.black)
-                                              : Colors.transparent,
-                                          border: Border.all(
-                                            color: isChecked
-                                                ? (isDark ? Colors.white : Colors.black)
-                                                : (isDark ? Colors.white38 : Colors.black26),
-                                            width: 2,
-                                          ),
-                                        ),
-                                        child: isChecked
-                                            ? Icon(
-                                                Icons.check_rounded,
-                                                color: isDark ? Colors.black : Colors.white,
-                                                size: 14,
-                                              )
-                                            : null,
-                                      ),
-                                      onTap: () {
-                                        setModalState(() {
-                                          if (!isChecked) {
-                                            selectedMemberUids.add(mUid);
-                                          } else {
-                                            selectedMemberUids.remove(mUid);
-                                          }
-                                        });
-                                      },
-                                    );
-                                  },
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                    ],
-
-                    const SizedBox(height: 16),
-                    Text(
-                      'Nama Saluran (Channel)',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: isDark ? Colors.white70 : Colors.black54,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    TextField(
-                      controller: channelController,
-                      style: GoogleFonts.dmSans(
-                        fontSize: 15.2,
-                        color: isDark ? Colors.white : Colors.black87,
-                      ),
-                      decoration: InputDecoration(
-                        hintText: 'Contoh: #ui-design',
-                        hintStyle: GoogleFonts.dmSans(
-                          color: isDark ? Colors.white38 : Colors.black26,
-                          fontSize: 15.2,
-                        ),
-                        filled: true,
-                        fillColor: isDark ? const Color(0xFF27272A) : const Color(0xFFF8FAFC),
-                        contentPadding: const EdgeInsets.all(16),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(16),
-                          borderSide: BorderSide(
-                            color: isDark ? const Color(0xFF3F3F46) : const Color(0xFFF1F5F9),
-                          ),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(16),
-                          borderSide: BorderSide(
-                            color: isDark ? Colors.white : Colors.black,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Judul Diskusi',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: isDark ? Colors.white70 : Colors.black54,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    TextField(
-                      controller: titleController,
-                      style: GoogleFonts.dmSans(
-                        fontSize: 15.2,
-                        color: isDark ? Colors.white : Colors.black87,
-                      ),
-                      decoration: InputDecoration(
-                        hintText: 'Contoh: Saluran Masukan Desain UI',
-                        hintStyle: GoogleFonts.dmSans(
-                          color: isDark ? Colors.white38 : Colors.black26,
-                          fontSize: 15.2,
-                        ),
-                        filled: true,
-                        fillColor: isDark ? const Color(0xFF27272A) : const Color(0xFFF8FAFC),
-                        contentPadding: const EdgeInsets.all(16),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(16),
-                          borderSide: BorderSide(
-                            color: isDark ? const Color(0xFF3F3F46) : const Color(0xFFF1F5F9),
-                          ),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(16),
-                          borderSide: BorderSide(
-                            color: isDark ? Colors.white : Colors.black,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Pilih Avatar Diskusi',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: isDark ? Colors.white70 : Colors.black54,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    SizedBox(
-                      height: 52,
-                      child: ListView.builder(
-                        scrollDirection: Axis.horizontal,
-                        itemCount: 10,
-                        itemBuilder: (context, i) {
-                          final avatarPath = 'assets/icon_pack/chat/chat_${i + 1}.png';
-                          final isSelected = selectedAvatar == avatarPath;
-                          return GestureDetector(
-                            onTap: () {
-                              setModalState(() {
-                                selectedAvatar = avatarPath;
-                              });
-                            },
-                            child: Center(
-                              child: Container(
-                                margin: const EdgeInsets.only(right: 10),
-                                width: 44,
-                                height: 44,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  border: Border.all(
-                                    color: isSelected
-                                        ? (isDark ? Colors.white : Colors.black)
-                                        : (isDark ? const Color(0xFF3F3F46) : const Color(0xFFE2E8F0)),
-                                    width: isSelected ? 2.0 : 1.0,
-                                  ),
-                                ),
-                                child: ClipOval(
-                                  child: Image.asset(avatarPath, fit: BoxFit.cover),
-                                ),
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    SizedBox(
-                      width: double.infinity,
-                      height: 52,
-                      child: ElevatedButton(
-                        onPressed: () async {
-                          final chan = channelController.text.trim();
-                          final ttl = titleController.text.trim();
-                          if (chan.isEmpty || ttl.isEmpty || selectedProjectId == null) return;
-
-                          final List<String> finalMembers = selectedMemberUids;
-                          if (!finalMembers.contains(currentUid)) {
-                            finalMembers.add(currentUid);
-                          }
-
-                          await FirebaseFirestore.instance.collection('discussions').add({
-                            'projectId': selectedProjectId,
-                            'channel': chan.startsWith('#') ? chan : '#$chan',
-                            'title': ttl,
-                            'avatar': selectedAvatar,
-                            'lastMessage': 'Mulai diskusi baru...',
-                            'time': 'Sekarang',
-                            'memberUids': finalMembers,
-                            'creatorUid': currentUid,
-                            'createdAt': FieldValue.serverTimestamp(),
-                            'colorIndex': Random().nextInt(5),
-                            'unreadCounts': {
-                              for (var mUid in finalMembers) mUid: 0
-                            },
-                          });
-
-                          if (context.mounted) {
-                            Navigator.pop(context);
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Diskusi baru berhasil dibuat!')),
-                            );
-                          }
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: isDark ? Colors.white : Colors.black,
-                          foregroundColor: isDark ? Colors.black : Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          elevation: 0,
-                        ),
-                        child: Text(
-                          'Buat Diskusi',
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 16.4,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          },
+      backgroundColor: Colors.transparent,
+      builder: (bottomSheetContext) {
+        return _WhatsAppStyleNewChatModal(
+          currentUid: currentUid,
+          isDark: isDark,
+          onLoadProjects: () => _loadProjects(currentUid),
+          onLoadProjectMembers: (projectId) => _loadProjectMembers(projectId),
+          onLoadAllContacts: () => _loadAllContacts(currentUid),
+          onDirectChatTap: (contact) => _openDirectChatWithContact(bottomSheetContext, currentUid, contact),
         );
       },
     );
@@ -1497,205 +1090,207 @@ class _DiscussionTabState extends State<DiscussionTab> {
     final bool isDesktop = MediaQuery.of(context).size.width >= 700 && MediaQuery.of(context).size.shortestSide >= 700;
     final bool isDark = AppColors.isDarkMode;
 
-    // Bottom Navigation floating position height reference
     final double bottomNavHeight = 64.0;
     final double bottomNavOffset = safeBottomPadding > 0 ? safeBottomPadding + 14 : 26;
     final double fabBottomPosition = bottomNavOffset + bottomNavHeight + 16;
     final double listBottomPadding = fabBottomPosition + 60;
 
-    final Widget listContent = Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Top In-List Header (Before scrolling)
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16.0, 10.0, 16.0, 10.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Text(
-                'Diskusi',
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 23.4,
-                  fontWeight: FontWeight.w600,
-                  color: isDark ? Colors.white : Colors.black,
-                ),
-              ),
-              BouncyButton(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => const ManageFriendsPage()),
-                  );
-                },
-                child: Container(
-                  width: 42,
-                  height: 42,
-                  decoration: BoxDecoration(
-                    color: isDark ? const Color(0xFF18181B) : Colors.white,
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
-                      width: 1.2,
+    final Widget listContent = StreamBuilder<QuerySnapshot>(
+      stream: FirebaseFirestore.instance
+          .collection('discussions')
+          .orderBy('createdAt', descending: true)
+          .snapshots(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting && !snapshot.hasData) {
+          return const SizedBox.shrink();
+        }
+
+        final docs = snapshot.data?.docs ?? [];
+        final filteredDocs = docs.where((doc) {
+          final data = doc.data() as Map<String, dynamic>;
+          final memberUids = data['memberUids'] as List?;
+          if (memberUids != null && !memberUids.contains(currentUid)) {
+            return false;
+          }
+          final title = (data['title'] ?? '').toString().toLowerCase();
+          final channel = (data['channel'] ?? '').toString().toLowerCase();
+          final q = _searchQuery.toLowerCase();
+          return title.contains(q) || channel.contains(q);
+        }).toList();
+
+        if (isDesktop) {
+          final bool activeExists = filteredDocs.any((d) => d.id == _activeDiscussionId);
+          if (!activeExists && filteredDocs.isNotEmpty) {
+            final firstDoc = filteredDocs[0];
+            final firstData = firstDoc.data() as Map<String, dynamic>;
+            _activeDiscussionId = firstDoc.id;
+            _activeChannelName = firstData['channel'] ?? '#general';
+            _activeProjectId = firstData['projectId'] as String?;
+          }
+        }
+
+        return CustomScrollView(
+          controller: _discussionScrollController,
+          physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+          slivers: [
+            // Top Scrollable Header & Search Bar (Scrolls away seamlessly!)
+            SliverToBoxAdapter(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Top In-List Header
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16.0, 10.0, 16.0, 10.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Text(
+                          'Diskusi',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 23.4,
+                            fontWeight: FontWeight.w600,
+                            color: isDark ? Colors.white : Colors.black,
+                          ),
+                        ),
+                        BouncyButton(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (_) => const ManageFriendsPage()),
+                            );
+                          },
+                          child: Container(
+                            width: 42,
+                            height: 42,
+                            decoration: BoxDecoration(
+                              color: isDark ? const Color(0xFF18181B) : Colors.white,
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+                                width: 1.2,
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.04),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: Icon(
+                              Icons.people_outline_rounded,
+                              color: isDark ? Colors.white : Colors.black87,
+                              size: 20,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.04),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
+                  ),
+
+                  // Search Bar (Rounded 28 & Styled match Home Page - scrolls away!)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 6.0),
+                    child: Container(
+                      height: 48,
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      decoration: BoxDecoration(
+                        color: isDark ? const Color(0xFF18181B) : Colors.white,
+                        borderRadius: BorderRadius.circular(28),
+                        border: Border.all(
+                          color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                          width: 1.2,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.05),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                  child: Icon(
-                    Icons.people_outline_rounded,
-                    color: isDark ? Colors.white : Colors.black87,
-                    size: 20,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-
-        // Search Bar (Rounded 28 & Styled match Home Page)
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 6.0),
-          child: Container(
-            height: 48,
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            decoration: BoxDecoration(
-              color: isDark ? const Color(0xFF18181B) : Colors.white,
-              borderRadius: BorderRadius.circular(28),
-              border: Border.all(
-                color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
-                width: 1.2,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.05),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Row(
-              children: [
-                Icon(
-                  Icons.search_rounded,
-                  color: isDark ? Colors.white60 : Colors.black45,
-                  size: 20,
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: TextField(
-                    controller: _searchController,
-                    onChanged: (val) {
-                      setState(() {
-                        _searchQuery = val;
-                      });
-                    },
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 14,
-                      color: isDark ? Colors.white : Colors.black87,
-                    ),
-                    decoration: InputDecoration(
-                      hintText: 'Cari thread diskusi...',
-                      hintStyle: GoogleFonts.dmSans(
-                        color: isDark ? Colors.white38 : Colors.black38,
-                        fontSize: 14,
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.search_rounded,
+                            color: isDark ? Colors.white60 : Colors.black45,
+                            size: 20,
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: TextField(
+                              controller: _searchController,
+                              onChanged: (val) {
+                                setState(() {
+                                  _searchQuery = val;
+                                });
+                              },
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 14,
+                                color: isDark ? Colors.white : Colors.black87,
+                              ),
+                              decoration: InputDecoration(
+                                hintText: 'Cari thread diskusi...',
+                                hintStyle: GoogleFonts.dmSans(
+                                  color: isDark ? Colors.white38 : Colors.black38,
+                                  fontSize: 14,
+                                ),
+                                border: InputBorder.none,
+                                isDense: true,
+                                contentPadding: const EdgeInsets.symmetric(vertical: 10),
+                              ),
+                            ),
+                          ),
+                          if (_searchQuery.isNotEmpty)
+                            GestureDetector(
+                              onTap: () {
+                                _searchController.clear();
+                                setState(() {
+                                  _searchQuery = '';
+                                });
+                              },
+                              child: Icon(
+                                Icons.close_rounded,
+                                color: isDark ? Colors.white60 : Colors.black45,
+                                size: 18,
+                              ),
+                            ),
+                        ],
                       ),
-                      border: InputBorder.none,
-                      isDense: true,
-                      contentPadding: const EdgeInsets.symmetric(vertical: 10),
                     ),
                   ),
-                ),
-                if (_searchQuery.isNotEmpty)
-                  GestureDetector(
-                    onTap: () {
-                      _searchController.clear();
-                      setState(() {
-                        _searchQuery = '';
-                      });
-                    },
-                    child: Icon(
-                      Icons.close_rounded,
-                      color: isDark ? Colors.white60 : Colors.black45,
-                      size: 18,
-                    ),
-                  ),
-              ],
+                  const SizedBox(height: 8),
+                ],
+              ),
             ),
-          ),
-        ),
-        const SizedBox(height: 10),
 
-        // List of Discussions from Firestore
-        Expanded(
-          child: StreamBuilder<QuerySnapshot>(
-            stream: FirebaseFirestore.instance
-                .collection('discussions')
-                .orderBy('createdAt', descending: true)
-                .snapshots(),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting && !snapshot.hasData) {
-                return const SizedBox.shrink();
-              }
-
-              final docs = snapshot.data?.docs ?? [];
-              final filteredDocs = docs.where((doc) {
-                final data = doc.data() as Map<String, dynamic>;
-                final memberUids = data['memberUids'] as List?;
-                if (memberUids != null && !memberUids.contains(currentUid)) {
-                  return false;
-                }
-                final title = (data['title'] ?? '').toString().toLowerCase();
-                final channel = (data['channel'] ?? '').toString().toLowerCase();
-                final q = _searchQuery.toLowerCase();
-                return title.contains(q) || channel.contains(q);
-              }).toList();
-
-              if (filteredDocs.isEmpty) {
-                return Center(
-                  child: Text(
-                    _searchQuery.isEmpty
-                        ? 'Belum ada diskusi. Buat sekarang!'
-                        : 'Tidak ada diskusi yang cocok.',
-                    style: GoogleFonts.dmSans(
-                      fontSize: 15.2,
-                      color: isDark ? Colors.white38 : Colors.black45,
+            if (filteredDocs.isEmpty)
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 40, bottom: 40),
+                  child: Center(
+                    child: Text(
+                      _searchQuery.isEmpty
+                          ? 'Belum ada diskusi. Buat sekarang!'
+                          : 'Tidak ada diskusi yang cocok.',
+                      style: GoogleFonts.dmSans(
+                        fontSize: 15.2,
+                        color: isDark ? Colors.white38 : Colors.black45,
+                      ),
                     ),
                   ),
-                );
-              }
-
-              // Auto-select first/latest chat room on Desktop if none is active
-              if (isDesktop) {
-                final bool activeExists = filteredDocs.any((d) => d.id == _activeDiscussionId);
-                if (!activeExists && filteredDocs.isNotEmpty) {
-                  final firstDoc = filteredDocs[0];
-                  final firstData = firstDoc.data() as Map<String, dynamic>;
-                  _activeDiscussionId = firstDoc.id;
-                  _activeChannelName = firstData['channel'] ?? '#general';
-                  _activeProjectId = firstData['projectId'] as String?;
-                }
-              }
-
-              return ListView.separated(
-                controller: _discussionScrollController,
-                physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
-                padding: EdgeInsets.only(
-                  left: 16.0,
-                  right: 16.0,
-                  top: 4.0,
-                  bottom: isDesktop ? safeBottomPadding + 20 : listBottomPadding,
                 ),
+              )
+            else
+              SliverList.separated(
                 itemCount: filteredDocs.length,
                 separatorBuilder: (context, index) => Divider(
                   height: 1,
                   thickness: 1,
                   color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
-                  indent: 62,
+                  indent: 76,
+                  endIndent: 16,
                 ),
                 itemBuilder: (context, index) {
                   final docId = filteredDocs[index].id;
@@ -1716,175 +1311,183 @@ class _DiscussionTabState extends State<DiscussionTab> {
                       final projectName = projectSnapshot.data ?? '';
                       final bool isGroupChat = channelName.startsWith('#');
 
-                      return InkWell(
-                        borderRadius: BorderRadius.circular(12),
-                        onTap: () {
-                          if (isDesktop) {
-                            setState(() {
-                              _activeDiscussionId = docId;
-                              _activeChannelName = channelName;
-                              _activeProjectId = projectId;
-                            });
-                          } else {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => ChatRoomPage(
-                                  discussionId: docId,
-                                  channelName: channelName,
-                                ),
-                              ),
-                            );
-                          }
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
-                          decoration: BoxDecoration(
-                            color: (isDesktop && _activeDiscussionId == docId)
-                                ? (isDark ? const Color(0xFF1E293B) : const Color(0xFFEFF6FF))
-                                : Colors.transparent,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Row(
-                            children: [
-                              Container(
-                                width: 48,
-                                height: 48,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  border: Border.all(
-                                    color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
-                                    width: 1.0,
+                      return Material(
+                        color: (isDesktop && _activeDiscussionId == docId)
+                            ? (isDark ? const Color(0xFF1E293B) : const Color(0xFFEFF6FF))
+                            : Colors.transparent,
+                        child: InkWell(
+                          onTap: () {
+                            if (isDesktop) {
+                              setState(() {
+                                _activeDiscussionId = docId;
+                                _activeChannelName = channelName;
+                                _activeProjectId = projectId;
+                              });
+                            } else {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => ChatRoomPage(
+                                    discussionId: docId,
+                                    channelName: channelName,
                                   ),
                                 ),
-                                child: ClipOval(
-                                  child: Image.asset(
-                                    avatar,
-                                    fit: BoxFit.cover,
-                                    errorBuilder: (ctx, err, st) => Icon(
-                                      Icons.forum_outlined,
-                                      color: isDark ? Colors.white70 : Colors.black54,
+                              );
+                            }
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                            child: Row(
+                              children: [
+                                Container(
+                                  width: 50,
+                                  height: 50,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
+                                    border: Border.all(
+                                      color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                                      width: 1.0,
                                     ),
                                   ),
-                                ),
-                              ),
-                              const SizedBox(width: 14),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    if (isGroupChat) ...[
-                                      Row(
-                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Expanded(
-                                            child: Text(
-                                              projectName.isNotEmpty
-                                                  ? '$channelName • Kelas $projectName'
-                                                  : channelName,
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
-                                              style: GoogleFonts.plusJakartaSans(
-                                                fontSize: 12.9,
-                                                fontWeight: FontWeight.w600,
-                                                color: isDark ? const Color(0xFF2DD4BF) : const Color(0xFF0F766E),
-                                              ),
-                                            ),
-                                          ),
-                                          Text(
-                                            time,
-                                            style: GoogleFonts.dmSans(
-                                              fontSize: 12.9,
-                                              color: isDark ? Colors.white38 : Colors.black38,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      const SizedBox(height: 4),
-                                      Text(
-                                        title,
-                                        style: GoogleFonts.plusJakartaSans(
-                                          fontSize: 16.0,
-                                          fontWeight: FontWeight.w600,
-                                          color: isDark ? Colors.white : Colors.black87,
+                                  child: ClipOval(
+                                    child: Transform.scale(
+                                      scale: 1.35,
+                                      child: Image.asset(
+                                        avatar,
+                                        fit: BoxFit.cover,
+                                        errorBuilder: (ctx, err, st) => Icon(
+                                          Icons.forum_outlined,
+                                          color: isDark ? Colors.white70 : Colors.black54,
                                         ),
                                       ),
-                                    ] else ...[
-                                      Row(
-                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Expanded(
-                                            child: Text(
-                                              title,
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
-                                              style: GoogleFonts.plusJakartaSans(
-                                                fontSize: 16.0,
-                                                fontWeight: FontWeight.w600,
-                                                color: isDark ? Colors.white : Colors.black87,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      if (isGroupChat) ...[
+                                        Row(
+                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Expanded(
+                                              child: Text(
+                                                projectName.isNotEmpty
+                                                    ? '$channelName • Kelas $projectName'
+                                                    : channelName,
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                                style: GoogleFonts.plusJakartaSans(
+                                                  fontSize: 12.9,
+                                                  fontWeight: FontWeight.w600,
+                                                  color: isDark ? const Color(0xFF2DD4BF) : const Color(0xFF0F766E),
+                                                ),
                                               ),
                                             ),
-                                          ),
-                                          const SizedBox(width: 8),
-                                          Text(
-                                            time,
-                                            style: GoogleFonts.dmSans(
-                                              fontSize: 12.9,
-                                              color: isDark ? Colors.white38 : Colors.black38,
+                                            Text(
+                                              time,
+                                              style: GoogleFonts.dmSans(
+                                                fontSize: 12.9,
+                                                color: isDark ? Colors.white38 : Colors.black38,
+                                              ),
                                             ),
+                                          ],
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          title,
+                                          style: GoogleFonts.plusJakartaSans(
+                                            fontSize: 16.0,
+                                            fontWeight: FontWeight.w600,
+                                            color: isDark ? Colors.white : Colors.black87,
                                           ),
-                                        ],
+                                        ),
+                                      ] else ...[
+                                        Row(
+                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Expanded(
+                                              child: Text(
+                                                title,
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                                style: GoogleFonts.plusJakartaSans(
+                                                  fontSize: 16.0,
+                                                  fontWeight: FontWeight.w600,
+                                                  color: isDark ? Colors.white : Colors.black87,
+                                                ),
+                                              ),
+                                            ),
+                                            const SizedBox(width: 8),
+                                            Text(
+                                              time,
+                                              style: GoogleFonts.dmSans(
+                                                fontSize: 12.9,
+                                                color: isDark ? Colors.white38 : Colors.black38,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        lastMsg,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: GoogleFonts.dmSans(
+                                          fontSize: 14,
+                                          color: isDark ? Colors.white60 : Colors.black54,
+                                        ),
                                       ),
                                     ],
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      lastMsg,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: GoogleFonts.dmSans(
-                                        fontSize: 14,
-                                        color: isDark ? Colors.white60 : Colors.black54,
-                                      ),
-                                    ),
-                                  ],
+                                  ),
                                 ),
-                              ),
-                              if (unreadCount > 0) ...[
-                                const SizedBox(width: 10),
-                                Container(
-                                  padding: const EdgeInsets.all(6),
-                                  decoration: BoxDecoration(
-                                    color: isDark ? Colors.white : Colors.black,
-                                    shape: BoxShape.circle,
-                                  ),
-                                  constraints: const BoxConstraints(
-                                    minWidth: 20,
-                                    minHeight: 20,
-                                  ),
-                                  child: Center(
-                                    child: Text(
-                                      '$unreadCount',
-                                      style: GoogleFonts.plusJakartaSans(
-                                        color: isDark ? Colors.black : Colors.white,
-                                        fontSize: 11.7,
-                                        fontWeight: FontWeight.bold,
+                                if (unreadCount > 0) ...[
+                                  const SizedBox(width: 10),
+                                  Container(
+                                    padding: const EdgeInsets.all(6),
+                                    decoration: BoxDecoration(
+                                      color: isDark ? Colors.white : Colors.black,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    constraints: const BoxConstraints(
+                                      minWidth: 20,
+                                      minHeight: 20,
+                                    ),
+                                    child: Center(
+                                      child: Text(
+                                        '$unreadCount',
+                                        style: GoogleFonts.plusJakartaSans(
+                                          color: isDark ? Colors.black : Colors.white,
+                                          fontSize: 11.7,
+                                          fontWeight: FontWeight.bold,
+                                        ),
                                       ),
                                     ),
                                   ),
-                                ),
+                                ],
                               ],
-                            ],
+                            ),
                           ),
                         ),
                       );
                     },
                   );
                 },
-              );
-            },
-          ),
-        ),
-      ],
+              ),
+
+            // Bottom space for floating bottom navigation & FAB
+            SliverToBoxAdapter(
+              child: SizedBox(
+                height: isDesktop ? safeBottomPadding + 20 : listBottomPadding,
+              ),
+            ),
+          ],
+        );
+      },
     );
 
     if (isDesktop) {
@@ -2025,7 +1628,7 @@ class _DiscussionTabState extends State<DiscussionTab> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          const SizedBox(width: 42), // Balance spacer to center title
+                          const SizedBox(width: 42),
                           Text(
                             'Diskusi',
                             style: GoogleFonts.plusJakartaSans(
@@ -2104,6 +1707,867 @@ class _DiscussionTabState extends State<DiscussionTab> {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+// =========================================================================
+// WHATSAPP STYLE NEW CHAT / DISCUSSION BOTTOM SHEET MODAL
+// =========================================================================
+class _WhatsAppStyleNewChatModal extends StatefulWidget {
+  final String currentUid;
+  final bool isDark;
+  final Future<List<Map<String, dynamic>>> Function() onLoadProjects;
+  final Future<List<Map<String, dynamic>>> Function(String projectId) onLoadProjectMembers;
+  final Future<List<Map<String, dynamic>>> Function() onLoadAllContacts;
+  final Function(Map<String, dynamic> contact) onDirectChatTap;
+
+  const _WhatsAppStyleNewChatModal({
+    required this.currentUid,
+    required this.isDark,
+    required this.onLoadProjects,
+    required this.onLoadProjectMembers,
+    required this.onLoadAllContacts,
+    required this.onDirectChatTap,
+  });
+
+  @override
+  State<_WhatsAppStyleNewChatModal> createState() => _WhatsAppStyleNewChatModalState();
+}
+
+class _WhatsAppStyleNewChatModalState extends State<_WhatsAppStyleNewChatModal> {
+  bool _isCreatingClassDiscussion = false;
+  String _contactSearch = '';
+  final TextEditingController _modalSearchController = TextEditingController();
+
+  final TextEditingController _channelController = TextEditingController();
+  final TextEditingController _titleController = TextEditingController();
+  String? _selectedProjectId;
+  List<Map<String, dynamic>> _projectMembers = [];
+  List<String> _selectedMemberUids = [];
+  String _selectedAvatar = 'assets/icon_pack/chat/chat_1.png';
+  bool _isLoadingMembers = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedMemberUids = [widget.currentUid];
+  }
+
+  @override
+  void dispose() {
+    _modalSearchController.dispose();
+    _channelController.dispose();
+    _titleController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = widget.isDark;
+    final screenHeight = MediaQuery.of(context).size.height;
+
+    return Container(
+      constraints: BoxConstraints(maxHeight: screenHeight * 0.88),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF141416) : Colors.white,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: isDark ? 0.5 : 0.15),
+            blurRadius: 20,
+            offset: const Offset(0, -4),
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: 10),
+          Center(
+            child: Container(
+              width: 44,
+              height: 4.5,
+              decoration: BoxDecoration(
+                color: isDark ? Colors.white24 : const Color(0xFFE2E8F0),
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    if (_isCreatingClassDiscussion)
+                      IconButton(
+                        onPressed: () {
+                          setState(() {
+                            _isCreatingClassDiscussion = false;
+                          });
+                        },
+                        icon: Icon(
+                          Icons.arrow_back_rounded,
+                          color: isDark ? Colors.white : Colors.black,
+                        ),
+                      ),
+                    Text(
+                      _isCreatingClassDiscussion ? 'Diskusi Kelas Baru' : 'Diskusi Baru',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 18.5,
+                        fontWeight: FontWeight.bold,
+                        color: isDark ? Colors.white : Colors.black,
+                      ),
+                    ),
+                  ],
+                ),
+                BouncyButton(
+                  onTap: () => Navigator.pop(context),
+                  child: Container(
+                    width: 36,
+                    height: 36,
+                    decoration: BoxDecoration(
+                      color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.close_rounded,
+                      color: isDark ? Colors.white70 : Colors.black87,
+                      size: 19,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 10),
+
+          if (!_isCreatingClassDiscussion) ...[
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Container(
+                height: 44,
+                padding: const EdgeInsets.symmetric(horizontal: 14),
+                decoration: BoxDecoration(
+                  color: isDark ? const Color(0xFF27272A) : const Color(0xFFF8FAFC),
+                  borderRadius: BorderRadius.circular(24),
+                  border: Border.all(
+                    color: isDark ? const Color(0xFF3F3F46) : const Color(0xFFE2E8F0),
+                    width: 1.0,
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.search_rounded,
+                      color: isDark ? Colors.white60 : Colors.black45,
+                      size: 18,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: TextField(
+                        controller: _modalSearchController,
+                        onChanged: (val) {
+                          setState(() {
+                            _contactSearch = val.trim().toLowerCase();
+                          });
+                        },
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 13.5,
+                          color: isDark ? Colors.white : Colors.black87,
+                        ),
+                        decoration: InputDecoration(
+                          hintText: 'Cari kontak atau kelas...',
+                          hintStyle: GoogleFonts.dmSans(
+                            color: isDark ? Colors.white38 : Colors.black38,
+                            fontSize: 13.5,
+                          ),
+                          border: InputBorder.none,
+                          isDense: true,
+                          contentPadding: const EdgeInsets.symmetric(vertical: 8),
+                        ),
+                      ),
+                    ),
+                    if (_contactSearch.isNotEmpty)
+                      GestureDetector(
+                        onTap: () {
+                          _modalSearchController.clear();
+                          setState(() {
+                            _contactSearch = '';
+                          });
+                        },
+                        child: Icon(
+                          Icons.close_rounded,
+                          color: isDark ? Colors.white60 : Colors.black45,
+                          size: 16,
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+
+            Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: () {
+                  setState(() {
+                    _isCreatingClassDiscussion = true;
+                  });
+                },
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 46,
+                        height: 46,
+                        decoration: const BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Color(0xFF0F766E),
+                        ),
+                        child: const Icon(
+                          Icons.group_add_rounded,
+                          color: Colors.white,
+                          size: 22,
+                        ),
+                      ),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Buat Diskusi Kelas',
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 15.0,
+                                fontWeight: FontWeight.bold,
+                                color: isDark ? Colors.white : const Color(0xFF0F172A),
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              'Mulai diskusi grup untuk seluruh anggota kelas',
+                              style: GoogleFonts.dmSans(
+                                fontSize: 12.5,
+                                color: isDark ? Colors.white60 : const Color(0xFF64748B),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Icon(
+                        Icons.chevron_right_rounded,
+                        color: isDark ? Colors.white38 : Colors.black38,
+                        size: 22,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            Divider(
+              color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+              height: 16,
+              thickness: 1,
+              indent: 16,
+              endIndent: 16,
+            ),
+
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+              child: Text(
+                'Kontak & Teman',
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 13.0,
+                  fontWeight: FontWeight.bold,
+                  color: isDark ? Colors.white60 : const Color(0xFF64748B),
+                ),
+              ),
+            ),
+
+            Expanded(
+              child: FutureBuilder<List<Map<String, dynamic>>>(
+                future: widget.onLoadAllContacts(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: ThreeDotsLoader());
+                  }
+
+                  final allContacts = snapshot.data ?? [];
+                  final filtered = allContacts.where((c) {
+                    final name = (c['name'] ?? '').toString().toLowerCase();
+                    final id = (c['userId'] ?? '').toString().toLowerCase();
+                    return name.contains(_contactSearch) || id.contains(_contactSearch);
+                  }).toList();
+
+                  if (filtered.isEmpty) {
+                    return Center(
+                      child: Text(
+                        _contactSearch.isEmpty ? 'Belum ada kontak ditemukan.' : 'Tidak ada kontak yang cocok.',
+                        style: GoogleFonts.dmSans(
+                          fontSize: 14,
+                          color: isDark ? Colors.white38 : Colors.black45,
+                        ),
+                      ),
+                    );
+                  }
+
+                  return ListView.separated(
+                    padding: const EdgeInsets.only(bottom: 24),
+                    itemCount: filtered.length,
+                    separatorBuilder: (_, __) => Divider(
+                      height: 1,
+                      color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+                      indent: 72,
+                      endIndent: 16,
+                    ),
+                    itemBuilder: (ctx, idx) {
+                      final contact = filtered[idx];
+                      final avatarPath = contact['avatar'] ?? 'assets/icon_pack/avatar/avatar_2.png';
+                      final name = contact['name'] ?? 'User';
+                      final role = contact['role'] ?? 'Siswa';
+                      final userId = contact['userId'] ?? '';
+
+                      return Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          onTap: () => widget.onDirectChatTap(contact),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                            child: Row(
+                              children: [
+                                Container(
+                                  width: 44,
+                                  height: 44,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
+                                    border: Border.all(
+                                      color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                                    ),
+                                  ),
+                                  child: ClipOval(
+                                    child: Transform.scale(
+                                      scale: 1.35,
+                                      child: Image.asset(avatarPath, fit: BoxFit.cover),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        name,
+                                        style: GoogleFonts.plusJakartaSans(
+                                          fontSize: 14.5,
+                                          fontWeight: FontWeight.bold,
+                                          color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                        ),
+                                      ),
+                                      const SizedBox(height: 2),
+                                      Text(
+                                        '$role ${userId.isNotEmpty ? '· ID: $userId' : ''}',
+                                        style: GoogleFonts.dmSans(
+                                          fontSize: 12.0,
+                                          color: isDark ? Colors.white60 : const Color(0xFF64748B),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                  decoration: BoxDecoration(
+                                    color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Text(
+                                    'Chat',
+                                    style: GoogleFonts.plusJakartaSans(
+                                      fontSize: 12.0,
+                                      fontWeight: FontWeight.bold,
+                                      color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
+            ),
+          ] else ...[
+            Expanded(
+              child: SingleChildScrollView(
+                padding: EdgeInsets.only(
+                  left: 20,
+                  right: 20,
+                  bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Pilih Kelas',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 13.5,
+                        fontWeight: FontWeight.w600,
+                        color: isDark ? Colors.white70 : Colors.black54,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    FutureBuilder<List<Map<String, dynamic>>>(
+                      future: widget.onLoadProjects(),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState == ConnectionState.waiting) {
+                          return const Center(child: ThreeDotsLoader(size: 6, bounceHeight: 3));
+                        }
+
+                        final projects = snapshot.data ?? [];
+                        if (projects.isEmpty) {
+                          return Text(
+                            'Anda tidak memiliki kelas untuk membuat diskusi.',
+                            style: GoogleFonts.dmSans(fontSize: 14, color: Colors.redAccent),
+                          );
+                        }
+
+                        return DropdownButtonFormField<String>(
+                          initialValue: _selectedProjectId,
+                          hint: Text(
+                            'Pilih Kelas...',
+                            style: GoogleFonts.dmSans(
+                              fontSize: 14.5,
+                              color: isDark ? Colors.white38 : Colors.black26,
+                            ),
+                          ),
+                          dropdownColor: isDark ? const Color(0xFF27272A) : Colors.white,
+                          decoration: InputDecoration(
+                            filled: true,
+                            fillColor: isDark ? const Color(0xFF27272A) : const Color(0xFFF8FAFC),
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(14),
+                              borderSide: BorderSide(
+                                color: isDark ? const Color(0xFF3F3F46) : const Color(0xFFE2E8F0),
+                              ),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(14),
+                              borderSide: BorderSide(
+                                color: isDark ? Colors.white : Colors.black,
+                              ),
+                            ),
+                          ),
+                          items: projects.map((p) {
+                            return DropdownMenuItem<String>(
+                              value: p['id'],
+                              child: Text(
+                                p['name'],
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 14.5,
+                                  fontWeight: FontWeight.w600,
+                                  color: isDark ? Colors.white : Colors.black87,
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                          onChanged: (val) {
+                            setState(() {
+                              _selectedProjectId = val;
+                              _projectMembers = [];
+                              _selectedMemberUids = [widget.currentUid];
+                              _isLoadingMembers = true;
+                            });
+                            if (val != null) {
+                              widget.onLoadProjectMembers(val).then((members) {
+                                setState(() {
+                                  _projectMembers = members;
+                                  _selectedMemberUids = members.map((m) => m['uid'] as String).toList();
+                                  if (!_selectedMemberUids.contains(widget.currentUid)) {
+                                    _selectedMemberUids.add(widget.currentUid);
+                                  }
+                                  _isLoadingMembers = false;
+                                });
+                              });
+                            }
+                          },
+                        );
+                      },
+                    ),
+
+                    if (_selectedProjectId != null) ...[
+                      const SizedBox(height: 14),
+                      Text(
+                        'Penerima Diskusi (${_selectedMemberUids.length} dipilih)',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 13.5,
+                          fontWeight: FontWeight.w600,
+                          color: isDark ? Colors.white70 : Colors.black54,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      if (_isLoadingMembers)
+                        const Center(child: ThreeDotsLoader())
+                      else
+                        Container(
+                          constraints: const BoxConstraints(maxHeight: 160),
+                          decoration: BoxDecoration(
+                            color: isDark ? const Color(0xFF27272A) : const Color(0xFFF8FAFC),
+                            borderRadius: BorderRadius.circular(14),
+                            border: Border.all(
+                              color: isDark ? const Color(0xFF3F3F46) : const Color(0xFFE2E8F0),
+                            ),
+                          ),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              ListTile(
+                                title: Text(
+                                  'Pilih Semua Anggota',
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontSize: 13.5,
+                                    fontWeight: FontWeight.bold,
+                                    color: isDark ? Colors.white : Colors.black,
+                                  ),
+                                ),
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 14),
+                                trailing: AnimatedContainer(
+                                  duration: const Duration(milliseconds: 200),
+                                  width: 22,
+                                  height: 22,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: (_selectedMemberUids.length - 1 >=
+                                            _projectMembers.where((m) => m['uid'] != widget.currentUid).length)
+                                        ? (isDark ? Colors.white : Colors.black)
+                                        : Colors.transparent,
+                                    border: Border.all(
+                                      color: (_selectedMemberUids.length - 1 >=
+                                              _projectMembers.where((m) => m['uid'] != widget.currentUid).length)
+                                          ? (isDark ? Colors.white : Colors.black)
+                                          : (isDark ? Colors.white38 : Colors.black26),
+                                      width: 2,
+                                    ),
+                                  ),
+                                  child: (_selectedMemberUids.length - 1 >=
+                                          _projectMembers.where((m) => m['uid'] != widget.currentUid).length)
+                                      ? Icon(
+                                          Icons.check_rounded,
+                                          color: isDark ? Colors.black : Colors.white,
+                                          size: 14,
+                                        )
+                                      : null,
+                                ),
+                                onTap: () {
+                                  setState(() {
+                                    final bool isAll = _selectedMemberUids.length - 1 >=
+                                        _projectMembers.where((m) => m['uid'] != widget.currentUid).length;
+                                    if (!isAll) {
+                                      _selectedMemberUids = _projectMembers.map((m) => m['uid'] as String).toList();
+                                      if (!_selectedMemberUids.contains(widget.currentUid)) {
+                                        _selectedMemberUids.add(widget.currentUid);
+                                      }
+                                    } else {
+                                      _selectedMemberUids = [widget.currentUid];
+                                    }
+                                  });
+                                },
+                              ),
+                              Divider(
+                                color: isDark ? const Color(0xFF3F3F46) : const Color(0xFFE2E8F0),
+                                height: 1,
+                              ),
+                              Expanded(
+                                child: ListView.separated(
+                                  shrinkWrap: true,
+                                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+                                  itemCount: _projectMembers.length,
+                                  separatorBuilder: (_, __) => Divider(
+                                    color: isDark ? const Color(0xFF3F3F46) : const Color(0xFFE2E8F0),
+                                    height: 1,
+                                  ),
+                                  itemBuilder: (ctx, idx) {
+                                    final m = _projectMembers[idx];
+                                    final mUid = m['uid'] as String;
+                                    if (mUid == widget.currentUid) return const SizedBox();
+                                    final isChecked = _selectedMemberUids.contains(mUid);
+
+                                    return ListTile(
+                                      title: Text(
+                                        m['name'],
+                                        style: GoogleFonts.plusJakartaSans(
+                                          fontSize: 13.5,
+                                          fontWeight: FontWeight.w600,
+                                          color: isDark ? Colors.white : Colors.black87,
+                                        ),
+                                      ),
+                                      subtitle: Text(
+                                        'ID: ${m['userId']}',
+                                        style: GoogleFonts.plusJakartaSans(
+                                          fontSize: 11.5,
+                                          color: isDark ? Colors.white38 : Colors.black38,
+                                        ),
+                                      ),
+                                      leading: Container(
+                                        width: 28,
+                                        height: 28,
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          border: Border.all(
+                                            color: isDark ? Colors.white54 : Colors.black,
+                                            width: 1,
+                                          ),
+                                        ),
+                                        child: ClipOval(
+                                          child: Image.asset(m['avatar']),
+                                        ),
+                                      ),
+                                      contentPadding: EdgeInsets.zero,
+                                      trailing: AnimatedContainer(
+                                        duration: const Duration(milliseconds: 200),
+                                        width: 22,
+                                        height: 22,
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          color: isChecked
+                                              ? (isDark ? Colors.white : Colors.black)
+                                              : Colors.transparent,
+                                          border: Border.all(
+                                            color: isChecked
+                                                ? (isDark ? Colors.white : Colors.black)
+                                                : (isDark ? Colors.white38 : Colors.black26),
+                                            width: 2,
+                                          ),
+                                        ),
+                                        child: isChecked
+                                            ? Icon(
+                                                Icons.check_rounded,
+                                                color: isDark ? Colors.black : Colors.white,
+                                                size: 14,
+                                              )
+                                            : null,
+                                      ),
+                                      onTap: () {
+                                        setState(() {
+                                          if (!isChecked) {
+                                            _selectedMemberUids.add(mUid);
+                                          } else {
+                                            _selectedMemberUids.remove(mUid);
+                                          }
+                                        });
+                                      },
+                                    );
+                                  },
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                    ],
+
+                    const SizedBox(height: 14),
+                    Text(
+                      'Nama Saluran (Channel)',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 13.5,
+                        fontWeight: FontWeight.w600,
+                        color: isDark ? Colors.white70 : Colors.black54,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    TextField(
+                      controller: _channelController,
+                      style: GoogleFonts.dmSans(
+                        fontSize: 14.5,
+                        color: isDark ? Colors.white : Colors.black87,
+                      ),
+                      decoration: InputDecoration(
+                        hintText: 'Contoh: #ui-design',
+                        hintStyle: GoogleFonts.dmSans(
+                          color: isDark ? Colors.white38 : Colors.black26,
+                          fontSize: 14.5,
+                        ),
+                        filled: true,
+                        fillColor: isDark ? const Color(0xFF27272A) : const Color(0xFFF8FAFC),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(14),
+                          borderSide: BorderSide(
+                            color: isDark ? const Color(0xFF3F3F46) : const Color(0xFFE2E8F0),
+                          ),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(14),
+                          borderSide: BorderSide(
+                            color: isDark ? Colors.white : Colors.black,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 14),
+                    Text(
+                      'Judul Diskusi',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 13.5,
+                        fontWeight: FontWeight.w600,
+                        color: isDark ? Colors.white70 : Colors.black54,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    TextField(
+                      controller: _titleController,
+                      style: GoogleFonts.dmSans(
+                        fontSize: 14.5,
+                        color: isDark ? Colors.white : Colors.black87,
+                      ),
+                      decoration: InputDecoration(
+                        hintText: 'Contoh: Saluran Masukan Desain UI',
+                        hintStyle: GoogleFonts.dmSans(
+                          color: isDark ? Colors.white38 : Colors.black26,
+                          fontSize: 14.5,
+                        ),
+                        filled: true,
+                        fillColor: isDark ? const Color(0xFF27272A) : const Color(0xFFF8FAFC),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(14),
+                          borderSide: BorderSide(
+                            color: isDark ? const Color(0xFF3F3F46) : const Color(0xFFE2E8F0),
+                          ),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(14),
+                          borderSide: BorderSide(
+                            color: isDark ? Colors.white : Colors.black,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 14),
+                    Text(
+                      'Pilih Avatar Diskusi',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 13.5,
+                        fontWeight: FontWeight.w600,
+                        color: isDark ? Colors.white70 : Colors.black54,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    SizedBox(
+                      height: 48,
+                      child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: 10,
+                        itemBuilder: (context, i) {
+                          final avatarPath = 'assets/icon_pack/chat/chat_${i + 1}.png';
+                          final isSelected = _selectedAvatar == avatarPath;
+                          return GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                _selectedAvatar = avatarPath;
+                              });
+                            },
+                            child: Center(
+                              child: Container(
+                                margin: const EdgeInsets.only(right: 10),
+                                width: 44,
+                                height: 44,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: isSelected
+                                        ? (isDark ? Colors.white : Colors.black)
+                                        : (isDark ? const Color(0xFF3F3F46) : const Color(0xFFE2E8F0)),
+                                    width: isSelected ? 2.0 : 1.0,
+                                  ),
+                                ),
+                                child: ClipOval(
+                                  child: Transform.scale(
+                                    scale: 1.25,
+                                    child: Image.asset(avatarPath, fit: BoxFit.cover),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 48,
+                      child: ElevatedButton(
+                        onPressed: () async {
+                          final chan = _channelController.text.trim();
+                          final ttl = _titleController.text.trim();
+                          if (chan.isEmpty || ttl.isEmpty || _selectedProjectId == null) return;
+
+                          final List<String> finalMembers = _selectedMemberUids;
+                          if (!finalMembers.contains(widget.currentUid)) {
+                            finalMembers.add(widget.currentUid);
+                          }
+
+                          await FirebaseFirestore.instance.collection('discussions').add({
+                            'projectId': _selectedProjectId,
+                            'channel': chan.startsWith('#') ? chan : '#$chan',
+                            'title': ttl,
+                            'avatar': _selectedAvatar,
+                            'lastMessage': 'Mulai diskusi baru...',
+                            'time': 'Sekarang',
+                            'memberUids': finalMembers,
+                            'creatorUid': widget.currentUid,
+                            'createdAt': FieldValue.serverTimestamp(),
+                            'colorIndex': Random().nextInt(5),
+                            'unreadCounts': {
+                              for (var mUid in finalMembers) mUid: 0
+                            },
+                          });
+
+                          if (context.mounted) {
+                            Navigator.pop(context);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Diskusi baru berhasil dibuat!')),
+                            );
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: isDark ? Colors.white : Colors.black,
+                          foregroundColor: isDark ? Colors.black : Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          elevation: 0,
+                        ),
+                        child: Text(
+                          'Buat Diskusi',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 15.0,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ],
       ),
     );
   }

@@ -43,6 +43,10 @@ class _HomePageState extends State<HomePage> {
   bool _isClassPageFullScreen = false;
   final Set<String> _flippedClassroomIds = {};
   final Set<String> _deletedProjectIds = {};
+  Stream<List<DocumentSnapshot>>? _cachedProjectsStream;
+  String? _cachedUid;
+  List<String>? _cachedProjectIds;
+  List<DocumentSnapshot> _lastProjectDocs = [];
   final ValueNotifier<bool> _isManagingClassesNotifier = ValueNotifier<bool>(false);
   final ValueNotifier<String> _searchQueryNotifier = ValueNotifier<String>('');
   final GlobalKey _notesButtonKey = GlobalKey();
@@ -143,6 +147,11 @@ class _HomePageState extends State<HomePage> {
         if (mounted) {
           setState(() {
             _deletedProjectIds.add(projectId);
+            _lastProjectDocs.removeWhere((d) {
+              final pData = d.data() as Map<String, dynamic>? ?? {};
+              final pId = (pData['projectId'] ?? d.id).toString();
+              return d.id == projectId || pId == projectId;
+            });
           });
         }
 
@@ -281,6 +290,11 @@ class _HomePageState extends State<HomePage> {
         if (mounted) {
           setState(() {
             _deletedProjectIds.add(projectId);
+            _lastProjectDocs.removeWhere((d) {
+              final pData = d.data() as Map<String, dynamic>? ?? {};
+              final pId = (pData['projectId'] ?? d.id).toString();
+              return d.id == projectId || pId == projectId;
+            });
           });
         }
 
@@ -594,17 +608,43 @@ class _HomePageState extends State<HomePage> {
     return controller.stream;
   }
 
+  bool _listEquals(List<String> a, List<String> b) {
+    if (a.length != b.length) return false;
+    for (int i = 0; i < a.length; i++) {
+      if (a[i] != b[i]) return false;
+    }
+    return true;
+  }
+
   Stream<List<DocumentSnapshot>> _combineProjectsStreams(
     String currentUid,
     List<String> projectIds,
   ) {
-    final controller = StreamController<List<DocumentSnapshot>>();
+    if (_cachedProjectsStream != null &&
+        _cachedUid == currentUid &&
+        _cachedProjectIds != null &&
+        _listEquals(_cachedProjectIds!, projectIds)) {
+      return _cachedProjectsStream!;
+    }
+
+    _cachedUid = currentUid;
+    _cachedProjectIds = List<String>.from(projectIds);
+
+    final controller = StreamController<List<DocumentSnapshot>>.broadcast();
     final Map<String, DocumentSnapshot> latestDocs = {};
     final List<StreamSubscription> subscriptions = [];
 
     void emitLatest() {
       if (!controller.isClosed) {
-        controller.add(latestDocs.values.toList());
+        final list = latestDocs.values.toList();
+        _lastProjectDocs = list;
+        controller.add(list);
+      }
+    }
+
+    if (_lastProjectDocs.isNotEmpty) {
+      for (var d in _lastProjectDocs) {
+        latestDocs[d.id] = d;
       }
     }
 
@@ -643,11 +683,11 @@ class _HomePageState extends State<HomePage> {
       subscriptions.add(subJoined);
     }
 
-    if (currentUid.isEmpty && projectIds.isEmpty) {
+    if (latestDocs.isNotEmpty) {
+      emitLatest();
+    } else if (currentUid.isEmpty && projectIds.isEmpty) {
       return Stream.value([]);
     }
-
-    emitLatest();
 
     controller.onCancel = () {
       for (final sub in subscriptions) {
@@ -656,7 +696,8 @@ class _HomePageState extends State<HomePage> {
       controller.close();
     };
 
-    return controller.stream;
+    _cachedProjectsStream = controller.stream;
+    return _cachedProjectsStream!;
   }
 
   Widget _buildLeftCardSection({
@@ -1532,12 +1573,23 @@ class _HomePageState extends State<HomePage> {
 
               final String currentUserId = FirebaseAuth.instance.currentUser?.uid ?? '';
               return StreamBuilder<List<DocumentSnapshot>>(
+                initialData: _lastProjectDocs.isNotEmpty ? _lastProjectDocs : null,
                 stream: _combineProjectsStreams(
                   currentUserId,
                   projectIds,
                 ),
                 builder: (context, projectsSnapshot) {
-                  final projectDocs = projectsSnapshot.data ?? [];
+                  if (projectsSnapshot.hasData && projectsSnapshot.data != null && projectsSnapshot.data!.isNotEmpty) {
+                    _lastProjectDocs = projectsSnapshot.data!;
+                  }
+                  final rawDocs = (projectsSnapshot.data != null && projectsSnapshot.data!.isNotEmpty)
+                      ? projectsSnapshot.data!
+                      : _lastProjectDocs;
+                  final projectDocs = rawDocs.where((doc) {
+                    final pData = doc.data() as Map<String, dynamic>? ?? {};
+                    final pId = (pData['projectId'] ?? doc.id).toString();
+                    return !_deletedProjectIds.contains(doc.id) && !_deletedProjectIds.contains(pId);
+                  }).toList();
                   final List<Map<String, dynamic>> allUserTasks = [];
 
                   for (var projDoc in projectDocs) {
@@ -1964,19 +2016,17 @@ class _HomePageState extends State<HomePage> {
                                 ],
                                 const SizedBox(height: 16),
                               ],
-                              if (role.toLowerCase() == 'guru') ...[
-                                const SizedBox(height: 4),
-                                _HomeSearchAndNotesRow(
-                                  key: const ValueKey('home_search_and_notes_row'),
-                                  notesKey: _notesButtonKey,
-                                  onNotesTap: _showQuickNotesOverlay,
-                                  onSearchChanged: (query) {
-                                    _searchQueryNotifier.value = query;
-                                  },
-                                  isDark: isDark,
-                                ),
-                                const SizedBox(height: 16),
-                              ],
+                              const SizedBox(height: 4),
+                              _HomeSearchAndNotesRow(
+                                key: const ValueKey('home_search_and_notes_row'),
+                                notesKey: _notesButtonKey,
+                                onNotesTap: _showQuickNotesOverlay,
+                                onSearchChanged: (query) {
+                                  _searchQueryNotifier.value = query;
+                                },
+                                isDark: isDark,
+                              ),
+                              const SizedBox(height: 16),
 
                           if (role.toLowerCase() != 'guru') ...[
                             // Grid Layout for Today & Task States with student progress
@@ -3583,7 +3633,9 @@ class _HomePageState extends State<HomePage> {
                                   (index) {
                                     final projectData = activeProjectDocs[index].data()
                                         as Map<String, dynamic>;
-                                    final projId = projectData['projectId'] ?? '';
+                                    final projId = (projectData['projectId'] != null && projectData['projectId'].toString().isNotEmpty)
+                                        ? projectData['projectId'].toString()
+                                        : activeProjectDocs[index].id;
                                     final projTitle =
                                         projectData['name'] ?? 'Project';
                                     final stages =
@@ -7400,7 +7452,6 @@ class _HomeSearchAndNotesRowState extends State<_HomeSearchAndNotesRow> {
   late final TextEditingController _controller;
   late final FocusNode _focusNode;
   Timer? _debounceTimer;
-  bool _canCollapseOnTapOutside = false;
 
   @override
   void initState() {
@@ -7418,13 +7469,11 @@ class _HomeSearchAndNotesRowState extends State<_HomeSearchAndNotesRow> {
   }
 
   void _expand() {
-    _canCollapseOnTapOutside = false;
     setState(() {
       _isExpanded = true;
     });
-    Future.delayed(const Duration(milliseconds: 250), () {
+    Future.delayed(const Duration(milliseconds: 100), () {
       if (mounted) {
-        _canCollapseOnTapOutside = true;
         _focusNode.requestFocus();
       }
     });
@@ -7435,7 +7484,6 @@ class _HomeSearchAndNotesRowState extends State<_HomeSearchAndNotesRow> {
     _debounceTimer?.cancel();
     setState(() {
       _isExpanded = false;
-      _canCollapseOnTapOutside = false;
       _controller.clear();
     });
     widget.onSearchChanged('');
@@ -7463,66 +7511,108 @@ class _HomeSearchAndNotesRowState extends State<_HomeSearchAndNotesRow> {
         );
       },
       child: _isExpanded
-          ? TapRegion(
-              onTapOutside: (_) {
-                if (_canCollapseOnTapOutside) {
-                  _collapse();
-                }
-              },
-              child: Container(
-                key: const ValueKey('home_search_bar_expanded'),
-                height: 48,
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                decoration: BoxDecoration(
-                  color: isDark ? const Color(0xFF18181B) : Colors.white,
-                  borderRadius: BorderRadius.circular(28),
-                  border: Border.all(
-                    color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
-                    width: 1.2,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.05),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
+          ? Container(
+              key: const ValueKey('home_search_bar_expanded'),
+              height: 48,
+              padding: const EdgeInsets.symmetric(horizontal: 14),
+              decoration: BoxDecoration(
+                color: isDark ? const Color(0xFF18181B) : Colors.white,
+                borderRadius: BorderRadius.circular(28),
+                border: Border.all(
+                  color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                  width: 1.2,
                 ),
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.search_rounded,
-                      color: isDark ? Colors.white60 : Colors.black45,
-                      size: 20,
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: TextField(
-                        key: const ValueKey('home_search_input'),
-                        controller: _controller,
-                        focusNode: _focusNode,
-                        keyboardType: TextInputType.text,
-                        textInputAction: TextInputAction.search,
-                        autofocus: false,
-                        onChanged: _onChanged,
-                        style: GoogleFonts.plusJakartaSans(
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.05),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.search_rounded,
+                    color: isDark ? Colors.white60 : Colors.black45,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: TextField(
+                      key: const ValueKey('home_search_input'),
+                      controller: _controller,
+                      focusNode: _focusNode,
+                      keyboardType: TextInputType.text,
+                      textInputAction: TextInputAction.search,
+                      autofocus: false,
+                      onChanged: (val) {
+                        setState(() {});
+                        _onChanged(val);
+                      },
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 14,
+                        color: isDark ? Colors.white : Colors.black87,
+                      ),
+                      decoration: InputDecoration(
+                        hintText: 'Cari kelas atau materi...',
+                        hintStyle: GoogleFonts.dmSans(
+                          color: isDark ? Colors.white38 : Colors.black38,
                           fontSize: 14,
-                          color: isDark ? Colors.white : Colors.black87,
                         ),
-                        decoration: InputDecoration(
-                          hintText: 'Cari kelas atau materi...',
-                          hintStyle: GoogleFonts.dmSans(
-                            color: isDark ? Colors.white38 : Colors.black38,
-                            fontSize: 14,
-                          ),
-                          border: InputBorder.none,
-                          isDense: true,
-                          contentPadding: const EdgeInsets.symmetric(vertical: 10),
+                        border: InputBorder.none,
+                        isDense: true,
+                        contentPadding: const EdgeInsets.symmetric(vertical: 10),
+                      ),
+                    ),
+                  ),
+                  if (_controller.text.isNotEmpty)
+                    GestureDetector(
+                      onTap: () {
+                        _controller.clear();
+                        setState(() {});
+                        widget.onSearchChanged('');
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 6),
+                        child: Icon(
+                          Icons.clear_rounded,
+                          color: isDark ? Colors.white60 : Colors.black45,
+                          size: 18,
                         ),
                       ),
                     ),
-                  ],
-                ),
+                  GestureDetector(
+                    onTap: _collapse,
+                    behavior: HitTestBehavior.opaque,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                      decoration: BoxDecoration(
+                        color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.close_rounded,
+                            size: 13,
+                            color: isDark ? Colors.white70 : Colors.black54,
+                          ),
+                          const SizedBox(width: 3),
+                          Text(
+                            'Tutup',
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: isDark ? Colors.white70 : Colors.black54,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
               ),
             )
           : Row(
