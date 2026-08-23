@@ -22,41 +22,22 @@ class _ManageFriendsPageState extends State<ManageFriendsPage> {
     super.dispose();
   }
 
-  Future<void> _startPrivateChat(BuildContext context, String friendUid, String friendName, String friendAvatar) async {
+  void _startPrivateChat(BuildContext context, String friendUid, String friendName, String friendAvatar) {
     final currentUid = FirebaseAuth.instance.currentUser?.uid;
     if (currentUid == null || friendUid.isEmpty || friendUid == currentUid) return;
 
-    String? existingChatId;
-    try {
-      final query = await FirebaseFirestore.instance
-          .collection('discussions')
-          .where('isPrivate', isEqualTo: true)
-          .where('memberUids', arrayContains: currentUid)
-          .get();
-
-      for (var doc in query.docs) {
-        final uids = List<String>.from(doc.data()['memberUids'] ?? []);
-        if (uids.contains(friendUid) && uids.length == 2) {
-          existingChatId = doc.id;
-          break;
-        }
-      }
-    } catch (_) {}
-
-    if (context.mounted) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => ChatRoomPage(
-            discussionId: existingChatId ?? '',
-            channelName: friendName,
-            targetUserUid: friendUid,
-            targetUserAvatar: friendAvatar,
-            isPrivateDraft: existingChatId == null,
-          ),
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ChatRoomPage(
+          discussionId: '',
+          channelName: friendName,
+          targetUserUid: friendUid,
+          targetUserAvatar: friendAvatar,
+          isPrivateDraft: true,
         ),
-      );
-    }
+      ),
+    );
   }
 
   Future<void> _addFriend() async {
@@ -194,9 +175,10 @@ class _ManageFriendsPageState extends State<ManageFriendsPage> {
   @override
   Widget build(BuildContext context) {
     final currentUid = FirebaseAuth.instance.currentUser?.uid ?? '';
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: isDark ? const Color(0xFF0F0F10) : Colors.white,
       body: Align(
         alignment: Alignment.topCenter,
         child: Container(
@@ -205,9 +187,9 @@ class _ManageFriendsPageState extends State<ManageFriendsPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Custom AppBar
+                // Custom AppBar (Disamakan persis dengan Data Anggota Kelas)
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
+                  padding: const EdgeInsets.fromLTRB(16.0, 12.0, 16.0, 12.0),
                   child: Row(
                     children: [
                       GestureDetector(
@@ -215,100 +197,134 @@ class _ManageFriendsPageState extends State<ManageFriendsPage> {
                         child: Container(
                           width: 44,
                           height: 44,
-                          decoration: const BoxDecoration(
-                            color: Color(0xFFF1F5F9),
+                          decoration: BoxDecoration(
+                            color: isDark ? const Color(0xFF18181B) : const Color(0xFFF1F5F9),
                             shape: BoxShape.circle,
+                            border: Border.all(
+                              color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                              width: 1.0,
+                            ),
                           ),
-                          child: const Icon(Icons.arrow_back_rounded, color: Colors.black, size: 18),
+                          child: Icon(
+                            Icons.arrow_back_rounded,
+                            color: isDark ? Colors.white : Colors.black,
+                            size: 18,
+                          ),
                         ),
                       ),
                       const SizedBox(width: 14),
-                      Text(
-                        'Kelola Teman',
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 21.1,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.black,
+                      Expanded(
+                        child: Text(
+                          'Kelola Teman',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 19.5,
+                            fontWeight: FontWeight.w800,
+                            color: isDark ? Colors.white : const Color(0xFF0F172A),
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.center,
                         ),
                       ),
+                      const SizedBox(width: 44),
                     ],
                   ),
                 ),
 
-                // Add Friend input field
+                Divider(
+                  height: 1,
+                  color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+                ),
+
+                const SizedBox(height: 16),
+
+                // Add Friend input field (Disamakan persis dengan Data Anggota Kelas)
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 8.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Tambah Teman Baru',
-                        style: GoogleFonts.plusJakartaSans(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.black54),
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  child: Container(
+                    height: 54,
+                    padding: const EdgeInsets.fromLTRB(16, 0, 6, 0),
+                    decoration: BoxDecoration(
+                      color: isDark ? const Color(0xFF18181B) : Colors.white,
+                      borderRadius: BorderRadius.circular(32),
+                      border: Border.all(
+                        color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                        width: 1.2,
                       ),
-                      const SizedBox(height: 8),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: TextField(
-                              controller: _friendIdController,
-                              style: GoogleFonts.plusJakartaSans(fontSize: 16.4, fontWeight: FontWeight.w600),
-                              decoration: InputDecoration(
-                                hintText: 'Masukkan ID User teman...',
-                                hintStyle: GoogleFonts.plusJakartaSans(color: Colors.black26, fontWeight: FontWeight.normal, fontSize: 15.2),
-                                filled: true,
-                                fillColor: const Color(0xFFF8FAFC),
-                                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                                enabledBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(16),
-                                  borderSide: const BorderSide(color: Color(0xFFF1F5F9)),
-                                ),
-                                focusedBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(16),
-                                  borderSide: const BorderSide(color: Colors.black),
-                                ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.04),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: _friendIdController,
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 16.0,
+                              fontWeight: FontWeight.w600,
+                              color: isDark ? Colors.white : Colors.black87,
+                            ),
+                            decoration: InputDecoration(
+                              hintText: 'Ketik ID pengguna untuk tambah...',
+                              hintStyle: GoogleFonts.dmSans(
+                                fontSize: 15.0,
+                                color: isDark ? Colors.white38 : Colors.black38,
                               ),
+                              isDense: true,
+                              border: InputBorder.none,
+                              contentPadding: EdgeInsets.zero,
                             ),
                           ),
-                          const SizedBox(width: 10),
-                          GestureDetector(
-                            onTap: _isAdding ? null : _addFriend,
-                            child: Container(
-                              height: 48,
-                              padding: const EdgeInsets.symmetric(horizontal: 18),
-                              decoration: BoxDecoration(
-                                color: Colors.black,
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                              alignment: Alignment.center,
-                              child: _isAdding
-                                  ? const SizedBox(
-                                      width: 18,
-                                      height: 18,
-                                      child: const ThreeDotsLoader(),
-                                    )
-                                  : Text(
-                                      'Tambah',
-                                      style: GoogleFonts.plusJakartaSans(
-                                        fontSize: 15.2,
-                                        fontWeight: FontWeight.w600,
-                                        color: Colors.white,
-                                      ),
+                        ),
+                        const SizedBox(width: 6),
+                        GestureDetector(
+                          onTap: _isAdding ? null : _addFriend,
+                          child: Container(
+                            height: 42,
+                            padding: const EdgeInsets.symmetric(horizontal: 20),
+                            decoration: BoxDecoration(
+                              color: isDark ? const Color(0xFF27272A) : const Color(0xFF0F172A),
+                              borderRadius: BorderRadius.circular(22),
+                            ),
+                            alignment: Alignment.center,
+                            child: _isAdding
+                                ? const SizedBox(
+                                    width: 16,
+                                    height: 16,
+                                    child: ThreeDotsLoader(),
+                                  )
+                                : Text(
+                                    'Tambah',
+                                    style: GoogleFonts.plusJakartaSans(
+                                      fontSize: 15.5,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
                                     ),
-                            ),
+                                  ),
                           ),
-                        ],
-                      ),
-                    ],
+                        ),
+                      ],
+                    ),
                   ),
                 ),
+
                 const SizedBox(height: 16),
 
                 // Friends List Header
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
                   child: Text(
                     'Daftar Teman Anda',
-                    style: GoogleFonts.plusJakartaSans(fontSize: 15.2, fontWeight: FontWeight.w600, color: Colors.black87),
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 16.5,
+                      fontWeight: FontWeight.w800,
+                      color: isDark ? Colors.white70 : const Color(0xFF0F172A),
+                    ),
                   ),
                 ),
                 const SizedBox(height: 10),
@@ -323,7 +339,10 @@ class _ManageFriendsPageState extends State<ManageFriendsPage> {
                       }
                       if (!snapshot.hasData || !snapshot.data!.exists) {
                         return Center(
-                          child: Text('Data tidak ditemukan.', style: GoogleFonts.dmSans(color: Colors.black45)),
+                          child: Text(
+                            'Data tidak ditemukan.',
+                            style: GoogleFonts.dmSans(color: isDark ? Colors.white38 : Colors.black45),
+                          ),
                         );
                       }
 
@@ -334,7 +353,10 @@ class _ManageFriendsPageState extends State<ManageFriendsPage> {
                         return Center(
                           child: Text(
                             'Anda belum memiliki teman.',
-                            style: GoogleFonts.dmSans(fontSize: 15.2, color: Colors.black45),
+                            style: GoogleFonts.dmSans(
+                              fontSize: 15.2,
+                              color: isDark ? Colors.white38 : Colors.black45,
+                            ),
                           ),
                         );
                       }
@@ -352,9 +374,9 @@ class _ManageFriendsPageState extends State<ManageFriendsPage> {
                           final friendDocs = friendsSnapshot.data?.docs ?? [];
 
                           return ListView.separated(
-                            padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 8.0),
+                            padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
                             itemCount: friendDocs.length,
-                            separatorBuilder: (context, index) => const SizedBox(height: 12),
+                            separatorBuilder: (context, index) => const SizedBox(height: 10),
                             itemBuilder: (context, index) {
                               final fData = friendDocs[index].data() as Map<String, dynamic>;
                               final fUid = friendDocs[index].id;
@@ -362,56 +384,105 @@ class _ManageFriendsPageState extends State<ManageFriendsPage> {
                               final fUserId = fData['userId'] ?? 'ID';
                               final fAvatar = fData['avatar'] as String? ?? 'assets/icon_pack/avatar/avatar_2.png';
 
-                              return GestureDetector(
-                                onDoubleTap: () => _startPrivateChat(context, fUid, fName, fAvatar),
-                                child: Container(
-                                  padding: const EdgeInsets.all(12),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(18),
-                                    border: Border.all(color: const Color(0xFFF1F5F9)),
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      Container(
-                                        width: 44,
-                                        height: 44,
-                                        decoration: BoxDecoration(
-                                          shape: BoxShape.circle,
-                                          border: Border.all(color: Colors.black, width: 1.5),
+                              return Material(
+                                color: Colors.transparent,
+                                child: InkWell(
+                                  borderRadius: BorderRadius.circular(36),
+                                  onTap: () => _startPrivateChat(context, fUid, fName, fAvatar),
+                                  child: Container(
+                                    height: 64,
+                                    padding: const EdgeInsets.fromLTRB(5, 5, 8, 5),
+                                    decoration: BoxDecoration(
+                                      color: isDark ? const Color(0xFF18181B) : Colors.white,
+                                      borderRadius: BorderRadius.circular(36),
+                                      border: Border.all(
+                                        color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                                        width: 1.2,
+                                      ),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.04),
+                                          blurRadius: 8,
+                                          offset: const Offset(0, 2),
                                         ),
-                                        child: ClipOval(
-                                          child: Image.asset(
-                                            fAvatar,
-                                            fit: BoxFit.cover,
-                                            errorBuilder: (ctx, err, st) => Container(
-                                              color: const Color(0xFFF1F5F9),
-                                              child: const Icon(Icons.person_rounded, color: Colors.black38),
+                                      ],
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        // Avatar: Samakan persis dengan Kelola Anggota (Scale 1.45, Frameless)
+                                        Container(
+                                          width: 54,
+                                          height: 54,
+                                          decoration: BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                                            boxShadow: [
+                                              BoxShadow(
+                                                color: Colors.black.withValues(alpha: 0.12),
+                                                blurRadius: 4,
+                                                offset: const Offset(0, 2),
+                                              ),
+                                            ],
+                                          ),
+                                          child: ClipOval(
+                                            child: Transform.scale(
+                                              scale: 1.45,
+                                              child: Image.asset(
+                                                fAvatar,
+                                                fit: BoxFit.cover,
+                                                errorBuilder: (ctx, err, st) => Container(
+                                                  color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+                                                  child: Icon(
+                                                    Icons.person_rounded,
+                                                    color: isDark ? Colors.white38 : Colors.black38,
+                                                  ),
+                                                ),
+                                              ),
                                             ),
                                           ),
                                         ),
-                                      ),
-                                      const SizedBox(width: 14),
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              fName,
-                                              style: GoogleFonts.plusJakartaSans(fontSize: 16.4, fontWeight: FontWeight.w600, color: Colors.black87),
-                                            ),
-                                            Text(
-                                              'ID User: $fUserId',
-                                              style: GoogleFonts.dmSans(fontSize: 14.0, color: Colors.black45),
-                                            ),
-                                          ],
+                                        const SizedBox(width: 12),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            mainAxisAlignment: MainAxisAlignment.center,
+                                            children: [
+                                              Text(
+                                                fName,
+                                                style: GoogleFonts.plusJakartaSans(
+                                                  fontSize: 16.0,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                                ),
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                              const SizedBox(height: 2),
+                                              Text(
+                                                'ID: $fUserId',
+                                                style: GoogleFonts.dmSans(
+                                                  fontSize: 14.0,
+                                                  color: isDark ? Colors.white54 : const Color(0xFF64748B),
+                                                  fontWeight: FontWeight.w500,
+                                                ),
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ],
+                                          ),
                                         ),
-                                      ),
-                                      IconButton(
-                                        onPressed: () => _removeFriend(fUid, fName),
-                                        icon: const Icon(Icons.person_remove_rounded, color: Colors.redAccent, size: 20),
-                                      ),
-                                    ],
+                                        // Remove friend button (Ikon Tong Sampah Merah Persis Gambar 2)
+                                        IconButton(
+                                          tooltip: 'Hapus Teman',
+                                          onPressed: () => _removeFriend(fUid, fName),
+                                          icon: const Icon(
+                                            Icons.delete_outline_rounded,
+                                            color: Colors.redAccent,
+                                            size: 22,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                 ),
                               );

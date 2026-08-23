@@ -17,6 +17,7 @@ import 'package:googleapis/drive/v3.dart' as drive;
 import 'package:url_launcher/url_launcher.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:hubner/core/theme/app_colors.dart';
+import 'package:hubner/main.dart' show HubnerApp;
 import 'home_page.dart' show BouncyButton;
 
 class ChatRoomPage extends StatefulWidget {
@@ -114,6 +115,32 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
     _messageController.addListener(_onTextChanged);
     _scrollController.addListener(_onScroll);
     _loadCurrentUserName();
+    _checkExistingPrivateChatInBackground();
+  }
+
+  void _checkExistingPrivateChatInBackground() async {
+    if (!_isDraft || widget.targetUserUid == null || widget.targetUserUid!.isEmpty) return;
+    final currentUid = FirebaseAuth.instance.currentUser?.uid;
+    if (currentUid == null) return;
+    try {
+      final query = await FirebaseFirestore.instance
+          .collection('discussions')
+          .where('isPrivate', isEqualTo: true)
+          .where('memberUids', arrayContains: currentUid)
+          .get();
+      for (var doc in query.docs) {
+        final uids = List<String>.from(doc.data()['memberUids'] ?? []);
+        if (uids.contains(widget.targetUserUid) && uids.length == 2) {
+          if (mounted) {
+            setState(() {
+              _currentDiscussionId = doc.id;
+              _isDraft = false;
+            });
+          }
+          break;
+        }
+      }
+    } catch (_) {}
   }
 
   void _loadCurrentUserName() async {
@@ -949,19 +976,13 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
 
   void _openEditDiscussionSettings(BuildContext context, Map<String, dynamic> discData) async {
     final projectId = discData['projectId'] as String? ?? '';
-    
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => const Center(
-        child: ThreeDotsLoader(),
-      ),
-    );
+    if (projectId.isEmpty) {
+      _showEditDiscussionDialog(context, discData, []);
+      return;
+    }
 
     final members = await _loadProjectMembers(projectId);
-    
     if (context.mounted) {
-      Navigator.pop(context); // close loading indicator
       _showEditDiscussionDialog(context, discData, members);
     }
   }
@@ -979,6 +1000,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
     bool isDefaultGroupIcon = currentAvatarInDoc.isEmpty || currentAvatarInDoc == 'default_group';
     String selectedAvatar = isDefaultGroupIcon ? 'assets/icon_pack/chat/chat_1.png' : currentAvatarInDoc;
     bool showAvatarSlider = false;
+    bool isManagingMembers = false;
 
     List<String> selectedMemberUids = List<String>.from(discData['memberUids'] ?? []);
     List<String> adminUids = List<String>.from(discData['adminUids'] ?? []);
@@ -1009,7 +1031,14 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
       builder: (modalCtx) {
         return StatefulBuilder(
           builder: (modalCtx, setModalState) {
-            // Helper to build stacked avatars
+            final activeSelectedMembers = projectMembers
+                .where((m) => selectedMemberUids.contains(m['uid']))
+                .toList();
+            final availableToAdd = projectMembers
+                .where((m) => !selectedMemberUids.contains(m['uid']))
+                .toList();
+
+            // Helper to build stacked avatars (clickable, no Kelola button)
             Widget buildStackedAvatars(List<Map<String, dynamic>> members) {
               if (members.isEmpty) return const SizedBox.shrink();
               final int maxDisplay = 4;
@@ -1072,325 +1101,108 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
               );
             }
 
-            // Manage Members Modal
-            void openManageMembersModal() {
+            void showAddMemberSheet() {
               showModalBottomSheet(
                 context: context,
-                isScrollControlled: true,
                 backgroundColor: isDark ? const Color(0xFF141416) : Colors.white,
                 shape: const RoundedRectangleBorder(
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
                 ),
-                builder: (mCtx) {
-                  return StatefulBuilder(
-                    builder: (mCtx, setInnerState) {
-                      final activeMembers = projectMembers
-                          .where((m) => selectedMemberUids.contains(m['uid']))
-                          .toList();
-                      final availableToAdd = projectMembers
-                          .where((m) => !selectedMemberUids.contains(m['uid']))
-                          .toList();
-
-                      return Container(
-                        constraints: BoxConstraints(maxHeight: screenHeight * 0.85),
-                        padding: EdgeInsets.only(
-                          top: 16,
-                          left: 20,
-                          right: 20,
-                          bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+                builder: (addCtx) {
+                  final currentAvailable = projectMembers
+                      .where((m) => !selectedMemberUids.contains(m['uid']))
+                      .toList();
+                  return Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Tambah Anggota dari Kelas',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: isDark ? Colors.white : Colors.black87,
+                          ),
                         ),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Center(
-                              child: Container(
-                                width: 44,
-                                height: 4.5,
-                                decoration: BoxDecoration(
-                                  color: isDark ? Colors.white24 : const Color(0xFFE2E8F0),
-                                  borderRadius: BorderRadius.circular(10),
+                        const SizedBox(height: 12),
+                        if (currentAvailable.isEmpty)
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            child: Center(
+                              child: Text(
+                                'Semua anggota kelas sudah tergabung.',
+                                style: GoogleFonts.dmSans(
+                                  fontSize: 13,
+                                  color: isDark ? Colors.white54 : Colors.black45,
                                 ),
                               ),
                             ),
-                            const SizedBox(height: 16),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  'Kelola Anggota (${activeMembers.length})',
-                                  style: GoogleFonts.plusJakartaSans(
-                                    fontSize: 17,
-                                    fontWeight: FontWeight.bold,
-                                    color: isDark ? Colors.white : Colors.black87,
+                          )
+                        else
+                          Flexible(
+                            child: ListView.separated(
+                              shrinkWrap: true,
+                              itemCount: currentAvailable.length,
+                              separatorBuilder: (_, __) => Divider(
+                                color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+                              ),
+                              itemBuilder: (aCtx, aIdx) {
+                                final cand = currentAvailable[aIdx];
+                                final candUid = cand['uid'] as String;
+                                final candName = cand['name'] ?? 'User';
+                                final candAvatar = cand['avatar'] ?? 'assets/icon_pack/avatar/avatar_2.png';
+
+                                return ListTile(
+                                  contentPadding: EdgeInsets.zero,
+                                  leading: Container(
+                                    width: 38,
+                                    height: 38,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: isDark ? const Color(0xFF18181B) : const Color(0xFFF1F5F9),
+                                    ),
+                                    child: ClipOval(
+                                      child: Transform.scale(
+                                        scale: 1.35,
+                                        child: Image.asset(candAvatar, fit: BoxFit.cover),
+                                      ),
+                                    ),
                                   ),
-                                ),
-                                // Tambah Anggota (if admin or canAllMembersInvite)
-                                if (isUserAdmin || canAllMembersInvite)
-                                  if (availableToAdd.isNotEmpty)
-                                    GestureDetector(
-                                      onTap: () {
-                                        showModalBottomSheet(
-                                          context: context,
-                                          backgroundColor: isDark ? const Color(0xFF1E293B) : Colors.white,
-                                          shape: const RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-                                          ),
-                                          builder: (addCtx) {
-                                            return Padding(
-                                              padding: const EdgeInsets.all(20),
-                                              child: Column(
-                                                mainAxisSize: MainAxisSize.min,
-                                                crossAxisAlignment: CrossAxisAlignment.start,
-                                                children: [
-                                                  Text(
-                                                    'Tambah Anggota dari Kelas',
-                                                    style: GoogleFonts.plusJakartaSans(
-                                                      fontSize: 16,
-                                                      fontWeight: FontWeight.bold,
-                                                      color: isDark ? Colors.white : Colors.black87,
-                                                    ),
-                                                  ),
-                                                  const SizedBox(height: 12),
-                                                  Flexible(
-                                                    child: ListView.separated(
-                                                      shrinkWrap: true,
-                                                      itemCount: availableToAdd.length,
-                                                      separatorBuilder: (_, __) => Divider(
-                                                        color: isDark ? const Color(0xFF334155) : const Color(0xFFF1F5F9),
-                                                      ),
-                                                      itemBuilder: (aCtx, aIdx) {
-                                                        final cand = availableToAdd[aIdx];
-                                                        final candUid = cand['uid'] as String;
-                                                        final candName = cand['name'] ?? 'User';
-                                                        final candAvatar = cand['avatar'] ?? 'assets/icon_pack/avatar/avatar_2.png';
-
-                                                        return ListTile(
-                                                          contentPadding: EdgeInsets.zero,
-                                                          leading: ClipOval(
-                                                            child: Image.asset(candAvatar, width: 38, height: 38, fit: BoxFit.cover),
-                                                          ),
-                                                          title: Text(
-                                                            candName,
-                                                            style: GoogleFonts.plusJakartaSans(
-                                                              fontSize: 13.5,
-                                                              fontWeight: FontWeight.bold,
-                                                              color: isDark ? Colors.white : Colors.black87,
-                                                            ),
-                                                          ),
-                                                          trailing: ElevatedButton(
-                                                            onPressed: () {
-                                                              Navigator.pop(addCtx);
-                                                              setInnerState(() {
-                                                                selectedMemberUids.add(candUid);
-                                                              });
-                                                              setModalState(() {});
-                                                            },
-                                                            style: ElevatedButton.styleFrom(
-                                                              backgroundColor: const Color(0xFF0F766E),
-                                                              foregroundColor: Colors.white,
-                                                              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-                                                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                                                            ),
-                                                            child: const Text('Tambah', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-                                                          ),
-                                                        );
-                                                      },
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            );
-                                          },
-                                        );
-                                      },
-                                      child: Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                                        decoration: BoxDecoration(
-                                          color: const Color(0xFF0F766E).withValues(alpha: 0.15),
-                                          borderRadius: BorderRadius.circular(12),
-                                        ),
-                                        child: Row(
-                                          children: [
-                                            const Icon(Icons.person_add_rounded, size: 15, color: Color(0xFF0F766E)),
-                                            const SizedBox(width: 4),
-                                            Text(
-                                              '+ Tambah',
-                                              style: GoogleFonts.plusJakartaSans(
-                                                fontSize: 12.0,
-                                                fontWeight: FontWeight.bold,
-                                                color: const Color(0xFF0F766E),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
+                                  title: Text(
+                                    candName,
+                                    style: GoogleFonts.plusJakartaSans(
+                                      fontSize: 13.5,
+                                      fontWeight: FontWeight.bold,
+                                      color: isDark ? Colors.white : Colors.black87,
                                     ),
-                              ],
+                                  ),
+                                  trailing: ElevatedButton(
+                                    onPressed: () {
+                                      Navigator.pop(addCtx);
+                                      setModalState(() {
+                                        selectedMemberUids.add(candUid);
+                                      });
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: const Color(0xFF0F766E),
+                                      foregroundColor: Colors.white,
+                                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                    ),
+                                    child: const Text('Tambah', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                                  ),
+                                );
+                              },
                             ),
-                            const SizedBox(height: 14),
-                            Expanded(
-                              child: ListView.separated(
-                                itemCount: activeMembers.length,
-                                separatorBuilder: (_, __) => Divider(
-                                  color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
-                                  height: 1,
-                                  indent: 56,
-                                ),
-                                itemBuilder: (ctx, i) {
-                                  final m = activeMembers[i];
-                                  final mUid = m['uid'] as String;
-                                  final name = m['name'] ?? 'User';
-                                  final avatarPath = m['avatar'] ?? 'assets/icon_pack/avatar/avatar_2.png';
-                                  final bool isGuru = (m['role'] == 'guru') || (mUid == projectGuruUid);
-                                  final bool isCreator = mUid == creatorUid;
-                                  final bool isAdmin = isGuru || isCreator || adminUids.contains(mUid);
-
-                                  return ListTile(
-                                    contentPadding: EdgeInsets.zero,
-                                    leading: Container(
-                                      width: 42,
-                                      height: 42,
-                                      decoration: BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
-                                      ),
-                                      child: ClipOval(
-                                        child: Transform.scale(
-                                          scale: 1.35,
-                                          child: Image.asset(avatarPath, fit: BoxFit.cover),
-                                        ),
-                                      ),
-                                    ),
-                                    title: Row(
-                                      children: [
-                                        Flexible(
-                                          child: Text(
-                                            name,
-                                            style: GoogleFonts.plusJakartaSans(
-                                              fontSize: 13.5,
-                                              fontWeight: FontWeight.bold,
-                                              color: isDark ? Colors.white : Colors.black87,
-                                            ),
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
-                                        ),
-                                        if (isGuru) ...[
-                                          const SizedBox(width: 6),
-                                          Container(
-                                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                            decoration: BoxDecoration(
-                                              color: const Color(0xFF0F766E).withValues(alpha: 0.15),
-                                              borderRadius: BorderRadius.circular(6),
-                                            ),
-                                            child: Text(
-                                              'Guru',
-                                              style: GoogleFonts.plusJakartaSans(
-                                                fontSize: 10,
-                                                fontWeight: FontWeight.bold,
-                                                color: const Color(0xFF0F766E),
-                                              ),
-                                            ),
-                                          ),
-                                        ] else if (isAdmin) ...[
-                                          const SizedBox(width: 6),
-                                          Container(
-                                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                            decoration: BoxDecoration(
-                                              color: const Color(0xFF2563EB).withValues(alpha: 0.15),
-                                              borderRadius: BorderRadius.circular(6),
-                                            ),
-                                            child: Text(
-                                              'Admin',
-                                              style: GoogleFonts.plusJakartaSans(
-                                                fontSize: 10,
-                                                fontWeight: FontWeight.bold,
-                                                color: const Color(0xFF2563EB),
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ],
-                                    ),
-                                    subtitle: Text(
-                                      isGuru
-                                          ? 'Admin Utama (Guru)'
-                                          : (isAdmin ? 'Admin Grup' : 'Anggota'),
-                                      style: GoogleFonts.dmSans(
-                                        fontSize: 11.5,
-                                        color: isDark ? Colors.white60 : Colors.black54,
-                                      ),
-                                    ),
-                                    trailing: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        // Admin management options (only by Admin)
-                                        if (isUserAdmin && !isGuru && !isCreator) ...[
-                                          TextButton(
-                                            onPressed: () {
-                                              setInnerState(() {
-                                                if (adminUids.contains(mUid)) {
-                                                  if (adminUids.length > 1) {
-                                                    adminUids.remove(mUid);
-                                                  } else {
-                                                    ScaffoldMessenger.of(context).showSnackBar(
-                                                      const SnackBar(content: Text('Minimal 1 admin di dalam grup.')),
-                                                    );
-                                                  }
-                                                } else {
-                                                  adminUids.add(mUid);
-                                                }
-                                              });
-                                              setModalState(() {});
-                                            },
-                                            style: TextButton.styleFrom(
-                                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                              minimumSize: Size.zero,
-                                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                            ),
-                                            child: Text(
-                                              adminUids.contains(mUid) ? 'Lepas Admin' : 'Jadikan Admin',
-                                              style: GoogleFonts.plusJakartaSans(
-                                                fontSize: 11.5,
-                                                fontWeight: FontWeight.bold,
-                                                color: adminUids.contains(mUid)
-                                                    ? const Color(0xFFE11D48)
-                                                    : const Color(0xFF2563EB),
-                                              ),
-                                            ),
-                                          ),
-                                          IconButton(
-                                            icon: const Icon(Icons.close_rounded, size: 18, color: Colors.redAccent),
-                                            padding: EdgeInsets.zero,
-                                            constraints: const BoxConstraints(),
-                                            onPressed: () {
-                                              setInnerState(() {
-                                                selectedMemberUids.remove(mUid);
-                                                adminUids.remove(mUid);
-                                              });
-                                              setModalState(() {});
-                                            },
-                                          ),
-                                        ],
-                                      ],
-                                    ),
-                                  );
-                                },
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    },
+                          ),
+                      ],
+                    ),
                   );
                 },
               );
             }
-
-            final activeSelectedMembers = projectMembers
-                .where((m) => selectedMemberUids.contains(m['uid']))
-                .toList();
 
             return Container(
               constraints: BoxConstraints(maxHeight: screenHeight * 0.90),
@@ -1431,7 +1243,15 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                         Row(
                           children: [
                             BouncyButton(
-                              onTap: () => Navigator.pop(modalCtx),
+                              onTap: () {
+                                if (isManagingMembers) {
+                                  setModalState(() {
+                                    isManagingMembers = false;
+                                  });
+                                } else {
+                                  Navigator.pop(modalCtx);
+                                }
+                              },
                               child: Container(
                                 width: 42,
                                 height: 42,
@@ -1452,14 +1272,14 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                   ],
                                 ),
                                 child: Icon(
-                                  Icons.close_rounded,
+                                  Icons.arrow_back_rounded,
                                   color: isDark ? Colors.white : Colors.black,
                                   size: 20,
                                 ),
                               ),
                             ),
                             Text(
-                              'Edit Diskusi',
+                              isManagingMembers ? 'Kelola Anggota' : 'Edit Diskusi',
                               style: GoogleFonts.plusJakartaSans(
                                 fontSize: 18.0,
                                 fontWeight: FontWeight.bold,
@@ -1468,425 +1288,362 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                             ),
                           ],
                         ),
-                        // Simpan Perubahan button
-                        GestureDetector(
-                          onTap: () async {
-                            final chan = channelController.text.trim();
-                            final ttl = titleController.text.trim();
-                            if (ttl.isEmpty) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Nama diskusi wajib diisi.')),
-                              );
-                              return;
-                            }
-
-                            final List<String> finalMembers = List<String>.from(selectedMemberUids);
-                            if (!finalMembers.contains(currentUid)) {
-                              finalMembers.add(currentUid);
-                            }
-
-                            final List<String> finalAdminUids = List<String>.from(adminUids);
-                            if (!finalAdminUids.contains(currentUid) && isUserAdmin) {
-                              finalAdminUids.add(currentUid);
-                            }
-                            if (projectGuruUid.isNotEmpty && !finalAdminUids.contains(projectGuruUid)) {
-                              finalAdminUids.add(projectGuruUid);
-                            }
-
-                            final cleanTitle = ttl.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]+'), '-').replaceAll(RegExp(r'^-|-$'), '');
-                            final channelName = chan.isNotEmpty
-                                ? (chan.startsWith('#') ? chan : '#$chan')
-                                : '#${cleanTitle.isNotEmpty ? cleanTitle : 'diskusi'}';
-
-                            await FirebaseFirestore.instance.collection('discussions').doc(_currentDiscussionId).update({
-                              'channel': channelName,
-                              'title': ttl,
-                              'avatar': isDefaultGroupIcon ? '' : selectedAvatar,
-                              'memberUids': finalMembers,
-                              'adminUids': finalAdminUids,
-                              'canAllMembersEditInfo': canAllMembersEditInfo,
-                              'canAllMembersInvite': canAllMembersInvite,
-                            });
-
-                            if (context.mounted) {
-                              Navigator.pop(modalCtx);
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Pengaturan diskusi berhasil diperbarui!')),
-                              );
-                            }
-                          },
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                            decoration: BoxDecoration(
-                              color: isDark ? Colors.white : Colors.black,
-                              borderRadius: BorderRadius.circular(16),
+                        if (isManagingMembers) ...[
+                          if ((isUserAdmin || canAllMembersInvite) && availableToAdd.isNotEmpty)
+                            GestureDetector(
+                              onTap: showAddMemberSheet,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF0F766E).withValues(alpha: 0.15),
+                                  borderRadius: BorderRadius.circular(14),
+                                ),
+                                child: Row(
+                                  children: [
+                                    const Icon(Icons.person_add_rounded, size: 15, color: Color(0xFF0F766E)),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      '+ Tambah',
+                                      style: GoogleFonts.plusJakartaSans(
+                                        fontSize: 12.0,
+                                        fontWeight: FontWeight.bold,
+                                        color: const Color(0xFF0F766E),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
                             ),
-                            child: Text(
-                              'Simpan',
-                              style: GoogleFonts.plusJakartaSans(
-                                fontSize: 13.0,
-                                fontWeight: FontWeight.bold,
-                                color: isDark ? Colors.black : Colors.white,
+                        ] else ...[
+                          // Simpan Perubahan button
+                          GestureDetector(
+                            onTap: () async {
+                              final chan = channelController.text.trim();
+                              final ttl = titleController.text.trim();
+                              if (ttl.isEmpty) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('Nama diskusi wajib diisi.')),
+                                );
+                                return;
+                              }
+
+                              final List<String> finalMembers = List<String>.from(selectedMemberUids);
+                              if (!finalMembers.contains(currentUid)) {
+                                finalMembers.add(currentUid);
+                              }
+
+                              final List<String> finalAdminUids = List<String>.from(adminUids);
+                              if (!finalAdminUids.contains(currentUid) && isUserAdmin) {
+                                finalAdminUids.add(currentUid);
+                              }
+                              if (projectGuruUid.isNotEmpty && !finalAdminUids.contains(projectGuruUid)) {
+                                finalAdminUids.add(projectGuruUid);
+                              }
+
+                              final cleanTitle = ttl.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]+'), '-').replaceAll(RegExp(r'^-|-$'), '');
+                              final channelName = chan.isNotEmpty
+                                  ? (chan.startsWith('#') ? chan : '#$chan')
+                                  : '#${cleanTitle.isNotEmpty ? cleanTitle : 'diskusi'}';
+
+                              await FirebaseFirestore.instance.collection('discussions').doc(_currentDiscussionId).update({
+                                'channel': channelName,
+                                'title': ttl,
+                                'avatar': isDefaultGroupIcon ? '' : selectedAvatar,
+                                'memberUids': finalMembers,
+                                'adminUids': finalAdminUids,
+                                'canAllMembersEditInfo': canAllMembersEditInfo,
+                                'canAllMembersInvite': canAllMembersInvite,
+                              });
+
+                              if (context.mounted) {
+                                Navigator.pop(modalCtx);
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('Pengaturan diskusi berhasil diperbarui!')),
+                                );
+                              }
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                              decoration: BoxDecoration(
+                                color: isDark ? Colors.white : Colors.black,
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: Text(
+                                'Simpan',
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 13.0,
+                                  fontWeight: FontWeight.bold,
+                                  color: isDark ? Colors.black : Colors.white,
+                                ),
                               ),
                             ),
                           ),
-                        ),
+                        ],
                       ],
                     ),
                   ),
 
                   const SizedBox(height: 16),
 
-                  // BODY (Same as Step 2 of WhatsApp-Style Creation)
-                  Expanded(
-                    child: SingleChildScrollView(
-                      padding: EdgeInsets.only(
-                        left: 20,
-                        right: 20,
-                        bottom: MediaQuery.of(context).viewInsets.bottom + 24,
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Layout 35% - 65% (Avatar + Title)
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              // Kiri: Avatar (Tap to toggle slider)
-                              GestureDetector(
-                                onTap: canEditGroupInfo
-                                    ? () {
-                                        setModalState(() {
-                                          showAvatarSlider = !showAvatarSlider;
-                                        });
-                                      }
-                                    : null,
-                                child: Stack(
-                                  children: [
-                                    Container(
-                                      width: 72,
-                                      height: 72,
-                                      decoration: BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.06),
-                                            blurRadius: 8,
-                                            offset: const Offset(0, 3),
-                                          ),
-                                        ],
-                                      ),
-                                      child: isDefaultGroupIcon
-                                          ? const Center(
-                                              child: Icon(
-                                                Icons.groups_rounded,
-                                                color: Color(0xFF0F766E),
-                                                size: 38,
-                                              ),
-                                            )
-                                          : ClipOval(
-                                              child: Transform.scale(
-                                                scale: 1.35,
-                                                child: Image.asset(selectedAvatar, fit: BoxFit.cover),
-                                              ),
-                                            ),
-                                    ),
-                                    if (canEditGroupInfo)
-                                      Positioned(
-                                        bottom: 0,
-                                        right: 0,
-                                        child: Container(
-                                          padding: const EdgeInsets.all(4),
-                                          decoration: BoxDecoration(
-                                            color: isDark ? Colors.white : Colors.black,
-                                            shape: BoxShape.circle,
-                                          ),
-                                          child: Icon(
-                                            showAvatarSlider ? Icons.check_rounded : Icons.camera_alt_rounded,
-                                            size: 12,
-                                            color: isDark ? Colors.black : Colors.white,
-                                          ),
-                                        ),
-                                      ),
-                                  ],
+                  // BODY (Switches between Kelola Anggota and Edit Diskusi)
+                  if (isManagingMembers)
+                    Expanded(
+                      child: ListView.separated(
+                        padding: EdgeInsets.only(
+                          left: 20,
+                          right: 20,
+                          bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+                        ),
+                        itemCount: activeSelectedMembers.length,
+                        separatorBuilder: (_, __) => Divider(
+                          color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+                          height: 1,
+                          indent: 56,
+                        ),
+                        itemBuilder: (ctx, i) {
+                          final m = activeSelectedMembers[i];
+                          final mUid = m['uid'] as String;
+                          final name = m['name'] ?? 'User';
+                          final avatarPath = m['avatar'] ?? 'assets/icon_pack/avatar/avatar_2.png';
+                          final bool isGuru = (m['role'] == 'guru') || (mUid == projectGuruUid);
+                          final bool isCreator = mUid == creatorUid;
+                          final bool isAdmin = isGuru || isCreator || adminUids.contains(mUid);
+
+                          return ListTile(
+                            contentPadding: EdgeInsets.zero,
+                            leading: Container(
+                              width: 42,
+                              height: 42,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: isDark ? const Color(0xFF18181B) : const Color(0xFFF1F5F9),
+                              ),
+                              child: ClipOval(
+                                child: Transform.scale(
+                                  scale: 1.35,
+                                  child: Image.asset(avatarPath, fit: BoxFit.cover),
                                 ),
                               ),
-                              const SizedBox(width: 14),
-
-                              // Kanan: Nama Diskusi
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Nama Diskusi',
+                            ),
+                            title: Row(
+                              children: [
+                                Flexible(
+                                  child: Text(
+                                    name,
+                                    style: GoogleFonts.plusJakartaSans(
+                                      fontSize: 13.5,
+                                      fontWeight: FontWeight.bold,
+                                      color: isDark ? Colors.white : Colors.black87,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                if (isGuru) ...[
+                                  const SizedBox(width: 6),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFF0F766E).withValues(alpha: 0.15),
+                                      borderRadius: BorderRadius.circular(6),
+                                    ),
+                                    child: Text(
+                                      'Guru',
                                       style: GoogleFonts.plusJakartaSans(
-                                        fontSize: 13.0,
+                                        fontSize: 10,
                                         fontWeight: FontWeight.bold,
-                                        color: isDark ? Colors.white70 : Colors.black87,
+                                        color: const Color(0xFF0F766E),
                                       ),
-                                    ),
-                                    const SizedBox(height: 6),
-                                    TextField(
-                                      controller: titleController,
-                                      enabled: canEditGroupInfo,
-                                      style: GoogleFonts.plusJakartaSans(
-                                        fontSize: 14.0,
-                                        fontWeight: FontWeight.w600,
-                                        color: isDark ? Colors.white : Colors.black87,
-                                      ),
-                                      decoration: InputDecoration(
-                                        hintText: 'Nama Diskusi (Wajib)',
-                                        hintStyle: GoogleFonts.dmSans(
-                                          color: isDark ? Colors.white38 : Colors.black38,
-                                          fontSize: 13.5,
-                                        ),
-                                        filled: true,
-                                        fillColor: isDark ? const Color(0xFF1E293B) : const Color(0xFFF8FAFC),
-                                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                                        enabledBorder: OutlineInputBorder(
-                                          borderRadius: BorderRadius.circular(24),
-                                          borderSide: BorderSide(
-                                            color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
-                                          ),
-                                        ),
-                                        focusedBorder: OutlineInputBorder(
-                                          borderRadius: BorderRadius.circular(24),
-                                          borderSide: BorderSide(
-                                            color: isDark ? Colors.white : Colors.black,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-
-                          // Frameless 50% Translucent Avatar Slider
-                          if (showAvatarSlider && canEditGroupInfo) ...[
-                            const SizedBox(height: 12),
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(32),
-                              child: BackdropFilter(
-                                filter: ui.ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                                child: Container(
-                                  width: double.infinity,
-                                  height: 56,
-                                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 3),
-                                  decoration: BoxDecoration(
-                                    color: isDark
-                                        ? Colors.black.withValues(alpha: 0.50)
-                                        : Colors.white.withValues(alpha: 0.50),
-                                    borderRadius: BorderRadius.circular(32),
-                                    border: Border.all(
-                                      color: isDark
-                                          ? Colors.white.withValues(alpha: 0.12)
-                                          : Colors.black.withValues(alpha: 0.08),
-                                      width: 1.0,
                                     ),
                                   ),
-                                  child: ListView.separated(
-                                    scrollDirection: Axis.horizontal,
-                                    padding: const EdgeInsets.symmetric(horizontal: 2),
-                                    itemCount: 11,
-                                    separatorBuilder: (_, __) => const SizedBox(width: 6),
-                                    itemBuilder: (ctx, i) {
-                                      final isDef = i == 0;
-                                      final avatarP = isDef ? '' : 'assets/icon_pack/chat/chat_$i.png';
-                                      final isSel = isDef
-                                          ? isDefaultGroupIcon
-                                          : (!isDefaultGroupIcon && selectedAvatar == avatarP);
-
-                                      return GestureDetector(
-                                        onTap: () {
-                                          setModalState(() {
-                                            if (isDef) {
-                                              isDefaultGroupIcon = true;
-                                              selectedAvatar = 'assets/icon_pack/chat/chat_1.png';
-                                            } else {
-                                              isDefaultGroupIcon = false;
-                                              selectedAvatar = avatarP;
-                                            }
-                                            showAvatarSlider = false;
-                                          });
-                                        },
-                                        child: Container(
-                                          width: 48,
-                                          height: 48,
-                                          decoration: BoxDecoration(
-                                            shape: BoxShape.circle,
-                                            border: isSel
-                                                ? Border.all(color: const Color(0xFF0F766E), width: 2.2)
-                                                : Border.all(color: Colors.transparent, width: 2.2),
-                                            color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
-                                          ),
-                                          child: isDef
-                                              ? const Center(
-                                                  child: Icon(
-                                                    Icons.groups_rounded,
-                                                    color: Color(0xFF0F766E),
-                                                    size: 26,
-                                                  ),
-                                                )
-                                              : ClipOval(
-                                                  child: Transform.scale(
-                                                    scale: 1.35,
-                                                    child: Image.asset(avatarP, fit: BoxFit.cover),
-                                                  ),
-                                                ),
-                                        ),
-                                      );
+                                ] else if (isAdmin) ...[
+                                  const SizedBox(width: 6),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFF2563EB).withValues(alpha: 0.15),
+                                      borderRadius: BorderRadius.circular(6),
+                                    ),
+                                    child: Text(
+                                      'Admin',
+                                      style: GoogleFonts.plusJakartaSans(
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.bold,
+                                        color: const Color(0xFF2563EB),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ],
+                            ),
+                            subtitle: Text(
+                              isGuru
+                                  ? 'Admin Utama (Guru)'
+                                  : (isAdmin ? 'Admin Grup' : 'Anggota'),
+                              style: GoogleFonts.dmSans(
+                                fontSize: 11.5,
+                                color: isDark ? Colors.white60 : Colors.black54,
+                              ),
+                            ),
+                            trailing: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                // Admin management options (only by Admin)
+                                if (isUserAdmin && !isGuru && !isCreator) ...[
+                                  TextButton(
+                                    onPressed: () {
+                                      setModalState(() {
+                                        if (adminUids.contains(mUid)) {
+                                          if (adminUids.length > 1) {
+                                            adminUids.remove(mUid);
+                                          } else {
+                                            ScaffoldMessenger.of(context).showSnackBar(
+                                              const SnackBar(content: Text('Minimal 1 admin di dalam grup.')),
+                                            );
+                                          }
+                                        } else {
+                                          adminUids.add(mUid);
+                                        }
+                                      });
+                                    },
+                                    style: TextButton.styleFrom(
+                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                      minimumSize: Size.zero,
+                                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                    ),
+                                    child: Text(
+                                      adminUids.contains(mUid) ? 'Lepas Admin' : 'Jadikan Admin',
+                                      style: GoogleFonts.plusJakartaSans(
+                                        fontSize: 11.5,
+                                        fontWeight: FontWeight.bold,
+                                        color: adminUids.contains(mUid)
+                                            ? const Color(0xFFE11D48)
+                                            : const Color(0xFF2563EB),
+                                      ),
+                                    ),
+                                  ),
+                                  IconButton(
+                                    icon: const Icon(Icons.close_rounded, size: 18, color: Colors.redAccent),
+                                    padding: EdgeInsets.zero,
+                                    constraints: const BoxConstraints(),
+                                    onPressed: () {
+                                      setModalState(() {
+                                        selectedMemberUids.remove(mUid);
+                                        adminUids.remove(mUid);
+                                      });
                                     },
                                   ),
-                                ),
-                              ),
+                                ],
+                              ],
                             ),
-                          ],
-
-                          const SizedBox(height: 14),
-
-                          // Saluran / Channel
-                          Text(
-                            'Saluran (Channel)',
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 13.0,
-                              fontWeight: FontWeight.bold,
-                              color: isDark ? Colors.white70 : Colors.black87,
-                            ),
-                          ),
-                          const SizedBox(height: 6),
-                          TextField(
-                            controller: channelController,
-                            enabled: canEditGroupInfo,
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 14.0,
-                              color: isDark ? Colors.white : Colors.black87,
-                            ),
-                            decoration: InputDecoration(
-                              hintText: 'Saluran (Opsional, contoh: #diskusi)',
-                              hintStyle: GoogleFonts.dmSans(
-                                color: isDark ? Colors.white38 : Colors.black38,
-                                fontSize: 13.5,
-                              ),
-                              filled: true,
-                              fillColor: isDark ? const Color(0xFF1E293B) : const Color(0xFFF8FAFC),
-                              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(24),
-                                borderSide: BorderSide(
-                                  color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
-                                ),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(24),
-                                borderSide: BorderSide(
-                                  color: isDark ? Colors.white : Colors.black,
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 18),
-
-                          // Detail Classroom Card & Anggota Terpilih (Clickable -> Kelola Anggota)
-                          Container(
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF8FAFC),
-                              borderRadius: BorderRadius.circular(20),
-                              border: Border.all(
-                                color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
-                              ),
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                          );
+                        },
+                      ),
+                    )
+                  else
+                    Expanded(
+                      child: SingleChildScrollView(
+                        padding: EdgeInsets.only(
+                          left: 20,
+                          right: 20,
+                          bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // 1. Channel Name & Icon Row
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
-                                Row(
-                                  children: [
-                                    Container(
-                                      width: 38,
-                                      height: 38,
-                                      decoration: BoxDecoration(
-                                        color: const Color(0xFF0F766E).withValues(alpha: 0.15),
-                                        shape: BoxShape.circle,
-                                      ),
-                                      child: const Icon(
-                                        Icons.school_rounded,
-                                        color: Color(0xFF0F766E),
-                                        size: 20,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 12),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            'Classroom ID: $projectId',
-                                            style: GoogleFonts.plusJakartaSans(
-                                              fontSize: 14.0,
-                                              fontWeight: FontWeight.bold,
-                                              color: isDark ? Colors.white : const Color(0xFF0F172A),
-                                            ),
-                                          ),
-                                          const SizedBox(height: 2),
-                                          Text(
-                                            '${activeSelectedMembers.length} Anggota',
-                                            style: GoogleFonts.dmSans(
-                                              fontSize: 12.0,
-                                              color: isDark ? Colors.white60 : const Color(0xFF64748B),
-                                            ),
-                                          ),
-                                        ],
+                                // Avatar circle
+                                GestureDetector(
+                                  onTap: canEditGroupInfo
+                                      ? () {
+                                          setModalState(() {
+                                            showAvatarSlider = !showAvatarSlider;
+                                          });
+                                        }
+                                      : null,
+                                  child: Container(
+                                    width: 58,
+                                    height: 58,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: isDark ? const Color(0xFF18181B) : const Color(0xFFF1F5F9),
+                                      border: Border.all(
+                                        color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                                        width: 2,
                                       ),
                                     ),
-                                  ],
-                                ),
-                                const SizedBox(height: 14),
-                                Text(
-                                  'Anggota',
-                                  style: GoogleFonts.plusJakartaSans(
-                                    fontSize: 12.5,
-                                    fontWeight: FontWeight.bold,
-                                    color: isDark ? Colors.white70 : Colors.black87,
+                                    child: isDefaultGroupIcon
+                                        ? const Center(
+                                            child: Icon(
+                                              Icons.groups_rounded,
+                                              color: Color(0xFF0F766E),
+                                              size: 32,
+                                            ),
+                                          )
+                                        : ClipOval(
+                                            child: Transform.scale(
+                                              scale: 1.35,
+                                              child: Image.asset(selectedAvatar, fit: BoxFit.cover),
+                                            ),
+                                          ),
                                   ),
                                 ),
-                                const SizedBox(height: 8),
-                                InkWell(
-                                  onTap: openManageMembersModal,
-                                  borderRadius: BorderRadius.circular(16),
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                const SizedBox(width: 14),
+                                // Channel Name input
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      buildStackedAvatars(activeSelectedMembers),
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                                        decoration: BoxDecoration(
-                                          color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
-                                          borderRadius: BorderRadius.circular(12),
-                                          border: Border.all(
-                                            color: isDark ? const Color(0xFF3F3F46) : const Color(0xFFE2E8F0),
-                                          ),
+                                      TextField(
+                                        controller: channelController,
+                                        enabled: canEditGroupInfo,
+                                        style: GoogleFonts.plusJakartaSans(
+                                          fontSize: 16.0,
+                                          fontWeight: FontWeight.bold,
+                                          color: isDark ? Colors.white : Colors.black,
                                         ),
-                                        child: Row(
-                                          children: [
-                                            Icon(
-                                              Icons.people_alt_rounded,
-                                              size: 14,
-                                              color: isDark ? Colors.white70 : Colors.black87,
-                                            ),
-                                            const SizedBox(width: 4),
-                                            Text(
-                                              'Kelola',
+                                        decoration: InputDecoration(
+                                          hintText: 'Nama Channel (cth: diskusi-ipa)',
+                                          hintStyle: GoogleFonts.dmSans(
+                                            color: isDark ? Colors.white38 : Colors.black38,
+                                            fontSize: 13.5,
+                                          ),
+                                          prefixIcon: Padding(
+                                            padding: const EdgeInsets.only(left: 14, right: 8),
+                                            child: Text(
+                                              '#',
                                               style: GoogleFonts.plusJakartaSans(
-                                                fontSize: 11.5,
+                                                fontSize: 18.0,
                                                 fontWeight: FontWeight.bold,
                                                 color: isDark ? Colors.white70 : Colors.black87,
                                               ),
                                             ),
-                                          ],
+                                          ),
+                                          prefixIconConstraints: const BoxConstraints(minWidth: 0, minHeight: 0),
+                                          contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                                          filled: true,
+                                          fillColor: isDark ? const Color(0xFF18181B) : const Color(0xFFF8FAFC),
+                                          border: OutlineInputBorder(
+                                            borderRadius: BorderRadius.circular(24),
+                                            borderSide: BorderSide(
+                                              color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                                            ),
+                                          ),
+                                          enabledBorder: OutlineInputBorder(
+                                            borderRadius: BorderRadius.circular(24),
+                                            borderSide: BorderSide(
+                                              color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                                            ),
+                                          ),
+                                          focusedBorder: OutlineInputBorder(
+                                            borderRadius: BorderRadius.circular(24),
+                                            borderSide: BorderSide(
+                                              color: isDark ? Colors.white : Colors.black,
+                                            ),
+                                          ),
                                         ),
                                       ),
                                     ],
@@ -1894,162 +1651,378 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                 ),
                               ],
                             ),
-                          ),
 
-                          const SizedBox(height: 18),
-
-                          // Pengaturan Hak Akses / Role Admin
-                          Container(
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF8FAFC),
-                              borderRadius: BorderRadius.circular(20),
-                              border: Border.all(
-                                color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
-                              ),
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  children: [
-                                    Icon(
-                                      Icons.admin_panel_settings_rounded,
-                                      size: 18,
-                                      color: const Color(0xFF0F766E),
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Text(
-                                      'Hak Akses Anggota',
-                                      style: GoogleFonts.plusJakartaSans(
-                                        fontSize: 13.0,
-                                        fontWeight: FontWeight.bold,
-                                        color: isDark ? Colors.white : const Color(0xFF0F172A),
+                            // Frameless 50% Translucent Avatar Slider
+                            if (showAvatarSlider && canEditGroupInfo) ...[
+                              const SizedBox(height: 12),
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(32),
+                                child: BackdropFilter(
+                                  filter: ui.ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                                  child: Container(
+                                    width: double.infinity,
+                                    height: 56,
+                                    padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 3),
+                                    decoration: BoxDecoration(
+                                      color: isDark
+                                          ? Colors.black.withValues(alpha: 0.50)
+                                          : Colors.white.withValues(alpha: 0.50),
+                                      borderRadius: BorderRadius.circular(32),
+                                      border: Border.all(
+                                        color: isDark
+                                            ? Colors.white.withValues(alpha: 0.12)
+                                            : Colors.black.withValues(alpha: 0.08),
+                                        width: 1.0,
                                       ),
                                     ),
-                                  ],
+                                    child: ListView.separated(
+                                      scrollDirection: Axis.horizontal,
+                                      padding: const EdgeInsets.symmetric(horizontal: 2),
+                                      itemCount: 11,
+                                      separatorBuilder: (_, __) => const SizedBox(width: 6),
+                                      itemBuilder: (ctx, i) {
+                                        final isDef = i == 0;
+                                        final avatarP = isDef ? '' : 'assets/icon_pack/chat/chat_$i.png';
+                                        final isSel = isDef
+                                            ? isDefaultGroupIcon
+                                            : (!isDefaultGroupIcon && selectedAvatar == avatarP);
+
+                                        return GestureDetector(
+                                          onTap: () {
+                                            setModalState(() {
+                                              if (isDef) {
+                                                isDefaultGroupIcon = true;
+                                                selectedAvatar = 'assets/icon_pack/chat/chat_1.png';
+                                              } else {
+                                                isDefaultGroupIcon = false;
+                                                selectedAvatar = avatarP;
+                                              }
+                                              showAvatarSlider = false;
+                                            });
+                                          },
+                                          child: Container(
+                                            width: 48,
+                                            height: 48,
+                                            decoration: BoxDecoration(
+                                              shape: BoxShape.circle,
+                                              border: isSel
+                                                  ? Border.all(color: const Color(0xFF0F766E), width: 2.2)
+                                                  : Border.all(color: Colors.transparent, width: 2.2),
+                                              color: isDark ? const Color(0xFF18181B) : const Color(0xFFF1F5F9),
+                                            ),
+                                            child: isDef
+                                                ? const Center(
+                                                    child: Icon(
+                                                      Icons.groups_rounded,
+                                                      color: Color(0xFF0F766E),
+                                                      size: 26,
+                                                    ),
+                                                  )
+                                                : ClipOval(
+                                                    child: Transform.scale(
+                                                      scale: 1.35,
+                                                      child: Image.asset(avatarP, fit: BoxFit.cover),
+                                                    ),
+                                                  ),
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  ),
                                 ),
-                                const SizedBox(height: 10),
-                                // Checkbox 1: Edit info grup (Only editable by admin)
-                                InkWell(
-                                  onTap: isUserAdmin
-                                      ? () {
-                                          setModalState(() {
-                                            canAllMembersEditInfo = !canAllMembersEditInfo;
-                                          });
-                                        }
-                                      : null,
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(vertical: 4),
-                                    child: Row(
-                                      children: [
-                                        AnimatedContainer(
-                                          duration: const Duration(milliseconds: 180),
-                                          width: 20,
-                                          height: 20,
-                                          decoration: BoxDecoration(
-                                            shape: BoxShape.circle,
-                                            color: canAllMembersEditInfo
-                                                ? (isDark ? Colors.white : Colors.black)
-                                                : Colors.transparent,
-                                            border: Border.all(
+                              ),
+                            ],
+
+                            const SizedBox(height: 16),
+
+                            // 2. Title / Deskripsi
+                            Text(
+                              'Nama Lengkap / Topik Diskusi',
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 13.0,
+                                fontWeight: FontWeight.bold,
+                                color: isDark ? Colors.white : Colors.black,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            TextField(
+                              controller: titleController,
+                              enabled: canEditGroupInfo,
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 14.5,
+                                color: isDark ? Colors.white : Colors.black,
+                              ),
+                              decoration: InputDecoration(
+                                hintText: 'Masukkan topik diskusi...',
+                                hintStyle: GoogleFonts.dmSans(
+                                  color: isDark ? Colors.white38 : Colors.black38,
+                                  fontSize: 13.5,
+                                ),
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                                filled: true,
+                                fillColor: isDark ? const Color(0xFF18181B) : const Color(0xFFF8FAFC),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(20),
+                                  borderSide: BorderSide(
+                                    color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                                  ),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(20),
+                                  borderSide: BorderSide(
+                                    color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                                  ),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(20),
+                                  borderSide: BorderSide(
+                                    color: isDark ? Colors.white : Colors.black,
+                                  ),
+                                ),
+                              ),
+                            ),
+
+                            const SizedBox(height: 18),
+
+                            // 3. Classroom Info & Anggota Stack (Clickable to switch view, NO Kelola button)
+                            Container(
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: isDark ? const Color(0xFF18181B) : const Color(0xFFF8FAFC),
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(
+                                  color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                                ),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Container(
+                                        width: 38,
+                                        height: 38,
+                                        decoration: BoxDecoration(
+                                          color: const Color(0xFF0F766E).withValues(alpha: 0.15),
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: const Icon(
+                                          Icons.school_rounded,
+                                          color: Color(0xFF0F766E),
+                                          size: 20,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              'Classroom ID: $projectId',
+                                              style: GoogleFonts.plusJakartaSans(
+                                                fontSize: 14.0,
+                                                fontWeight: FontWeight.bold,
+                                                color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                              ),
+                                            ),
+                                            const SizedBox(height: 2),
+                                            Text(
+                                              '${activeSelectedMembers.length} Anggota',
+                                              style: GoogleFonts.dmSans(
+                                                fontSize: 12.0,
+                                                color: isDark ? Colors.white60 : const Color(0xFF64748B),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 14),
+                                  Text(
+                                    'Anggota',
+                                    style: GoogleFonts.plusJakartaSans(
+                                      fontSize: 12.5,
+                                      fontWeight: FontWeight.bold,
+                                      color: isDark ? Colors.white70 : Colors.black87,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  // Clickable member stack to open member management in same modal
+                                  InkWell(
+                                    onTap: () {
+                                      setModalState(() {
+                                        isManagingMembers = true;
+                                      });
+                                    },
+                                    borderRadius: BorderRadius.circular(16),
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(vertical: 4),
+                                      child: Row(
+                                        children: [
+                                          buildStackedAvatars(activeSelectedMembers),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+
+                            const SizedBox(height: 18),
+
+                            // Pengaturan Hak Akses / Role Admin
+                            Container(
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: isDark ? const Color(0xFF18181B) : const Color(0xFFF8FAFC),
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(
+                                  color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                                ),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      const Icon(
+                                        Icons.admin_panel_settings_rounded,
+                                        size: 18,
+                                        color: Color(0xFF0F766E),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        'Hak Akses Anggota',
+                                        style: GoogleFonts.plusJakartaSans(
+                                          fontSize: 13.0,
+                                          fontWeight: FontWeight.bold,
+                                          color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 10),
+                                  // Checkbox 1: Edit info grup (Only editable by admin)
+                                  InkWell(
+                                    onTap: isUserAdmin
+                                        ? () {
+                                            setModalState(() {
+                                              canAllMembersEditInfo = !canAllMembersEditInfo;
+                                            });
+                                          }
+                                        : null,
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(vertical: 4),
+                                      child: Row(
+                                        children: [
+                                          AnimatedContainer(
+                                            duration: const Duration(milliseconds: 180),
+                                            width: 20,
+                                            height: 20,
+                                            decoration: BoxDecoration(
+                                              shape: BoxShape.circle,
                                               color: canAllMembersEditInfo
                                                   ? (isDark ? Colors.white : Colors.black)
-                                                  : (isDark ? Colors.white38 : Colors.black26),
-                                              width: 2,
+                                                  : Colors.transparent,
+                                              border: Border.all(
+                                                color: canAllMembersEditInfo
+                                                    ? (isDark ? Colors.white : Colors.black)
+                                                    : (isDark ? Colors.white38 : Colors.black26),
+                                                width: 2,
+                                              ),
+                                            ),
+                                            child: canAllMembersEditInfo
+                                                ? Icon(
+                                                    Icons.check_rounded,
+                                                    color: isDark ? Colors.black : Colors.white,
+                                                    size: 13,
+                                                  )
+                                                : null,
+                                          ),
+                                          const SizedBox(width: 10),
+                                          Expanded(
+                                            child: Text(
+                                              'Seluruh anggota dapat mengubah info grup',
+                                              style: GoogleFonts.dmSans(
+                                                fontSize: 12.5,
+                                                color: isDark ? Colors.white70 : Colors.black87,
+                                                fontWeight: FontWeight.w500,
+                                              ),
                                             ),
                                           ),
-                                          child: canAllMembersEditInfo
-                                              ? Icon(
-                                                  Icons.check_rounded,
-                                                  color: isDark ? Colors.black : Colors.white,
-                                                  size: 13,
-                                                )
-                                              : null,
-                                        ),
-                                        const SizedBox(width: 10),
-                                        Expanded(
-                                          child: Text(
-                                            'Seluruh anggota dapat mengubah info grup',
-                                            style: GoogleFonts.dmSans(
-                                              fontSize: 12.5,
-                                              color: isDark ? Colors.white70 : Colors.black87,
-                                              fontWeight: FontWeight.w500,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
+                                        ],
+                                      ),
                                     ),
                                   ),
-                                ),
-                                const SizedBox(height: 6),
-                                // Checkbox 2: Undang teman (Only editable by admin)
-                                InkWell(
-                                  onTap: isUserAdmin
-                                      ? () {
-                                          setModalState(() {
-                                            canAllMembersInvite = !canAllMembersInvite;
-                                          });
-                                        }
-                                      : null,
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(vertical: 4),
-                                    child: Row(
-                                      children: [
-                                        AnimatedContainer(
-                                          duration: const Duration(milliseconds: 180),
-                                          width: 20,
-                                          height: 20,
-                                          decoration: BoxDecoration(
-                                            shape: BoxShape.circle,
-                                            color: canAllMembersInvite
-                                                ? (isDark ? Colors.white : Colors.black)
-                                                : Colors.transparent,
-                                            border: Border.all(
+                                  const SizedBox(height: 6),
+                                  // Checkbox 2: Undang teman (Only editable by admin)
+                                  InkWell(
+                                    onTap: isUserAdmin
+                                        ? () {
+                                            setModalState(() {
+                                              canAllMembersInvite = !canAllMembersInvite;
+                                            });
+                                          }
+                                        : null,
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(vertical: 4),
+                                      child: Row(
+                                        children: [
+                                          AnimatedContainer(
+                                            duration: const Duration(milliseconds: 180),
+                                            width: 20,
+                                            height: 20,
+                                            decoration: BoxDecoration(
+                                              shape: BoxShape.circle,
                                               color: canAllMembersInvite
                                                   ? (isDark ? Colors.white : Colors.black)
-                                                  : (isDark ? Colors.white38 : Colors.black26),
-                                              width: 2,
+                                                  : Colors.transparent,
+                                              border: Border.all(
+                                                color: canAllMembersInvite
+                                                    ? (isDark ? Colors.white : Colors.black)
+                                                    : (isDark ? Colors.white38 : Colors.black26),
+                                                width: 2,
+                                              ),
+                                            ),
+                                            child: canAllMembersInvite
+                                                ? Icon(
+                                                    Icons.check_rounded,
+                                                    color: isDark ? Colors.black : Colors.white,
+                                                    size: 13,
+                                                  )
+                                                : null,
+                                          ),
+                                          const SizedBox(width: 10),
+                                          Expanded(
+                                            child: Text(
+                                              'Seluruh anggota dapat mengundang teman',
+                                              style: GoogleFonts.dmSans(
+                                                fontSize: 12.5,
+                                                color: isDark ? Colors.white70 : Colors.black87,
+                                                fontWeight: FontWeight.w500,
+                                              ),
                                             ),
                                           ),
-                                          child: canAllMembersInvite
-                                              ? Icon(
-                                                  Icons.check_rounded,
-                                                  color: isDark ? Colors.black : Colors.white,
-                                                  size: 13,
-                                                )
-                                              : null,
-                                        ),
-                                        const SizedBox(width: 10),
-                                        Expanded(
-                                          child: Text(
-                                            'Seluruh anggota dapat mengundang teman',
-                                            style: GoogleFonts.dmSans(
-                                              fontSize: 12.5,
-                                              color: isDark ? Colors.white70 : Colors.black87,
-                                              fontWeight: FontWeight.w500,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
+                                        ],
+                                      ),
                                     ),
                                   ),
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  '• Pembuat grup dan Guru otomatis menjadi Admin.\n• Minimal 1 admin di dalam grup. Guru tidak dapat dilepas.',
-                                  style: GoogleFonts.dmSans(
-                                    fontSize: 11.0,
-                                    color: isDark ? Colors.white38 : Colors.black45,
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    '• Pembuat grup dan Guru otomatis menjadi Admin.\n• Minimal 1 admin di dalam grup. Guru tidak dapat dilepas.',
+                                    style: GoogleFonts.dmSans(
+                                      fontSize: 11.0,
+                                      color: isDark ? Colors.white38 : Colors.black45,
+                                    ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
-                  ),
                 ],
               ),
             );
@@ -2057,20 +2030,6 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
         );
       },
     );
-  }
-  Future<bool> _checkIsOwner(String projectId, String creatorUid) async {
-    final currentUid = FirebaseAuth.instance.currentUser?.uid;
-    if (currentUid == null) return false;
-    if (creatorUid == currentUid) return true;
-
-    if (projectId.isNotEmpty) {
-      final doc = await FirebaseFirestore.instance.collection('projects').doc(projectId).get();
-      if (doc.exists) {
-        final projectOwner = doc.data()?['ownerUid'] ?? doc.data()?['owner'] ?? '';
-        if (projectOwner == currentUid) return true;
-      }
-    }
-    return false;
   }
 
   Widget _buildMessageTextWithTime({
@@ -2236,12 +2195,15 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
                     children: [
-                      // Emoji reactions bar (Frameless press & mepet ke card)
                       Container(
                         margin: const EdgeInsets.only(bottom: 2),
                         decoration: BoxDecoration(
-                          color: isDark ? const Color(0xFF1E293B) : Colors.white,
+                          color: isDark ? const Color(0xFF141416) : Colors.white,
                           borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+                            width: 1.0,
+                          ),
                           boxShadow: [
                             BoxShadow(
                               color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.12),
@@ -2283,8 +2245,6 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                           ),
                         ),
                       ),
-
-                      // The Message Bubble itself with avatar beside it
                       Row(
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.end,
@@ -2304,21 +2264,22 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                           ],
                           Container(
                             constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.72),
-                            padding: EdgeInsets.fromLTRB(
-                              12,
-                              replyData != null ? 6 : 8,
-                              12,
-                              8,
-                            ),
+                            padding: EdgeInsets.fromLTRB(12, replyData != null ? 6 : 8, 12, 8),
                             decoration: BoxDecoration(
                               color: isMe
-                                  ? Colors.black
-                                  : (isDark ? const Color(0xFF1E293B) : Colors.white),
+                                  ? (isDark ? const Color(0xFF141416).withValues(alpha: 0.85) : Colors.black)
+                                  : (isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9)),
                               borderRadius: BorderRadius.only(
                                 topLeft: const Radius.circular(16),
                                 topRight: const Radius.circular(16),
                                 bottomLeft: isMe ? const Radius.circular(16) : const Radius.circular(4),
                                 bottomRight: isMe ? const Radius.circular(4) : const Radius.circular(16),
+                              ),
+                              border: Border.all(
+                                color: isMe
+                                    ? (isDark ? Colors.white.withValues(alpha: 0.12) : Colors.transparent)
+                                    : (isDark ? const Color(0xFF3F3F46) : const Color(0xFFE2E8F0)),
+                                width: 1.0,
                               ),
                               boxShadow: [
                                 BoxShadow(
@@ -2339,8 +2300,14 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                     decoration: BoxDecoration(
                                       color: isMe
                                           ? Colors.white.withValues(alpha: 0.12)
-                                          : (isDark ? Colors.black.withValues(alpha: 0.25) : const Color(0xFFF1F5F9)),
+                                          : (isDark ? Colors.black.withValues(alpha: 0.35) : Colors.white),
                                       borderRadius: BorderRadius.circular(10),
+                                      border: Border.all(
+                                        color: isMe
+                                            ? Colors.transparent
+                                            : (isDark ? const Color(0xFF3F3F46) : const Color(0xFFE2E8F0)),
+                                        width: 0.8,
+                                      ),
                                     ),
                                     child: Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -2350,7 +2317,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                           style: GoogleFonts.plusJakartaSans(
                                             fontSize: 11.0,
                                             fontWeight: FontWeight.bold,
-                                            color: isMe ? const Color(0xFF60A5FA) : const Color(0xFF2563EB),
+                                            color: isMe ? Colors.white : (isDark ? Colors.white70 : const Color(0xFF334155)),
                                           ),
                                         ),
                                         Text(
@@ -2374,7 +2341,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                     style: GoogleFonts.plusJakartaSans(
                                       fontSize: 12.0,
                                       fontWeight: FontWeight.bold,
-                                      color: senderColor,
+                                      color: isDark ? Colors.white70 : senderColor,
                                     ),
                                   ),
                                   const SizedBox(height: 2),
@@ -2417,17 +2384,14 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                           ],
                         ],
                       ),
-
                       const SizedBox(height: 4),
-
-                      // Context Menu Card (Sleek compact dropdown card)
                       Container(
                         width: 135,
                         decoration: BoxDecoration(
-                          color: isDark ? const Color(0xFF1E293B) : Colors.white,
+                          color: isDark ? const Color(0xFF141416) : Colors.white,
                           borderRadius: BorderRadius.circular(14),
                           border: Border.all(
-                            color: isDark ? const Color(0xFF334155) : const Color(0xFFF1F5F9),
+                            color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
                             width: 1.0,
                           ),
                           boxShadow: [
@@ -2443,7 +2407,6 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              // 1. Balas
                               _buildContextMenuItem(
                                 icon: Icons.reply_rounded,
                                 iconColor: const Color(0xFF3B82F6),
@@ -2461,9 +2424,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                   });
                                 },
                               ),
-                              Divider(height: 1, thickness: 0.5, color: isDark ? const Color(0xFF334155) : const Color(0xFFF1F5F9)),
-
-                              // 2. Edit (Tulis ulang di text box bawah)
+                              Divider(height: 1, thickness: 0.5, color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9)),
                               if (canEdit) ...[
                                 _buildContextMenuItem(
                                   icon: Icons.edit_rounded,
@@ -2483,10 +2444,8 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                     _inputFocusNode.requestFocus();
                                   },
                                 ),
-                                Divider(height: 1, thickness: 0.5, color: isDark ? const Color(0xFF334155) : const Color(0xFFF1F5F9)),
+                                Divider(height: 1, thickness: 0.5, color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9)),
                               ],
-
-                              // 3. Salin (Jika ada teks)
                               if (message.isNotEmpty) ...[
                                 _buildContextMenuItem(
                                   icon: Icons.copy_rounded,
@@ -2569,143 +2528,147 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = AppColors.isDarkMode;
     final currentUid = FirebaseAuth.instance.currentUser?.uid ?? '';
 
-    return PopScope(
-      canPop: true,
-      onPopInvokedWithResult: (didPop, result) async {
-        if (didPop) {
-          // If discussion was created but has 0 messages, auto-delete it on exit
-          if (!_isDraft && _currentDiscussionId.isNotEmpty) {
-            try {
-              final msgsSnap = await FirebaseFirestore.instance
-                  .collection('discussions')
-                  .doc(_currentDiscussionId)
-                  .collection('messages')
-                  .limit(1)
-                  .get();
-              if (msgsSnap.docs.isEmpty) {
-                final discDoc = await FirebaseFirestore.instance
-                    .collection('discussions')
-                    .doc(_currentDiscussionId)
-                    .get();
-                if (discDoc.exists && discDoc.data()?['isPrivate'] == true) {
-                  await FirebaseFirestore.instance
+    return ValueListenableBuilder<String>(
+      valueListenable: HubnerApp.themeNotifier,
+      builder: (context, themeMode, _) {
+        final isDark = themeMode == 'Gelap' || themeMode == 'Hitam';
+
+        return PopScope(
+          canPop: true,
+          onPopInvokedWithResult: (didPop, result) async {
+            if (didPop) {
+              // If discussion was created but has 0 messages, auto-delete it on exit
+              if (!_isDraft && _currentDiscussionId.isNotEmpty) {
+                try {
+                  final msgsSnap = await FirebaseFirestore.instance
                       .collection('discussions')
                       .doc(_currentDiscussionId)
-                      .delete();
-                }
+                      .collection('messages')
+                      .limit(1)
+                      .get();
+                  if (msgsSnap.docs.isEmpty) {
+                    final discDoc = await FirebaseFirestore.instance
+                        .collection('discussions')
+                        .doc(_currentDiscussionId)
+                        .get();
+                    if (discDoc.exists && discDoc.data()?['isPrivate'] == true) {
+                      await FirebaseFirestore.instance
+                          .collection('discussions')
+                          .doc(_currentDiscussionId)
+                          .delete();
+                    }
+                  }
+                } catch (_) {}
               }
-            } catch (_) {}
-          }
-        }
-      },
-      child: StreamBuilder<DocumentSnapshot>(
-        stream: (!_isDraft && _currentDiscussionId.isNotEmpty)
-            ? FirebaseFirestore.instance
-                .collection('discussions')
-                .doc(_currentDiscussionId)
-                .snapshots()
-            : null,
-        builder: (context, discSnapshot) {
-          final discData = discSnapshot.data?.data() as Map<String, dynamic>?;
-          final channelTitle = discData?['channel'] ?? widget.channelName;
-          final channelDesc = discData?['title'] ?? '';
-          final isPrivate = _isDraft ? true : (discData?['isPrivate'] ?? false);
-          final memberUids = List<String>.from(discData?['memberUids'] ?? []);
-          final memberCount = memberUids.isNotEmpty ? memberUids.length : 1;
-          final subtitle = isPrivate ? 'Obrolan Pribadi' : '$channelDesc • $memberCount anggota';
-          final projectId = discData?['projectId'] as String? ?? '';
-          final isOwner = discData?['creatorUid'] == currentUid || _userRole == 'guru';
-
-          return StreamBuilder<DocumentSnapshot>(
-            stream: projectId.isNotEmpty
-                ? FirebaseFirestore.instance.collection('projects').doc(projectId).snapshots()
+            }
+          },
+          child: StreamBuilder<DocumentSnapshot>(
+            stream: (!_isDraft && _currentDiscussionId.isNotEmpty)
+                ? FirebaseFirestore.instance
+                    .collection('discussions')
+                    .doc(_currentDiscussionId)
+                    .snapshots()
                 : null,
-            builder: (context, projSnapshot) {
-              final projData = projSnapshot.data?.data() as Map<String, dynamic>?;
+            builder: (context, discSnapshot) {
+              final discData = discSnapshot.data?.data() as Map<String, dynamic>?;
+              final channelTitle = discData?['channel'] ?? widget.channelName;
+              final channelDesc = discData?['title'] ?? '';
+              final isPrivate = _isDraft ? true : (discData?['isPrivate'] ?? false);
+              final memberUids = List<String>.from(discData?['memberUids'] ?? []);
+              final memberCount = memberUids.isNotEmpty ? memberUids.length : 1;
+              final subtitle = isPrivate ? 'Obrolan Pribadi' : '$channelDesc • $memberCount anggota';
+              final projectId = discData?['projectId'] as String? ?? '';
+              final isOwner = discData?['creatorUid'] == currentUid || _userRole == 'guru';
 
-              final double fullScreenHeight = MediaQuery.of(context).size.height;
-              final double fullScreenWidth = MediaQuery.of(context).size.width;
+              return StreamBuilder<DocumentSnapshot>(
+                stream: projectId.isNotEmpty
+                    ? FirebaseFirestore.instance.collection('projects').doc(projectId).snapshots()
+                    : null,
+                builder: (context, projSnapshot) {
+                  final projData = projSnapshot.data?.data() as Map<String, dynamic>?;
 
-              return Scaffold(
-              backgroundColor: isDark ? const Color(0xFF0A0910) : const Color(0xFFFAF8FF),
-              body: Stack(
-                children: [
-                  // 1. Sticky Wallpaper background (Does not move or squish when keyboard appears)
-                  Positioned(
-                    top: 0,
-                    left: 0,
-                    width: fullScreenWidth,
-                    height: fullScreenHeight,
-                    child: AnimatedPurpleMicroPatternBackground(
-                      isDark: isDark,
-                      child: const SizedBox.shrink(),
-                    ),
-                  ),
+                  final double fullScreenHeight = MediaQuery.of(context).size.height;
+                  final double fullScreenWidth = MediaQuery.of(context).size.width;
 
-                  // 2. Main Column: Solid White Header + Full Viewport Messages Stack + Solid White Input Bar
-                  Column(
+                  return Scaffold(
+                  backgroundColor: isDark ? const Color(0xFF000000) : const Color(0xFFFAF8FF),
+                  body: Stack(
                     children: [
-                      // Header Bar (Transparan 50% + Blur Glassmorphic dengan Border Bawah)
-                      ClipRect(
-                        child: BackdropFilter(
-                          filter: ui.ImageFilter.blur(sigmaX: 16, sigmaY: 16),
-                          child: Container(
-                            width: double.infinity,
-                            padding: EdgeInsets.fromLTRB(
-                              14.0,
-                              MediaQuery.of(context).padding.top + 10.0,
-                              14.0,
-                              12.0,
-                            ),
-                            decoration: BoxDecoration(
-                              color: isDark
-                                  ? const Color(0xFF0F0B1E).withValues(alpha: 0.70)
-                                  : Colors.white.withValues(alpha: 0.70),
-                              border: Border(
-                                bottom: BorderSide(
+                      // 1. Sticky Wallpaper background (Does not move or squish when keyboard appears)
+                      Positioned(
+                        top: 0,
+                        left: 0,
+                        width: fullScreenWidth,
+                        height: fullScreenHeight,
+                        child: AnimatedPurpleMicroPatternBackground(
+                          isDark: isDark,
+                          child: const SizedBox.shrink(),
+                        ),
+                      ),
+
+                      // 2. Main Column: Solid White Header + Full Viewport Messages Stack + Solid White Input Bar
+                      Column(
+                        children: [
+                          // Header Bar (Transparan 50% + Blur Glassmorphic dengan Border Bawah)
+                          ClipRect(
+                            child: BackdropFilter(
+                              filter: ui.ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+                              child: Container(
+                                width: double.infinity,
+                                padding: EdgeInsets.fromLTRB(
+                                  14.0,
+                                  MediaQuery.of(context).padding.top + 10.0,
+                                  14.0,
+                                  12.0,
+                                ),
+                                decoration: BoxDecoration(
                                   color: isDark
-                                      ? Colors.white.withValues(alpha: 0.12)
-                                      : Colors.white.withValues(alpha: 0.50),
-                                  width: 1.0,
-                                ),
-                              ),
-                            ),
-                        child: Row(
-                          children: [
-                            if (!widget.isEmbedded) ...[
-                              BouncyButton(
-                                onTap: () => Navigator.pop(context),
-                                child: Container(
-                                  width: 42,
-                                  height: 42,
-                                  decoration: BoxDecoration(
-                                    color: isDark ? const Color(0xFF18181B) : Colors.white,
-                                    shape: BoxShape.circle,
-                                    border: Border.all(
-                                      color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
-                                      width: 1.2,
+                                      ? const Color(0xFF000000).withValues(alpha: 0.75)
+                                      : Colors.white.withValues(alpha: 0.70),
+                                  border: Border(
+                                    bottom: BorderSide(
+                                      color: isDark
+                                          ? const Color(0xFF27272A)
+                                          : const Color(0xFFF1F5F9),
+                                      width: 1.0,
                                     ),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.04),
-                                        blurRadius: 8,
-                                        offset: const Offset(0, 2),
-                                      ),
-                                    ],
-                                  ),
-                                  child: Icon(
-                                    Icons.arrow_back_rounded,
-                                    color: isDark ? Colors.white : Colors.black,
-                                    size: 20,
                                   ),
                                 ),
-                              ),
-                              const SizedBox(width: 14),
-                            ],
-                            Expanded(
+                            child: Row(
+                              children: [
+                                if (!widget.isEmbedded) ...[
+                                  BouncyButton(
+                                    onTap: () => Navigator.pop(context),
+                                    child: Container(
+                                      width: 42,
+                                      height: 42,
+                                      decoration: BoxDecoration(
+                                        color: isDark ? const Color(0xFF18181B) : Colors.white,
+                                        shape: BoxShape.circle,
+                                        border: Border.all(
+                                          color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+                                          width: 1.2,
+                                        ),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.04),
+                                            blurRadius: 8,
+                                            offset: const Offset(0, 2),
+                                          ),
+                                        ],
+                                      ),
+                                      child: Icon(
+                                        Icons.arrow_back_rounded,
+                                        color: isDark ? Colors.white : Colors.black,
+                                        size: 20,
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 14),
+                                ],
+                                Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
@@ -2755,10 +2718,10 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                       width: 42,
                                       height: 42,
                                       decoration: BoxDecoration(
-                                        color: isDark ? const Color(0xFF1E293B) : const Color(0xFFEFF6FF),
+                                        color: isDark ? const Color(0xFF000000) : const Color(0xFFEFF6FF),
                                         shape: BoxShape.circle,
                                         border: Border.all(
-                                          color: isDark ? const Color(0xFF334155) : const Color(0xFFDBEAFE),
+                                          color: isDark ? const Color(0xFF27272A) : const Color(0xFFDBEAFE),
                                           width: 1.2,
                                         ),
                                         boxShadow: [
@@ -2817,12 +2780,12 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(16),
                                 side: BorderSide(
-                                  color: isDark ? const Color(0xFF334155) : const Color(0xFFF1F5F9),
+                                  color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
                                   width: 1.0,
                                 ),
                               ),
                               elevation: 6,
-                              color: isDark ? const Color(0xFF1E293B) : Colors.white,
+                              color: isDark ? const Color(0xFF141416) : Colors.white,
                               icon: Container(
                                 width: 42,
                                 height: 42,
@@ -3317,8 +3280,12 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                             child: Container(
                                               padding: const EdgeInsets.all(8),
                                               decoration: BoxDecoration(
-                                                color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                                                color: isDark ? const Color(0xFF18181B) : Colors.white,
                                                 shape: BoxShape.circle,
+                                                border: Border.all(
+                                                  color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                                                  width: 1.0,
+                                                ),
                                               ),
                                               child: Icon(
                                                 Icons.reply_rounded,
@@ -3388,13 +3355,19 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                                           ),
                                                           decoration: BoxDecoration(
                                                             color: isMe
-                                                                ? Colors.black
-                                                                : (isDark ? const Color(0xFF1E293B) : Colors.white),
+                                                                ? (isDark ? const Color(0xFF141416).withValues(alpha: 0.85) : Colors.black)
+                                                                : (isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9)),
                                                             borderRadius: BorderRadius.only(
                                                               topLeft: const Radius.circular(16),
                                                               topRight: const Radius.circular(16),
                                                               bottomLeft: isMe ? const Radius.circular(16) : const Radius.circular(4),
                                                               bottomRight: isMe ? const Radius.circular(4) : const Radius.circular(16),
+                                                            ),
+                                                            border: Border.all(
+                                                              color: isMe
+                                                                  ? (isDark ? Colors.white.withValues(alpha: 0.12) : Colors.transparent)
+                                                                  : (isDark ? const Color(0xFF3F3F46) : const Color(0xFFE2E8F0)),
+                                                              width: 1.0,
                                                             ),
                                                             boxShadow: [
                                                               BoxShadow(
@@ -3419,7 +3392,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                                                           targetKey!.currentContext!,
                                                                           duration: const Duration(milliseconds: 400),
                                                                           curve: Curves.easeOut,
-                                                                          alignment: 0.3,
+                                                                          alignment: 0.2,
                                                                         );
                                                                       }
                                                                     }
@@ -3430,8 +3403,14 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                                                     decoration: BoxDecoration(
                                                                       color: isMe
                                                                           ? Colors.white.withValues(alpha: 0.12)
-                                                                          : (isDark ? Colors.black.withValues(alpha: 0.25) : const Color(0xFFF1F5F9)),
+                                                                          : (isDark ? Colors.black.withValues(alpha: 0.35) : Colors.white),
                                                                       borderRadius: BorderRadius.circular(10),
+                                                                      border: Border.all(
+                                                                        color: isMe
+                                                                            ? Colors.transparent
+                                                                            : (isDark ? const Color(0xFF3F3F46) : const Color(0xFFE2E8F0)),
+                                                                        width: 0.8,
+                                                                      ),
                                                                     ),
                                                                     child: Column(
                                                                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -3441,7 +3420,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                                                           style: GoogleFonts.plusJakartaSans(
                                                                             fontSize: 11.0,
                                                                             fontWeight: FontWeight.bold,
-                                                                            color: isMe ? const Color(0xFF60A5FA) : const Color(0xFF2563EB),
+                                                                            color: isMe ? Colors.white : (isDark ? Colors.white70 : const Color(0xFF334155)),
                                                                           ),
                                                                         ),
                                                                         Text(
@@ -3466,7 +3445,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                                                   style: GoogleFonts.plusJakartaSans(
                                                                     fontSize: 12.0,
                                                                     fontWeight: FontWeight.bold,
-                                                                    color: senderColor,
+                                                                    color: isDark ? Colors.white70 : senderColor,
                                                                   ),
                                                                 ),
                                                                 const SizedBox(height: 2),
@@ -3590,10 +3569,10 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                                                   Container(
                                                                     padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
                                                                     decoration: BoxDecoration(
-                                                                      color: isDark ? const Color(0xFF1E293B) : Colors.white,
+                                                                      color: isDark ? const Color(0xFF18181B) : Colors.white,
                                                                       borderRadius: BorderRadius.circular(10),
                                                                       border: Border.all(
-                                                                        color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                                                                        color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
                                                                         width: 1.2,
                                                                       ),
                                                                       boxShadow: [
@@ -3666,9 +3645,12 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                     child: Container(
                                       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
                                       decoration: BoxDecoration(
-                                        color: const Color(0xFFF3EEFF),
+                                        color: isDark ? const Color(0xFF18181B) : const Color(0xFFF3EEFF),
                                         border: Border(
-                                          bottom: BorderSide(color: const Color(0xFFD8B4FE).withValues(alpha: 0.4), width: 1),
+                                          bottom: BorderSide(
+                                            color: isDark ? const Color(0xFF27272A) : const Color(0xFFD8B4FE).withValues(alpha: 0.4),
+                                            width: 1,
+                                          ),
                                         ),
                                       ),
                                       child: Row(
@@ -3703,10 +3685,10 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                       width: 40,
                                       height: 40,
                                       decoration: BoxDecoration(
-                                        color: isDark ? const Color(0xFF1E293B) : Colors.white,
+                                        color: isDark ? const Color(0xFF18181B) : Colors.white,
                                         shape: BoxShape.circle,
                                         border: Border.all(
-                                          color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                                          color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
                                           width: 1.0,
                                         ),
                                         boxShadow: [
@@ -3727,7 +3709,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                   ),
                                 ),
 
-                              // 4. Glassmorphic Flat Input Bar (Non-Round, Transparan 60% + Blur)
+                              // 4. Glassmorphic Flat Input Bar (Non-Round, Transparan 80% Hitam + Blur)
                               Positioned(
                                 left: 0,
                                 right: 0,
@@ -3738,13 +3720,13 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                     child: Container(
                                       decoration: BoxDecoration(
                                         color: isDark
-                                            ? const Color(0xFF0F0B1E).withValues(alpha: 0.60)
-                                            : Colors.white.withValues(alpha: 0.60),
+                                            ? const Color(0xFF000000).withValues(alpha: 0.80)
+                                            : Colors.white.withValues(alpha: 0.70),
                                         border: Border(
                                           top: BorderSide(
                                             color: isDark
-                                                ? Colors.white.withValues(alpha: 0.12)
-                                                : Colors.white.withValues(alpha: 0.50),
+                                                ? const Color(0xFF27272A)
+                                                : const Color(0xFFF1F5F9),
                                             width: 1.0,
                                           ),
                                         ),
@@ -3767,10 +3749,10 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                               height: 38,
                                               margin: const EdgeInsets.only(bottom: 8),
                                               decoration: BoxDecoration(
-                                                color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF8FAFC),
+                                                color: isDark ? const Color(0xFF18181B) : const Color(0xFFF8FAFC),
                                                 borderRadius: BorderRadius.circular(19),
                                                 border: Border.all(
-                                                  color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                                                  color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
                                                   width: 1.0,
                                                 ),
                                               ),
@@ -3823,7 +3805,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                                       margin: const EdgeInsets.only(right: 8),
                                                       padding: const EdgeInsets.all(4),
                                                       decoration: BoxDecoration(
-                                                        color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                                                        color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
                                                         shape: BoxShape.circle,
                                                       ),
                                                       child: Icon(
@@ -3844,10 +3826,10 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                               height: 38,
                                               margin: const EdgeInsets.only(bottom: 8),
                                               decoration: BoxDecoration(
-                                                color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF8FAFC),
+                                                color: isDark ? const Color(0xFF18181B) : const Color(0xFFF8FAFC),
                                                 borderRadius: BorderRadius.circular(19),
                                                 border: Border.all(
-                                                  color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                                                  color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
                                                   width: 1.0,
                                                 ),
                                               ),
@@ -3899,7 +3881,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                                       margin: const EdgeInsets.only(right: 8),
                                                       padding: const EdgeInsets.all(4),
                                                       decoration: BoxDecoration(
-                                                        color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                                                        color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
                                                         shape: BoxShape.circle,
                                                       ),
                                                       child: Icon(
@@ -4030,7 +4012,9 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
       },
     ),
   );
-}
+},
+);
+  }
 }
 
 class ClassroomCardPatternPainter extends CustomPainter {
@@ -4207,7 +4191,13 @@ class FullScreenImagePage extends StatelessWidget {
             fit: BoxFit.contain,
             loadingBuilder: (context, child, loadingProgress) {
               if (loadingProgress == null) return child;
-              return const Center(child: ThreeDotsLoader());
+              return const Center(
+                child: SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white70),
+                ),
+              );
             },
             errorBuilder: (context, error, stackTrace) {
               return const Center(
