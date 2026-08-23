@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:googleapis/drive/v3.dart' as drive;
 import 'package:http/http.dart' as http;
@@ -97,6 +98,91 @@ class GoogleDriveService {
       return created.id ?? '';
     } catch (e) {
       throw Exception('Gagal membuat folder Google Drive: $e');
+    }
+  }
+
+  /// Buat folder publik bersama yang bisa diakses, diedit, dihapus, dan ditambah oleh siapa saja dengan link
+  static Future<Map<String, String>> createPublicSharedFolder({
+    required String accessToken,
+    required String folderName,
+  }) async {
+    try {
+      final api = getDriveApi(accessToken);
+      final folder = drive.File()
+        ..name = folderName
+        ..mimeType = 'application/vnd.google-apps.folder';
+      
+      final created = await api.files.create(folder);
+      final folderId = created.id!;
+      final folderUrl = 'https://drive.google.com/drive/folders/$folderId';
+
+      // Berikan hak akses publik 'writer' agar siapa pun dengan link dapat menambah/mengedit/menghapus file
+      try {
+        await api.permissions.create(
+          drive.Permission()
+            ..type = 'anyone'
+            ..role = 'writer',
+          folderId,
+        );
+      } catch (_) {
+        try {
+          await api.permissions.create(
+            drive.Permission()
+              ..type = 'anyone'
+              ..role = 'reader',
+            folderId,
+          );
+        } catch (_) {}
+      }
+
+      return {
+        'folderId': folderId,
+        'folderUrl': folderUrl,
+      };
+    } catch (e) {
+      throw Exception('Gagal membuat folder publik Google Drive: $e');
+    }
+  }
+
+  /// Setup folder publik untuk user dan simpan ke Firestore
+  static Future<Map<String, String>?> setupUserPublicDriveFolder({
+    required String uid,
+    String? folderName,
+  }) async {
+    try {
+      var account = await GoogleSignIn.instance.attemptLightweightAuthentication();
+      account ??= await GoogleSignIn.instance.authenticate();
+
+      final auth = await account.authorizationClient.authorizeScopes([
+        drive.DriveApi.driveFileScope,
+      ]);
+      final accessToken = auth.accessToken;
+
+      final name = folderName ?? 'Hubner Edu - Dokumen Bersama';
+      final folderData = await createPublicSharedFolder(
+        accessToken: accessToken,
+        folderName: name,
+      );
+
+      final folderId = folderData['folderId']!;
+      final folderUrl = folderData['folderUrl']!;
+
+      // Simpan ke Firestore
+      await FirebaseFirestore.instance.collection('users').doc(uid).set({
+        'publicDriveFolderId': folderId,
+        'publicDriveFolderUrl': folderUrl,
+        'publicDriveConnectedEmail': account.email,
+        'publicDriveConnectedAt': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
+
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool(_prefKeyConnected, true);
+      await prefs.setString(_prefKeyEmail, account.email);
+
+      return folderData;
+    } catch (e) {
+      debugPrint('Error setupUserPublicDriveFolder: $e');
+      rethrow;
     }
   }
 

@@ -3102,54 +3102,7 @@ class _HomePageState extends State<HomePage> {
                               ),
                               Row(
                                 children: [
-                                  if (role.toLowerCase() != 'guru') ...[
-                                    // Gabung Project button
-                                    GestureDetector(
-                                      onTap: () =>
-                                          _showJoinProjectBottomSheet(context),
-                                      child: Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 14,
-                                          vertical: 8,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: Colors.black,
-                                          borderRadius: BorderRadius.circular(
-                                            12,
-                                          ),
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color: Colors.black.withOpacity(
-                                                0.1,
-                                              ),
-                                              blurRadius: 4,
-                                              offset: const Offset(0, 2),
-                                            ),
-                                          ],
-                                        ),
-                                        child: Row(
-                                          children: [
-                                            const Icon(
-                                              Icons.add_rounded,
-                                              color: Colors.white,
-                                              size: 16,
-                                            ),
-                                            const SizedBox(width: 6),
-                                            Text(
-                                              'Gabung Kelas',
-                                              style:
-                                                  GoogleFonts.plusJakartaSans(
-                                                    fontSize: 14.0,
-                                                    fontWeight: FontWeight.bold,
-                                                    color: Colors.white,
-                                                  ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(width: 8),
-                                  ],
+
 
                                   // Tombol Kelola Kelas (Ikon Lingkaran Hitam & Centang Hijau Tanpa Background)
                                   ValueListenableBuilder<bool>(
@@ -3188,38 +3141,34 @@ class _HomePageState extends State<HomePage> {
                                           ),
                                         );
                                       }
-
-                                      // Saat Normal: Lingkaran dengan Ikon Hitam / Putih
-                                      return GestureDetector(
+                                      return BouncyButton(
                                         onTap: () {
-                                          _isManagingClassesNotifier.value = true;
+                                          _isManagingClassesNotifier.value = !isManaging;
                                         },
                                         child: Container(
-                                          width: 38,
-                                          height: 38,
+                                          width: 44,
+                                          height: 44,
                                           decoration: BoxDecoration(
                                             color: isDark ? const Color(0xFF18181B) : Colors.white,
                                             shape: BoxShape.circle,
                                             border: Border.all(
-                                              color: isDark
-                                                  ? const Color(0xFF27272A)
-                                                  : const Color(0xFFF1F5F9),
-                                              width: 1.0,
+                                              color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+                                              width: 1.2,
                                             ),
                                             boxShadow: [
                                               BoxShadow(
-                                                color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.06),
-                                                blurRadius: 6,
+                                                color: Colors.black.withValues(
+                                                  alpha: isDark ? 0.35 : 0.04,
+                                                ),
+                                                blurRadius: 8,
                                                 offset: const Offset(0, 2),
                                               ),
                                             ],
                                           ),
-                                          child: Center(
-                                            child: Icon(
-                                              Icons.dashboard_customize_rounded,
-                                              color: isDark ? Colors.white : Colors.black87,
-                                              size: 19,
-                                            ),
+                                          child: Icon(
+                                            Icons.dashboard_customize_rounded,
+                                            color: isDark ? Colors.white : Colors.black87,
+                                            size: 20,
                                           ),
                                         ),
                                       );
@@ -7511,126 +7460,112 @@ class _HomeSearchAndNotesRowState extends State<_HomeSearchAndNotesRow> {
         );
       },
       child: _isExpanded
-          ? Row(
+          ? Container(
               key: const ValueKey('home_search_bar_expanded'),
-              children: [
-                // Text box pencarian model input id gabung
-                Expanded(
-                  child: Container(
-                    height: 44,
-                    padding: const EdgeInsets.symmetric(horizontal: 14),
-                    decoration: BoxDecoration(
-                      color: isDark ? const Color(0xFF18181B) : Colors.white,
-                      borderRadius: BorderRadius.circular(14),
-                      border: Border.all(
-                        color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
-                        width: 1.2,
+              height: 54,
+              padding: const EdgeInsets.fromLTRB(16, 0, 6, 0),
+              decoration: BoxDecoration(
+                color: isDark ? const Color(0xFF18181B) : Colors.white,
+                borderRadius: BorderRadius.circular(32),
+                border: Border.all(
+                  color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                  width: 1.2,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.04),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.search_rounded,
+                    color: isDark ? Colors.white60 : Colors.black45,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: TextField(
+                      key: const ValueKey('home_search_input'),
+                      controller: _controller,
+                      focusNode: _focusNode,
+                      keyboardType: TextInputType.text,
+                      textInputAction: TextInputAction.search,
+                      autofocus: false,
+                      onChanged: (val) {
+                        setState(() {});
+                        _onChanged(val);
+                      },
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 15.0,
+                        fontWeight: FontWeight.w600,
+                        color: isDark ? Colors.white : Colors.black87,
                       ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.04),
-                          blurRadius: 6,
-                          offset: const Offset(0, 2),
+                      decoration: InputDecoration(
+                        hintText: 'Cari kelas / materi...',
+                        hintStyle: GoogleFonts.dmSans(
+                          color: isDark ? Colors.white38 : Colors.black38,
+                          fontSize: 14.5,
                         ),
-                      ],
+                        border: InputBorder.none,
+                        isDense: true,
+                        contentPadding: EdgeInsets.zero,
+                      ),
                     ),
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.search_rounded,
+                  ),
+                  if (_controller.text.isNotEmpty)
+                    GestureDetector(
+                      onTap: () {
+                        _controller.clear();
+                        setState(() {});
+                        widget.onSearchChanged('');
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 6),
+                        child: Icon(
+                          Icons.clear_rounded,
                           color: isDark ? Colors.white60 : Colors.black45,
                           size: 18,
                         ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: TextField(
-                            key: const ValueKey('home_search_input'),
-                            controller: _controller,
-                            focusNode: _focusNode,
-                            keyboardType: TextInputType.text,
-                            textInputAction: TextInputAction.search,
-                            autofocus: false,
-                            onChanged: (val) {
-                              setState(() {});
-                              _onChanged(val);
-                            },
+                      ),
+                    ),
+                  const SizedBox(width: 6),
+                  GestureDetector(
+                    onTap: _collapse,
+                    child: Container(
+                      height: 42,
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      decoration: BoxDecoration(
+                        color: isDark ? const Color(0xFF27272A) : const Color(0xFF0F172A),
+                        borderRadius: BorderRadius.circular(22),
+                      ),
+                      alignment: Alignment.center,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(
+                            Icons.close_rounded,
+                            size: 15,
+                            color: Colors.white,
+                          ),
+                          const SizedBox(width: 5),
+                          Text(
+                            'Tutup',
                             style: GoogleFonts.plusJakartaSans(
-                              fontSize: 13.5,
-                              color: isDark ? Colors.white : Colors.black87,
-                            ),
-                            decoration: InputDecoration(
-                              hintText: 'Cari kelas / materi...',
-                              hintStyle: GoogleFonts.dmSans(
-                                color: isDark ? Colors.white38 : Colors.black38,
-                                fontSize: 13.5,
-                              ),
-                              border: InputBorder.none,
-                              isDense: true,
-                              contentPadding: const EdgeInsets.symmetric(vertical: 8),
+                              fontSize: 14.0,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
                             ),
                           ),
-                        ),
-                        if (_controller.text.isNotEmpty)
-                          GestureDetector(
-                            onTap: () {
-                              _controller.clear();
-                              setState(() {});
-                              widget.onSearchChanged('');
-                            },
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 4),
-                              child: Icon(
-                                Icons.clear_rounded,
-                                color: isDark ? Colors.white60 : Colors.black45,
-                                size: 16,
-                              ),
-                            ),
-                          ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(width: 8),
-
-                // Tombol Tutup warna hitam text putih frameless mirip tombol gabung di detail kelas
-                GestureDetector(
-                  onTap: _collapse,
-                  child: Container(
-                    height: 44,
-                    padding: const EdgeInsets.symmetric(horizontal: 14),
-                    decoration: BoxDecoration(
-                      color: isDark ? Colors.white : Colors.black,
-                      borderRadius: BorderRadius.circular(14),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.12),
-                          blurRadius: 4,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.close_rounded,
-                          size: 15,
-                          color: isDark ? Colors.black : Colors.white,
-                        ),
-                        const SizedBox(width: 5),
-                        Text(
-                          'Tutup',
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 13.5,
-                            fontWeight: FontWeight.bold,
-                            color: isDark ? Colors.black : Colors.white,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
+                ],
+              ),
             )
           : Row(
               key: const ValueKey('home_search_bar_collapsed'),
