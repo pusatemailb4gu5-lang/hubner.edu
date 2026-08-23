@@ -4720,6 +4720,32 @@ class _AnimatedPurpleMicroPatternBackgroundState extends State<AnimatedPurpleMic
   }
 }
 
+class _AbstractSquiggleData {
+  final double xFrac;
+  final double yFrac;
+  final double driftX;
+  final double driftY;
+  final double speedX;
+  final double speedY;
+  final double baseAngle;
+  final double rotSpeed;
+  final double scale;
+  final int style;
+
+  const _AbstractSquiggleData(
+    this.xFrac,
+    this.yFrac,
+    this.driftX,
+    this.driftY,
+    this.speedX,
+    this.speedY,
+    this.baseAngle,
+    this.rotSpeed,
+    this.scale,
+    this.style,
+  );
+}
+
 class _PurpleMicroPatternPainter extends CustomPainter {
   final double animationValue;
   final bool isDark;
@@ -4729,18 +4755,43 @@ class _PurpleMicroPatternPainter extends CustomPainter {
     required this.isDark,
   });
 
+  static const List<_AbstractSquiggleData> _squiggles = [
+    _AbstractSquiggleData(0.12, 0.08, 16.0, 22.0, 1.0, 1.2, 0.4, 0.8, 1.1, 0),
+    _AbstractSquiggleData(0.48, 0.05, 22.0, 14.0, -1.1, 0.9, -0.6, -1.0, 0.95, 1),
+    _AbstractSquiggleData(0.84, 0.12, 18.0, 24.0, 0.8, -1.3, 1.1, 0.7, 1.2, 2),
+    _AbstractSquiggleData(0.26, 0.22, 25.0, 16.0, -1.3, 1.0, -1.4, -0.9, 0.9, 3),
+    _AbstractSquiggleData(0.68, 0.26, 17.0, 26.0, 1.2, -0.8, 0.8, 1.1, 1.15, 4),
+    _AbstractSquiggleData(0.08, 0.38, 22.0, 18.0, 0.9, 1.4, -0.3, -0.8, 1.2, 5),
+    _AbstractSquiggleData(0.92, 0.35, 16.0, 28.0, -1.0, -1.1, 1.5, 0.6, 0.95, 6),
+    _AbstractSquiggleData(0.42, 0.44, 26.0, 20.0, 1.4, 0.7, -0.9, -1.2, 1.05, 0),
+    _AbstractSquiggleData(0.72, 0.52, 18.0, 22.0, -0.7, -1.4, 0.5, 1.0, 1.25, 1),
+    _AbstractSquiggleData(0.18, 0.58, 24.0, 17.0, 1.1, 1.1, -1.2, -0.7, 0.88, 2),
+    _AbstractSquiggleData(0.54, 0.64, 21.0, 24.0, -1.2, 0.8, 1.3, 0.9, 1.1, 3),
+    _AbstractSquiggleData(0.88, 0.68, 19.0, 21.0, 0.8, -1.0, -0.4, -1.1, 1.0, 4),
+    _AbstractSquiggleData(0.14, 0.76, 23.0, 18.0, -1.0, 1.3, 0.9, 0.8, 1.2, 5),
+    _AbstractSquiggleData(0.46, 0.82, 17.0, 28.0, 1.3, -0.9, -1.1, -1.0, 1.05, 6),
+    _AbstractSquiggleData(0.80, 0.88, 22.0, 19.0, -0.9, 1.2, 1.4, 0.7, 0.92, 0),
+    _AbstractSquiggleData(0.30, 0.94, 20.0, 23.0, 1.0, -1.1, -0.7, -0.8, 1.2, 1),
+    _AbstractSquiggleData(0.95, 0.92, 18.0, 20.0, -1.2, 0.9, 0.6, 1.1, 1.05, 2),
+    _AbstractSquiggleData(0.06, 0.90, 25.0, 16.0, 0.7, 1.4, -1.5, -0.6, 0.88, 3),
+    _AbstractSquiggleData(0.62, 0.16, 21.0, 22.0, -1.4, -0.8, 0.2, 1.2, 1.1, 4),
+    _AbstractSquiggleData(0.36, 0.34, 19.0, 25.0, 1.1, 1.0, -0.8, -0.9, 0.95, 5),
+    _AbstractSquiggleData(0.86, 0.48, 23.0, 17.0, -0.8, -1.2, 1.0, 0.8, 1.3, 6),
+    _AbstractSquiggleData(0.10, 0.62, 18.0, 24.0, 1.3, 0.9, -0.5, -1.1, 1.05, 0),
+  ];
+
   @override
   void paint(Canvas canvas, Size size) {
-    // 1. Solid Flat Background (Hitam pekat solid #000000, bukan abu-abu)
+    // 1. Solid Flat Background (Hitam pekat solid #000000)
     final Color solidBg = isDark ? const Color(0xFF000000) : const Color(0xFFFAF9FD);
     canvas.drawColor(solidBg, BlendMode.src);
 
-    // 2. Abstract Pattern Paint (Ungu soft elegan)
+    // 2. Abstract Squiggle & Brush Paint (Ungu soft elegan)
     final strokePaint = Paint()
       ..color = (isDark ? const Color(0xFFA855F7) : const Color(0xFF7C3AED))
           .withValues(alpha: isDark ? 0.14 : 0.10)
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.2
+      ..strokeWidth = 1.3
       ..strokeCap = StrokeCap.round
       ..strokeJoin = StrokeJoin.round;
 
@@ -4749,195 +4800,109 @@ class _PurpleMicroPatternPainter extends CustomPainter {
           .withValues(alpha: isDark ? 0.18 : 0.12)
       ..style = PaintingStyle.fill;
 
-    const double cellSize = 82.0;
-    final int cols = (size.width / cellSize).ceil() + 2;
-    final int rows = (size.height / cellSize).ceil() + 2;
+    for (int i = 0; i < _squiggles.length; i++) {
+      final sq = _squiggles[i];
 
-    for (int r = -1; r < rows; r++) {
-      for (int c = -1; c < cols; c++) {
-        // Base anchor
-        final double xOffset = (r % 2 == 1) ? cellSize * 0.45 : 0.0;
-        final double baseX = (c * cellSize) + xOffset;
-        final double baseY = (r * cellSize);
+      // Gerak mengambang dinamis ke sana ke mari secara organik
+      final double progressX = (animationValue * sq.speedX) % 1.0;
+      final double progressY = (animationValue * sq.speedY) % 1.0;
 
-        // Organic Pseudo-Random Jitter (Tidak beraturan)
-        final double jitterX = sin(c * 19.3 + r * 37.7) * (cellSize * 0.20);
-        final double jitterY = cos(c * 29.1 + r * 13.5) * (cellSize * 0.20);
+      final double floatX = sin(progressX * 2 * pi) * sq.driftX;
+      final double floatY = cos(progressY * 2 * pi) * sq.driftY;
 
-        // Gentle Floating Micro-Movement (Bergerak sedikit-sedikit secara halus)
-        final double phase = (c * 2.37 + r * 1.83);
-        final double floatX = sin(animationValue * 2 * pi + phase) * 4.0;
-        final double floatY = cos(animationValue * 2 * pi + phase * 1.3) * 5.0;
+      final double cx = (sq.xFrac * size.width + floatX);
+      final double cy = (sq.yFrac * size.height + floatY);
 
-        // Subtle Organic Tilt & Gentle Sway
-        final double baseAngle = sin(c * 11.2 + r * 17.8) * 0.25;
-        final double swayAngle = sin(animationValue * 2 * pi + phase * 0.8) * 0.05;
-        final double totalAngle = baseAngle + swayAngle;
+      // Rotasi dan goyangan halus tak beraturan
+      final double angle = sq.baseAngle + sin(animationValue * 2 * pi * sq.rotSpeed + i) * 0.30;
 
-        // Scale variation
-        final double scale = 0.90 + (sin(c * 7.1 + r * 5.3) + 1.0) * 0.09;
+      canvas.save();
+      canvas.translate(cx, cy);
+      canvas.rotate(angle);
+      canvas.scale(sq.scale);
 
-        final double cx = baseX + jitterX + floatX;
-        final double cy = baseY + jitterY + floatY;
+      switch (sq.style) {
+        case 0:
+          // 1. S-curve squiggle ("oletan lengkung S")
+          final p = Path()
+            ..moveTo(-16, -8)
+            ..cubicTo(-8, -18, -2, 6, 8, -4)
+            ..cubicTo(14, -10, 18, 10, 12, 16);
+          canvas.drawPath(p, strokePaint);
+          break;
 
-        // Skip offscreen
-        if (cx < -50 || cx > size.width + 50 || cy < -50 || cy > size.height + 50) continue;
+        case 1:
+          // 2. Fluid loop squiggle ("oletan melingkar halus")
+          final p = Path()
+            ..moveTo(-14, 6)
+            ..cubicTo(-18, -12, -2, -16, 4, -4)
+            ..cubicTo(10, 8, 16, -10, 12, 12);
+          canvas.drawPath(p, strokePaint);
+          break;
 
-        final int iconType = ((c + 10) * 7 + (r + 10) * 13) % 12;
+        case 2:
+          // 3. Organic wave ribbon ("lekukan gelombang mengalir")
+          final p = Path()
+            ..moveTo(-18, -4)
+            ..cubicTo(-8, -14, 2, 8, 12, -6)
+            ..cubicTo(16, -12, 20, 2, 14, 8);
+          canvas.drawPath(p, strokePaint);
+          break;
 
-        canvas.save();
-        canvas.translate(cx, cy);
-        canvas.rotate(totalAngle);
-        canvas.scale(scale);
+        case 3:
+          // 4. Freeform curl squiggle ("oletan spiral bebas")
+          final p = Path()
+            ..moveTo(-12, 10)
+            ..cubicTo(-16, -6, 2, -14, 10, -2)
+            ..cubicTo(16, 8, 0, 14, -4, 4)
+            ..cubicTo(-6, -2, 2, -4, 4, 0);
+          canvas.drawPath(p, strokePaint);
+          break;
 
-        switch (iconType) {
-          case 0:
-            // 1. Flowing Organic Wave / Ribbon Arc
-            final p1 = Path()
-              ..moveTo(-12, -6)
-              ..cubicTo(-4, -14, 4, 2, 12, -4);
-            canvas.drawPath(p1, strokePaint);
-            final p2 = Path()
-              ..moveTo(-10, 4)
-              ..cubicTo(-2, -4, 6, 12, 14, 6);
-            canvas.drawPath(p2, strokePaint);
-            break;
+        case 4:
+          // 5. Floating double arcs ("dua goresan kurva lepas")
+          final p1 = Path()
+            ..moveTo(-14, -10)
+            ..quadraticBezierTo(0, 12, 14, -6);
+          canvas.drawPath(p1, strokePaint);
+          final p2 = Path()
+            ..moveTo(-8, 6)
+            ..quadraticBezierTo(4, -10, 16, 8);
+          canvas.drawPath(p2, strokePaint);
+          break;
 
-          case 1:
-            // 2. Minimalist Constellation Nodes
-            final p = Path()
-              ..moveTo(-10, 8)
-              ..lineTo(0, -6)
-              ..lineTo(10, 4);
-            canvas.drawPath(p, strokePaint);
-            canvas.drawCircle(const Offset(-10, 8), 1.6, dotPaint);
-            canvas.drawCircle(const Offset(0, -6), 2.0, dotPaint);
-            canvas.drawCircle(const Offset(10, 4), 1.6, dotPaint);
-            break;
+        case 5:
+          // 6. Wandering fluid squiggle dengan aksen titik
+          final p = Path()
+            ..moveTo(-15, 8)
+            ..cubicTo(-5, 16, -2, -12, 10, -8)
+            ..cubicTo(16, -6, 12, 10, 6, 12);
+          canvas.drawPath(p, strokePaint);
+          canvas.drawCircle(const Offset(16, -12), 1.5, dotPaint);
+          break;
 
-          case 2:
-            // 3. Concentric Fluid Ellipse Loops
-            canvas.drawOval(const Rect.fromLTWH(-12, -7, 24, 14), strokePaint);
-            canvas.drawOval(const Rect.fromLTWH(-6, -4, 12, 8), strokePaint);
-            break;
-
-          case 3:
-            // 4. Abstract Dynamic Sparkle
-            final star = Path()
-              ..moveTo(0, -11)
-              ..quadraticBezierTo(0, 0, 11, 0)
-              ..quadraticBezierTo(0, 0, 0, 11)
-              ..quadraticBezierTo(0, 0, -11, 0)
-              ..quadraticBezierTo(0, 0, 0, -11);
-            canvas.drawPath(star, strokePaint);
-            break;
-
-          case 4:
-            // 5. Abstract Diamond / Nested Lozenge
-            final d1 = Path()
-              ..moveTo(0, -10)
-              ..lineTo(9, 0)
-              ..lineTo(0, 10)
-              ..lineTo(-9, 0)
-              ..close();
-            canvas.drawPath(d1, strokePaint);
-            final d2 = Path()
-              ..moveTo(0, -5)
-              ..lineTo(4.5, 0)
-              ..lineTo(0, 5)
-              ..lineTo(-4.5, 0)
-              ..close();
-            canvas.drawPath(d2, strokePaint);
-            break;
-
-          case 5:
-            // 6. Topographic Contour Swirl
-            final topo = Path()
-              ..moveTo(-10, -4)
-              ..cubicTo(-6, -10, 6, -10, 10, -3)
-              ..cubicTo(12, 4, 4, 10, -4, 8)
-              ..cubicTo(-8, 6, -6, 0, 0, 0);
-            canvas.drawPath(topo, strokePaint);
-            break;
-
-          case 6:
-            // 7. Minimalist Hexagon / Polygon Node
-            final hex = Path()
-              ..moveTo(0, -10)
-              ..lineTo(9, -5)
-              ..lineTo(9, 5)
-              ..lineTo(0, 10)
-              ..lineTo(-9, 5)
-              ..lineTo(-9, -5)
-              ..close();
-            canvas.drawPath(hex, strokePaint);
-            canvas.drawLine(const Offset(-9, -5), const Offset(9, 5), strokePaint);
-            break;
-
-          case 7:
-            // 8. Abstract Triple Curved Waves
-            for (int i = -1; i <= 1; i++) {
-              final wave = Path()
-                ..moveTo(-10, i * 6.0 - 3)
-                ..quadraticBezierTo(0, i * 6.0 + 4, 10, i * 6.0 - 3);
-              canvas.drawPath(wave, strokePaint);
-            }
-            break;
-
-          case 8:
-            // 9. Floating Abstract Petal / Arc Loop
-            final petal = Path()
-              ..moveTo(-8, 8)
-              ..cubicTo(-12, -4, 4, -12, 8, -8)
-              ..cubicTo(12, 4, -4, 12, -8, 8)
-              ..close();
-            canvas.drawPath(petal, strokePaint);
-            canvas.drawCircle(const Offset(0, 0), 1.5, dotPaint);
-            break;
-
-          case 9:
-            // 10. Abstract Circular Gyro & Tangent Rays
-            canvas.drawCircle(Offset.zero, 7, strokePaint);
-            canvas.drawLine(const Offset(-11, -7), const Offset(11, 7), strokePaint);
-            canvas.drawCircle(const Offset(0, 0), 2.0, dotPaint);
-            break;
-
-          case 10:
-            // 11. Modern Stepped Geometric Rhythm
-            final step = Path()
-              ..moveTo(-10, -8)
-              ..lineTo(-3, -8)
-              ..lineTo(-3, 0)
-              ..lineTo(4, 0)
-              ..lineTo(4, 8)
-              ..lineTo(11, 8);
-            canvas.drawPath(step, strokePaint);
-            break;
-
-          case 11:
-            // 12. Minimalist Isometric Cube Frame
-            final iso = Path()
-              ..moveTo(0, -10)
-              ..lineTo(9, -5)
-              ..lineTo(9, 5)
-              ..lineTo(0, 10)
-              ..lineTo(-9, 5)
-              ..lineTo(-9, -5)
-              ..close();
-            canvas.drawPath(iso, strokePaint);
-            canvas.drawLine(const Offset(0, 0), const Offset(0, 10), strokePaint);
-            canvas.drawLine(const Offset(0, 0), const Offset(-9, -5), strokePaint);
-            canvas.drawLine(const Offset(0, 0), const Offset(9, -5), strokePaint);
-            break;
-        }
-
-        // Floating Micro Accent Dot
-        canvas.drawCircle(const Offset(20, -20), 1.3, dotPaint);
-        canvas.drawLine(const Offset(-20, 18), const Offset(-16, 18), strokePaint);
-        canvas.drawLine(const Offset(-18, 16), const Offset(-18, 20), strokePaint);
-
-        canvas.restore();
+        case 6:
+        default:
+          // 7. Crescent wave squiggle
+          final p = Path()
+            ..moveTo(-14, -10)
+            ..cubicTo(-4, -4, 4, 6, 14, 10)
+            ..cubicTo(8, 6, -4, -4, -14, -10);
+          canvas.drawPath(p, strokePaint);
+          break;
       }
+
+      // Aksen titik mikro mengambang di sekitar oletan
+      canvas.drawCircle(
+        Offset(
+          sin(animationValue * 2 * pi * 0.8 + i) * 16.0,
+          cos(animationValue * 2 * pi * 0.6 + i) * 16.0,
+        ),
+        1.4,
+        dotPaint,
+      );
+
+      canvas.restore();
     }
   }
 
