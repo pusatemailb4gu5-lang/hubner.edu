@@ -13,7 +13,7 @@ import 'package:hubner/features/todo/presentation/pages/todo_page.dart';
 import 'package:hubner/features/home/presentation/widgets/animated_rainbow_background.dart';
 import 'package:hubner/features/notifications/presentation/pages/notifications_page.dart';
 
-import 'package:hubner/features/projects/presentation/pages/laporan_page.dart';
+import 'package:hubner/features/projects/presentation/pages/laporan_page.dart' hide BouncyButton;
 import 'package:hubner/features/projects/presentation/pages/monitoring_page.dart';
 import 'package:hubner/features/splash/presentation/pages/splash_page.dart';
 import 'package:hubner/main.dart';
@@ -871,11 +871,29 @@ class DiscussionTab extends StatefulWidget {
 class _DiscussionTabState extends State<DiscussionTab> {
   String _searchQuery = '';
   final TextEditingController _searchController = TextEditingController();
+  final ScrollController _discussionScrollController = ScrollController();
+  final ValueNotifier<double> _headerScrollOffsetNotifier = ValueNotifier<double>(0.0);
 
   // Active chat/discussion state for Desktop split view
   String? _activeDiscussionId;
   String? _activeChannelName;
   String? _activeProjectId;
+
+  @override
+  void initState() {
+    super.initState();
+    _discussionScrollController.addListener(() {
+      _headerScrollOffsetNotifier.value = _discussionScrollController.offset;
+    });
+  }
+
+  @override
+  void dispose() {
+    _discussionScrollController.dispose();
+    _headerScrollOffsetNotifier.dispose();
+    _searchController.dispose();
+    super.dispose();
+  }
 
   Future<List<Map<String, dynamic>>> _loadProjects(String currentUid) async {
     final userDoc = await FirebaseFirestore.instance.collection('users').doc(currentUid).get();
@@ -923,11 +941,12 @@ class _DiscussionTabState extends State<DiscussionTab> {
 
     final currentUid = FirebaseAuth.instance.currentUser?.uid ?? '';
     selectedMemberUids.add(currentUid);
+    final bool isDark = AppColors.isDarkMode;
 
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.white,
+      backgroundColor: isDark ? const Color(0xFF18181B) : Colors.white,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
       ),
@@ -939,7 +958,8 @@ class _DiscussionTabState extends State<DiscussionTab> {
                 top: 24,
                 left: 24,
                 right: 24,
-                bottom: MediaQuery.of(context).viewInsets.bottom + (MediaQuery.of(context).viewInsets.bottom > 0 ? 16 : 16 + MediaQuery.of(context).padding.bottom),
+                bottom: MediaQuery.of(context).viewInsets.bottom +
+                    (MediaQuery.of(context).viewInsets.bottom > 0 ? 16 : 16 + MediaQuery.of(context).padding.bottom),
               ),
               child: SingleChildScrollView(
                 child: Column(
@@ -951,7 +971,7 @@ class _DiscussionTabState extends State<DiscussionTab> {
                         width: 48,
                         height: 5,
                         decoration: BoxDecoration(
-                          color: const Color(0xFFE2E8F0),
+                          color: isDark ? Colors.white24 : const Color(0xFFE2E8F0),
                           borderRadius: BorderRadius.circular(10),
                         ),
                       ),
@@ -962,7 +982,7 @@ class _DiscussionTabState extends State<DiscussionTab> {
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 21.1,
                         fontWeight: FontWeight.bold,
-                        color: Colors.black,
+                        color: isDark ? Colors.white : Colors.black,
                       ),
                     ),
                     const SizedBox(height: 18),
@@ -970,7 +990,11 @@ class _DiscussionTabState extends State<DiscussionTab> {
                     // Project selection dropdown
                     Text(
                       'Terkait Kelas',
-                      style: GoogleFonts.plusJakartaSans(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.black54),
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: isDark ? Colors.white70 : Colors.black54,
+                      ),
                     ),
                     const SizedBox(height: 8),
                     FutureBuilder<List<Map<String, dynamic>>>(
@@ -994,25 +1018,42 @@ class _DiscussionTabState extends State<DiscussionTab> {
 
                         return DropdownButtonFormField<String>(
                           initialValue: selectedProjectId,
-                          hint: Text('Pilih Kelas...', style: GoogleFonts.dmSans(fontSize: 15.2, color: Colors.black26)),
-                          dropdownColor: Colors.white,
+                          hint: Text(
+                            'Pilih Kelas...',
+                            style: GoogleFonts.dmSans(
+                              fontSize: 15.2,
+                              color: isDark ? Colors.white38 : Colors.black26,
+                            ),
+                          ),
+                          dropdownColor: isDark ? const Color(0xFF27272A) : Colors.white,
                           decoration: InputDecoration(
                             filled: true,
-                            fillColor: const Color(0xFFF8FAFC),
+                            fillColor: isDark ? const Color(0xFF27272A) : const Color(0xFFF8FAFC),
                             contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(16),
-                              borderSide: const BorderSide(color: Color(0xFFF1F5F9)),
+                              borderSide: BorderSide(
+                                color: isDark ? const Color(0xFF3F3F46) : const Color(0xFFF1F5F9),
+                              ),
                             ),
                             focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(16),
-                              borderSide: const BorderSide(color: Colors.black),
+                              borderSide: BorderSide(
+                                color: isDark ? Colors.white : Colors.black,
+                              ),
                             ),
                           ),
                           items: projects.map((p) {
                             return DropdownMenuItem<String>(
                               value: p['id'],
-                              child: Text(p['name'], style: GoogleFonts.plusJakartaSans(fontSize: 15.2, fontWeight: FontWeight.w600)),
+                              child: Text(
+                                p['name'],
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 15.2,
+                                  fontWeight: FontWeight.w600,
+                                  color: isDark ? Colors.white : Colors.black87,
+                                ),
+                              ),
                             );
                           }).toList(),
                           onChanged: (val) {
@@ -1025,7 +1066,6 @@ class _DiscussionTabState extends State<DiscussionTab> {
                               _loadProjectMembers(val).then((members) {
                                 setModalState(() {
                                   projectMembers = members;
-                                  // Auto check all members by default
                                   selectedMemberUids = members.map((m) => m['uid'] as String).toList();
                                   if (!selectedMemberUids.contains(currentUid)) {
                                     selectedMemberUids.add(currentUid);
@@ -1040,7 +1080,6 @@ class _DiscussionTabState extends State<DiscussionTab> {
 
                     if (selectedProjectId != null) ...[
                       const SizedBox(height: 16),
-                      // Selected project info card
                       FutureBuilder<String?>(
                         future: _loadProjectName(selectedProjectId!),
                         builder: (context, projectSnapshot) {
@@ -1061,7 +1100,6 @@ class _DiscussionTabState extends State<DiscussionTab> {
                                   ),
                                   child: const Icon(Icons.folder_open_rounded, color: Colors.white, size: 20),
                                 ),
-                                SvgPicture.asset('assets/images/Google_Drive_icon_(2026).svg', width: 24, height: 24),
                                 const SizedBox(width: 12),
                                 Expanded(
                                   child: Column(
@@ -1096,7 +1134,11 @@ class _DiscussionTabState extends State<DiscussionTab> {
                       const SizedBox(height: 16),
                       Text(
                         'Penerima Diskusi',
-                        style: GoogleFonts.plusJakartaSans(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.black54),
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: isDark ? Colors.white70 : Colors.black54,
+                        ),
                       ),
                       const SizedBox(height: 8),
                       if (projectMembers.isEmpty)
@@ -1105,16 +1147,24 @@ class _DiscussionTabState extends State<DiscussionTab> {
                         Container(
                           constraints: const BoxConstraints(maxHeight: 180),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFF8FAFC),
+                            color: isDark ? const Color(0xFF27272A) : const Color(0xFFF8FAFC),
                             borderRadius: BorderRadius.circular(16),
-                            border: Border.all(color: const Color(0xFFF1F5F9)),
+                            border: Border.all(
+                              color: isDark ? const Color(0xFF3F3F46) : const Color(0xFFF1F5F9),
+                            ),
                           ),
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              // "Pilih Semua" row
                               ListTile(
-                                title: Text('Pilih Semua', style: GoogleFonts.plusJakartaSans(fontSize: 14, fontWeight: FontWeight.bold)),
+                                title: Text(
+                                  'Pilih Semua',
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                    color: isDark ? Colors.white : Colors.black,
+                                  ),
+                                ),
                                 contentPadding: const EdgeInsets.symmetric(horizontal: 14),
                                 trailing: AnimatedContainer(
                                   duration: const Duration(milliseconds: 200),
@@ -1122,23 +1172,31 @@ class _DiscussionTabState extends State<DiscussionTab> {
                                   height: 22,
                                   decoration: BoxDecoration(
                                     shape: BoxShape.circle,
-                                    color: (selectedMemberUids.length - 1 >= projectMembers.where((m) => m['uid'] != currentUid).length) ? Colors.black : Colors.transparent,
+                                    color: (selectedMemberUids.length - 1 >=
+                                            projectMembers.where((m) => m['uid'] != currentUid).length)
+                                        ? (isDark ? Colors.white : Colors.black)
+                                        : Colors.transparent,
                                     border: Border.all(
-                                      color: (selectedMemberUids.length - 1 >= projectMembers.where((m) => m['uid'] != currentUid).length) ? Colors.black : Colors.black26,
+                                      color: (selectedMemberUids.length - 1 >=
+                                              projectMembers.where((m) => m['uid'] != currentUid).length)
+                                          ? (isDark ? Colors.white : Colors.black)
+                                          : (isDark ? Colors.white38 : Colors.black26),
                                       width: 2,
                                     ),
                                   ),
-                                  child: (selectedMemberUids.length - 1 >= projectMembers.where((m) => m['uid'] != currentUid).length)
-                                      ? const Icon(
+                                  child: (selectedMemberUids.length - 1 >=
+                                          projectMembers.where((m) => m['uid'] != currentUid).length)
+                                      ? Icon(
                                           Icons.check_rounded,
-                                          color: Colors.white,
+                                          color: isDark ? Colors.black : Colors.white,
                                           size: 14,
                                         )
                                       : null,
                                 ),
                                 onTap: () {
                                   setModalState(() {
-                                    final bool isAll = selectedMemberUids.length - 1 >= projectMembers.where((m) => m['uid'] != currentUid).length;
+                                    final bool isAll = selectedMemberUids.length - 1 >=
+                                        projectMembers.where((m) => m['uid'] != currentUid).length;
                                     if (!isAll) {
                                       selectedMemberUids = projectMembers.map((m) => m['uid'] as String).toList();
                                       if (!selectedMemberUids.contains(currentUid)) {
@@ -1150,13 +1208,19 @@ class _DiscussionTabState extends State<DiscussionTab> {
                                   });
                                 },
                               ),
-                              const Divider(color: Color(0xFFF1F5F9), height: 1),
+                              Divider(
+                                color: isDark ? const Color(0xFF3F3F46) : const Color(0xFFF1F5F9),
+                                height: 1,
+                              ),
                               Expanded(
                                 child: ListView.separated(
                                   shrinkWrap: true,
                                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
                                   itemCount: projectMembers.length,
-                                  separatorBuilder: (context, index) => const Divider(color: Color(0xFFF1F5F9), height: 1),
+                                  separatorBuilder: (context, index) => Divider(
+                                    color: isDark ? const Color(0xFF3F3F46) : const Color(0xFFF1F5F9),
+                                    height: 1,
+                                  ),
                                   itemBuilder: (context, idx) {
                                     final m = projectMembers[idx];
                                     final mUid = m['uid'] as String;
@@ -1164,14 +1228,30 @@ class _DiscussionTabState extends State<DiscussionTab> {
                                     final isChecked = selectedMemberUids.contains(mUid);
 
                                     return ListTile(
-                                      title: Text(m['name'], style: GoogleFonts.plusJakartaSans(fontSize: 14, fontWeight: FontWeight.w600)),
-                                      subtitle: Text('ID: ${m['userId']}', style: GoogleFonts.plusJakartaSans(fontSize: 11.7, color: Colors.black38)),
+                                      title: Text(
+                                        m['name'],
+                                        style: GoogleFonts.plusJakartaSans(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w600,
+                                          color: isDark ? Colors.white : Colors.black87,
+                                        ),
+                                      ),
+                                      subtitle: Text(
+                                        'ID: ${m['userId']}',
+                                        style: GoogleFonts.plusJakartaSans(
+                                          fontSize: 11.7,
+                                          color: isDark ? Colors.white38 : Colors.black38,
+                                        ),
+                                      ),
                                       leading: Container(
                                         width: 28,
                                         height: 28,
                                         decoration: BoxDecoration(
                                           shape: BoxShape.circle,
-                                          border: Border.all(color: Colors.black, width: 1),
+                                          border: Border.all(
+                                            color: isDark ? Colors.white54 : Colors.black,
+                                            width: 1,
+                                          ),
                                         ),
                                         child: ClipOval(
                                           child: Image.asset(m['avatar']),
@@ -1184,16 +1264,20 @@ class _DiscussionTabState extends State<DiscussionTab> {
                                         height: 22,
                                         decoration: BoxDecoration(
                                           shape: BoxShape.circle,
-                                          color: isChecked ? Colors.black : Colors.transparent,
+                                          color: isChecked
+                                              ? (isDark ? Colors.white : Colors.black)
+                                              : Colors.transparent,
                                           border: Border.all(
-                                            color: isChecked ? Colors.black : Colors.black26,
+                                            color: isChecked
+                                                ? (isDark ? Colors.white : Colors.black)
+                                                : (isDark ? Colors.white38 : Colors.black26),
                                             width: 2,
                                           ),
                                         ),
                                         child: isChecked
-                                            ? const Icon(
+                                            ? Icon(
                                                 Icons.check_rounded,
-                                                color: Colors.white,
+                                                color: isDark ? Colors.black : Colors.white,
                                                 size: 14,
                                               )
                                             : null,
@@ -1219,57 +1303,89 @@ class _DiscussionTabState extends State<DiscussionTab> {
                     const SizedBox(height: 16),
                     Text(
                       'Nama Saluran (Channel)',
-                      style: GoogleFonts.plusJakartaSans(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.black54),
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: isDark ? Colors.white70 : Colors.black54,
+                      ),
                     ),
                     const SizedBox(height: 8),
                     TextField(
                       controller: channelController,
-                      style: GoogleFonts.dmSans(fontSize: 15.2),
+                      style: GoogleFonts.dmSans(
+                        fontSize: 15.2,
+                        color: isDark ? Colors.white : Colors.black87,
+                      ),
                       decoration: InputDecoration(
                         hintText: 'Contoh: #ui-design',
-                        hintStyle: GoogleFonts.dmSans(color: Colors.black26, fontSize: 15.2),
+                        hintStyle: GoogleFonts.dmSans(
+                          color: isDark ? Colors.white38 : Colors.black26,
+                          fontSize: 15.2,
+                        ),
                         filled: true,
-                        fillColor: const Color(0xFFF8FAFC),
+                        fillColor: isDark ? const Color(0xFF27272A) : const Color(0xFFF8FAFC),
                         contentPadding: const EdgeInsets.all(16),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(16),
-                          borderSide: const BorderSide(color: Color(0xFFF1F5F9)),
+                          borderSide: BorderSide(
+                            color: isDark ? const Color(0xFF3F3F46) : const Color(0xFFF1F5F9),
+                          ),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(16),
-                          borderSide: const BorderSide(color: Colors.black),
+                          borderSide: BorderSide(
+                            color: isDark ? Colors.white : Colors.black,
+                          ),
                         ),
                       ),
                     ),
                     const SizedBox(height: 16),
                     Text(
                       'Judul Diskusi',
-                      style: GoogleFonts.plusJakartaSans(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.black54),
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: isDark ? Colors.white70 : Colors.black54,
+                      ),
                     ),
                     const SizedBox(height: 8),
                     TextField(
                       controller: titleController,
-                      style: GoogleFonts.dmSans(fontSize: 15.2),
+                      style: GoogleFonts.dmSans(
+                        fontSize: 15.2,
+                        color: isDark ? Colors.white : Colors.black87,
+                      ),
                       decoration: InputDecoration(
                         hintText: 'Contoh: Saluran Masukan Desain UI',
-                        hintStyle: GoogleFonts.dmSans(color: Colors.black26, fontSize: 15.2),
+                        hintStyle: GoogleFonts.dmSans(
+                          color: isDark ? Colors.white38 : Colors.black26,
+                          fontSize: 15.2,
+                        ),
                         filled: true,
-                        fillColor: const Color(0xFFF8FAFC),
+                        fillColor: isDark ? const Color(0xFF27272A) : const Color(0xFFF8FAFC),
                         contentPadding: const EdgeInsets.all(16),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(16),
-                          borderSide: const BorderSide(color: Color(0xFFF1F5F9)),
+                          borderSide: BorderSide(
+                            color: isDark ? const Color(0xFF3F3F46) : const Color(0xFFF1F5F9),
+                          ),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(16),
-                          borderSide: const BorderSide(color: Colors.black),
+                          borderSide: BorderSide(
+                            color: isDark ? Colors.white : Colors.black,
+                          ),
                         ),
                       ),
                     ),
                     const SizedBox(height: 16),
                     Text(
                       'Pilih Avatar Diskusi',
-                      style: GoogleFonts.plusJakartaSans(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.black54),
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: isDark ? Colors.white70 : Colors.black54,
+                      ),
                     ),
                     const SizedBox(height: 8),
                     SizedBox(
@@ -1294,7 +1410,9 @@ class _DiscussionTabState extends State<DiscussionTab> {
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
                                   border: Border.all(
-                                    color: isSelected ? Colors.black : const Color(0xFFE2E8F0),
+                                    color: isSelected
+                                        ? (isDark ? Colors.white : Colors.black)
+                                        : (isDark ? const Color(0xFF3F3F46) : const Color(0xFFE2E8F0)),
                                     width: isSelected ? 2.0 : 1.0,
                                   ),
                                 ),
@@ -1318,8 +1436,6 @@ class _DiscussionTabState extends State<DiscussionTab> {
                           if (chan.isEmpty || ttl.isEmpty || selectedProjectId == null) return;
 
                           final List<String> finalMembers = selectedMemberUids;
-
-                          // Ensure creator is always in finalMembers list
                           if (!finalMembers.contains(currentUid)) {
                             finalMembers.add(currentUid);
                           }
@@ -1348,8 +1464,8 @@ class _DiscussionTabState extends State<DiscussionTab> {
                           }
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.black,
-                          foregroundColor: Colors.white,
+                          backgroundColor: isDark ? Colors.white : Colors.black,
+                          foregroundColor: isDark ? Colors.black : Colors.white,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(16),
                           ),
@@ -1357,7 +1473,10 @@ class _DiscussionTabState extends State<DiscussionTab> {
                         ),
                         child: Text(
                           'Buat Diskusi',
-                          style: GoogleFonts.plusJakartaSans(fontSize: 16.4, fontWeight: FontWeight.bold),
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 16.4,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ),
@@ -1372,35 +1491,37 @@ class _DiscussionTabState extends State<DiscussionTab> {
   }
 
   @override
-  void dispose() {
-    _searchController.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     final currentUid = FirebaseAuth.instance.currentUser?.uid ?? '';
     final safeBottomPadding = MediaQuery.of(context).padding.bottom;
     final bool isDesktop = MediaQuery.of(context).size.width >= 700 && MediaQuery.of(context).size.shortestSide >= 700;
+    final bool isDark = AppColors.isDarkMode;
+
+    // Bottom Navigation floating position height reference
+    final double bottomNavHeight = 64.0;
+    final double bottomNavOffset = safeBottomPadding > 0 ? safeBottomPadding + 14 : 26;
+    final double fabBottomPosition = bottomNavOffset + bottomNavHeight + 16;
+    final double listBottomPadding = fabBottomPosition + 60;
 
     final Widget listContent = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Header
+        // Top In-List Header (Before scrolling)
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
+          padding: const EdgeInsets.fromLTRB(16.0, 10.0, 16.0, 10.0),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Text(
                 'Diskusi',
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 23.4,
                   fontWeight: FontWeight.w600,
-                  color: Colors.black,
+                  color: isDark ? Colors.white : Colors.black,
                 ),
               ),
-              GestureDetector(
+              BouncyButton(
                 onTap: () {
                   Navigator.push(
                     context,
@@ -1408,15 +1529,26 @@ class _DiscussionTabState extends State<DiscussionTab> {
                   );
                 },
                 child: Container(
-                  width: 44,
-                  height: 44,
-                  decoration: const BoxDecoration(
-                    color: Color(0xFFF1F5F9),
+                  width: 42,
+                  height: 42,
+                  decoration: BoxDecoration(
+                    color: isDark ? const Color(0xFF18181B) : Colors.white,
                     shape: BoxShape.circle,
+                    border: Border.all(
+                      color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+                      width: 1.2,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.04),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.people_outline_rounded,
-                    color: Colors.black87,
+                    color: isDark ? Colors.white : Colors.black87,
                     size: 20,
                   ),
                 ),
@@ -1425,35 +1557,78 @@ class _DiscussionTabState extends State<DiscussionTab> {
           ),
         ),
 
-        // Search Bar
+        // Search Bar (Rounded 28 & Styled match Home Page)
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 8.0),
-          child: TextField(
-            controller: _searchController,
-            onChanged: (val) {
-              setState(() {
-                _searchQuery = val;
-              });
-            },
-            decoration: InputDecoration(
-              hintText: 'Cari thread diskusi...',
-              hintStyle: GoogleFonts.dmSans(color: Colors.black26, fontSize: 15.2),
-              filled: true,
-              fillColor: const Color(0xFFF8FAFC),
-              prefixIcon: const Icon(Icons.search_rounded, color: Colors.black38, size: 20),
-              contentPadding: const EdgeInsets.symmetric(vertical: 12),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
-                borderSide: const BorderSide(color: Color(0xFFF1F5F9)),
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 6.0),
+          child: Container(
+            height: 48,
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            decoration: BoxDecoration(
+              color: isDark ? const Color(0xFF18181B) : Colors.white,
+              borderRadius: BorderRadius.circular(28),
+              border: Border.all(
+                color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                width: 1.2,
               ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
-                borderSide: const BorderSide(color: Colors.black),
-              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.05),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.search_rounded,
+                  color: isDark ? Colors.white60 : Colors.black45,
+                  size: 20,
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: TextField(
+                    controller: _searchController,
+                    onChanged: (val) {
+                      setState(() {
+                        _searchQuery = val;
+                      });
+                    },
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 14,
+                      color: isDark ? Colors.white : Colors.black87,
+                    ),
+                    decoration: InputDecoration(
+                      hintText: 'Cari thread diskusi...',
+                      hintStyle: GoogleFonts.dmSans(
+                        color: isDark ? Colors.white38 : Colors.black38,
+                        fontSize: 14,
+                      ),
+                      border: InputBorder.none,
+                      isDense: true,
+                      contentPadding: const EdgeInsets.symmetric(vertical: 10),
+                    ),
+                  ),
+                ),
+                if (_searchQuery.isNotEmpty)
+                  GestureDetector(
+                    onTap: () {
+                      _searchController.clear();
+                      setState(() {
+                        _searchQuery = '';
+                      });
+                    },
+                    child: Icon(
+                      Icons.close_rounded,
+                      color: isDark ? Colors.white60 : Colors.black45,
+                      size: 18,
+                    ),
+                  ),
+              ],
             ),
           ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 10),
 
         // List of Discussions from Firestore
         Expanded(
@@ -1486,12 +1661,15 @@ class _DiscussionTabState extends State<DiscussionTab> {
                     _searchQuery.isEmpty
                         ? 'Belum ada diskusi. Buat sekarang!'
                         : 'Tidak ada diskusi yang cocok.',
-                    style: GoogleFonts.dmSans(fontSize: 15.2, color: Colors.black45),
+                    style: GoogleFonts.dmSans(
+                      fontSize: 15.2,
+                      color: isDark ? Colors.white38 : Colors.black45,
+                    ),
                   ),
                 );
               }
 
-              // Auto-select first/latest chat room on Desktop if none is active or active is no longer valid
+              // Auto-select first/latest chat room on Desktop if none is active
               if (isDesktop) {
                 final bool activeExists = filteredDocs.any((d) => d.id == _activeDiscussionId);
                 if (!activeExists && filteredDocs.isNotEmpty) {
@@ -1504,16 +1682,19 @@ class _DiscussionTabState extends State<DiscussionTab> {
               }
 
               return ListView.separated(
+                controller: _discussionScrollController,
+                physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
                 padding: EdgeInsets.only(
                   left: 16.0,
                   right: 16.0,
-                  bottom: safeBottomPadding + 10 + 56 + 16,
+                  top: 4.0,
+                  bottom: isDesktop ? safeBottomPadding + 20 : listBottomPadding,
                 ),
                 itemCount: filteredDocs.length,
-                separatorBuilder: (context, index) => const Divider(
+                separatorBuilder: (context, index) => Divider(
                   height: 1,
                   thickness: 1,
-                  color: Color(0xFFF1F5F9),
+                  color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
                   indent: 62,
                 ),
                 itemBuilder: (context, index) {
@@ -1525,7 +1706,7 @@ class _DiscussionTabState extends State<DiscussionTab> {
                   final time = chat['time'] ?? '';
                   final avatar = chat['avatar'] as String? ?? 'assets/icon_pack/chat/chat_1.png';
                   final projectId = chat['projectId'] as String? ?? '';
-                  
+
                   final Map<String, dynamic>? unreadCounts = chat['unreadCounts'] as Map<String, dynamic>?;
                   final int unreadCount = unreadCounts?[currentUid] as int? ?? 0;
 
@@ -1535,7 +1716,8 @@ class _DiscussionTabState extends State<DiscussionTab> {
                       final projectName = projectSnapshot.data ?? '';
                       final bool isGroupChat = channelName.startsWith('#');
 
-                      return GestureDetector(
+                      return InkWell(
+                        borderRadius: BorderRadius.circular(12),
                         onTap: () {
                           if (isDesktop) {
                             setState(() {
@@ -1556,10 +1738,10 @@ class _DiscussionTabState extends State<DiscussionTab> {
                           }
                         },
                         child: Container(
-                          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
+                          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
                           decoration: BoxDecoration(
                             color: (isDesktop && _activeDiscussionId == docId)
-                                ? const Color(0xFFEFF6FF)
+                                ? (isDark ? const Color(0xFF1E293B) : const Color(0xFFEFF6FF))
                                 : Colors.transparent,
                             borderRadius: BorderRadius.circular(12),
                           ),
@@ -1570,13 +1752,19 @@ class _DiscussionTabState extends State<DiscussionTab> {
                                 height: 48,
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
-                                  border: Border.all(color: const Color(0xFFE2E8F0), width: 1.0),
+                                  border: Border.all(
+                                    color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                                    width: 1.0,
+                                  ),
                                 ),
                                 child: ClipOval(
                                   child: Image.asset(
                                     avatar,
                                     fit: BoxFit.cover,
-                                    errorBuilder: (ctx, err, st) => const Icon(Icons.forum_outlined),
+                                    errorBuilder: (ctx, err, st) => Icon(
+                                      Icons.forum_outlined,
+                                      color: isDark ? Colors.white70 : Colors.black54,
+                                    ),
                                   ),
                                 ),
                               ),
@@ -1599,7 +1787,7 @@ class _DiscussionTabState extends State<DiscussionTab> {
                                               style: GoogleFonts.plusJakartaSans(
                                                 fontSize: 12.9,
                                                 fontWeight: FontWeight.w600,
-                                                color: const Color(0xFF0F766E),
+                                                color: isDark ? const Color(0xFF2DD4BF) : const Color(0xFF0F766E),
                                               ),
                                             ),
                                           ),
@@ -1607,7 +1795,7 @@ class _DiscussionTabState extends State<DiscussionTab> {
                                             time,
                                             style: GoogleFonts.dmSans(
                                               fontSize: 12.9,
-                                              color: Colors.black38,
+                                              color: isDark ? Colors.white38 : Colors.black38,
                                             ),
                                           ),
                                         ],
@@ -1616,9 +1804,9 @@ class _DiscussionTabState extends State<DiscussionTab> {
                                       Text(
                                         title,
                                         style: GoogleFonts.plusJakartaSans(
-                                          fontSize: 16.4,
+                                          fontSize: 16.0,
                                           fontWeight: FontWeight.w600,
-                                          color: Colors.black87,
+                                          color: isDark ? Colors.white : Colors.black87,
                                         ),
                                       ),
                                     ] else ...[
@@ -1631,9 +1819,9 @@ class _DiscussionTabState extends State<DiscussionTab> {
                                               maxLines: 1,
                                               overflow: TextOverflow.ellipsis,
                                               style: GoogleFonts.plusJakartaSans(
-                                                fontSize: 16.4,
+                                                fontSize: 16.0,
                                                 fontWeight: FontWeight.w600,
-                                                color: Colors.black87,
+                                                color: isDark ? Colors.white : Colors.black87,
                                               ),
                                             ),
                                           ),
@@ -1642,7 +1830,7 @@ class _DiscussionTabState extends State<DiscussionTab> {
                                             time,
                                             style: GoogleFonts.dmSans(
                                               fontSize: 12.9,
-                                              color: Colors.black38,
+                                              color: isDark ? Colors.white38 : Colors.black38,
                                             ),
                                           ),
                                         ],
@@ -1655,7 +1843,7 @@ class _DiscussionTabState extends State<DiscussionTab> {
                                       overflow: TextOverflow.ellipsis,
                                       style: GoogleFonts.dmSans(
                                         fontSize: 14,
-                                        color: Colors.black54,
+                                        color: isDark ? Colors.white60 : Colors.black54,
                                       ),
                                     ),
                                   ],
@@ -1665,8 +1853,8 @@ class _DiscussionTabState extends State<DiscussionTab> {
                                 const SizedBox(width: 10),
                                 Container(
                                   padding: const EdgeInsets.all(6),
-                                  decoration: const BoxDecoration(
-                                    color: Colors.black,
+                                  decoration: BoxDecoration(
+                                    color: isDark ? Colors.white : Colors.black,
                                     shape: BoxShape.circle,
                                   ),
                                   constraints: const BoxConstraints(
@@ -1677,7 +1865,7 @@ class _DiscussionTabState extends State<DiscussionTab> {
                                     child: Text(
                                       '$unreadCount',
                                       style: GoogleFonts.plusJakartaSans(
-                                        color: Colors.white,
+                                        color: isDark ? Colors.black : Colors.white,
                                         fontSize: 11.7,
                                         fontWeight: FontWeight.bold,
                                       ),
@@ -1705,9 +1893,12 @@ class _DiscussionTabState extends State<DiscussionTab> {
           // Left Pane: Discussion list
           Container(
             width: 380,
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               border: Border(
-                right: BorderSide(color: Color(0xFFE2E8F0), width: 1),
+                right: BorderSide(
+                  color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                  width: 1,
+                ),
               ),
             ),
             child: Stack(
@@ -1717,28 +1908,28 @@ class _DiscussionTabState extends State<DiscussionTab> {
                   child: listContent,
                 ),
                 Positioned(
-                  bottom: safeBottomPadding + 10,
+                  bottom: safeBottomPadding + 20,
                   right: 16,
-                  child: GestureDetector(
+                  child: BouncyButton(
                     onTap: () => _showCreateDiscussionDialog(context),
                     child: Container(
-                      width: 56,
-                      height: 56,
+                      width: 52,
+                      height: 52,
                       decoration: BoxDecoration(
-                        color: Colors.black,
+                        color: isDark ? Colors.white : Colors.black,
                         shape: BoxShape.circle,
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.2),
+                            color: Colors.black.withValues(alpha: isDark ? 0.4 : 0.25),
                             blurRadius: 10,
                             offset: const Offset(0, 4),
                           ),
                         ],
                       ),
-                      child: const Icon(
+                      child: Icon(
                         Icons.add_rounded,
-                        color: Colors.white,
-                        size: 32,
+                        color: isDark ? Colors.black : Colors.white,
+                        size: 28,
                       ),
                     ),
                   ),
@@ -1761,11 +1952,18 @@ class _DiscussionTabState extends State<DiscussionTab> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(Icons.forum_outlined, size: 64, color: Colors.black26),
+                        Icon(
+                          Icons.forum_outlined,
+                          size: 64,
+                          color: isDark ? Colors.white24 : Colors.black26,
+                        ),
                         const SizedBox(height: 16),
                         Text(
                           'Pilih diskusi untuk memulai chat',
-                          style: GoogleFonts.dmSans(fontSize: 16.4, color: Colors.black45),
+                          style: GoogleFonts.dmSans(
+                            fontSize: 16.4,
+                            color: isDark ? Colors.white38 : Colors.black45,
+                          ),
                         ),
                       ],
                     ),
@@ -1778,36 +1976,128 @@ class _DiscussionTabState extends State<DiscussionTab> {
     return Align(
       alignment: Alignment.topCenter,
       child: Container(
-        constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width > 500 ? double.infinity : 500),
+        constraints: BoxConstraints(
+          maxWidth: MediaQuery.of(context).size.width > 500 ? double.infinity : 500,
+        ),
         child: Stack(
           children: [
             SafeArea(
               bottom: false,
               child: listContent,
             ),
+
+            // Sticky Header with blur/gradient when scrolling down (Like Home Page)
+            ValueListenableBuilder<double>(
+              valueListenable: _headerScrollOffsetNotifier,
+              builder: (context, scrollOffset, _) {
+                if (scrollOffset <= 20.0) {
+                  return const SizedBox.shrink();
+                }
+                final double t = ((scrollOffset - 20.0) / 40.0).clamp(0.0, 1.0);
+
+                return Positioned(
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  child: Opacity(
+                    opacity: t,
+                    child: Container(
+                      padding: EdgeInsets.fromLTRB(
+                        16,
+                        MediaQuery.of(context).padding.top + 6,
+                        16,
+                        16,
+                      ),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            (isDark ? Colors.black : Colors.white).withValues(alpha: t * 0.98),
+                            (isDark ? Colors.black : Colors.white).withValues(alpha: t * 0.95),
+                            (isDark ? Colors.black : Colors.white).withValues(alpha: t * 0.45),
+                            (isDark ? Colors.black : Colors.white).withValues(alpha: 0.0),
+                          ],
+                          stops: const [0.0, 0.48, 0.75, 1.0],
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          const SizedBox(width: 42), // Balance spacer to center title
+                          Text(
+                            'Diskusi',
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 16.0,
+                              fontWeight: FontWeight.w800,
+                              color: isDark ? Colors.white : const Color(0xFF0F172A),
+                            ),
+                          ),
+                          BouncyButton(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (_) => const ManageFriendsPage()),
+                              );
+                            },
+                            child: Container(
+                              width: 42,
+                              height: 42,
+                              decoration: BoxDecoration(
+                                color: isDark ? const Color(0xFF18181B) : Colors.white,
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+                                  width: 1.2,
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.04),
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
+                              ),
+                              child: Icon(
+                                Icons.people_outline_rounded,
+                                color: isDark ? Colors.white : Colors.black87,
+                                size: 20,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+
+            // Elevated Floating Action Button (+), well above bottom navigation menu
             Positioned(
-              bottom: safeBottomPadding + 20,
+              bottom: fabBottomPosition,
               right: 16,
-              child: GestureDetector(
+              child: BouncyButton(
                 onTap: () => _showCreateDiscussionDialog(context),
                 child: Container(
-                  width: 56,
-                  height: 56,
+                  width: 52,
+                  height: 52,
                   decoration: BoxDecoration(
-                    color: Colors.black,
+                    color: isDark ? Colors.white : Colors.black,
                     shape: BoxShape.circle,
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.2),
+                        color: Colors.black.withValues(alpha: isDark ? 0.4 : 0.25),
                         blurRadius: 10,
                         offset: const Offset(0, 4),
                       ),
                     ],
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.add_rounded,
-                    color: Colors.white,
-                    size: 32,
+                    color: isDark ? Colors.black : Colors.white,
+                    size: 28,
                   ),
                 ),
               ),
@@ -1822,7 +2112,9 @@ class _DiscussionTabState extends State<DiscussionTab> {
 class _GoogleAuthClient extends http.BaseClient {
   final Map<String, String> _headers;
   final http.Client _client = http.Client();
+
   _GoogleAuthClient(this._headers);
+
   @override
   Future<http.StreamedResponse> send(http.BaseRequest request) {
     return _client.send(request..headers.addAll(_headers));
