@@ -3,7 +3,6 @@ import 'package:hubner/core/widgets/three_dots_loader.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'dart:math';
 import 'chat_room_page.dart';
 
 class ManageFriendsPage extends StatefulWidget {
@@ -25,16 +24,9 @@ class _ManageFriendsPageState extends State<ManageFriendsPage> {
 
   Future<void> _startPrivateChat(BuildContext context, String friendUid, String friendName, String friendAvatar) async {
     final currentUid = FirebaseAuth.instance.currentUser?.uid;
-    if (currentUid == null) return;
+    if (currentUid == null || friendUid.isEmpty || friendUid == currentUid) return;
 
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => const Center(
-        child: const ThreeDotsLoader(),
-      ),
-    );
-
+    String? existingChatId;
     try {
       final query = await FirebaseFirestore.instance
           .collection('discussions')
@@ -42,7 +34,6 @@ class _ManageFriendsPageState extends State<ManageFriendsPage> {
           .where('memberUids', arrayContains: currentUid)
           .get();
 
-      String? existingChatId;
       for (var doc in query.docs) {
         final uids = List<String>.from(doc.data()['memberUids'] ?? []);
         if (uids.contains(friendUid) && uids.length == 2) {
@@ -50,41 +41,21 @@ class _ManageFriendsPageState extends State<ManageFriendsPage> {
           break;
         }
       }
+    } catch (_) {}
 
-      if (existingChatId == null) {
-        final newDocRef = await FirebaseFirestore.instance.collection('discussions').add({
-          'channel': '@${friendName.toLowerCase().replaceAll(' ', '')}',
-          'title': friendName,
-          'avatar': friendAvatar,
-          'isPrivate': true,
-          'memberUids': [currentUid, friendUid],
-          'lastMessage': 'Mulai obrolan privat...',
-          'time': 'Sekarang',
-          'createdAt': FieldValue.serverTimestamp(),
-          'colorIndex': Random().nextInt(5),
-        });
-        existingChatId = newDocRef.id;
-      }
-
-      if (context.mounted) {
-        Navigator.pop(context); // Close loading indicator
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => ChatRoomPage(
-              discussionId: existingChatId!,
-              channelName: friendName,
-            ),
+    if (context.mounted) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ChatRoomPage(
+            discussionId: existingChatId ?? '',
+            channelName: friendName,
+            targetUserUid: friendUid,
+            targetUserAvatar: friendAvatar,
+            isPrivateDraft: existingChatId == null,
           ),
-        );
-      }
-    } catch (e) {
-      if (context.mounted) {
-        Navigator.pop(context); // Close loading indicator
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Gagal memulai chat privat: $e'), backgroundColor: Colors.redAccent),
-        );
-      }
+        ),
+      );
     }
   }
 
