@@ -4731,11 +4731,11 @@ class _PurpleMicroPatternPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    // 1. Solid Flat Background (Abu kehitaman solid, tanpa gradasi)
-    final Color solidBg = isDark ? const Color(0xFF101014) : const Color(0xFFFAF9FD);
+    // 1. Solid Flat Background (Hitam pekat solid #000000, bukan abu-abu)
+    final Color solidBg = isDark ? const Color(0xFF000000) : const Color(0xFFFAF9FD);
     canvas.drawColor(solidBg, BlendMode.src);
 
-    // 2. Doodle Pattern Paint (Ungu soft elegan)
+    // 2. Abstract Pattern Paint (Ungu soft elegan)
     final strokePaint = Paint()
       ..color = (isDark ? const Color(0xFFA855F7) : const Color(0xFF7C3AED))
           .withValues(alpha: isDark ? 0.14 : 0.10)
@@ -4749,7 +4749,7 @@ class _PurpleMicroPatternPainter extends CustomPainter {
           .withValues(alpha: isDark ? 0.18 : 0.12)
       ..style = PaintingStyle.fill;
 
-    const double cellSize = 80.0;
+    const double cellSize = 82.0;
     final int cols = (size.width / cellSize).ceil() + 2;
     final int rows = (size.height / cellSize).ceil() + 2;
 
@@ -4770,7 +4770,7 @@ class _PurpleMicroPatternPainter extends CustomPainter {
         final double floatY = cos(animationValue * 2 * pi + phase * 1.3) * 5.0;
 
         // Subtle Organic Tilt & Gentle Sway
-        final double baseAngle = sin(c * 11.2 + r * 17.8) * 0.25; // ~14 deg
+        final double baseAngle = sin(c * 11.2 + r * 17.8) * 0.25;
         final double swayAngle = sin(animationValue * 2 * pi + phase * 0.8) * 0.05;
         final double totalAngle = baseAngle + swayAngle;
 
@@ -4792,163 +4792,149 @@ class _PurpleMicroPatternPainter extends CustomPainter {
 
         switch (iconType) {
           case 0:
-            // 1. Chat Bubble
-            final rrect = RRect.fromRectAndRadius(
-              const Rect.fromLTWH(-12, -10, 24, 16),
-              const Radius.circular(5),
-            );
-            canvas.drawRRect(rrect, strokePaint);
-            final tail = Path()
-              ..moveTo(-6, 6)
-              ..lineTo(-10, 11)
-              ..lineTo(-2, 6);
-            canvas.drawPath(tail, strokePaint);
-            canvas.drawLine(const Offset(-7, -4), const Offset(7, -4), strokePaint);
-            canvas.drawLine(const Offset(-7, 0), const Offset(3, 0), strokePaint);
+            // 1. Flowing Organic Wave / Ribbon Arc
+            final p1 = Path()
+              ..moveTo(-12, -6)
+              ..cubicTo(-4, -14, 4, 2, 12, -4);
+            canvas.drawPath(p1, strokePaint);
+            final p2 = Path()
+              ..moveTo(-10, 4)
+              ..cubicTo(-2, -4, 6, 12, 14, 6);
+            canvas.drawPath(p2, strokePaint);
             break;
 
           case 1:
-            // 2. Pencil
-            final pencil = Path()
+            // 2. Minimalist Constellation Nodes
+            final p = Path()
               ..moveTo(-10, 8)
-              ..lineTo(-12, 12)
-              ..lineTo(-8, 10)
-              ..lineTo(8, -6)
-              ..lineTo(6, -8)
-              ..close();
-            canvas.drawPath(pencil, strokePaint);
-            canvas.drawLine(const Offset(4, -4), const Offset(2, -6), strokePaint);
+              ..lineTo(0, -6)
+              ..lineTo(10, 4);
+            canvas.drawPath(p, strokePaint);
+            canvas.drawCircle(const Offset(-10, 8), 1.6, dotPaint);
+            canvas.drawCircle(const Offset(0, -6), 2.0, dotPaint);
+            canvas.drawCircle(const Offset(10, 4), 1.6, dotPaint);
             break;
 
           case 2:
-            // 3. Open Book / Notebook
-            final book = Path()
-              ..moveTo(0, -8)
-              ..quadraticBezierTo(-6, -10, -12, -8)
-              ..lineTo(-12, 6)
-              ..quadraticBezierTo(-6, 4, 0, 6)
-              ..quadraticBezierTo(6, 4, 12, 6)
-              ..lineTo(12, -8)
-              ..quadraticBezierTo(6, -10, 0, -8)
-              ..close();
-            canvas.drawPath(book, strokePaint);
-            canvas.drawLine(const Offset(0, -8), const Offset(0, 6), strokePaint);
+            // 3. Concentric Fluid Ellipse Loops
+            canvas.drawOval(const Rect.fromLTWH(-12, -7, 24, 14), strokePaint);
+            canvas.drawOval(const Rect.fromLTWH(-6, -4, 12, 8), strokePaint);
             break;
 
           case 3:
-            // 4. Lightbulb
-            canvas.drawCircle(const Offset(0, -4), 7, strokePaint);
-            final base = Path()
-              ..moveTo(-3, 3)
-              ..lineTo(3, 3)
-              ..moveTo(-2.5, 6)
-              ..lineTo(2.5, 6)
-              ..moveTo(-1.5, 9)
-              ..lineTo(1.5, 9);
-            canvas.drawPath(base, strokePaint);
-            break;
-
-          case 4:
-            // 5. Heart
-            final heart = Path()
-              ..moveTo(0, 3)
-              ..cubicTo(-6, -4, -10, -1, -6, 5)
-              ..lineTo(0, 11)
-              ..lineTo(6, 5)
-              ..cubicTo(10, -1, 6, -4, 0, 3);
-            canvas.drawPath(heart, strokePaint);
-            break;
-
-          case 5:
-            // 6. Four-point Star / Sparkle
+            // 4. Abstract Dynamic Sparkle
             final star = Path()
-              ..moveTo(0, -10)
-              ..quadraticBezierTo(0, 0, 10, 0)
-              ..quadraticBezierTo(0, 0, 0, 10)
-              ..quadraticBezierTo(0, 0, -10, 0)
-              ..quadraticBezierTo(0, 0, 0, -10);
+              ..moveTo(0, -11)
+              ..quadraticBezierTo(0, 0, 11, 0)
+              ..quadraticBezierTo(0, 0, 0, 11)
+              ..quadraticBezierTo(0, 0, -11, 0)
+              ..quadraticBezierTo(0, 0, 0, -11);
             canvas.drawPath(star, strokePaint);
             break;
 
-          case 6:
-            // 7. Paper Airplane
-            final plane = Path()
-              ..moveTo(-9, -9)
-              ..lineTo(11, 0)
-              ..lineTo(-9, 9)
-              ..lineTo(-4, 0)
+          case 4:
+            // 5. Abstract Diamond / Nested Lozenge
+            final d1 = Path()
+              ..moveTo(0, -10)
+              ..lineTo(9, 0)
+              ..lineTo(0, 10)
+              ..lineTo(-9, 0)
               ..close();
-            canvas.drawPath(plane, strokePaint);
-            canvas.drawLine(const Offset(-4, 0), const Offset(11, 0), strokePaint);
+            canvas.drawPath(d1, strokePaint);
+            final d2 = Path()
+              ..moveTo(0, -5)
+              ..lineTo(4.5, 0)
+              ..lineTo(0, 5)
+              ..lineTo(-4.5, 0)
+              ..close();
+            canvas.drawPath(d2, strokePaint);
+            break;
+
+          case 5:
+            // 6. Topographic Contour Swirl
+            final topo = Path()
+              ..moveTo(-10, -4)
+              ..cubicTo(-6, -10, 6, -10, 10, -3)
+              ..cubicTo(12, 4, 4, 10, -4, 8)
+              ..cubicTo(-8, 6, -6, 0, 0, 0);
+            canvas.drawPath(topo, strokePaint);
+            break;
+
+          case 6:
+            // 7. Minimalist Hexagon / Polygon Node
+            final hex = Path()
+              ..moveTo(0, -10)
+              ..lineTo(9, -5)
+              ..lineTo(9, 5)
+              ..lineTo(0, 10)
+              ..lineTo(-9, 5)
+              ..lineTo(-9, -5)
+              ..close();
+            canvas.drawPath(hex, strokePaint);
+            canvas.drawLine(const Offset(-9, -5), const Offset(9, 5), strokePaint);
             break;
 
           case 7:
-            // 8. Headphones / Audio
-            final headArc = Path()
-              ..moveTo(-8, 3)
-              ..lineTo(-8, -2)
-              ..arcToPoint(const Offset(8, -2), radius: const Radius.circular(8))
-              ..lineTo(8, 3);
-            canvas.drawPath(headArc, strokePaint);
-            canvas.drawRRect(
-              RRect.fromRectAndRadius(const Rect.fromLTWH(-10, 0, 4, 8), const Radius.circular(2)),
-              strokePaint,
-            );
-            canvas.drawRRect(
-              RRect.fromRectAndRadius(const Rect.fromLTWH(6, 0, 4, 8), const Radius.circular(2)),
-              strokePaint,
-            );
+            // 8. Abstract Triple Curved Waves
+            for (int i = -1; i <= 1; i++) {
+              final wave = Path()
+                ..moveTo(-10, i * 6.0 - 3)
+                ..quadraticBezierTo(0, i * 6.0 + 4, 10, i * 6.0 - 3);
+              canvas.drawPath(wave, strokePaint);
+            }
             break;
 
           case 8:
-            // 9. Smiley / Emoji
-            canvas.drawCircle(Offset.zero, 9, strokePaint);
-            canvas.drawCircle(const Offset(-3.5, -2.5), 1.0, dotPaint);
-            canvas.drawCircle(const Offset(3.5, -2.5), 1.0, dotPaint);
-            final smile = Path()
-              ..moveTo(-4.5, 2)
-              ..quadraticBezierTo(0, 6, 4.5, 2);
-            canvas.drawPath(smile, strokePaint);
+            // 9. Floating Abstract Petal / Arc Loop
+            final petal = Path()
+              ..moveTo(-8, 8)
+              ..cubicTo(-12, -4, 4, -12, 8, -8)
+              ..cubicTo(12, 4, -4, 12, -8, 8)
+              ..close();
+            canvas.drawPath(petal, strokePaint);
+            canvas.drawCircle(const Offset(0, 0), 1.5, dotPaint);
             break;
 
           case 9:
-            // 10. Cloud with Stars
-            final cloud = Path()
-              ..moveTo(-8, 4)
-              ..lineTo(8, 4)
-              ..arcToPoint(const Offset(8, -1), radius: const Radius.circular(3))
-              ..arcToPoint(const Offset(3, -6), radius: const Radius.circular(5))
-              ..arcToPoint(const Offset(-4, -5), radius: const Radius.circular(5))
-              ..arcToPoint(const Offset(-8, 4), radius: const Radius.circular(4));
-            canvas.drawPath(cloud, strokePaint);
+            // 10. Abstract Circular Gyro & Tangent Rays
+            canvas.drawCircle(Offset.zero, 7, strokePaint);
+            canvas.drawLine(const Offset(-11, -7), const Offset(11, 7), strokePaint);
+            canvas.drawCircle(const Offset(0, 0), 2.0, dotPaint);
             break;
 
           case 10:
-            // 11. Magnifying Glass
-            canvas.drawCircle(const Offset(-2, -2), 6, strokePaint);
-            canvas.drawLine(const Offset(3, 3), const Offset(9, 9), strokePaint);
+            // 11. Modern Stepped Geometric Rhythm
+            final step = Path()
+              ..moveTo(-10, -8)
+              ..lineTo(-3, -8)
+              ..lineTo(-3, 0)
+              ..lineTo(4, 0)
+              ..lineTo(4, 8)
+              ..lineTo(11, 8);
+            canvas.drawPath(step, strokePaint);
             break;
 
           case 11:
-            // 12. Padlock / Key
-            final shackle = Path()
-              ..moveTo(-4, -1)
-              ..lineTo(-4, -6)
-              ..arcToPoint(const Offset(4, -6), radius: const Radius.circular(4))
-              ..lineTo(4, -1);
-            canvas.drawPath(shackle, strokePaint);
-            canvas.drawRRect(
-              RRect.fromRectAndRadius(const Rect.fromLTWH(-7, -1, 14, 10), const Radius.circular(3)),
-              strokePaint,
-            );
-            canvas.drawCircle(const Offset(0, 3), 1.2, dotPaint);
+            // 12. Minimalist Isometric Cube Frame
+            final iso = Path()
+              ..moveTo(0, -10)
+              ..lineTo(9, -5)
+              ..lineTo(9, 5)
+              ..lineTo(0, 10)
+              ..lineTo(-9, 5)
+              ..lineTo(-9, -5)
+              ..close();
+            canvas.drawPath(iso, strokePaint);
+            canvas.drawLine(const Offset(0, 0), const Offset(0, 10), strokePaint);
+            canvas.drawLine(const Offset(0, 0), const Offset(-9, -5), strokePaint);
+            canvas.drawLine(const Offset(0, 0), const Offset(9, -5), strokePaint);
             break;
         }
 
-        // Floating Micro Accent Dot in corner
-        canvas.drawCircle(const Offset(22, -22), 1.2, dotPaint);
-        canvas.drawLine(const Offset(-22, 18), const Offset(-18, 18), strokePaint);
-        canvas.drawLine(const Offset(-20, 16), const Offset(-20, 20), strokePaint);
+        // Floating Micro Accent Dot
+        canvas.drawCircle(const Offset(20, -20), 1.3, dotPaint);
+        canvas.drawLine(const Offset(-20, 18), const Offset(-16, 18), strokePaint);
+        canvas.drawLine(const Offset(-18, 16), const Offset(-18, 20), strokePaint);
 
         canvas.restore();
       }
