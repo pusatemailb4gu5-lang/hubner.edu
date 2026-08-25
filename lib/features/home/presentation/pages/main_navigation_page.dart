@@ -5763,8 +5763,13 @@ class _PurplePatternPainter extends CustomPainter {
 class _ProfileHeroMicroPatternPainter extends CustomPainter {
   final String avatarPath;
   final bool isDark;
+  final double progress;
 
-  _ProfileHeroMicroPatternPainter({required this.avatarPath, required this.isDark});
+  _ProfileHeroMicroPatternPainter({
+    required this.avatarPath,
+    required this.isDark,
+    this.progress = 0.0,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -5786,12 +5791,17 @@ class _ProfileHeroMicroPatternPainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2.0;
 
+    // Smooth subtle floating drift
+    final driftX = sin(progress * 2 * pi) * 6.0;
+    final driftY = cos(progress * 2 * pi) * 4.0;
+    final rotAngle = progress * 2 * pi;
+
     switch (patternType) {
       case 0:
         // === Variation 0: Bauhaus Arches, Wedges & Triangles ===
         fillPaint.color = geoColor;
         canvas.drawArc(
-          Rect.fromCircle(center: const Offset(15, 15), radius: 38),
+          Rect.fromCircle(center: Offset(15 + driftX, 15 + driftY), radius: 38),
           0,
           pi / 2,
           true,
@@ -5801,7 +5811,7 @@ class _ProfileHeroMicroPatternPainter extends CustomPainter {
         fillPaint.color = accentGeoColor;
         canvas.drawRRect(
           RRect.fromRectAndRadius(
-            Rect.fromCenter(center: Offset(size.width - 35, 32), width: 34, height: 34),
+            Rect.fromCenter(center: Offset(size.width - 35 - driftX, 32 + driftY), width: 34, height: 34),
             const Radius.circular(10),
           ),
           fillPaint,
@@ -5809,7 +5819,7 @@ class _ProfileHeroMicroPatternPainter extends CustomPainter {
 
         fillPaint.color = geoColor;
         canvas.drawArc(
-          Rect.fromCircle(center: Offset(30, size.height * 0.48), radius: 30),
+          Rect.fromCircle(center: Offset(30 + driftX, size.height * 0.48 - driftY), radius: 30),
           pi * 0.2,
           pi * 1.5,
           true,
@@ -5818,15 +5828,15 @@ class _ProfileHeroMicroPatternPainter extends CustomPainter {
 
         fillPaint.color = accentGeoColor;
         final triPath = Path()
-          ..moveTo(size.width - 15, size.height * 0.40)
-          ..lineTo(size.width - 50, size.height * 0.50)
-          ..lineTo(size.width - 15, size.height * 0.58)
+          ..moveTo(size.width - 15 - driftX, size.height * 0.40 + driftY)
+          ..lineTo(size.width - 50 - driftX, size.height * 0.50 + driftY)
+          ..lineTo(size.width - 15 - driftX, size.height * 0.58 + driftY)
           ..close();
         canvas.drawPath(triPath, fillPaint);
 
         fillPaint.color = geoColor;
         canvas.drawArc(
-          Rect.fromCircle(center: Offset(size.width - 20, size.height * 0.86), radius: 38),
+          Rect.fromCircle(center: Offset(size.width - 20 + driftX, size.height * 0.86 - driftY), radius: 38),
           pi,
           pi / 2,
           true,
@@ -5839,7 +5849,7 @@ class _ProfileHeroMicroPatternPainter extends CustomPainter {
         fillPaint.color = geoColor;
         canvas.drawRRect(
           RRect.fromRectAndRadius(
-            Rect.fromLTWH(10, 15, 60, 24),
+            Rect.fromLTWH(10 + driftX, 15 + driftY, 60, 24),
             const Radius.circular(12),
           ),
           fillPaint,
@@ -5848,35 +5858,39 @@ class _ProfileHeroMicroPatternPainter extends CustomPainter {
         fillPaint.color = accentGeoColor;
         canvas.drawRRect(
           RRect.fromRectAndRadius(
-            Rect.fromLTWH(size.width - 55, 20, 42, 42),
+            Rect.fromLTWH(size.width - 55 - driftX, 20 + driftY, 42, 42),
             const Radius.circular(21),
           ),
           fillPaint,
         );
 
-        // Diamond star on middle left
+        // Diamond star on middle left with gentle rotation
         fillPaint.color = accentGeoColor;
-        final dX = 35.0, dY = size.height * 0.50, dS = 18.0;
+        canvas.save();
+        canvas.translate(35 + driftX, size.height * 0.50 + driftY);
+        canvas.rotate(rotAngle * 0.25);
+        final dS = 18.0;
         final dPath = Path()
-          ..moveTo(dX, dY - dS)
-          ..lineTo(dX + dS, dY)
-          ..lineTo(dX, dY + dS)
-          ..lineTo(dX - dS, dY)
+          ..moveTo(0, -dS)
+          ..lineTo(dS, 0)
+          ..lineTo(0, dS)
+          ..lineTo(-dS, 0)
           ..close();
         canvas.drawPath(dPath, fillPaint);
+        canvas.restore();
 
         // Concentric waves / arcs on right
         strokePaint.color = geoColor;
         strokePaint.strokeWidth = 3.5;
         canvas.drawArc(
-          Rect.fromCircle(center: Offset(size.width - 20, size.height * 0.52), radius: 32),
+          Rect.fromCircle(center: Offset(size.width - 20 - driftX, size.height * 0.52 + driftY), radius: 32),
           pi * 0.7,
           pi * 1.1,
           false,
           strokePaint,
         );
         canvas.drawArc(
-          Rect.fromCircle(center: Offset(size.width - 20, size.height * 0.52), radius: 46),
+          Rect.fromCircle(center: Offset(size.width - 20 - driftX, size.height * 0.52 + driftY), radius: 46),
           pi * 0.7,
           pi * 1.1,
           false,
@@ -5888,17 +5902,17 @@ class _ProfileHeroMicroPatternPainter extends CustomPainter {
         // === Variation 2: Modern Concentric Rings & Grid Arrays ===
         strokePaint.color = accentGeoColor;
         strokePaint.strokeWidth = 3.0;
-        canvas.drawCircle(Offset(28, 30), 22, strokePaint);
-        canvas.drawCircle(Offset(28, 30), 34, strokePaint);
+        canvas.drawCircle(Offset(28 + driftX, 30 + driftY), 22, strokePaint);
+        canvas.drawCircle(Offset(28 + driftX, 30 + driftY), 34, strokePaint);
 
         fillPaint.color = geoColor;
-        canvas.drawCircle(Offset(size.width - 32, 36), 26, fillPaint);
+        canvas.drawCircle(Offset(size.width - 32 - driftX, 36 + driftY), 26, fillPaint);
 
         // Diagonal pill strips on bottom
         fillPaint.color = geoColor;
         canvas.save();
-        canvas.translate(size.width - 45, size.height * 0.58);
-        canvas.rotate(-pi / 4);
+        canvas.translate(size.width - 45 - driftX, size.height * 0.58 + driftY);
+        canvas.rotate(-pi / 4 + sin(rotAngle) * 0.1);
         canvas.drawRRect(
           RRect.fromRectAndRadius(
             const Rect.fromLTWH(-30, -10, 60, 20),
@@ -5910,8 +5924,8 @@ class _ProfileHeroMicroPatternPainter extends CustomPainter {
 
         fillPaint.color = accentGeoColor;
         canvas.save();
-        canvas.translate(35, size.height * 0.56);
-        canvas.rotate(pi / 6);
+        canvas.translate(35 + driftX, size.height * 0.56 - driftY);
+        canvas.rotate(pi / 6 - sin(rotAngle) * 0.1);
         canvas.drawRRect(
           RRect.fromRectAndRadius(
             const Rect.fromLTWH(-25, -8, 50, 16),
@@ -5925,22 +5939,26 @@ class _ProfileHeroMicroPatternPainter extends CustomPainter {
       case 3:
         // === Variation 3: Playful 4-Point Starbursts & Organic Crescents ===
         fillPaint.color = accentGeoColor;
-        // Starburst top left
+        // Starburst top left with gentle rotation
+        canvas.save();
+        canvas.translate(30 + driftX, 28 + driftY);
+        canvas.rotate(rotAngle * 0.3);
         final sPath = Path()
-          ..moveTo(30, 10)
-          ..quadraticBezierTo(30, 28, 48, 28)
-          ..quadraticBezierTo(30, 28, 30, 46)
-          ..quadraticBezierTo(30, 28, 12, 28)
-          ..quadraticBezierTo(30, 28, 30, 10)
+          ..moveTo(0, -18)
+          ..quadraticBezierTo(0, 0, 18, 0)
+          ..quadraticBezierTo(0, 0, 0, 18)
+          ..quadraticBezierTo(0, 0, -18, 0)
+          ..quadraticBezierTo(0, 0, 0, -18)
           ..close();
         canvas.drawPath(sPath, fillPaint);
+        canvas.restore();
 
         // Crescent top right
         fillPaint.color = geoColor;
         final cPath = Path()
-          ..addOval(Rect.fromCircle(center: Offset(size.width - 35, 35), radius: 25));
+          ..addOval(Rect.fromCircle(center: Offset(size.width - 35 - driftX, 35 + driftY), radius: 25));
         final cutPath = Path()
-          ..addOval(Rect.fromCircle(center: Offset(size.width - 44, 30), radius: 22));
+          ..addOval(Rect.fromCircle(center: Offset(size.width - 44 - driftX, 30 + driftY), radius: 22));
         final diffPath = Path.combine(PathOperation.difference, cPath, cutPath);
         canvas.drawPath(diffPath, fillPaint);
 
@@ -5948,7 +5966,7 @@ class _ProfileHeroMicroPatternPainter extends CustomPainter {
         fillPaint.color = accentGeoColor;
         canvas.drawRRect(
           RRect.fromRectAndRadius(
-            Rect.fromLTWH(size.width - 50, size.height * 0.46, 44, 32),
+            Rect.fromLTWH(size.width - 50 - driftX, size.height * 0.46 + driftY, 44, 32),
             const Radius.circular(16),
           ),
           fillPaint,
@@ -5958,7 +5976,7 @@ class _ProfileHeroMicroPatternPainter extends CustomPainter {
         strokePaint.color = geoColor;
         strokePaint.strokeWidth = 3.0;
         canvas.drawArc(
-          Rect.fromCircle(center: Offset(20, size.height * 0.65), radius: 26),
+          Rect.fromCircle(center: Offset(20 + driftX, size.height * 0.65 - driftY), radius: 26),
           -pi * 0.2,
           pi * 1.2,
           false,
@@ -5970,14 +5988,16 @@ class _ProfileHeroMicroPatternPainter extends CustomPainter {
       default:
         // === Variation 4: Dynamic Hexagons, Ribbons & Rounded Cutouts ===
         fillPaint.color = geoColor;
-        // Hexagon top left
+        // Hexagon top left with gentle rotation
+        canvas.save();
+        canvas.translate(32 + driftX, 32 + driftY);
+        canvas.rotate(rotAngle * 0.15);
         final hPath = Path();
-        final hCenter = const Offset(32, 32);
         final hRadius = 24.0;
         for (int i = 0; i < 6; i++) {
           final angle = pi / 3 * i;
-          final pX = hCenter.dx + hRadius * cos(angle);
-          final pY = hCenter.dy + hRadius * sin(angle);
+          final pX = hRadius * cos(angle);
+          final pY = hRadius * sin(angle);
           if (i == 0) {
             hPath.moveTo(pX, pY);
           } else {
@@ -5986,14 +6006,15 @@ class _ProfileHeroMicroPatternPainter extends CustomPainter {
         }
         hPath.close();
         canvas.drawPath(hPath, fillPaint);
+        canvas.restore();
 
         // Chevron arrow right
         fillPaint.color = accentGeoColor;
         final chPath = Path()
-          ..moveTo(size.width - 48, size.height * 0.38)
-          ..lineTo(size.width - 24, size.height * 0.46)
-          ..lineTo(size.width - 48, size.height * 0.54)
-          ..lineTo(size.width - 36, size.height * 0.46)
+          ..moveTo(size.width - 48 - driftX, size.height * 0.38 + driftY)
+          ..lineTo(size.width - 24 - driftX, size.height * 0.46 + driftY)
+          ..lineTo(size.width - 48 - driftX, size.height * 0.54 + driftY)
+          ..lineTo(size.width - 36 - driftX, size.height * 0.46 + driftY)
           ..close();
         canvas.drawPath(chPath, fillPaint);
 
@@ -6001,7 +6022,7 @@ class _ProfileHeroMicroPatternPainter extends CustomPainter {
         fillPaint.color = geoColor;
         canvas.drawRRect(
           RRect.fromRectAndRadius(
-            Rect.fromLTWH(size.width - 65, size.height * 0.80, 55, 20),
+            Rect.fromLTWH(size.width - 65 - driftX, size.height * 0.80 + driftY, 55, 20),
             const Radius.circular(10),
           ),
           fillPaint,
@@ -6012,8 +6033,8 @@ class _ProfileHeroMicroPatternPainter extends CustomPainter {
     // Common scattered playful micro-dots
     final dotPaint = Paint()..style = PaintingStyle.fill;
     for (int i = 0; i < 7; i++) {
-      final x = (rand.nextDouble() * 0.86 + 0.07) * size.width;
-      final y = (rand.nextDouble() * 0.86 + 0.07) * size.height;
+      final x = ((rand.nextDouble() * 0.86 + 0.07) * size.width) + sin(progress * 2 * pi + i) * 4.0;
+      final y = ((rand.nextDouble() * 0.86 + 0.07) * size.height) + cos(progress * 2 * pi + i) * 4.0;
       dotPaint.color = (i % 2 == 0 ? accentGeoColor : geoColor);
       canvas.drawCircle(Offset(x, y), 2.5 + rand.nextDouble() * 2.0, dotPaint);
     }
@@ -6021,7 +6042,9 @@ class _ProfileHeroMicroPatternPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _ProfileHeroMicroPatternPainter oldDelegate) {
-    return oldDelegate.avatarPath != avatarPath || oldDelegate.isDark != isDark;
+    return oldDelegate.avatarPath != avatarPath ||
+        oldDelegate.isDark != isDark ||
+        oldDelegate.progress != progress;
   }
 }
 
@@ -6033,9 +6056,25 @@ class ProfilePage extends StatefulWidget {
   State<ProfilePage> createState() => _ProfilePageState();
 }
 
-class _ProfilePageState extends State<ProfilePage> {
+class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStateMixin {
   Map<String, dynamic>? _cachedUserData;
   bool _showAvatarOverlay = false;
+  late AnimationController _animController;
+
+  @override
+  void initState() {
+    super.initState();
+    _animController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 8),
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _animController.dispose();
+    super.dispose();
+  }
 
   // 10 Pasangan Warna Resmi Identitas Classroom dari desain.md
   static const List<Color> _classroomCardColors = [
@@ -6081,7 +6120,7 @@ class _ProfilePageState extends State<ProfilePage> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: isDark ? const Color(0xFF18181B) : Colors.white,
+        backgroundColor: isDark ? const Color(0xFF1C1C1E) : Colors.white,
         title: Text(
           'Hapus Akun',
           style: AppTypography.buttonLabel(color: Colors.redAccent, fontWeight: FontWeight.bold),
@@ -6233,31 +6272,29 @@ class _ProfilePageState extends State<ProfilePage> {
             // Frameless icon placed cleanly at the left
             Icon(icon, color: effectiveIconColor, size: 22),
             const SizedBox(width: 14),
-            Expanded(
-              child: Text(
-                title,
-                maxLines: 1,
-                style: AppTypography.cardTitle(
-                  color: effectiveTitleColor,
-                  fontWeight: FontWeight.w600,
-                  fontSize: 18,
-                ),
+            Text(
+              title,
+              maxLines: 1,
+              style: AppTypography.cardTitle(
+                color: effectiveTitleColor,
+                fontWeight: FontWeight.w600,
+                fontSize: 18,
               ),
             ),
-            const SizedBox(width: 8),
-            if (trailing.isNotEmpty)
-              Flexible(
-                child: Text(
-                  trailing,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  textAlign: TextAlign.end,
-                  style: AppTypography.timestamp(
-                    color: isDark ? Colors.white54 : const Color(0xFF64748B),
-                  ),
+            const Spacer(),
+            if (trailing.isNotEmpty) ...[
+              Text(
+                trailing,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.right,
+                style: AppTypography.timestamp(
+                  color: isDark ? Colors.white54 : const Color(0xFF64748B),
+                  fontWeight: FontWeight.w500,
                 ),
               ),
-            const SizedBox(width: 4),
+              const SizedBox(width: 8),
+            ],
             Icon(
               Icons.chevron_right_rounded,
               color: isDark ? Colors.white38 : const Color(0xFF94A3B8),
@@ -6271,219 +6308,209 @@ class _ProfilePageState extends State<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
-    final bool isDark = AppColors.isDarkMode;
+    return ValueListenableBuilder<String>(
+      valueListenable: HubnerApp.themeNotifier,
+      builder: (context, activeTheme, _) {
+        final bool isDark = activeTheme == 'Gelap' || activeTheme == 'Hitam';
 
-    Future<void> logOut() async {
-      final confirm = await showDialog<bool>(
-        context: context,
-        builder: (ctx) => AlertDialog(
-          backgroundColor: isDark ? const Color(0xFF18181B) : Colors.white,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          title: Text(
-            'Keluar dari Akun',
-            style: AppTypography.buttonLabel(
-              color: isDark ? Colors.white : Colors.black87,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          content: Text(
-            'Apakah Anda yakin ingin keluar dari akun ini?',
-            style: AppTypography.buttonLabel(
-              color: isDark ? Colors.white70 : Colors.black87,
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(ctx, false),
-              child: Text(
-                'Batal',
+        Future<void> logOut() async {
+          final confirm = await showDialog<bool>(
+            context: context,
+            builder: (ctx) => AlertDialog(
+              backgroundColor: isDark ? const Color(0xFF1C1C1E) : Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+              title: Text(
+                'Keluar dari Akun',
                 style: AppTypography.buttonLabel(
-                  color: isDark ? Colors.white60 : Colors.black54,
-                  fontWeight: FontWeight.w600,
+                  color: isDark ? Colors.white : Colors.black87,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
-            ),
-            ElevatedButton(
-              onPressed: () => Navigator.pop(ctx, true),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFEF4444),
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+              content: Text(
+                'Apakah Anda yakin ingin keluar dari akun ini?',
+                style: AppTypography.buttonLabel(
+                  color: isDark ? Colors.white70 : Colors.black87,
                 ),
-                elevation: 0,
               ),
-              child: Text(
-                'Keluar',
-                style: AppTypography.buttonLabel(fontWeight: FontWeight.bold),
-              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(ctx, false),
+                  child: Text(
+                    'Batal',
+                    style: AppTypography.buttonLabel(
+                      color: isDark ? Colors.white60 : Colors.black54,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                ElevatedButton(
+                  onPressed: () => Navigator.pop(ctx, true),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFEF4444),
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    elevation: 0,
+                  ),
+                  child: Text(
+                    'Keluar',
+                    style: AppTypography.buttonLabel(fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
-      );
+          );
 
-      if (confirm != true) return;
+          if (confirm != true) return;
 
-      try {
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.remove('isLoggedIn');
-        await FirebaseAuth.instance.signOut();
-        try {
-          await GoogleSignIn.instance.signOut();
-        } catch (_) {}
-      } catch (e) {
-        debugPrint('Logout error: $e');
-      }
+          try {
+            final prefs = await SharedPreferences.getInstance();
+            await prefs.remove('isLoggedIn');
+            await FirebaseAuth.instance.signOut();
+            try {
+              await GoogleSignIn.instance.signOut();
+            } catch (_) {}
+          } catch (e) {
+            debugPrint('Logout error: $e');
+          }
 
-      if (context.mounted) {
-        Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (_) => const LoginPage()),
-          (route) => false,
-        );
-      }
-    }
-
-    final String currentUid = FirebaseAuth.instance.currentUser?.uid ?? '';
-
-    return StreamBuilder<DocumentSnapshot>(
-      stream: FirebaseFirestore.instance.collection('users').doc(currentUid).snapshots(),
-      builder: (context, snapshot) {
-        if (snapshot.hasData && snapshot.data?.data() != null) {
-          _cachedUserData = snapshot.data!.data() as Map<String, dynamic>;
-        }
-        final userData = (snapshot.data?.data() as Map<String, dynamic>?) ?? _cachedUserData;
-        
-        final currentUser = FirebaseAuth.instance.currentUser;
-        final fallbackName = currentUser?.displayName?.isNotEmpty == true
-            ? currentUser!.displayName!
-            : (currentUser?.email?.split('@').first ?? 'User');
-        final fallbackUserId = currentUid.length >= 8 ? currentUid.substring(0, 8) : currentUid;
-
-        final String name = (userData?['name'] as String?)?.isNotEmpty == true
-            ? userData!['name'] as String
-            : fallbackName;
-        final String email = currentUser?.email ?? 'user@hubner.io';
-        final String gender = userData?['gender'] ?? 'Laki-laki';
-        final String userId = (userData?['userId'] as String?)?.isNotEmpty == true
-            ? userData!['userId'] as String
-            : fallbackUserId;
-        final String roleDb = userData?['role'] ?? 'Siswa';
-        final String schoolLevel = userData?['schoolLevel'] ?? '-';
-        final String grade = userData?['grade'] ?? '-';
-        final bool isFemale = gender.toLowerCase() == 'perempuan';
-        final String suffix = isFemale ? '6' : '1';
-        String defaultAvatar = 'assets/icon_pack/avatar/sma_$suffix.png';
-        if (roleDb.toLowerCase() == 'guru') {
-          defaultAvatar = 'assets/icon_pack/avatar/guru_$suffix.png';
-        } else {
-          final String sL = schoolLevel.toUpperCase();
-          if (sL == 'SD') {
-            defaultAvatar = 'assets/icon_pack/avatar/sd_$suffix.png';
-          } else if (sL == 'SMP') {
-            defaultAvatar = 'assets/icon_pack/avatar/smp_$suffix.png';
-          } else {
-            defaultAvatar = 'assets/icon_pack/avatar/sma_$suffix.png';
+          if (context.mounted) {
+            Navigator.of(context).pushAndRemoveUntil(
+              MaterialPageRoute(builder: (_) => const LoginPage()),
+              (route) => false,
+            );
           }
         }
-        final String avatarPath = (userData?['avatar'] as String?)?.isNotEmpty == true
-            ? userData!['avatar'] as String
-            : defaultAvatar;
 
-        final String timezone = userData?['timezone'] ?? 'Asia/Jakarta (GMT+07:00)';
-        final String language = userData?['language'] ?? 'Bahasa Indonesia';
-        final bool twoFactorEnabled = userData?['twoFactorEnabled'] ?? false;
-        final String themeMode = userData?['themeMode'] ?? 'Light';
-        final bool notifyTaskReminder = userData?['notifyTaskReminder'] ?? true;
-        final bool notifyChatMention = userData?['notifyChatMention'] ?? true;
+        final String currentUid = FirebaseAuth.instance.currentUser?.uid ?? '';
 
-        final heroColor = _getHeroColor(avatarPath, isDark);
+        return StreamBuilder<DocumentSnapshot>(
+          stream: FirebaseFirestore.instance.collection('users').doc(currentUid).snapshots(),
+          builder: (context, snapshot) {
+            if (snapshot.hasData && snapshot.data?.data() != null) {
+              _cachedUserData = snapshot.data!.data() as Map<String, dynamic>;
+            }
+            final userData = (snapshot.data?.data() as Map<String, dynamic>?) ?? _cachedUserData;
+            
+            final currentUser = FirebaseAuth.instance.currentUser;
+            final fallbackName = currentUser?.displayName?.isNotEmpty == true
+                ? currentUser!.displayName!
+                : (currentUser?.email?.split('@').first ?? 'User');
+            final fallbackUserId = currentUid.length >= 8 ? currentUid.substring(0, 8) : currentUid;
 
-        final heroTextColor = isDark ? Colors.white : const Color(0xFF0F172A);
+            final String name = (userData?['name'] as String?)?.isNotEmpty == true
+                ? userData!['name'] as String
+                : fallbackName;
+            final String email = currentUser?.email ?? 'user@hubner.io';
+            final String gender = userData?['gender'] ?? 'Laki-laki';
+            final String userId = (userData?['userId'] as String?)?.isNotEmpty == true
+                ? userData!['userId'] as String
+                : fallbackUserId;
+            final String roleDb = userData?['role'] ?? 'Siswa';
+            final String schoolLevel = userData?['schoolLevel'] ?? '-';
+            final String grade = userData?['grade'] ?? '-';
+            final bool isFemale = gender.toLowerCase() == 'perempuan';
+            final String suffix = isFemale ? '6' : '1';
+            String defaultAvatar = 'assets/icon_pack/avatar/sma_$suffix.png';
+            if (roleDb.toLowerCase() == 'guru') {
+              defaultAvatar = 'assets/icon_pack/avatar/guru_$suffix.png';
+            } else {
+              final String sL = schoolLevel.toUpperCase();
+              if (sL == 'SD') {
+                defaultAvatar = 'assets/icon_pack/avatar/sd_$suffix.png';
+              } else if (sL == 'SMP') {
+                defaultAvatar = 'assets/icon_pack/avatar/smp_$suffix.png';
+              } else {
+                defaultAvatar = 'assets/icon_pack/avatar/sma_$suffix.png';
+              }
+            }
+            final String avatarPath = (userData?['avatar'] as String?)?.isNotEmpty == true
+                ? userData!['avatar'] as String
+                : defaultAvatar;
 
-        return Scaffold(
-          backgroundColor: isDark ? const Color(0xFF000000) : const Color(0xFFF8FAFC),
-          body: SingleChildScrollView(
-            padding: EdgeInsets.only(
-              bottom: MediaQuery.of(context).padding.bottom + 80 + 24,
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // 1. Symmetrical Curved Hero Header Card
-                ClipRRect(
-                  borderRadius: const BorderRadius.vertical(
-                    bottom: Radius.circular(36),
-                  ),
-                  child: Container(
-                    width: double.infinity,
-                    color: heroColor,
-                    child: CustomPaint(
-                      painter: _ProfileHeroMicroPatternPainter(
-                        avatarPath: avatarPath,
-                        isDark: isDark,
+            final String timezone = userData?['timezone'] ?? 'Asia/Jakarta (GMT+07:00)';
+            final String language = userData?['language'] ?? 'Bahasa Indonesia';
+            final bool twoFactorEnabled = userData?['twoFactorEnabled'] ?? false;
+            final String themeMode = userData?['themeMode'] ?? 'Light';
+            final bool notifyTaskReminder = userData?['notifyTaskReminder'] ?? true;
+            final bool notifyChatMention = userData?['notifyChatMention'] ?? true;
+
+            final heroColor = _getHeroColor(avatarPath, isDark);
+
+            final heroTextColor = isDark ? Colors.white : const Color(0xFF0F172A);
+
+            return Scaffold(
+              backgroundColor: isDark ? const Color(0xFF000000) : const Color(0xFFF8FAFC),
+              body: SingleChildScrollView(
+                padding: EdgeInsets.only(
+                  bottom: MediaQuery.of(context).padding.bottom + 80 + 24,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // 1. Symmetrical Curved Hero Header Card
+                    ClipRRect(
+                      borderRadius: const BorderRadius.vertical(
+                        bottom: Radius.circular(36),
                       ),
-                      child: SafeArea(
-                        bottom: false,
-                        child: Padding(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: AppTypography.screenHorizontalMargin,
-                            vertical: 16,
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              // Top Bar: Edit Action on top right
-                              Align(
-                                alignment: Alignment.topRight,
-                                child: InkWell(
-                                  borderRadius: BorderRadius.circular(20),
-                                  onTap: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (_) => EditProfilePage(
-                                          uid: currentUid,
-                                          initialData: userData,
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
-                                    decoration: BoxDecoration(
-                                      color: isDark
-                                          ? Colors.black.withValues(alpha: 0.35)
-                                          : Colors.white.withValues(alpha: 0.85),
-                                      borderRadius: BorderRadius.circular(20),
-                                      border: Border.all(
-                                        color: isDark
-                                            ? Colors.white.withValues(alpha: 0.25)
-                                            : Colors.black.withValues(alpha: 0.08),
-                                        width: 1.0,
-                                      ),
-                                    ),
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Icon(
-                                          Icons.edit_rounded,
-                                          color: heroTextColor,
-                                          size: 14,
-                                        ),
-                                        const SizedBox(width: 5),
-                                        Text(
-                                          'Edit Profil',
-                                          style: AppTypography.timestamp(
-                                            color: heroTextColor,
-                                            fontWeight: FontWeight.bold,
+                      child: Container(
+                        width: double.infinity,
+                        color: heroColor,
+                        child: AnimatedBuilder(
+                          animation: _animController,
+                          builder: (context, _) => CustomPaint(
+                            painter: _ProfileHeroMicroPatternPainter(
+                              avatarPath: avatarPath,
+                              isDark: isDark,
+                              progress: _animController.value,
+                            ),
+                            child: SafeArea(
+                              bottom: false,
+                              child: Padding(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: AppTypography.screenHorizontalMargin,
+                                  vertical: 16,
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    // Top Bar: Edit Action on top right (styled exactly like Mode Edit button)
+                                    Align(
+                                      alignment: Alignment.topRight,
+                                      child: InkWell(
+                                        borderRadius: BorderRadius.circular(20),
+                                        onTap: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (_) => EditProfilePage(
+                                                uid: currentUid,
+                                                initialData: userData,
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                        child: Container(
+                                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+                                          decoration: BoxDecoration(
+                                            color: isDark ? const Color(0xFF27272A) : const Color(0xFF1E293B),
+                                            borderRadius: BorderRadius.circular(20),
+                                            border: isDark
+                                                ? Border.all(color: const Color(0xFF3F3F46), width: 1.0)
+                                                : null,
+                                          ),
+                                          child: Text(
+                                            'Edit Profil',
+                                            style: AppTypography.buttonLabel(
+                                              color: Colors.white,
+                                              fontWeight: FontWeight.bold,
+                                            ),
                                           ),
                                         ),
-                                      ],
+                                      ),
                                     ),
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(height: 14),
+                                    const SizedBox(height: 14),
 
                               // Symmetrical Centered Avatar (Tapping toggles floating overlay)
                               GestureDetector(
@@ -6739,7 +6766,8 @@ class _ProfilePageState extends State<ProfilePage> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 16),
+              ),
+              const SizedBox(height: 16),
 
                 // 2. Main Content Sections
                 Padding(
@@ -7049,6 +7077,8 @@ class _ProfilePageState extends State<ProfilePage> {
         );
       },
     );
+  },
+);
   }
 }
 

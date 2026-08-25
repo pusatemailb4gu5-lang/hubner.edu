@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hubner/main.dart';
 
 /// Color tokens extracted from the HTML/Tailwind config of the design
 /// (see `brand` & `meeting` palettes in the source design).
@@ -7,7 +8,11 @@ class AppColors {
 
   static String themeMode = 'Terang'; // 'Terang', 'Gelap', 'Hitam'
 
-  static bool get isDarkMode => themeMode == 'Gelap' || themeMode == 'Hitam';
+  static bool get isDarkMode =>
+      HubnerApp.themeNotifier.value == 'Gelap' ||
+      HubnerApp.themeNotifier.value == 'Hitam' ||
+      themeMode == 'Gelap' ||
+      themeMode == 'Hitam';
 
   // Brand
   static Color get brandBg {
