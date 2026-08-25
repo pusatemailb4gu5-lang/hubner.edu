@@ -27,6 +27,39 @@ class _DesktopDiskusiTabState extends State<DesktopDiskusiTab> {
   String _selectedChannelName = '';
   String _searchQuery = '';
 
+  Widget _buildSafeAvatar(String? avatar) {
+    final String raw = (avatar ?? '').trim();
+    if (raw.isEmpty) {
+      return Image.asset('assets/icon_pack/avatar/avatar_2.png', fit: BoxFit.cover);
+    }
+    if (raw.startsWith('http://') || raw.startsWith('https://')) {
+      return Image.network(
+        raw,
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) => Image.asset('assets/icon_pack/avatar/avatar_2.png', fit: BoxFit.cover),
+      );
+    }
+    String assetPath = raw;
+    if (!assetPath.startsWith('assets/')) {
+      if (assetPath.startsWith('icon_pack/')) {
+        assetPath = 'assets/$assetPath';
+      } else {
+        assetPath = 'assets/icon_pack/avatar/$assetPath';
+      }
+    }
+    if (!assetPath.toLowerCase().endsWith('.png') &&
+        !assetPath.toLowerCase().endsWith('.jpg') &&
+        !assetPath.toLowerCase().endsWith('.jpeg') &&
+        !assetPath.toLowerCase().endsWith('.webp')) {
+      assetPath = '$assetPath.png';
+    }
+    return Image.asset(
+      assetPath,
+      fit: BoxFit.cover,
+      errorBuilder: (_, __, ___) => Image.asset('assets/icon_pack/avatar/avatar_2.png', fit: BoxFit.cover),
+    );
+  }
+
   Future<List<Map<String, dynamic>>> _loadProjectMembers(String projectId) async {
     final query = await FirebaseFirestore.instance
         .collection('users')
@@ -259,7 +292,7 @@ class _DesktopDiskusiTabState extends State<DesktopDiskusiTab> {
                                         border: Border.all(color: isDark ? const Color(0xFF27272A) : Colors.black, width: 1),
                                       ),
                                       child: ClipOval(
-                                        child: Image.asset(m['avatar']),
+                                        child: _buildSafeAvatar(m['avatar'] as String?),
                                       ),
                                     ),
                                     contentPadding: EdgeInsets.zero,
@@ -409,7 +442,7 @@ class _DesktopDiskusiTabState extends State<DesktopDiskusiTab> {
                                   ),
                                 ),
                                 child: ClipOval(
-                                  child: Image.asset(avatarPath, fit: BoxFit.cover),
+                                  child: _buildSafeAvatar(avatarPath),
                                 ),
                               ),
                             ),
@@ -830,14 +863,7 @@ class _DesktopDiskusiTabState extends State<DesktopDiskusiTab> {
                                           ),
                                         ),
                                         child: ClipOval(
-                                          child: Image.asset(
-                                            avatar,
-                                            fit: BoxFit.cover,
-                                            errorBuilder: (ctx, err, st) => Icon(
-                                              Icons.forum_outlined,
-                                              color: isDark ? Colors.white60 : Colors.black54,
-                                            ),
-                                          ),
+                                          child: _buildSafeAvatar(avatar),
                                         ),
                                       ),
                                       const SizedBox(width: 12),

@@ -10,7 +10,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/foundation.dart' show kIsWeb, listEquals;
 import 'dart:io';
 import 'package:hubner/core/services/google_drive_service.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -49,6 +49,9 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
   late String _currentDiscussionId;
   late bool _isDraft;
 
+  Stream<DocumentSnapshot>? _discussionStream;
+  Stream<QuerySnapshot>? _messagesStream;
+
   final Set<String> _expandedMessageIds = {};
   final TextEditingController _messageController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
@@ -61,28 +64,29 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
   String _userRole = 'siswa';
   String _currentUserUid = '';
   String? _lastPlayedMessageId;
+  String? _lastMarkedUnreadMsgId;
   int _lastMessageCount = -1; // Track for smart scroll
   bool _initialScrollDone = false;
   
-  // Mention tracking: list of message doc IDs where current user is mentioned
-  List<String> _mentionMessageIds = [];
-  int _unreadMentionCount = 0;
+  // Mention tracking via ValueNotifier to avoid rebuild loops
+  final ValueNotifier<List<String>> _mentionNotifier = ValueNotifier<List<String>>([]);
   final Map<String, GlobalKey> _messageKeys = {};
   final AudioPlayer _audioPlayer = AudioPlayer();
   Map<String, dynamic>? _replyingToMessage;
   String? _editingMessageId;
   final FocusNode _inputFocusNode = FocusNode();
-  bool _showScrollToBottom = false;
+  final ValueNotifier<bool> _showScrollToBottom = ValueNotifier<bool>(false);
+
+  Stream<DocumentSnapshot>? _cachedProjectStream;
+  String? _cachedProjectId;
 
   void _onScroll() {
     if (!_scrollController.hasClients) return;
     final maxScroll = _scrollController.position.maxScrollExtent;
     final currentScroll = _scrollController.offset;
     final bool shouldShow = (maxScroll - currentScroll) > 80;
-    if (shouldShow != _showScrollToBottom) {
-      setState(() {
-        _showScrollToBottom = shouldShow;
-      });
+    if (shouldShow != _showScrollToBottom.value) {
+      _showScrollToBottom.value = shouldShow;
     }
   }
 
@@ -100,6 +104,24 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
     }
   }
 
+  void _initStreams() {
+    final discId = _currentDiscussionId.isNotEmpty ? _currentDiscussionId : widget.discussionId;
+    if (discId.isNotEmpty) {
+      _discussionStream = FirebaseFirestore.instance
+          .collection('discussions')
+          .doc(discId)
+          .snapshots();
+      _messagesStream = FirebaseFirestore.instance
+          .collection('discussions')
+          .doc(discId)
+          .collection('messages')
+          .snapshots();
+    } else {
+      _discussionStream = null;
+      _messagesStream = null;
+    }
+  }
+
   Future<void> _playNotificationSound() async {
     try {
       await _audioPlayer.play(AssetSource('sounds/notification.wav'));
@@ -112,11 +134,28 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
   void initState() {
     super.initState();
     _currentDiscussionId = widget.discussionId;
-    _isDraft = widget.isPrivateDraft || widget.discussionId.isEmpty;
+    _isDraft = widget.discussionId.isEmpty;
+    _initStreams();
     _messageController.addListener(_onTextChanged);
     _scrollController.addListener(_onScroll);
     _loadCurrentUserName();
     _checkExistingPrivateChatInBackground();
+  }
+
+  @override
+  void didUpdateWidget(covariant ChatRoomPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.discussionId != oldWidget.discussionId ||
+        widget.channelName != oldWidget.channelName) {
+      _currentDiscussionId = widget.discussionId;
+      _isDraft = widget.discussionId.isEmpty;
+      _initialScrollDone = false;
+      _lastMessageCount = -1;
+      _lastMarkedUnreadMsgId = null;
+      _discussionMembers = [];
+      _initStreams();
+      setState(() {});
+    }
   }
 
   void _checkExistingPrivateChatInBackground() async {
@@ -136,6 +175,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
             setState(() {
               _currentDiscussionId = doc.id;
               _isDraft = false;
+              _initStreams();
             });
           }
           break;
@@ -274,7 +314,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
       spans.add(TextSpan(
         text: mention,
         style: GoogleFonts.plusJakartaSans(
-          fontSize: 13.5,
+          fontSize: 20.0,
           fontWeight: FontWeight.bold,
           // Pastel purple for mentions that include you; subtle purple for others
           color: isMeMentioned
@@ -673,6 +713,24 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
   }
 
   
+  Future<String> _generateMicroThumbnail(Uint8List rawBytes) async {
+    try {
+      final img.Image? decodedNullable = img.decodeImage(rawBytes);
+      if (decodedNullable == null) return '';
+      // Micro thumbnail around 60-80px width (~2-5 KB)
+      final img.Image thumbImg = img.copyResize(
+        decodedNullable,
+        width: decodedNullable.width > decodedNullable.height ? 80 : null,
+        height: decodedNullable.height >= decodedNullable.width ? 80 : null,
+      );
+      final Uint8List thumbBytes = Uint8List.fromList(img.encodeJpg(thumbImg, quality: 20));
+      return 'data:image/jpeg;base64,${base64Encode(thumbBytes)}';
+    } catch (e) {
+      debugPrint('Error generating micro thumbnail: $e');
+      return '';
+    }
+  }
+
   Future<Uint8List> _compressImageToMax200Kb(Uint8List rawBytes) async {
     const int maxSizeBytes = 200 * 1024; // 200 KB
     if (rawBytes.lengthInBytes <= maxSizeBytes) {
@@ -836,13 +894,14 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
       }
     }
 
-    // Coba dapatkan access token aktif jika belum ada
+    // Coba dapatkan access token aktif secara silent (TIDAK membuka prompt interaktif agar tidak kedip-kedip)
     if (driveAccessToken == null || driveAccessToken.isEmpty) {
       try {
-        var account = await GoogleSignIn.instance.attemptLightweightAuthentication();
-        account ??= await GoogleSignIn.instance.authenticate();
-        final auth = await account.authorizationClient.authorizeScopes([drive.DriveApi.driveFileScope]);
-        driveAccessToken = auth.accessToken;
+        final account = await GoogleSignIn.instance.attemptLightweightAuthentication();
+        if (account != null) {
+          final auth = await account.authorizationClient.authorizeScopes([drive.DriveApi.driveFileScope]);
+          driveAccessToken = auth.accessToken;
+        }
       } catch (_) {}
     }
 
@@ -988,13 +1047,6 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
       if (result == null || result.files.isEmpty) return;
       final pickedFile = result.files.first;
 
-      if (!mounted) return;
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (_) => const Center(child: ThreeDotsLoader()),
-      );
-
       Uint8List rawBytes;
       if (kIsWeb) {
         rawBytes = pickedFile.bytes!;
@@ -1002,20 +1054,63 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
         rawBytes = await File(pickedFile.path!).readAsBytes();
       }
 
-      Uint8List uploadBytes = rawBytes;
-      String uploadFileName = pickedFile.name;
+      bool isHd = false;
+      String caption = '';
 
       if (isImage) {
-        uploadBytes = await _compressImageToMax200Kb(rawBytes);
+        if (!mounted) return;
+        final bool isDark = Theme.of(context).brightness == Brightness.dark;
+        final previewResult = await showDialog<Map<String, dynamic>>(
+          context: context,
+          builder: (dialogCtx) => ImagePreviewSendDialog(
+            imageBytes: rawBytes,
+            fileName: pickedFile.name,
+            isDark: isDark,
+          ),
+        );
+
+        if (previewResult == null) {
+          // User cancelled sending
+          return;
+        }
+
+        isHd = previewResult['isHd'] as bool? ?? false;
+        caption = previewResult['caption'] as String? ?? '';
+      }
+
+      if (!mounted) return;
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (_) => const Center(
+          child: SizedBox(
+            width: 36,
+            height: 36,
+            child: CircularProgressIndicator(
+              strokeWidth: 3,
+              valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF7C3AED)),
+            ),
+          ),
+        ),
+      );
+
+      Uint8List uploadBytes = rawBytes;
+      String uploadFileName = pickedFile.name;
+      String thumbnailLink = '';
+
+      if (isImage) {
+        // 1. Generate micro thumbnail (~2-5 KB) for instant progressive blur rendering
+        thumbnailLink = await _generateMicroThumbnail(rawBytes);
+
+        // 2. Compress or keep HD based on user choice
+        if (!isHd) {
+          uploadBytes = await _compressImageToMax200Kb(rawBytes);
+        }
+
         if (!uploadFileName.toLowerCase().endsWith('.jpg') && !uploadFileName.toLowerCase().endsWith('.jpeg')) {
           uploadFileName = '${uploadFileName.split('.').first}.jpg';
         }
       }
-
-      final driveInfo = await _getDiscussionDriveInfo();
-      String? driveFolderId = driveInfo['folderId'];
-      String? driveAccessToken = driveInfo['accessToken'];
-      final driveFolderUrl = driveInfo['folderUrl'] ?? '';
 
       String imageLink = '';
       String fileLink = '';
@@ -1024,31 +1119,29 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
         imageLink = 'data:image/jpeg;base64,${base64Encode(uploadBytes)}';
       }
 
-      // Try Google Drive upload if connected and access token available
-      if (driveFolderId != null && driveFolderId.isNotEmpty) {
-        if (driveAccessToken == null || driveAccessToken.isEmpty) {
-          try {
-            var account = await GoogleSignIn.instance.attemptLightweightAuthentication();
-            account ??= await GoogleSignIn.instance.authenticate();
-            final auth = await account.authorizationClient.authorizeScopes([drive.DriveApi.driveFileScope]);
-            driveAccessToken = auth.accessToken;
-          } catch (_) {}
-        }
+      // Check Drive info silently without triggering interactive OAuth prompts
+      String? driveFolderId;
+      String? driveAccessToken;
+      String driveFolderUrl = '';
 
-        if (driveAccessToken != null && driveAccessToken.isNotEmpty) {
-          try {
-            final uploadResult = await GoogleDriveService.uploadFile(
-              accessToken: driveAccessToken,
-              folderId: driveFolderId,
-              fileName: uploadFileName,
-              bytes: uploadBytes,
-            );
-            if (isImage && uploadResult['directLink'] != null && uploadResult['directLink']!.isNotEmpty) {
-              imageLink = uploadResult['directLink']!;
-            }
-            fileLink = uploadResult['directLink'] ?? uploadResult['viewLink'] ?? driveFolderUrl;
-          } catch (_) {}
+      try {
+        final driveInfo = await _getDiscussionDriveInfo();
+        driveFolderId = driveInfo['folderId'];
+        driveAccessToken = driveInfo['accessToken'];
+        driveFolderUrl = driveInfo['folderUrl'] ?? '';
+
+        // If it's a non-image file and drive token is already ready, upload to drive
+        if (!isImage && driveFolderId != null && driveFolderId.isNotEmpty && driveAccessToken != null && driveAccessToken.isNotEmpty) {
+          final uploadResult = await GoogleDriveService.uploadFile(
+            accessToken: driveAccessToken,
+            folderId: driveFolderId,
+            fileName: uploadFileName,
+            bytes: uploadBytes,
+          );
+          fileLink = uploadResult['directLink'] ?? uploadResult['viewLink'] ?? driveFolderUrl;
         }
+      } catch (e) {
+        debugPrint('Silent drive check error: $e');
       }
 
       if (!isImage && fileLink.isEmpty) {
@@ -1065,23 +1158,29 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
       final senderName = userDoc.data()?['name'] ?? 'User';
       final senderAvatar = userDoc.data()?['avatar'] ?? 'assets/icon_pack/avatar/avatar_2.png';
 
+      String targetDocId = _currentDiscussionId.isNotEmpty ? _currentDiscussionId : widget.discussionId;
+
       // If draft private chat, create discussion doc in Firestore
-      if (_isDraft || _currentDiscussionId.isEmpty) {
+      if (_isDraft || targetDocId.isEmpty) {
         final newDoc = await FirebaseFirestore.instance.collection('discussions').add({
           'channel': '@${widget.channelName.toLowerCase().replaceAll(' ', '')}',
           'title': widget.channelName,
           'avatar': widget.targetUserAvatar ?? 'assets/icon_pack/avatar/sma_1.png',
           'isPrivate': true,
           'memberUids': [user.uid, widget.targetUserUid ?? ''],
-          'lastMessage': isImage ? '$senderName mengirim gambar' : '$senderName mengirim berkas',
+          'lastMessage': isImage
+              ? '$senderName: 📷 Foto${caption.isNotEmpty ? ' $caption' : ''}'
+              : '$senderName mengirim berkas',
           'time': 'Sekarang',
           if (driveFolderId != null && driveFolderId.isNotEmpty) 'driveFolderId': driveFolderId,
           if (driveFolderUrl.isNotEmpty) 'driveFolderUrl': driveFolderUrl,
           'createdAt': FieldValue.serverTimestamp(),
           'colorIndex': Random().nextInt(5),
         });
+        targetDocId = newDoc.id;
         _currentDiscussionId = newDoc.id;
         _isDraft = false;
+        _initStreams();
         if (mounted) setState(() {});
       }
 
@@ -1091,14 +1190,18 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
       // Send message with media info
       await FirebaseFirestore.instance
           .collection('discussions')
-          .doc(_currentDiscussionId)
+          .doc(targetDocId)
           .collection('messages')
           .add({
         'sender': senderName,
         'senderUid': user.uid,
         'avatar': senderAvatar,
-        'message': isImage ? '[Gambar Lampiran]' : '[Berkas: $uploadFileName]',
-        if (isImage) 'imageUrl': imageLink,
+        'message': isImage ? caption : '[Berkas: $uploadFileName]',
+        if (isImage) ...{
+          'imageUrl': imageLink,
+          'thumbnailUrl': thumbnailLink,
+          'isHd': isHd,
+        },
         if (!isImage) ...{
           'fileUrl': fileLink,
           'fileName': uploadFileName,
@@ -1113,6 +1216,80 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
         },
       });
 
+      // Auto-save to Dokumen -> Berkas Diskusi in Firestore
+      try {
+        final diskFolderQuery = await FirebaseFirestore.instance
+            .collection('driveDocuments')
+            .where('name', isEqualTo: 'Berkas Diskusi')
+            .where('isFolder', isEqualTo: true)
+            .limit(1)
+            .get();
+
+        String diskFolderId;
+        if (diskFolderQuery.docs.isNotEmpty) {
+          diskFolderId = diskFolderQuery.docs.first.id;
+        } else {
+          final newFolder = await FirebaseFirestore.instance.collection('driveDocuments').add({
+            'name': 'Berkas Diskusi',
+            'mimeType': 'application/vnd.google-apps.folder',
+            'isFolder': true,
+            'parentFolderId': '',
+            'driveFileId': '',
+            'driveLink': '',
+            'uploaderUid': user.uid,
+            'uploaderName': 'Sistem',
+            'fileSize': 0,
+            'uploadedAt': FieldValue.serverTimestamp(),
+          });
+          diskFolderId = newFolder.id;
+        }
+
+        final String channelFolderName = widget.channelName.isNotEmpty ? widget.channelName : 'Umum';
+        final subFolderQuery = await FirebaseFirestore.instance
+            .collection('driveDocuments')
+            .where('name', isEqualTo: channelFolderName)
+            .where('parentFolderId', isEqualTo: diskFolderId)
+            .where('isFolder', isEqualTo: true)
+            .limit(1)
+            .get();
+
+        String channelFolderDocId;
+        if (subFolderQuery.docs.isNotEmpty) {
+          channelFolderDocId = subFolderQuery.docs.first.id;
+        } else {
+          final newSub = await FirebaseFirestore.instance.collection('driveDocuments').add({
+            'name': channelFolderName,
+            'mimeType': 'application/vnd.google-apps.folder',
+            'isFolder': true,
+            'parentFolderId': diskFolderId,
+            'driveFileId': '',
+            'driveLink': '',
+            'uploaderUid': user.uid,
+            'uploaderName': 'Sistem',
+            'fileSize': 0,
+            'uploadedAt': FieldValue.serverTimestamp(),
+          });
+          channelFolderDocId = newSub.id;
+        }
+
+        await FirebaseFirestore.instance.collection('driveDocuments').add({
+          'name': uploadFileName,
+          'mimeType': isImage ? 'image/jpeg' : (fileExt.isNotEmpty ? 'application/$fileExt' : 'application/octet-stream'),
+          'isFolder': false,
+          'parentFolderId': channelFolderDocId,
+          'driveFileId': '',
+          'driveLink': isImage ? imageLink : fileLink,
+          'uploaderUid': user.uid,
+          'uploaderName': senderName,
+          'uploaderAvatar': senderAvatar,
+          'discussionId': targetDocId,
+          'fileSize': pickedFile.size,
+          'uploadedAt': FieldValue.serverTimestamp(),
+        });
+      } catch (e) {
+        debugPrint('Error syncing chat file to driveDocuments: $e');
+      }
+
       if (_replyingToMessage != null) {
         setState(() {
           _replyingToMessage = null;
@@ -1120,7 +1297,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
       }
 
       // Update last message in discussion
-      final discDoc = await FirebaseFirestore.instance.collection('discussions').doc(_currentDiscussionId).get();
+      final discDoc = await FirebaseFirestore.instance.collection('discussions').doc(targetDocId).get();
       final memberUids = List<String>.from(discDoc.data()?['memberUids'] ?? []);
 
       final Map<String, dynamic> updates = {
@@ -1135,11 +1312,12 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
           updates['unreadCounts.$mUid'] = FieldValue.increment(1);
         }
       }
-      await FirebaseFirestore.instance.collection('discussions').doc(_currentDiscussionId).update(updates);
+      await FirebaseFirestore.instance.collection('discussions').doc(targetDocId).update(updates);
 
       if (mounted) {
         Navigator.pop(context); // Close loading dialog
       }
+      _scrollToBottom();
     } catch (e) {
       if (mounted) {
         Navigator.pop(context); // Close loading dialog
@@ -1157,6 +1335,8 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
 
+    String targetDocId = _currentDiscussionId.isNotEmpty ? _currentDiscussionId : widget.discussionId;
+
     if (_editingMessageId != null) {
       final editId = _editingMessageId!;
       _messageController.clear();
@@ -1167,7 +1347,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
       try {
         await FirebaseFirestore.instance
             .collection('discussions')
-            .doc(_currentDiscussionId)
+            .doc(targetDocId)
             .collection('messages')
             .doc(editId)
             .update({
@@ -1197,7 +1377,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
       final senderAvatar = userDoc.data()?['avatar'] ?? 'assets/icon_pack/avatar/avatar_2.png';
 
       // If draft private chat, create discussion doc in Firestore now!
-      if (_isDraft || _currentDiscussionId.isEmpty) {
+      if (_isDraft || targetDocId.isEmpty) {
         final newDoc = await FirebaseFirestore.instance.collection('discussions').add({
           'channel': '@${widget.channelName.toLowerCase().replaceAll(' ', '')}',
           'title': widget.channelName,
@@ -1209,15 +1389,17 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
           'createdAt': FieldValue.serverTimestamp(),
           'colorIndex': Random().nextInt(5),
         });
+        targetDocId = newDoc.id;
         _currentDiscussionId = newDoc.id;
         _isDraft = false;
+        _initStreams();
         if (mounted) setState(() {});
       }
 
       // 1. Add message to discussions subcollection
       await FirebaseFirestore.instance
           .collection('discussions')
-          .doc(_currentDiscussionId)
+          .doc(targetDocId)
           .collection('messages')
           .add({
         'sender': senderName,
@@ -1239,7 +1421,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
       }
 
       // 2. Update discussion document's last message info and increment unread counts
-      final discDoc = await FirebaseFirestore.instance.collection('discussions').doc(_currentDiscussionId).get();
+      final discDoc = await FirebaseFirestore.instance.collection('discussions').doc(targetDocId).get();
       final memberUids = List<String>.from(discDoc.data()?['memberUids'] ?? []);
       
       final Map<String, dynamic> updates = {
@@ -1258,7 +1440,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
 
       await FirebaseFirestore.instance
           .collection('discussions')
-          .doc(_currentDiscussionId)
+          .doc(targetDocId)
           .update(updates);
 
       // Scroll to bottom
@@ -1284,6 +1466,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
   @override
   void dispose() {
     _scrollController.removeListener(_onScroll);
+    _showScrollToBottom.dispose();
     _inputFocusNode.dispose();
     _audioPlayer.dispose();
     _messageController.removeListener(_onTextChanged);
@@ -2411,12 +2594,14 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
       crossAxisAlignment: WrapCrossAlignment.end,
       spacing: 8,
       children: [
-        Text(
-          text,
-          style: GoogleFonts.dmSans(
-            fontSize: 13.5,
-            color: isMe ? Colors.white : (isDark ? Colors.white : Colors.black87),
-            height: 1.3,
+        Text.rich(
+          TextSpan(
+            children: _buildMessageSpans(text, _currentUserName, context, isMe),
+            style: GoogleFonts.dmSans(
+              fontSize: 20.0,
+              color: isMe ? Colors.white : (isDark ? Colors.white : Colors.black87),
+              height: 1.3,
+            ),
           ),
         ),
         if (timeText.isNotEmpty)
@@ -2425,7 +2610,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
             child: Text(
               timeText,
               style: GoogleFonts.dmSans(
-                fontSize: 10.0,
+                fontSize: 15.0,
                 color: isMe ? Colors.white60 : (isDark ? Colors.white38 : Colors.black38),
               ),
             ),
@@ -2474,6 +2659,39 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
         ),
       );
     }
+  }
+
+  Widget _buildSafeAvatar(String? avatar) {
+    final String raw = (avatar ?? '').trim();
+    if (raw.isEmpty) {
+      return Image.asset('assets/icon_pack/avatar/avatar_2.png', fit: BoxFit.cover);
+    }
+    if (raw.startsWith('http://') || raw.startsWith('https://')) {
+      return Image.network(
+        raw,
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) => Image.asset('assets/icon_pack/avatar/avatar_2.png', fit: BoxFit.cover),
+      );
+    }
+    String assetPath = raw;
+    if (!assetPath.startsWith('assets/')) {
+      if (assetPath.startsWith('icon_pack/')) {
+        assetPath = 'assets/$assetPath';
+      } else {
+        assetPath = 'assets/icon_pack/avatar/$assetPath';
+      }
+    }
+    if (!assetPath.toLowerCase().endsWith('.png') &&
+        !assetPath.toLowerCase().endsWith('.jpg') &&
+        !assetPath.toLowerCase().endsWith('.jpeg') &&
+        !assetPath.toLowerCase().endsWith('.webp')) {
+      assetPath = '$assetPath.png';
+    }
+    return Image.asset(
+      assetPath,
+      fit: BoxFit.cover,
+      errorBuilder: (_, __, ___) => Image.asset('assets/icon_pack/avatar/avatar_2.png', fit: BoxFit.cover),
+    );
   }
 
   Widget _buildContextMenuItem({
@@ -2624,7 +2842,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                               child: ClipOval(
                                 child: Transform.scale(
                                   scale: 1.45,
-                                  child: Image.asset(avatar, fit: BoxFit.cover),
+                                  child: _buildSafeAvatar(avatar),
                                 ),
                               ),
                             ),
@@ -2683,7 +2901,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                         Text(
                                           replyData['sender'] ?? 'User',
                                           style: GoogleFonts.plusJakartaSans(
-                                            fontSize: 11.0,
+                                            fontSize: 16.5,
                                             fontWeight: FontWeight.bold,
                                             color: isMe ? Colors.white : (isDark ? Colors.white70 : const Color(0xFF334155)),
                                           ),
@@ -2695,7 +2913,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                           maxLines: 1,
                                           overflow: TextOverflow.ellipsis,
                                           style: GoogleFonts.dmSans(
-                                            fontSize: 11.0,
+                                            fontSize: 16.5,
                                             color: isMe ? Colors.white70 : (isDark ? Colors.white60 : Colors.black54),
                                           ),
                                         ),
@@ -2707,7 +2925,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                   Text(
                                     senderName.trim().isEmpty ? 'User' : senderName.trim().split(' ')[0],
                                     style: GoogleFonts.plusJakartaSans(
-                                      fontSize: 12.0,
+                                      fontSize: 18.0,
                                       fontWeight: FontWeight.bold,
                                       color: isDark ? Colors.white70 : senderColor,
                                     ),
@@ -2719,9 +2937,20 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                     borderRadius: BorderRadius.circular(10),
                                     child: Container(
                                       constraints: const BoxConstraints(maxHeight: 200, maxWidth: 240),
-                                      child: Image.network(
-                                        imageUrl,
-                                        fit: BoxFit.cover,
+                                      child: Builder(
+                                        builder: (context) {
+                                          if (imageUrl.startsWith('data:image') && imageUrl.contains(',')) {
+                                            try {
+                                              final b64 = imageUrl.split(',').last;
+                                              final bytes = base64Decode(b64);
+                                              return Image.memory(bytes, fit: BoxFit.cover);
+                                            } catch (_) {}
+                                          }
+                                          return Image.network(
+                                            imageUrl,
+                                            fit: BoxFit.cover,
+                                          );
+                                        },
                                       ),
                                     ),
                                   ),
@@ -2745,7 +2974,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                               child: ClipOval(
                                 child: Transform.scale(
                                   scale: 1.45,
-                                  child: Image.asset(avatar, fit: BoxFit.cover),
+                                  child: _buildSafeAvatar(avatar),
                                 ),
                               ),
                             ),
@@ -2933,12 +3162,13 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
             }
           },
           child: StreamBuilder<DocumentSnapshot>(
-            stream: (!_isDraft && _currentDiscussionId.isNotEmpty)
-                ? FirebaseFirestore.instance
-                    .collection('discussions')
-                    .doc(_currentDiscussionId)
-                    .snapshots()
-                : null,
+            stream: _discussionStream ??
+                ((_currentDiscussionId.isNotEmpty || widget.discussionId.isNotEmpty)
+                    ? FirebaseFirestore.instance
+                        .collection('discussions')
+                        .doc(_currentDiscussionId.isNotEmpty ? _currentDiscussionId : widget.discussionId)
+                        .snapshots()
+                    : null),
             builder: (context, discSnapshot) {
               final discData = discSnapshot.data?.data() as Map<String, dynamic>?;
               final channelTitle = discData?['channel'] ?? widget.channelName;
@@ -2950,43 +3180,41 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
               final projectId = discData?['projectId'] as String? ?? '';
               final isOwner = discData?['creatorUid'] == currentUid || _userRole == 'guru';
 
-              return StreamBuilder<DocumentSnapshot>(
-                stream: projectId.isNotEmpty
-                    ? FirebaseFirestore.instance.collection('projects').doc(projectId).snapshots()
-                    : null,
-                builder: (context, projSnapshot) {
-                  final projData = projSnapshot.data?.data() as Map<String, dynamic>?;
+              if (memberUids.isNotEmpty && _discussionMembers.isEmpty) {
+                _loadDiscussionMembersOnce(memberUids);
+              }
 
-                  final double fullScreenHeight = MediaQuery.of(context).size.height;
-                  final double fullScreenWidth = MediaQuery.of(context).size.width;
+              final double fullScreenHeight = MediaQuery.of(context).size.height;
+              final double fullScreenWidth = MediaQuery.of(context).size.width;
 
-                  return AnnotatedRegion<SystemUiOverlayStyle>(
-                    value: SystemUiOverlayStyle(
-                      statusBarColor: Colors.transparent,
-                      statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
-                      systemNavigationBarColor: isDark ? const Color(0xFF000000) : Colors.white,
-                      systemNavigationBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
-                      systemNavigationBarDividerColor: Colors.transparent,
-                    ),
-                    child: Scaffold(
-                      backgroundColor: isDark ? const Color(0xFF000000) : const Color(0xFFFAF8FF),
-                      body: Stack(
+              return AnnotatedRegion<SystemUiOverlayStyle>(
+                value: SystemUiOverlayStyle(
+                  statusBarColor: Colors.transparent,
+                  statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+                  systemNavigationBarColor: isDark ? const Color(0xFF000000) : Colors.white,
+                  systemNavigationBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+                  systemNavigationBarDividerColor: Colors.transparent,
+                  systemNavigationBarContrastEnforced: false,
+                ),
+                child: Scaffold(
+                  backgroundColor: isDark ? const Color(0xFF000000) : const Color(0xFFFAF8FF),
+                  body: Stack(
+                    fit: StackFit.expand,
                     children: [
                       // 1. Sticky Wallpaper background (Does not move or squish when keyboard appears)
-                      Positioned(
-                        top: 0,
-                        left: 0,
-                        width: fullScreenWidth,
-                        height: fullScreenHeight,
-                        child: AnimatedPurpleMicroPatternBackground(
-                          isDark: isDark,
-                          child: const SizedBox.shrink(),
+                      Positioned.fill(
+                        child: RepaintBoundary(
+                          child: AnimatedPurpleMicroPatternBackground(
+                            isDark: isDark,
+                            child: const SizedBox.shrink(),
+                          ),
                         ),
                       ),
 
                       // 2. Main Column: Solid White Header + Full Viewport Messages Stack + Solid White Input Bar
-                      Column(
-                        children: [
+                      Positioned.fill(
+                        child: Column(
+                          children: [
                           // Header Bar (Transparan 50% + Blur Glassmorphic dengan Border Bawah)
                           ClipRect(
                             child: BackdropFilter(
@@ -3399,21 +3627,52 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                               // 1. Full Screen Messages ListView with 94px bottom padding (completely unobstructed)
                               Positioned.fill(
                                 child: StreamBuilder<QuerySnapshot>(
-                                  stream: (!_isDraft && _currentDiscussionId.isNotEmpty)
-                                      ? FirebaseFirestore.instance
-                                          .collection('discussions')
-                                          .doc(_currentDiscussionId)
-                                          .collection('messages')
-                                          .orderBy('time', descending: false)
-                                          .snapshots()
-                                      : null,
+                                  stream: FirebaseFirestore.instance
+                                      .collection('discussions')
+                                      .doc(_currentDiscussionId.isNotEmpty ? _currentDiscussionId : widget.discussionId)
+                                      .collection('messages')
+                                      .snapshots(),
                                   builder: (context, snapshot) {
-                                    if (snapshot.data == null && snapshot.connectionState == ConnectionState.waiting) {
-                                      return const SizedBox.shrink();
+                                    if (snapshot.connectionState == ConnectionState.waiting && !snapshot.hasData) {
+                                      return Center(
+                                        child: SizedBox(
+                                          width: 24,
+                                          height: 24,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2.2,
+                                            valueColor: AlwaysStoppedAnimation<Color>(
+                                              isDark ? const Color(0xFF7C3AED) : const Color(0xFF9333EA),
+                                            ),
+                                          ),
+                                        ),
+                                      );
                                     }
-                                    final messageDocs = snapshot.data?.docs ?? [];
+                                    if (snapshot.hasError) {
+                                      return Center(
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(20.0),
+                                          child: Text(
+                                            'Gagal memuat pesan: ${snapshot.error}',
+                                            textAlign: TextAlign.center,
+                                            style: GoogleFonts.dmSans(color: Colors.redAccent, fontSize: 13),
+                                          ),
+                                        ),
+                                      );
+                                    }
+                                    final rawDocs = snapshot.data?.docs ?? [];
+                                    final messageDocs = List<QueryDocumentSnapshot>.from(rawDocs);
+                                    messageDocs.sort((a, b) {
+                                      final aData = a.data() as Map<String, dynamic>;
+                                      final bData = b.data() as Map<String, dynamic>;
+                                      final aTime = aData['time'] ?? aData['createdAt'] ?? aData['timestamp'];
+                                      final bTime = bData['time'] ?? bData['createdAt'] ?? bData['timestamp'];
+                                      if (aTime is Timestamp && bTime is Timestamp) {
+                                        return aTime.compareTo(bTime);
+                                      }
+                                      return a.id.compareTo(b.id);
+                                    });
 
-                                    // Track mention messages
+                                    // Track mention messages (no setState!)
                                     if (messageDocs.isNotEmpty && _currentUserName.isNotEmpty) {
                                       final mentionIds = <String>[];
                                       for (final doc in messageDocs) {
@@ -3429,21 +3688,24 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                           }
                                         }
                                       }
-                                      if (_mentionMessageIds.length != mentionIds.length) {
+                                      if (!listEquals(_mentionNotifier.value, mentionIds)) {
                                         WidgetsBinding.instance.addPostFrameCallback((_) {
-                                          if (mounted) setState(() { _mentionMessageIds = mentionIds; _unreadMentionCount = mentionIds.length; });
+                                          if (mounted) {
+                                            _mentionNotifier.value = mentionIds;
+                                          }
                                         });
                                       }
                                     }
 
-                                    // Smart scroll
+                                    // Smart scroll & unread count
                                     final currentCount = messageDocs.length;
                                     if (!_initialScrollDone) {
                                       _initialScrollDone = true;
                                       _lastMessageCount = currentCount;
                                       WidgetsBinding.instance.addPostFrameCallback((_) {
                                         _scrollToBottom();
-                                        if (!_isDraft && _currentDiscussionId.isNotEmpty) {
+                                        if (!_isDraft && _currentDiscussionId.isNotEmpty && messageDocs.isNotEmpty) {
+                                          _lastMarkedUnreadMsgId = messageDocs.last.id;
                                           FirebaseFirestore.instance
                                               .collection('discussions')
                                               .doc(_currentDiscussionId)
@@ -3463,33 +3725,51 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                           _lastPlayedMessageId = lastMsgId;
                                           _playNotificationSound();
                                         }
-                                      }
 
-                                      WidgetsBinding.instance.addPostFrameCallback((_) {
-                                        _scrollToBottom();
-                                        if (!_isDraft && _currentDiscussionId.isNotEmpty) {
-                                          FirebaseFirestore.instance
-                                              .collection('discussions')
-                                              .doc(_currentDiscussionId)
-                                              .update({
-                                            'unreadCounts.$currentUid': 0,
-                                          }).catchError((_) {});
+                                        if (!_isDraft && _currentDiscussionId.isNotEmpty && _lastMarkedUnreadMsgId != lastMsgId) {
+                                          _lastMarkedUnreadMsgId = lastMsgId;
+                                          WidgetsBinding.instance.addPostFrameCallback((_) {
+                                            _scrollToBottom();
+                                            FirebaseFirestore.instance
+                                                .collection('discussions')
+                                                .doc(_currentDiscussionId)
+                                                .update({
+                                              'unreadCounts.$currentUid': 0,
+                                            }).catchError((_) {});
+                                          });
                                         }
-                                      });
+                                      }
                                     }
 
                                     if (messageDocs.isEmpty) {
                                       return Center(
-                                        child: Text(
-                                          'Belum ada pesan di sini. Mulai obrolan!',
-                                          style: GoogleFonts.dmSans(fontSize: 14, color: Colors.black38),
+                                        child: Column(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: [
+                                            Icon(
+                                              Icons.chat_bubble_outline_rounded,
+                                              size: 48,
+                                              color: isDark ? Colors.white24 : Colors.black26,
+                                            ),
+                                            const SizedBox(height: 12),
+                                            Text(
+                                              'Belum ada pesan di sini.\nMulai obrolan sekarang!',
+                                              textAlign: TextAlign.center,
+                                              style: GoogleFonts.dmSans(
+                                                fontSize: 15,
+                                                color: isDark ? Colors.white60 : Colors.black45,
+                                              ),
+                                            ),
+                                          ],
                                         ),
                                       );
                                     }
 
                                     return ListView.builder(
                                       controller: _scrollController,
-                                      padding: EdgeInsets.only(
+                                      physics: const AlwaysScrollableScrollPhysics(parent: ClampingScrollPhysics()),
+                                      cacheExtent: 500,
+                                      padding: const EdgeInsets.only(
                                         left: 14,
                                         right: 14,
                                         top: 16,
@@ -3520,13 +3800,15 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                         final fileName = msgData['fileName'] as String? ?? '';
                                         final fileSize = msgData['fileSize'] as String? ?? '';
                                         final fileExtension = msgData['fileExtension'] as String? ?? '';
-                                        final timeVal = msgData['time'];
+                                        final timeVal = msgData['time'] ?? msgData['createdAt'] ?? msgData['timestamp'];
                                         String timeText = '';
                                         if (timeVal is Timestamp) {
                                           final dt = timeVal.toDate();
                                           final hour = dt.hour.toString().padLeft(2, '0');
                                           final min = dt.minute.toString().padLeft(2, '0');
                                           timeText = '$hour:$min';
+                                        } else if (timeVal is String) {
+                                          timeText = timeVal;
                                         }
                                         final isMe = senderUid == currentUid;
                                         final String displayName = senderName.trim().isEmpty ? 'User' : senderName.trim().split(' ')[0];
@@ -3557,6 +3839,10 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                             .map((e) => e.toString())
                                             .where((e) => e.isNotEmpty)
                                             .toList();
+                                        final String thumbnailUrl = msgData['thumbnailUrl'] as String? ?? msgData['thumbnailBase64'] as String? ?? '';
+                                        final bool isHdImage = msgData['isHd'] as bool? ?? false;
+                                        final bool isOnlyImage = imageUrl.isNotEmpty && (message.trim().isEmpty || message == '[Gambar Lampiran]');
+                                        final bool isOnlyFile = fileUrl.isNotEmpty && (message.trim().isEmpty || message.startsWith('[Berkas:'));
 
                                         return Dismissible(
                                           key: Key('msg_$msgId'),
@@ -3566,7 +3852,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                               _replyingToMessage = {
                                                 'id': msgId,
                                                 'sender': senderName,
-                                                'message': message.isNotEmpty ? message : '[Gambar Lampiran]',
+                                                'message': message.isNotEmpty ? message : (imageUrl.isNotEmpty ? '📷 Foto' : '[Berkas]'),
                                                 'senderUid': senderUid,
                                               };
                                             });
@@ -3616,7 +3902,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                                       child: ClipOval(
                                                         child: Transform.scale(
                                                           scale: 1.45,
-                                                          child: Image.asset(avatar, fit: BoxFit.cover),
+                                                          child: _buildSafeAvatar(avatar),
                                                         ),
                                                       ),
                                                     ),
@@ -3646,12 +3932,14 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                                       clipBehavior: Clip.none,
                                                       children: [
                                                         Container(
-                                                          padding: EdgeInsets.fromLTRB(
-                                                            12,
-                                                            replyData != null ? 6 : 8,
-                                                            12,
-                                                            8,
-                                                          ),
+                                                          padding: isOnlyImage
+                                                              ? const EdgeInsets.all(3)
+                                                              : EdgeInsets.fromLTRB(
+                                                                  12,
+                                                                  replyData != null ? 6 : 8,
+                                                                  12,
+                                                                  8,
+                                                                ),
                                                           decoration: BoxDecoration(
                                                             color: isMe
                                                                 ? (isDark ? const Color(0xFF3B185F) : const Color(0xFF7C3AED))
@@ -3717,7 +4005,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                                                         Text(
                                                                           replyData['sender'] ?? 'User',
                                                                           style: GoogleFonts.plusJakartaSans(
-                                                                            fontSize: 11.0,
+                                                                            fontSize: 16.5,
                                                                             fontWeight: FontWeight.bold,
                                                                             color: isMe ? Colors.white : (isDark ? Colors.white70 : const Color(0xFF334155)),
                                                                           ),
@@ -3729,7 +4017,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                                                           maxLines: 1,
                                                                           overflow: TextOverflow.ellipsis,
                                                                           style: GoogleFonts.dmSans(
-                                                                            fontSize: 11.0,
+                                                                            fontSize: 16.5,
                                                                             color: isMe ? Colors.white70 : (isDark ? Colors.white60 : Colors.black54),
                                                                           ),
                                                                         ),
@@ -3742,7 +4030,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                                                 Text(
                                                                   displayName,
                                                                   style: GoogleFonts.plusJakartaSans(
-                                                                    fontSize: 12.0,
+                                                                    fontSize: 18.0,
                                                                     fontWeight: FontWeight.bold,
                                                                     color: isDark ? Colors.white70 : senderColor,
                                                                   ),
@@ -3750,75 +4038,82 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                                                 const SizedBox(height: 2),
                                                               ],
                                                               if (imageUrl.isNotEmpty) ...[
-                                                                GestureDetector(
-                                                                  onTap: () async {
-                                                                    final isDriveConnected = await GoogleDriveService.isConnected();
-                                                                    if (!isDriveConnected) {
-                                                                      if (context.mounted) {
-                                                                        ScaffoldMessenger.of(context).showSnackBar(
-                                                                          const SnackBar(
-                                                                            content: Text('Sambungkan akun Google Drive terlebih dahulu untuk melihat gambar.'),
-                                                                            backgroundColor: Colors.redAccent,
-                                                                            duration: Duration(seconds: 2),
+                                                                if (isOnlyImage) ...[
+                                                                  Stack(
+                                                                    children: [
+                                                                      BlurImageProgressive(
+                                                                        imageUrl: imageUrl,
+                                                                        thumbnailUrl: thumbnailUrl,
+                                                                        isMe: isMe,
+                                                                        isDark: isDark,
+                                                                        onTap: () {
+                                                                          Navigator.of(context).push(
+                                                                            MaterialPageRoute(
+                                                                              builder: (_) => FullScreenImagePage(imageUrl: imageUrl),
+                                                                            ),
+                                                                          );
+                                                                        },
+                                                                      ),
+                                                                      Positioned(
+                                                                        bottom: 6,
+                                                                        right: 6,
+                                                                        child: Container(
+                                                                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2.5),
+                                                                          decoration: BoxDecoration(
+                                                                            color: Colors.black.withValues(alpha: 0.55),
+                                                                            borderRadius: BorderRadius.circular(10),
                                                                           ),
-                                                                        );
-                                                                      }
-                                                                      return;
-                                                                    }
-                                                                    if (context.mounted) {
+                                                                          child: Row(
+                                                                            mainAxisSize: MainAxisSize.min,
+                                                                            children: [
+                                                                              if (isHdImage) ...[
+                                                                                Container(
+                                                                                  padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 1),
+                                                                                  margin: const EdgeInsets.only(right: 4),
+                                                                                  decoration: BoxDecoration(
+                                                                                    color: const Color(0xFF7C3AED),
+                                                                                    borderRadius: BorderRadius.circular(4),
+                                                                                  ),
+                                                                                  child: Text(
+                                                                                    'HD',
+                                                                                    style: GoogleFonts.plusJakartaSans(
+                                                                                      fontSize: 8.5,
+                                                                                      fontWeight: FontWeight.bold,
+                                                                                      color: Colors.white,
+                                                                                    ),
+                                                                                  ),
+                                                                                ),
+                                                                              ],
+                                                                              Text(
+                                                                                timeText,
+                                                                                style: GoogleFonts.dmSans(
+                                                                                  fontSize: 11.0,
+                                                                                  fontWeight: FontWeight.w500,
+                                                                                  color: Colors.white.withValues(alpha: 0.95),
+                                                                                ),
+                                                                              ),
+                                                                            ],
+                                                                          ),
+                                                                        ),
+                                                                      ),
+                                                                    ],
+                                                                  ),
+                                                                ] else ...[
+                                                                  BlurImageProgressive(
+                                                                    imageUrl: imageUrl,
+                                                                    thumbnailUrl: thumbnailUrl,
+                                                                    isMe: isMe,
+                                                                    isDark: isDark,
+                                                                    onTap: () {
                                                                       Navigator.of(context).push(
                                                                         MaterialPageRoute(
                                                                           builder: (_) => FullScreenImagePage(imageUrl: imageUrl),
                                                                         ),
                                                                       );
-                                                                    }
-                                                                  },
-                                                                  child: ClipRRect(
-                                                                    borderRadius: BorderRadius.circular(10),
-                                                                    child: Container(
-                                                                      constraints: const BoxConstraints(maxHeight: 200, maxWidth: 240),
-                                                                      child: Builder(
-                                                                        builder: (context) {
-                                                                          if (imageUrl.startsWith('data:image') && imageUrl.contains(',')) {
-                                                                            try {
-                                                                              final b64 = imageUrl.split(',').last;
-                                                                              final bytes = base64Decode(b64);
-                                                                              return Image.memory(bytes, fit: BoxFit.cover);
-                                                                            } catch (_) {}
-                                                                          }
-                                                                          return Image.network(
-                                                                            imageUrl,
-                                                                            fit: BoxFit.cover,
-                                                                            loadingBuilder: (context, child, progress) {
-                                                                              if (progress == null) return child;
-                                                                              return Container(
-                                                                                height: 120,
-                                                                                width: 200,
-                                                                                color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
-                                                                                child: const Center(
-                                                                                  child: SizedBox(
-                                                                                    width: 20,
-                                                                                    height: 20,
-                                                                                    child: CircularProgressIndicator(strokeWidth: 2),
-                                                                                  ),
-                                                                                ),
-                                                                              );
-                                                                            },
-                                                                            errorBuilder: (_, __, ___) => Container(
-                                                                              height: 80,
-                                                                              width: 140,
-                                                                              color: Colors.red.withValues(alpha: 0.1),
-                                                                              child: const Center(
-                                                                                child: Icon(Icons.broken_image_rounded, color: Colors.redAccent),
-                                                                              ),
-                                                                            ),
-                                                                          );
-                                                                        },
-                                                                      ),
-                                                                    ),
+                                                                    },
                                                                   ),
-                                                                ),
-                                                                if (message.isNotEmpty) const SizedBox(height: 4),
+                                                                  const SizedBox(height: 6),
+                                                                ],
                                                               ],
                                                               if (fileUrl.isNotEmpty || fileName.isNotEmpty) ...[
                                                                   GestureDetector(
@@ -3867,7 +4162,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                                                                   maxLines: 1,
                                                                                   overflow: TextOverflow.ellipsis,
                                                                                   style: GoogleFonts.plusJakartaSans(
-                                                                                    fontSize: 13,
+                                                                                    fontSize: 19.5,
                                                                                     fontWeight: FontWeight.bold,
                                                                                     color: isMe ? Colors.white : (isDark ? Colors.white : const Color(0xFF0F172A)),
                                                                                   ),
@@ -3877,7 +4172,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                                                                   Text(
                                                                                     fileSize,
                                                                                     style: GoogleFonts.dmSans(
-                                                                                      fontSize: 11,
+                                                                                      fontSize: 16.5,
                                                                                       color: isMe ? Colors.white70 : (isDark ? Colors.white60 : Colors.black54),
                                                                                     ),
                                                                                   ),
@@ -3897,7 +4192,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                                                   ),
                                                                   if (message.isNotEmpty && !message.startsWith('[Berkas:')) const SizedBox(height: 4),
                                                               ],
-                                                              if (message.isNotEmpty) ...[
+                                                              if (message.isNotEmpty && !isOnlyImage && !isOnlyFile) ...[
                                                                 _buildMessageTextWithTime(
                                                                   text: displayMessage,
                                                                   timeText: timeText,
@@ -3919,7 +4214,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                                                     child: Text(
                                                                       isExpanded ? 'Lebih sedikit' : 'Selengkapnya...',
                                                                       style: GoogleFonts.plusJakartaSans(
-                                                                        fontSize: 12.0,
+                                                                        fontSize: 18.0,
                                                                         fontWeight: FontWeight.bold,
                                                                         color: isMe
                                                                             ? const Color(0xFF60A5FA)
@@ -4011,90 +4306,101 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                               ),
 
                               // 2. Mention Banner
-                              if (!isPrivate && _mentionMessageIds.isNotEmpty)
+                              if (!isPrivate)
                                 Positioned(
                                   top: 0,
                                   left: 0,
                                   right: 0,
-                                  child: GestureDetector(
-                                    onTap: () {
-                                      final lastMentionId = _mentionMessageIds.last;
-                                      final key = _messageKeys[lastMentionId];
-                                      if (key?.currentContext != null) {
-                                        Scrollable.ensureVisible(
-                                          key!.currentContext!,
-                                          duration: const Duration(milliseconds: 400),
-                                          curve: Curves.easeOut,
-                                          alignment: 0.2,
-                                        );
-                                      }
-                                    },
-                                    child: Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-                                      decoration: BoxDecoration(
-                                        color: isDark ? const Color(0xFF18181B) : const Color(0xFFF3EEFF),
-                                        border: Border(
-                                          bottom: BorderSide(
-                                            color: isDark ? const Color(0xFF27272A) : const Color(0xFFD8B4FE).withValues(alpha: 0.4),
-                                            width: 1,
-                                          ),
-                                        ),
-                                      ),
-                                      child: Row(
-                                        children: [
-                                          const Icon(Icons.alternate_email_rounded, size: 14, color: Color(0xFF9333EA)),
-                                          const SizedBox(width: 6),
-                                          Text(
-                                            '@mention ($_unreadMentionCount)',
-                                            style: GoogleFonts.plusJakartaSans(
-                                              fontSize: 14.0,
-                                              fontWeight: FontWeight.w600,
-                                              color: const Color(0xFF9333EA),
+                                  child: ValueListenableBuilder<List<String>>(
+                                    valueListenable: _mentionNotifier,
+                                    builder: (context, mentionIds, _) {
+                                      if (mentionIds.isEmpty) return const SizedBox.shrink();
+                                      return GestureDetector(
+                                        onTap: () {
+                                          final lastMentionId = mentionIds.last;
+                                          final key = _messageKeys[lastMentionId];
+                                          if (key?.currentContext != null) {
+                                            Scrollable.ensureVisible(
+                                              key!.currentContext!,
+                                              duration: const Duration(milliseconds: 400),
+                                              curve: Curves.easeOut,
+                                              alignment: 0.2,
+                                            );
+                                          }
+                                        },
+                                        child: Container(
+                                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                                          decoration: BoxDecoration(
+                                            color: isDark ? const Color(0xFF18181B) : const Color(0xFFF3EEFF),
+                                            border: Border(
+                                              bottom: BorderSide(
+                                                color: isDark ? const Color(0xFF27272A) : const Color(0xFFD8B4FE).withValues(alpha: 0.4),
+                                                width: 1,
+                                              ),
                                             ),
                                           ),
-                                          const Spacer(),
-                                          const Icon(Icons.keyboard_arrow_down_rounded, size: 16, color: Color(0xFF9333EA)),
-                                        ],
-                                      ),
-                                    ),
+                                          child: Row(
+                                            children: [
+                                              const Icon(Icons.alternate_email_rounded, size: 14, color: Color(0xFF9333EA)),
+                                              const SizedBox(width: 6),
+                                              Text(
+                                                '@mention (${mentionIds.length})',
+                                                style: GoogleFonts.plusJakartaSans(
+                                                  fontSize: 16.0,
+                                                  fontWeight: FontWeight.w600,
+                                                  color: const Color(0xFF9333EA),
+                                                ),
+                                              ),
+                                              const Spacer(),
+                                              const Icon(Icons.keyboard_arrow_down_rounded, size: 16, color: Color(0xFF9333EA)),
+                                            ],
+                                          ),
+                                        ),
+                                      );
+                                    },
                                   ),
                                 ),
 
                               // 3. Floating Scroll-To-Bottom Button (Kanan di luar card textbox, circular button dengan shadow)
-                              if (_showScrollToBottom)
-                                Positioned(
-                                  right: 18,
-                                  bottom: 16,
-                                  child: BouncyButton(
-                                    scaleDown: 0.85,
-                                    onTap: () => _scrollToBottom(animate: true),
-                                    child: Container(
-                                      width: 40,
-                                      height: 40,
-                                      decoration: BoxDecoration(
-                                        color: isDark ? const Color(0xFF18181B) : Colors.white,
-                                        shape: BoxShape.circle,
-                                        border: Border.all(
-                                          color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
-                                          width: 1.0,
-                                        ),
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: Colors.black.withValues(alpha: isDark ? 0.40 : 0.12),
-                                            blurRadius: 10,
-                                            offset: const Offset(0, 3),
+                              Positioned(
+                                right: 18,
+                                bottom: 16,
+                                child: ValueListenableBuilder<bool>(
+                                  valueListenable: _showScrollToBottom,
+                                  builder: (context, show, _) {
+                                    if (!show) return const SizedBox.shrink();
+                                    return BouncyButton(
+                                      scaleDown: 0.85,
+                                      onTap: () => _scrollToBottom(animate: true),
+                                      child: Container(
+                                        width: 40,
+                                        height: 40,
+                                        decoration: BoxDecoration(
+                                          color: isDark ? const Color(0xFF18181B) : Colors.white,
+                                          shape: BoxShape.circle,
+                                          border: Border.all(
+                                            color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                                            width: 1.0,
                                           ),
-                                        ],
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: Colors.black.withValues(alpha: isDark ? 0.40 : 0.12),
+                                              blurRadius: 10,
+                                              offset: const Offset(0, 3),
+                                            ),
+                                          ],
+                                        ),
+                                        alignment: Alignment.center,
+                                        child: Icon(
+                                          Icons.keyboard_arrow_down_rounded,
+                                          color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                          size: 24,
+                                        ),
                                       ),
-                                      alignment: Alignment.center,
-                                      child: Icon(
-                                        Icons.keyboard_arrow_down_rounded,
-                                        color: isDark ? Colors.white : const Color(0xFF0F172A),
-                                        size: 24,
-                                      ),
-                                    ),
-                                  ),
+                                    );
+                                  },
                                 ),
+                              ),
                             ],
                           ),
                         ),
@@ -4135,11 +4441,11 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                   // Replying Banner
                                   if (_replyingToMessage != null) ...[
                                     Container(
-                                      height: 38,
+                                      height: 44,
                                       margin: const EdgeInsets.only(bottom: 8),
                                       decoration: BoxDecoration(
                                         color: isDark ? const Color(0xFF18181B) : const Color(0xFFF8FAFC),
-                                        borderRadius: BorderRadius.circular(19),
+                                        borderRadius: BorderRadius.circular(22),
                                         border: Border.all(
                                           color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
                                           width: 1.0,
@@ -4165,7 +4471,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                                 Text(
                                                   _replyingToMessage!['sender'] ?? 'User',
                                                   style: GoogleFonts.plusJakartaSans(
-                                                    fontSize: 12.0,
+                                                    fontSize: 16.5,
                                                     fontWeight: FontWeight.bold,
                                                     color: const Color(0xFF2563EB),
                                                   ),
@@ -4177,7 +4483,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                                   maxLines: 1,
                                                   overflow: TextOverflow.ellipsis,
                                                   style: GoogleFonts.dmSans(
-                                                    fontSize: 11.0,
+                                                    fontSize: 15.0,
                                                     color: isDark ? Colors.white70 : Colors.black54,
                                                   ),
                                                 ),
@@ -4212,11 +4518,11 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                   // Editing Banner
                                   if (_editingMessageId != null) ...[
                                     Container(
-                                      height: 38,
+                                      height: 44,
                                       margin: const EdgeInsets.only(bottom: 8),
                                       decoration: BoxDecoration(
                                         color: isDark ? const Color(0xFF18181B) : const Color(0xFFF8FAFC),
-                                        borderRadius: BorderRadius.circular(19),
+                                        borderRadius: BorderRadius.circular(22),
                                         border: Border.all(
                                           color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
                                           width: 1.0,
@@ -4242,7 +4548,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                                 Text(
                                                   'Edit Pesan',
                                                   style: GoogleFonts.plusJakartaSans(
-                                                    fontSize: 12.0,
+                                                    fontSize: 16.5,
                                                     fontWeight: FontWeight.bold,
                                                     color: const Color(0xFF7C3AED),
                                                   ),
@@ -4252,7 +4558,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                                   maxLines: 1,
                                                   overflow: TextOverflow.ellipsis,
                                                   style: GoogleFonts.dmSans(
-                                                    fontSize: 11.0,
+                                                    fontSize: 15.0,
                                                     color: isDark ? Colors.white70 : Colors.black54,
                                                   ),
                                                 ),
@@ -4292,8 +4598,8 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                         BouncyButton(
                                           onTap: _showAttachmentPickerSheet,
                                           child: Container(
-                                            width: 36,
-                                            height: 36,
+                                            width: 38,
+                                            height: 38,
                                             margin: const EdgeInsets.only(right: 6),
                                             decoration: BoxDecoration(
                                               color: isDark ? const Color(0xFF18181B) : const Color(0xFFF8FAFC),
@@ -4306,18 +4612,18 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                             child: Icon(
                                               Icons.attach_file_rounded,
                                               color: isDark ? Colors.white70 : const Color(0xFF4F46E5),
-                                              size: 18,
+                                              size: 20,
                                             ),
                                           ),
                                         ),
                                       // Text Field (1 Baris lurus sejajar)
                                       Expanded(
                                         child: Container(
-                                          constraints: const BoxConstraints(minHeight: 38),
+                                          constraints: const BoxConstraints(minHeight: 46),
                                           alignment: Alignment.center,
                                           decoration: BoxDecoration(
                                             color: isDark ? const Color(0xFF18181B) : const Color(0xFFF8FAFC),
-                                            borderRadius: BorderRadius.circular(19),
+                                            borderRadius: BorderRadius.circular(23),
                                             border: Border.all(
                                               color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
                                               width: 1.0,
@@ -4340,20 +4646,20 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                               textInputAction: TextInputAction.send,
                                               onSubmitted: (_) => _sendMessage(),
                                               style: GoogleFonts.dmSans(
-                                                fontSize: 13.5,
+                                                fontSize: 20.0,
                                                 color: isDark ? Colors.white : Colors.black87,
                                               ),
                                               decoration: InputDecoration(
                                                 hintText: _editingMessageId != null ? 'Edit pesan...' : 'Tulis pesan...',
                                                 hintStyle: GoogleFonts.dmSans(
                                                   color: isDark ? Colors.white38 : Colors.black26,
-                                                  fontSize: 13.5,
+                                                  fontSize: 20.0,
                                                 ),
                                                 border: InputBorder.none,
                                                 isDense: true,
                                                 contentPadding: const EdgeInsets.symmetric(
-                                                  horizontal: 14,
-                                                  vertical: 9,
+                                                  horizontal: 16,
+                                                  vertical: 10,
                                                 ),
                                               ),
                                             ),
@@ -4367,13 +4673,13 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                         duration: const Duration(milliseconds: 100),
                                         onTap: _sendMessage,
                                         child: Container(
-                                          width: 36,
-                                          height: 36,
+                                          width: 40,
+                                          height: 40,
                                           alignment: Alignment.center,
                                           child: Icon(
                                             _editingMessageId != null ? Icons.check_rounded : Icons.send_rounded,
                                             color: isDark ? const Color(0xFFD6A5F8) : const Color(0xFF7C3AED),
-                                            size: 21,
+                                            size: 22,
                                           ),
                                         ),
                                       ),
@@ -4386,18 +4692,17 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                         ),
                       ],
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            );
-        },
+            ),
+          );
+          },
+        ),
       );
     },
-  ),
-);
-},
-);
-  }
+  );
+}
 }
 
 class ClassroomCardPatternPainter extends CustomPainter {
@@ -4549,6 +4854,395 @@ class ClassroomCardPatternPainter extends CustomPainter {
   }
 }
 
+class ImagePreviewSendDialog extends StatefulWidget {
+  final Uint8List imageBytes;
+  final String fileName;
+  final bool isDark;
+
+  const ImagePreviewSendDialog({
+    super.key,
+    required this.imageBytes,
+    required this.fileName,
+    required this.isDark,
+  });
+
+  @override
+  State<ImagePreviewSendDialog> createState() => _ImagePreviewSendDialogState();
+}
+
+class _ImagePreviewSendDialogState extends State<ImagePreviewSendDialog> {
+  bool _isHd = false;
+  final TextEditingController _captionController = TextEditingController();
+
+  @override
+  void dispose() {
+    _captionController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final sizeKb = (widget.imageBytes.lengthInBytes / 1024).toStringAsFixed(1);
+    return Dialog(
+      backgroundColor: widget.isDark ? const Color(0xFF18181B) : Colors.white,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+      child: Container(
+        constraints: const BoxConstraints(maxWidth: 420),
+        padding: const EdgeInsets.all(18),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Header with Title & HD toggle badge
+            Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Kirim Gambar',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: widget.isDark ? Colors.white : const Color(0xFF0F172A),
+                        ),
+                      ),
+                      Text(
+                        'Ukuran file: $sizeKb KB',
+                        style: GoogleFonts.dmSans(
+                          fontSize: 12,
+                          color: widget.isDark ? Colors.white60 : Colors.black54,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                // HD Toggle Button (WhatsApp Style)
+                GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      _isHd = !_isHd;
+                    });
+                  },
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: _isHd
+                          ? const Color(0xFF7C3AED)
+                          : (widget.isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9)),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: _isHd
+                            ? const Color(0xFF9333EA)
+                            : (widget.isDark ? const Color(0xFF3F3F46) : const Color(0xFFE2E8F0)),
+                        width: 1.2,
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.hd_rounded,
+                          size: 18,
+                          color: _isHd ? Colors.white : (widget.isDark ? Colors.white70 : const Color(0xFF475569)),
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          _isHd ? 'HD ON' : 'HD OFF',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 11.5,
+                            fontWeight: FontWeight.bold,
+                            color: _isHd ? Colors.white : (widget.isDark ? Colors.white70 : const Color(0xFF475569)),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+
+            // Image Preview Container
+            ClipRRect(
+              borderRadius: BorderRadius.circular(14),
+              child: Container(
+                constraints: const BoxConstraints(maxHeight: 280),
+                color: widget.isDark ? Colors.black : const Color(0xFFF8FAFC),
+                child: Image.memory(
+                  widget.imageBytes,
+                  fit: BoxFit.contain,
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
+
+            // HD Status Indicator Text
+            Row(
+              children: [
+                Icon(
+                  _isHd ? Icons.check_circle_rounded : Icons.info_outline_rounded,
+                  size: 13,
+                  color: _isHd ? const Color(0xFF10B981) : const Color(0xFF7C3AED),
+                ),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    _isHd
+                        ? 'Kualitas HD diunggah penuh tanpa kompresi'
+                        : 'Mode Hemat: Dikompresi otomatis ke ~200 KB',
+                    style: GoogleFonts.dmSans(
+                      fontSize: 11.5,
+                      color: _isHd
+                          ? const Color(0xFF10B981)
+                          : (widget.isDark ? Colors.white60 : Colors.black54),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+
+            // Caption Text Field
+            Container(
+              decoration: BoxDecoration(
+                color: widget.isDark ? const Color(0xFF27272A) : const Color(0xFFF8FAFC),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: widget.isDark ? const Color(0xFF3F3F46) : const Color(0xFFE2E8F0),
+                ),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
+              child: TextField(
+                controller: _captionController,
+                style: GoogleFonts.dmSans(
+                  fontSize: 14,
+                  color: widget.isDark ? Colors.white : Colors.black87,
+                ),
+                decoration: InputDecoration(
+                  hintText: 'Tambah keterangan (opsional)...',
+                  hintStyle: GoogleFonts.dmSans(
+                    fontSize: 14,
+                    color: widget.isDark ? Colors.white38 : Colors.black38,
+                  ),
+                  border: InputBorder.none,
+                  isDense: true,
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            // Actions Buttons: Batal & Kirim
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () => Navigator.pop(context, null),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: widget.isDark ? Colors.white70 : Colors.black87,
+                      side: BorderSide(
+                        color: widget.isDark ? const Color(0xFF3F3F46) : const Color(0xFFE2E8F0),
+                      ),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                    ),
+                    child: Text(
+                      'Batal',
+                      style: GoogleFonts.plusJakartaSans(fontSize: 13.5, fontWeight: FontWeight.w600),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.pop(context, {
+                        'isHd': _isHd,
+                        'caption': _captionController.text.trim(),
+                      });
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF7C3AED),
+                      foregroundColor: Colors.white,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.send_rounded, size: 16),
+                        const SizedBox(width: 6),
+                        Text(
+                          'Kirim',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 13.5,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class BlurImageProgressive extends StatefulWidget {
+  final String imageUrl;
+  final String? thumbnailUrl;
+  final bool isMe;
+  final bool isDark;
+  final VoidCallback? onTap;
+
+  const BlurImageProgressive({
+    super.key,
+    required this.imageUrl,
+    this.thumbnailUrl,
+    required this.isMe,
+    required this.isDark,
+    this.onTap,
+  });
+
+  @override
+  State<BlurImageProgressive> createState() => _BlurImageProgressiveState();
+}
+
+class _BlurImageProgressiveState extends State<BlurImageProgressive> {
+  Uint8List? _fullImageBytes;
+  Uint8List? _thumbBytes;
+
+  @override
+  void initState() {
+    super.initState();
+    _decodeThumb();
+    _decodeFullIfBase64();
+  }
+
+  void _decodeThumb() {
+    final thumb = widget.thumbnailUrl;
+    if (thumb != null && thumb.startsWith('data:image') && thumb.contains(',')) {
+      try {
+        _thumbBytes = base64Decode(thumb.split(',').last);
+      } catch (_) {}
+    }
+  }
+
+  void _decodeFullIfBase64() {
+    if (widget.imageUrl.startsWith('data:image') && widget.imageUrl.contains(',')) {
+      try {
+        _fullImageBytes = base64Decode(widget.imageUrl.split(',').last);
+      } catch (_) {}
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant BlurImageProgressive oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.imageUrl != oldWidget.imageUrl || widget.thumbnailUrl != oldWidget.thumbnailUrl) {
+      _fullImageBytes = null;
+      _decodeThumb();
+      _decodeFullIfBase64();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: widget.onTap,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(14),
+        child: Container(
+          constraints: const BoxConstraints(maxHeight: 280, maxWidth: 260),
+          decoration: BoxDecoration(
+            color: widget.isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
+            borderRadius: BorderRadius.circular(14),
+          ),
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              // 1. Low-res blurred background thumbnail (instant load)
+              if (_thumbBytes != null)
+                Positioned.fill(
+                  child: ImageFiltered(
+                    imageFilter: ui.ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                    child: Image.memory(
+                      _thumbBytes!,
+                      fit: BoxFit.cover,
+                      width: double.infinity,
+                      height: double.infinity,
+                    ),
+                  ),
+                ),
+
+              // 2. Full resolution image (memory or network)
+              if (_fullImageBytes != null)
+                Image.memory(
+                  _fullImageBytes!,
+                  fit: BoxFit.cover,
+                  width: double.infinity,
+                )
+              else
+                Image.network(
+                  widget.imageUrl,
+                  fit: BoxFit.cover,
+                  width: double.infinity,
+                  loadingBuilder: (context, child, progress) {
+                    if (progress == null) {
+                      return child;
+                    }
+                    return Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        if (_thumbBytes == null)
+                          Container(
+                            height: 180,
+                            width: 240,
+                            color: widget.isDark ? const Color(0xFF18181B) : const Color(0xFFF1F5F9),
+                          ),
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: Colors.black.withValues(alpha: 0.45),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const SizedBox(
+                            width: 22,
+                            height: 22,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2.2,
+                              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                            ),
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                  errorBuilder: (_, __, ___) => Container(
+                    height: 100,
+                    width: 180,
+                    color: Colors.red.withValues(alpha: 0.1),
+                    child: const Center(
+                      child: Icon(Icons.broken_image_rounded, color: Colors.redAccent),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class FullScreenImagePage extends StatelessWidget {
   final String imageUrl;
   const FullScreenImagePage({super.key, required this.imageUrl});
@@ -4556,9 +5250,9 @@ class FullScreenImagePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF4F46E5),
+      backgroundColor: Colors.black,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF4F46E5),
+        backgroundColor: Colors.black.withValues(alpha: 0.8),
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 20),

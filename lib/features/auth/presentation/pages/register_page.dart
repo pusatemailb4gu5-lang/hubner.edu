@@ -1161,8 +1161,9 @@ class _RegisterPageState extends State<RegisterPage> {
       ),
     );
 
+    Widget screenBody;
     if (isTablet) {
-      return Scaffold(
+      screenBody = Scaffold(
         backgroundColor: Colors.transparent,
         body: AnimatedRainbowBackground(
           child: Row(
@@ -1172,7 +1173,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 flex: 4,
                 child: onboardingPanel,
               ),
-              // Right Column: Register Form inside pres white card
+              // Right Column: Registration Form inside pres white card
               Expanded(
                 flex: 5,
                 child: Center(
@@ -1183,7 +1184,6 @@ class _RegisterPageState extends State<RegisterPage> {
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(24),
-                        // Removed boxShadow (no shadow!)
                       ),
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(24),
@@ -1197,38 +1197,25 @@ class _RegisterPageState extends State<RegisterPage> {
           ),
         ),
       );
-    }
-
-    if (!isTablet) {
-      return AnnotatedRegion<SystemUiOverlayStyle>(
-        value: SystemUiOverlayStyle(
-          statusBarColor: Colors.transparent,
-          statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
-          systemNavigationBarColor: Colors.transparent,
-          systemNavigationBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
-          systemNavigationBarDividerColor: Colors.transparent,
-          systemNavigationBarContrastEnforced: false,
-        ),
-        child: Scaffold(
-          backgroundColor: isDark ? const Color(0xFF000000) : const Color(0xFFF8FAFC),
-          body: SafeArea(
-            child: formContent,
-          ),
+    } else {
+      screenBody = Scaffold(
+        backgroundColor: isDark ? const Color(0xFF000000) : const Color(0xFFF8FAFC),
+        body: SafeArea(
+          child: formContent,
         ),
       );
     }
 
-    return Scaffold(
-      backgroundColor: isDark ? const Color(0xFF000000) : Colors.transparent,
-      body: AnimatedRainbowBackground(
-        child: Align(
-          alignment: Alignment.topCenter,
-          child: Container(
-            constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width > 500 ? double.infinity : 500),
-            child: formContent,
-          ),
-        ),
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+        systemNavigationBarColor: Colors.transparent,
+        systemNavigationBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+        systemNavigationBarDividerColor: Colors.transparent,
+        systemNavigationBarContrastEnforced: false,
       ),
+      child: screenBody,
     );
   }
 

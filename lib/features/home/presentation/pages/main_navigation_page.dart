@@ -1114,36 +1114,54 @@ class _DiscussionTabState extends State<DiscussionTab> {
     final Widget listContent = StreamBuilder<QuerySnapshot>(
       stream: FirebaseFirestore.instance
           .collection('discussions')
-          .orderBy('createdAt', descending: true)
           .snapshots(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting && !snapshot.hasData) {
           return const SizedBox.shrink();
         }
 
-        final docs = snapshot.data?.docs ?? [];
+        final docs = List<QueryDocumentSnapshot>.from(snapshot.data?.docs ?? []);
+        docs.sort((a, b) {
+          final aData = a.data() as Map<String, dynamic>;
+          final bData = b.data() as Map<String, dynamic>;
+          final aTime = aData['createdAt'] ?? aData['time'];
+          final bTime = bData['createdAt'] ?? bData['time'];
+          if (aTime is Timestamp && bTime is Timestamp) {
+            return bTime.compareTo(aTime);
+          }
+          return b.id.compareTo(a.id);
+        });
+
         final filteredDocs = docs.where((doc) {
           final data = doc.data() as Map<String, dynamic>;
+          final isPrivate = data['isPrivate'] == true;
           final memberUids = data['memberUids'] as List?;
-          if (memberUids != null && !memberUids.contains(currentUid)) {
+          final creatorUid = data['creatorUid'] as String?;
+          
+          // Filter out chats/discussions where current user is not a participant or creator
+          if (memberUids != null && memberUids.isNotEmpty) {
+            if (!memberUids.contains(currentUid) && creatorUid != currentUid) {
+              return false;
+            }
+          } else if (creatorUid != null && creatorUid.isNotEmpty && creatorUid != currentUid) {
             return false;
           }
 
           final bool isGroupChat = (data['channel'] ?? '').toString().startsWith('#') ||
               (data['projectId'] ?? '').toString().isNotEmpty;
-          final bool isDirect = data['isDirect'] == true || !isGroupChat;
+          final bool isDirect = data['isDirect'] == true || isPrivate;
           final String lastMsg = (data['lastMessage'] ?? '').toString();
           final bool hasRealMessages = data['hasMessages'] == true ||
               (lastMsg.isNotEmpty &&
                   lastMsg != 'Mulai percakapan langsung...' &&
                   lastMsg != 'Mulai diskusi baru...');
 
-          // Logic 1: If private chat has no messages sent yet, do not display in discussion list
+          // If direct chat has no real messages yet, hide from list
           if (isDirect && !hasRealMessages) {
             return false;
           }
 
-          // Logic 2: If private chat was cleared / deleted for current user, do not display
+          // If chat was cleared / deleted for current user, hide from list
           final List hiddenForUids = (data['hiddenForUids'] ?? data['clearedByUids']) as List? ?? [];
           if (hiddenForUids.contains(currentUid)) {
             return false;
@@ -1459,6 +1477,7 @@ class _DiscussionTabState extends State<DiscussionTab> {
                                   builder: (_) => ChatRoomPage(
                                     discussionId: docId,
                                     channelName: channelName,
+                                    projectId: projectId.isNotEmpty ? projectId : null,
                                   ),
                                 ),
                               );
@@ -4505,6 +4524,34 @@ class _DocumentsTabState extends State<DocumentsTab> {
   void initState() {
     super.initState();
     _initGoogleSignIn();
+    _ensureChatFilesFolderExists();
+  }
+
+  Future<void> _ensureChatFilesFolderExists() async {
+    try {
+      final query = await FirebaseFirestore.instance
+          .collection('driveDocuments')
+          .where('name', isEqualTo: 'Berkas Diskusi')
+          .where('isFolder', isEqualTo: true)
+          .limit(1)
+          .get();
+
+      if (query.docs.isEmpty) {
+        final currentUid = FirebaseAuth.instance.currentUser?.uid ?? '';
+        await FirebaseFirestore.instance.collection('driveDocuments').add({
+          'name': 'Berkas Diskusi',
+          'mimeType': 'application/vnd.google-apps.folder',
+          'isFolder': true,
+          'parentFolderId': '',
+          'driveFileId': '',
+          'driveLink': '',
+          'uploaderUid': currentUid,
+          'uploaderName': 'Sistem',
+          'fileSize': 0,
+          'uploadedAt': FieldValue.serverTimestamp(),
+        });
+      }
+    } catch (_) {}
   }
 
   Future<void> _initGoogleSignIn() async {

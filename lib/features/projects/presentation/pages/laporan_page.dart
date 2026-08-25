@@ -1157,7 +1157,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                               style: GoogleFonts.plusJakartaSans(
                                                 fontSize: 22,
                                                 fontWeight: FontWeight.w900,
-                                                color: Colors.white,
+                                                color: isDark ? Colors.white : Colors.black87,
                                                 letterSpacing: -0.4,
                                                 height: 1.2,
                                               ),
@@ -1263,7 +1263,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                           height: 52,
                                           padding: const EdgeInsets.symmetric(horizontal: 16),
                                           decoration: BoxDecoration(
-                                            color: isDark ? const Color(0xFF1C1C1E) : Colors.white.withValues(alpha: 0.95),
+                                            color: isDark ? const Color(0xFF1C1C1E) : Colors.black,
                                             borderRadius: BorderRadius.circular(30),
                                             border: Border.all(
                                               color: isDark ? const Color(0xFF27272A) : Colors.transparent,
@@ -1271,7 +1271,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                             ),
                                             boxShadow: [
                                               BoxShadow(
-                                                color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.12),
+                                                color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.2),
                                                 blurRadius: 8,
                                                 offset: const Offset(0, 2),
                                               ),
@@ -1280,7 +1280,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                           child: Row(
                                             mainAxisSize: MainAxisSize.min,
                                             children: [
-                                              Icon(Icons.manage_accounts_rounded, color: isDark ? Colors.white : const Color(0xFF7F52FC), size: 18),
+                                              const Icon(Icons.manage_accounts_rounded, color: Colors.white, size: 18),
                                               const SizedBox(width: 6),
                                               Text(
                                                 'Atur Presensi',
@@ -1574,11 +1574,11 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                       // LAYER 1: DRAGGABLE SCROLLABLE SHEET PUTIH FULL KE BAWAH (Seperti Detail Classroom)
                       // ==========================================
                       DraggableScrollableSheet(
-                        initialChildSize: 0.58,
-                        minChildSize: 0.58,
+                        initialChildSize: 0.48,
+                        minChildSize: 0.48,
                         maxChildSize: 0.96,
                         snap: true,
-                        snapSizes: const [0.58, 0.96],
+                        snapSizes: const [0.48, 0.96],
                         builder: (context, scrollController) {
                           final bool showTugas = _selectedTypeFilter == 'all' || _selectedTypeFilter == 'tugas';
                           final bool showQuiz = _selectedTypeFilter == 'all' || _selectedTypeFilter == 'quiz';

@@ -94,24 +94,16 @@ class _DesktopClassroomPageState extends State<DesktopClassroomPage>
     super.initState();
     _fadeController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 500),
+      duration: const Duration(milliseconds: 200),
+      value: 1.0,
     );
     _fadeAnimation = CurvedAnimation(
       parent: _fadeController,
       curve: Curves.easeInOut,
     );
 
+    _isLoading = false;
     _fetchUserData();
-
-    // Relaxed initial loading sequence (1200ms) with zero reloading afterwards
-    Future.delayed(const Duration(milliseconds: 1200), () {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-        _fadeController.forward();
-      }
-    });
   }
 
   Future<void> _fetchUserData() async {
@@ -209,32 +201,7 @@ class _DesktopClassroomPageState extends State<DesktopClassroomPage>
 
   // ─── Translucent White Blur Overlay with 3-Dot Loader ───
   Widget _buildWhiteBlurThreeDotsLoadingOverlay({required String message}) {
-    return Positioned.fill(
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-        child: Container(
-          color: Colors.white.withValues(alpha: 0.8),
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const ThreeDotsLoader(),
-                const SizedBox(height: 16),
-                Text(
-                  message,
-                  style: GoogleFonts.dmSans(
-                    fontSize: 15.8,
-                    fontWeight: FontWeight.w500,
-                    color: const Color(0xFF000000),
-                    letterSpacing: 0.2,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
+    return const SizedBox.shrink();
   }
 
   // ─── Unified Desktop Top Bar ───

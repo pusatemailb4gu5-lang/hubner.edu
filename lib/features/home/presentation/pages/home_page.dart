@@ -345,28 +345,27 @@ class _HomePageState extends State<HomePage> {
   void _toggleThemeWithBounce(BuildContext context, bool currentlyDark) async {
     final String newTheme = currentlyDark ? 'Terang' : 'Gelap';
 
-    // 1. Trigger 5-second full-screen blur with colorful bouncy dots
+    // 1. Activate full-screen blur with bouncing dots for theme transition
     HubnerApp.isThemeTransitioning.value = true;
 
-    // 2. Persist locally to SharedPreferences and Firestore
+    // 2. Persist locally and in Firestore in background
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('themeMode', newTheme);
     final currentUid = FirebaseAuth.instance.currentUser?.uid;
     if (currentUid != null) {
-      try {
-        await FirebaseFirestore.instance
-            .collection('users')
-            .doc(currentUid)
-            .update({'themeMode': newTheme});
-      } catch (_) {}
+      FirebaseFirestore.instance
+          .collection('users')
+          .doc(currentUid)
+          .update({'themeMode': newTheme})
+          .catchError((_) {});
     }
 
-    // 3. Switch theme in the background at 2.5s under the full-screen blur
-    await Future.delayed(const Duration(milliseconds: 2500));
+    // 3. Let the dots animate smoothly, then switch theme underneath
+    await Future.delayed(const Duration(milliseconds: 600));
     HubnerApp.themeNotifier.value = newTheme;
 
-    // 4. Complete full 5 seconds (2500ms remaining) before hiding overlay
-    await Future.delayed(const Duration(milliseconds: 2500));
+    // 4. Complete transition and dismiss overlay
+    await Future.delayed(const Duration(milliseconds: 250));
     HubnerApp.isThemeTransitioning.value = false;
   }
 

@@ -627,8 +627,9 @@ class _LoginPageState extends State<LoginPage> {
       ),
     );
 
+    Widget screenBody;
     if (isTablet) {
-      return Scaffold(
+      screenBody = Scaffold(
         backgroundColor: Colors.transparent,
         body: AnimatedRainbowBackground(
           child: Row(
@@ -649,7 +650,6 @@ class _LoginPageState extends State<LoginPage> {
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(24),
-                        // Removed boxShadow (no shadow!)
                       ),
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(24),
@@ -663,71 +663,39 @@ class _LoginPageState extends State<LoginPage> {
           ),
         ),
       );
-    }
-
-    if (!isTablet) {
+    } else {
       final route = ModalRoute.of(context);
       final animation = route?.animation;
 
-      return AnnotatedRegion<SystemUiOverlayStyle>(
-        value: SystemUiOverlayStyle(
-          statusBarColor: Colors.transparent,
-          statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
-          systemNavigationBarColor: Colors.transparent,
-          systemNavigationBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
-          systemNavigationBarDividerColor: Colors.transparent,
-          systemNavigationBarContrastEnforced: false,
-        ),
-        child: Scaffold(
-          backgroundColor: isDark ? const Color(0xFF000000) : Colors.white,
-          body: animation != null
-              ? AnimatedBuilder(
-                  animation: animation,
-                  builder: (context, child) {
-                    final double radius = 32.0 * (1.0 - animation.value);
-                    return Container(
-                      width: double.infinity,
-                      height: double.infinity,
-                      decoration: BoxDecoration(
-                        color: isDark ? const Color(0xFF000000) : Colors.white,
-                        borderRadius: BorderRadius.vertical(
-                          top: Radius.circular(radius),
-                        ),
-                      ),
-                      child: child,
-                    );
-                  },
-                  child: SafeArea(
-                    bottom: false,
-                    child: formContent,
-                  ),
-                )
-              : Container(
-                  width: double.infinity,
-                  height: double.infinity,
-                  decoration: BoxDecoration(
-                    color: isDark ? const Color(0xFF000000) : Colors.white,
-                  ),
-                  child: SafeArea(
-                    bottom: false,
-                    child: formContent,
-                  ),
-                ),
-        ),
+      screenBody = Scaffold(
+        backgroundColor: isDark ? const Color(0xFF000000) : Colors.white,
+        body: animation != null
+            ? AnimatedBuilder(
+                animation: animation,
+                builder: (context, child) {
+                  return Transform.translate(
+                    offset: Offset(0, 50 * (1 - animation.value)),
+                    child: Opacity(
+                      opacity: animation.value.clamp(0.0, 1.0),
+                      child: SafeArea(child: formContent),
+                    ),
+                  );
+                },
+              )
+            : SafeArea(child: formContent),
       );
     }
 
-    return Scaffold(
-      backgroundColor: isDark ? const Color(0xFF000000) : Colors.transparent,
-      body: AnimatedRainbowBackground(
-        child: Align(
-          alignment: Alignment.topCenter,
-          child: Container(
-            constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width > 500 ? double.infinity : 500),
-            child: formContent,
-          ),
-        ),
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+        systemNavigationBarColor: Colors.transparent,
+        systemNavigationBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+        systemNavigationBarDividerColor: Colors.transparent,
+        systemNavigationBarContrastEnforced: false,
       ),
+      child: screenBody,
     );
   }
 

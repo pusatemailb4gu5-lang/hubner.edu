@@ -1,3 +1,4 @@
+import 'dart:io' show Platform;
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -15,10 +16,12 @@ import 'features/landing/presentation/pages/landing_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await SystemChrome.setPreferredOrientations([
-    DeviceOrientation.portraitUp,
-    DeviceOrientation.portraitDown,
-  ]);
+  if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
+    await SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
+  }
   
   // Pre-load Poppins fonts to prevent splash screen font flicker / layout shift
   try {
@@ -31,9 +34,14 @@ void main() async {
   }
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  FirebaseFirestore.instance.settings = const Settings(
-    persistenceEnabled: false,
-  );
+  if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
+    try {
+      FirebaseFirestore.instance.settings = const Settings(
+        persistenceEnabled: true,
+        cacheSizeBytes: Settings.CACHE_SIZE_UNLIMITED,
+      );
+    } catch (_) {}
+  }
 
   final prefs = await SharedPreferences.getInstance();
   final hasSavedLogin = prefs.getBool('isLoggedIn') ?? false;
@@ -51,27 +59,29 @@ void main() async {
   HubnerApp.languageNotifier.value = savedLanguage;
 
   final bool initialIsDark = savedTheme == 'Gelap' || savedTheme == 'Hitam';
-  SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-  SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-    statusBarColor: Colors.transparent,
-    statusBarIconBrightness: initialIsDark ? Brightness.light : Brightness.dark,
-    systemNavigationBarColor: Colors.transparent,
-    systemNavigationBarIconBrightness: initialIsDark ? Brightness.light : Brightness.dark,
-    systemNavigationBarDividerColor: Colors.transparent,
-    systemNavigationBarContrastEnforced: false,
-  ));
-
-  HubnerApp.themeNotifier.addListener(() {
-    final bool isDark = HubnerApp.themeNotifier.value == 'Gelap' || HubnerApp.themeNotifier.value == 'Hitam';
+  if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
-      statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+      statusBarIconBrightness: initialIsDark ? Brightness.light : Brightness.dark,
       systemNavigationBarColor: Colors.transparent,
-      systemNavigationBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+      systemNavigationBarIconBrightness: initialIsDark ? Brightness.light : Brightness.dark,
       systemNavigationBarDividerColor: Colors.transparent,
       systemNavigationBarContrastEnforced: false,
     ));
-  });
+
+    HubnerApp.themeNotifier.addListener(() {
+      final bool isDark = HubnerApp.themeNotifier.value == 'Gelap' || HubnerApp.themeNotifier.value == 'Hitam';
+      SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+        systemNavigationBarColor: Colors.transparent,
+        systemNavigationBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+        systemNavigationBarDividerColor: Colors.transparent,
+        systemNavigationBarContrastEnforced: false,
+      ));
+    });
+  }
 
   runApp(HubnerApp(isLoggedIn: isLoggedIn));
 }
@@ -167,9 +177,9 @@ class _FullScreenThemeTransitionBlurState extends State<FullScreenThemeTransitio
   late AnimationController _controller;
 
   static const List<Color> _dotColors = [
-    Color(0xFF8B5CF6), // Ungu (Purple Violet)
-    Color(0xFFFBBF24), // Kuning (Amber Yellow)
-    Color(0xFFEC4899), // Magenta (Pink Magenta)
+    Color(0xFF8B5CF6), // Violet Purple
+    Color(0xFFF59E0B), // Amber
+    Color(0xFFEC4899), // Pink
   ];
 
   @override
@@ -177,7 +187,7 @@ class _FullScreenThemeTransitionBlurState extends State<FullScreenThemeTransitio
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 900),
+      duration: const Duration(milliseconds: 750),
     )..repeat();
   }
 
@@ -196,18 +206,16 @@ class _FullScreenThemeTransitionBlurState extends State<FullScreenThemeTransitio
         color: Colors.transparent,
         child: Stack(
           children: [
-            // Full-screen backdrop blur
             Positioned.fill(
               child: BackdropFilter(
-                filter: ui.ImageFilter.blur(sigmaX: 18.0, sigmaY: 18.0),
+                filter: ui.ImageFilter.blur(sigmaX: 16.0, sigmaY: 16.0),
                 child: Container(
                   color: isDark
-                      ? Colors.black.withValues(alpha: 0.62)
-                      : Colors.black.withValues(alpha: 0.28),
+                      ? Colors.black.withValues(alpha: 0.55)
+                      : Colors.white.withValues(alpha: 0.45),
                 ),
               ),
             ),
-            // Centered Animated Colorful Floating Dots (Without background container)
             Center(
               child: Row(
                 mainAxisSize: MainAxisSize.min,
@@ -219,23 +227,23 @@ class _FullScreenThemeTransitionBlurState extends State<FullScreenThemeTransitio
                       final double delay = index * 0.22;
                       final double progress = (_controller.value - delay) % 1.0;
                       final double bounce = (progress < 0.5)
-                          ? -16.0 * (1 - ((progress - 0.25).abs() / 0.25))
+                          ? -14.0 * (1 - ((progress - 0.25).abs() / 0.25))
                           : 0.0;
 
                       return Transform.translate(
-                        offset: Offset(0, bounce.clamp(-16.0, 0.0)),
+                        offset: Offset(0, bounce.clamp(-14.0, 0.0)),
                         child: Container(
-                          margin: const EdgeInsets.symmetric(horizontal: 6),
-                          width: 14,
-                          height: 14,
+                          margin: const EdgeInsets.symmetric(horizontal: 5),
+                          width: 13,
+                          height: 13,
                           decoration: BoxDecoration(
                             color: color,
                             shape: BoxShape.circle,
                             boxShadow: [
                               BoxShadow(
-                                color: color.withValues(alpha: 0.65),
-                                blurRadius: 10,
-                                offset: const Offset(0, 3),
+                                color: color.withValues(alpha: 0.5),
+                                blurRadius: 8,
+                                offset: const Offset(0, 2),
                               ),
                             ],
                           ),
@@ -252,4 +260,5 @@ class _FullScreenThemeTransitionBlurState extends State<FullScreenThemeTransitio
     );
   }
 }
+
 
