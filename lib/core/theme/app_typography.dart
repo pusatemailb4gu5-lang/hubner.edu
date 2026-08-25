@@ -406,6 +406,28 @@ class AppTypography {
     );
   }
 
+  /// Alias for subtitle
+  static TextStyle bodySubtitle({
+    Color? color,
+    FontWeight fontWeight = FontWeight.w500,
+    FontStyle? fontStyle,
+    double? letterSpacing,
+    double? height,
+    TextDecoration? decoration,
+    Color? decorationColor,
+    double? fontSize,
+  }) =>
+      subtitle(
+        color: color,
+        fontWeight: fontWeight,
+        fontStyle: fontStyle,
+        letterSpacing: letterSpacing,
+        height: height,
+        decoration: decoration,
+        decorationColor: decorationColor,
+        fontSize: fontSize,
+      );
+
   /// 17. Nama File Dokumen Lampiran (.document-title)
   static TextStyle documentTitle({
     Color? color,

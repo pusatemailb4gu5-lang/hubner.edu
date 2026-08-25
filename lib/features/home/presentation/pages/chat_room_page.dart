@@ -1112,6 +1112,9 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
         _showAttachmentPanel = false;
       });
       _inputFocusNode.requestFocus();
+      _messageController.selection = TextSelection.fromPosition(
+        TextPosition(offset: _messageController.text.length),
+      );
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
           _inputFocusNode.requestFocus();
@@ -5558,17 +5561,17 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                               width: 1.0,
                                             ),
                                           ),
-                                          child: KeyboardListener(
-                                            focusNode: _inputFocusNode,
-                                            onKeyEvent: (event) {
-                                              if (event is KeyDownEvent && event.logicalKey == LogicalKeyboardKey.enter) {
+                                          child: CallbackShortcuts(
+                                            bindings: {
+                                              const SingleActivator(LogicalKeyboardKey.enter): () {
                                                 if (!HardwareKeyboard.instance.isShiftPressed) {
                                                   _sendMessage();
                                                 }
-                                              }
+                                              },
                                             },
                                             child: TextField(
                                               controller: _messageController,
+                                              focusNode: _inputFocusNode,
                                               minLines: 1,
                                               maxLines: 4,
                                               keyboardType: TextInputType.multiline,

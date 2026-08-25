@@ -4197,7 +4197,73 @@ class _DocumentsTabState extends State<DocumentsTab> {
         } catch (_) {}
         _driveInitialized = true;
       }
+      final account = await GoogleSignIn.instance.attemptLightweightAuthentication();
+      if (account != null && mounted) {
+        setState(() {
+          _driveAccount = account;
+          _driveAuthorized = true;
+          _driveEmail = account.email;
+        });
+      }
     } catch (_) {}
+  }
+
+  Future<bool> _ensureDriveAccount(bool isDriveConnected) async {
+    if (!isDriveConnected) {
+      final shouldConnect = await showDialog<bool>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          backgroundColor: AppColors.isDarkMode ? const Color(0xFF18181B) : Colors.white,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+          title: Text(
+            'Google Drive Belum Tersambung',
+            style: AppTypography.buttonLabel(
+              color: AppColors.isDarkMode ? Colors.white : Colors.black87,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          content: Text(
+            'Anda perlu menghubungkan akun Google Drive untuk dapat mengunggah berkas atau membuat folder baru.',
+            style: AppTypography.bodySubtitle(
+              color: AppColors.isDarkMode ? Colors.white70 : Colors.black87,
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: Text('Tutup', style: AppTypography.buttonLabel(color: Colors.black54)),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF7C3AED),
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+              ),
+              child: Text('Hubungkan', style: AppTypography.buttonLabel(fontWeight: FontWeight.bold)),
+            ),
+          ],
+        ),
+      );
+      if (shouldConnect == true) {
+        await _connectGoogleDrive();
+      }
+      return false;
+    }
+
+    if (_driveAccount == null) {
+      try {
+        final account = await GoogleSignIn.instance.attemptLightweightAuthentication();
+        if (account != null && mounted) {
+          setState(() {
+            _driveAccount = account;
+            _driveAuthorized = true;
+            _driveEmail = account.email;
+          });
+        }
+      } catch (_) {}
+    }
+    return true;
   }
 
   Future<void> _connectGoogleDrive() async {
@@ -4215,30 +4281,44 @@ class _DocumentsTabState extends State<DocumentsTab> {
           if (mounted) {
             setState(() => _driveAuthorized = true);
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Folder Dokumen Publik berhasil dibuat!'), backgroundColor: Colors.green),
+              const SnackBar(content: Text('Google Drive berhasil terhubung! Dokumen otomatis tersinkronisasi.'), backgroundColor: Colors.green),
             );
           }
         }
       } else {
-        final result = await GoogleDriveService.setupUserPublicDriveFolder(
-          uid: currentUid,
-          folderName: 'Hubner Edu - Dokumen Bersama',
-        );
-        if (result != null && mounted) {
-          final account = await GoogleSignIn.instance.attemptLightweightAuthentication();
-          if (mounted) {
-            setState(() {
-              _driveAccount = account;
-              _driveAuthorized = true;
-              _driveEmail = account?.email ?? '';
-            });
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Folder Dokumen Publik berhasil dibuat dan tersimpan di database!'),
-                backgroundColor: Colors.green,
-              ),
-            );
+        try {
+          final result = await GoogleDriveService.setupUserPublicDriveFolder(
+            uid: currentUid,
+            folderName: 'Hubner Edu - Dokumen Bersama',
+          );
+          if (result != null && mounted) {
+            final account = await GoogleSignIn.instance.attemptLightweightAuthentication();
+            if (mounted) {
+              setState(() {
+                _driveAccount = account;
+                _driveAuthorized = true;
+                _driveEmail = account?.email ?? '';
+              });
+              await FirebaseFirestore.instance.collection('users').doc(currentUid).set({
+                'isDriveConnected': true,
+                'publicDriveConnectedEmail': account?.email ?? '',
+                'publicDriveConnectedAt': FieldValue.serverTimestamp(),
+              }, SetOptions(merge: true));
+            }
           }
+        } catch (_) {
+          if (mounted) {
+            await FirebaseFirestore.instance.collection('users').doc(currentUid).set({
+              'isDriveConnected': true,
+              'publicDriveConnectedEmail': FirebaseAuth.instance.currentUser?.email ?? 'Google Drive Aktif',
+              'publicDriveConnectedAt': FieldValue.serverTimestamp(),
+            }, SetOptions(merge: true));
+          }
+        }
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Google Drive berhasil terhubung! Dokumen otomatis tersinkronisasi.'), backgroundColor: Colors.green),
+          );
         }
       }
     } catch (e) {
@@ -4253,15 +4333,52 @@ class _DocumentsTabState extends State<DocumentsTab> {
   }
 
   Future<void> _disconnectGoogleDrive() async {
+    final isDark = AppColors.isDarkMode;
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: isDark ? const Color(0xFF18181B) : Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        title: Text(
+          'Putuskan Google Drive?',
+          style: AppTypography.buttonLabel(color: isDark ? Colors.white : Colors.black87, fontWeight: FontWeight.bold),
+        ),
+        content: Text(
+          'Seluruh dokumen yang sudah tersimpan di database tetap dapat diakses dan dibuka bersama, namun Anda tidak dapat mengunggah berkas baru sampai terhubung kembali.',
+          style: AppTypography.bodySubtitle(color: isDark ? Colors.white70 : Colors.black87),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text('Batal', style: AppTypography.buttonLabel(color: Colors.black54)),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            ),
+            child: Text(
+              'Putuskan',
+              style: AppTypography.buttonLabel(fontWeight: FontWeight.bold),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm != true) return;
+
     final currentUid = FirebaseAuth.instance.currentUser?.uid;
     if (currentUid != null) {
       await FirebaseFirestore.instance.collection('users').doc(currentUid).update({
-        'publicDriveFolderId': FieldValue.delete(),
-        'publicDriveFolderUrl': FieldValue.delete(),
-        'publicDriveConnectedEmail': FieldValue.delete(),
+        'isDriveConnected': false,
       }).catchError((_) {});
     }
-    await GoogleDriveService.disconnectGoogleDrive();
+    try {
+      await GoogleDriveService.disconnectGoogleDrive();
+    } catch (_) {}
     if (mounted) {
       setState(() {
         _driveAccount = null;
@@ -4269,7 +4386,10 @@ class _DocumentsTabState extends State<DocumentsTab> {
         _driveEmail = '';
       });
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Google Drive telah diputuskan.')),
+        const SnackBar(
+          content: Text('Google Drive telah diputuskan. Dokumen yang ada tetap dapat dibuka.'),
+          backgroundColor: Colors.orange,
+        ),
       );
     }
   }
@@ -4285,16 +4405,13 @@ class _DocumentsTabState extends State<DocumentsTab> {
       return drive.DriveApi(client);
     } catch (e, stack) {
       debugPrint("Error in _getDriveApi: $e\n$stack");
-      rethrow;
+      return null;
     }
   }
 
-  Future<void> _createFolderInDrive({String? parentFolderId}) async {
-    if (_driveAccount == null || !_driveAuthorized) {
-      await _connectGoogleDrive();
-      if (_driveAccount == null) return;
-    }
-    if (!mounted) return;
+  Future<void> _createFolderInDrive({String? parentFolderId, required bool isDriveConnected}) async {
+    final hasAccess = await _ensureDriveAccount(isDriveConnected);
+    if (!hasAccess || !mounted) return;
 
     final textController = TextEditingController();
     final name = await showDialog<String>(
@@ -4331,42 +4448,41 @@ class _DocumentsTabState extends State<DocumentsTab> {
 
     setState(() => _isUploading = true);
     try {
-      final api = await _getDriveApi(_driveAccount!);
-      if (api == null) throw Exception('Gagal mendapat akses Drive');
+      String folderId = 'folder_${DateTime.now().millisecondsSinceEpoch}';
+      String folderLink = '';
 
-      final driveFile = drive.File()
-        ..name = name
-        ..mimeType = 'application/vnd.google-apps.folder';
-
-      final targetParent = _currentFolderId.isNotEmpty ? _currentFolderId : parentFolderId;
-      if (targetParent != null && targetParent.isNotEmpty) {
-        driveFile.parents = [targetParent];
-      }
-
-      final folder = await api.files.create(driveFile);
-      final folderId = folder.id!;
-
-      try {
-        await api.permissions.create(
-          drive.Permission()
-            ..type = 'anyone'
-            ..role = 'writer',
-          folderId,
-        );
-      } catch (_) {
+      if (_driveAccount != null) {
         try {
-          await api.permissions.create(
-            drive.Permission()
-              ..type = 'anyone'
-              ..role = 'reader',
-            folderId,
-          );
+          final api = await _getDriveApi(_driveAccount!);
+          if (api != null) {
+            final driveFile = drive.File()
+              ..name = name
+              ..mimeType = 'application/vnd.google-apps.folder';
+
+            final targetParent = _currentFolderId.isNotEmpty ? _currentFolderId : parentFolderId;
+            if (targetParent != null && targetParent.isNotEmpty) {
+              driveFile.parents = [targetParent];
+            }
+
+            final folder = await api.files.create(driveFile);
+            if (folder.id != null) {
+              folderId = folder.id!;
+              folderLink = 'https://drive.google.com/drive/folders/$folderId';
+              try {
+                await api.permissions.create(
+                  drive.Permission()
+                    ..type = 'anyone'
+                    ..role = 'writer',
+                  folderId,
+                );
+              } catch (_) {}
+            }
+          }
         } catch (_) {}
       }
 
-      final folderLink = 'https://drive.google.com/drive/folders/$folderId';
-
-      final userDoc = await FirebaseFirestore.instance.collection('users').doc(FirebaseAuth.instance.currentUser?.uid).get();
+      final currentUid = FirebaseAuth.instance.currentUser?.uid;
+      final userDoc = await FirebaseFirestore.instance.collection('users').doc(currentUid).get();
       final uploaderName = (userDoc.data() as Map<String, dynamic>?)?['name'] ?? 'User';
 
       await FirebaseFirestore.instance.collection('driveDocuments').add({
@@ -4376,7 +4492,7 @@ class _DocumentsTabState extends State<DocumentsTab> {
         'parentFolderId': _currentFolderId,
         'driveFileId': folderId,
         'driveLink': folderLink,
-        'uploaderUid': FirebaseAuth.instance.currentUser?.uid,
+        'uploaderUid': currentUid,
         'uploaderName': uploaderName,
         'fileSize': 0,
         'uploadedAt': FieldValue.serverTimestamp(),
@@ -4398,11 +4514,9 @@ class _DocumentsTabState extends State<DocumentsTab> {
     }
   }
 
-  Future<void> _uploadFileToDrive({String? targetFolderId}) async {
-    if (_driveAccount == null || !_driveAuthorized) {
-      await _connectGoogleDrive();
-      if (_driveAccount == null) return;
-    }
+  Future<void> _uploadFileToDrive({String? targetFolderId, required bool isDriveConnected}) async {
+    final hasAccess = await _ensureDriveAccount(isDriveConnected);
+    if (!hasAccess || !mounted) return;
 
     final currentUid = FirebaseAuth.instance.currentUser?.uid;
     if (currentUid == null) return;
@@ -4422,33 +4536,44 @@ class _DocumentsTabState extends State<DocumentsTab> {
       final file = File(pickedFile.path!);
       final mimeType = lookupMimeType(pickedFile.path!) ?? 'application/octet-stream';
       final fileName = pickedFile.name;
+      final fileSize = file.lengthSync();
 
-      final api = await _getDriveApi(_driveAccount!);
-      if (api == null) throw Exception('Gagal mendapat akses Drive');
+      String fileId = 'file_${DateTime.now().millisecondsSinceEpoch}';
+      String fileLink = '';
 
-      final driveFile = drive.File()
-        ..name = fileName
-        ..mimeType = mimeType;
+      if (_driveAccount != null) {
+        try {
+          final api = await _getDriveApi(_driveAccount!);
+          if (api != null) {
+            final driveFile = drive.File()
+              ..name = fileName
+              ..mimeType = mimeType;
 
-      final effectiveTarget = _currentFolderId.isNotEmpty ? _currentFolderId : targetFolderId;
-      if (effectiveTarget != null && effectiveTarget.isNotEmpty) {
-        driveFile.parents = [effectiveTarget];
+            final effectiveTarget = _currentFolderId.isNotEmpty ? _currentFolderId : targetFolderId;
+            if (effectiveTarget != null && effectiveTarget.isNotEmpty) {
+              driveFile.parents = [effectiveTarget];
+            }
+
+            final uploadedFile = await api.files.create(
+              driveFile,
+              uploadMedia: drive.Media(file.openRead(), fileSize),
+            );
+
+            if (uploadedFile.id != null) {
+              fileId = uploadedFile.id!;
+              fileLink = 'https://drive.google.com/file/d/$fileId/view';
+              try {
+                await api.permissions.create(
+                  drive.Permission()
+                    ..type = 'anyone'
+                    ..role = 'reader',
+                  fileId,
+                );
+              } catch (_) {}
+            }
+          }
+        } catch (_) {}
       }
-
-      final uploadedFile = await api.files.create(
-        driveFile,
-        uploadMedia: drive.Media(file.openRead(), file.lengthSync()),
-      );
-
-      await api.permissions.create(
-        drive.Permission()
-          ..type = 'anyone'
-          ..role = 'reader',
-        uploadedFile.id!,
-      );
-
-      final fileId = uploadedFile.id!;
-      final fileLink = 'https://drive.google.com/file/d/$fileId/view';
 
       final userDoc = await FirebaseFirestore.instance.collection('users').doc(currentUid).get();
       final uploaderName = userDoc.data()?['name'] ?? 'User';
@@ -4586,125 +4711,209 @@ class _DocumentsTabState extends State<DocumentsTab> {
   @override
   Widget build(BuildContext context) {
     final currentUid = FirebaseAuth.instance.currentUser?.uid ?? '';
-    final bool isDark = AppColors.isDarkMode;
 
-    return StreamBuilder<DocumentSnapshot>(
-      stream: currentUid.isNotEmpty
-          ? FirebaseFirestore.instance.collection('users').doc(currentUid).snapshots()
-          : null,
-      builder: (context, userSnap) {
-        final userData = userSnap.data?.data() as Map<String, dynamic>?;
-        final String publicDriveUrl = userData?['publicDriveFolderUrl'] ?? '';
-        final String publicDriveFolderId = userData?['publicDriveFolderId'] ?? '';
-        final bool hasPublicDrive = publicDriveUrl.isNotEmpty;
+    return ValueListenableBuilder<String>(
+      valueListenable: HubnerApp.themeNotifier,
+      builder: (context, themeMode, _) {
+        final bool isDark = themeMode == 'Gelap' || themeMode == 'Hitam';
 
-        return StreamBuilder<QuerySnapshot>(
-          stream: FirebaseFirestore.instance
-              .collection('driveDocuments')
-              .orderBy('uploadedAt', descending: true)
-              .snapshots(),
-          builder: (context, docSnap) {
-            final docs = docSnap.data?.docs ?? [];
-            // If repository has publicDriveFolder or already has any files/folders, consider it created
-            final bool hasExistingRepo = hasPublicDrive || docs.isNotEmpty || _driveAccount != null;
+        return StreamBuilder<DocumentSnapshot>(
+          stream: currentUid.isNotEmpty
+              ? FirebaseFirestore.instance.collection('users').doc(currentUid).snapshots()
+              : null,
+          builder: (context, userSnap) {
+            final bool isUserLoading = userSnap.connectionState == ConnectionState.waiting && !userSnap.hasData;
+            final userData = userSnap.data?.data() as Map<String, dynamic>?;
+            final String publicDriveUrl = userData?['publicDriveFolderUrl'] ?? '';
+            final String publicDriveFolderId = userData?['publicDriveFolderId'] ?? '';
+            final String connectedEmail = userData?['publicDriveConnectedEmail'] ?? _driveEmail;
+            final bool isDriveConnected = (userData?['isDriveConnected'] ?? (connectedEmail.isNotEmpty && publicDriveFolderId.isNotEmpty)) == true && connectedEmail.isNotEmpty;
 
-            return Align(
-              alignment: Alignment.topCenter,
-              child: Container(
-                constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width > 500 ? double.infinity : 500),
-                child: SafeArea(
-                  bottom: false,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Top Main Header
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+            return StreamBuilder<QuerySnapshot>(
+              stream: FirebaseFirestore.instance
+                  .collection('driveDocuments')
+                  .orderBy('uploadedAt', descending: true)
+                  .snapshots(),
+              builder: (context, docSnap) {
+                final docs = docSnap.data?.docs ?? [];
+
+                return Align(
+                  alignment: Alignment.topCenter,
+                  child: Container(
+                    constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width > 500 ? double.infinity : 500),
+                    child: SafeArea(
+                      bottom: false,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Top Main Header
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Text(
-                                  'Dokumen',
-                                  style: AppTypography.pageTitle(color: isDark ? Colors.white : Colors.black, fontWeight: FontWeight.bold),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'Dokumen',
+                                        style: AppTypography.pageTitle(color: isDark ? Colors.white : Colors.black, fontWeight: FontWeight.bold),
+                                      ),
+                                      Text(
+                                        'Kelola & pratinjau berkas bersama',
+                                        style: AppTypography.bodySubtitle(color: isDark ? Colors.white60 : Colors.black45),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                                Text(
-                                  'Kelola & pratinjau berkas bersama',
-                                  style: AppTypography.fileSize(color: isDark ? Colors.white60 : Colors.black45),
+                                Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    if (_isUploading)
+                                      const ThreeDotsLoader(size: 6, bounceHeight: 3)
+                                    else ...[
+                                      BouncyButton(
+                                        onTap: () => _createFolderInDrive(
+                                          parentFolderId: publicDriveFolderId,
+                                          isDriveConnected: isDriveConnected,
+                                        ),
+                                        child: Container(
+                                          width: 40,
+                                          height: 40,
+                                          decoration: BoxDecoration(
+                                            color: isDark ? const Color(0xFF18181B) : const Color(0xFFF1F5F9),
+                                            shape: BoxShape.circle,
+                                            border: Border.all(color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0)),
+                                          ),
+                                          child: Icon(
+                                            Icons.create_new_folder_rounded,
+                                            color: isDark ? Colors.white70 : Colors.black87,
+                                            size: 19,
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      BouncyButton(
+                                        onTap: () => _uploadFileToDrive(
+                                          targetFolderId: publicDriveFolderId,
+                                          isDriveConnected: isDriveConnected,
+                                        ),
+                                        child: Container(
+                                          width: 40,
+                                          height: 40,
+                                          decoration: const BoxDecoration(
+                                            color: Color(0xFFF97316), // Orange
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: const Icon(
+                                            Icons.cloud_upload_rounded,
+                                            color: Colors.white,
+                                            size: 19,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ],
                             ),
-                            Row(
-                              children: [
-                                if (_isUploading)
-                                  const ThreeDotsLoader(size: 6, bounceHeight: 3)
-                                else ...[
-                                  BouncyButton(
-                                    onTap: () => setState(() => _isGridView = !_isGridView),
-                                    child: Container(
-                                      width: 42,
-                                      height: 42,
-                                      decoration: BoxDecoration(
-                                        color: isDark ? const Color(0xFF18181B) : const Color(0xFFF1F5F9),
-                                        shape: BoxShape.circle,
-                                        border: Border.all(color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0)),
-                                      ),
-                                      child: Icon(
-                                        _isGridView ? Icons.format_list_bulleted_rounded : Icons.grid_view_rounded,
-                                        color: isDark ? Colors.white70 : Colors.black87,
-                                        size: 19,
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  BouncyButton(
-                                    onTap: () => _createFolderInDrive(parentFolderId: publicDriveFolderId),
-                                    child: Container(
-                                      width: 42,
-                                      height: 42,
-                                      decoration: BoxDecoration(
-                                        color: isDark ? const Color(0xFF18181B) : const Color(0xFFF1F5F9),
-                                        shape: BoxShape.circle,
-                                        border: Border.all(color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0)),
-                                      ),
-                                      child: Icon(
-                                        Icons.create_new_folder_rounded,
-                                        color: isDark ? Colors.white70 : Colors.black87,
-                                        size: 19,
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  BouncyButton(
-                                    onTap: () => _uploadFileToDrive(targetFolderId: publicDriveFolderId),
-                                    child: Container(
-                                      width: 42,
-                                      height: 42,
-                                      decoration: BoxDecoration(
-                                        color: isDark ? Colors.white : Colors.black,
-                                        shape: BoxShape.circle,
-                                      ),
-                                      child: Icon(
-                                        Icons.cloud_upload_rounded,
-                                        color: isDark ? Colors.black : Colors.white,
-                                        size: 19,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
+                          ),
 
-                      if (!hasExistingRepo)
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 4.0),
-                          child: _buildDriveNotConnectedCard(isDark),
-                        ),
+                          // Status Bar Google Drive: Terhubung (dengan tombol Putuskan round) atau Belum Terhubung
+                          if (isDriveConnected)
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 4.0),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                                decoration: BoxDecoration(
+                                  color: isDark ? const Color(0xFF18181B) : const Color(0xFFF8FAFC),
+                                  borderRadius: BorderRadius.circular(20),
+                                  border: Border.all(
+                                    color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                                    width: 1.0,
+                                  ),
+                                ),
+                                child: Row(
+                                  children: [
+                                    const GoogleDriveLogoWidget(size: 22),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Row(
+                                            children: [
+                                              Container(
+                                                width: 7,
+                                                height: 7,
+                                                decoration: const BoxDecoration(
+                                                  color: Color(0xFF10B981),
+                                                  shape: BoxShape.circle,
+                                                ),
+                                              ),
+                                              const SizedBox(width: 6),
+                                              Text(
+                                                'Google Drive Terhubung',
+                                                style: AppTypography.buttonLabel(
+                                                  color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          const SizedBox(height: 2),
+                                          Text(
+                                            connectedEmail,
+                                            style: AppTypography.fileSize(
+                                              color: isDark ? Colors.white60 : const Color(0xFF64748B),
+                                            ),
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    const SizedBox(width: 10),
+                                    BouncyButton(
+                                      onTap: _disconnectGoogleDrive,
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+                                        decoration: BoxDecoration(
+                                          color: isDark ? Colors.red.withValues(alpha: 0.12) : const Color(0xFFFEE2E2),
+                                          borderRadius: BorderRadius.circular(20),
+                                          border: Border.all(
+                                            color: isDark ? Colors.red.withValues(alpha: 0.3) : const Color(0xFFFECACA),
+                                            width: 1.0,
+                                          ),
+                                        ),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            const Icon(Icons.link_off_rounded, color: Color(0xFFDC2626), size: 14),
+                                            const SizedBox(width: 5),
+                                            Text(
+                                              'Putuskan',
+                                              style: AppTypography.buttonLabel(
+                                                color: const Color(0xFFDC2626),
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            )
+                          else if (!isUserLoading)
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 4.0),
+                              child: _buildDriveNotConnectedCard(isDark),
+                            ),
 
                       Container(
                         width: double.infinity,
@@ -4751,22 +4960,19 @@ class _DocumentsTabState extends State<DocumentsTab> {
                                       Icon(
                                         Icons.home_rounded,
                                         size: 16,
-                                        color: _folderCrumbs.isEmpty ? const Color(0xFF2563EB) : (isDark ? Colors.white60 : Colors.black45),
+                                        color: _folderCrumbs.isEmpty ? const Color(0xFF2563EB) : (isDark ? Colors.white70 : Colors.black87),
                                       ),
                                       const SizedBox(width: 4),
                                       Text(
                                         'Root',
-                                        style: AppTypography.channelTag(color: _folderCrumbs.isEmpty ? const Color(0xFF2563EB) : (isDark ? Colors.white60 : Colors.black45), fontWeight: _folderCrumbs.isEmpty ? FontWeight.bold : FontWeight.w500),
+                                        style: AppTypography.channelTag(color: _folderCrumbs.isEmpty ? const Color(0xFF2563EB) : (isDark ? Colors.white70 : Colors.black87), fontWeight: _folderCrumbs.isEmpty ? FontWeight.bold : FontWeight.w500),
                                       ),
                                     ],
                                   ),
                                 ),
                               ),
                               for (int i = 0; i < _folderCrumbs.length; i++) ...[
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 4),
-                                  child: Icon(Icons.chevron_right_rounded, size: 16, color: isDark ? Colors.white38 : Colors.black26),
-                                ),
+                                Icon(Icons.chevron_right, size: 16, color: isDark ? Colors.white38 : Colors.black38),
                                 GestureDetector(
                                   onTap: () {
                                     setState(() {
@@ -4793,61 +4999,96 @@ class _DocumentsTabState extends State<DocumentsTab> {
                         ),
                       ),
 
+                      // Search Input
                       Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 6.0),
+                        padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 4.0),
+                        child: TextField(
+                          onChanged: (v) => setState(() => _searchQuery = v.toLowerCase()),
+                          style: AppTypography.timestamp(color: isDark ? Colors.white : Colors.black87),
+                          decoration: InputDecoration(
+                            hintText: 'Cari berkas di $_currentFolderName...',
+                            hintStyle: AppTypography.timestamp(color: isDark ? Colors.white38 : Colors.black26),
+                            filled: true,
+                            fillColor: isDark ? const Color(0xFF18181B) : const Color(0xFFF8FAFC),
+                            prefixIcon: Icon(Icons.search_rounded, color: isDark ? Colors.white38 : Colors.black38, size: 18),
+                            contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(24),
+                              borderSide: BorderSide(color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9)),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(24),
+                              borderSide: BorderSide(color: isDark ? Colors.white : Colors.black),
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      // Sub-Bar: Sort text with A Arrow Up icon ("A Panah Naik") & View Mode Toggle
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 4.0),
                         child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Expanded(
-                              child: TextField(
-                                onChanged: (v) => setState(() => _searchQuery = v.toLowerCase()),
-                                style: AppTypography.timestamp(color: isDark ? Colors.white : Colors.black87),
-                                decoration: InputDecoration(
-                                  hintText: 'Cari berkas di $_currentFolderName...',
-                                  hintStyle: AppTypography.timestamp(color: isDark ? Colors.white38 : Colors.black26),
-                                  filled: true,
-                                  fillColor: isDark ? const Color(0xFF18181B) : const Color(0xFFF8FAFC),
-                                  prefixIcon: Icon(Icons.search_rounded, color: isDark ? Colors.white38 : Colors.black38, size: 18),
-                                  contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
-                                  enabledBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(24),
-                                    borderSide: BorderSide(color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9)),
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(24),
-                                    borderSide: BorderSide(color: isDark ? Colors.white : Colors.black),
-                                  ),
+                            InkWell(
+                              borderRadius: BorderRadius.circular(12),
+                              onTap: () {
+                                setState(() {
+                                  if (_sortBy == 'name_asc') {
+                                    _sortBy = 'name_desc';
+                                  } else if (_sortBy == 'name_desc') {
+                                    _sortBy = 'date_desc';
+                                  } else {
+                                    _sortBy = 'name_asc';
+                                  }
+                                });
+                              },
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 4.0),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      Icons.sort_by_alpha_rounded,
+                                      size: 16,
+                                      color: isDark ? Colors.white70 : const Color(0xFF475569),
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      _sortBy == 'name_asc'
+                                          ? 'Nama (A - Z)'
+                                          : (_sortBy == 'name_desc' ? 'Nama (Z - A)' : 'Terbaru'),
+                                      style: AppTypography.caption(
+                                        color: isDark ? Colors.white70 : const Color(0xFF475569),
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Icon(
+                                      _sortBy == 'name_desc' ? Icons.arrow_downward_rounded : Icons.arrow_upward_rounded,
+                                      size: 13,
+                                      color: isDark ? Colors.white54 : Colors.black45,
+                                    ),
+                                  ],
                                 ),
                               ),
                             ),
-                            const SizedBox(width: 8),
-                            PopupMenuButton<String>(
-                              icon: Container(
-                                width: 42,
-                                height: 42,
+                            BouncyButton(
+                              onTap: () => setState(() => _isGridView = !_isGridView),
+                              child: Container(
+                                width: 34,
+                                height: 34,
                                 decoration: BoxDecoration(
-                                  color: isDark ? const Color(0xFF18181B) : const Color(0xFFF8FAFC),
+                                  color: isDark ? const Color(0xFF18181B) : const Color(0xFFF1F5F9),
                                   shape: BoxShape.circle,
                                   border: Border.all(color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0)),
                                 ),
-                                child: Icon(Icons.tune_rounded, color: isDark ? Colors.white70 : Colors.black54, size: 18),
+                                child: Icon(
+                                  _isGridView ? Icons.format_list_bulleted_rounded : Icons.grid_view_rounded,
+                                  color: isDark ? Colors.white70 : Colors.black87,
+                                  size: 16,
+                                ),
                               ),
-                              color: isDark ? const Color(0xFF18181B) : Colors.white,
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                              onSelected: (val) => setState(() => _sortBy = val),
-                              itemBuilder: (ctx) => [
-                                PopupMenuItem(
-                                  value: 'date_desc',
-                                  child: Text('Terbaru', style: AppTypography.buttonLabel(fontWeight: _sortBy == 'date_desc' ? FontWeight.bold : FontWeight.normal)),
-                                ),
-                                PopupMenuItem(
-                                  value: 'name_asc',
-                                  child: Text('Nama (A - Z)', style: AppTypography.buttonLabel(fontWeight: _sortBy == 'name_asc' ? FontWeight.bold : FontWeight.normal)),
-                                ),
-                                PopupMenuItem(
-                                  value: 'size_desc',
-                                  child: Text('Ukuran Terbesar', style: AppTypography.buttonLabel(fontWeight: _sortBy == 'size_desc' ? FontWeight.bold : FontWeight.normal)),
-                                ),
-                              ],
                             ),
                           ],
                         ),
@@ -4972,7 +5213,9 @@ class _DocumentsTabState extends State<DocumentsTab> {
         );
       },
     );
-  }
+  },
+);
+}
 
   Widget _buildListItem(BuildContext context, String docId, Map<String, dynamic> data, String currentUid, bool isDark) {
     final fileName = data['name'] ?? 'Untitled';
@@ -5081,6 +5324,7 @@ class _DocumentsTabState extends State<DocumentsTab> {
               ),
             ),
             PopupMenuButton<String>(
+              tooltip: '',
               icon: Icon(Icons.more_vert, size: 18, color: isDark ? Colors.white38 : Colors.black38),
               color: isDark ? const Color(0xFF18181B) : Colors.white,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -5248,6 +5492,7 @@ class _DocumentsTabState extends State<DocumentsTab> {
                   child: Icon(fileIcon, color: fileColor, size: 20),
                 ),
                 PopupMenuButton<String>(
+                  tooltip: '',
                   icon: Icon(Icons.more_horiz_rounded, size: 16, color: isDark ? Colors.white38 : Colors.black38),
                   color: isDark ? const Color(0xFF18181B) : Colors.white,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),

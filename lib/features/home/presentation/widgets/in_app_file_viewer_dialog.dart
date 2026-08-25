@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hubner/core/theme/app_typography.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:hubner/core/theme/app_colors.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
+import 'package:hubner/main.dart';
 
 class InAppFileViewerDialog extends StatefulWidget {
   final String fileName;
@@ -25,7 +25,7 @@ class InAppFileViewerDialog extends StatefulWidget {
     this.fileSize = 0,
   });
 
-  static Future<void> show(
+  static void show(
     BuildContext context, {
     required String fileName,
     String? mimeType,
@@ -34,8 +34,9 @@ class InAppFileViewerDialog extends StatefulWidget {
     String? dateFormatted,
     int fileSize = 0,
   }) {
-    return showDialog(
+    showDialog(
       context: context,
+      barrierDismissible: true,
       barrierColor: Colors.black87,
       builder: (ctx) => InAppFileViewerDialog(
         fileName: fileName,
@@ -65,7 +66,16 @@ class _InAppFileViewerDialogState extends State<InAppFileViewerDialog> {
   bool get _isImage {
     final m = widget.mimeType?.toLowerCase() ?? '';
     final n = widget.fileName.toLowerCase();
-    return m.contains('image') || n.endsWith('.jpg') || n.endsWith('.jpeg') || n.endsWith('.png') || n.endsWith('.webp') || n.endsWith('.gif');
+    final u = widget.fileUrl.toLowerCase();
+    return m.contains('image') ||
+        n.endsWith('.jpg') ||
+        n.endsWith('.jpeg') ||
+        n.endsWith('.png') ||
+        n.endsWith('.webp') ||
+        n.endsWith('.gif') ||
+        n.endsWith('.bmp') ||
+        u.endsWith('.jpg') ||
+        u.endsWith('.png');
   }
 
   bool get _isAudio {
@@ -96,6 +106,56 @@ class _InAppFileViewerDialogState extends State<InAppFileViewerDialog> {
     }
   }
 
+  String _extractFileId(String rawUrl) {
+    final regFile = RegExp(r'/file/d/([a-zA-Z0-9_-]+)');
+    final regId = RegExp(r'[?&]id=([a-zA-Z0-9_-]+)');
+    final regDoc = RegExp(r'/d/([a-zA-Z0-9_-]+)');
+
+    final matchFile = regFile.firstMatch(rawUrl);
+    final matchId = regId.firstMatch(rawUrl);
+    final matchDoc = regDoc.firstMatch(rawUrl);
+
+    if (matchFile != null) return matchFile.group(1)!;
+    if (matchId != null) return matchId.group(1)!;
+    if (matchDoc != null) return matchDoc.group(1)!;
+    return '';
+  }
+
+  Widget _buildCascadingImage(List<String> urls, int index, bool isDark) {
+    if (index >= urls.length) {
+      return Padding(
+        padding: const EdgeInsets.all(32.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.broken_image_rounded, size: 48, color: Colors.black26),
+            const SizedBox(height: 12),
+            Text(
+              'Gagal memuat pratinjau gambar',
+              style: AppTypography.timestamp(color: isDark ? Colors.white60 : Colors.black54),
+            ),
+          ],
+        ),
+      );
+    }
+
+    final url = urls[index];
+    return Image.network(
+      url,
+      fit: BoxFit.contain,
+      loadingBuilder: (context, child, progress) {
+        if (progress == null) return child;
+        return const Padding(
+          padding: EdgeInsets.all(48.0),
+          child: CircularProgressIndicator(strokeWidth: 2.5),
+        );
+      },
+      errorBuilder: (context, error, stackTrace) {
+        return _buildCascadingImage(urls, index + 1, isDark);
+      },
+    );
+  }
+
   Future<void> _initAudio() async {
     _audioPlayer = AudioPlayer();
     _audioPlayer!.onPlayerStateChanged.listen((state) {
@@ -116,7 +176,7 @@ class _InAppFileViewerDialogState extends State<InAppFileViewerDialog> {
         await _audioPlayer!.pause();
       } else {
         setState(() => _isLoadingAudio = true);
-        await _audioPlayer!.play(UrlSource(widget.fileUrl));
+        await _audioPlayer!.play(UrlSource(_resolveDownloadUrl(widget.fileUrl)));
         setState(() => _isLoadingAudio = false);
       }
     } catch (_) {
@@ -132,7 +192,7 @@ class _InAppFileViewerDialogState extends State<InAppFileViewerDialog> {
   Future<void> _loadTextContent() async {
     setState(() => _isLoadingText = true);
     try {
-      final res = await http.get(Uri.parse(widget.fileUrl)).timeout(const Duration(seconds: 10));
+      final res = await http.get(Uri.parse(_resolveDownloadUrl(widget.fileUrl))).timeout(const Duration(seconds: 10));
       if (res.statusCode == 200) {
         if (mounted) {
           setState(() {
@@ -167,9 +227,28 @@ class _InAppFileViewerDialogState extends State<InAppFileViewerDialog> {
     return '${(bytes / (1024 * 1024 * 1024)).toStringAsFixed(2)} GB';
   }
 
+  String _resolveDownloadUrl(String url) {
+    if (url.isEmpty) return url;
+    if (url.contains('drive.google.com') || url.contains('docs.google.com')) {
+      final regFileD = RegExp(r'/file/d/([a-zA-Z0-9_-]+)');
+      final matchFileD = regFileD.firstMatch(url);
+      if (matchFileD != null) {
+        final id = matchFileD.group(1);
+        return 'https://drive.google.com/uc?export=download&id=$id';
+      }
+      final regIdParam = RegExp(r'[?&]id=([a-zA-Z0-9_-]+)');
+      final matchId = regIdParam.firstMatch(url);
+      if (matchId != null) {
+        final id = matchId.group(1);
+        return 'https://drive.google.com/uc?export=download&id=$id';
+      }
+    }
+    return url;
+  }
+
   @override
   Widget build(BuildContext context) {
-    final isDark = AppColors.isDarkMode;
+    final isDark = HubnerApp.themeNotifier.value == 'Gelap' || HubnerApp.themeNotifier.value == 'Hitam';
 
     return Dialog(
       backgroundColor: Colors.transparent,
@@ -279,13 +358,25 @@ class _InAppFileViewerDialogState extends State<InAppFileViewerDialog> {
                       ],
                     ),
                   ),
-                  IconButton(
-                    onPressed: () => Navigator.pop(context),
-                    icon: Icon(
-                      Icons.close_rounded,
-                      color: isDark ? Colors.white70 : Colors.black54,
+                  GestureDetector(
+                    onTap: () => Navigator.pop(context),
+                    child: Container(
+                      width: 36,
+                      height: 36,
+                      decoration: BoxDecoration(
+                        color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: isDark ? const Color(0xFF3F3F46) : const Color(0xFFE2E8F0),
+                          width: 1.0,
+                        ),
+                      ),
+                      child: Icon(
+                        Icons.close_rounded,
+                        size: 18,
+                        color: isDark ? Colors.white70 : Colors.black87,
+                      ),
                     ),
-                    splashRadius: 20,
                   ),
                 ],
               ),
@@ -326,13 +417,13 @@ class _InAppFileViewerDialogState extends State<InAppFileViewerDialog> {
                       icon: const Icon(Icons.copy_rounded, size: 16),
                       label: Text(
                         'Salin Tautan',
-                        style: AppTypography.channelTag(fontWeight: FontWeight.w600),
+                        style: AppTypography.buttonLabel(fontWeight: FontWeight.w600),
                       ),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: isDark ? Colors.white70 : Colors.black87,
                         side: BorderSide(color: isDark ? const Color(0xFF3F3F46) : const Color(0xFFCBD5E1)),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+                        padding: const EdgeInsets.symmetric(vertical: 13),
                       ),
                     ),
                   ),
@@ -340,20 +431,24 @@ class _InAppFileViewerDialogState extends State<InAppFileViewerDialog> {
                   Expanded(
                     child: ElevatedButton.icon(
                       onPressed: () async {
-                        final uri = Uri.parse(widget.fileUrl);
-                        if (await canLaunchUrl(uri)) {
+                        final downloadUri = Uri.parse(widget.fileUrl);
+                        if (await canLaunchUrl(downloadUri)) {
+                          await launchUrl(downloadUri, mode: LaunchMode.externalApplication);
+                        } else {
+                          final downloadUrl = _resolveDownloadUrl(widget.fileUrl);
+                          final uri = Uri.parse(downloadUrl);
                           await launchUrl(uri, mode: LaunchMode.externalApplication);
                         }
                       },
-                      icon: const Icon(Icons.open_in_new_rounded, size: 16, color: Colors.white),
+                      icon: const Icon(Icons.download_rounded, size: 18, color: Colors.white),
                       label: Text(
-                        'Buka Berkas',
-                        style: AppTypography.channelTag(color: Colors.white, fontWeight: FontWeight.bold),
+                        'Unduh',
+                        style: AppTypography.buttonLabel(color: Colors.white, fontWeight: FontWeight.bold),
                       ),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF2563EB),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        backgroundColor: const Color(0xFF10B981), // Hijau
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+                        padding: const EdgeInsets.symmetric(vertical: 13),
                         elevation: 0,
                       ),
                     ),
@@ -369,8 +464,20 @@ class _InAppFileViewerDialogState extends State<InAppFileViewerDialog> {
 
   Widget _buildMainContent(bool isDark) {
     if (_isImage) {
+      final fileId = _extractFileId(widget.fileUrl);
+      final List<String> imageUrls = [];
+      if (fileId.isNotEmpty) {
+        imageUrls.add('https://drive.google.com/thumbnail?id=$fileId&sz=w1200');
+        imageUrls.add('https://lh3.googleusercontent.com/d/$fileId');
+        imageUrls.add('https://drive.google.com/uc?export=view&id=$fileId');
+        imageUrls.add('https://docs.google.com/uc?export=view&id=$fileId');
+      }
+      if (widget.fileUrl.isNotEmpty && !imageUrls.contains(widget.fileUrl)) {
+        imageUrls.add(widget.fileUrl);
+      }
+
       return Container(
-        constraints: const BoxConstraints(maxHeight: 400),
+        constraints: const BoxConstraints(maxHeight: 450),
         decoration: BoxDecoration(
           color: isDark ? Colors.black26 : const Color(0xFFF1F5F9),
           borderRadius: BorderRadius.circular(18),
@@ -382,31 +489,7 @@ class _InAppFileViewerDialogState extends State<InAppFileViewerDialog> {
             minScale: 0.8,
             maxScale: 4.0,
             child: Center(
-              child: Image.network(
-                widget.fileUrl,
-                fit: BoxFit.contain,
-                loadingBuilder: (context, child, progress) {
-                  if (progress == null) return child;
-                  return const Padding(
-                    padding: EdgeInsets.all(48.0),
-                    child: CircularProgressIndicator(),
-                  );
-                },
-                errorBuilder: (_, _, _) => Padding(
-                  padding: const EdgeInsets.all(32.0),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(Icons.broken_image_rounded, size: 48, color: Colors.black26),
-                      const SizedBox(height: 12),
-                      Text(
-                        'Gagal memuat pratinjau gambar',
-                        style: AppTypography.timestamp(color: isDark ? Colors.white60 : Colors.black54),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+              child: _buildCascadingImage(imageUrls, 0, isDark),
             ),
           ),
         ),
