@@ -129,13 +129,6 @@ class _ManageAttendancePageState extends State<ManageAttendancePage> {
                 color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
                 width: 1.2,
               ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.05),
-                  blurRadius: 12,
-                  offset: const Offset(0, 4),
-                ),
-              ],
             ),
             child: Padding(
               padding: const EdgeInsets.all(18.0),
@@ -282,16 +275,9 @@ class _ManageAttendancePageState extends State<ManageAttendancePage> {
                             child: Container(
                               width: 38,
                               height: 38,
-                              decoration: BoxDecoration(
-                                color: const Color(0xFF7C3AED),
+                              decoration: const BoxDecoration(
+                                color: Color(0xFF7C3AED),
                                 shape: BoxShape.circle,
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: const Color(0xFF7C3AED).withValues(alpha: 0.35),
-                                    blurRadius: 8,
-                                    offset: const Offset(0, 2),
-                                  ),
-                                ],
                               ),
                               child: const Icon(
                                 Icons.check_rounded,
@@ -332,13 +318,6 @@ class _ManageAttendancePageState extends State<ManageAttendancePage> {
                               color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
                               width: 1.2,
                             ),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.04),
-                                blurRadius: 8,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
                           ),
                           child: Icon(
                             Icons.arrow_back_ios_new_rounded,
@@ -376,16 +355,9 @@ class _ManageAttendancePageState extends State<ManageAttendancePage> {
                               child: Container(
                                 width: 42,
                                 height: 42,
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFF7C3AED),
+                                decoration: const BoxDecoration(
+                                  color: Color(0xFF7C3AED),
                                   shape: BoxShape.circle,
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: const Color(0xFF7C3AED).withValues(alpha: isDark ? 0.45 : 0.3),
-                                      blurRadius: 10,
-                                      offset: const Offset(0, 3),
-                                    ),
-                                  ],
                                 ),
                                 child: const Icon(
                                   Icons.check_rounded,

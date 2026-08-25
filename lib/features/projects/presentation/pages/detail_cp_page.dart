@@ -226,13 +226,6 @@ class _DetailCpPageState extends State<DetailCpPage> {
                             border: isDark
                                 ? Border.all(color: const Color(0xFF3F3F46), width: 1.0)
                                 : null,
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.1),
-                                blurRadius: 6,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
                           ),
                           child: Text(
                             'Mode Edit',
@@ -337,13 +330,6 @@ class _DetailCpPageState extends State<DetailCpPage> {
                       decoration: BoxDecoration(
                         color: cpCardBg,
                         borderRadius: BorderRadius.circular(32),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.08),
-                            blurRadius: 16,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
                       ),
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(32),
@@ -498,13 +484,6 @@ class _DetailCpPageState extends State<DetailCpPage> {
                                                   : Colors.white.withValues(alpha: 0.95)),
                                           width: _isEditMode ? 1.5 : 1.0,
                                         ),
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.03),
-                                            blurRadius: 8,
-                                            offset: const Offset(0, 2),
-                                          ),
-                                        ],
                                       ),
                                       child: _isEditMode
                                           ? TextField(
@@ -566,13 +545,6 @@ class _DetailCpPageState extends State<DetailCpPage> {
                               decoration: BoxDecoration(
                                 color: isDark ? Colors.white : Colors.black,
                                 shape: BoxShape.circle,
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.15),
-                                    blurRadius: 5,
-                                    offset: const Offset(0, 2),
-                                  ),
-                                ],
                               ),
                               child: Icon(
                                 Icons.add_rounded,
@@ -670,13 +642,6 @@ class _DetailCpPageState extends State<DetailCpPage> {
                                   color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
                                   width: 1.2,
                                 ),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.04),
-                                    blurRadius: 12,
-                                    offset: const Offset(0, 3),
-                                  ),
-                                ],
                               ),
                               child: Column(
                                 children: [
@@ -875,13 +840,6 @@ class _DetailCpPageState extends State<DetailCpPage> {
                                                     border: isDark
                                                         ? Border.all(color: const Color(0xFF3F3F46), width: 1.0)
                                                         : null,
-                                                    boxShadow: [
-                                                      BoxShadow(
-                                                        color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.05),
-                                                        blurRadius: 6,
-                                                        offset: const Offset(0, 2),
-                                                      ),
-                                                    ],
                                                   ),
                                                   child: Row(
                                                     mainAxisSize: MainAxisSize.min,

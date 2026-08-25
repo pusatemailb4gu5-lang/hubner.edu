@@ -203,45 +203,47 @@ Spesifikasi baku untuk daftar teman, anggota classroom, daftar peserta ujian, da
 
 ## 5. 🔤 Standar Tipografi Resmi (*Typography Scale & Android Standard*)
 
-Standar tipografi resmi Hubner Edu mengacu pada arsitektur halaman Chat:
+Standar tipografi resmi Hubner Edu mengacu pada arsitektur baku **Area Pesan Halaman Chat** (`chat_room_page.dart`):
 - **Headings, Display Names, Tab Titles & Action Buttons**: Menggunakan `GoogleFonts.plusJakartaSans` (Tegas, solid, modern, geometris).
 - **Body Text, Message Bubbles, Subtitles, Timestamps & Form Inputs**: Menggunakan `GoogleFonts.dmSans` (Sangat nyaman dan mudah dibaca pada paragraf chat, keterangan waktu, dan kolom form).
 
 ### A. Tabel Hierarki & Ukuran Font Baku
-| Kategori Komponen | Ukuran Font | Bobot (*Weight*) | Font Family | Contoh Implementasi |
+| Kategori Komponen | Ukuran Font | Bobot (*Weight*) | Font Family | Contoh Implementasi di Chat & App |
 | :--- | :--- | :--- | :--- | :--- |
-| **Large Page Title** | `26.0` – `30.0` px | `FontWeight.bold` (w700) | Plus Jakarta Sans | Judul halaman besar ("Chat", "Laporan Perkembangan", "Dokumen") |
-| **Header / Sender Name** | `18.0` px | `FontWeight.bold` (w700) | Plus Jakarta Sans | Nama pengirim di bubble chat ("Bagus Setia Budi", "Pak Guru") |
-| **Reply Sender / Card Title** | `16.5` px | `FontWeight.bold` (w700) | Plus Jakarta Sans | Nama pengirim reply, judul kartu ("agung", "ayong") |
-| **Chat Message / Body Text** | `16.5` px | `FontWeight.normal` (w400) | DM Sans | Isi pesan chat ("tes", "Selamat pagi semuanya...") |
-| **Input TextField Chat / Form**| `16.5` px | `FontWeight.normal` (w400) | DM Sans | Kolom input "Tulis pesan...", "Cari...", "Keterangan..." |
+| **Large Page Title** | `28.0` – `30.0` px | `FontWeight.bold` (w700/w800) | Plus Jakarta Sans | Judul halaman besar ("Chat", "Laporan Perkembangan", "Hubner Edu") |
+| **Chat Header Title (AppBar)** | `18.0` – `20.0` px | `FontWeight.bold` (w700) | Plus Jakarta Sans | **Nama grup / kontak di Header Chat** ("#umum", "Kelas Matematika", "Bagus") |
+| **Chat Header Subtitle** | `14.5` – `15.0` px | `FontWeight.w500` (w500) | DM Sans | Keterangan status di header ("3 anggota", "Online", "Terakhir dilihat...") |
+| **Chat Message / Primary Body** | `20.0` px | `FontWeight.normal` (w400) | DM Sans | **Isi teks bubble pesan chat** ("tes", "Selamat pagi semuanya..."), deskripsi utama materi |
+| **Input TextField Chat / Form** | `20.0` px | `FontWeight.normal` (w400) | DM Sans | Kolom input pesan ("Tulis pesan...", "Cari...", "Keterangan...") |
+| **Sender Display Name** | `18.0` px | `FontWeight.bold` (w700) | Plus Jakarta Sans | **Nama pengirim di bubble chat** ("Bagus Setia Budi", "Pak Guru") |
+| **Reply Sender Title** | `16.5` px | `FontWeight.bold` (w700) | Plus Jakarta Sans | Nama pengirim reply bubble ("agung", "ayong") |
+| **Reply Message Subtitle** | `16.5` px | `FontWeight.normal` (w400) | DM Sans | Isi ringkasan reply di bubble chat |
+| **Timestamp / Waktu Pesan** | `15.0` px | `FontWeight.w500` (w500) | DM Sans | **Keterangan jam di bubble chat** ("10:04", "10:06", "Kemarin") |
 | **Document Title / File Name** | `14.5` px | `FontWeight.bold` (w700) | Plus Jakarta Sans | Nama file attachment ("robbyfirmansyah...pdf", "Modul.docx") |
-| **Group Header / Filter Chip** | `13.5` px | `FontWeight.w600` (w600) | Plus Jakarta Sans | Chip tab ("Semua", "Tugas", "Quiz", "Favorit") |
-| **ID Subtitle / Description** | `13.0` px | `FontWeight.normal` (w400) | DM Sans | ID pengguna ("ID: swagun3348", "ID: 59382") |
-| **File Size / Sub-label** | `12.0` px | `FontWeight.normal` (w400) | DM Sans | Ukuran file ("927.3 KB", "1.2 MB", "2 halaman") |
-| **Timestamp / Waktu Pesan** | `12.0` px | `FontWeight.w500` (w500) | DM Sans | Keterangan jam bubble chat ("10:04", "10:06", "Kemarin") |
-| **Micro Badge / HD Tag** | `10.0` – `11.0` px | `FontWeight.bold` (w700) | Plus Jakarta Sans | Tag kecil ("HD", "PDF", "BARU") |
+| **Subtitle / Sub-label Deskripsi** | `14.0` – `15.0` px | `FontWeight.normal` (w400) | DM Sans | Keterangan sub-item ("Siswa · SMA/SMK", "Materi Pembelajaran") |
+| **File Size / Meta Info** | `12.0` px | `FontWeight.normal` (w400) | DM Sans | Ukuran file lampiran ("927.3 KB", "1.2 MB") |
+| **Micro Badge / HD Tag** | `10.0` – `11.0` px | `FontWeight.bold` (w700) | Plus Jakarta Sans | Tag kecil status ("HD", "Guru", "Admin") |
 
 ### B. Aturan Mutlak Batas Ukuran Terkecil (*Android Minimum Legibility Rule*)
 1. **Batas Font Minimum**: Ukuran font terkecil yang diizinkan di seluruh aplikasi Android adalah **`10.0 px`** (khusus badge micro/HD tag).
-2. **Body & Isi Teks**: Tidak boleh ada teks deskripsi/konten/bacaan dengan ukuran di bawah **`12.0 px`** agar teks tidak buram (*pixelated*) atau sulit dibaca pada berbagai ukuran kerapatan layar (*DPI*) perangkat Android.
+2. **Body & Isi Teks Chat**: Menggunakan standar baku **`20.0 px`** (`GoogleFonts.dmSans`) agar teks sangat jelas terbaca dan proporsional.
 3. **Format Penggunaan di Flutter**:
    ```dart
-   // Contoh Headings & Labels:
+   // Contoh Nama Pengirim:
    GoogleFonts.plusJakartaSans(
-     fontSize: 18.0, // Header Nama
+     fontSize: 18.0,
      fontWeight: FontWeight.bold,
    )
    
-   // Contoh Pesan Chat & Body Text:
+   // Contoh Isi Pesan Chat & Input Field:
    GoogleFonts.dmSans(
-     fontSize: 16.5, // Pesan Chat & Input
+     fontSize: 20.0,
      fontWeight: FontWeight.normal,
    )
    
-   // Contoh Keterangan Waktu & Ukuran File:
+   // Contoh Keterangan Waktu / Jam:
    GoogleFonts.dmSans(
-     fontSize: 12.0, // Timestamp & File Size
+     fontSize: 15.0,
      fontWeight: FontWeight.w500,
    )
    ```

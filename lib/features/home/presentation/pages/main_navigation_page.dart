@@ -1531,7 +1531,7 @@ class _DiscussionTabState extends State<DiscussionTab> {
                                                 maxLines: 1,
                                                 overflow: TextOverflow.ellipsis,
                                                 style: GoogleFonts.plusJakartaSans(
-                                                  fontSize: 12.9,
+                                                  fontSize: 13.5,
                                                   fontWeight: FontWeight.w600,
                                                   color: isDark ? const Color(0xFF2DD4BF) : const Color(0xFF0F766E),
                                                 ),
@@ -1540,7 +1540,7 @@ class _DiscussionTabState extends State<DiscussionTab> {
                                             Text(
                                               time,
                                               style: GoogleFonts.dmSans(
-                                                fontSize: 12.9,
+                                                fontSize: 15.0,
                                                 color: isDark ? Colors.white38 : Colors.black38,
                                               ),
                                             ),
@@ -1550,8 +1550,8 @@ class _DiscussionTabState extends State<DiscussionTab> {
                                         Text(
                                           title,
                                           style: GoogleFonts.plusJakartaSans(
-                                            fontSize: 16.0,
-                                            fontWeight: FontWeight.w600,
+                                            fontSize: 18.0,
+                                            fontWeight: FontWeight.bold,
                                             color: isDark ? Colors.white : Colors.black87,
                                           ),
                                         ),
@@ -1565,8 +1565,8 @@ class _DiscussionTabState extends State<DiscussionTab> {
                                                 maxLines: 1,
                                                 overflow: TextOverflow.ellipsis,
                                                 style: GoogleFonts.plusJakartaSans(
-                                                  fontSize: 16.0,
-                                                  fontWeight: FontWeight.w600,
+                                                  fontSize: 18.0,
+                                                  fontWeight: FontWeight.bold,
                                                   color: isDark ? Colors.white : Colors.black87,
                                                 ),
                                               ),
@@ -1575,7 +1575,7 @@ class _DiscussionTabState extends State<DiscussionTab> {
                                             Text(
                                               time,
                                               style: GoogleFonts.dmSans(
-                                                fontSize: 12.9,
+                                                fontSize: 15.0,
                                                 color: isDark ? Colors.white38 : Colors.black38,
                                               ),
                                             ),
@@ -1588,7 +1588,7 @@ class _DiscussionTabState extends State<DiscussionTab> {
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
                                         style: GoogleFonts.dmSans(
-                                          fontSize: 14,
+                                          fontSize: 15.0,
                                           color: isDark ? Colors.white60 : Colors.black54,
                                         ),
                                       ),

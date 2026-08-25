@@ -190,13 +190,6 @@ class _EditCpPageState extends State<EditCpPage> {
                       decoration: BoxDecoration(
                         color: isDark ? const Color(0xFF6B3BA3) : const Color(0xFFD6A5F8),
                         borderRadius: BorderRadius.circular(24),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.08),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
                       ),
                       child: Row(
                         children: [

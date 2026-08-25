@@ -444,13 +444,6 @@ class _HomePageState extends State<HomePage> {
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(24),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.05),
-                          blurRadius: 15,
-                          offset: const Offset(0, 5),
-                        ),
-                      ],
                       border: Border.all(
                         color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
                         width: 1.5,
@@ -1739,13 +1732,6 @@ class _HomePageState extends State<HomePage> {
                                                       : const Color(0xFFF1F5F9),
                                                   width: 1.2,
                                                 ),
-                                                boxShadow: [
-                                                  BoxShadow(
-                                                    color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.04),
-                                                    blurRadius: 8,
-                                                    offset: const Offset(0, 2),
-                                                  ),
-                                                ],
                                               ),
                                               child: Icon(
                                                 isDark ? Icons.wb_sunny_rounded : Icons.nightlight_round,
@@ -1784,13 +1770,6 @@ class _HomePageState extends State<HomePage> {
                                                       : const Color(0xFFF1F5F9),
                                                   width: 1.2,
                                                 ),
-                                                boxShadow: [
-                                                  BoxShadow(
-                                                    color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.04),
-                                                    blurRadius: 8,
-                                                    offset: const Offset(0, 2),
-                                                  ),
-                                                ],
                                               ),
                                               child: Icon(
                                                 Icons.notifications_none_rounded,
@@ -1846,13 +1825,6 @@ class _HomePageState extends State<HomePage> {
                                             decoration: BoxDecoration(
                                               shape: BoxShape.circle,
                                               color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
-                                              boxShadow: [
-                                                BoxShadow(
-                                                  color: Colors.black.withValues(alpha: 0.08),
-                                                  blurRadius: 10,
-                                                  offset: const Offset(0, 3),
-                                                ),
-                                              ],
                                             ),
                                             child: ClipOval(
                                               child: Transform.scale(
@@ -1962,13 +1934,6 @@ class _HomePageState extends State<HomePage> {
                                                           : const Color(0xFFF1F5F9),
                                                       width: 1.2,
                                                     ),
-                                                    boxShadow: [
-                                                      BoxShadow(
-                                                        color: Colors.black.withValues(alpha: currentIsDark ? 0.35 : 0.04),
-                                                        blurRadius: 8,
-                                                        offset: const Offset(0, 2),
-                                                      ),
-                                                    ],
                                                   ),
                                                   child: Icon(
                                                     currentIsDark ? Icons.wb_sunny_rounded : Icons.nightlight_round,
@@ -2003,13 +1968,6 @@ class _HomePageState extends State<HomePage> {
                                                       : const Color(0xFFF1F5F9),
                                                   width: 1.2,
                                                 ),
-                                                boxShadow: [
-                                                  BoxShadow(
-                                                    color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.04),
-                                                    blurRadius: 8,
-                                                    offset: const Offset(0, 2),
-                                                  ),
-                                                ],
                                               ),
                                               child: Icon(
                                                 Icons.notifications_none_rounded,
@@ -2253,15 +2211,6 @@ class _HomePageState extends State<HomePage> {
                                       end: Alignment.bottomRight,
                                     ),
                                     borderRadius: BorderRadius.circular(24),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: const Color(
-                                          0xFF0284C7,
-                                        ).withValues(alpha: 0.05),
-                                        blurRadius: 10,
-                                        offset: const Offset(0, 4),
-                                      ),
-                                    ],
                                   ),
                                   child: Stack(
                                     children: [
@@ -2446,15 +2395,6 @@ class _HomePageState extends State<HomePage> {
                                           end: Alignment.bottomRight,
                                         ),
                                         borderRadius: BorderRadius.circular(24),
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: const Color(
-                                              0xFF9333EA,
-                                            ).withValues(alpha: 0.05),
-                                            blurRadius: 10,
-                                            offset: const Offset(0, 4),
-                                          ),
-                                        ],
                                       ),
                                       child: Stack(
                                         children: [
@@ -2657,15 +2597,6 @@ class _HomePageState extends State<HomePage> {
                                               ),
                                               borderRadius:
                                                   BorderRadius.circular(24),
-                                              boxShadow: [
-                                                BoxShadow(
-                                                  color: const Color(
-                                                    0xFFD97706,
-                                                  ).withValues(alpha: 0.05),
-                                                  blurRadius: 10,
-                                                  offset: const Offset(0, 4),
-                                                ),
-                                              ],
                                             ),
                                             child: Stack(
                                               children: [
@@ -3130,15 +3061,6 @@ class _HomePageState extends State<HomePage> {
                                               color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
                                               width: 1.2,
                                             ),
-                                            boxShadow: [
-                                              BoxShadow(
-                                                color: Colors.black.withValues(
-                                                  alpha: isDark ? 0.35 : 0.04,
-                                                ),
-                                                blurRadius: 8,
-                                                offset: const Offset(0, 2),
-                                              ),
-                                            ],
                                           ),
                                           child: Icon(
                                             Icons.dashboard_customize_rounded,
@@ -3507,13 +3429,6 @@ class _HomePageState extends State<HomePage> {
                                                          decoration: BoxDecoration(
                                                            color: isDark ? Colors.white : Colors.black,
                                                            borderRadius: BorderRadius.circular(24),
-                                                           boxShadow: [
-                                                             BoxShadow(
-                                                               color: Colors.black.withValues(alpha: 0.15),
-                                                               blurRadius: 4,
-                                                               offset: const Offset(0, 2),
-                                                             ),
-                                                           ],
                                                          ),
                                                          child: Row(
                                                            mainAxisSize: MainAxisSize.min,
@@ -3809,13 +3724,6 @@ class _HomePageState extends State<HomePage> {
                                                   decoration: BoxDecoration(
                                                     shape: BoxShape.circle,
                                                     color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
-                                                    boxShadow: [
-                                                      BoxShadow(
-                                                        color: Colors.black.withValues(alpha: 0.08),
-                                                        blurRadius: 4,
-                                                        offset: const Offset(0, 2),
-                                                      ),
-                                                    ],
                                                   ),
                                                   child: ClipOval(
                                                     child: Transform.scale(
@@ -3876,152 +3784,129 @@ class _HomePageState extends State<HomePage> {
                                                 ),
                                                 const SizedBox(width: 9),
                                               ],
-                                              Expanded(
-                                                child: Column(
-                                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                                  mainAxisSize: MainAxisSize.min,
-                                                  children: [
-                                                    Text(
-                                                      role.toLowerCase() == 'guru'
-                                                          ? 'Pengajar · ${schoolLevel.isNotEmpty ? schoolLevel.toUpperCase() : 'SMA/SMK'}'
-                                                          : 'Siswa · ${schoolLevel.isNotEmpty ? schoolLevel.toUpperCase() : 'SMA/SMK'}',
-                                                      style: GoogleFonts.plusJakartaSans(
-                                                        fontSize: 14.0,
-                                                        fontWeight: FontWeight.w600,
-                                                        color: isDark ? Colors.white60 : const Color(0xFF64748B),
+                                                Expanded(
+                                                  child: Column(
+                                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                                    mainAxisSize: MainAxisSize.min,
+                                                    children: [
+                                                      Text(
+                                                        role.toLowerCase() == 'guru'
+                                                            ? 'Pengajar · ${schoolLevel.isNotEmpty ? schoolLevel.toUpperCase() : 'SMA/SMK'}'
+                                                            : 'Siswa · ${schoolLevel.isNotEmpty ? schoolLevel.toUpperCase() : 'SMA/SMK'}',
+                                                        style: GoogleFonts.dmSans(
+                                                          fontSize: 14.0,
+                                                          fontWeight: FontWeight.w500,
+                                                          color: isDark ? Colors.white60 : const Color(0xFF64748B),
+                                                        ),
+                                                        maxLines: 1,
+                                                        overflow: TextOverflow.ellipsis,
                                                       ),
-                                                      maxLines: 1,
-                                                      overflow: TextOverflow.ellipsis,
-                                                    ),
-                                                    const SizedBox(height: 1.0),
-                                                    Text(
-                                                      fullName.isNotEmpty ? fullName : userName,
-                                                      style: GoogleFonts.plusJakartaSans(
-                                                        fontSize: 16.0,
-                                                        fontWeight: FontWeight.w800,
-                                                        color: isDark ? Colors.white : const Color(0xFF0F172A),
-                                                        height: 1.15,
+                                                      const SizedBox(height: 1.0),
+                                                      Text(
+                                                        fullName.isNotEmpty ? fullName : userName,
+                                                        style: GoogleFonts.plusJakartaSans(
+                                                          fontSize: 16.0,
+                                                          fontWeight: FontWeight.w800,
+                                                          color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                                        ),
+                                                        maxLines: 1,
+                                                        overflow: TextOverflow.ellipsis,
                                                       ),
-                                                      maxLines: 1,
-                                                      overflow: TextOverflow.ellipsis,
+                                                    ],
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                          const SizedBox(width: 10),
+                                          Row(
+                                            children: [
+                                              ValueListenableBuilder<String>(
+                                                valueListenable: HubnerApp.themeNotifier,
+                                                builder: (context, currentTheme, _) {
+                                                  final bool currentIsDark = currentTheme == 'Gelap' || currentTheme == 'Hitam';
+                                                  return BouncyButton(
+                                                    onTap: () => _toggleThemeWithBounce(context, currentIsDark),
+                                                    child: Container(
+                                                      width: 42,
+                                                      height: 42,
+                                                      decoration: BoxDecoration(
+                                                        color: currentIsDark
+                                                            ? const Color(0xFF1C1C1E)
+                                                            : Colors.white,
+                                                        shape: BoxShape.circle,
+                                                        border: Border.all(
+                                                          color: currentIsDark
+                                                              ? const Color(0xFF27272A)
+                                                              : const Color(0xFFF1F5F9),
+                                                          width: 1.2,
+                                                        ),
+                                                      ),
+                                                      child: Icon(
+                                                        currentIsDark ? Icons.wb_sunny_rounded : Icons.nightlight_round,
+                                                        color: currentIsDark ? const Color(0xFFFBBF24) : Colors.black87,
+                                                        size: 20,
+                                                      ),
                                                     ),
-                                                  ],
+                                                  );
+                                                },
+                                              ),
+                                              const SizedBox(width: 10),
+                                              BouncyButton(
+                                                onTap: () {
+                                                  Navigator.push(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                      builder: (_) => const NotificationsPage(),
+                                                    ),
+                                                  );
+                                                },
+                                                child: Container(
+                                                  width: 42,
+                                                  height: 42,
+                                                  decoration: BoxDecoration(
+                                                    color: isDark
+                                                        ? const Color(0xFF1C1C1E)
+                                                        : Colors.white,
+                                                    shape: BoxShape.circle,
+                                                    border: Border.all(
+                                                      color: isDark
+                                                          ? const Color(0xFF27272A)
+                                                          : const Color(0xFFF1F5F9),
+                                                      width: 1.2,
+                                                    ),
+                                                  ),
+                                                  child: Icon(
+                                                    Icons.notifications_none_rounded,
+                                                    color: isDark ? Colors.white : Colors.black,
+                                                    size: 20,
+                                                  ),
                                                 ),
                                               ),
                                             ],
                                           ),
-                                        ),
-                                        const SizedBox(width: 10),
-                                        Row(
-                                          children: [
-                                            ValueListenableBuilder<String>(
-                                              valueListenable: HubnerApp.themeNotifier,
-                                              builder: (context, currentTheme, _) {
-                                                final bool currentIsDark = currentTheme == 'Gelap' || currentTheme == 'Hitam';
-                                                return BouncyButton(
-                                                  onTap: () => _toggleThemeWithBounce(context, currentIsDark),
-                                                  child: Container(
-                                                    width: 42,
-                                                    height: 42,
-                                                    decoration: BoxDecoration(
-                                                      color: currentIsDark
-                                                          ? const Color(0xFF1C1C1E)
-                                                          : Colors.white,
-                                                      shape: BoxShape.circle,
-                                                      border: Border.all(
-                                                        color: currentIsDark
-                                                            ? const Color(0xFF27272A)
-                                                            : const Color(0xFFF1F5F9),
-                                                        width: 1.2,
-                                                      ),
-                                                      boxShadow: [
-                                                        BoxShadow(
-                                                          color: Colors.black.withValues(alpha: currentIsDark ? 0.35 : 0.04),
-                                                          blurRadius: 8,
-                                                          offset: const Offset(0, 2),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                    child: Icon(
-                                                      currentIsDark ? Icons.wb_sunny_rounded : Icons.nightlight_round,
-                                                      color: currentIsDark ? const Color(0xFFFBBF24) : Colors.black87,
-                                                      size: 20,
-                                                    ),
-                                                  ),
-                                                );
-                                              },
-                                            ),
-                                            const SizedBox(width: 10),
-                                            BouncyButton(
-                                              onTap: () {
-                                                Navigator.push(
-                                                  context,
-                                                  MaterialPageRoute(
-                                                    builder: (_) => const NotificationsPage(),
-                                                  ),
-                                                );
-                                              },
-                                              child: Container(
-                                                width: 42,
-                                                height: 42,
-                                                decoration: BoxDecoration(
-                                                  color: isDark
-                                                      ? const Color(0xFF1C1C1E)
-                                                      : Colors.white,
-                                                  shape: BoxShape.circle,
-                                                  border: Border.all(
-                                                    color: isDark
-                                                        ? const Color(0xFF27272A)
-                                                        : const Color(0xFFF1F5F9),
-                                                    width: 1.2,
-                                                  ),
-                                                  boxShadow: [
-                                                    BoxShadow(
-                                                      color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.04),
-                                                      blurRadius: 8,
-                                                      offset: const Offset(0, 2),
-                                                    ),
-                                                  ],
-                                                ),
-                                                child: Icon(
-                                                  Icons.notifications_none_rounded,
-                                                  color: isDark ? Colors.white : Colors.black,
-                                                  size: 20,
-                                                ),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ],
+                                        ],
+                                      ),
                                     ),
                                   ),
-                                ),
-                              );
-                            },
-                          ),
-                  ],
-                ),
-              );
-                },
-              );
-            },
+                                );
+                              },
+                            ),
+                        ],
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
           ),
         ),
-      ),
-      if (isDesktop)
-        Positioned(
-          bottom: 24,
-          right: 24,
-          child: HoverFloatingButton(
-            onTap: _showQuickNotesOverlay,
-          ),
-        ),
-    ],
-  ),
+      ],
+    ),
+  );
+},
 );
-      },
-    );
-  }
+}
 
   Widget _buildTeacherProjectCard({
     required BuildContext context,
@@ -4147,13 +4032,6 @@ class _HomePageState extends State<HomePage> {
                                 width: 1.0,
                               )
                             : null,
-                        boxShadow: [
-                          BoxShadow(
-                            color: backgroundColor.withValues(alpha: isDark ? 0.25 : 0.12),
-                            blurRadius: 10,
-                            offset: const Offset(0, 3),
-                          ),
-                        ],
                       ),
                       child: Stack(
                         children: [
@@ -4215,15 +4093,6 @@ class _HomePageState extends State<HomePage> {
                                 decoration: BoxDecoration(
                                   color: isDark ? Colors.black : const Color(0xFFFFD600),
                                   borderRadius: BorderRadius.circular(8),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withValues(
-                                        alpha: 0.15,
-                                      ),
-                                      blurRadius: 4,
-                                      offset: const Offset(0, 2),
-                                    ),
-                                  ],
                                 ),
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
@@ -4416,7 +4285,6 @@ class _HomePageState extends State<HomePage> {
                           fontSize: calculatedFontSize,
                           fontWeight: FontWeight.w800,
                           color: isDark ? Colors.white : Colors.black87,
-                          height: 1.15,
                         ),
                       );
                     },
@@ -4511,13 +4379,6 @@ class _HomePageState extends State<HomePage> {
                         decoration: BoxDecoration(
                           color: isDark ? Colors.black : Colors.white,
                           shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.12),
-                              blurRadius: 6,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
                         ),
                         child: Center(
                           child: Icon(
@@ -4601,13 +4462,6 @@ class _HomePageState extends State<HomePage> {
                     decoration: BoxDecoration(
                       color: isYellow ? Colors.black : Colors.white,
                       shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.08),
-                          blurRadius: 4,
-                          offset: const Offset(0, 1),
-                        ),
-                      ],
                     ),
                     child: Icon(
                       Icons.qr_code_2_rounded,
@@ -4627,7 +4481,6 @@ class _HomePageState extends State<HomePage> {
                 fontSize: title.length > 55 ? 14.5 : 16.4,
                 fontWeight: FontWeight.bold,
                 color: textColor,
-                height: 1.2,
               ),
             ),
           ],
@@ -4799,13 +4652,6 @@ class _HomePageState extends State<HomePage> {
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.04),
-                blurRadius: 6,
-                offset: const Offset(0, 2),
-              ),
-            ],
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -4999,7 +4845,6 @@ class _HomePageState extends State<HomePage> {
               backgroundColor: isDark ? const Color(0xFF141416) : Colors.white,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(28),
-                side: isDark ? const BorderSide(color: Color(0xFF27272A), width: 1.2) : BorderSide.none,
               ),
               child: Container(
                 padding: const EdgeInsets.all(20),
@@ -5154,9 +4999,6 @@ class _HomePageState extends State<HomePage> {
               ? (isDark ? Colors.white : Colors.black)
               : (isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9)),
           borderRadius: BorderRadius.circular(20),
-          border: isDark && !isActive
-              ? Border.all(color: Colors.white.withValues(alpha: 0.08), width: 0.8)
-              : null,
         ),
         child: Text(
           text,
@@ -5212,13 +5054,6 @@ class _HomePageState extends State<HomePage> {
                           ],
                         ),
                         borderRadius: BorderRadius.circular(20), // FULL ROUNDED ATAS DAN BAWAH
-                        boxShadow: [
-                          BoxShadow(
-                            color: color.withValues(alpha: isDark ? 0.45 : 0.25),
-                            blurRadius: 10,
-                            offset: const Offset(0, 3),
-                          ),
-                        ],
                       ),
                     ),
                   ),
@@ -5232,14 +5067,6 @@ class _HomePageState extends State<HomePage> {
             decoration: BoxDecoration(
               color: isDark ? const Color(0xFF27272A) : const Color(0xFFF8FAFC),
               shape: BoxShape.circle,
-              border: isDark ? Border.all(color: const Color(0xFF3F3F46)) : null,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.05),
-                  blurRadius: 4,
-                  offset: const Offset(0, 2),
-                ),
-              ],
             ),
             child: Icon(
               icon,
@@ -5337,13 +5164,6 @@ class _HomePageState extends State<HomePage> {
                 decoration: BoxDecoration(
                   color: accentColor,
                   borderRadius: BorderRadius.circular(18),
-                  boxShadow: [
-                    BoxShadow(
-                      color: accentColor.withValues(alpha: 0.2),
-                      blurRadius: 8,
-                      offset: const Offset(0, 3),
-                    ),
-                  ],
                 ),
                 child: Stack(
                   children: [
@@ -5435,15 +5255,6 @@ class _HomePageState extends State<HomePage> {
                                 decoration: BoxDecoration(
                                   color: const Color(0xFFFFD600),
                                   borderRadius: BorderRadius.circular(8),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withValues(
-                                        alpha: 0.15,
-                                      ),
-                                      blurRadius: 4,
-                                      offset: const Offset(0, 2),
-                                    ),
-                                  ],
                                 ),
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
@@ -5651,13 +5462,6 @@ class _HomePageState extends State<HomePage> {
                     decoration: BoxDecoration(
                       color: const Color(0xFFFFD600),
                       borderRadius: BorderRadius.circular(8),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.1),
-                          blurRadius: 4,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
@@ -5750,13 +5554,6 @@ class _HomePageState extends State<HomePage> {
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(14),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.04),
-                blurRadius: 6,
-                offset: const Offset(0, 2),
-              ),
-            ],
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -6108,13 +5905,6 @@ class _HomePageState extends State<HomePage> {
         color: Colors.white,
         borderRadius: BorderRadius.circular(24),
         border: Border.all(color: const Color(0xFFE2E8F0)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.02),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
       ),
       padding: const EdgeInsets.all(20),
       child: Column(
@@ -6466,13 +6256,6 @@ class _HomePageState extends State<HomePage> {
                           color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
                           width: 1.2,
                         ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: isDark ? 0.45 : 0.12),
-                            blurRadius: 16,
-                            offset: const Offset(0, 6),
-                          ),
-                        ],
                       ),
                       child: _QuickNotesDropdownContent(
                         isDark: isDark,
@@ -7032,13 +6815,6 @@ class _HoverFloatingButtonState extends State<HoverFloatingButton> {
                 end: Alignment.bottomRight,
               ),
               borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: const Color(0xFF7D2AE8).withValues(alpha: _isHovered ? 0.45 : 0.3),
-                  blurRadius: _isHovered ? 16 : 12,
-                  offset: const Offset(0, 4),
-                ),
-              ],
             ),
             child: const Icon(
               Icons.description_outlined,
@@ -7227,13 +7003,6 @@ class _ManagementActionButtonState extends State<ManagementActionButton> {
               decoration: BoxDecoration(
                 color: widget.baseColor,
                 shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: widget.baseColor.withValues(alpha: _isHovered ? 0.4 : 0.2),
-                    blurRadius: _isHovered ? 10 : 6,
-                    offset: const Offset(0, 3),
-                  ),
-                ],
               ),
               child: Icon(
                 widget.icon,
@@ -7490,13 +7259,6 @@ class _HomeSearchAndNotesRowState extends State<_HomeSearchAndNotesRow> {
                   color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
                   width: 1.2,
                 ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.04),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
               ),
               child: Row(
                 children: [
@@ -7518,16 +7280,15 @@ class _HomeSearchAndNotesRowState extends State<_HomeSearchAndNotesRow> {
                         setState(() {});
                         _onChanged(val);
                       },
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 15.0,
-                        fontWeight: FontWeight.w600,
+                      style: GoogleFonts.dmSans(
+                        fontSize: 20.0,
                         color: isDark ? Colors.white : Colors.black87,
                       ),
                       decoration: InputDecoration(
                         hintText: 'Cari kelas / materi...',
                         hintStyle: GoogleFonts.dmSans(
                           color: isDark ? Colors.white38 : Colors.black38,
-                          fontSize: 14.5,
+                          fontSize: 20.0,
                         ),
                         border: InputBorder.none,
                         isDense: true,
@@ -7586,13 +7347,6 @@ class _HomeSearchAndNotesRowState extends State<_HomeSearchAndNotesRow> {
                         color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
                         width: 1.2,
                       ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.04),
-                          blurRadius: 8,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
@@ -7643,13 +7397,6 @@ class _HomeSearchAndNotesRowState extends State<_HomeSearchAndNotesRow> {
                         color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
                         width: 1.2,
                       ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.04),
-                          blurRadius: 8,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
                     ),
                     child: Center(
                       child: Icon(

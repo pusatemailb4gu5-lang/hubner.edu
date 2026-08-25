@@ -456,13 +456,6 @@ class _ManageMembersPageState extends State<ManageMembersPage> {
                             color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
                             width: 1.2,
                           ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.04),
-                              blurRadius: 8,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
                         ),
                         child: Icon(
                           Icons.arrow_back_rounded,
@@ -519,28 +512,20 @@ class _ManageMembersPageState extends State<ManageMembersPage> {
                       color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
                       width: 1.2,
                     ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.04),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
                   ),
                   child: Row(
                     children: [
                       Expanded(
                         child: TextField(
                           controller: _inviteController,
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 16.0,
-                            fontWeight: FontWeight.w600,
+                          style: GoogleFonts.dmSans(
+                            fontSize: 20.0,
                             color: isDark ? Colors.white : Colors.black87,
                           ),
                           decoration: InputDecoration(
                             hintText: 'Ketik ID pengguna untuk undang...',
                             hintStyle: GoogleFonts.dmSans(
-                              fontSize: 15.0,
+                              fontSize: 20.0,
                               color: isDark ? Colors.white38 : Colors.black38,
                             ),
                             isDense: true,
@@ -631,13 +616,6 @@ class _ManageMembersPageState extends State<ManageMembersPage> {
                                   color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
                                   width: 1.2,
                                 ),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.04),
-                                    blurRadius: 8,
-                                    offset: const Offset(0, 2),
-                                  ),
-                                ],
                               ),
                               child: Row(
                                 children: [
@@ -766,13 +744,6 @@ class _ManageMembersPageState extends State<ManageMembersPage> {
                                   color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
                                   width: 1.2,
                                 ),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.04),
-                                    blurRadius: 8,
-                                    offset: const Offset(0, 2),
-                                  ),
-                                ],
                               ),
                               child: Row(
                                 children: [
@@ -933,13 +904,6 @@ class _ManageMembersPageState extends State<ManageMembersPage> {
                                 color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
                                 width: 1.2,
                               ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.04),
-                                  blurRadius: 8,
-                                  offset: const Offset(0, 2),
-                                ),
-                              ],
                             ),
                             child: Row(
                               children: [
@@ -950,13 +914,6 @@ class _ManageMembersPageState extends State<ManageMembersPage> {
                                   decoration: BoxDecoration(
                                     shape: BoxShape.circle,
                                     color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black.withValues(alpha: 0.12),
-                                        blurRadius: 4,
-                                        offset: const Offset(0, 2),
-                                      ),
-                                    ],
                                   ),
                                   child: ClipOval(
                                     child: Transform.scale(

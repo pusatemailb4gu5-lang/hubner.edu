@@ -362,14 +362,6 @@ class _MengerjakanQuizPageState extends State<MengerjakanQuizPage> with TickerPr
                         decoration: BoxDecoration(
                           color: circleColor,
                           shape: BoxShape.circle,
-                          boxShadow: [
-                            if (isCurrent || isAnswered)
-                              BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.1),
-                                blurRadius: 4,
-                                offset: const Offset(0, 2),
-                              ),
-                          ],
                         ),
                         child: Center(
                           child: Text(
@@ -896,13 +888,6 @@ class _MengerjakanQuizPageState extends State<MengerjakanQuizPage> with TickerPr
                         decoration: BoxDecoration(
                           color: kThemeYellow,
                           borderRadius: BorderRadius.circular(24),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.12),
-                              blurRadius: 8,
-                              offset: const Offset(0, 3),
-                            ),
-                          ],
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
@@ -1023,16 +1008,9 @@ class _MengerjakanQuizPageState extends State<MengerjakanQuizPage> with TickerPr
                             Container(
                               width: 46,
                               height: 46,
-                              decoration: BoxDecoration(
-                                color: const Color(0xFF93C5FD),
+                              decoration: const BoxDecoration(
+                                color: Color(0xFF93C5FD),
                                 shape: BoxShape.circle,
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withValues(alpha: 0.15),
-                                    blurRadius: 8,
-                                    offset: const Offset(0, 3),
-                                  ),
-                                ],
                               ),
                               child: const Center(
                                 child: Icon(
@@ -1137,13 +1115,6 @@ class _MengerjakanQuizPageState extends State<MengerjakanQuizPage> with TickerPr
                 decoration: BoxDecoration(
                   color: isSelected ? kThemeYellow : Colors.white,
                   borderRadius: BorderRadius.circular(36),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: isSelected ? 0.20 : 0.08),
-                      blurRadius: isSelected ? 10 : 6,
-                      offset: const Offset(0, 3),
-                    ),
-                  ],
                 ),
                 child: Row(
                   children: [
@@ -1192,13 +1163,6 @@ class _MengerjakanQuizPageState extends State<MengerjakanQuizPage> with TickerPr
                   decoration: BoxDecoration(
                     color: isSelected ? kThemeYellow : Colors.white,
                     borderRadius: BorderRadius.circular(36),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: isSelected ? 0.20 : 0.08),
-                        blurRadius: isSelected ? 10 : 6,
-                        offset: const Offset(0, 3),
-                      ),
-                    ],
                   ),
                   child: Row(
                     children: [
@@ -1310,22 +1274,9 @@ class _MengerjakanQuizPageState extends State<MengerjakanQuizPage> with TickerPr
                       child: Container(
                         width: 170,
                         height: 170,
-                        decoration: BoxDecoration(
+                        decoration: const BoxDecoration(
                           shape: BoxShape.circle,
                           color: kThemeYellow,
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.25),
-                              blurRadius: 30,
-                              spreadRadius: 6,
-                              offset: const Offset(0, 8),
-                            ),
-                            BoxShadow(
-                              color: kThemeYellow.withValues(alpha: 0.7),
-                              blurRadius: 40,
-                              spreadRadius: 10,
-                            ),
-                          ],
                         ),
                         child: Center(
                           child: Column(
@@ -1640,13 +1591,6 @@ class _MengerjakanQuizPageState extends State<MengerjakanQuizPage> with TickerPr
                                                     color: badgeBgColor,
                                                     shape: BoxShape.circle,
                                                     border: Border.all(color: badgeBorderColor, width: 1.2),
-                                                    boxShadow: [
-                                                      BoxShadow(
-                                                        color: Colors.black.withValues(alpha: 0.15),
-                                                        blurRadius: 2,
-                                                        offset: const Offset(0, 1),
-                                                      ),
-                                                    ],
                                                   ),
                                                   child: Center(
                                                     child: Text(
@@ -1905,16 +1849,9 @@ class _MengerjakanQuizPageState extends State<MengerjakanQuizPage> with TickerPr
                     child: Container(
                       width: 32,
                       height: 32,
-                      decoration: BoxDecoration(
+                      decoration: const BoxDecoration(
                         color: Colors.white,
                         shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.1),
-                            blurRadius: 4,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
                       ),
                       child: Center(
                         child: Text(

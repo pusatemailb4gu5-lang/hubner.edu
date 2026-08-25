@@ -2370,7 +2370,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                   title: Text(
                                     candName,
                                     style: GoogleFonts.plusJakartaSans(
-                                      fontSize: 13.5,
+                                      fontSize: 16.5,
                                       fontWeight: FontWeight.bold,
                                       color: isDark ? Colors.white : Colors.black87,
                                     ),
@@ -3902,13 +3902,6 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                           color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
                                           width: 1.2,
                                         ),
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.04),
-                                            blurRadius: 8,
-                                            offset: const Offset(0, 2),
-                                          ),
-                                        ],
                                       ),
                                       child: Icon(
                                         Icons.arrow_back_rounded,
@@ -3926,7 +3919,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                   Text(
                                     channelTitle,
                                     style: GoogleFonts.plusJakartaSans(
-                                      fontSize: 15.5,
+                                      fontSize: 18.5,
                                       fontWeight: FontWeight.bold,
                                       color: isDark ? Colors.white : Colors.black87,
                                     ),
@@ -3937,7 +3930,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                   Text(
                                     subtitle,
                                     style: GoogleFonts.dmSans(
-                                      fontSize: 12.5,
+                                      fontSize: 14.5,
                                       color: isDark ? Colors.white60 : Colors.black45,
                                       fontWeight: FontWeight.w500,
                                     ),
@@ -3956,7 +3949,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                   width: 1.0,
                                 ),
                               ),
-                              elevation: 6,
+                              elevation: 0,
                               color: isDark ? const Color(0xFF141416) : Colors.white,
                               icon: Container(
                                 width: 42,
@@ -3968,13 +3961,6 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                     color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
                                     width: 1.2,
                                   ),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.04),
-                                      blurRadius: 8,
-                                      offset: const Offset(0, 2),
-                                    ),
-                                  ],
                                 ),
                                 child: Icon(
                                   Icons.more_horiz_rounded,

@@ -1547,13 +1547,6 @@ Sertakan HANYA JSON tersebut tanpa penjelasan markdown apa pun di luar JSON.
                           color: isSelected ? (isDark ? Colors.white : Colors.black87) : Colors.transparent,
                           width: 2.5,
                         ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: color.withOpacity(isDark ? 0.35 : 0.2),
-                            blurRadius: 6,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
                       ),
                     ),
                   );
@@ -2168,13 +2161,6 @@ Sertakan HANYA JSON tersebut tanpa penjelasan markdown apa pun di luar JSON.
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(28),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.15),
-              blurRadius: 24,
-              offset: const Offset(0, 8),
-            ),
-          ],
         ),
         child: Column(
           children: [
