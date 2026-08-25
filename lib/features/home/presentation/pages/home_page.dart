@@ -187,84 +187,157 @@ class _HomePageState extends State<HomePage> {
       final int? choice = await showDialog<int>(
         context: context,
         builder: (dialogCtx) {
-          return AlertDialog(
-            backgroundColor: Colors.white,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-            title: Row(
-              children: [
-                const Icon(Icons.cloud_off_rounded, color: Color(0xFFEA580C), size: 24),
-                const SizedBox(width: 8),
-                Text(
-                  'Peringatan Cadangan',
-                  style: GoogleFonts.plusJakartaSans(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 17,
-                    color: Colors.black,
-                  ),
-                ),
-              ],
-            ),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFFEF2F2),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: const Color(0xFFFECACA)),
-                  ),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+          final bool isDark = AppColors.isDarkMode;
+          return Dialog(
+            insetPadding: const EdgeInsets.symmetric(horizontal: 16),
+            backgroundColor: isDark ? const Color(0xFF141416) : Colors.white,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+            child: Container(
+              padding: const EdgeInsets.all(20),
+              constraints: const BoxConstraints(maxWidth: 400),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Header: Icon + Title & Circular Close X Button
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Icon(Icons.warning_amber_rounded, color: Color(0xFFDC2626), size: 20),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          'Google Drive belum terhubung! Data classroom "$title" TIDAK DAPAT DIPULIHKAN jika dihapus sekarang.',
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 14.0,
-                            color: const Color(0xFFB91C1C),
-                            fontWeight: FontWeight.w600,
-                            height: 1.3,
+                      Row(
+                        children: [
+                          const Icon(Icons.cloud_off_rounded, color: Color(0xFFEA580C), size: 22),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Peringatan Cadangan',
+                            style: AppTypography.chatHeaderTitle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 17.5,
+                              color: isDark ? Colors.white : Colors.black,
+                            ),
+                          ),
+                        ],
+                      ),
+                      GestureDetector(
+                        onTap: () => Navigator.pop(dialogCtx, 0),
+                        behavior: HitTestBehavior.opaque,
+                        child: Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: BoxDecoration(
+                            color: isDark ? Colors.white12 : const Color(0xFFF1F5F9),
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                              width: 1.0,
+                            ),
+                          ),
+                          child: Icon(
+                            Icons.close_rounded,
+                            color: isDark ? Colors.white70 : Colors.black87,
+                            size: 18,
                           ),
                         ),
                       ),
                     ],
                   ),
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  'Hubungkan akun Google Drive untuk mencadangkan data secara otomatis sebelum menghapus, atau tetap hapus secara permanen.',
-                  style: GoogleFonts.dmSans(fontSize: 14.0, color: Colors.black87),
-                ),
-              ],
+                  const SizedBox(height: 14),
+
+                  // Warning Box
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: isDark ? const Color(0xFF2D1214) : const Color(0xFFFEF2F2),
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(
+                        color: isDark ? const Color(0xFF7F1D1D) : const Color(0xFFFECACA),
+                      ),
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Icon(Icons.warning_amber_rounded, color: Color(0xFFDC2626), size: 20),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            'Google Drive belum terhubung! Data classroom "$title" TIDAK DAPAT DIPULIHKAN jika dihapus sekarang.',
+                            style: AppTypography.chatBody(
+                              fontSize: 13.5,
+                              color: isDark ? const Color(0xFFFCA5A5) : const Color(0xFFB91C1C),
+                              fontWeight: FontWeight.w600,
+                              height: 1.35,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    'Hubungkan akun Google Drive untuk mencadangkan data secara otomatis sebelum menghapus, atau tetap hapus secara permanen.',
+                    style: AppTypography.timestamp(
+                      fontSize: 13.0,
+                      color: isDark ? Colors.white70 : Colors.black87,
+                      height: 1.4,
+                    ),
+                  ),
+                  const SizedBox(height: 18),
+
+                  // Action Buttons (1 Horizontal Row)
+                  Row(
+                    children: [
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () => Navigator.pop(dialogCtx, 1),
+                          behavior: HitTestBehavior.opaque,
+                          child: Container(
+                            height: 44,
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              color: isDark ? const Color(0xFF1E293B) : Colors.white,
+                              borderRadius: BorderRadius.circular(22),
+                              border: Border.all(
+                                color: const Color(0xFF2563EB),
+                                width: 1.2,
+                              ),
+                            ),
+                            child: Text(
+                              'Hubungkan Drive',
+                              style: AppTypography.buttonLabel(
+                                color: const Color(0xFF2563EB),
+                                fontWeight: FontWeight.bold,
+                                fontSize: 13.0,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () => Navigator.pop(dialogCtx, 2),
+                          behavior: HitTestBehavior.opaque,
+                          child: Container(
+                            height: 44,
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFEF4444),
+                              borderRadius: BorderRadius.circular(22),
+                            ),
+                            child: Text(
+                              'Tetap Hapus',
+                              style: AppTypography.buttonLabel(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 13.0,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(dialogCtx, 0),
-                child: Text('Batal', style: GoogleFonts.plusJakartaSans(color: Colors.black54, fontWeight: FontWeight.w600)),
-              ),
-              OutlinedButton(
-                onPressed: () => Navigator.pop(dialogCtx, 1),
-                style: OutlinedButton.styleFrom(
-                  side: const BorderSide(color: Color(0xFF2563EB)),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                ),
-                child: Text('Hubungkan Drive', style: GoogleFonts.plusJakartaSans(color: const Color(0xFF2563EB), fontWeight: FontWeight.bold)),
-              ),
-              ElevatedButton(
-                onPressed: () => Navigator.pop(dialogCtx, 2),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFEF4444),
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                  elevation: 0,
-                ),
-                child: Text('Tetap Hapus', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold)),
-              ),
-            ],
           );
         },
       );
@@ -1926,7 +1999,6 @@ class _HomePageState extends State<HomePage> {
                                                return NotificationBellIcon(isDark: isDark, size: 42);
                                              },
                                            ),
-                                          ),
                                         ],
                                       ),
                                     ],
@@ -6166,23 +6238,17 @@ class _QuickNotesDropdownContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      constraints: const BoxConstraints(maxHeight: 360),
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Header with + Tambah (Catatan Cepat removed per request)
           Padding(
-            padding: const EdgeInsets.fromLTRB(14, 10, 10, 10),
+            padding: const EdgeInsets.fromLTRB(14, 8, 10, 8),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                Text(
-                  'Catatan Cepat',
-                  style: AppTypography.sectionHeader(
-                    color: isDark ? Colors.white : const Color(0xFF0F172A),
-                  ),
-                ),
                 BouncyButton(
                   scaleDown: 0.92,
                   onTap: () {
@@ -6197,8 +6263,16 @@ class _QuickNotesDropdownContent extends StatelessWidget {
                       ),
                     );
                   },
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(
+                        color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                        width: 1.0,
+                      ),
+                    ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
@@ -6207,11 +6281,13 @@ class _QuickNotesDropdownContent extends StatelessWidget {
                           color: isDark ? const Color(0xFF38BDF8) : const Color(0xFF2563EB),
                           size: 16,
                         ),
-                        const SizedBox(width: 2),
+                        const SizedBox(width: 3),
                         Text(
                           'Tambah',
                           style: AppTypography.buttonLabel(
                             color: isDark ? const Color(0xFF38BDF8) : const Color(0xFF2563EB),
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12.5,
                           ),
                         ),
                       ],
@@ -6222,134 +6298,141 @@ class _QuickNotesDropdownContent extends StatelessWidget {
             ),
           ),
           Divider(height: 1, color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9)),
-          Flexible(
-            child: isLoading
-                ? const Center(
-                    child: Padding(
-                      padding: EdgeInsets.all(24.0),
-                      child: ThreeDotsLoader(size: 6, bounceHeight: 3),
+          if (isLoading)
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 20.0),
+              child: Center(
+                child: ThreeDotsLoader(size: 6, bounceHeight: 3),
+              ),
+            )
+          else if (docs.isEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 18.0, horizontal: 16.0),
+              child: Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.note_alt_outlined,
+                      size: 28,
+                      color: isDark ? Colors.white30 : Colors.black26,
                     ),
-                  )
-                : docs.isEmpty
-                    ? Padding(
-                        padding: const EdgeInsets.all(24.0),
-                        child: Center(
-                          child: Column(
+                    const SizedBox(height: 6),
+                    Text(
+                      'Belum ada catatan',
+                      style: AppTypography.timestamp(
+                        fontSize: 13.0,
+                        color: isDark ? Colors.white54 : Colors.black45,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            )
+          else
+            ConstrainedBox(
+              constraints: const BoxConstraints(maxHeight: 280),
+              child: ListView.separated(
+                shrinkWrap: true,
+                padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 4),
+                itemCount: docs.length > 5 ? 5 : docs.length,
+                separatorBuilder: (_, __) => Divider(
+                  height: 1,
+                  color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF8FAFC),
+                ),
+                itemBuilder: (context, index) {
+                  final noteData = docs[index].data() as Map<String, dynamic>;
+                  final noteId = docs[index].id;
+                  final title = (noteData['title'] ?? 'Tanpa Judul').toString();
+                  final content = (noteData['content'] ?? '').toString();
+
+                  String formatDate(dynamic ts) {
+                    if (ts == null) return 'Baru saja';
+                    DateTime? dt;
+                    if (ts is Timestamp) {
+                      dt = ts.toDate();
+                    } else if (ts is DateTime) {
+                      dt = ts;
+                    }
+                    if (dt == null) return 'Baru saja';
+
+                    final now = DateTime.now();
+                    final hour = dt.hour.toString().padLeft(2, '0');
+                    final minute = dt.minute.toString().padLeft(2, '0');
+                    final day = dt.day.toString().padLeft(2, '0');
+                    final month = dt.month.toString().padLeft(2, '0');
+
+                    if (dt.year == now.year && dt.month == now.month && dt.day == now.day) {
+                      return '$hour:$minute';
+                    }
+                    return '$day/$month $hour:$minute';
+                  }
+
+                  final dynamic rawUpdated = noteData['updatedAt'];
+                  final dynamic rawCreated = noteData['createdAt'];
+                  final String dateStr = formatDate(rawUpdated ?? rawCreated);
+
+                  return InkWell(
+                    borderRadius: BorderRadius.circular(10),
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => NoteEditorPage(
+                            noteId: noteId,
+                            initialTitle: title,
+                            initialContent: content,
+                          ),
+                        ),
+                      );
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          // Judul Catatan
+                          Expanded(
+                            child: Text(
+                              title.isNotEmpty ? title : 'Tanpa Judul',
+                              style: AppTypography.cardTitle(
+                                color: isDark ? Colors.white : const Color(0xFF0F172A),
+                              ),
+                              maxLines: 2,
+                              softWrap: true,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          // Tanggal sama dengan style tanggal di Notif
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(
-                                Icons.note_alt_outlined,
-                                size: 36,
-                                color: isDark ? Colors.white30 : Colors.black26,
-                              ),
-                              const SizedBox(height: 8),
                               Text(
-                                'Belum ada catatan',
-                                style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 14.0,
-                                  color: isDark ? Colors.white54 : Colors.black45,
-                                  fontWeight: FontWeight.w600,
+                                dateStr,
+                                style: AppTypography.timestamp(
+                                  fontSize: 13.0,
+                                  color: isDark ? Colors.white38 : Colors.black38,
+                                  fontWeight: FontWeight.w500,
                                 ),
+                              ),
+                              const SizedBox(height: 2),
+                              Icon(
+                                Icons.chevron_right_rounded,
+                                size: 16,
+                                color: isDark ? Colors.white30 : Colors.black26,
                               ),
                             ],
                           ),
-                        ),
-                      )
-                    : ListView.separated(
-                        shrinkWrap: true,
-                        padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 4),
-                        itemCount: docs.length > 5 ? 5 : docs.length,
-                        separatorBuilder: (_, __) => Divider(
-                          height: 1,
-                          color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF8FAFC),
-                        ),
-                        itemBuilder: (context, index) {
-                          final noteData = docs[index].data() as Map<String, dynamic>;
-                          final noteId = docs[index].id;
-                          final title = (noteData['title'] ?? 'Tanpa Judul').toString();
-                          final content = (noteData['content'] ?? '').toString();
-
-                          String formatDate(dynamic ts) {
-                            if (ts == null) return '-';
-                            DateTime? dt;
-                            if (ts is Timestamp) {
-                              dt = ts.toDate();
-                            } else if (ts is DateTime) {
-                              dt = ts;
-                            }
-                            if (dt == null) return '-';
-                            return '${dt.day.toString().padLeft(2, '0')}/${dt.month.toString().padLeft(2, '0')}/${dt.year}';
-                          }
-
-                          final dynamic rawUpdated = noteData['updatedAt'];
-                          final dynamic rawCreated = noteData['createdAt'];
-                          final bool isEdited = rawUpdated != null &&
-                              rawCreated != null &&
-                              (rawUpdated is Timestamp && rawCreated is Timestamp
-                                  ? rawUpdated.seconds != rawCreated.seconds
-                                  : rawUpdated.toString() != rawCreated.toString());
-
-                          final String prefix = isEdited ? 'Diubah ' : 'Dibuat ';
-                          final String dateStr = '$prefix${formatDate(isEdited ? rawUpdated : (rawUpdated ?? rawCreated))}';
-
-                          return InkWell(
-                            borderRadius: BorderRadius.circular(10),
-                            onTap: () {
-                              Navigator.pop(context);
-                              Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (_) => NoteEditorPage(
-                                    noteId: noteId,
-                                    initialTitle: title,
-                                    initialContent: content,
-                                  ),
-                                ),
-                              );
-                            },
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  // Judul Catatan di Kiri (Bigger & Bolder, Max 2 Baris, SoftWrap)
-                                  Expanded(
-                                    child: Text(
-                                      title.isNotEmpty ? title : 'Tanpa Judul',
-                                      style: AppTypography.cardTitle(
-                                        color: isDark ? Colors.white : const Color(0xFF0F172A),
-                                      ),
-                                      maxLines: 2,
-                                      softWrap: true,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  // Tanggal di atas tombol > (Tanpa Card)
-                                  Column(
-                                    crossAxisAlignment: CrossAxisAlignment.end,
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Text(
-                                        dateStr,
-                                        style: AppTypography.timestamp(
-                                          color: isDark ? Colors.white38 : const Color(0xFF94A3B8),
-                                        ),
-                                      ),
-                                      const SizedBox(height: 2),
-                                      Icon(
-                                        Icons.chevron_right_rounded,
-                                        size: 16,
-                                        color: isDark ? Colors.white30 : Colors.black26,
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-                          );
-                        },
+                        ],
                       ),
-          ),
+                    ),
+                  );
+                },
+              ),
+            ),
         ],
       ),
     );
@@ -7113,11 +7196,11 @@ class _HomeSearchAndNotesRowState extends State<_HomeSearchAndNotesRow> {
       child: _isExpanded
           ? Container(
               key: const ValueKey('home_search_bar_expanded'),
-              height: 54,
-              padding: const EdgeInsets.fromLTRB(16, 0, 6, 0),
+              height: 48,
+              padding: const EdgeInsets.fromLTRB(14, 0, 8, 0),
               decoration: BoxDecoration(
-                color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
-                borderRadius: BorderRadius.circular(32),
+                color: isDark ? const Color(0xFF18181B) : Colors.white,
+                borderRadius: BorderRadius.circular(28),
                 border: Border.all(
                   color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
                   width: 1.2,
@@ -7143,46 +7226,37 @@ class _HomeSearchAndNotesRowState extends State<_HomeSearchAndNotesRow> {
                         setState(() {});
                         _onChanged(val);
                       },
-                      style: AppTypography.searchInput(
+                      style: AppTypography.timestamp(
                         color: isDark ? Colors.white : Colors.black87,
                       ),
                       decoration: InputDecoration(
-                        hintText: 'Cari kelas / materi...',
-                        hintStyle: AppTypography.searchInput(
-                          color: isDark ? Colors.white38 : Colors.black38,
+                        hintText: 'Cari kelas atau materi...',
+                        hintStyle: AppTypography.subtitle(
+                          color: isDark ? Colors.white38 : Colors.black26,
                         ),
                         border: InputBorder.none,
                         isDense: true,
+                        contentPadding: EdgeInsets.zero,
                       ),
                     ),
                   ),
                   const SizedBox(width: 6),
                   GestureDetector(
                     onTap: _collapse,
+                    behavior: HitTestBehavior.opaque,
                     child: Container(
-                      height: 42,
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      width: 32,
+                      height: 32,
                       decoration: BoxDecoration(
                         color: isDark ? const Color(0xFF27272A) : const Color(0xFF0F172A),
-                        borderRadius: BorderRadius.circular(22),
+                        shape: BoxShape.circle,
                       ),
-                      alignment: Alignment.center,
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(
-                            Icons.close_rounded,
-                            size: 15,
-                            color: Colors.white,
-                          ),
-                          const SizedBox(width: 5),
-                          Text(
-                            'Tutup',
-                            style: AppTypography.buttonLabel(
-                              color: Colors.white,
-                            ),
-                          ),
-                        ],
+                      child: const Center(
+                        child: Icon(
+                          Icons.close_rounded,
+                          size: 16,
+                          color: Colors.white,
+                        ),
                       ),
                     ),
                   ),

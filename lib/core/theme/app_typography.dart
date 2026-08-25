@@ -17,8 +17,7 @@ class AppTypography {
   static const double sizeChatHeaderTitle    = 18.5; // Judul Header Chat (Nama Grup/Kontak)
   static const double sizeChatHeaderSubtitle = 18.0; // Subjudul Header Chat (Status/Anggota)
   static const double sizeDiscussionTitle    = 18.0; // Judul Item di Tab Diskusi
-  static const double sizeChatBody           = 20.0; // Isi Teks Pesan di Daun/Bubble Chat
-  static const double sizeSearchInput        = 18.0; // Kolom Input Pencarian & Hint
+  static const double sizeSearchInput        = 17.0; // Kolom Input Pencarian & Hint
   static const double sizeSenderName         = 18.0; // Nama Pengirim di Daun Chat
   static const double sizeReplyTitle         = 16.5; // Nama Pengirim Reply
   static const double sizeReplySubtitle      = 16.5; // Isi Ringkasan Reply
@@ -27,7 +26,7 @@ class AppTypography {
   static const double sizeTimestamp          = 15.0; // Jam / Keterangan Waktu Pesan & Jadwal
   static const double sizeBodySubtitle       = 15.5; // Keterangan Subtitle / Role ("Siswa · SMA/SMK")
   static const double sizeDocumentTitle      = 18.5; // Nama Berkas Dokumen (Disamakan dengan Judul Chat Grup 18.5px)
-  static const double sizeButtonAction       = 18.0; // Tombol Aksi ("Catatan", "Statistik", dsb.)
+  static const double sizeButtonAction       = 16.0; // Tombol Aksi ("Catatan", "Statistik", dsb.)
   static const double sizeTagChannel         = 13.5; // Tag Channel (#umum, #diskusi)
   static const double sizeDropdown           = 18.0; // Tombol & Opsi Menu Dropdown Selector
   static const double sizeCheckbox           = 18.0; // Teks Label Checkbox & Multi-selector (18px)
