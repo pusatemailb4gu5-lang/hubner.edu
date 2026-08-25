@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hubner/core/widgets/three_dots_loader.dart';
 import 'package:hubner/core/widgets/bouncy_button.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:hubner/core/theme/app_typography.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'chat_room_page.dart';
@@ -134,16 +135,16 @@ class _ManageFriendsPageState extends State<ManageFriendsPage> {
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: Colors.white,
-        title: Text('Hapus Teman', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold)),
-        content: Text('Apakah Anda yakin ingin menghapus $friendName dari daftar teman?', style: GoogleFonts.plusJakartaSans()),
+        title: Text('Hapus Teman', style: AppTypography.buttonLabel(fontWeight: FontWeight.bold)),
+        content: Text('Apakah Anda yakin ingin menghapus $friendName dari daftar teman?', style: AppTypography.buttonLabel()),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: Text('Batal', style: GoogleFonts.plusJakartaSans(color: Colors.black54)),
+            child: Text('Batal', style: AppTypography.buttonLabel(color: Colors.black54)),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: Text('Hapus', style: GoogleFonts.plusJakartaSans(color: Colors.redAccent, fontWeight: FontWeight.bold)),
+            child: Text('Hapus', style: AppTypography.buttonLabel(color: Colors.redAccent, fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -218,11 +219,7 @@ class _ManageFriendsPageState extends State<ManageFriendsPage> {
                       Expanded(
                         child: Text(
                           'Kelola Teman',
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 19.5,
-                            fontWeight: FontWeight.w800,
-                            color: isDark ? Colors.white : const Color(0xFF0F172A),
-                          ),
+                          style: AppTypography.chatHeaderTitle(color: isDark ? Colors.white : const Color(0xFF0F172A), fontWeight: FontWeight.w800),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           textAlign: TextAlign.center,
@@ -259,17 +256,10 @@ class _ManageFriendsPageState extends State<ManageFriendsPage> {
                         Expanded(
                           child: TextField(
                             controller: _friendIdController,
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 16.0,
-                              fontWeight: FontWeight.w600,
-                              color: isDark ? Colors.white : Colors.black87,
-                            ),
+                            style: AppTypography.cardTitle(color: isDark ? Colors.white : Colors.black87, fontWeight: FontWeight.w600),
                             decoration: InputDecoration(
                               hintText: 'Ketik ID pengguna untuk tambah...',
-                              hintStyle: GoogleFonts.dmSans(
-                                fontSize: 15.0,
-                                color: isDark ? Colors.white38 : Colors.black38,
-                              ),
+                              hintStyle: AppTypography.subtitle(color: isDark ? Colors.white38 : Colors.black38),
                               isDense: true,
                               border: InputBorder.none,
                               contentPadding: EdgeInsets.zero,
@@ -295,11 +285,7 @@ class _ManageFriendsPageState extends State<ManageFriendsPage> {
                                   )
                                 : Text(
                                     'Tambah',
-                                    style: GoogleFonts.plusJakartaSans(
-                                      fontSize: 15.5,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white,
-                                    ),
+                                    style: AppTypography.cardTitle(color: Colors.white, fontWeight: FontWeight.bold),
                                   ),
                           ),
                         ),
@@ -315,11 +301,7 @@ class _ManageFriendsPageState extends State<ManageFriendsPage> {
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
                   child: Text(
                     'Daftar Teman Anda',
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 16.5,
-                      fontWeight: FontWeight.w800,
-                      color: isDark ? Colors.white70 : const Color(0xFF0F172A),
-                    ),
+                    style: AppTypography.cardTitle(color: isDark ? Colors.white70 : const Color(0xFF0F172A), fontWeight: FontWeight.w800),
                   ),
                 ),
                 const SizedBox(height: 10),
@@ -336,7 +318,7 @@ class _ManageFriendsPageState extends State<ManageFriendsPage> {
                         return Center(
                           child: Text(
                             'Data tidak ditemukan.',
-                            style: GoogleFonts.dmSans(color: isDark ? Colors.white38 : Colors.black45),
+                            style: AppTypography.timestamp(color: isDark ? Colors.white38 : Colors.black45),
                           ),
                         );
                       }
@@ -348,10 +330,7 @@ class _ManageFriendsPageState extends State<ManageFriendsPage> {
                         return Center(
                           child: Text(
                             'Anda belum memiliki teman.',
-                            style: GoogleFonts.dmSans(
-                              fontSize: 15.2,
-                              color: isDark ? Colors.white38 : Colors.black45,
-                            ),
+                            style: AppTypography.subtitle(color: isDark ? Colors.white38 : Colors.black45),
                           ),
                         );
                       }
@@ -430,22 +409,14 @@ class _ManageFriendsPageState extends State<ManageFriendsPage> {
                                             children: [
                                               Text(
                                                 fName,
-                                                style: GoogleFonts.plusJakartaSans(
-                                                  fontSize: 16.0,
-                                                  fontWeight: FontWeight.bold,
-                                                  color: isDark ? Colors.white : const Color(0xFF0F172A),
-                                                ),
+                                                style: AppTypography.cardTitle(color: isDark ? Colors.white : const Color(0xFF0F172A), fontWeight: FontWeight.bold),
                                                 maxLines: 1,
                                                 overflow: TextOverflow.ellipsis,
                                               ),
                                               const SizedBox(height: 2),
                                               Text(
                                                 'ID: $fUserId',
-                                                style: GoogleFonts.dmSans(
-                                                  fontSize: 14.0,
-                                                  color: isDark ? Colors.white54 : const Color(0xFF64748B),
-                                                  fontWeight: FontWeight.w500,
-                                                ),
+                                                style: AppTypography.timestamp(color: isDark ? Colors.white54 : const Color(0xFF64748B), fontWeight: FontWeight.w500),
                                                 maxLines: 1,
                                                 overflow: TextOverflow.ellipsis,
                                               ),

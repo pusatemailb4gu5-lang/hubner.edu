@@ -1789,7 +1789,7 @@ class _DetailCpPageState extends State<DetailCpPage> {
                                       child: Center(
                                         child: Text(
                                           'Tugas Individu',
-                                          style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, fontSize: 14.0, color: assignmentType == 'individu' ? const Color(0xFF1D4ED8) : (isDark ? Colors.white70 : const Color(0xFF475569))),
+                                          style: AppTypography.buttonLabel(color: assignmentType == 'individu' ? const Color(0xFF1D4ED8) : (isDark ? Colors.white70 : const Color(0xFF475569)), fontWeight: FontWeight.bold),
                                         ),
                                       ),
                                     ),
@@ -1810,7 +1810,7 @@ class _DetailCpPageState extends State<DetailCpPage> {
                                       child: Center(
                                         child: Text(
                                           'Tugas Kelompok',
-                                          style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, fontSize: 14.0, color: assignmentType == 'kelompok' ? const Color(0xFF1D4ED8) : (isDark ? Colors.white70 : const Color(0xFF475569))),
+                                          style: AppTypography.buttonLabel(color: assignmentType == 'kelompok' ? const Color(0xFF1D4ED8) : (isDark ? Colors.white70 : const Color(0xFF475569)), fontWeight: FontWeight.bold),
                                         ),
                                       ),
                                     ),
@@ -1845,7 +1845,7 @@ class _DetailCpPageState extends State<DetailCpPage> {
                                           children: [
                                             Icon(Icons.notes_rounded, size: 16, color: tugasMode == 'text' ? const Color(0xFF1D4ED8) : (isDark ? Colors.white70 : const Color(0xFF475569))),
                                             const SizedBox(width: 6),
-                                            Text('Jawaban Teks', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, fontSize: 14.0, color: tugasMode == 'text' ? const Color(0xFF1D4ED8) : (isDark ? Colors.white70 : const Color(0xFF475569)))),
+                                            Text('Jawaban Teks', style: AppTypography.buttonLabel(color: tugasMode == 'text' ? const Color(0xFF1D4ED8) : (isDark ? Colors.white70 : const Color(0xFF475569)), fontWeight: FontWeight.bold)),
                                           ],
                                         ),
                                       ),
@@ -1870,7 +1870,7 @@ class _DetailCpPageState extends State<DetailCpPage> {
                                           children: [
                                             Icon(Icons.picture_as_pdf_rounded, size: 16, color: tugasMode == 'pdf' ? const Color(0xFF1D4ED8) : (isDark ? Colors.white70 : const Color(0xFF475569))),
                                             const SizedBox(width: 6),
-                                            Text('File PDF', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, fontSize: 14.0, color: tugasMode == 'pdf' ? const Color(0xFF1D4ED8) : (isDark ? Colors.white70 : const Color(0xFF475569)))),
+                                            Text('File PDF', style: AppTypography.buttonLabel(color: tugasMode == 'pdf' ? const Color(0xFF1D4ED8) : (isDark ? Colors.white70 : const Color(0xFF475569)), fontWeight: FontWeight.bold)),
                                           ],
                                         ),
                                       ),
@@ -2555,7 +2555,7 @@ int? taskIdxToEdit,
                                       child: Center(
                                         child: Text(
                                           'Tanpa Batas',
-                                          style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, fontSize: 14.0, color: quizTimeMode == 'no_limit' ? const Color(0xFFB45309) : (isDark ? Colors.white70 : const Color(0xFF475569))),
+                                          style: AppTypography.buttonLabel(color: quizTimeMode == 'no_limit' ? const Color(0xFFB45309) : (isDark ? Colors.white70 : const Color(0xFF475569)), fontWeight: FontWeight.bold),
                                         ),
                                       ),
                                     ),
@@ -2576,7 +2576,7 @@ int? taskIdxToEdit,
                                       child: Center(
                                         child: Text(
                                           'Set Batas Waktu',
-                                          style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, fontSize: 14.0, color: quizTimeMode == 'set_time' ? const Color(0xFFB45309) : (isDark ? Colors.white70 : const Color(0xFF475569))),
+                                          style: AppTypography.buttonLabel(color: quizTimeMode == 'set_time' ? const Color(0xFFB45309) : (isDark ? Colors.white70 : const Color(0xFF475569)), fontWeight: FontWeight.bold),
                                         ),
                                       ),
                                     ),
@@ -2624,8 +2624,8 @@ int? taskIdxToEdit,
                                         dropdownColor: isDark ? const Color(0xFF1E1E24) : Colors.white,
                                         borderRadius: BorderRadius.circular(16),
                                         items: [
-                                          DropdownMenuItem(value: 'per_quiz', child: Text('Menit / Quiz', style: AppTypography.timestamp(color: isDark ? Colors.white : Colors.black87))),
-                                          DropdownMenuItem(value: 'per_question', child: Text('Detik / Soal', style: AppTypography.timestamp(color: isDark ? Colors.white : Colors.black87))),
+                                          DropdownMenuItem(value: 'per_quiz', child: Text('Menit / Quiz', style: AppTypography.dropdownItem(color: isDark ? Colors.white : Colors.black87))),
+                                          DropdownMenuItem(value: 'per_question', child: Text('Detik / Soal', style: AppTypography.dropdownItem(color: isDark ? Colors.white : Colors.black87))),
                                         ],
                                         onChanged: (val) {
                                           if (val != null) setDialogState(() => quizTimeType = val);
@@ -2797,7 +2797,7 @@ int? taskIdxToEdit,
                                               decoration: InputDecoration(
                                                 hintText: 'Pilihan A',
                                                 prefixText: 'A. ',
-                                                prefixStyle: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, color: (q['correct'] ?? 'A') == 'A' ? const Color(0xFF15803D) : (isDark ? Colors.white : const Color(0xFF0F172A)), fontSize: 14.0),
+                                                prefixStyle: AppTypography.buttonLabel(color: (q['correct'] ?? 'A') == 'A' ? const Color(0xFF15803D) : (isDark ? Colors.white : const Color(0xFF0F172A)), fontWeight: FontWeight.bold),
                                                 isDense: true,
                                                 contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                                                 fillColor: (q['correct'] ?? 'A') == 'A' ? (isDark ? const Color(0xFF143825) : const Color(0xFFDCFCE7)) : (isDark ? const Color(0xFF141416) : Colors.white),
@@ -2819,7 +2819,7 @@ int? taskIdxToEdit,
                                               decoration: InputDecoration(
                                                 hintText: 'Pilihan B',
                                                 prefixText: 'B. ',
-                                                prefixStyle: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, color: (q['correct'] ?? 'A') == 'B' ? const Color(0xFF15803D) : (isDark ? Colors.white : const Color(0xFF0F172A)), fontSize: 14.0),
+                                                prefixStyle: AppTypography.buttonLabel(color: (q['correct'] ?? 'A') == 'B' ? const Color(0xFF15803D) : (isDark ? Colors.white : const Color(0xFF0F172A)), fontWeight: FontWeight.bold),
                                                 isDense: true,
                                                 contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                                                 fillColor: (q['correct'] ?? 'A') == 'B' ? (isDark ? const Color(0xFF143825) : const Color(0xFFDCFCE7)) : (isDark ? const Color(0xFF141416) : Colors.white),
@@ -2845,7 +2845,7 @@ int? taskIdxToEdit,
                                               decoration: InputDecoration(
                                                 hintText: 'Pilihan C',
                                                 prefixText: 'C. ',
-                                                prefixStyle: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, color: (q['correct'] ?? 'A') == 'C' ? const Color(0xFF15803D) : (isDark ? Colors.white : const Color(0xFF0F172A)), fontSize: 14.0),
+                                                prefixStyle: AppTypography.buttonLabel(color: (q['correct'] ?? 'A') == 'C' ? const Color(0xFF15803D) : (isDark ? Colors.white : const Color(0xFF0F172A)), fontWeight: FontWeight.bold),
                                                 isDense: true,
                                                 contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                                                 fillColor: (q['correct'] ?? 'A') == 'C' ? (isDark ? const Color(0xFF143825) : const Color(0xFFDCFCE7)) : (isDark ? const Color(0xFF141416) : Colors.white),
@@ -2867,7 +2867,7 @@ int? taskIdxToEdit,
                                               decoration: InputDecoration(
                                                 hintText: 'Pilihan D',
                                                 prefixText: 'D. ',
-                                                prefixStyle: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, color: (q['correct'] ?? 'A') == 'D' ? const Color(0xFF15803D) : (isDark ? Colors.white : const Color(0xFF0F172A)), fontSize: 14.0),
+                                                prefixStyle: AppTypography.buttonLabel(color: (q['correct'] ?? 'A') == 'D' ? const Color(0xFF15803D) : (isDark ? Colors.white : const Color(0xFF0F172A)), fontWeight: FontWeight.bold),
                                                 isDense: true,
                                                 contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                                                 fillColor: (q['correct'] ?? 'A') == 'D' ? (isDark ? const Color(0xFF143825) : const Color(0xFFDCFCE7)) : (isDark ? const Color(0xFF141416) : Colors.white),
@@ -2904,11 +2904,7 @@ int? taskIdxToEdit,
                                                       ),
                                                       child: Text(
                                                         opt,
-                                                        style: GoogleFonts.plusJakartaSans(
-                                                          fontSize: 14.0,
-                                                          fontWeight: FontWeight.bold,
-                                                          color: isSelected ? Colors.white : (isDark ? Colors.white70 : const Color(0xFF0F172A)),
-                                                        ),
+                                                        style: AppTypography.buttonLabel(color: isSelected ? Colors.white : (isDark ? Colors.white70 : const Color(0xFF0F172A)), fontWeight: FontWeight.bold),
                                                       ),
                                                     ),
                                                   );

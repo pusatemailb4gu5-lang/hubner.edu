@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:async';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:hubner/core/theme/app_typography.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:hubner/features/onboarding/presentation/pages/onboarding_page.dart';
 import 'package:hubner/features/home/presentation/pages/main_navigation_page.dart';
@@ -259,11 +260,7 @@ class _SplashPageState extends State<SplashPage> with SingleTickerProviderStateM
                         ),
                         child: Text(
                           'edu',
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: logoFontSize * 0.35,
-                            fontWeight: FontWeight.bold,
-                            color: isDark ? Colors.white : const Color(0xFF7C3AED),
-                          ),
+                          style: AppTypography.buttonLabel(color: isDark ? Colors.white : const Color(0xFF7C3AED), fontWeight: FontWeight.bold),
                         ),
                       ),
                     ],

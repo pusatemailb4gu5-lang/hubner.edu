@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:hubner/core/theme/app_typography.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:hubner/core/theme/app_colors.dart';
 import 'package:audioplayers/audioplayers.dart';
@@ -239,11 +240,7 @@ class _InAppFileViewerDialogState extends State<InAppFileViewerDialog> {
                           widget.fileName,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w700,
-                            color: isDark ? Colors.white : const Color(0xFF0F172A),
-                          ),
+                          style: AppTypography.documentTitle(color: isDark ? Colors.white : const Color(0xFF0F172A), fontWeight: FontWeight.bold),
                         ),
                         const SizedBox(height: 2),
                         Row(
@@ -251,10 +248,7 @@ class _InAppFileViewerDialogState extends State<InAppFileViewerDialog> {
                             if (widget.uploaderName != null && widget.uploaderName!.isNotEmpty) ...[
                               Text(
                                 widget.uploaderName!,
-                                style: GoogleFonts.dmSans(
-                                  fontSize: 12,
-                                  color: isDark ? Colors.white60 : Colors.black45,
-                                ),
+                                style: AppTypography.fileSize(color: isDark ? Colors.white60 : Colors.black45),
                               ),
                               const SizedBox(width: 6),
                               Container(
@@ -270,20 +264,14 @@ class _InAppFileViewerDialogState extends State<InAppFileViewerDialog> {
                             if (widget.fileSize > 0) ...[
                               Text(
                                 _formatBytes(widget.fileSize),
-                                style: GoogleFonts.dmSans(
-                                  fontSize: 12,
-                                  color: isDark ? Colors.white60 : Colors.black45,
-                                ),
+                                style: AppTypography.fileSize(color: isDark ? Colors.white60 : Colors.black45),
                               ),
                               const SizedBox(width: 6),
                             ],
                             if (widget.dateFormatted != null && widget.dateFormatted!.isNotEmpty) ...[
                               Text(
                                 widget.dateFormatted!,
-                                style: GoogleFonts.dmSans(
-                                  fontSize: 12,
-                                  color: isDark ? Colors.white60 : Colors.black45,
-                                ),
+                                style: AppTypography.fileSize(color: isDark ? Colors.white60 : Colors.black45),
                               ),
                             ],
                           ],
@@ -338,7 +326,7 @@ class _InAppFileViewerDialogState extends State<InAppFileViewerDialog> {
                       icon: const Icon(Icons.copy_rounded, size: 16),
                       label: Text(
                         'Salin Tautan',
-                        style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w600, fontSize: 13),
+                        style: AppTypography.channelTag(fontWeight: FontWeight.w600),
                       ),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: isDark ? Colors.white70 : Colors.black87,
@@ -360,11 +348,7 @@ class _InAppFileViewerDialogState extends State<InAppFileViewerDialog> {
                       icon: const Icon(Icons.open_in_new_rounded, size: 16, color: Colors.white),
                       label: Text(
                         'Buka Berkas',
-                        style: GoogleFonts.plusJakartaSans(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 13,
-                          color: Colors.white,
-                        ),
+                        style: AppTypography.channelTag(color: Colors.white, fontWeight: FontWeight.bold),
                       ),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF2563EB),
@@ -417,7 +401,7 @@ class _InAppFileViewerDialogState extends State<InAppFileViewerDialog> {
                       const SizedBox(height: 12),
                       Text(
                         'Gagal memuat pratinjau gambar',
-                        style: GoogleFonts.dmSans(color: isDark ? Colors.white60 : Colors.black54),
+                        style: AppTypography.timestamp(color: isDark ? Colors.white60 : Colors.black54),
                       ),
                     ],
                   ),
@@ -458,11 +442,7 @@ class _InAppFileViewerDialogState extends State<InAppFileViewerDialog> {
               textAlign: TextAlign.center,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: isDark ? Colors.white : Colors.black87,
-              ),
+              style: AppTypography.cardTitle(color: isDark ? Colors.white : Colors.black87, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 20),
             SliderTheme(
@@ -488,11 +468,11 @@ class _InAppFileViewerDialogState extends State<InAppFileViewerDialog> {
                 children: [
                   Text(
                     _formatDuration(_position),
-                    style: GoogleFonts.dmSans(fontSize: 12, color: isDark ? Colors.white60 : Colors.black54),
+                    style: AppTypography.fileSize(color: isDark ? Colors.white60 : Colors.black54),
                   ),
                   Text(
                     _formatDuration(_duration),
-                    style: GoogleFonts.dmSans(fontSize: 12, color: isDark ? Colors.white60 : Colors.black54),
+                    style: AppTypography.fileSize(color: isDark ? Colors.white60 : Colors.black54),
                   ),
                 ],
               ),
@@ -590,19 +570,12 @@ class _InAppFileViewerDialogState extends State<InAppFileViewerDialog> {
           Text(
             widget.fileName,
             textAlign: TextAlign.center,
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: isDark ? Colors.white : Colors.black87,
-            ),
+            style: AppTypography.cardTitle(color: isDark ? Colors.white : Colors.black87, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
           Text(
             _isPdf ? 'Dokumen Format PDF' : 'Berkas Repositori Hubner Edu',
-            style: GoogleFonts.dmSans(
-              fontSize: 13.5,
-              color: isDark ? Colors.white60 : Colors.black54,
-            ),
+            style: AppTypography.timestamp(color: isDark ? Colors.white60 : Colors.black54),
           ),
           const SizedBox(height: 16),
           Container(
@@ -619,10 +592,7 @@ class _InAppFileViewerDialogState extends State<InAppFileViewerDialog> {
                 const SizedBox(width: 8),
                 Text(
                   'Akses publik aman & terenkripsi',
-                  style: GoogleFonts.dmSans(
-                    fontSize: 12.5,
-                    color: isDark ? Colors.white70 : Colors.black54,
-                  ),
+                  style: AppTypography.fileSize(color: isDark ? Colors.white70 : Colors.black54),
                 ),
               ],
             ),

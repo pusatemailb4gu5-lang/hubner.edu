@@ -26,9 +26,11 @@ class AppTypography {
   static const double sizeCardTitle          = 16.5; // Judul Kartu Kelas / Catatan
   static const double sizeTimestamp          = 15.0; // Jam / Keterangan Waktu Pesan & Jadwal
   static const double sizeBodySubtitle       = 15.5; // Keterangan Subtitle / Role ("Siswa · SMA/SMK")
-  static const double sizeDocumentTitle      = 16.5; // Nama Berkas Lampiran (.pdf, .docx)
+  static const double sizeDocumentTitle      = 18.5; // Nama Berkas Dokumen (Disamakan dengan Judul Chat Grup 18.5px)
   static const double sizeButtonAction       = 18.0; // Tombol Aksi ("Catatan", "Statistik", dsb.)
   static const double sizeTagChannel         = 13.5; // Tag Channel (#umum, #diskusi)
+  static const double sizeDropdown           = 18.0; // Tombol & Opsi Menu Dropdown Selector
+  static const double sizeCheckbox           = 18.0; // Teks Label Checkbox & Multi-selector (18px)
   static const double sizeFileSize           = 12.0; // Ukuran Berkas Lampiran (KB/MB)
   static const double sizeMicroBadge         = 11.0; // Tag Status / HD Badge / Counter Reaksi
 
@@ -486,6 +488,75 @@ class AppTypography {
   }) {
     return GoogleFonts.plusJakartaSans(
       fontSize: fontSize ?? sizeMicroBadge,
+      fontWeight: fontWeight,
+      fontStyle: fontStyle,
+      color: color,
+      letterSpacing: letterSpacing,
+      height: height,
+      decoration: decoration,
+      decorationColor: decorationColor,
+    );
+  }
+
+  /// 21. Teks Tombol / Label Dropdown & Selector (.dropdown-button)
+  static TextStyle dropdown({
+    Color? color,
+    FontWeight fontWeight = FontWeight.w600,
+    FontStyle? fontStyle,
+    double? letterSpacing,
+    double? height,
+    TextDecoration? decoration,
+    Color? decorationColor,
+    double? fontSize,
+  }) {
+    return GoogleFonts.plusJakartaSans(
+      fontSize: fontSize ?? sizeDropdown,
+      fontWeight: fontWeight,
+      fontStyle: fontStyle,
+      color: color,
+      letterSpacing: letterSpacing,
+      height: height,
+      decoration: decoration,
+      decorationColor: decorationColor,
+    );
+  }
+
+  /// 22. Teks Opsi Menu Dropdown (.dropdown-item)
+  static TextStyle dropdownItem({
+    Color? color,
+    FontWeight fontWeight = FontWeight.w500,
+    FontStyle? fontStyle,
+    double? letterSpacing,
+    double? height,
+    TextDecoration? decoration,
+    Color? decorationColor,
+    double? fontSize,
+  }) {
+    return GoogleFonts.plusJakartaSans(
+      fontSize: fontSize ?? sizeDropdown,
+      fontWeight: fontWeight,
+      fontStyle: fontStyle,
+      color: color,
+      letterSpacing: letterSpacing,
+      height: height,
+      decoration: decoration,
+      decorationColor: decorationColor,
+    );
+  }
+
+  /// 23. Teks Label Checkbox & Multi-selector (.checkbox-label)
+  static TextStyle checkboxLabel({
+    Color? color,
+    FontWeight fontWeight = FontWeight.w600,
+    FontStyle? fontStyle,
+    double? letterSpacing,
+    double? height,
+    TextDecoration? decoration,
+    Color? decorationColor,
+    double? fontSize,
+  }) {
+    return GoogleFonts.plusJakartaSans(
+      fontSize: fontSize ?? sizeCheckbox,
       fontWeight: fontWeight,
       fontStyle: fontStyle,
       color: color,

@@ -575,8 +575,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
             const SizedBox(width: 6),
             Text(
               label,
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 13.5,
+              style: AppTypography.checkboxLabel(
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
                 color: isSelected
                     ? (isDark ? Colors.white : const Color(0xFF0F172A))
@@ -1164,7 +1163,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                                  Expanded(
                                                    child: Text(
                                                      className,
-                                                     style: AppTypography.channelTag(color: isDark ? Colors.white : Colors.black87, fontWeight: FontWeight.bold, height: 1.15),
+                                                     style: AppTypography.dropdown(color: isDark ? Colors.white : Colors.black87, fontWeight: FontWeight.bold, height: 1.15),
                                                      maxLines: 2,
                                                      overflow: TextOverflow.ellipsis,
                                                    ),
@@ -1368,7 +1367,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                                             .toString()
                                                             .replaceFirst(RegExp(r'^Materi\s*\d*:\s*', caseSensitive: false), '')
                                                             .trim()),
-                                                    style: AppTypography.channelTag(color: isDark ? Colors.white : Colors.black87, fontWeight: FontWeight.bold, height: 1.15),
+                                                    style: AppTypography.dropdown(color: isDark ? Colors.white : Colors.black87, fontWeight: FontWeight.bold, height: 1.15),
                                                     overflow: TextOverflow.ellipsis,
                                                     maxLines: 2,
                                                   ),
@@ -1420,7 +1419,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                                       }
                                                       return 'Materi';
                                                     })(),
-                                                    style: AppTypography.channelTag(color: isDark ? Colors.white : Colors.black87, fontWeight: FontWeight.bold, height: 1.15),
+                                                    style: AppTypography.dropdown(color: isDark ? Colors.white : Colors.black87, fontWeight: FontWeight.bold, height: 1.15),
                                                     overflow: TextOverflow.ellipsis,
                                                     maxLines: 2,
                                                   ),
@@ -2032,11 +2031,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                                                                           alignment: Alignment.center,
                                                                                           child: Text(
                                                                                             isFinished ? quizScore.toString() : '-',
-                                                                                            style: GoogleFonts.plusJakartaSans(
-                                                                                              fontSize: 14.0,
-                                                                                              fontWeight: FontWeight.bold,
-                                                                                              color: isFinished ? (isDark ? const Color(0xFFFDBA74) : const Color(0xFFEA580C)) : (isDark ? const Color(0xFF71717A) : Colors.black45),
-                                                                                            ),
+                                                                                            style: AppTypography.buttonLabel(color: isFinished ? (isDark ? const Color(0xFFFDBA74) : const Color(0xFFEA580C)) : (isDark ? const Color(0xFF71717A) : Colors.black45), fontWeight: FontWeight.bold),
                                                                                           ),
                                                                                         ),
                                                                                       ),

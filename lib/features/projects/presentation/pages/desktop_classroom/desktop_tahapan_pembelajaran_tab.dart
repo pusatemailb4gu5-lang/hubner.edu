@@ -527,7 +527,7 @@ class _DesktopTahapanPembelajaranTabState
                                         const SizedBox(width: 8),
                                         Text(
                                           'Pilih Semua (${_selectedManageIndices.length}/${stages.length})',
-                                          style: AppTypography.buttonLabel(color: const Color(0xFF1E293B), fontWeight: FontWeight.bold),
+                                          style: AppTypography.checkboxLabel(color: const Color(0xFF1E293B), fontWeight: FontWeight.bold),
                                         ),
                                       ],
                                     ),

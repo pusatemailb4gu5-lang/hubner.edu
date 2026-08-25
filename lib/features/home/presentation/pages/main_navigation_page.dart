@@ -184,7 +184,7 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
                                 displayMsg,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                style: GoogleFonts.dmSans(fontSize: 14),
+                                style: AppTypography.timestamp(),
                               ),
                             ),
                           ],
@@ -306,10 +306,10 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
                               border: Border.all(color: Colors.white.withValues(alpha: 0.24), width: 1.0),
                             ),
                             child: TextField(
-                              style: GoogleFonts.dmSans(fontSize: 15.2, color: Colors.white),
+                              style: AppTypography.subtitle(color: Colors.white),
                               decoration: InputDecoration(
                                 hintText: 'Cari sesuatu...',
-                                hintStyle: GoogleFonts.dmSans(color: Colors.white70, fontSize: 15.2),
+                                hintStyle: AppTypography.subtitle(color: Colors.white70),
                                 prefixIcon: const Icon(Icons.search_rounded, color: Colors.white70, size: 18),
                                 border: InputBorder.none,
                                 contentPadding: const EdgeInsets.symmetric(vertical: 8),
@@ -355,11 +355,7 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
                             ),
                             child: Text(
                               role,
-                              style: GoogleFonts.plusJakartaSans(
-                                fontSize: 12.9,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.white,
-                              ),
+                              style: AppTypography.channelTag(color: Colors.white, fontWeight: FontWeight.w600),
                             ),
                           ),
                           const SizedBox(width: 12),
@@ -510,10 +506,7 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
       size: const Size(38, 20),
       painter: CutoutTextPainter(
         text: 'edu',
-        textStyle: GoogleFonts.plusJakartaSans(
-          fontSize: 12.9,
-          fontWeight: FontWeight.bold,
-        ),
+        textStyle: AppTypography.channelTag(fontWeight: FontWeight.bold),
       ),
     );
   }
@@ -813,11 +806,7 @@ class _FluidIPhoneBottomNavBarState extends State<_FluidIPhoneBottomNavBar>
                                         child: Center(
                                           child: Text(
                                             '$unread',
-                                            style: GoogleFonts.plusJakartaSans(
-                                              color: Colors.white,
-                                              fontSize: 9.5,
-                                              fontWeight: FontWeight.bold,
-                                            ),
+                                            style: AppTypography.microBadge(color: Colors.white, fontWeight: FontWeight.bold),
                                           ),
                                         ),
                                       ),
@@ -1196,11 +1185,7 @@ class _DiscussionTabState extends State<DiscussionTab> {
                       children: [
                         Text(
                           'Diskusi',
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 23.4,
-                            fontWeight: FontWeight.w600,
-                            color: isDark ? Colors.white : Colors.black,
-                          ),
+                          style: AppTypography.pageTitle(color: isDark ? Colors.white : Colors.black, fontWeight: FontWeight.w600),
                         ),
                         BouncyButton(
                           onTap: () {
@@ -1261,14 +1246,10 @@ class _DiscussionTabState extends State<DiscussionTab> {
                                   _searchQuery = val;
                                 });
                               },
-                              style: AppTypography.searchInput(
-                                color: isDark ? Colors.white : Colors.black87,
-                              ),
+                              style: AppTypography.searchInput(color: isDark ? Colors.white : Colors.black87),
                               decoration: InputDecoration(
                                 hintText: 'Cari thread diskusi...',
-                                hintStyle: AppTypography.searchInput(
-                                  color: isDark ? Colors.white38 : Colors.black38,
-                                ),
+                                hintStyle: AppTypography.searchInput(color: isDark ? Colors.white38 : Colors.black38),
                                 border: InputBorder.none,
                                 isDense: true,
                                 contentPadding: const EdgeInsets.symmetric(vertical: 10),
@@ -1307,10 +1288,7 @@ class _DiscussionTabState extends State<DiscussionTab> {
                       _searchQuery.isEmpty
                           ? 'Belum ada diskusi. Buat sekarang!'
                           : 'Tidak ada diskusi yang cocok.',
-                      style: GoogleFonts.dmSans(
-                        fontSize: 15.2,
-                        color: isDark ? Colors.white38 : Colors.black45,
-                      ),
+                      style: AppTypography.subtitle(color: isDark ? Colors.white38 : Colors.black45),
                     ),
                   ),
                 ),
@@ -1365,11 +1343,7 @@ class _DiscussionTabState extends State<DiscussionTab> {
                               const SizedBox(height: 3),
                               Text(
                                 'Hapus Chat',
-                                style: GoogleFonts.plusJakartaSans(
-                                  color: Colors.white,
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.bold,
-                                ),
+                                style: AppTypography.microBadge(color: Colors.white, fontWeight: FontWeight.bold),
                               ),
                             ],
                           ),
@@ -1383,27 +1357,18 @@ class _DiscussionTabState extends State<DiscussionTab> {
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                               title: Text(
                                 'Kosongkan Chat Pribadi?',
-                                style: GoogleFonts.plusJakartaSans(
-                                  fontWeight: FontWeight.bold,
-                                  color: isDark ? Colors.white : Colors.black,
-                                ),
+                                style: AppTypography.buttonLabel(color: isDark ? Colors.white : Colors.black, fontWeight: FontWeight.bold),
                               ),
                               content: Text(
                                 'Chat ini akan dihapus dari daftar Anda dan hanya dikosongkan untuk Anda. Riwayat akan muncul kembali jika ada pesan baru.',
-                                style: GoogleFonts.dmSans(
-                                  fontSize: 14,
-                                  color: isDark ? Colors.white70 : Colors.black87,
-                                ),
+                                style: AppTypography.timestamp(color: isDark ? Colors.white70 : Colors.black87),
                               ),
                               actions: [
                                 TextButton(
                                   onPressed: () => Navigator.pop(ctx, false),
                                   child: Text(
                                     'Batal',
-                                    style: GoogleFonts.plusJakartaSans(
-                                      color: isDark ? Colors.white60 : Colors.black54,
-                                      fontWeight: FontWeight.w600,
-                                    ),
+                                    style: AppTypography.buttonLabel(color: isDark ? Colors.white60 : Colors.black54, fontWeight: FontWeight.w600),
                                   ),
                                 ),
                                 ElevatedButton(
@@ -1415,7 +1380,7 @@ class _DiscussionTabState extends State<DiscussionTab> {
                                   ),
                                   child: Text(
                                     'Hapus untuk Saya',
-                                    style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold),
+                                    style: AppTypography.buttonLabel(fontWeight: FontWeight.bold),
                                   ),
                                 ),
                               ],
@@ -1508,30 +1473,19 @@ class _DiscussionTabState extends State<DiscussionTab> {
                                                         : channelName),
                                                 maxLines: 1,
                                                 overflow: TextOverflow.ellipsis,
-                                                style: GoogleFonts.plusJakartaSans(
-                                                  fontSize: 13.5,
-                                                  fontWeight: FontWeight.w600,
-                                                  color: isDark ? const Color(0xFF2DD4BF) : const Color(0xFF0F766E),
-                                                ),
+                                                style: AppTypography.buttonLabel(color: isDark ? const Color(0xFF2DD4BF) : const Color(0xFF475569), fontWeight: FontWeight.w600),
                                               ),
                                             ),
                                             Text(
                                               time,
-                                              style: GoogleFonts.dmSans(
-                                                fontSize: 15.0,
-                                                color: isDark ? Colors.white38 : Colors.black38,
-                                              ),
+                                              style: AppTypography.subtitle(color: isDark ? Colors.white38 : Colors.black38),
                                             ),
                                           ],
                                         ),
                                         const SizedBox(height: 4),
                                         Text(
                                           title,
-                                          style: GoogleFonts.plusJakartaSans(
-                                            fontSize: 18.0,
-                                            fontWeight: FontWeight.bold,
-                                            color: isDark ? Colors.white : Colors.black87,
-                                          ),
+                                          style: AppTypography.chatHeaderTitle(color: isDark ? Colors.white : Colors.black87, fontWeight: FontWeight.bold),
                                         ),
                                       ] else ...[
                                         Row(
@@ -1542,20 +1496,13 @@ class _DiscussionTabState extends State<DiscussionTab> {
                                                 title,
                                                 maxLines: 1,
                                                 overflow: TextOverflow.ellipsis,
-                                                style: GoogleFonts.plusJakartaSans(
-                                                  fontSize: 18.0,
-                                                  fontWeight: FontWeight.bold,
-                                                  color: isDark ? Colors.white : Colors.black87,
-                                                ),
+                                                style: AppTypography.chatHeaderTitle(color: isDark ? Colors.white : Colors.black87, fontWeight: FontWeight.bold),
                                               ),
                                             ),
                                             const SizedBox(width: 8),
                                             Text(
                                               time,
-                                              style: GoogleFonts.dmSans(
-                                                fontSize: 15.0,
-                                                color: isDark ? Colors.white38 : Colors.black38,
-                                              ),
+                                              style: AppTypography.subtitle(color: isDark ? Colors.white38 : Colors.black38),
                                             ),
                                           ],
                                         ),
@@ -1565,10 +1512,7 @@ class _DiscussionTabState extends State<DiscussionTab> {
                                         lastMsg,
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
-                                        style: GoogleFonts.dmSans(
-                                          fontSize: 15.0,
-                                          color: isDark ? Colors.white60 : Colors.black54,
-                                        ),
+                                        style: AppTypography.subtitle(color: isDark ? Colors.white60 : Colors.black54),
                                       ),
                                     ],
                                   ),
@@ -1588,11 +1532,7 @@ class _DiscussionTabState extends State<DiscussionTab> {
                                     child: Center(
                                       child: Text(
                                         '$unreadCount',
-                                        style: GoogleFonts.plusJakartaSans(
-                                          color: Colors.white,
-                                          fontSize: 11.5,
-                                          fontWeight: FontWeight.bold,
-                                        ),
+                                        style: AppTypography.microBadge(color: Colors.white, fontWeight: FontWeight.bold),
                                       ),
                                     ),
                                   ),
@@ -1685,10 +1625,7 @@ class _DiscussionTabState extends State<DiscussionTab> {
                         const SizedBox(height: 16),
                         Text(
                           'Pilih diskusi untuk memulai chat',
-                          style: GoogleFonts.dmSans(
-                            fontSize: 16.4,
-                            color: isDark ? Colors.white38 : Colors.black45,
-                          ),
+                          style: AppTypography.replySubtitle(color: isDark ? Colors.white38 : Colors.black45),
                         ),
                       ],
                     ),
@@ -1755,11 +1692,7 @@ class _DiscussionTabState extends State<DiscussionTab> {
                             const SizedBox(width: 42),
                             Text(
                               'Diskusi',
-                              style: GoogleFonts.plusJakartaSans(
-                                fontSize: 16.0,
-                                fontWeight: FontWeight.w800,
-                                color: isDark ? Colors.white : const Color(0xFF0F172A),
-                              ),
+                              style: AppTypography.cardTitle(color: isDark ? Colors.white : const Color(0xFF0F172A), fontWeight: FontWeight.w800),
                             ),
                             BouncyButton(
                               onTap: () {
@@ -2089,11 +2022,7 @@ class _WhatsAppStyleNewChatModalState extends State<_WhatsAppStyleNewChatModal> 
                     children: [
                       Text(
                         'Kelola Anggota (${selectedMembers.length})',
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 17,
-                          fontWeight: FontWeight.bold,
-                          color: isDark ? Colors.white : Colors.black87,
-                        ),
+                        style: AppTypography.cardTitle(color: isDark ? Colors.white : Colors.black87, fontWeight: FontWeight.bold),
                       ),
                       GestureDetector(
                         onTap: () {
@@ -2121,11 +2050,7 @@ class _WhatsAppStyleNewChatModalState extends State<_WhatsAppStyleNewChatModal> 
                               const SizedBox(width: 4),
                               Text(
                                 '+ Tambah',
-                                style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 12.0,
-                                  fontWeight: FontWeight.bold,
-                                  color: isFriendMode ? const Color(0xFF6366F1) : const Color(0xFF0F766E),
-                                ),
+                                style: AppTypography.channelTag(color: isFriendMode ? const Color(0xFF6366F1) : const Color(0xFF0F766E), fontWeight: FontWeight.bold),
                               ),
                             ],
                           ),
@@ -2172,11 +2097,7 @@ class _WhatsAppStyleNewChatModalState extends State<_WhatsAppStyleNewChatModal> 
                               Flexible(
                                 child: Text(
                                   name,
-                                  style: GoogleFonts.plusJakartaSans(
-                                    fontSize: 13.5,
-                                    fontWeight: FontWeight.bold,
-                                    color: isDark ? Colors.white : Colors.black87,
-                                  ),
+                                  style: AppTypography.buttonLabel(color: isDark ? Colors.white : Colors.black87, fontWeight: FontWeight.bold),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                 ),
@@ -2191,11 +2112,7 @@ class _WhatsAppStyleNewChatModalState extends State<_WhatsAppStyleNewChatModal> 
                                   ),
                                   child: Text(
                                     'Guru',
-                                    style: GoogleFonts.plusJakartaSans(
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.bold,
-                                      color: const Color(0xFF0F766E),
-                                    ),
+                                    style: AppTypography.microBadge(color: const Color(0xFF0F766E), fontWeight: FontWeight.bold),
                                   ),
                                 ),
                               ] else if (isAdmin) ...[
@@ -2208,11 +2125,7 @@ class _WhatsAppStyleNewChatModalState extends State<_WhatsAppStyleNewChatModal> 
                                   ),
                                   child: Text(
                                     'Admin',
-                                    style: GoogleFonts.plusJakartaSans(
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.bold,
-                                      color: const Color(0xFF2563EB),
-                                    ),
+                                    style: AppTypography.microBadge(color: const Color(0xFF2563EB), fontWeight: FontWeight.bold),
                                   ),
                                 ),
                               ],
@@ -2222,10 +2135,7 @@ class _WhatsAppStyleNewChatModalState extends State<_WhatsAppStyleNewChatModal> 
                             isGuru
                                 ? 'Admin Utama (Guru)'
                                 : (isAdmin ? 'Admin Grup' : (isFriendMode ? 'Teman' : 'Anggota')),
-                            style: GoogleFonts.dmSans(
-                              fontSize: 11.5,
-                              color: isDark ? Colors.white60 : Colors.black54,
-                            ),
+                            style: AppTypography.fileSize(color: isDark ? Colors.white60 : Colors.black54),
                           ),
                           trailing: Row(
                             mainAxisSize: MainAxisSize.min,
@@ -2251,13 +2161,7 @@ class _WhatsAppStyleNewChatModalState extends State<_WhatsAppStyleNewChatModal> 
                                   ),
                                   child: Text(
                                     _adminUids.contains(mUid) ? 'Lepas Admin' : 'Jadikan Admin',
-                                    style: GoogleFonts.plusJakartaSans(
-                                      fontSize: 11.5,
-                                      fontWeight: FontWeight.bold,
-                                      color: _adminUids.contains(mUid)
-                                          ? const Color(0xFFE11D48)
-                                          : const Color(0xFF2563EB),
-                                    ),
+                                    style: AppTypography.microBadge(color: _adminUids.contains(mUid) ? Colors.orange : const Color(0xFF2563EB), fontWeight: FontWeight.bold),
                                   ),
                                 ),
                               // Hapus dari grup button
@@ -2338,11 +2242,7 @@ class _WhatsAppStyleNewChatModalState extends State<_WhatsAppStyleNewChatModal> 
                 child: Center(
                   child: Text(
                     '+$remaining',
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 12.0,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
+                    style: AppTypography.channelTag(color: Colors.white, fontWeight: FontWeight.bold),
                   ),
                 ),
               ),
@@ -2622,11 +2522,7 @@ class _WhatsAppStyleNewChatModalState extends State<_WhatsAppStyleNewChatModal> 
                           : (_step == 1
                               ? (isFriendMode ? 'Pilih Teman Diskusi' : 'Buat Diskusi Kelas')
                               : (isFriendMode ? 'Info Diskusi Teman' : 'Info Grup Diskusi')),
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 18.0,
-                        fontWeight: FontWeight.bold,
-                        color: isDark ? Colors.white : Colors.black,
-                      ),
+                      style: AppTypography.chatHeaderTitle(color: isDark ? Colors.white : Colors.black, fontWeight: FontWeight.bold),
                     ),
                   ],
                 ),
@@ -2715,11 +2611,7 @@ class _WhatsAppStyleNewChatModalState extends State<_WhatsAppStyleNewChatModal> 
                             )
                           : Text(
                               'Buat',
-                              style: GoogleFonts.plusJakartaSans(
-                                fontSize: 13.5,
-                                fontWeight: FontWeight.bold,
-                                color: isDark ? Colors.black : Colors.white,
-                              ),
+                              style: AppTypography.buttonLabel(color: isDark ? Colors.black : Colors.white, fontWeight: FontWeight.bold),
                             ),
                     ),
                   ),
@@ -2760,16 +2652,10 @@ class _WhatsAppStyleNewChatModalState extends State<_WhatsAppStyleNewChatModal> 
                             _contactSearch = val.trim().toLowerCase();
                           });
                         },
-                        style: GoogleFonts.dmSans(
-                          fontSize: 20.0,
-                          color: isDark ? Colors.white : Colors.black87,
-                        ),
+                        style: AppTypography.chatBody(color: isDark ? Colors.white : Colors.black87),
                         decoration: InputDecoration(
                           hintText: 'Cari kontak, kelas, atau teman',
-                          hintStyle: GoogleFonts.dmSans(
-                            color: isDark ? Colors.white38 : Colors.black38,
-                            fontSize: 20.0,
-                          ),
+                          hintStyle: AppTypography.chatBody(color: isDark ? Colors.white38 : Colors.black38),
                           border: InputBorder.none,
                           isDense: true,
                           contentPadding: const EdgeInsets.symmetric(vertical: 8),
@@ -2833,19 +2719,12 @@ class _WhatsAppStyleNewChatModalState extends State<_WhatsAppStyleNewChatModal> 
                           children: [
                             Text(
                               'Buat Diskusi Kelas',
-                              style: GoogleFonts.plusJakartaSans(
-                                fontSize: 15.0,
-                                fontWeight: FontWeight.bold,
-                                color: isDark ? Colors.white : const Color(0xFF0F172A),
-                              ),
+                              style: AppTypography.buttonLabel(color: isDark ? Colors.white : const Color(0xFF0F172A), fontWeight: FontWeight.bold),
                             ),
                             const SizedBox(height: 2),
                             Text(
                               'Pilih kelas & anggota untuk diskusi kelompok baru',
-                              style: GoogleFonts.dmSans(
-                                fontSize: 12.5,
-                                color: isDark ? Colors.white60 : const Color(0xFF64748B),
-                              ),
+                              style: AppTypography.fileSize(color: isDark ? Colors.white60 : const Color(0xFF64748B)),
                             ),
                           ],
                         ),
@@ -2910,19 +2789,12 @@ class _WhatsAppStyleNewChatModalState extends State<_WhatsAppStyleNewChatModal> 
                           children: [
                             Text(
                               'Buat Diskusi dengan Teman',
-                              style: GoogleFonts.plusJakartaSans(
-                                fontSize: 15.0,
-                                fontWeight: FontWeight.bold,
-                                color: isDark ? Colors.white : const Color(0xFF0F172A),
-                              ),
+                              style: AppTypography.buttonLabel(color: isDark ? Colors.white : const Color(0xFF0F172A), fontWeight: FontWeight.bold),
                             ),
                             const SizedBox(height: 2),
                             Text(
                               'Pilih teman untuk diskusi kelompok tanpa verifikasi kelas',
-                              style: GoogleFonts.dmSans(
-                                fontSize: 12.5,
-                                color: isDark ? Colors.white60 : const Color(0xFF64748B),
-                              ),
+                              style: AppTypography.fileSize(color: isDark ? Colors.white60 : const Color(0xFF64748B)),
                             ),
                           ],
                         ),
@@ -2958,10 +2830,7 @@ class _WhatsAppStyleNewChatModalState extends State<_WhatsAppStyleNewChatModal> 
                     return Center(
                       child: Text(
                         'Belum ada kontak ditemukan.',
-                        style: GoogleFonts.dmSans(
-                          fontSize: 14,
-                          color: isDark ? Colors.white38 : Colors.black45,
-                        ),
+                        style: AppTypography.timestamp(color: isDark ? Colors.white38 : Colors.black45),
                       ),
                     );
                   }
@@ -2987,10 +2856,7 @@ class _WhatsAppStyleNewChatModalState extends State<_WhatsAppStyleNewChatModal> 
                     return Center(
                       child: Text(
                         'Tidak ada kontak yang cocok.',
-                        style: GoogleFonts.dmSans(
-                          fontSize: 14,
-                          color: isDark ? Colors.white38 : Colors.black45,
-                        ),
+                        style: AppTypography.timestamp(color: isDark ? Colors.white38 : Colors.black45),
                       ),
                     );
                   }
@@ -3029,23 +2895,13 @@ class _WhatsAppStyleNewChatModalState extends State<_WhatsAppStyleNewChatModal> 
                                 children: [
                                   Text(
                                     '#',
-                                    style: GoogleFonts.plusJakartaSans(
-                                      fontSize: 14.5,
-                                      fontWeight: FontWeight.w900,
-                                      color: isFriendsGroup
-                                          ? const Color(0xFF6366F1)
-                                          : const Color(0xFF0F766E),
-                                    ),
+                                    style: AppTypography.buttonLabel(color: isFriendsGroup ? const Color(0xFF10B981) : const Color(0xFF6366F1), fontWeight: FontWeight.w900),
                                   ),
                                   const SizedBox(width: 6),
                                   Expanded(
                                     child: Text(
                                       className,
-                                      style: GoogleFonts.plusJakartaSans(
-                                        fontSize: 13.5,
-                                        fontWeight: FontWeight.bold,
-                                        color: isDark ? Colors.white : const Color(0xFF0F172A),
-                                      ),
+                                      style: AppTypography.buttonLabel(color: isDark ? Colors.white : const Color(0xFF0F172A), fontWeight: FontWeight.bold),
                                     ),
                                   ),
                                   Container(
@@ -3056,11 +2912,7 @@ class _WhatsAppStyleNewChatModalState extends State<_WhatsAppStyleNewChatModal> 
                                     ),
                                     child: Text(
                                       '${members.length} Kontak',
-                                      style: GoogleFonts.plusJakartaSans(
-                                        fontSize: 11.0,
-                                        fontWeight: FontWeight.w600,
-                                        color: isDark ? Colors.white70 : const Color(0xFF64748B),
-                                      ),
+                                      style: AppTypography.microBadge(color: isDark ? Colors.white70 : const Color(0xFF64748B), fontWeight: FontWeight.w600),
                                     ),
                                   ),
                                   const SizedBox(width: 6),
@@ -3116,20 +2968,13 @@ class _WhatsAppStyleNewChatModalState extends State<_WhatsAppStyleNewChatModal> 
                                             children: [
                                               Text(
                                                 name,
-                                                style: GoogleFonts.plusJakartaSans(
-                                                  fontSize: 14.5,
-                                                  fontWeight: FontWeight.bold,
-                                                  color: isDark ? Colors.white : const Color(0xFF0F172A),
-                                                ),
+                                                style: AppTypography.buttonLabel(color: isDark ? Colors.white : const Color(0xFF0F172A), fontWeight: FontWeight.bold),
                                                 overflow: TextOverflow.ellipsis,
                                               ),
                                               const SizedBox(height: 2),
                                               Text(
                                                 '$role ${userId.isNotEmpty ? '· ID: $userId' : ''}',
-                                                style: GoogleFonts.dmSans(
-                                                  fontSize: 12.0,
-                                                  color: isDark ? Colors.white60 : const Color(0xFF64748B),
-                                                ),
+                                                style: AppTypography.fileSize(color: isDark ? Colors.white60 : const Color(0xFF64748B)),
                                               ),
                                             ],
                                           ),
@@ -3142,11 +2987,7 @@ class _WhatsAppStyleNewChatModalState extends State<_WhatsAppStyleNewChatModal> 
                                           ),
                                           child: Text(
                                             'Chat',
-                                            style: GoogleFonts.plusJakartaSans(
-                                              fontSize: 12.0,
-                                              fontWeight: FontWeight.bold,
-                                              color: isDark ? Colors.white : const Color(0xFF0F172A),
-                                            ),
+                                            style: AppTypography.channelTag(color: isDark ? Colors.white : const Color(0xFF0F172A), fontWeight: FontWeight.bold),
                                           ),
                                         ),
                                       ],
@@ -3201,16 +3042,10 @@ class _WhatsAppStyleNewChatModalState extends State<_WhatsAppStyleNewChatModal> 
                                   _memberSearch = val.trim().toLowerCase();
                                 });
                               },
-                              style: GoogleFonts.dmSans(
-                                fontSize: 20.0,
-                                color: isDark ? Colors.white : Colors.black87,
-                              ),
+                              style: AppTypography.chatBody(color: isDark ? Colors.white : Colors.black87),
                               decoration: InputDecoration(
                                 hintText: 'Cari teman',
-                                hintStyle: GoogleFonts.dmSans(
-                                  color: isDark ? Colors.white38 : Colors.black38,
-                                  fontSize: 20.0,
-                                ),
+                                hintStyle: AppTypography.chatBody(color: isDark ? Colors.white38 : Colors.black38),
                                 border: InputBorder.none,
                                 isDense: true,
                                 contentPadding: const EdgeInsets.symmetric(vertical: 8),
@@ -3241,11 +3076,7 @@ class _WhatsAppStyleNewChatModalState extends State<_WhatsAppStyleNewChatModal> 
                       padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
                       child: Text(
                         'Pilih Teman (${_selectedMemberUids.length} dipilih)',
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 13.0,
-                          fontWeight: FontWeight.bold,
-                          color: isDark ? Colors.white70 : Colors.black87,
-                        ),
+                        style: AppTypography.channelTag(color: isDark ? Colors.white70 : Colors.black87, fontWeight: FontWeight.bold),
                       ),
                     ),
                     const SizedBox(height: 4),
@@ -3266,20 +3097,13 @@ class _WhatsAppStyleNewChatModalState extends State<_WhatsAppStyleNewChatModal> 
                               const SizedBox(height: 12),
                               Text(
                                 'Belum memiliki teman.',
-                                style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 15.0,
-                                  fontWeight: FontWeight.bold,
-                                  color: isDark ? Colors.white70 : Colors.black87,
-                                ),
+                                style: AppTypography.buttonLabel(color: isDark ? Colors.white70 : Colors.black87, fontWeight: FontWeight.bold),
                               ),
                               const SizedBox(height: 4),
                               Text(
                                 'Tambahkan teman terlebih dahulu di menu Kelola Teman.',
                                 textAlign: TextAlign.center,
-                                style: GoogleFonts.dmSans(
-                                  fontSize: 13.0,
-                                  color: isDark ? Colors.white38 : Colors.black45,
-                                ),
+                                style: AppTypography.fileSize(color: isDark ? Colors.white38 : Colors.black45),
                               ),
                               const SizedBox(height: 16),
                               ElevatedButton.icon(
@@ -3343,18 +3167,11 @@ class _WhatsAppStyleNewChatModalState extends State<_WhatsAppStyleNewChatModal> 
                                     ),
                                     title: Text(
                                       'Seluruh Teman',
-                                      style: GoogleFonts.plusJakartaSans(
-                                        fontSize: 14.0,
-                                        fontWeight: FontWeight.bold,
-                                        color: isDark ? Colors.white : Colors.black87,
-                                      ),
+                                      style: AppTypography.buttonLabel(color: isDark ? Colors.white : Colors.black87, fontWeight: FontWeight.bold),
                                     ),
                                     subtitle: Text(
                                       'Semua ${_friendsList.length} teman Anda',
-                                      style: GoogleFonts.dmSans(
-                                        fontSize: 12.0,
-                                        color: isDark ? Colors.white60 : Colors.black54,
-                                      ),
+                                      style: AppTypography.fileSize(color: isDark ? Colors.white60 : Colors.black54),
                                     ),
                                     trailing: AnimatedContainer(
                                       duration: const Duration(milliseconds: 200),
@@ -3418,18 +3235,11 @@ class _WhatsAppStyleNewChatModalState extends State<_WhatsAppStyleNewChatModal> 
                                   ),
                                   title: Text(
                                     m['name'] ?? 'Teman',
-                                    style: GoogleFonts.plusJakartaSans(
-                                      fontSize: 13.5,
-                                      fontWeight: FontWeight.w600,
-                                      color: isDark ? Colors.white : Colors.black87,
-                                    ),
+                                    style: AppTypography.buttonLabel(color: isDark ? Colors.white : Colors.black87, fontWeight: FontWeight.w600),
                                   ),
                                   subtitle: Text(
                                     'ID: ${m['userId'] ?? '-'}',
-                                    style: GoogleFonts.dmSans(
-                                      fontSize: 11.5,
-                                      color: isDark ? Colors.white38 : Colors.black38,
-                                    ),
+                                    style: AppTypography.fileSize(color: isDark ? Colors.white38 : Colors.black38),
                                   ),
                                   trailing: AnimatedContainer(
                                     duration: const Duration(milliseconds: 200),
@@ -3487,11 +3297,7 @@ class _WhatsAppStyleNewChatModalState extends State<_WhatsAppStyleNewChatModal> 
                   children: [
                     Text(
                       'Pilih Classroom',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 13.5,
-                        fontWeight: FontWeight.w600,
-                        color: isDark ? Colors.white70 : Colors.black54,
-                      ),
+                      style: AppTypography.buttonLabel(color: isDark ? Colors.white70 : Colors.black54, fontWeight: FontWeight.w600),
                     ),
                     const SizedBox(height: 6),
                     FutureBuilder<List<Map<String, dynamic>>>(
@@ -3505,7 +3311,7 @@ class _WhatsAppStyleNewChatModalState extends State<_WhatsAppStyleNewChatModal> 
                         if (projects.isEmpty) {
                           return Text(
                             'Anda belum terhubung ke classroom.',
-                            style: GoogleFonts.dmSans(fontSize: 14, color: Colors.redAccent),
+                            style: AppTypography.timestamp(color: Colors.redAccent),
                           );
                         }
 
@@ -3531,15 +3337,7 @@ class _WhatsAppStyleNewChatModalState extends State<_WhatsAppStyleNewChatModal> 
                                     _selectedProjectName.isNotEmpty
                                         ? _selectedProjectName
                                         : 'Pilih Classroom',
-                                    style: GoogleFonts.plusJakartaSans(
-                                      fontSize: 14,
-                                      fontWeight: _selectedProjectName.isNotEmpty
-                                          ? FontWeight.bold
-                                          : FontWeight.normal,
-                                      color: _selectedProjectName.isNotEmpty
-                                          ? (isDark ? Colors.white : Colors.black87)
-                                          : (isDark ? Colors.white38 : Colors.black38),
-                                    ),
+                                    style: AppTypography.dropdown(color: _selectedProjectName.isNotEmpty ? (isDark ? Colors.white : const Color(0xFF0F172A)) : (isDark ? Colors.white38 : Colors.black38), fontWeight: _selectedProjectName.isNotEmpty ? FontWeight.w600 : FontWeight.normal),
                                   ),
                                 ),
                                 Icon(
@@ -3584,16 +3382,10 @@ class _WhatsAppStyleNewChatModalState extends State<_WhatsAppStyleNewChatModal> 
                                     _memberSearch = val.trim().toLowerCase();
                                   });
                                 },
-                                style: GoogleFonts.dmSans(
-                                  fontSize: 20.0,
-                                  color: isDark ? Colors.white : Colors.black87,
-                                ),
+                                style: AppTypography.chatBody(color: isDark ? Colors.white : Colors.black87),
                                 decoration: InputDecoration(
                                   hintText: 'Cari anggota kelas',
-                                  hintStyle: GoogleFonts.dmSans(
-                                    color: isDark ? Colors.white38 : Colors.black38,
-                                    fontSize: 20.0,
-                                  ),
+                                  hintStyle: AppTypography.chatBody(color: isDark ? Colors.white38 : Colors.black38),
                                   border: InputBorder.none,
                                   isDense: true,
                                   contentPadding: const EdgeInsets.symmetric(vertical: 8),
@@ -3624,11 +3416,7 @@ class _WhatsAppStyleNewChatModalState extends State<_WhatsAppStyleNewChatModal> 
                         padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
                         child: Text(
                           'Pilih Anggota (${_selectedMemberUids.length} dipilih)',
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 13.0,
-                            fontWeight: FontWeight.bold,
-                            color: isDark ? Colors.white70 : Colors.black87,
-                          ),
+                          style: AppTypography.channelTag(color: isDark ? Colors.white70 : Colors.black87, fontWeight: FontWeight.bold),
                         ),
                       ),
                       const SizedBox(height: 4),
@@ -3676,18 +3464,11 @@ class _WhatsAppStyleNewChatModalState extends State<_WhatsAppStyleNewChatModal> 
                                       ),
                                       title: Text(
                                         'Seluruh Anggota Kelas',
-                                        style: GoogleFonts.plusJakartaSans(
-                                          fontSize: 14.0,
-                                          fontWeight: FontWeight.bold,
-                                          color: isDark ? Colors.white : Colors.black87,
-                                        ),
+                                        style: AppTypography.buttonLabel(color: isDark ? Colors.white : Colors.black87, fontWeight: FontWeight.bold),
                                       ),
                                       subtitle: Text(
                                         'Semua ${_projectMembers.length} anggota di dalam kelas',
-                                        style: GoogleFonts.dmSans(
-                                          fontSize: 12.0,
-                                          color: isDark ? Colors.white60 : Colors.black54,
-                                        ),
+                                        style: AppTypography.fileSize(color: isDark ? Colors.white60 : Colors.black54),
                                       ),
                                       trailing: AnimatedContainer(
                                         duration: const Duration(milliseconds: 200),
@@ -3752,18 +3533,11 @@ class _WhatsAppStyleNewChatModalState extends State<_WhatsAppStyleNewChatModal> 
                                     ),
                                     title: Text(
                                       '${m['name']}${isSelf ? ' (Anda)' : ''}',
-                                      style: GoogleFonts.plusJakartaSans(
-                                        fontSize: 13.5,
-                                        fontWeight: FontWeight.w600,
-                                        color: isDark ? Colors.white : Colors.black87,
-                                      ),
+                                      style: AppTypography.buttonLabel(color: isDark ? Colors.white : Colors.black87, fontWeight: FontWeight.w600),
                                     ),
                                     subtitle: Text(
                                       'ID: ${m['userId'] ?? '-'}',
-                                      style: GoogleFonts.dmSans(
-                                        fontSize: 11.5,
-                                        color: isDark ? Colors.white38 : Colors.black38,
-                                      ),
+                                      style: AppTypography.fileSize(color: isDark ? Colors.white38 : Colors.black38),
                                     ),
                                     trailing: AnimatedContainer(
                                       duration: const Duration(milliseconds: 200),
@@ -3887,26 +3661,15 @@ class _WhatsAppStyleNewChatModalState extends State<_WhatsAppStyleNewChatModal> 
                             children: [
                               Text(
                                 'Nama Diskusi',
-                                style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 13.0,
-                                  fontWeight: FontWeight.bold,
-                                  color: isDark ? Colors.white70 : Colors.black87,
-                                ),
+                                style: AppTypography.channelTag(color: isDark ? Colors.white70 : Colors.black87, fontWeight: FontWeight.bold),
                               ),
                               const SizedBox(height: 6),
                               TextField(
                                 controller: _titleController,
-                                style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 14.0,
-                                  fontWeight: FontWeight.w600,
-                                  color: isDark ? Colors.white : Colors.black87,
-                                ),
+                                style: AppTypography.buttonLabel(color: isDark ? Colors.white : Colors.black87, fontWeight: FontWeight.w600),
                                 decoration: InputDecoration(
                                   hintText: isFriendMode ? 'Nama Diskusi Teman (Wajib)' : 'Nama Diskusi (Wajib)',
-                                  hintStyle: GoogleFonts.dmSans(
-                                    color: isDark ? Colors.white38 : Colors.black38,
-                                    fontSize: 13.5,
-                                  ),
+                                  hintStyle: AppTypography.timestamp(color: isDark ? Colors.white38 : Colors.black38),
                                   filled: true,
                                   fillColor: isDark ? const Color(0xFF18181B) : const Color(0xFFF8FAFC),
                                   contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -4019,27 +3782,17 @@ class _WhatsAppStyleNewChatModalState extends State<_WhatsAppStyleNewChatModal> 
                     // Saluran / Channel (Opsional, Full Width di bawahnya, Fully Rounded)
                     Text(
                       'Saluran (Channel)',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 13.0,
-                        fontWeight: FontWeight.bold,
-                        color: isDark ? Colors.white70 : Colors.black87,
-                      ),
+                      style: AppTypography.channelTag(color: isDark ? Colors.white70 : Colors.black87, fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 6),
                     TextField(
                       controller: _channelController,
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 14.0,
-                        color: isDark ? Colors.white : Colors.black87,
-                      ),
+                      style: AppTypography.buttonLabel(color: isDark ? Colors.white : Colors.black87),
                       decoration: InputDecoration(
                         hintText: isFriendMode
                             ? 'Saluran (Opsional, contoh: #teman-belajar)'
                             : 'Saluran (Opsional, contoh: #diskusi)',
-                        hintStyle: GoogleFonts.dmSans(
-                          color: isDark ? Colors.white38 : Colors.black38,
-                          fontSize: 13.5,
-                        ),
+                        hintStyle: AppTypography.timestamp(color: isDark ? Colors.white38 : Colors.black38),
                         filled: true,
                         fillColor: isDark ? const Color(0xFF18181B) : const Color(0xFFF8FAFC),
                         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -4091,18 +3844,11 @@ class _WhatsAppStyleNewChatModalState extends State<_WhatsAppStyleNewChatModal> 
                               children: [
                                 Text(
                                   'Folder Penyimpanan Data',
-                                  style: GoogleFonts.plusJakartaSans(
-                                    fontSize: 13.5,
-                                    fontWeight: FontWeight.bold,
-                                    color: isDark ? Colors.white : const Color(0xFF0F172A),
-                                  ),
+                                  style: AppTypography.buttonLabel(color: isDark ? Colors.white : const Color(0xFF0F172A), fontWeight: FontWeight.bold),
                                 ),
                                 Text(
                                   'Buat folder arsip berkas grup otomatis',
-                                  style: GoogleFonts.dmSans(
-                                    fontSize: 11.5,
-                                    color: isDark ? Colors.white60 : const Color(0xFF64748B),
-                                  ),
+                                  style: AppTypography.fileSize(color: isDark ? Colors.white60 : const Color(0xFF64748B)),
                                 ),
                               ],
                             ),
@@ -4161,21 +3907,14 @@ class _WhatsAppStyleNewChatModalState extends State<_WhatsAppStyleNewChatModal> 
                                       isFriendMode
                                           ? 'Diskusi Teman'
                                           : (_selectedProjectName.isNotEmpty ? _selectedProjectName : 'Classroom'),
-                                      style: GoogleFonts.plusJakartaSans(
-                                        fontSize: 14.0,
-                                        fontWeight: FontWeight.bold,
-                                        color: isDark ? Colors.white : const Color(0xFF0F172A),
-                                      ),
+                                      style: AppTypography.buttonLabel(color: isDark ? Colors.white : const Color(0xFF0F172A), fontWeight: FontWeight.bold),
                                     ),
                                     const SizedBox(height: 2),
                                     Text(
                                       isFriendMode
                                           ? '${_selectedMemberUids.length} Teman Terpilih'
                                           : '${_selectedMemberUids.length} Anggota',
-                                      style: GoogleFonts.dmSans(
-                                        fontSize: 12.0,
-                                        color: isDark ? Colors.white60 : const Color(0xFF64748B),
-                                      ),
+                                      style: AppTypography.fileSize(color: isDark ? Colors.white60 : const Color(0xFF64748B)),
                                     ),
                                   ],
                                 ),
@@ -4185,11 +3924,7 @@ class _WhatsAppStyleNewChatModalState extends State<_WhatsAppStyleNewChatModal> 
                           const SizedBox(height: 14),
                           Text(
                             isFriendMode ? 'Teman' : 'Anggota',
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 12.5,
-                              fontWeight: FontWeight.bold,
-                              color: isDark ? Colors.white70 : Colors.black87,
-                            ),
+                            style: AppTypography.channelTag(color: isDark ? Colors.white70 : Colors.black87, fontWeight: FontWeight.bold),
                           ),
                           const SizedBox(height: 8),
                           Builder(
@@ -4224,11 +3959,7 @@ class _WhatsAppStyleNewChatModalState extends State<_WhatsAppStyleNewChatModal> 
                                           const SizedBox(width: 4),
                                           Text(
                                             'Kelola',
-                                            style: GoogleFonts.plusJakartaSans(
-                                              fontSize: 11.5,
-                                              fontWeight: FontWeight.bold,
-                                              color: isDark ? Colors.white70 : Colors.black87,
-                                            ),
+                                            style: AppTypography.microBadge(color: isDark ? Colors.white70 : Colors.black87, fontWeight: FontWeight.bold),
                                           ),
                                         ],
                                       ),
@@ -4267,11 +3998,7 @@ class _WhatsAppStyleNewChatModalState extends State<_WhatsAppStyleNewChatModal> 
                               const SizedBox(width: 8),
                               Text(
                                 'Hak Akses Anggota',
-                                style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 13.0,
-                                  fontWeight: FontWeight.bold,
-                                  color: isDark ? Colors.white : const Color(0xFF0F172A),
-                                ),
+                                style: AppTypography.channelTag(color: isDark ? Colors.white : const Color(0xFF0F172A), fontWeight: FontWeight.bold),
                               ),
                             ],
                           ),
@@ -4315,11 +4042,7 @@ class _WhatsAppStyleNewChatModalState extends State<_WhatsAppStyleNewChatModal> 
                                   Expanded(
                                     child: Text(
                                       'Seluruh anggota dapat mengubah info grup',
-                                      style: GoogleFonts.dmSans(
-                                        fontSize: 12.5,
-                                        color: isDark ? Colors.white70 : Colors.black87,
-                                        fontWeight: FontWeight.w500,
-                                      ),
+                                      style: AppTypography.checkboxLabel(color: isDark ? Colors.white70 : Colors.black87, fontWeight: FontWeight.w500),
                                     ),
                                   ),
                                 ],
@@ -4366,11 +4089,7 @@ class _WhatsAppStyleNewChatModalState extends State<_WhatsAppStyleNewChatModal> 
                                   Expanded(
                                     child: Text(
                                       'Seluruh anggota dapat mengundang teman',
-                                      style: GoogleFonts.dmSans(
-                                        fontSize: 12.5,
-                                        color: isDark ? Colors.white70 : Colors.black87,
-                                        fontWeight: FontWeight.w500,
-                                      ),
+                                      style: AppTypography.checkboxLabel(color: isDark ? Colors.white70 : Colors.black87, fontWeight: FontWeight.w500),
                                     ),
                                   ),
                                 ],
@@ -4382,10 +4101,7 @@ class _WhatsAppStyleNewChatModalState extends State<_WhatsAppStyleNewChatModal> 
                             isFriendMode
                                 ? '• Pembuat grup otomatis menjadi Admin.\n• Seluruh teman yang dipilih dapat bergabung dalam obrolan.'
                                 : '• Pembuat grup dan Guru otomatis menjadi Admin.\n• Minimal 1 admin di dalam grup. Guru tidak dapat dilepas.',
-                            style: GoogleFonts.dmSans(
-                              fontSize: 11.0,
-                              color: isDark ? Colors.white38 : Colors.black45,
-                            ),
+                            style: AppTypography.fileSize(color: isDark ? Colors.white38 : Colors.black45),
                           ),
                         ],
                       ),
@@ -4604,28 +4320,25 @@ class _DocumentsTabState extends State<DocumentsTab> {
         backgroundColor: AppColors.isDarkMode ? const Color(0xFF18181B) : Colors.white,
         title: Text(
           'Buat Folder Baru',
-          style: GoogleFonts.plusJakartaSans(
-            fontWeight: FontWeight.bold,
-            color: AppColors.isDarkMode ? Colors.white : Colors.black87,
-          ),
+          style: AppTypography.buttonLabel(color: AppColors.isDarkMode ? Colors.white : Colors.black87, fontWeight: FontWeight.bold),
         ),
         content: TextField(
           controller: textController,
           autofocus: true,
-          style: GoogleFonts.dmSans(color: AppColors.isDarkMode ? Colors.white : Colors.black87),
+          style: AppTypography.timestamp(color: AppColors.isDarkMode ? Colors.white : Colors.black87),
           decoration: InputDecoration(
             hintText: 'Nama Folder',
-            hintStyle: GoogleFonts.dmSans(color: AppColors.isDarkMode ? Colors.white38 : Colors.black26),
+            hintStyle: AppTypography.timestamp(color: AppColors.isDarkMode ? Colors.white38 : Colors.black26),
           ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text('Batal', style: GoogleFonts.plusJakartaSans(color: Colors.black54)),
+            child: Text('Batal', style: AppTypography.buttonLabel(color: Colors.black54)),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, textController.text.trim()),
-            child: Text('Buat', style: GoogleFonts.plusJakartaSans(color: const Color(0xFF2563EB), fontWeight: FontWeight.bold)),
+            child: Text('Buat', style: AppTypography.buttonLabel(color: const Color(0xFF2563EB), fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -4798,28 +4511,25 @@ class _DocumentsTabState extends State<DocumentsTab> {
         backgroundColor: AppColors.isDarkMode ? const Color(0xFF18181B) : Colors.white,
         title: Text(
           'Ganti Nama ${isFolder ? "Folder" : "Berkas"}',
-          style: GoogleFonts.plusJakartaSans(
-            fontWeight: FontWeight.bold,
-            color: AppColors.isDarkMode ? Colors.white : Colors.black87,
-          ),
+          style: AppTypography.buttonLabel(color: AppColors.isDarkMode ? Colors.white : Colors.black87, fontWeight: FontWeight.bold),
         ),
         content: TextField(
           controller: textController,
           autofocus: true,
-          style: GoogleFonts.dmSans(color: AppColors.isDarkMode ? Colors.white : Colors.black87),
+          style: AppTypography.timestamp(color: AppColors.isDarkMode ? Colors.white : Colors.black87),
           decoration: InputDecoration(
             hintText: 'Nama baru',
-            hintStyle: GoogleFonts.dmSans(color: AppColors.isDarkMode ? Colors.white38 : Colors.black26),
+            hintStyle: AppTypography.timestamp(color: AppColors.isDarkMode ? Colors.white38 : Colors.black26),
           ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: Text('Batal', style: GoogleFonts.plusJakartaSans(color: Colors.black54)),
+            child: Text('Batal', style: AppTypography.buttonLabel(color: Colors.black54)),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, textController.text.trim()),
-            child: Text('Simpan', style: GoogleFonts.plusJakartaSans(color: const Color(0xFF2563EB), fontWeight: FontWeight.bold)),
+            child: Text('Simpan', style: AppTypography.buttonLabel(color: const Color(0xFF2563EB), fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -4934,18 +4644,11 @@ class _DocumentsTabState extends State<DocumentsTab> {
                               children: [
                                 Text(
                                   'Dokumen',
-                                  style: GoogleFonts.plusJakartaSans(
-                                    fontSize: 23.4,
-                                    fontWeight: FontWeight.bold,
-                                    color: isDark ? Colors.white : Colors.black,
-                                  ),
+                                  style: AppTypography.pageTitle(color: isDark ? Colors.white : Colors.black, fontWeight: FontWeight.bold),
                                 ),
                                 Text(
                                   'Kelola & pratinjau berkas bersama',
-                                  style: GoogleFonts.dmSans(
-                                    fontSize: 13,
-                                    color: isDark ? Colors.white60 : Colors.black45,
-                                  ),
+                                  style: AppTypography.fileSize(color: isDark ? Colors.white60 : Colors.black45),
                                 ),
                               ],
                             ),
@@ -5069,11 +4772,7 @@ class _DocumentsTabState extends State<DocumentsTab> {
                                       const SizedBox(width: 4),
                                       Text(
                                         'Root',
-                                        style: GoogleFonts.plusJakartaSans(
-                                          fontSize: 13,
-                                          fontWeight: _folderCrumbs.isEmpty ? FontWeight.bold : FontWeight.w500,
-                                          color: _folderCrumbs.isEmpty ? const Color(0xFF2563EB) : (isDark ? Colors.white60 : Colors.black45),
-                                        ),
+                                        style: AppTypography.channelTag(color: _folderCrumbs.isEmpty ? const Color(0xFF2563EB) : (isDark ? Colors.white60 : Colors.black45), fontWeight: _folderCrumbs.isEmpty ? FontWeight.bold : FontWeight.w500),
                                       ),
                                     ],
                                   ),
@@ -5100,11 +4799,7 @@ class _DocumentsTabState extends State<DocumentsTab> {
                                     ),
                                     child: Text(
                                       _folderCrumbs[i].name,
-                                      style: GoogleFonts.plusJakartaSans(
-                                        fontSize: 13,
-                                        fontWeight: i == _folderCrumbs.length - 1 ? FontWeight.bold : FontWeight.w500,
-                                        color: i == _folderCrumbs.length - 1 ? const Color(0xFF2563EB) : (isDark ? Colors.white60 : Colors.black45),
-                                      ),
+                                      style: AppTypography.channelTag(color: i == _folderCrumbs.length - 1 ? const Color(0xFF2563EB) : (isDark ? Colors.white70 : Colors.black87), fontWeight: i == _folderCrumbs.length - 1 ? FontWeight.bold : FontWeight.w500),
                                     ),
                                   ),
                                 ),
@@ -5121,10 +4816,10 @@ class _DocumentsTabState extends State<DocumentsTab> {
                             Expanded(
                               child: TextField(
                                 onChanged: (v) => setState(() => _searchQuery = v.toLowerCase()),
-                                style: GoogleFonts.dmSans(color: isDark ? Colors.white : Colors.black87),
+                                style: AppTypography.timestamp(color: isDark ? Colors.white : Colors.black87),
                                 decoration: InputDecoration(
                                   hintText: 'Cari berkas di $_currentFolderName...',
-                                  hintStyle: GoogleFonts.dmSans(color: isDark ? Colors.white38 : Colors.black26, fontSize: 13.5),
+                                  hintStyle: AppTypography.timestamp(color: isDark ? Colors.white38 : Colors.black26),
                                   filled: true,
                                   fillColor: isDark ? const Color(0xFF18181B) : const Color(0xFFF8FAFC),
                                   prefixIcon: Icon(Icons.search_rounded, color: isDark ? Colors.white38 : Colors.black38, size: 18),
@@ -5158,15 +4853,15 @@ class _DocumentsTabState extends State<DocumentsTab> {
                               itemBuilder: (ctx) => [
                                 PopupMenuItem(
                                   value: 'date_desc',
-                                  child: Text('Terbaru', style: GoogleFonts.plusJakartaSans(fontWeight: _sortBy == 'date_desc' ? FontWeight.bold : FontWeight.normal)),
+                                  child: Text('Terbaru', style: AppTypography.buttonLabel(fontWeight: _sortBy == 'date_desc' ? FontWeight.bold : FontWeight.normal)),
                                 ),
                                 PopupMenuItem(
                                   value: 'name_asc',
-                                  child: Text('Nama (A - Z)', style: GoogleFonts.plusJakartaSans(fontWeight: _sortBy == 'name_asc' ? FontWeight.bold : FontWeight.normal)),
+                                  child: Text('Nama (A - Z)', style: AppTypography.buttonLabel(fontWeight: _sortBy == 'name_asc' ? FontWeight.bold : FontWeight.normal)),
                                 ),
                                 PopupMenuItem(
                                   value: 'size_desc',
-                                  child: Text('Ukuran Terbesar', style: GoogleFonts.plusJakartaSans(fontWeight: _sortBy == 'size_desc' ? FontWeight.bold : FontWeight.normal)),
+                                  child: Text('Ukuran Terbesar', style: AppTypography.buttonLabel(fontWeight: _sortBy == 'size_desc' ? FontWeight.bold : FontWeight.normal)),
                                 ),
                               ],
                             ),
@@ -5241,10 +4936,7 @@ class _DocumentsTabState extends State<DocumentsTab> {
                                           ? 'Tidak ada berkas cocok dengan pencarian.'
                                           : 'Folder ini masih kosong.\nUpload berkas atau buat folder baru!',
                                       textAlign: TextAlign.center,
-                                      style: GoogleFonts.dmSans(
-                                        fontSize: 14.5,
-                                        color: isDark ? Colors.white38 : Colors.black38,
-                                      ),
+                                      style: AppTypography.subtitle(color: isDark ? Colors.white38 : Colors.black38),
                                     ),
                                   ],
                                 ),
@@ -5358,21 +5050,14 @@ class _DocumentsTabState extends State<DocumentsTab> {
                       fileName,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 14.0,
-                        fontWeight: FontWeight.w600,
-                        color: isDark ? Colors.white : Colors.black87,
-                      ),
+                      style: AppTypography.documentTitle(color: isDark ? Colors.white : const Color(0xFF0F172A), fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 2),
                   Row(
                     children: [
                       Text(
                         isFolder ? 'Folder' : (isMyFile ? 'Saya' : uploaderName),
-                        style: GoogleFonts.dmSans(
-                          fontSize: 12,
-                          color: isDark ? Colors.white38 : Colors.black38,
-                        ),
+                        style: AppTypography.fileSize(color: isDark ? Colors.white38 : Colors.black38),
                       ),
                       if (!isFolder && fileSize > 0) ...[
                         const SizedBox(width: 6),
@@ -5387,10 +5072,7 @@ class _DocumentsTabState extends State<DocumentsTab> {
                         const SizedBox(width: 6),
                         Text(
                           _formatBytes(fileSize.toDouble()),
-                          style: GoogleFonts.dmSans(
-                            fontSize: 12,
-                            color: isDark ? Colors.white38 : Colors.black38,
-                          ),
+                          style: AppTypography.fileSize(color: isDark ? Colors.white38 : Colors.black38),
                         ),
                       ],
                       if (dateStr.isNotEmpty) ...[
@@ -5406,10 +5088,7 @@ class _DocumentsTabState extends State<DocumentsTab> {
                         const SizedBox(width: 6),
                         Text(
                           dateStr,
-                          style: GoogleFonts.dmSans(
-                            fontSize: 12,
-                            color: isDark ? Colors.white38 : Colors.black38,
-                          ),
+                          style: AppTypography.fileSize(color: isDark ? Colors.white38 : Colors.black38),
                         ),
                       ],
                     ],
@@ -5451,25 +5130,20 @@ class _DocumentsTabState extends State<DocumentsTab> {
                       backgroundColor: isDark ? const Color(0xFF18181B) : Colors.white,
                       title: Text(
                         'Hapus ${isFolder ? "Folder" : "Berkas"}',
-                        style: GoogleFonts.plusJakartaSans(
-                          fontWeight: FontWeight.bold,
-                          color: isDark ? Colors.white : Colors.black87,
-                        ),
+                        style: AppTypography.buttonLabel(color: isDark ? Colors.white : Colors.black87, fontWeight: FontWeight.bold),
                       ),
                       content: Text(
                         'Hapus "$fileName" dari repositori?',
-                        style: GoogleFonts.plusJakartaSans(
-                          color: isDark ? Colors.white70 : Colors.black87,
-                        ),
+                        style: AppTypography.buttonLabel(color: isDark ? Colors.white70 : Colors.black87),
                       ),
                       actions: [
                         TextButton(
                           onPressed: () => Navigator.pop(ctx, false),
-                          child: Text('Batal', style: GoogleFonts.plusJakartaSans(color: Colors.black54)),
+                          child: Text('Batal', style: AppTypography.buttonLabel(color: Colors.black54)),
                         ),
                         TextButton(
                           onPressed: () => Navigator.pop(ctx, true),
-                          child: Text('Hapus', style: GoogleFonts.plusJakartaSans(color: Colors.redAccent, fontWeight: FontWeight.bold)),
+                          child: Text('Hapus', style: AppTypography.buttonLabel(color: Colors.redAccent, fontWeight: FontWeight.bold)),
                         ),
                       ],
                     ),
@@ -5486,7 +5160,7 @@ class _DocumentsTabState extends State<DocumentsTab> {
                     children: [
                       Icon(isFolder ? Icons.folder_open : Icons.visibility, size: 16),
                       const SizedBox(width: 8),
-                      Text(isFolder ? 'Buka Folder' : 'Buka / Pratinjau', style: GoogleFonts.plusJakartaSans()),
+                      Text(isFolder ? 'Buka Folder' : 'Buka / Pratinjau', style: AppTypography.buttonLabel()),
                     ],
                   ),
                 ),
@@ -5496,7 +5170,7 @@ class _DocumentsTabState extends State<DocumentsTab> {
                     children: [
                       const Icon(Icons.edit, size: 16),
                       const SizedBox(width: 8),
-                      Text('Ganti Nama', style: GoogleFonts.plusJakartaSans()),
+                      Text('Ganti Nama', style: AppTypography.buttonLabel()),
                     ],
                   ),
                 ),
@@ -5506,7 +5180,7 @@ class _DocumentsTabState extends State<DocumentsTab> {
                     children: [
                       const Icon(Icons.link, size: 16),
                       const SizedBox(width: 8),
-                      Text('Salin Tautan', style: GoogleFonts.plusJakartaSans()),
+                      Text('Salin Tautan', style: AppTypography.buttonLabel()),
                     ],
                   ),
                 ),
@@ -5517,7 +5191,7 @@ class _DocumentsTabState extends State<DocumentsTab> {
                       children: [
                         const Icon(Icons.delete_outline, size: 16, color: Colors.redAccent),
                         const SizedBox(width: 8),
-                        Text('Hapus', style: GoogleFonts.plusJakartaSans(color: Colors.redAccent)),
+                        Text('Hapus', style: AppTypography.buttonLabel(color: Colors.redAccent)),
                       ],
                     ),
                   ),
@@ -5623,25 +5297,20 @@ class _DocumentsTabState extends State<DocumentsTab> {
                           backgroundColor: isDark ? const Color(0xFF18181B) : Colors.white,
                           title: Text(
                             'Hapus ${isFolder ? "Folder" : "Berkas"}',
-                            style: GoogleFonts.plusJakartaSans(
-                              fontWeight: FontWeight.bold,
-                              color: isDark ? Colors.white : Colors.black87,
-                            ),
+                            style: AppTypography.buttonLabel(color: isDark ? Colors.white : Colors.black87, fontWeight: FontWeight.bold),
                           ),
                           content: Text(
                             'Hapus "$fileName" dari repositori?',
-                            style: GoogleFonts.plusJakartaSans(
-                              color: isDark ? Colors.white70 : Colors.black87,
-                            ),
+                            style: AppTypography.buttonLabel(color: isDark ? Colors.white70 : Colors.black87),
                           ),
                           actions: [
                             TextButton(
                               onPressed: () => Navigator.pop(ctx, false),
-                              child: Text('Batal', style: GoogleFonts.plusJakartaSans(color: Colors.black54)),
+                              child: Text('Batal', style: AppTypography.buttonLabel(color: Colors.black54)),
                             ),
                             TextButton(
                               onPressed: () => Navigator.pop(ctx, true),
-                              child: Text('Hapus', style: GoogleFonts.plusJakartaSans(color: Colors.redAccent, fontWeight: FontWeight.bold)),
+                              child: Text('Hapus', style: AppTypography.buttonLabel(color: Colors.redAccent, fontWeight: FontWeight.bold)),
                             ),
                           ],
                         ),
@@ -5654,20 +5323,20 @@ class _DocumentsTabState extends State<DocumentsTab> {
                   itemBuilder: (ctx) => [
                     PopupMenuItem(
                       value: 'view',
-                      child: Text(isFolder ? 'Buka Folder' : 'Buka di Aplikasi', style: GoogleFonts.plusJakartaSans()),
+                      child: Text(isFolder ? 'Buka Folder' : 'Buka di Aplikasi', style: AppTypography.buttonLabel()),
                     ),
                     PopupMenuItem(
                       value: 'rename',
-                      child: Text('Ganti Nama', style: GoogleFonts.plusJakartaSans()),
+                      child: Text('Ganti Nama', style: AppTypography.buttonLabel()),
                     ),
                     PopupMenuItem(
                       value: 'copy',
-                      child: Text('Salin Tautan', style: GoogleFonts.plusJakartaSans()),
+                      child: Text('Salin Tautan', style: AppTypography.buttonLabel()),
                     ),
                     if (isMyFile) ...[
                       PopupMenuItem(
                         value: 'delete',
-                        child: Text('Hapus', style: GoogleFonts.plusJakartaSans(color: Colors.redAccent)),
+                        child: Text('Hapus', style: AppTypography.buttonLabel(color: Colors.redAccent)),
                       ),
                     ],
                   ],
@@ -5681,19 +5350,12 @@ class _DocumentsTabState extends State<DocumentsTab> {
                   fileName,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 13.5,
-                    fontWeight: FontWeight.w600,
-                    color: isDark ? Colors.white : Colors.black87,
-                  ),
+                  style: AppTypography.documentTitle(color: isDark ? Colors.white : const Color(0xFF0F172A), fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   isFolder ? 'Folder' : (fileSize > 0 ? _formatBytes(fileSize.toDouble()) : (isMyFile ? 'Saya' : uploaderName)),
-                  style: GoogleFonts.dmSans(
-                    fontSize: 11.5,
-                    color: isDark ? Colors.white38 : Colors.black38,
-                  ),
+                  style: AppTypography.fileSize(color: isDark ? Colors.white38 : Colors.black38),
                 ),
               ],
             ),
@@ -5732,21 +5394,13 @@ class _DocumentsTabState extends State<DocumentsTab> {
                 const SizedBox(height: 14),
                 Text(
                   'Sinkronisasi Google Drive',
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 16.5,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
+                  style: AppTypography.cardTitle(color: Colors.white, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 6),
                 Text(
                   'Hubungkan sekali untuk mengaktifkan folder bersama seluruh anggota.',
                   textAlign: TextAlign.center,
-                  style: GoogleFonts.dmSans(
-                    fontSize: 12.5,
-                    color: Colors.white.withValues(alpha: 0.9),
-                    height: 1.35,
-                  ),
+                  style: AppTypography.fileSize(color: Colors.white.withValues(alpha: 0.9), height: 1.35),
                 ),
                 const SizedBox(height: 18),
                 if (kIsWeb && _driveAccount == null)
@@ -5770,11 +5424,7 @@ class _DocumentsTabState extends State<DocumentsTab> {
                           const SizedBox(width: 10),
                           Text(
                             _isConnecting ? 'Menghubungkan...' : 'Hubungkan Google Drive',
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 13.5,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
+                            style: AppTypography.buttonLabel(color: Colors.white, fontWeight: FontWeight.bold),
                           ),
                         ],
                       ),
@@ -5862,16 +5512,12 @@ class _ProfilePageState extends State<ProfilePage> {
               const SizedBox(height: 20),
               Text(
                 'Pilih Jenis Kelamin',
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 18.7,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                ),
+                style: AppTypography.chatHeaderTitle(color: Colors.black, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 16),
               ListTile(
                 leading: const Icon(Icons.male_rounded, color: Colors.blueAccent),
-                title: Text('Laki-laki', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w600)),
+                title: Text('Laki-laki', style: AppTypography.buttonLabel(fontWeight: FontWeight.w600)),
                 trailing: currentGender == 'Laki-laki' ? const Icon(Icons.check_circle, color: Colors.green) : null,
                 onTap: () async {
                   await FirebaseFirestore.instance.collection('users').doc(currentUid).update({
@@ -5889,7 +5535,7 @@ class _ProfilePageState extends State<ProfilePage> {
               const Divider(color: Color(0xFFF1F5F9)),
               ListTile(
                 leading: const Icon(Icons.female_rounded, color: Colors.pinkAccent),
-                title: Text('Perempuan', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w600)),
+                title: Text('Perempuan', style: AppTypography.buttonLabel(fontWeight: FontWeight.w600)),
                 trailing: currentGender == 'Perempuan' ? const Icon(Icons.check_circle, color: Colors.green) : null,
                 onTap: () async {
                   await FirebaseFirestore.instance.collection('users').doc(currentUid).update({
@@ -5944,11 +5590,7 @@ class _ProfilePageState extends State<ProfilePage> {
               const SizedBox(height: 20),
               Text(
                 'Pilih Tingkat Sekolah',
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 18.7,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                ),
+                style: AppTypography.chatHeaderTitle(color: Colors.black, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 16),
               ...['SD', 'SMP', 'SMA', 'SMK'].map((level) {
@@ -5956,7 +5598,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   children: [
                     ListTile(
                       leading: const Icon(Icons.school_rounded, color: Colors.blueAccent),
-                      title: Text(level, style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w600)),
+                      title: Text(level, style: AppTypography.buttonLabel(fontWeight: FontWeight.w600)),
                       trailing: currentSchoolLevel == level ? const Icon(Icons.check_circle, color: Colors.green) : null,
                       onTap: () async {
                         await FirebaseFirestore.instance.collection('users').doc(currentUid).update({
@@ -6003,13 +5645,13 @@ class _ProfilePageState extends State<ProfilePage> {
               const SizedBox(height: 16),
               Text(
                 'Upgrade ke Hubner Pro',
-                style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, fontSize: 21.1),
+                style: AppTypography.chatHeaderTitle(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
               Text(
                 'Dapatkan akses penuh ke semua fitur premium kolaborasi tim tanpa batas.',
                 textAlign: TextAlign.center,
-                style: GoogleFonts.dmSans(fontSize: 14, color: Colors.black54),
+                style: AppTypography.timestamp(color: Colors.black54),
               ),
               const SizedBox(height: 20),
               _buildFeatureRow('Unlimited Proyek & Tugas'),
@@ -6035,7 +5677,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   ),
                   child: Text(
                     'Mulai Berlangganan - Rp 99.000/bln',
-                    style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, fontSize: 15.2),
+                    style: AppTypography.buttonLabel(fontWeight: FontWeight.bold),
                   ),
                 ),
               ),
@@ -6053,7 +5695,7 @@ class _ProfilePageState extends State<ProfilePage> {
         children: [
           const Icon(Icons.check_circle_rounded, color: Color(0xFF0F766E), size: 16),
           const SizedBox(width: 8),
-          Text(text, style: GoogleFonts.dmSans(fontSize: 14, fontWeight: FontWeight.w500)),
+          Text(text, style: AppTypography.timestamp(fontWeight: FontWeight.w500)),
         ],
       ),
     );
@@ -6064,13 +5706,13 @@ class _ProfilePageState extends State<ProfilePage> {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: Colors.white,
-        title: Text('Hapus Akun', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, color: Colors.redAccent)),
-        content: Text('Yakin ingin menghapus akun Anda secara permanen? Semua data proyek dan tugas Anda akan dihapus selamanya.', style: GoogleFonts.plusJakartaSans()),
+        title: Text('Hapus Akun', style: AppTypography.buttonLabel(color: Colors.redAccent, fontWeight: FontWeight.bold)),
+        content: Text('Yakin ingin menghapus akun Anda secara permanen? Semua data proyek dan tugas Anda akan dihapus selamanya.', style: AppTypography.buttonLabel()),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text('Batal', style: GoogleFonts.plusJakartaSans(color: Colors.black54))),
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text('Batal', style: AppTypography.buttonLabel(color: Colors.black54))),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: Text('Hapus Permanen', style: GoogleFonts.plusJakartaSans(color: Colors.redAccent, fontWeight: FontWeight.bold)),
+            child: Text('Hapus Permanen', style: AppTypography.buttonLabel(color: Colors.redAccent, fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -6104,12 +5746,7 @@ class _ProfilePageState extends State<ProfilePage> {
       padding: const EdgeInsets.only(top: 22, bottom: 8, left: 4),
       child: Text(
         title.toUpperCase(),
-        style: GoogleFonts.plusJakartaSans(
-          fontSize: 12.9,
-          fontWeight: FontWeight.bold,
-          color: Colors.black38,
-          letterSpacing: 0.8,
-        ),
+        style: AppTypography.channelTag(color: Colors.black38, fontWeight: FontWeight.bold, letterSpacing: 0.8),
       ),
     );
   }
@@ -6155,11 +5792,7 @@ class _ProfilePageState extends State<ProfilePage> {
             Text(
               title,
               maxLines: 1,
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 15.2,
-                fontWeight: FontWeight.w600,
-                color: titleColor,
-              ),
+              style: AppTypography.buttonLabel(color: titleColor, fontWeight: FontWeight.w600),
             ),
             const SizedBox(width: 8),
             Expanded(
@@ -6173,10 +5806,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         textAlign: TextAlign.end,
-                        style: GoogleFonts.dmSans(
-                          fontSize: 14,
-                          color: Colors.black45,
-                        ),
+                        style: AppTypography.timestamp(color: Colors.black45),
                       ),
                     ),
                   const SizedBox(width: 4),
@@ -6201,26 +5831,18 @@ class _ProfilePageState extends State<ProfilePage> {
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           title: Text(
             'Keluar dari Akun',
-            style: GoogleFonts.plusJakartaSans(
-              fontWeight: FontWeight.bold,
-              color: isDark ? Colors.white : Colors.black87,
-            ),
+            style: AppTypography.buttonLabel(color: isDark ? Colors.white : Colors.black87, fontWeight: FontWeight.bold),
           ),
           content: Text(
             'Apakah Anda yakin ingin keluar dari akun ini?',
-            style: GoogleFonts.plusJakartaSans(
-              color: isDark ? Colors.white70 : Colors.black87,
-            ),
+            style: AppTypography.buttonLabel(color: isDark ? Colors.white70 : Colors.black87),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx, false),
               child: Text(
                 'Batal',
-                style: GoogleFonts.plusJakartaSans(
-                  color: isDark ? Colors.white60 : Colors.black54,
-                  fontWeight: FontWeight.w600,
-                ),
+                style: AppTypography.buttonLabel(color: isDark ? Colors.white60 : Colors.black54, fontWeight: FontWeight.w600),
               ),
             ),
             ElevatedButton(
@@ -6235,9 +5857,7 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
               child: Text(
                 'Keluar',
-                style: GoogleFonts.plusJakartaSans(
-                  fontWeight: FontWeight.bold,
-                ),
+                style: AppTypography.buttonLabel(fontWeight: FontWeight.bold),
               ),
             ),
           ],
@@ -6344,11 +5964,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         children: [
                           Text(
                             'Profil',
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 23.4,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.black,
-                            ),
+                            style: AppTypography.pageTitle(color: Colors.black, fontWeight: FontWeight.w600),
                           ),
                           const SizedBox(height: 20),
 
@@ -6404,18 +6020,11 @@ class _ProfilePageState extends State<ProfilePage> {
                                 const SizedBox(height: 16),
                                 Text(
                                   name,
-                                  style: GoogleFonts.plusJakartaSans(
-                                    fontSize: 21.1,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.black,
-                                  ),
+                                  style: AppTypography.chatHeaderTitle(color: Colors.black, fontWeight: FontWeight.bold),
                                 ),
                                 Text(
                                   'ID User: $userId',
-                                  style: GoogleFonts.dmSans(
-                                    fontSize: 14,
-                                    color: Colors.black38,
-                                  ),
+                                  style: AppTypography.timestamp(color: Colors.black38),
                                 ),
                               ],
                             ),
@@ -6515,12 +6124,12 @@ class _ProfilePageState extends State<ProfilePage> {
                                   context: context,
                                   builder: (ctx) => AlertDialog(
                                     backgroundColor: Colors.white,
-                                    title: Text('Pilih Bahasa', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold)),
-                                    content: Text('Saat ini Hubner Edu hanya tersedia dalam Bahasa Indonesia.', style: GoogleFonts.plusJakartaSans()),
+                                    title: Text('Pilih Bahasa', style: AppTypography.buttonLabel(fontWeight: FontWeight.bold)),
+                                    content: Text('Saat ini Hubner Edu hanya tersedia dalam Bahasa Indonesia.', style: AppTypography.buttonLabel()),
                                     actions: [
                                       TextButton(
                                         onPressed: () => Navigator.pop(ctx),
-                                        child: Text('OK', style: GoogleFonts.plusJakartaSans(color: Colors.black, fontWeight: FontWeight.bold)),
+                                        child: Text('OK', style: AppTypography.buttonLabel(color: Colors.black, fontWeight: FontWeight.bold)),
                                       ),
                                     ],
                                   ),
@@ -6695,15 +6304,15 @@ class _ProfilePageState extends State<ProfilePage> {
                                   context: context,
                                   builder: (ctx) => AlertDialog(
                                     backgroundColor: Colors.white,
-                                    title: Text('Hubner Edu', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold)),
+                                    title: Text('Hubner Edu', style: AppTypography.buttonLabel(fontWeight: FontWeight.bold)),
                                     content: Text(
                                       'Hubner Edu adalah platform manajemen kelas online dan pembelajaran interaktif secara real-time.',
-                                      style: GoogleFonts.plusJakartaSans(),
+                                      style: AppTypography.buttonLabel(),
                                     ),
                                     actions: [
                                       TextButton(
                                         onPressed: () => Navigator.pop(ctx),
-                                        child: Text('Tutup', style: GoogleFonts.plusJakartaSans(color: Colors.black, fontWeight: FontWeight.bold)),
+                                        child: Text('Tutup', style: AppTypography.buttonLabel(color: Colors.black, fontWeight: FontWeight.bold)),
                                       )
                                     ],
                                   ),
@@ -6723,10 +6332,7 @@ class _ProfilePageState extends State<ProfilePage> {
                               icon: const Icon(Icons.logout_rounded, size: 18),
                               label: Text(
                                 'Keluar dari Akun',
-                                style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 16.4,
-                                  fontWeight: FontWeight.bold,
-                                ),
+                                style: AppTypography.cardTitle(fontWeight: FontWeight.bold),
                               ),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: const Color(0xFFFEE2E2),
@@ -6867,11 +6473,7 @@ class ProfileSubPage extends StatelessWidget {
         ),
         title: Text(
           title,
-          style: GoogleFonts.plusJakartaSans(
-            color: Colors.black,
-            fontSize: 18.7,
-            fontWeight: FontWeight.bold,
-          ),
+          style: AppTypography.chatHeaderTitle(color: Colors.black, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
         bottom: PreferredSize(
@@ -6919,7 +6521,7 @@ class _EditNameFormState extends State<EditNameForm> {
       children: [
         Text(
           'Nama Lengkap',
-          style: GoogleFonts.plusJakartaSans(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.black54),
+          style: AppTypography.buttonLabel(color: Colors.black54, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 8),
         TextField(
@@ -6937,7 +6539,7 @@ class _EditNameFormState extends State<EditNameForm> {
               borderSide: const BorderSide(color: Colors.black),
             ),
           ),
-          style: GoogleFonts.dmSans(fontSize: 16.4),
+          style: AppTypography.replySubtitle(),
         ),
         const SizedBox(height: 24),
         SizedBox(
@@ -6964,7 +6566,7 @@ class _EditNameFormState extends State<EditNameForm> {
             ),
             child: _isLoading 
                 ? const ThreeDotsLoader(size: 5, bounceHeight: 2, colors: [Colors.white, Colors.white70, Colors.white60])
-                : Text('Simpan Perubahan', style: GoogleFonts.plusJakartaSans(fontSize: 16.4, fontWeight: FontWeight.bold)),
+                : Text('Simpan Perubahan', style: AppTypography.cardTitle(fontWeight: FontWeight.bold)),
           ),
         ),
       ],
@@ -6994,7 +6596,7 @@ class EditTimezoneForm extends StatelessWidget {
         final isSelected = tz == currentTz;
         return ListTile(
           contentPadding: EdgeInsets.zero,
-          title: Text(tz, style: GoogleFonts.plusJakartaSans(fontSize: 16.4, fontWeight: isSelected ? FontWeight.bold : FontWeight.normal)),
+          title: Text(tz, style: AppTypography.cardTitle(fontWeight: isSelected ? FontWeight.bold : FontWeight.normal)),
           trailing: isSelected ? const Icon(Icons.check_circle_rounded, color: Colors.black) : null,
           onTap: () async {
             await FirebaseFirestore.instance.collection('users').doc(uid).update({'timezone': tz});
@@ -7032,7 +6634,7 @@ class _ChangePasswordFormState extends State<ChangePasswordForm> {
       children: [
         Text(
           'Kata Sandi Baru',
-          style: GoogleFonts.plusJakartaSans(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.black54),
+          style: AppTypography.buttonLabel(color: Colors.black54, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 8),
         TextField(
@@ -7051,7 +6653,7 @@ class _ChangePasswordFormState extends State<ChangePasswordForm> {
               borderSide: const BorderSide(color: Colors.black),
             ),
           ),
-          style: GoogleFonts.dmSans(fontSize: 16.4),
+          style: AppTypography.replySubtitle(),
         ),
         const SizedBox(height: 24),
         SizedBox(
@@ -7093,7 +6695,7 @@ class _ChangePasswordFormState extends State<ChangePasswordForm> {
             ),
             child: _isLoading 
                 ? const ThreeDotsLoader(size: 5, bounceHeight: 2, colors: [Colors.white, Colors.white70, Colors.white60])
-                : Text('Ubah Kata Sandi', style: GoogleFonts.plusJakartaSans(fontSize: 16.4, fontWeight: FontWeight.bold)),
+                : Text('Ubah Kata Sandi', style: AppTypography.cardTitle(fontWeight: FontWeight.bold)),
           ),
         ),
       ],
@@ -7114,7 +6716,7 @@ class TwoFactorSetupForm extends StatelessWidget {
       children: [
         Text(
           'Status Otentikasi 2 Langkah',
-          style: GoogleFonts.plusJakartaSans(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.black54),
+          style: AppTypography.buttonLabel(color: Colors.black54, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 14),
         Row(
@@ -7122,7 +6724,7 @@ class TwoFactorSetupForm extends StatelessWidget {
           children: [
             Text(
               isEnabled ? 'Aktif' : 'Nonaktif',
-              style: GoogleFonts.plusJakartaSans(fontSize: 18.7, fontWeight: FontWeight.bold, color: isEnabled ? Colors.green : Colors.black87),
+              style: AppTypography.chatHeaderTitle(color: isEnabled ? Colors.green : Colors.black87, fontWeight: FontWeight.bold),
             ),
             Switch.adaptive(
               value: isEnabled,
@@ -7142,7 +6744,7 @@ class TwoFactorSetupForm extends StatelessWidget {
         const SizedBox(height: 16),
         Text(
           'Otentikasi 2 langkah menambahkan lapisan keamanan ekstra ke akun Anda. Kode verifikasi akan diminta setiap kali Anda masuk di perangkat baru.',
-          style: GoogleFonts.dmSans(fontSize: 14, color: Colors.black38, height: 1.5),
+          style: AppTypography.timestamp(color: Colors.black38, height: 1.5),
         ),
       ],
     );
@@ -7160,7 +6762,7 @@ class ActiveSessionsForm extends StatelessWidget {
       children: [
         Text(
           'Perangkat yang Terhubung',
-          style: GoogleFonts.plusJakartaSans(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.black54),
+          style: AppTypography.buttonLabel(color: Colors.black54, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 14),
         Container(
@@ -7178,8 +6780,8 @@ class ActiveSessionsForm extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Perangkat saat ini', style: GoogleFonts.plusJakartaSans(fontSize: 15.2, fontWeight: FontWeight.bold)),
-                    Text('Jakarta, Indonesia • Aktif Sekarang', style: GoogleFonts.plusJakartaSans(fontSize: 12.9, color: Colors.green, fontWeight: FontWeight.w500)),
+                    Text('Perangkat saat ini', style: AppTypography.buttonLabel(fontWeight: FontWeight.bold)),
+                    Text('Jakarta, Indonesia • Aktif Sekarang', style: AppTypography.channelTag(color: Colors.green, fontWeight: FontWeight.w500)),
                   ],
                 ),
               ),
@@ -7209,7 +6811,7 @@ class ThemeSetupForm extends StatelessWidget {
         final isSelected = th == 'Light';
         return ListTile(
           contentPadding: EdgeInsets.zero,
-          title: Text(th, style: GoogleFonts.plusJakartaSans(fontSize: 16.4, fontWeight: isSelected ? FontWeight.bold : FontWeight.normal, color: th.contains('Segera') ? Colors.black38 : Colors.black87)),
+          title: Text(th, style: AppTypography.cardTitle(color: th.contains('Segera') ? Colors.black38 : Colors.black87, fontWeight: isSelected ? FontWeight.bold : FontWeight.normal)),
           trailing: isSelected ? const Icon(Icons.check_circle_rounded, color: Colors.black) : null,
           onTap: th.contains('Segera') ? null : () async {
             await FirebaseFirestore.instance.collection('users').doc(uid).update({'themeMode': th});
@@ -7251,8 +6853,8 @@ class _NotificationSetupFormState extends State<NotificationSetupForm> {
         SwitchListTile.adaptive(
           contentPadding: EdgeInsets.zero,
           activeColor: Colors.black,
-          title: Text('Task Reminder', style: GoogleFonts.plusJakartaSans(fontSize: 16.4, fontWeight: FontWeight.bold)),
-          subtitle: Text('Kirim pengingat untuk tugas yang akan jatuh tempo.', style: GoogleFonts.plusJakartaSans(fontSize: 12.9, color: Colors.black38)),
+          title: Text('Task Reminder', style: AppTypography.cardTitle(fontWeight: FontWeight.bold)),
+          subtitle: Text('Kirim pengingat untuk tugas yang akan jatuh tempo.', style: AppTypography.channelTag(color: Colors.black38)),
           value: _taskReminder,
           onChanged: (val) async {
             setState(() => _taskReminder = val);
@@ -7263,8 +6865,8 @@ class _NotificationSetupFormState extends State<NotificationSetupForm> {
         SwitchListTile.adaptive(
           contentPadding: EdgeInsets.zero,
           activeColor: Colors.black,
-          title: Text('Chat Mention', style: GoogleFonts.plusJakartaSans(fontSize: 16.4, fontWeight: FontWeight.bold)),
-          subtitle: Text('Beritahu saya saat seseorang menyebut nama saya di diskusi.', style: GoogleFonts.plusJakartaSans(fontSize: 12.9, color: Colors.black38)),
+          title: Text('Chat Mention', style: AppTypography.cardTitle(fontWeight: FontWeight.bold)),
+          subtitle: Text('Beritahu saya saat seseorang menyebut nama saya di diskusi.', style: AppTypography.channelTag(color: Colors.black38)),
           value: _chatMention,
           onChanged: (val) async {
             setState(() => _chatMention = val);
@@ -7430,11 +7032,7 @@ class _SidebarNavigationItemState extends State<SidebarNavigationItem> {
                           child: Center(
                             child: Text(
                               '${widget.unreadCount}',
-                              style: GoogleFonts.plusJakartaSans(
-                                color: Colors.white,
-                                fontSize: 9.4,
-                                fontWeight: FontWeight.bold,
-                              ),
+                              style: AppTypography.microBadge(color: Colors.white, fontWeight: FontWeight.bold),
                             ),
                           ),
                         ),
@@ -7447,11 +7045,7 @@ class _SidebarNavigationItemState extends State<SidebarNavigationItem> {
                 Expanded(
                   child: Text(
                     widget.label,
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 14.7,
-                      fontWeight: widget.isSelected ? FontWeight.w600 : FontWeight.w500,
-                      color: textColor,
-                    ),
+                    style: AppTypography.buttonLabel(color: textColor, fontWeight: widget.isSelected ? FontWeight.w600 : FontWeight.w500),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
