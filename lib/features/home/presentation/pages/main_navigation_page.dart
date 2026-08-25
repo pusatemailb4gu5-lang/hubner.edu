@@ -6144,11 +6144,11 @@ class _ProfilePageState extends State<ProfilePage> {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF18181B) : Colors.white,
+        color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
         borderRadius: BorderRadius.circular(24),
         border: Border.all(
           color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
-          width: 1.2,
+          width: 1.0,
         ),
       ),
       child: Column(
@@ -6432,65 +6432,56 @@ class _ProfilePageState extends State<ProfilePage> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              // Top Bar: "Profile" title on left + Circular Edit Action on right
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    'Profile',
-                                    style: AppTypography.pageTitle(
-                                      color: heroTextColor,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  InkWell(
-                                    borderRadius: BorderRadius.circular(20),
-                                    onTap: () {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (_) => EditProfilePage(
-                                            uid: currentUid,
-                                            initialData: userData,
-                                          ),
+                              // Top Bar: Edit Action on top right
+                              Align(
+                                alignment: Alignment.topRight,
+                                child: InkWell(
+                                  borderRadius: BorderRadius.circular(20),
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) => EditProfilePage(
+                                          uid: currentUid,
+                                          initialData: userData,
                                         ),
-                                      );
-                                    },
-                                    child: Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                                      decoration: BoxDecoration(
+                                      ),
+                                    );
+                                  },
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+                                    decoration: BoxDecoration(
+                                      color: isDark
+                                          ? Colors.black.withValues(alpha: 0.35)
+                                          : Colors.white.withValues(alpha: 0.85),
+                                      borderRadius: BorderRadius.circular(20),
+                                      border: Border.all(
                                         color: isDark
-                                            ? Colors.black.withValues(alpha: 0.35)
-                                            : Colors.white.withValues(alpha: 0.85),
-                                        borderRadius: BorderRadius.circular(20),
-                                        border: Border.all(
-                                          color: isDark
-                                              ? Colors.white.withValues(alpha: 0.25)
-                                              : Colors.black.withValues(alpha: 0.08),
-                                          width: 1.0,
-                                        ),
-                                      ),
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Icon(
-                                            Icons.edit_rounded,
-                                            color: heroTextColor,
-                                            size: 14,
-                                          ),
-                                          const SizedBox(width: 5),
-                                          Text(
-                                            'Edit Profil',
-                                            style: AppTypography.timestamp(
-                                              color: heroTextColor,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                        ],
+                                            ? Colors.white.withValues(alpha: 0.25)
+                                            : Colors.black.withValues(alpha: 0.08),
+                                        width: 1.0,
                                       ),
                                     ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(
+                                          Icons.edit_rounded,
+                                          color: heroTextColor,
+                                          size: 14,
+                                        ),
+                                        const SizedBox(width: 5),
+                                        Text(
+                                          'Edit Profil',
+                                          style: AppTypography.timestamp(
+                                            color: heroTextColor,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
                                   ),
-                                ],
+                                ),
                               ),
                               const SizedBox(height: 14),
 
@@ -7084,30 +7075,53 @@ class ProfileSubPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool isDark = AppColors.isDarkMode;
+
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: isDark ? const Color(0xFF000000) : const Color(0xFFF8FAFC),
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: isDark ? const Color(0xFF000000) : const Color(0xFFF8FAFC),
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.black, size: 20),
-          onPressed: () => Navigator.pop(context),
+        centerTitle: true,
+        leading: Padding(
+          padding: const EdgeInsets.only(left: 14.0),
+          child: Center(
+            child: InkWell(
+              borderRadius: BorderRadius.circular(24),
+              onTap: () => Navigator.pop(context),
+              child: Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
+                  border: Border.all(
+                    color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                    width: 1.0,
+                  ),
+                ),
+                child: Icon(
+                  Icons.arrow_back_rounded,
+                  size: 20,
+                  color: isDark ? Colors.white : const Color(0xFF0F172A),
+                ),
+              ),
+            ),
+          ),
         ),
         title: Text(
           title,
-          style: AppTypography.chatHeaderTitle(color: Colors.black, fontWeight: FontWeight.bold),
-        ),
-        centerTitle: true,
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(1),
-          child: Container(color: const Color(0xFFF1F5F9), height: 1),
+          style: AppTypography.chatHeaderTitle(
+            color: isDark ? Colors.white : const Color(0xFF0F172A),
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ),
       body: Align(
         alignment: Alignment.topCenter,
         child: Container(
           constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width > 500 ? double.infinity : 500),
-          padding: const EdgeInsets.all(24.0),
+          padding: const EdgeInsets.all(20.0),
           child: child,
         ),
       ),
@@ -7138,35 +7152,44 @@ class _EditNameFormState extends State<EditNameForm> {
   }
   @override
   Widget build(BuildContext context) {
+    final bool isDark = AppColors.isDarkMode;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           'Nama Lengkap',
-          style: AppTypography.buttonLabel(color: Colors.black54, fontWeight: FontWeight.bold),
+          style: AppTypography.buttonLabel(
+            color: isDark ? Colors.white70 : const Color(0xFF334155),
+            fontWeight: FontWeight.bold,
+          ),
         ),
         const SizedBox(height: 8),
         TextField(
           controller: _controller,
+          style: AppTypography.replySubtitle(
+            color: isDark ? Colors.white : Colors.black87,
+          ),
           decoration: InputDecoration(
             filled: true,
-            fillColor: const Color(0xFFF8FAFC),
+            fillColor: isDark ? const Color(0xFF2C2C2E) : const Color(0xFFF8FAFC),
             contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+              borderRadius: BorderRadius.circular(16),
+              borderSide: BorderSide(
+                color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+              ),
             ),
             focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Colors.black),
+              borderRadius: BorderRadius.circular(16),
+              borderSide: const BorderSide(color: Color(0xFF7F52FC), width: 1.8),
             ),
           ),
-          style: AppTypography.replySubtitle(),
         ),
         const SizedBox(height: 24),
         SizedBox(
           width: double.infinity,
-          height: 50,
+          height: 52,
           child: ElevatedButton(
             onPressed: _isLoading ? null : () async {
               final newName = _controller.text.trim();
@@ -7181,14 +7204,14 @@ class _EditNameFormState extends State<EditNameForm> {
               }
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.black,
+              backgroundColor: const Color(0xFF7F52FC),
               foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(32)),
               elevation: 0,
             ),
             child: _isLoading 
                 ? const ThreeDotsLoader(size: 5, bounceHeight: 2, colors: [Colors.white, Colors.white70, Colors.white60])
-                : Text('Simpan Perubahan', style: AppTypography.cardTitle(fontWeight: FontWeight.bold)),
+                : Text('Simpan Perubahan', style: AppTypography.cardTitle(color: Colors.white, fontWeight: FontWeight.bold)),
           ),
         ),
       ],
@@ -7204,6 +7227,7 @@ class EditTimezoneForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool isDark = AppColors.isDarkMode;
     final timezones = [
       'Asia/Jakarta (GMT+07:00)',
       'Asia/Makassar (GMT+08:00)',
@@ -7212,14 +7236,20 @@ class EditTimezoneForm extends StatelessWidget {
     return ListView.separated(
       shrinkWrap: true,
       itemCount: timezones.length,
-      separatorBuilder: (_, __) => const Divider(color: Color(0xFFF1F5F9)),
+      separatorBuilder: (_, __) => Divider(color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9)),
       itemBuilder: (context, idx) {
         final tz = timezones[idx];
         final isSelected = tz == currentTz;
         return ListTile(
           contentPadding: EdgeInsets.zero,
-          title: Text(tz, style: AppTypography.cardTitle(fontWeight: isSelected ? FontWeight.bold : FontWeight.normal)),
-          trailing: isSelected ? const Icon(Icons.check_circle_rounded, color: Colors.black) : null,
+          title: Text(
+            tz,
+            style: AppTypography.cardTitle(
+              color: isDark ? Colors.white : Colors.black87,
+              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+            ),
+          ),
+          trailing: isSelected ? const Icon(Icons.check_circle_rounded, color: Color(0xFF7F52FC)) : null,
           onTap: () async {
             await FirebaseFirestore.instance.collection('users').doc(uid).update({'timezone': tz});
             if (context.mounted) {
@@ -7251,36 +7281,45 @@ class _ChangePasswordFormState extends State<ChangePasswordForm> {
   }
   @override
   Widget build(BuildContext context) {
+    final bool isDark = AppColors.isDarkMode;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           'Kata Sandi Baru',
-          style: AppTypography.buttonLabel(color: Colors.black54, fontWeight: FontWeight.bold),
+          style: AppTypography.buttonLabel(
+            color: isDark ? Colors.white70 : const Color(0xFF334155),
+            fontWeight: FontWeight.bold,
+          ),
         ),
         const SizedBox(height: 8),
         TextField(
           controller: _newPasswordController,
           obscureText: true,
+          style: AppTypography.replySubtitle(
+            color: isDark ? Colors.white : Colors.black87,
+          ),
           decoration: InputDecoration(
             filled: true,
-            fillColor: const Color(0xFFF8FAFC),
+            fillColor: isDark ? const Color(0xFF2C2C2E) : const Color(0xFFF8FAFC),
             contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+              borderRadius: BorderRadius.circular(16),
+              borderSide: BorderSide(
+                color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+              ),
             ),
             focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Colors.black),
+              borderRadius: BorderRadius.circular(16),
+              borderSide: const BorderSide(color: Color(0xFF7F52FC), width: 1.8),
             ),
           ),
-          style: AppTypography.replySubtitle(),
         ),
         const SizedBox(height: 24),
         SizedBox(
           width: double.infinity,
-          height: 50,
+          height: 52,
           child: ElevatedButton(
             onPressed: _isLoading ? null : () async {
               final newPass = _newPasswordController.text.trim();
@@ -7310,14 +7349,14 @@ class _ChangePasswordFormState extends State<ChangePasswordForm> {
               }
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.black,
+              backgroundColor: const Color(0xFF7F52FC),
               foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(32)),
               elevation: 0,
             ),
             child: _isLoading 
                 ? const ThreeDotsLoader(size: 5, bounceHeight: 2, colors: [Colors.white, Colors.white70, Colors.white60])
-                : Text('Ubah Kata Sandi', style: AppTypography.cardTitle(fontWeight: FontWeight.bold)),
+                : Text('Ubah Kata Sandi', style: AppTypography.cardTitle(color: Colors.white, fontWeight: FontWeight.bold)),
           ),
         ),
       ],
@@ -7333,12 +7372,17 @@ class TwoFactorSetupForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool isDark = AppColors.isDarkMode;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           'Status Otentikasi 2 Langkah',
-          style: AppTypography.buttonLabel(color: Colors.black54, fontWeight: FontWeight.bold),
+          style: AppTypography.buttonLabel(
+            color: isDark ? Colors.white70 : const Color(0xFF334155),
+            fontWeight: FontWeight.bold,
+          ),
         ),
         const SizedBox(height: 14),
         Row(
@@ -7346,11 +7390,14 @@ class TwoFactorSetupForm extends StatelessWidget {
           children: [
             Text(
               isEnabled ? 'Aktif' : 'Nonaktif',
-              style: AppTypography.chatHeaderTitle(color: isEnabled ? Colors.green : Colors.black87, fontWeight: FontWeight.bold),
+              style: AppTypography.chatHeaderTitle(
+                color: isEnabled ? const Color(0xFF10B981) : (isDark ? Colors.white70 : Colors.black87),
+                fontWeight: FontWeight.bold,
+              ),
             ),
             Switch.adaptive(
               value: isEnabled,
-              activeColor: Colors.black,
+              activeTrackColor: const Color(0xFF7F52FC),
               onChanged: (val) async {
                 await FirebaseFirestore.instance.collection('users').doc(uid).update({'twoFactorEnabled': val});
                 if (context.mounted) {
@@ -7366,7 +7413,10 @@ class TwoFactorSetupForm extends StatelessWidget {
         const SizedBox(height: 16),
         Text(
           'Otentikasi 2 langkah menambahkan lapisan keamanan ekstra ke akun Anda. Kode verifikasi akan diminta setiap kali Anda masuk di perangkat baru.',
-          style: AppTypography.timestamp(color: Colors.black38, height: 1.5),
+          style: AppTypography.timestamp(
+            color: isDark ? Colors.white38 : Colors.black38,
+            height: 1.5,
+          ),
         ),
       ],
     );
@@ -7379,31 +7429,54 @@ class ActiveSessionsForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool isDark = AppColors.isDarkMode;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           'Perangkat yang Terhubung',
-          style: AppTypography.buttonLabel(color: Colors.black54, fontWeight: FontWeight.bold),
+          style: AppTypography.buttonLabel(
+            color: isDark ? Colors.white70 : const Color(0xFF334155),
+            fontWeight: FontWeight.bold,
+          ),
         ),
         const SizedBox(height: 14),
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: const Color(0xFFF8FAFC),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: const Color(0xFFE2E8F0)),
+            color: isDark ? const Color(0xFF1C1C1E) : const Color(0xFFF8FAFC),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+            ),
           ),
           child: Row(
             children: [
-              const Icon(Icons.phone_android_rounded, color: Colors.black87, size: 32),
+              Icon(
+                Icons.phone_android_rounded,
+                color: isDark ? Colors.white70 : Colors.black87,
+                size: 32,
+              ),
               const SizedBox(width: 16),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Perangkat saat ini', style: AppTypography.buttonLabel(fontWeight: FontWeight.bold)),
-                    Text('Jakarta, Indonesia • Aktif Sekarang', style: AppTypography.channelTag(color: Colors.green, fontWeight: FontWeight.w500)),
+                    Text(
+                      'Perangkat saat ini',
+                      style: AppTypography.buttonLabel(
+                        color: isDark ? Colors.white : Colors.black87,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(
+                      'Jakarta, Indonesia • Aktif Sekarang',
+                      style: AppTypography.channelTag(
+                        color: const Color(0xFF10B981),
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -7507,25 +7580,49 @@ class _NotificationSetupFormState extends State<NotificationSetupForm> {
 
   @override
   Widget build(BuildContext context) {
+    final bool isDark = AppColors.isDarkMode;
+
     return Column(
       children: [
         SwitchListTile.adaptive(
           contentPadding: EdgeInsets.zero,
-          activeColor: Colors.black,
-          title: Text('Task Reminder', style: AppTypography.cardTitle(fontWeight: FontWeight.bold)),
-          subtitle: Text('Kirim pengingat untuk tugas yang akan jatuh tempo.', style: AppTypography.channelTag(color: Colors.black38)),
+          activeTrackColor: const Color(0xFF7F52FC),
+          title: Text(
+            'Task Reminder',
+            style: AppTypography.cardTitle(
+              color: isDark ? Colors.white : Colors.black87,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          subtitle: Text(
+            'Kirim pengingat untuk tugas yang akan jatuh tempo.',
+            style: AppTypography.channelTag(
+              color: isDark ? Colors.white38 : Colors.black38,
+            ),
+          ),
           value: _taskReminder,
           onChanged: (val) async {
             setState(() => _taskReminder = val);
             await FirebaseFirestore.instance.collection('users').doc(widget.uid).update({'notifyTaskReminder': val});
           },
         ),
-        const Divider(color: Color(0xFFF1F5F9)),
+        Divider(color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9)),
         SwitchListTile.adaptive(
           contentPadding: EdgeInsets.zero,
-          activeColor: Colors.black,
-          title: Text('Chat Mention', style: AppTypography.cardTitle(fontWeight: FontWeight.bold)),
-          subtitle: Text('Beritahu saya saat seseorang menyebut nama saya di diskusi.', style: AppTypography.channelTag(color: Colors.black38)),
+          activeTrackColor: const Color(0xFF7F52FC),
+          title: Text(
+            'Chat Mention',
+            style: AppTypography.cardTitle(
+              color: isDark ? Colors.white : Colors.black87,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          subtitle: Text(
+            'Beritahu saya saat seseorang menyebut nama saya di diskusi.',
+            style: AppTypography.channelTag(
+              color: isDark ? Colors.white38 : Colors.black38,
+            ),
+          ),
           value: _chatMention,
           onChanged: (val) async {
             setState(() => _chatMention = val);

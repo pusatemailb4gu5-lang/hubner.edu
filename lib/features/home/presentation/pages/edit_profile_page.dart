@@ -295,11 +295,11 @@ class _EditProfilePageState extends State<EditProfilePage> {
             Container(
               padding: const EdgeInsets.all(18),
               decoration: BoxDecoration(
-                color: isDark ? const Color(0xFF18181B) : Colors.white,
+                color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
                 borderRadius: BorderRadius.circular(24),
                 border: Border.all(
                   color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
-                  width: 1.2,
+                  width: 1.0,
                 ),
               ),
               child: Column(
@@ -310,7 +310,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                   const SizedBox(height: 8),
                   DropdownButtonFormField<String>(
                     value: _selectedTimezone,
-                    dropdownColor: isDark ? const Color(0xFF18181B) : Colors.white,
+                    dropdownColor: isDark ? const Color(0xFF1C1C1E) : Colors.white,
                     borderRadius: BorderRadius.circular(20),
                     style: AppTypography.cardTitle(
                       color: isDark ? Colors.white : Colors.black87,
@@ -343,11 +343,11 @@ class _EditProfilePageState extends State<EditProfilePage> {
                   const SizedBox(height: 18),
 
                   // Bahasa
-                  _buildFieldLabel('Bahasa', isDark),
+                  _buildFieldLabel('Bahasa Aplikasi', isDark),
                   const SizedBox(height: 8),
                   DropdownButtonFormField<String>(
                     value: _selectedLanguage,
-                    dropdownColor: isDark ? const Color(0xFF18181B) : Colors.white,
+                    dropdownColor: isDark ? const Color(0xFF1C1C1E) : Colors.white,
                     borderRadius: BorderRadius.circular(20),
                     style: AppTypography.cardTitle(
                       color: isDark ? Colors.white : Colors.black87,
@@ -360,8 +360,14 @@ class _EditProfilePageState extends State<EditProfilePage> {
                       isDark: isDark,
                     ),
                     items: const [
-                      DropdownMenuItem(value: 'Bahasa Indonesia', child: Text('Bahasa Indonesia')),
-                      DropdownMenuItem(value: 'English (US)', child: Text('English (US)')),
+                      DropdownMenuItem(
+                        value: 'Bahasa Indonesia',
+                        child: Text('Bahasa Indonesia (ID)'),
+                      ),
+                      DropdownMenuItem(
+                        value: 'English (US)',
+                        child: Text('English (US)'),
+                      ),
                     ],
                     onChanged: (val) {
                       if (val != null) setState(() => _selectedLanguage = val);
@@ -375,7 +381,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
             // 3. Solid Round Action Button
             SizedBox(
               width: double.infinity,
-              height: 54,
+              height: 52,
               child: ElevatedButton(
                 onPressed: _isSaving ? null : _saveProfile,
                 style: ElevatedButton.styleFrom(
@@ -447,13 +453,13 @@ class _EditProfilePageState extends State<EditProfilePage> {
         size: 20,
       ),
       filled: true,
-      fillColor: isDark ? const Color(0xFF18181B) : const Color(0xFFF8FAFC),
+      fillColor: isDark ? const Color(0xFF2C2C2E) : const Color(0xFFF8FAFC),
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(20), // Solid round
         borderSide: BorderSide(
           color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
-          width: 1.2,
+          width: 1.0,
         ),
       ),
       focusedBorder: OutlineInputBorder(
