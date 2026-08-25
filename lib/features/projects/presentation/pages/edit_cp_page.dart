@@ -230,7 +230,7 @@ class _EditCpPageState extends State<EditCpPage> {
                       controller: _controller,
                       maxLines: null,
                       autofocus: true,
-                      style: AppTypography.subtitle(color: isDark ? Colors.white : const Color(0xFF0F172A, height: 1.7)),
+                      style: AppTypography.subtitle(color: isDark ? Colors.white : const Color(0xFF0F172A), height: 1.7),
                       decoration: InputDecoration(
                         hintText: 'Mulai menuliskan Capaian Pembelajaran (CP) di sini...\n\nContoh:\nPada akhir fase ini, peserta didik mampu memahami konsep dasar, menganalisis permasalahan, dan mempresentasikan hasil proyek secara mandiri maupun berkelompok.',
                         hintStyle: AppTypography.subtitle(color: isDark ? Colors.white30 : Colors.black38, height: 1.7),

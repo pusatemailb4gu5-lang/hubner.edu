@@ -163,7 +163,7 @@ class _ManageAttendancePageState extends State<ManageAttendancePage> {
                             const SizedBox(height: 2),
                             Text(
                               'Satu nama per baris',
-                              style: AppTypography.fileSize(color: isDark ? const Color(0xFF71717A)),
+                              style: AppTypography.fileSize(color: isDark ? const Color(0xFF71717A) : const Color(0xFF475569)),
                             ),
                           ],
                         ),
@@ -181,7 +181,7 @@ class _ManageAttendancePageState extends State<ManageAttendancePage> {
                         ),
                         child: Text(
                           '${_parsedNames.length} Siswa',
-                          style: AppTypography.channelTag(color: isDark ? const Color(0xFFD6A5F8), fontWeight: FontWeight.bold),
+                          style: AppTypography.channelTag(color: isDark ? const Color(0xFFD6A5F8) : const Color(0xFF475569), fontWeight: FontWeight.bold),
                         ),
                       ),
                     ],
@@ -189,7 +189,7 @@ class _ManageAttendancePageState extends State<ManageAttendancePage> {
                   const SizedBox(height: 12),
                   Text(
                     'Tulis atau tempel daftar nama siswa. Sistem akan otomatis mendata dan memproses ke laporan.',
-                    style: AppTypography.timestamp(color: isDark ? const Color(0xFF71717A, height: 1.4)),
+                    style: AppTypography.timestamp(color: isDark ? const Color(0xFF71717A) : const Color(0xFF475569), height: 1.4),
                   ),
                   const SizedBox(height: 14),
                   Expanded(
@@ -211,11 +211,11 @@ class _ManageAttendancePageState extends State<ManageAttendancePage> {
                           textAlignVertical: TextAlignVertical.top,
                           keyboardType: TextInputType.multiline,
                           cursorColor: const Color(0xFF7C3AED),
-                          style: AppTypography.subtitle(color: isDark ? Colors.white : const Color(0xFF0F172A, height: 1.5)),
+                          style: AppTypography.subtitle(color: isDark ? Colors.white : const Color(0xFF0F172A), height: 1.5),
                           decoration: InputDecoration(
                             border: InputBorder.none,
                             hintText: "Contoh:\nBudi Santoso\nAni Wijaya\nCandra Pratama\nDewi Lestari",
-                            hintStyle: AppTypography.subtitle(color: isDark ? const Color(0xFF52525B, height: 1.5)),
+                            hintStyle: AppTypography.subtitle(color: isDark ? const Color(0xFF52525B) : const Color(0xFF475569), height: 1.5),
                             contentPadding: const EdgeInsets.all(16),
                           ),
                         ),

@@ -159,7 +159,7 @@ class _DesktopDiskusiTabState extends State<DesktopDiskusiTab> {
                               children: [
                                 Text(
                                   'Grup Kelas',
-                                  style: AppTypography.fileSize(color: Colors.white.withValues(alpha: 0.7, fontWeight: FontWeight.w500)),
+                                  style: AppTypography.fileSize(color: Colors.white.withValues(alpha: 0.7), fontWeight: FontWeight.w500),
                                 ),
                                 const SizedBox(height: 2),
                                 Text(
@@ -803,7 +803,7 @@ class _DesktopDiskusiTabState extends State<DesktopDiskusiTab> {
                                               channelName,
                                               maxLines: 1,
                                               overflow: TextOverflow.ellipsis,
-                                              style: AppTypography.channelTag(color: isDark ? const Color(0xFF2DD4BF), fontWeight: isSelected ? FontWeight.bold : FontWeight.w600),
+                                              style: AppTypography.channelTag(color: isDark ? const Color(0xFF2DD4BF) : const Color(0xFF475569), fontWeight: isSelected ? FontWeight.bold : FontWeight.w600),
                                             ),
                                             const SizedBox(height: 2),
                                             Text(
@@ -817,7 +817,7 @@ class _DesktopDiskusiTabState extends State<DesktopDiskusiTab> {
                                               lastMsg,
                                               maxLines: 1,
                                               overflow: TextOverflow.ellipsis,
-                                              style: AppTypography.timestamp(color: isDark ? const Color(0xFFD4D4D8)),
+                                              style: AppTypography.timestamp(color: isDark ? const Color(0xFFD4D4D8) : const Color(0xFF475569)),
                                             ),
                                           ],
                                         ),

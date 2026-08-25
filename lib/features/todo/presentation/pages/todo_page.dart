@@ -431,7 +431,7 @@ class _TodoPageState extends State<TodoPage> {
                                                   task['isPendingApproval'] == true
                                                       ? 'Status: Menunggu Acc Guru'
                                                       : 'Status: $progressStr',
-                                                  style: AppTypography.buttonLabel(color: cardTextColor.withOpacity(0.6, fontWeight: FontWeight.bold)),
+                                                  style: AppTypography.buttonLabel(color: cardTextColor.withValues(alpha: 0.6), fontWeight: FontWeight.bold),
                                                 ),
                                               ],
                                             ),

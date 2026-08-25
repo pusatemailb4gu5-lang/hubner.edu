@@ -516,7 +516,7 @@ class DesktopDetailKelasTab extends StatelessWidget {
             const SizedBox(height: 4),
             Text(
               subtitle,
-              style: AppTypography.timestamp(color: const Color(0xFF000000, height: 1.3)),
+              style: AppTypography.timestamp(color: const Color(0xFF000000), height: 1.3),
             ),
           ],
         ),
@@ -869,7 +869,7 @@ class DesktopDetailKelasTab extends StatelessWidget {
             children: [
               RichText(
                 text: TextSpan(
-                  style: AppTypography.buttonLabel(color: const Color(0xFF000000, height: 1.35)),
+                  style: AppTypography.buttonLabel(color: const Color(0xFF000000), height: 1.35),
                   children: [
                     TextSpan(
                       text: '$actor ',

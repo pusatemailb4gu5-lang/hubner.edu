@@ -200,7 +200,7 @@ class _DesktopJadwalPembelajaranTabState
                           },
                           selectedColor: activeColor,
                           backgroundColor: Colors.white,
-                          labelStyle: AppTypography.buttonLabel(color: isSelected, fontWeight: isSelected ? FontWeight.bold : FontWeight.w500),
+                          labelStyle: AppTypography.buttonLabel(color: isSelected ? Colors.white : Colors.black87, fontWeight: isSelected ? FontWeight.bold : FontWeight.w500),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(16),
                             side: BorderSide(
@@ -460,7 +460,7 @@ class _DesktopJadwalPembelajaranTabState
           const SizedBox(height: 14),
           Text(
             'Total ${schedules.length} sesi pembelajaran terkonfigurasi di kelas ini.',
-            style: AppTypography.timestamp(color: const Color(0xFF000000, height: 1.35)),
+            style: AppTypography.timestamp(color: const Color(0xFF000000), height: 1.35),
           ),
           const SizedBox(height: 12),
           Container(
@@ -521,7 +521,7 @@ class _DesktopJadwalPembelajaranTabState
           const SizedBox(height: 12),
           Text(
             'Pastikan siswa telah menerima notifikasi sebelum sesi pembelajaran dimulai.',
-            style: AppTypography.timestamp(color: const Color(0xFF000000, height: 1.35)),
+            style: AppTypography.timestamp(color: const Color(0xFF000000), height: 1.35),
           ),
         ],
       ),

@@ -902,7 +902,7 @@ class _MonitoringPageState extends State<MonitoringPage> {
                                       sName.isNotEmpty
                                           ? sName[0].toUpperCase()
                                           : 'S',
-                                      style: AppTypography.buttonLabel(color: isSelf, fontWeight: FontWeight.bold),
+                                      style: AppTypography.buttonLabel(color: isSelf ? Colors.white : Colors.black87, fontWeight: FontWeight.bold),
                                     ),
                                   ),
                                   const SizedBox(width: 12),
@@ -938,7 +938,7 @@ class _MonitoringPageState extends State<MonitoringPage> {
                                                 ),
                                                 child: Text(
                                                   'Saya',
-                                                  style: AppTypography.buttonLabel(color: const Color(, fontWeight: FontWeight.bold)),
+                                                  style: AppTypography.buttonLabel(color: const Color(0xFF2563EB), fontWeight: FontWeight.bold),
                                                 ),
                                               ),
                                             ],
@@ -2121,12 +2121,12 @@ class _MonitoringPageState extends State<MonitoringPage> {
                                                           children: [
                                                             Text(
                                                               formattedName,
-                                                              style: AppTypography.replySubtitle(color: Colors, fontWeight: FontWeight),
+                                                              style: AppTypography.replySubtitle(color: Colors.black87, fontWeight: FontWeight.normal),
                                                             ),
                                                             Text(
                                                               'Pengajar Kelas',
                                                               style:
-                                                                  AppTypography.timestamp(color: Colors),
+                                                                  AppTypography.timestamp(color: Colors.black54),
                                                             ),
                                                           ],
                                                         ),
@@ -2217,7 +2217,7 @@ class _MonitoringPageState extends State<MonitoringPage> {
                                                               ),
                                                               Text(
                                                                 'Lihat Elemen',
-                                                                style: AppTypography.timestamp(color: Colors, fontWeight: FontWeight),
+                                                                style: AppTypography.timestamp(color: Colors.black54, fontWeight: FontWeight.w500),
                                                               ),
                                                             ],
                                                           ),
@@ -2267,7 +2267,7 @@ class _MonitoringPageState extends State<MonitoringPage> {
                                                               ),
                                                               Text(
                                                                 'Lihat Jadwal',
-                                                                style: AppTypography.timestamp(color: Colors, fontWeight: FontWeight),
+                                                                style: AppTypography.timestamp(color: Colors.black54, fontWeight: FontWeight.w500),
                                                               ),
                                                             ],
                                                           ),
@@ -2604,7 +2604,7 @@ class _MonitoringPageState extends State<MonitoringPage> {
                               const SizedBox(height: 6),
                               Text(
                                 stageDesc,
-                                style: AppTypography.timestamp(color: Colors.black87.withValues(alpha: 0.75, height: 1.4)),
+                                style: AppTypography.timestamp(color: Colors.black87.withValues(alpha: 0.75), height: 1.4),
                               ),
                             ],
                           ],
@@ -2812,7 +2812,7 @@ class _MonitoringPageState extends State<MonitoringPage> {
                                     children: [
                                       Text(
                                         mTitle,
-                                        style: AppTypography.buttonLabel(color: isMateriCompleted, fontWeight: FontWeight.bold),
+                                        style: AppTypography.buttonLabel(color: isMateriCompleted ? const Color(0xFF10B981) : Colors.black54, fontWeight: FontWeight.bold),
                                       ),
                                       const SizedBox(height: 2),
                                       Text(

@@ -779,11 +779,11 @@ class _DesktopTahapanPembelajaranTabState
                                                 Text(
                                                   stageTitle,
                                                   style:
-                                                      AppTypography.buttonLabel(color: isSelected, fontWeight: isSelected),
+                                                      AppTypography.buttonLabel(color: isSelected ? Colors.white : Colors.black87, fontWeight: isSelected ? FontWeight.bold : FontWeight.w500),
                                                 ),
                                                 Text(
                                                   '${materis.length} Materi',
-                                                  style: AppTypography.timestamp(color: const Color()),
+                                                  style: AppTypography.timestamp(color: const Color(0xFF71717A)),
                                                 ),
                                               ],
                                             ),

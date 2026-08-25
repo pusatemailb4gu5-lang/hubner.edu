@@ -475,7 +475,7 @@ class _DesktopTugasTabState extends State<DesktopTugasTab> {
                                               t['title'] ?? 'Tanpa Judul',
                                               maxLines: 1,
                                               overflow: TextOverflow.ellipsis,
-                                              style: AppTypography.buttonLabel(color: isSelected, fontWeight: isSelected),
+                                              style: AppTypography.buttonLabel(color: isSelected ? Colors.white : Colors.black87, fontWeight: isSelected ? FontWeight.bold : FontWeight.w500),
                                             ),
                                             Text(
                                               'Materi: ${t['materiTitle'] ?? '-'}',
@@ -650,7 +650,7 @@ class _DesktopTugasTabState extends State<DesktopTugasTab> {
                   const SizedBox(height: 8),
                   Text(
                     docName.isNotEmpty ? docName : 'Teks pertanyaan kosong.',
-                    style: AppTypography.subtitle(color: const Color(0xFF1E293B, height: 1.5)),
+                    style: AppTypography.subtitle(color: const Color(0xFF1E293B), height: 1.5),
                   ),
                 ],
               ),
@@ -1750,7 +1750,7 @@ class _DesktopTugasTabState extends State<DesktopTugasTab> {
                             ),
                             child: Text(
                               content.isNotEmpty ? content : 'Teks pertanyaan kosong.',
-                              style: AppTypography.subtitle(color: const Color(0xFF334155, height: 1.5)),
+                              style: AppTypography.subtitle(color: const Color(0xFF334155), height: 1.5),
                             ),
                           ),
                         ],

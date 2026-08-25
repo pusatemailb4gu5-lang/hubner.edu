@@ -475,7 +475,7 @@ class _DesktopQuizTabState extends State<DesktopQuizTab> {
                                                   t['title'] ?? 'Tanpa Judul',
                                                   maxLines: 1,
                                                   overflow: TextOverflow.ellipsis,
-                                                  style: AppTypography.buttonLabel(color: isTitleHighlighted, fontWeight: isSelected),
+                                                  style: AppTypography.buttonLabel(color: isTitleHighlighted ? const Color(0xFF2563EB) : Colors.black87, fontWeight: isSelected ? FontWeight.bold : FontWeight.w500),
                                                 ),
                                                 Text(
                                                   'Materi: ${t['materiTitle'] ?? '-'}',
@@ -1188,7 +1188,7 @@ class _DesktopQuizTabState extends State<DesktopQuizTab> {
           Expanded(
             child: Text(
               text.isNotEmpty ? text : '(Opsi kosong)',
-              style: AppTypography.timestamp(color: isCorrect ? const Color(0xFF065F46)),
+              style: AppTypography.timestamp(color: isCorrect ? const Color(0xFF065F46) : const Color(0xFFDC2626)),
             ),
           ),
         ],

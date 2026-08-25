@@ -882,7 +882,7 @@ class _ClassPageState extends State<ClassPage> {
                           ),
                           child: Text(
                             status == 'selesai' ? 'Selesai' : 'Aktif',
-                            style: AppTypography.buttonLabel(color: status == 'selesai', fontWeight: FontWeight.bold),
+                            style: AppTypography.buttonLabel(color: status == 'selesai' ? const Color(0xFF047857) : const Color(0xFF1D4ED8), fontWeight: FontWeight.bold),
                           ),
                         ),
                       ],
@@ -2887,7 +2887,7 @@ class _ClassPageState extends State<ClassPage> {
                             ),
                             child: Text(
                               currentCp,
-                              style: AppTypography.timestamp(color: dark ? Colors.white70 : const Color(0xFF334155, height: 1.6)),
+                              style: AppTypography.timestamp(color: dark ? Colors.white70 : const Color(0xFF334155), height: 1.6),
                             ),
                           ),
                         ] else ...[
@@ -4011,7 +4011,7 @@ class _ClassPageState extends State<ClassPage> {
                                 children: [
                                   Text(
                                     'KODE KELAS',
-                                    style: AppTypography.buttonLabel(color: isDark ? const Color(0xFFC084FC), fontWeight: FontWeight.w800, letterSpacing: 0.5),
+                                    style: AppTypography.buttonLabel(color: isDark ? const Color(0xFFC084FC) : const Color(0xFF475569), fontWeight: FontWeight.w800, letterSpacing: 0.5),
                                   ),
                                   const SizedBox(height: 1),
                                   SelectableText(
@@ -4622,7 +4622,7 @@ class _ClassPageState extends State<ClassPage> {
                                                 const SizedBox(width: 4.5),
                                                 Text(
                                                   statusLabel,
-                                                  style: AppTypography.buttonLabel(color: (stageStatus == 'proses', fontWeight: FontWeight.w700)),
+                                                  style: AppTypography.buttonLabel(color: stageStatus == 'proses' ? const Color(0xFF047857) : Colors.black87, fontWeight: FontWeight.w700),
                                                 ),
                                               ],
                                             ),
@@ -7785,7 +7785,7 @@ class _AddActivityOverlayPageState extends State<AddActivityOverlayPage> {
                           alignment: Alignment.center,
                           child: Text(
                             '📝 Individu',
-                            style: AppTypography.buttonLabel(color: _assignmentType == 'individu', fontWeight: FontWeight.bold),
+                            style: AppTypography.buttonLabel(color: _assignmentType == 'individu' ? Colors.white : Colors.black87, fontWeight: FontWeight.bold),
                           ),
                         ),
                       ),
@@ -7811,7 +7811,7 @@ class _AddActivityOverlayPageState extends State<AddActivityOverlayPage> {
                           alignment: Alignment.center,
                           child: Text(
                             '👥 Kelompok',
-                            style: AppTypography.buttonLabel(color: _assignmentType == 'kelompok', fontWeight: FontWeight.bold),
+                            style: AppTypography.buttonLabel(color: _assignmentType == 'kelompok' ? Colors.white : Colors.black87, fontWeight: FontWeight.bold),
                           ),
                         ),
                       ),
@@ -7845,7 +7845,7 @@ class _AddActivityOverlayPageState extends State<AddActivityOverlayPage> {
                           alignment: Alignment.center,
                           child: Text(
                             'Teks Pertanyaan',
-                            style: AppTypography.buttonLabel(color: _tugasMode == 'text', fontWeight: FontWeight.bold),
+                            style: AppTypography.buttonLabel(color: _tugasMode == 'text' ? Colors.white : Colors.black87, fontWeight: FontWeight.bold),
                           ),
                         ),
                       ),
@@ -7870,7 +7870,7 @@ class _AddActivityOverlayPageState extends State<AddActivityOverlayPage> {
                           alignment: Alignment.center,
                           child: Text(
                             'Berkas PDF',
-                            style: AppTypography.buttonLabel(color: _tugasMode == 'pdf', fontWeight: FontWeight.bold),
+                            style: AppTypography.buttonLabel(color: _tugasMode == 'pdf' ? Colors.white : Colors.black87, fontWeight: FontWeight.bold),
                           ),
                         ),
                       ),
@@ -8113,7 +8113,7 @@ class _AddActivityOverlayPageState extends State<AddActivityOverlayPage> {
                           alignment: Alignment.center,
                           child: Text(
                             'Isi Manual',
-                            style: AppTypography.buttonLabel(color: _quizMode == 'manual', fontWeight: FontWeight.bold),
+                            style: AppTypography.buttonLabel(color: _quizMode == 'manual' ? Colors.white : Colors.black87, fontWeight: FontWeight.bold),
                           ),
                         ),
                       ),
@@ -8138,7 +8138,7 @@ class _AddActivityOverlayPageState extends State<AddActivityOverlayPage> {
                           alignment: Alignment.center,
                           child: Text(
                             'Mass Upload',
-                            style: AppTypography.buttonLabel(color: _quizMode == 'mass', fontWeight: FontWeight.bold),
+                            style: AppTypography.buttonLabel(color: _quizMode == 'mass' ? Colors.white : Colors.black87, fontWeight: FontWeight.bold),
                           ),
                         ),
                       ),

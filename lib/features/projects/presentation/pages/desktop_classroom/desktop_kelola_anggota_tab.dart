@@ -808,7 +808,7 @@ class _DesktopKelolaAnggotaTabState extends State<DesktopKelolaAnggotaTab> {
                               ),
                               child: Text(
                                 role,
-                                style: AppTypography.buttonLabel(color: isTeacher, fontWeight: FontWeight.bold),
+                                style: AppTypography.buttonLabel(color: isTeacher ? const Color(0xFF2563EB) : Colors.black87, fontWeight: FontWeight.bold),
                               ),
                             ),
                           ],
