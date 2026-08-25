@@ -165,7 +165,7 @@ class _SplashPageState extends State<SplashPage> with SingleTickerProviderStateM
                     width: (widthToUse * 0.48).clamp(160.0, 240.0),
                     height: (widthToUse * 0.48).clamp(160.0, 240.0),
                     child: Image.asset(
-                      'assets/iconapp/icon.png',
+                      isDark ? 'assets/iconapp/logo-dark.png' : 'assets/iconapp/icon.png',
                       fit: BoxFit.contain,
                       errorBuilder: (context, error, stackTrace) {
                         return Icon(
