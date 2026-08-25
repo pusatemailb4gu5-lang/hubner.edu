@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hubner/core/theme/app_typography.dart';
 import 'package:hubner/core/widgets/three_dots_loader.dart';
 import 'package:hubner/core/widgets/bouncy_button.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -198,18 +199,18 @@ class _ManageMembersPageState extends State<ManageMembersPage> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         title: Text(
           'Hapus Anggota',
-          style: GoogleFonts.plusJakartaSans(fontSize: 18, fontWeight: FontWeight.bold),
+          style: AppTypography.chatHeaderTitle(fontWeight: FontWeight.bold),
         ),
         content: Text(
           'Apakah Anda yakin ingin menghapus $memberName dari kelas ini?',
-          style: GoogleFonts.dmSans(fontSize: 15.5),
+          style: AppTypography.replySubtitle(),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
             child: Text(
               'Batal',
-              style: GoogleFonts.plusJakartaSans(fontSize: 15, color: Colors.black54),
+              style: AppTypography.buttonLabel(color: Colors.black54),
             ),
           ),
           ElevatedButton(
@@ -220,7 +221,7 @@ class _ManageMembersPageState extends State<ManageMembersPage> {
             ),
             child: Text(
               'Hapus',
-              style: GoogleFonts.plusJakartaSans(fontSize: 15, color: Colors.white, fontWeight: FontWeight.bold),
+              style: AppTypography.buttonLabel(color: Colors.white, fontWeight: FontWeight.bold),
             ),
           ),
         ],
@@ -394,11 +395,7 @@ class _ManageMembersPageState extends State<ManageMembersPage> {
       child: Center(
         child: Text(
           initial,
-          style: GoogleFonts.plusJakartaSans(
-            fontSize: 18,
-            fontWeight: FontWeight.w900,
-            color: const Color(0xFF1E293B),
-          ),
+          style: AppTypography.chatHeaderTitle(color: const Color(0xFF1E293B, fontWeight: FontWeight.w900),
         ),
       ),
     );
@@ -472,11 +469,7 @@ class _ManageMembersPageState extends State<ManageMembersPage> {
                         children: [
                           Text(
                             'Data Anggota Kelas',
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 19.5,
-                              fontWeight: FontWeight.w800,
-                              color: isDark ? Colors.white : const Color(0xFF0F172A),
-                            ),
+                            style: AppTypography.chatHeaderTitle(color: isDark ? Colors.white : const Color(0xFF0F172A, fontWeight: FontWeight.w800),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             textAlign: TextAlign.center,
@@ -518,16 +511,10 @@ class _ManageMembersPageState extends State<ManageMembersPage> {
                       Expanded(
                         child: TextField(
                           controller: _inviteController,
-                          style: GoogleFonts.dmSans(
-                            fontSize: 20.0,
-                            color: isDark ? Colors.white : Colors.black87,
-                          ),
+                          style: AppTypography.chatBody(color: isDark ? Colors.white : Colors.black87),
                           decoration: InputDecoration(
                             hintText: 'Ketik ID pengguna untuk undang...',
-                            hintStyle: GoogleFonts.dmSans(
-                              fontSize: 20.0,
-                              color: isDark ? Colors.white38 : Colors.black38,
-                            ),
+                            hintStyle: AppTypography.chatBody(color: isDark ? Colors.white38 : Colors.black38),
                             isDense: true,
                             border: InputBorder.none,
                             contentPadding: EdgeInsets.zero,
@@ -553,11 +540,7 @@ class _ManageMembersPageState extends State<ManageMembersPage> {
                                 )
                               : Text(
                                   'Undang',
-                                  style: GoogleFonts.plusJakartaSans(
-                                    fontSize: 15.5,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white,
-                                  ),
+                                  style: AppTypography.cardTitle(color: Colors.white, fontWeight: FontWeight.bold),
                                 ),
                         ),
                       ),
@@ -588,11 +571,7 @@ class _ManageMembersPageState extends State<ManageMembersPage> {
                       children: [
                         Text(
                           'Permintaan Bergabung (${docs.length})',
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 16.5,
-                            fontWeight: FontWeight.w800,
-                            color: isDark ? Colors.white70 : const Color(0xFF0F172A),
-                          ),
+                          style: AppTypography.cardTitle(color: isDark ? Colors.white70 : const Color(0xFF0F172A, fontWeight: FontWeight.w800),
                         ),
                         const SizedBox(height: 8),
                         ListView.separated(
@@ -641,20 +620,13 @@ class _ManageMembersPageState extends State<ManageMembersPage> {
                                       children: [
                                         Text(
                                           requesterName,
-                                          style: GoogleFonts.plusJakartaSans(
-                                            fontSize: 16.5,
-                                            fontWeight: FontWeight.bold,
-                                            color: isDark ? Colors.white : const Color(0xFF0F172A),
-                                          ),
+                                          style: AppTypography.cardTitle(color: isDark ? Colors.white : const Color(0xFF0F172A, fontWeight: FontWeight.bold),
                                           maxLines: 1,
                                           overflow: TextOverflow.ellipsis,
                                         ),
                                         Text(
                                           'ID: $requesterUserId',
-                                          style: GoogleFonts.dmSans(
-                                            fontSize: 14.5,
-                                            color: isDark ? Colors.white54 : Colors.black54,
-                                          ),
+                                          style: AppTypography.subtitle(color: isDark ? Colors.white54 : Colors.black54),
                                         ),
                                       ],
                                     ),
@@ -717,11 +689,7 @@ class _ManageMembersPageState extends State<ManageMembersPage> {
                       children: [
                         Text(
                           'Menunggu Persetujuan Siswa (${invDocs.length})',
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 16.5,
-                            fontWeight: FontWeight.w800,
-                            color: isDark ? Colors.white70 : const Color(0xFF0F172A),
-                          ),
+                          style: AppTypography.cardTitle(color: isDark ? Colors.white70 : const Color(0xFF0F172A, fontWeight: FontWeight.w800),
                         ),
                         const SizedBox(height: 8),
                         ListView.separated(
@@ -766,21 +734,13 @@ class _ManageMembersPageState extends State<ManageMembersPage> {
                                       children: [
                                         Text(
                                           invitedName,
-                                          style: GoogleFonts.plusJakartaSans(
-                                            fontSize: 16.5,
-                                            fontWeight: FontWeight.bold,
-                                            color: isDark ? Colors.white : const Color(0xFF0F172A),
-                                          ),
+                                          style: AppTypography.cardTitle(color: isDark ? Colors.white : const Color(0xFF0F172A, fontWeight: FontWeight.bold),
                                           maxLines: 1,
                                           overflow: TextOverflow.ellipsis,
                                         ),
                                         Text(
                                           'ID: $invitedUserId • Status: Pending',
-                                          style: GoogleFonts.dmSans(
-                                            fontSize: 14.5,
-                                            color: const Color(0xFF2563EB),
-                                            fontWeight: FontWeight.w600,
-                                          ),
+                                          style: AppTypography.subtitle(color: const Color(0xFF2563EB, fontWeight: FontWeight.w600),
                                         ),
                                       ],
                                     ),
@@ -814,11 +774,7 @@ class _ManageMembersPageState extends State<ManageMembersPage> {
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: Text(
                 'Data Anggota Kelas',
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 16.5,
-                  fontWeight: FontWeight.w800,
-                  color: isDark ? Colors.white70 : const Color(0xFF0F172A),
-                ),
+                style: AppTypography.cardTitle(color: isDark ? Colors.white70 : const Color(0xFF0F172A, fontWeight: FontWeight.w800),
               ),
             ),
             const SizedBox(height: 10),
@@ -841,10 +797,7 @@ class _ManageMembersPageState extends State<ManageMembersPage> {
                     return Center(
                       child: Text(
                         'Tidak ada anggota terdaftar.',
-                        style: GoogleFonts.dmSans(
-                          fontSize: 16,
-                          color: isDark ? Colors.white38 : Colors.black45,
-                        ),
+                        style: AppTypography.replySubtitle(color: isDark ? Colors.white38 : Colors.black45),
                       ),
                     );
                   }
@@ -931,11 +884,7 @@ class _ManageMembersPageState extends State<ManageMembersPage> {
                                       // Nama Lengkap
                                       Text(
                                         displayName + (memberUid == currentUid ? ' (Anda)' : ''),
-                                        style: GoogleFonts.plusJakartaSans(
-                                          fontSize: 16.0,
-                                          fontWeight: FontWeight.bold,
-                                          color: isDark ? Colors.white : const Color(0xFF0F172A),
-                                        ),
+                                        style: AppTypography.cardTitle(color: isDark ? Colors.white : const Color(0xFF0F172A, fontWeight: FontWeight.bold),
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
                                       ),

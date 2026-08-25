@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hubner/core/theme/app_typography.dart';
 import 'package:hubner/core/widgets/three_dots_loader.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -157,19 +158,12 @@ class _ManageAttendancePageState extends State<ManageAttendancePage> {
                           children: [
                             Text(
                               'Masukan Daftar Nama',
-                              style: GoogleFonts.plusJakartaSans(
-                                fontSize: 15.5,
-                                fontWeight: FontWeight.bold,
-                                color: isDark ? Colors.white : const Color(0xFF0F172A),
-                              ),
+                              style: AppTypography.cardTitle(color: isDark ? Colors.white : const Color(0xFF0F172A, fontWeight: FontWeight.bold),
                             ),
                             const SizedBox(height: 2),
                             Text(
                               'Satu nama per baris',
-                              style: GoogleFonts.dmSans(
-                                fontSize: 13.0,
-                                color: isDark ? const Color(0xFF71717A) : const Color(0xFF64748B),
-                              ),
+                              style: AppTypography.fileSize(color: isDark ? const Color(0xFF71717A),
                             ),
                           ],
                         ),
@@ -187,11 +181,7 @@ class _ManageAttendancePageState extends State<ManageAttendancePage> {
                         ),
                         child: Text(
                           '${_parsedNames.length} Siswa',
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 12.5,
-                            fontWeight: FontWeight.bold,
-                            color: isDark ? const Color(0xFFD6A5F8) : const Color(0xFF6D28D9),
-                          ),
+                          style: AppTypography.channelTag(color: isDark ? const Color(0xFFD6A5F8, fontWeight: FontWeight.bold),
                         ),
                       ),
                     ],
@@ -199,11 +189,7 @@ class _ManageAttendancePageState extends State<ManageAttendancePage> {
                   const SizedBox(height: 12),
                   Text(
                     'Tulis atau tempel daftar nama siswa. Sistem akan otomatis mendata dan memproses ke laporan.',
-                    style: GoogleFonts.dmSans(
-                      fontSize: 13.5,
-                      color: isDark ? const Color(0xFF71717A) : const Color(0xFF64748B),
-                      height: 1.4,
-                    ),
+                    style: AppTypography.timestamp(color: isDark ? const Color(0xFF71717A, height: 1.4),
                   ),
                   const SizedBox(height: 14),
                   Expanded(
@@ -225,19 +211,11 @@ class _ManageAttendancePageState extends State<ManageAttendancePage> {
                           textAlignVertical: TextAlignVertical.top,
                           keyboardType: TextInputType.multiline,
                           cursorColor: const Color(0xFF7C3AED),
-                          style: GoogleFonts.dmSans(
-                            fontSize: 15.0,
-                            color: isDark ? Colors.white : const Color(0xFF0F172A),
-                            height: 1.5,
-                          ),
+                          style: AppTypography.subtitle(color: isDark ? Colors.white : const Color(0xFF0F172A, height: 1.5),
                           decoration: InputDecoration(
                             border: InputBorder.none,
                             hintText: "Contoh:\nBudi Santoso\nAni Wijaya\nCandra Pratama\nDewi Lestari",
-                            hintStyle: GoogleFonts.dmSans(
-                              fontSize: 14.5,
-                              color: isDark ? const Color(0xFF52525B) : const Color(0xFF94A3B8),
-                              height: 1.5,
-                            ),
+                            hintStyle: AppTypography.subtitle(color: isDark ? const Color(0xFF52525B, height: 1.5),
                             contentPadding: const EdgeInsets.all(16),
                           ),
                         ),
@@ -330,11 +308,7 @@ class _ManageAttendancePageState extends State<ManageAttendancePage> {
                       // Judul Header
                       Text(
                         'Atur Presensi Siswa',
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 18.0,
-                          fontWeight: FontWeight.w700,
-                          color: isDark ? Colors.white : const Color(0xFF0F172A),
-                        ),
+                        style: AppTypography.chatHeaderTitle(color: isDark ? Colors.white : const Color(0xFF0F172A, fontWeight: FontWeight.w700),
                       ),
 
                       // Tombol Simpan Centang (✓) di atas

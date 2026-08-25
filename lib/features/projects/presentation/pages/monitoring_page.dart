@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hubner/core/theme/app_typography.dart';
 import 'package:hubner/core/widgets/three_dots_loader.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -239,18 +240,11 @@ class _MonitoringPageState extends State<MonitoringPage> {
                             children: [
                               Text(
                                 'Capaian Pembelajaran',
-                                style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 17.6,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black87,
-                                ),
+                                style: AppTypography.chatHeaderTitle(color: Colors.black87, fontWeight: FontWeight.bold),
                               ),
                               Text(
                                 'Target & Tujuan Pembelajaran (CP)',
-                                style: GoogleFonts.dmSans(
-                                  fontSize: 14.0,
-                                  color: Colors.black45,
-                                ),
+                                style: AppTypography.timestamp(color: Colors.black45),
                               ),
                             ],
                           ),
@@ -275,20 +269,13 @@ class _MonitoringPageState extends State<MonitoringPage> {
                       children: [
                         Text(
                           'Target Elemen Pembelajaran',
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                            color: accentColor,
-                          ),
+                          style: AppTypography.buttonLabel(color: accentColor, fontWeight: FontWeight.bold),
                         ),
                         const SizedBox(height: 8),
                         if (stages.isEmpty)
                           Text(
                             'Belum ada elemen pembelajaran yang dikonfigurasi.',
-                            style: GoogleFonts.dmSans(
-                              fontSize: 14,
-                              color: Colors.black45,
-                            ),
+                            style: AppTypography.timestamp(color: Colors.black45),
                           )
                         else
                           ...List.generate(stages.length, (idx) {
@@ -328,11 +315,7 @@ class _MonitoringPageState extends State<MonitoringPage> {
                                     child: Center(
                                       child: Text(
                                         '${idx + 1}',
-                                        style: GoogleFonts.plusJakartaSans(
-                                          fontSize: 14.0,
-                                          fontWeight: FontWeight.bold,
-                                          color: itemAccentColor,
-                                        ),
+                                        style: AppTypography.buttonLabel(color: itemAccentColor, fontWeight: FontWeight.bold),
                                       ),
                                     ),
                                   ),
@@ -344,19 +327,12 @@ class _MonitoringPageState extends State<MonitoringPage> {
                                       children: [
                                         Text(
                                           title,
-                                          style: GoogleFonts.plusJakartaSans(
-                                            fontSize: 14.7,
-                                            fontWeight: FontWeight.bold,
-                                            color: Colors.black87,
-                                          ),
+                                          style: AppTypography.buttonLabel(color: Colors.black87, fontWeight: FontWeight.bold),
                                         ),
                                         const SizedBox(height: 2),
                                         Text(
                                           desc,
-                                          style: GoogleFonts.dmSans(
-                                            fontSize: 14.0,
-                                            color: Colors.black54,
-                                          ),
+                                          style: AppTypography.timestamp(color: Colors.black54),
                                         ),
                                       ],
                                     ),
@@ -441,18 +417,11 @@ class _MonitoringPageState extends State<MonitoringPage> {
                             children: [
                               Text(
                                 'Jadwal Pelajaran',
-                                style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 17.6,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black87,
-                                ),
+                                style: AppTypography.chatHeaderTitle(color: Colors.black87, fontWeight: FontWeight.bold),
                               ),
                               Text(
                                 'Hari & Jam Pertemuan Kelas',
-                                style: GoogleFonts.dmSans(
-                                  fontSize: 14.0,
-                                  color: Colors.black45,
-                                ),
+                                style: AppTypography.timestamp(color: Colors.black45),
                               ),
                             ],
                           ),
@@ -491,19 +460,12 @@ class _MonitoringPageState extends State<MonitoringPage> {
                                 const SizedBox(height: 10),
                                 Text(
                                   'Belum Ada Jadwal',
-                                  style: GoogleFonts.plusJakartaSans(
-                                    fontSize: 16.4,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.black87,
-                                  ),
+                                  style: AppTypography.cardTitle(color: Colors.black87, fontWeight: FontWeight.bold),
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
                                   'Jadwal pelajaran belum diatur oleh guru pengajar.',
-                                  style: GoogleFonts.dmSans(
-                                    fontSize: 14.0,
-                                    color: Colors.black45,
-                                  ),
+                                  style: AppTypography.timestamp(color: Colors.black45),
                                   textAlign: TextAlign.center,
                                 ),
                               ],
@@ -557,12 +519,7 @@ class _MonitoringPageState extends State<MonitoringPage> {
                                     ),
                                     child: Text(
                                       dayStr.toUpperCase(),
-                                      style: GoogleFonts.plusJakartaSans(
-                                        fontSize: 14.0,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.white,
-                                        letterSpacing: 0.5,
-                                      ),
+                                      style: AppTypography.buttonLabel(color: Colors.white, fontWeight: FontWeight.bold, letterSpacing: 0.5),
                                     ),
                                   ),
                                   const SizedBox(width: 14),
@@ -581,11 +538,7 @@ class _MonitoringPageState extends State<MonitoringPage> {
                                             const SizedBox(width: 6),
                                             Text(
                                               '$startTime - $endTime WIB',
-                                              style: GoogleFonts.plusJakartaSans(
-                                                fontSize: 14.7,
-                                                fontWeight: FontWeight.bold,
-                                                color: Colors.black87,
-                                              ),
+                                              style: AppTypography.buttonLabel(color: Colors.black87, fontWeight: FontWeight.bold),
                                             ),
                                           ],
                                         ),
@@ -600,10 +553,7 @@ class _MonitoringPageState extends State<MonitoringPage> {
                                             const SizedBox(width: 6),
                                             Text(
                                               room,
-                                              style: GoogleFonts.dmSans(
-                                                fontSize: 14.0,
-                                                color: Colors.black54,
-                                              ),
+                                              style: AppTypography.timestamp(color: Colors.black54),
                                             ),
                                           ],
                                         ),
@@ -738,18 +688,11 @@ class _MonitoringPageState extends State<MonitoringPage> {
                       children: [
                         Text(
                           'Anggota Kelas',
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 18.7,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black87,
-                          ),
+                          style: AppTypography.chatHeaderTitle(color: Colors.black87, fontWeight: FontWeight.bold),
                         ),
                         Text(
                           'Guru pengajar & teman sekelas terdaftar',
-                          style: GoogleFonts.dmSans(
-                            fontSize: 14.0,
-                            color: Colors.black45,
-                          ),
+                          style: AppTypography.timestamp(color: Colors.black45),
                         ),
                       ],
                     ),
@@ -803,11 +746,7 @@ class _MonitoringPageState extends State<MonitoringPage> {
                                         Flexible(
                                           child: Text(
                                             teacherDisplayName,
-                                            style: GoogleFonts.plusJakartaSans(
-                                              fontSize: 15.2,
-                                              fontWeight: FontWeight.bold,
-                                              color: Colors.black87,
-                                            ),
+                                            style: AppTypography.buttonLabel(color: Colors.black87, fontWeight: FontWeight.bold),
                                             maxLines: 1,
                                             overflow: TextOverflow.ellipsis,
                                           ),
@@ -826,21 +765,14 @@ class _MonitoringPageState extends State<MonitoringPage> {
                                           ),
                                           child: Text(
                                             'Guru',
-                                            style: GoogleFonts.plusJakartaSans(
-                                              fontSize: 14.0,
-                                              fontWeight: FontWeight.bold,
-                                              color: const Color(0xFFD97706),
-                                            ),
+                                            style: AppTypography.buttonLabel(color: const Color(0xFFD97706, fontWeight: FontWeight.bold),
                                           ),
                                         ),
                                       ],
                                     ),
                                     Text(
                                       'Pengajar Kelas',
-                                      style: GoogleFonts.dmSans(
-                                        fontSize: 14.0,
-                                        color: Colors.black45,
-                                      ),
+                                      style: AppTypography.timestamp(color: Colors.black45),
                                     ),
                                   ],
                                 ),
@@ -860,11 +792,7 @@ class _MonitoringPageState extends State<MonitoringPage> {
                                     ),
                                     child: Text(
                                       'Teman',
-                                      style: GoogleFonts.plusJakartaSans(
-                                        fontSize: 14.0,
-                                        fontWeight: FontWeight.bold,
-                                        color: const Color(0xFF15803D),
-                                      ),
+                                      style: AppTypography.buttonLabel(color: const Color(0xFF15803D, fontWeight: FontWeight.bold),
                                     ),
                                   )
                                 else
@@ -895,11 +823,7 @@ class _MonitoringPageState extends State<MonitoringPage> {
                                           const SizedBox(width: 4),
                                           Text(
                                             'Tambah',
-                                            style: GoogleFonts.plusJakartaSans(
-                                              fontSize: 14.0,
-                                              fontWeight: FontWeight.bold,
-                                              color: const Color(0xFF1D4ED8),
-                                            ),
+                                            style: AppTypography.buttonLabel(color: const Color(0xFF1D4ED8, fontWeight: FontWeight.bold),
                                           ),
                                         ],
                                       ),
@@ -919,18 +843,11 @@ class _MonitoringPageState extends State<MonitoringPage> {
                           children: [
                             Text(
                               'Daftar Siswa',
-                              style: GoogleFonts.plusJakartaSans(
-                                fontSize: 15.2,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black87,
-                              ),
+                              style: AppTypography.buttonLabel(color: Colors.black87, fontWeight: FontWeight.bold),
                             ),
                             Text(
                               '${masterList.length} Siswa',
-                              style: GoogleFonts.dmSans(
-                                fontSize: 14.0,
-                                color: Colors.black45,
-                              ),
+                              style: AppTypography.timestamp(color: Colors.black45),
                             ),
                           ],
                         ),
@@ -942,10 +859,7 @@ class _MonitoringPageState extends State<MonitoringPage> {
                             child: Center(
                               child: Text(
                                 'Belum ada siswa terdaftar di kelas ini.',
-                                style: GoogleFonts.dmSans(
-                                  fontSize: 14,
-                                  color: Colors.black45,
-                                ),
+                                style: AppTypography.timestamp(color: Colors.black45),
                               ),
                             ),
                           )
@@ -988,13 +902,7 @@ class _MonitoringPageState extends State<MonitoringPage> {
                                       sName.isNotEmpty
                                           ? sName[0].toUpperCase()
                                           : 'S',
-                                      style: GoogleFonts.plusJakartaSans(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.bold,
-                                        color: isSelf
-                                            ? const Color(0xFF2563EB)
-                                            : Colors.black54,
-                                      ),
+                                      style: AppTypography.buttonLabel(color: isSelf, fontWeight: FontWeight.bold),
                                     ),
                                   ),
                                   const SizedBox(width: 12),
@@ -1008,11 +916,7 @@ class _MonitoringPageState extends State<MonitoringPage> {
                                             Flexible(
                                               child: Text(
                                                 sName,
-                                                style: GoogleFonts.plusJakartaSans(
-                                                  fontSize: 15.2,
-                                                  fontWeight: FontWeight.bold,
-                                                  color: Colors.black87,
-                                                ),
+                                                style: AppTypography.buttonLabel(color: Colors.black87, fontWeight: FontWeight.bold),
                                                 maxLines: 1,
                                                 overflow: TextOverflow.ellipsis,
                                               ),
@@ -1034,13 +938,7 @@ class _MonitoringPageState extends State<MonitoringPage> {
                                                 ),
                                                 child: Text(
                                                   'Saya',
-                                                  style: GoogleFonts.plusJakartaSans(
-                                                    fontSize: 14.0,
-                                                    fontWeight: FontWeight.bold,
-                                                    color: const Color(
-                                                      0xFF2563EB,
-                                                    ),
-                                                  ),
+                                                  style: AppTypography.buttonLabel(color: const Color(, fontWeight: FontWeight.bold),
                                                 ),
                                               ),
                                             ],
@@ -1049,10 +947,7 @@ class _MonitoringPageState extends State<MonitoringPage> {
                                         if (sNis.isNotEmpty)
                                           Text(
                                             'NIS: $sNis',
-                                            style: GoogleFonts.dmSans(
-                                              fontSize: 14.0,
-                                              color: Colors.black45,
-                                            ),
+                                            style: AppTypography.timestamp(color: Colors.black45),
                                           ),
                                       ],
                                     ),
@@ -1088,11 +983,7 @@ class _MonitoringPageState extends State<MonitoringPage> {
                                             const SizedBox(width: 4),
                                             Text(
                                               'Keluar',
-                                              style: GoogleFonts.plusJakartaSans(
-                                                fontSize: 14.0,
-                                                fontWeight: FontWeight.bold,
-                                                color: const Color(0xFFEF4444),
-                                              ),
+                                              style: AppTypography.buttonLabel(color: const Color(0xFFEF4444, fontWeight: FontWeight.bold),
                                             ),
                                           ],
                                         ),
@@ -1110,11 +1001,7 @@ class _MonitoringPageState extends State<MonitoringPage> {
                                       ),
                                       child: Text(
                                         'Teman',
-                                        style: GoogleFonts.plusJakartaSans(
-                                          fontSize: 14.0,
-                                          fontWeight: FontWeight.bold,
-                                          color: const Color(0xFF15803D),
-                                        ),
+                                        style: AppTypography.buttonLabel(color: const Color(0xFF15803D, fontWeight: FontWeight.bold),
                                       ),
                                     )
                                   else
@@ -1144,11 +1031,7 @@ class _MonitoringPageState extends State<MonitoringPage> {
                                             const SizedBox(width: 4),
                                             Text(
                                               'Tambah',
-                                              style: GoogleFonts.plusJakartaSans(
-                                                fontSize: 14.0,
-                                                fontWeight: FontWeight.bold,
-                                                color: const Color(0xFF1D4ED8),
-                                              ),
+                                              style: AppTypography.buttonLabel(color: const Color(0xFF1D4ED8, fontWeight: FontWeight.bold),
                                             ),
                                           ],
                                         ),
@@ -1177,18 +1060,18 @@ class _MonitoringPageState extends State<MonitoringPage> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: Text(
           'Keluar Kelas?',
-          style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, fontSize: 18.7),
+          style: AppTypography.chatHeaderTitle(fontWeight: FontWeight.bold),
         ),
         content: Text(
           'Apakah Anda yakin ingin keluar dari kelas ${_selectedProjectData?['name'] ?? ''}?',
-          style: GoogleFonts.dmSans(fontSize: 14, color: Colors.black87),
+          style: AppTypography.timestamp(color: Colors.black87),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
             child: Text(
               'Batal',
-              style: GoogleFonts.dmSans(color: Colors.black54),
+              style: AppTypography.timestamp(color: Colors.black54),
             ),
           ),
           ElevatedButton(
@@ -1201,10 +1084,7 @@ class _MonitoringPageState extends State<MonitoringPage> {
             ),
             child: Text(
               'Keluar',
-              style: GoogleFonts.plusJakartaSans(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
+              style: AppTypography.buttonLabel(color: Colors.white, fontWeight: FontWeight.bold),
             ),
           ),
         ],
@@ -1462,12 +1342,7 @@ class _MonitoringPageState extends State<MonitoringPage> {
               children: [
                 Text(
                   title,
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: isCompleted ? Colors.black38 : Colors.black87,
-                    decoration: isCompleted ? TextDecoration.lineThrough : null,
-                  ),
+                  style: AppTypography.buttonLabel(color: isCompleted ? Colors.black38 : Colors.black87, fontWeight: FontWeight.w600),
                 ),
                 const SizedBox(height: 2),
                 Row(
@@ -1484,10 +1359,7 @@ class _MonitoringPageState extends State<MonitoringPage> {
                     const SizedBox(width: 4),
                     Text(
                       subtitle,
-                      style: GoogleFonts.dmSans(
-                        fontSize: 14.0,
-                        color: Colors.black45,
-                      ),
+                      style: AppTypography.timestamp(color: Colors.black45),
                     ),
                   ],
                 ),
@@ -1524,11 +1396,7 @@ class _MonitoringPageState extends State<MonitoringPage> {
                     const SizedBox(width: 4),
                     Text(
                       'Selesai',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 14.0,
-                        fontWeight: FontWeight.bold,
-                        color: const Color(0xFF059669),
-                      ),
+                      style: AppTypography.buttonLabel(color: const Color(0xFF059669, fontWeight: FontWeight.bold),
                     ),
                   ],
                 ),
@@ -1555,10 +1423,7 @@ class _MonitoringPageState extends State<MonitoringPage> {
                 icon: Icon(buttonIcon, size: 11),
                 label: Text(
                   buttonText,
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 14.0,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: AppTypography.buttonLabel(fontWeight: FontWeight.bold),
                 ),
               ),
             ),
@@ -1599,19 +1464,12 @@ class _MonitoringPageState extends State<MonitoringPage> {
                 const SizedBox(height: 16),
                 Text(
                   'Belum Ada Kelas',
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 18.7,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black87,
-                  ),
+                  style: AppTypography.chatHeaderTitle(color: Colors.black87, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   'Silakan bergabung ke kelas untuk melihat monitoring.',
-                  style: GoogleFonts.dmSans(
-                    fontSize: 14,
-                    color: Colors.black45,
-                  ),
+                  style: AppTypography.timestamp(color: Colors.black45),
                   textAlign: TextAlign.center,
                 ),
               ],
@@ -1674,18 +1532,11 @@ class _MonitoringPageState extends State<MonitoringPage> {
                                 children: [
                                   Text(
                                     'Monitoring Classroom',
-                                    style: GoogleFonts.plusJakartaSans(
-                                      fontSize: 25.7,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.black87,
-                                    ),
+                                    style: AppTypography.pageTitle(color: Colors.black87, fontWeight: FontWeight.bold),
                                   ),
                                   Text(
                                     'Cek checklist materi, kuis, dan tugas Anda di sini.',
-                                    style: GoogleFonts.dmSans(
-                                      fontSize: 14,
-                                      color: Colors.black45,
-                                    ),
+                                    style: AppTypography.timestamp(color: Colors.black45),
                                   ),
                                 ],
                               ),
@@ -1722,21 +1573,14 @@ class _MonitoringPageState extends State<MonitoringPage> {
                                               alignment: Alignment.centerLeft,
                                               child: Text(
                                                 'Ganti',
-                                                style: GoogleFonts.plusJakartaSans(
-                                                  fontSize: 14.0,
-                                                  fontWeight: FontWeight.bold,
-                                                  color: Colors.black87,
-                                                ),
+                                                style: AppTypography.buttonLabel(color: Colors.black87, fontWeight: FontWeight.bold),
                                               ),
                                             );
                                           }).toList();
                                         },
                                     hint: Text(
                                       'Pilih Classroom',
-                                      style: GoogleFonts.dmSans(
-                                        fontSize: 14.0,
-                                        color: Colors.black54,
-                                      ),
+                                      style: AppTypography.timestamp(color: Colors.black54),
                                     ),
                                     onChanged: (newVal) {
                                       if (newVal != null &&
@@ -1764,11 +1608,7 @@ class _MonitoringPageState extends State<MonitoringPage> {
                                         value: pId,
                                         child: Text(
                                           pName,
-                                          style: GoogleFonts.dmSans(
-                                            fontSize: 14.0,
-                                            fontWeight: FontWeight.w500,
-                                            color: Colors.black87,
-                                          ),
+                                          style: AppTypography.timestamp(color: Colors.black87, fontWeight: FontWeight.w500),
                                           maxLines: 2,
                                           overflow: TextOverflow.ellipsis,
                                         ),
@@ -1932,15 +1772,6 @@ class _MonitoringPageState extends State<MonitoringPage> {
                                   decoration: BoxDecoration(
                                     color: cardColor,
                                     borderRadius: BorderRadius.circular(28),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: accentColor.withValues(
-                                          alpha: 0.1,
-                                        ),
-                                        blurRadius: 14,
-                                        offset: const Offset(0, 4),
-                                      ),
-                                    ],
                                   ),
                                   child: Stack(
                                     children: [
@@ -1982,13 +1813,7 @@ class _MonitoringPageState extends State<MonitoringPage> {
                                                         16;
 
                                                     final textStyle =
-                                                        GoogleFonts.plusJakartaSans(
-                                                          fontSize: 25.7,
-                                                          fontWeight:
-                                                              FontWeight.bold,
-                                                          color: Colors.black87,
-                                                          height: 1.2,
-                                                        );
+                                                        AppTypography.pageTitle(color: Colors.black87, fontWeight: FontWeight.bold, height: 1.2);
 
                                                     String splitTitle(
                                                       String title,
@@ -2120,19 +1945,6 @@ class _MonitoringPageState extends State<MonitoringPage> {
                                                                             BorderRadius.circular(
                                                                               16,
                                                                             ),
-                                                                        boxShadow: [
-                                                                          BoxShadow(
-                                                                            color: Colors.black.withValues(
-                                                                              alpha: 0.05,
-                                                                            ),
-                                                                            blurRadius:
-                                                                                6,
-                                                                            offset: const Offset(
-                                                                              0,
-                                                                              2,
-                                                                            ),
-                                                                          ),
-                                                                        ],
                                                                       ),
                                                                       child: Row(
                                                                         mainAxisSize:
@@ -2151,11 +1963,7 @@ class _MonitoringPageState extends State<MonitoringPage> {
                                                                           ),
                                                                           Text(
                                                                             'Kelola Kelas',
-                                                                            style: GoogleFonts.plusJakartaSans(
-                                                                              fontSize: 14.0,
-                                                                              fontWeight: FontWeight.bold,
-                                                                              color: accentColor,
-                                                                            ),
+                                                                            style: AppTypography.buttonLabel(color: accentColor, fontWeight: FontWeight.bold),
                                                                           ),
                                                                         ],
                                                                       ),
@@ -2189,20 +1997,6 @@ class _MonitoringPageState extends State<MonitoringPage> {
                                                                           BorderRadius.circular(
                                                                             16,
                                                                           ),
-                                                                      boxShadow: [
-                                                                        BoxShadow(
-                                                                          color: Colors.black.withValues(
-                                                                            alpha:
-                                                                                0.05,
-                                                                          ),
-                                                                          blurRadius:
-                                                                              6,
-                                                                          offset: const Offset(
-                                                                            0,
-                                                                            2,
-                                                                          ),
-                                                                        ),
-                                                                      ],
                                                                     ),
                                                                     child: Row(
                                                                       mainAxisSize:
@@ -2223,13 +2017,7 @@ class _MonitoringPageState extends State<MonitoringPage> {
                                                                         ),
                                                                         Text(
                                                                           'Lihat Kelas',
-                                                                          style: GoogleFonts.plusJakartaSans(
-                                                                            fontSize: 14.0,
-                                                                            fontWeight:
-                                                                                FontWeight.bold,
-                                                                            color:
-                                                                                accentColor,
-                                                                          ),
+                                                                          style: AppTypography.buttonLabel(color: accentColor, fontWeight: FontWeight.bold),
                                                                         ),
                                                                         const SizedBox(
                                                                           width:
@@ -2333,23 +2121,12 @@ class _MonitoringPageState extends State<MonitoringPage> {
                                                           children: [
                                                             Text(
                                                               formattedName,
-                                                              style: GoogleFonts.dmSans(
-                                                                fontSize: 15.8,
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .bold,
-                                                                color: Colors
-                                                                    .black87,
-                                                              ),
+                                                              style: AppTypography.replySubtitle(color: Colors, fontWeight: FontWeight),
                                                             ),
                                                             Text(
                                                               'Pengajar Kelas',
                                                               style:
-                                                                  GoogleFonts.dmSans(
-                                                                    fontSize: 14.0,
-                                                                    color: Colors
-                                                                        .black54,
-                                                                  ),
+                                                                  AppTypography.timestamp(color: Colors),
                                                             ),
                                                           ],
                                                         ),
@@ -2368,23 +2145,12 @@ class _MonitoringPageState extends State<MonitoringPage> {
                                                     Text(
                                                       'Progress Saya',
                                                       style:
-                                                          GoogleFonts.plusJakartaSans(
-                                                            fontSize: 15.8,
-                                                            fontWeight:
-                                                                FontWeight.bold,
-                                                            color:
-                                                                Colors.black87,
-                                                          ),
+                                                          AppTypography.cardTitle(color: Colors.black87, fontWeight: FontWeight.bold),
                                                     ),
                                                     Text(
                                                       '$completedItems/$totalItems Selesai',
                                                       style:
-                                                          GoogleFonts.plusJakartaSans(
-                                                            fontSize: 14,
-                                                            fontWeight:
-                                                                FontWeight.bold,
-                                                            color: accentColor,
-                                                          ),
+                                                          AppTypography.buttonLabel(color: accentColor, fontWeight: FontWeight.bold),
                                                     ),
                                                   ],
                                                 ),
@@ -2451,14 +2217,7 @@ class _MonitoringPageState extends State<MonitoringPage> {
                                                               ),
                                                               Text(
                                                                 'Lihat Elemen',
-                                                                style: GoogleFonts.dmSans(
-                                                                  fontSize: 14.0,
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .bold,
-                                                                  color: Colors
-                                                                      .black87,
-                                                                ),
+                                                                style: AppTypography.timestamp(color: Colors, fontWeight: FontWeight),
                                                               ),
                                                             ],
                                                           ),
@@ -2508,14 +2267,7 @@ class _MonitoringPageState extends State<MonitoringPage> {
                                                               ),
                                                               Text(
                                                                 'Lihat Jadwal',
-                                                                style: GoogleFonts.dmSans(
-                                                                  fontSize: 14.0,
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .bold,
-                                                                  color: Colors
-                                                                      .black87,
-                                                                ),
+                                                                style: AppTypography.timestamp(color: Colors, fontWeight: FontWeight),
                                                               ),
                                                             ],
                                                           ),
@@ -2543,15 +2295,6 @@ class _MonitoringPageState extends State<MonitoringPage> {
                                               borderRadius:
                                                   BorderRadius.circular(20),
                                               border: null,
-                                              boxShadow: [
-                                                BoxShadow(
-                                                  color: accentColor.withValues(
-                                                    alpha: 0.05,
-                                                  ),
-                                                  blurRadius: 8,
-                                                  offset: const Offset(0, 2),
-                                                ),
-                                              ],
                                             ),
                                             child: TextField(
                                               onChanged: (val) {
@@ -2560,16 +2303,11 @@ class _MonitoringPageState extends State<MonitoringPage> {
                                                       .toLowerCase();
                                                 });
                                               },
-                                              style: GoogleFonts.dmSans(
-                                                fontSize: 15.2,
-                                              ),
+                                              style: AppTypography.subtitle(),
                                               decoration: InputDecoration(
                                                 hintText:
                                                     'Cari materi atau tugas...',
-                                                hintStyle: GoogleFonts.dmSans(
-                                                  fontSize: 14,
-                                                  color: Colors.black45,
-                                                ),
+                                                hintStyle: AppTypography.timestamp(color: Colors.black45),
                                                 prefixIcon: Icon(
                                                   Icons.search_rounded,
                                                   size: 18,
@@ -2723,21 +2461,12 @@ class _MonitoringPageState extends State<MonitoringPage> {
                   children: [
                     Text(
                       value,
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 25.7,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black87,
-                        height: 1.0,
-                      ),
+                      style: AppTypography.pageTitle(color: Colors.black87, fontWeight: FontWeight.bold, height: 1.0),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       label,
-                      style: GoogleFonts.dmSans(
-                        fontSize: 14.0,
-                        fontWeight: FontWeight.w500,
-                        color: Colors.black87,
-                      ),
+                      style: AppTypography.timestamp(color: Colors.black87, fontWeight: FontWeight.w500),
                     ),
                   ],
                 ),
@@ -2824,13 +2553,6 @@ class _MonitoringPageState extends State<MonitoringPage> {
         color: elementBgColor.withValues(alpha: 0.55),
         borderRadius: BorderRadius.circular(24),
         border: null,
-        boxShadow: [
-          BoxShadow(
-            color: elementAccentColor.withValues(alpha: 0.20),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
       ),
       child: Column(
         children: [
@@ -2871,30 +2593,18 @@ class _MonitoringPageState extends State<MonitoringPage> {
                           children: [
                             Text(
                               stageTitle,
-                              style: GoogleFonts.plusJakartaSans(
-                                fontSize: 17,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black87,
-                                height: 1.2,
-                              ),
+                              style: AppTypography.cardTitle(color: Colors.black87, fontWeight: FontWeight.bold, height: 1.2),
                             ),
                             const SizedBox(height: 4),
                             Text(
                               '$totalMateris Materi · ${totalTasksCount + totalQuizCount} Tugas & Quiz',
-                              style: GoogleFonts.dmSans(
-                                fontSize: 14.0,
-                                color: Colors.black54,
-                              ),
+                              style: AppTypography.timestamp(color: Colors.black54),
                             ),
                             if (stageDesc.isNotEmpty) ...[
                               const SizedBox(height: 6),
                               Text(
                                 stageDesc,
-                                style: GoogleFonts.dmSans(
-                                  fontSize: 14.0,
-                                  color: Colors.black87.withValues(alpha: 0.75),
-                                  height: 1.4,
-                                ),
+                                style: AppTypography.timestamp(color: Colors.black87.withValues(alpha: 0.75, height: 1.4),
                               ),
                             ],
                           ],
@@ -2957,11 +2667,7 @@ class _MonitoringPageState extends State<MonitoringPage> {
                                 ),
                                 child: Text(
                                   'Selesai',
-                                  style: GoogleFonts.plusJakartaSans(
-                                    fontSize: 14.0,
-                                    fontWeight: FontWeight.bold,
-                                    color: const Color(0xFF059669),
-                                  ),
+                                  style: AppTypography.buttonLabel(color: const Color(0xFF059669, fontWeight: FontWeight.bold),
                                 ),
                               ),
                             ),
@@ -2974,11 +2680,7 @@ class _MonitoringPageState extends State<MonitoringPage> {
                                 ),
                                 child: Text(
                                   'Proses Pembelajaran',
-                                  style: GoogleFonts.plusJakartaSans(
-                                    fontSize: 14.0,
-                                    fontWeight: FontWeight.bold,
-                                    color: const Color(0xFF1D4ED8),
-                                  ),
+                                  style: AppTypography.buttonLabel(color: const Color(0xFF1D4ED8, fontWeight: FontWeight.bold),
                                 ),
                               ),
                             ),
@@ -2991,11 +2693,7 @@ class _MonitoringPageState extends State<MonitoringPage> {
                                 ),
                                 child: Text(
                                   'Akan Datang',
-                                  style: GoogleFonts.plusJakartaSans(
-                                    fontSize: 14.0,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.black54,
-                                  ),
+                                  style: AppTypography.buttonLabel(color: Colors.black54, fontWeight: FontWeight.bold),
                                 ),
                               ),
                             ),
@@ -3015,11 +2713,7 @@ class _MonitoringPageState extends State<MonitoringPage> {
                       ),
                       child: Text(
                         statusLabel,
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 14.0,
-                          fontWeight: FontWeight.bold,
-                          color: statusFg,
-                        ),
+                        style: AppTypography.buttonLabel(color: statusFg, fontWeight: FontWeight.bold),
                       ),
                     ),
                 ],
@@ -3118,26 +2812,14 @@ class _MonitoringPageState extends State<MonitoringPage> {
                                     children: [
                                       Text(
                                         mTitle,
-                                        style: GoogleFonts.plusJakartaSans(
-                                          fontSize: 15.2,
-                                          fontWeight: FontWeight.bold,
-                                          color: isMateriCompleted
-                                              ? Colors.black45
-                                              : Colors.black87,
-                                          decoration: isMateriCompleted
-                                              ? TextDecoration.lineThrough
-                                              : null,
-                                        ),
+                                        style: AppTypography.buttonLabel(color: isMateriCompleted, fontWeight: FontWeight.bold),
                                       ),
                                       const SizedBox(height: 2),
                                       Text(
                                         tasks.isNotEmpty
                                             ? '$tugasCount Tugas · $quizCount Quiz · $pdfCount PDF'
                                             : 'Materi Pembelajaran',
-                                        style: GoogleFonts.dmSans(
-                                          fontSize: 14.0,
-                                          color: Colors.black45,
-                                        ),
+                                        style: AppTypography.timestamp(color: Colors.black45),
                                       ),
                                     ],
                                   ),

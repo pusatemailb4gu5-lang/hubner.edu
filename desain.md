@@ -227,26 +227,31 @@ Standar tipografi resmi Hubner Edu mengacu pada arsitektur baku **Area Pesan Hal
 ### B. Aturan Mutlak Batas Ukuran Terkecil (*Android Minimum Legibility Rule*)
 1. **Batas Font Minimum**: Ukuran font terkecil yang diizinkan di seluruh aplikasi Android adalah **`10.0 px`** (khusus badge micro/HD tag).
 2. **Body & Isi Teks Chat**: Menggunakan standar baku **`20.0 px`** (`GoogleFonts.dmSans`) agar teks sangat jelas terbaca dan proporsional.
-3. **Format Penggunaan di Flutter**:
+3. **Format Penggunaan Terpusat (`style.css` Flutter - `AppTypography`)**:
+   Seluruh halaman **TIDAK LAGI** menulis angka ukuran font secara manual, melainkan memanggil token terpusat dari `lib/core/theme/app_typography.dart`:
    ```dart
-   // Contoh Nama Pengirim:
-   GoogleFonts.plusJakartaSans(
-     fontSize: 18.0,
-     fontWeight: FontWeight.bold,
+   import 'package:hubner/core/theme/app_typography.dart';
+
+   // Judul Header Chat:
+   Text(channelTitle, style: AppTypography.chatHeaderTitle(color: Colors.white))
+
+   // Subjudul Header Chat (18.0 px):
+   Text(subtitle, style: AppTypography.chatHeaderSubtitle(color: Colors.white60))
+
+   // Isi Pesan Chat (20.0 px):
+   Text(message, style: AppTypography.chatBody(color: Colors.white))
+
+   // Kolom Input Pesan / Pencarian:
+   TextField(
+     style: AppTypography.messageInput(color: Colors.white),
+     decoration: InputDecoration(hintStyle: AppTypography.messageInput(color: Colors.white38)),
    )
-   
-   // Contoh Isi Pesan Chat & Input Field:
-   GoogleFonts.dmSans(
-     fontSize: 20.0,
-     fontWeight: FontWeight.normal,
-   )
-   
-   // Contoh Keterangan Waktu / Jam:
-   GoogleFonts.dmSans(
-     fontSize: 15.0,
-     fontWeight: FontWeight.w500,
-   )
+
+   // Nama Pengirim & Waktu Pesan:
+   Text(senderName, style: AppTypography.senderName(color: senderColor))
+   Text(timeText, style: AppTypography.timestamp(color: Colors.white60))
    ```
+   > **Keuntungan**: Cukup ubah 1 baris angka di `lib/core/theme/app_typography.dart`, seluruh ukuran dan font di aplikasi langsung terupdate serentak!
 
 ---
 

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hubner/core/theme/app_typography.dart';
 import 'package:hubner/core/widgets/three_dots_loader.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -161,11 +162,7 @@ class _TodoPageState extends State<TodoPage> {
                       ),
                       Text(
                         'Jadwal',
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 21.1,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.black,
-                        ),
+                        style: AppTypography.chatHeaderTitle(color: Colors.black, fontWeight: FontWeight.w600),
                       ),
                       const SizedBox(width: 44),
                     ],
@@ -180,11 +177,7 @@ class _TodoPageState extends State<TodoPage> {
                     children: [
                       Text(
                         currentMonthYearStr,
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 17.6,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.black87,
-                        ),
+                        style: AppTypography.chatHeaderTitle(color: Colors.black87, fontWeight: FontWeight.w600),
                       ),
                       const Icon(Icons.calendar_month_outlined, size: 18, color: Colors.black45),
                     ],
@@ -236,21 +229,13 @@ class _TodoPageState extends State<TodoPage> {
                                 ),
                                 child: Text(
                                   _getDayName(day.weekday),
-                                  style: GoogleFonts.plusJakartaSans(
-                                    fontSize: 14.0,
-                                    fontWeight: FontWeight.bold,
-                                    color: isSelected ? Colors.white : dayTextColor,
-                                  ),
+                                  style: AppTypography.buttonLabel(color: isSelected ? Colors.white : dayTextColor, fontWeight: FontWeight.bold),
                                 ),
                               ),
                               const SizedBox(height: 4),
                               Text(
                                 day.day.toString(),
-                                style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 18.7,
-                                  fontWeight: FontWeight.w700,
-                                  color: isSelected ? Colors.black : Colors.black87,
-                                ),
+                                style: AppTypography.chatHeaderTitle(color: isSelected ? Colors.black : Colors.black87, fontWeight: FontWeight.w700),
                               ),
                               const SizedBox(height: 8),
                             ],
@@ -335,11 +320,7 @@ class _TodoPageState extends State<TodoPage> {
                                   const SizedBox(height: 16),
                                   Text(
                                     'Bebas tugas untuk hari ini!',
-                                    style: GoogleFonts.dmSans(
-                                      fontSize: 16.4,
-                                      fontWeight: FontWeight.w500,
-                                      color: Colors.black38,
-                                    ),
+                                    style: AppTypography.replySubtitle(color: Colors.black38, fontWeight: FontWeight.w500),
                                   ),
                                 ],
                               ),
@@ -376,11 +357,7 @@ class _TodoPageState extends State<TodoPage> {
                                       padding: const EdgeInsets.symmetric(vertical: 16),
                                       child: Text(
                                         task['start'] ?? '',
-                                        style: GoogleFonts.plusJakartaSans(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w600,
-                                          color: Colors.black54,
-                                        ),
+                                        style: AppTypography.buttonLabel(color: Colors.black54, fontWeight: FontWeight.w600),
                                       ),
                                     ),
 
@@ -442,30 +419,19 @@ class _TodoPageState extends State<TodoPage> {
                                               children: [
                                                 Text(
                                                   task['title'] ?? '',
-                                                  style: GoogleFonts.plusJakartaSans(
-                                                    fontSize: 15.2,
-                                                    fontWeight: FontWeight.bold,
-                                                    color: cardTextColor,
-                                                  ),
+                                                  style: AppTypography.buttonLabel(color: cardTextColor, fontWeight: FontWeight.bold),
                                                 ),
                                                 const SizedBox(height: 4),
                                                 Text(
                                                   'Classroom: ${task['projectName']} | Materi: ${task['stageName']}',
-                                                  style: GoogleFonts.dmSans(
-                                                    fontSize: 14.0,
-                                                    color: cardTextColor.withOpacity(0.8),
-                                                  ),
+                                                  style: AppTypography.timestamp(color: cardTextColor.withOpacity(0.8),
                                                 ),
                                                 const SizedBox(height: 6),
                                                 Text(
                                                   task['isPendingApproval'] == true
                                                       ? 'Status: Menunggu Acc Guru'
                                                       : 'Status: $progressStr',
-                                                  style: GoogleFonts.plusJakartaSans(
-                                                    fontSize: 14.0,
-                                                    fontWeight: FontWeight.bold,
-                                                    color: cardTextColor.withOpacity(0.6),
-                                                  ),
+                                                  style: AppTypography.buttonLabel(color: cardTextColor.withOpacity(0.6, fontWeight: FontWeight.bold),
                                                 ),
                                               ],
                                             ),
@@ -550,12 +516,7 @@ class _TodoPageState extends State<TodoPage> {
                               overlayShape: const RoundSliderOverlayShape(overlayRadius: 14),
                               showValueIndicator: ShowValueIndicator.onDrag,
                               valueIndicatorColor: dynamicColor,
-                              valueIndicatorTextStyle: GoogleFonts.plusJakartaSans(
-                                color: Colors.white,
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
-                                decoration: TextDecoration.none,
-                              ),
+                              valueIndicatorTextStyle: AppTypography.buttonLabel(color: Colors.white, fontWeight: FontWeight.bold),
                             ),
                             child: Slider(
                               value: progressVal,
@@ -579,11 +540,7 @@ class _TodoPageState extends State<TodoPage> {
                                 final isSelected = selectedProgress == v;
                                 return Text(
                                   '$v%',
-                                  style: GoogleFonts.plusJakartaSans(
-                                    fontSize: 14.0,
-                                    color: isSelected ? dynamicColor : Colors.black26,
-                                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                                  ),
+                                  style: AppTypography.buttonLabel(color: isSelected ? dynamicColor : Colors.black26, fontWeight: isSelected ? FontWeight.bold : FontWeight.normal),
                                 );
                               }).toList(),
                             ),

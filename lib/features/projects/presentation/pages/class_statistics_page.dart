@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 import 'package:hubner/core/widgets/three_dots_loader.dart';
 import 'package:flutter/material.dart';
+import 'package:hubner/core/theme/app_typography.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:hubner/core/theme/app_colors.dart';
@@ -168,13 +169,6 @@ class _ClassStatisticsPageState extends State<ClassStatisticsPage>
                                   decoration: BoxDecoration(
                                     color: isDark ? const Color(0xFF1E293B) : Colors.white,
                                     shape: BoxShape.circle,
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.06),
-                                        blurRadius: 8,
-                                        offset: const Offset(0, 2),
-                                      ),
-                                    ],
                                   ),
                                   child: Icon(
                                     Icons.arrow_back_rounded,
@@ -188,13 +182,6 @@ class _ClassStatisticsPageState extends State<ClassStatisticsPage>
                                 decoration: BoxDecoration(
                                   color: isDark ? const Color(0xFF1E293B) : Colors.white,
                                   borderRadius: BorderRadius.circular(24),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.04),
-                                      blurRadius: 6,
-                                      offset: const Offset(0, 2),
-                                    ),
-                                  ],
                                 ),
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
@@ -203,11 +190,7 @@ class _ClassStatisticsPageState extends State<ClassStatisticsPage>
                                     const SizedBox(width: 6),
                                     Text(
                                       '$classLabel · $totalSiswa Siswa',
-                                      style: GoogleFonts.plusJakartaSans(
-                                        fontSize: 14.0,
-                                        fontWeight: FontWeight.bold,
-                                        color: isDark ? Colors.white70 : const Color(0xFF0F172A),
-                                      ),
+                                      style: AppTypography.buttonLabel(color: isDark ? Colors.white70 : const Color(0xFF0F172A, fontWeight: FontWeight.bold),
                                     ),
                                   ],
                                 ),
@@ -220,22 +203,12 @@ class _ClassStatisticsPageState extends State<ClassStatisticsPage>
                           // Header Title (Learning Pathway Status)
                           Text(
                             'Learning\nPathway Status',
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 30,
-                              fontWeight: FontWeight.w900,
-                              color: isDark ? Colors.white : const Color(0xFF0F172A),
-                              letterSpacing: -0.8,
-                              height: 1.15,
-                            ),
+                            style: AppTypography.pageTitle(color: isDark ? Colors.white : const Color(0xFF0F172A, fontWeight: FontWeight.w900, height: 1.15, letterSpacing: -0.8),
                           ),
                           const SizedBox(height: 4),
                           Text(
                             widget.projectName,
-                            style: GoogleFonts.dmSans(
-                              fontSize: 14.5,
-                              fontWeight: FontWeight.w600,
-                              color: isDark ? Colors.white54 : Colors.black45,
-                            ),
+                            style: AppTypography.subtitle(color: isDark ? Colors.white54 : Colors.black45, fontWeight: FontWeight.w600),
                           ),
 
                           const SizedBox(height: 22),
@@ -315,13 +288,6 @@ class _ClassStatisticsPageState extends State<ClassStatisticsPage>
                               decoration: BoxDecoration(
                                 color: isDark ? const Color(0xFF261938) : const Color(0xFFD6A5F8),
                                 borderRadius: BorderRadius.circular(36),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withValues(alpha: isDark ? 0.4 : 0.08),
-                                    blurRadius: 16,
-                                    offset: const Offset(0, 4),
-                                  ),
-                                ],
                               ),
                               child: Stack(
                                 children: [
@@ -359,11 +325,7 @@ class _ClassStatisticsPageState extends State<ClassStatisticsPage>
                                               const SizedBox(width: 12),
                                               Text(
                                                 'Progress',
-                                                style: GoogleFonts.plusJakartaSans(
-                                                  fontSize: 18,
-                                                  fontWeight: FontWeight.w800,
-                                                  color: const Color(0xFF0F172A),
-                                                ),
+                                                style: AppTypography.chatHeaderTitle(color: const Color(0xFF0F172A, fontWeight: FontWeight.w800),
                                               ),
                                             ],
                                           ),
@@ -405,20 +367,11 @@ class _ClassStatisticsPageState extends State<ClassStatisticsPage>
                                                   children: [
                                                     Text(
                                                       '$displayedScore',
-                                                      style: GoogleFonts.plusJakartaSans(
-                                                        fontSize: 42,
-                                                        fontWeight: FontWeight.w900,
-                                                        color: const Color(0xFF0F172A),
-                                                        letterSpacing: -1.0,
-                                                      ),
+                                                      style: AppTypography.pageTitle(color: const Color(0xFF0F172A, fontWeight: FontWeight.w900, letterSpacing: -1.0),
                                                     ),
                                                     Text(
                                                       'Score',
-                                                      style: GoogleFonts.dmSans(
-                                                        fontSize: 14,
-                                                        fontWeight: FontWeight.w700,
-                                                        color: const Color(0xFF4C1D95),
-                                                      ),
+                                                      style: AppTypography.timestamp(color: const Color(0xFF4C1D95, fontWeight: FontWeight.w700),
                                                     ),
                                                     const SizedBox(height: 6),
                                                   ],
@@ -475,11 +428,7 @@ class _ClassStatisticsPageState extends State<ClassStatisticsPage>
                           // Section Title: Detail Tahapan Pembelajaran
                           Text(
                             'Distribusi Tahapan Pembelajaran',
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w800,
-                              color: isDark ? Colors.white : const Color(0xFF0F172A),
-                            ),
+                            style: AppTypography.chatHeaderTitle(color: isDark ? Colors.white : const Color(0xFF0F172A, fontWeight: FontWeight.w800),
                           ),
                           const SizedBox(height: 12),
 
@@ -495,10 +444,7 @@ class _ClassStatisticsPageState extends State<ClassStatisticsPage>
                               child: Center(
                                 child: Text(
                                   'Belum ada tahapan capaian pembelajaran.',
-                                  style: GoogleFonts.dmSans(
-                                    fontSize: 14,
-                                    color: isDark ? Colors.white54 : Colors.black45,
-                                  ),
+                                  style: AppTypography.timestamp(color: isDark ? Colors.white54 : Colors.black45),
                                 ),
                               ),
                             )
@@ -533,13 +479,6 @@ class _ClassStatisticsPageState extends State<ClassStatisticsPage>
                                     decoration: BoxDecoration(
                                       color: isDark ? const Color(0xFF1E293B) : Colors.white,
                                       borderRadius: BorderRadius.circular(28),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.04),
-                                          blurRadius: 10,
-                                          offset: const Offset(0, 2),
-                                        ),
-                                      ],
                                     ),
                                     child: Row(
                                       children: [
@@ -553,11 +492,7 @@ class _ClassStatisticsPageState extends State<ClassStatisticsPage>
                                           child: Center(
                                             child: Text(
                                               (index + 1).toString().padLeft(2, '0'),
-                                              style: GoogleFonts.plusJakartaSans(
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.w900,
-                                                color: const Color(0xFF0F172A),
-                                              ),
+                                              style: AppTypography.cardTitle(color: const Color(0xFF0F172A, fontWeight: FontWeight.w900),
                                             ),
                                           ),
                                         ),
@@ -568,19 +503,12 @@ class _ClassStatisticsPageState extends State<ClassStatisticsPage>
                                             children: [
                                               Text(
                                                 name,
-                                                style: GoogleFonts.plusJakartaSans(
-                                                  fontSize: 15,
-                                                  fontWeight: FontWeight.bold,
-                                                  color: isDark ? Colors.white : const Color(0xFF0F172A),
-                                                ),
+                                                style: AppTypography.buttonLabel(color: isDark ? Colors.white : const Color(0xFF0F172A, fontWeight: FontWeight.bold),
                                               ),
                                               const SizedBox(height: 2),
                                               Text(
                                                 '${rawMateris.length} Materi · $stageTasks Tugas/Kuis',
-                                                style: GoogleFonts.dmSans(
-                                                  fontSize: 14.0,
-                                                  color: isDark ? Colors.white54 : Colors.black54,
-                                                ),
+                                                style: AppTypography.timestamp(color: isDark ? Colors.white54 : Colors.black54),
                                               ),
                                             ],
                                           ),
@@ -595,13 +523,7 @@ class _ClassStatisticsPageState extends State<ClassStatisticsPage>
                                           ),
                                           child: Text(
                                             status == 'selesai' ? 'Selesai' : 'Aktif',
-                                            style: GoogleFonts.plusJakartaSans(
-                                              fontSize: 14.0,
-                                              fontWeight: FontWeight.bold,
-                                              color: status == 'selesai'
-                                                  ? const Color(0xFF10B981)
-                                                  : const Color(0xFF6366F1),
-                                            ),
+                                            style: AppTypography.buttonLabel(color: status == 'selesai', fontWeight: FontWeight.bold),
                                           ),
                                         ),
                                       ],
@@ -643,15 +565,6 @@ class _ClassStatisticsPageState extends State<ClassStatisticsPage>
                 ? (isDark ? Colors.white : const Color(0xFF0F172A))
                 : Colors.transparent,
             borderRadius: BorderRadius.circular(28),
-            boxShadow: isSelected
-                ? [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.12),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
-                  ]
-                : null,
           ),
           child: Center(
             child: Text(
@@ -739,13 +652,6 @@ class _BouncyCardState extends State<_BouncyCard> with SingleTickerProviderState
           decoration: BoxDecoration(
             color: widget.cardBg,
             borderRadius: BorderRadius.circular(32),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: widget.isDark ? 0.35 : 0.06),
-                blurRadius: 12,
-                offset: const Offset(0, 4),
-              ),
-            ],
           ),
           child: Stack(
             children: [
@@ -777,11 +683,7 @@ class _BouncyCardState extends State<_BouncyCard> with SingleTickerProviderState
                       Expanded(
                         child: Text(
                           widget.title,
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 14.0,
-                            fontWeight: FontWeight.w800,
-                            color: const Color(0xFF0F172A),
-                          ),
+                          style: AppTypography.buttonLabel(color: const Color(0xFF0F172A, fontWeight: FontWeight.w800),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -795,12 +697,7 @@ class _BouncyCardState extends State<_BouncyCard> with SingleTickerProviderState
                     children: [
                       Text(
                         widget.value,
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 34,
-                          fontWeight: FontWeight.w900,
-                          color: const Color(0xFF0F172A),
-                          letterSpacing: -1.0,
-                        ),
+                        style: AppTypography.pageTitle(color: const Color(0xFF0F172A, fontWeight: FontWeight.w900, letterSpacing: -1.0),
                       ),
                       Container(
                         width: 40,

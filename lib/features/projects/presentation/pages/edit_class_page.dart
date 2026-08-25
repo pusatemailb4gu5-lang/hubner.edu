@@ -4,6 +4,7 @@ import 'dart:async';
 import 'dart:ui';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
+import 'package:hubner/core/theme/app_typography.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:hubner/core/theme/app_colors.dart';
@@ -280,13 +281,13 @@ class _EditClassPageState extends State<EditClassPage> {
           return AlertDialog(
             backgroundColor: Colors.white,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-            title: Text('Edit Elemen / Tahap', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, fontSize: 18.7)),
+            title: Text('Edit Elemen / Tahap', style: AppTypography.chatHeaderTitle(fontWeight: FontWeight.bold)),
             content: SingleChildScrollView(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Nama Elemen', style: GoogleFonts.plusJakartaSans(fontSize: 14.0, fontWeight: FontWeight.bold, color: Colors.black54)),
+                  Text('Nama Elemen', style: AppTypography.buttonLabel(color: Colors.black54, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 6),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -297,12 +298,12 @@ class _EditClassPageState extends State<EditClassPage> {
                     ),
                     child: TextField(
                       controller: nameController,
-                      style: GoogleFonts.plusJakartaSans(fontSize: 15.2),
+                      style: AppTypography.buttonLabel(),
                       decoration: const InputDecoration(border: InputBorder.none, hintText: 'Nama Elemen...'),
                     ),
                   ),
                   const SizedBox(height: 12),
-                  Text('Summary / Deskripsi', style: GoogleFonts.plusJakartaSans(fontSize: 14.0, fontWeight: FontWeight.bold, color: Colors.black54)),
+                  Text('Summary / Deskripsi', style: AppTypography.buttonLabel(color: Colors.black54, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 6),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -314,7 +315,7 @@ class _EditClassPageState extends State<EditClassPage> {
                     child: TextField(
                       controller: summaryController,
                       maxLines: 3,
-                      style: GoogleFonts.dmSans(fontSize: 15.2),
+                      style: AppTypography.subtitle(),
                       decoration: const InputDecoration(border: InputBorder.none, hintText: 'Deskripsi elemen...'),
                     ),
                   ),
@@ -328,7 +329,7 @@ class _EditClassPageState extends State<EditClassPage> {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Text('Nama Materi ${mIdx + 1}', style: GoogleFonts.plusJakartaSans(fontSize: 14.0, fontWeight: FontWeight.bold, color: Colors.black54)),
+                                Text('Nama Materi ${mIdx + 1}', style: AppTypography.buttonLabel(color: Colors.black54, fontWeight: FontWeight.bold)),
                                 GestureDetector(
                                   onTap: () {
                                     _removeMateri(stageIdx, mIdx);
@@ -337,7 +338,7 @@ class _EditClassPageState extends State<EditClassPage> {
                                   },
                                   child: Text(
                                     'Hapus',
-                                    style: GoogleFonts.plusJakartaSans(fontSize: 14.0, color: Colors.redAccent, fontWeight: FontWeight.bold),
+                                    style: AppTypography.buttonLabel(color: Colors.redAccent, fontWeight: FontWeight.bold),
                                   ),
                                 ),
                               ],
@@ -352,7 +353,7 @@ class _EditClassPageState extends State<EditClassPage> {
                               ),
                               child: TextField(
                                 controller: materiControllers[mIdx],
-                                style: GoogleFonts.dmSans(fontSize: 15.2),
+                                style: AppTypography.subtitle(),
                                 decoration: const InputDecoration(border: InputBorder.none, hintText: 'Nama materi...'),
                               ),
                             ),
@@ -372,7 +373,7 @@ class _EditClassPageState extends State<EditClassPage> {
                   }
                   Navigator.pop(ctx);
                 },
-                child: Text('Batal', style: GoogleFonts.plusJakartaSans(color: Colors.black54, fontWeight: FontWeight.bold)),
+                child: Text('Batal', style: AppTypography.buttonLabel(color: Colors.black54, fontWeight: FontWeight.bold)),
               ),
               ElevatedButton(
                 onPressed: () {
@@ -395,7 +396,7 @@ class _EditClassPageState extends State<EditClassPage> {
                   Navigator.pop(ctx);
                 },
                 style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF4F46E5), foregroundColor: Colors.white),
-                child: Text('Simpan', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold)),
+                child: Text('Simpan', style: AppTypography.buttonLabel(fontWeight: FontWeight.bold)),
               ),
             ],
           );
@@ -411,12 +412,12 @@ class _EditClassPageState extends State<EditClassPage> {
       builder: (ctx) => AlertDialog(
         backgroundColor: Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        title: Text('Edit Nama Materi', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, fontSize: 18.7)),
+        title: Text('Edit Nama Materi', style: AppTypography.chatHeaderTitle(fontWeight: FontWeight.bold)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Judul Materi', style: GoogleFonts.plusJakartaSans(fontSize: 14.0, fontWeight: FontWeight.bold, color: Colors.black54)),
+            Text('Judul Materi', style: AppTypography.buttonLabel(color: Colors.black54, fontWeight: FontWeight.bold)),
             const SizedBox(height: 6),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -427,7 +428,7 @@ class _EditClassPageState extends State<EditClassPage> {
               ),
               child: TextField(
                 controller: titleController,
-                style: GoogleFonts.dmSans(fontSize: 15.2),
+                style: AppTypography.subtitle(),
                 decoration: const InputDecoration(border: InputBorder.none, hintText: 'Judul materi...'),
               ),
             ),
@@ -442,11 +443,11 @@ class _EditClassPageState extends State<EditClassPage> {
               });
               Navigator.pop(ctx);
             },
-            child: Text('Hapus', style: GoogleFonts.plusJakartaSans(color: Colors.redAccent, fontWeight: FontWeight.bold)),
+            child: Text('Hapus', style: AppTypography.buttonLabel(color: Colors.redAccent, fontWeight: FontWeight.bold)),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: Text('Batal', style: GoogleFonts.plusJakartaSans(color: Colors.black54, fontWeight: FontWeight.bold)),
+            child: Text('Batal', style: AppTypography.buttonLabel(color: Colors.black54, fontWeight: FontWeight.bold)),
           ),
           ElevatedButton(
             onPressed: () {
@@ -457,7 +458,7 @@ class _EditClassPageState extends State<EditClassPage> {
               Navigator.pop(ctx);
             },
             style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF4F46E5), foregroundColor: Colors.white),
-            child: Text('Simpan', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold)),
+            child: Text('Simpan', style: AppTypography.buttonLabel(fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -488,14 +489,14 @@ class _EditClassPageState extends State<EditClassPage> {
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
               title: Text(
                 'Edit Detail Kegiatan',
-                style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, fontSize: 18.7),
+                style: AppTypography.chatHeaderTitle(fontWeight: FontWeight.bold),
               ),
               content: SingleChildScrollView(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text('Judul Kegiatan', style: GoogleFonts.plusJakartaSans(fontSize: 14.0, fontWeight: FontWeight.bold, color: Colors.black54)),
+                    Text('Judul Kegiatan', style: AppTypography.buttonLabel(color: Colors.black54, fontWeight: FontWeight.bold)),
                     const SizedBox(height: 6),
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -506,13 +507,13 @@ class _EditClassPageState extends State<EditClassPage> {
                       ),
                       child: TextField(
                         controller: titleController,
-                        style: GoogleFonts.plusJakartaSans(fontSize: 15.2),
+                        style: AppTypography.buttonLabel(),
                         decoration: const InputDecoration(border: InputBorder.none),
                       ),
                     ),
                     const SizedBox(height: 12),
                     
-                    Text('Tipe Kegiatan', style: GoogleFonts.plusJakartaSans(fontSize: 14.0, fontWeight: FontWeight.bold, color: Colors.black54)),
+                    Text('Tipe Kegiatan', style: AppTypography.buttonLabel(color: Colors.black54, fontWeight: FontWeight.bold)),
                     const SizedBox(height: 6),
                     Container(
                       width: double.infinity,
@@ -528,13 +529,13 @@ class _EditClassPageState extends State<EditClassPage> {
                             : selectedType == 'quiz'
                                 ? '❓ Kuis (Quiz)'
                                 : '📄 Materi Pembelajaran (PDF)',
-                        style: GoogleFonts.plusJakartaSans(fontSize: 14, color: Colors.black54, fontWeight: FontWeight.w600),
+                        style: AppTypography.buttonLabel(color: Colors.black54, fontWeight: FontWeight.w600),
                       ),
                     ),
                     const SizedBox(height: 12),
 
                     if (selectedType == 'tugas') ...[
-                      Text('Opsi Pengerjaan', style: GoogleFonts.plusJakartaSans(fontSize: 14.0, fontWeight: FontWeight.bold, color: Colors.black54)),
+                      Text('Opsi Pengerjaan', style: AppTypography.buttonLabel(color: Colors.black54, fontWeight: FontWeight.bold)),
                       const SizedBox(height: 6),
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -550,7 +551,7 @@ class _EditClassPageState extends State<EditClassPage> {
                             itemHeight: null,
                             value: selectedAssignmentType,
                             isExpanded: true,
-                            style: GoogleFonts.dmSans(fontSize: 15.2, color: Colors.black87),
+                            style: AppTypography.subtitle(color: Colors.black87),
                             items: const [
                               DropdownMenuItem(value: 'individu', child: Padding(padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8), child: Text('📝 Individu'))),
                               DropdownMenuItem(value: 'kelompok', child: Padding(padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8), child: Text('👥 Kelompok'))),
@@ -570,7 +571,7 @@ class _EditClassPageState extends State<EditClassPage> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text('Mulai', style: GoogleFonts.plusJakartaSans(fontSize: 14.0, fontWeight: FontWeight.bold, color: Colors.black54)),
+                              Text('Mulai', style: AppTypography.buttonLabel(color: Colors.black54, fontWeight: FontWeight.bold)),
                               const SizedBox(height: 6),
                               GestureDetector(
                                 onTap: () async {
@@ -592,7 +593,7 @@ class _EditClassPageState extends State<EditClassPage> {
                                   ),
                                   child: Text(
                                     startDate == null ? 'Mulai' : '${startDate!.day}/${startDate!.month}/${startDate!.year}',
-                                    style: GoogleFonts.dmSans(fontSize: 14.0),
+                                    style: AppTypography.timestamp(),
                                   ),
                                 ),
                               ),
@@ -604,7 +605,7 @@ class _EditClassPageState extends State<EditClassPage> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text('Selesai', style: GoogleFonts.plusJakartaSans(fontSize: 14.0, fontWeight: FontWeight.bold, color: Colors.black54)),
+                              Text('Selesai', style: AppTypography.buttonLabel(color: Colors.black54, fontWeight: FontWeight.bold)),
                               const SizedBox(height: 6),
                               GestureDetector(
                                 onTap: () async {
@@ -626,7 +627,7 @@ class _EditClassPageState extends State<EditClassPage> {
                                   ),
                                   child: Text(
                                     endDate == null ? 'Selesai' : '${endDate!.day}/${endDate!.month}/${endDate!.year}',
-                                    style: GoogleFonts.dmSans(fontSize: 14.0),
+                                    style: AppTypography.timestamp(),
                                   ),
                                 ),
                               ),
@@ -637,7 +638,7 @@ class _EditClassPageState extends State<EditClassPage> {
                     ),
                     const SizedBox(height: 12),
 
-                    Text('Lampiran / Link Modul', style: GoogleFonts.plusJakartaSans(fontSize: 14.0, fontWeight: FontWeight.bold, color: Colors.black54)),
+                    Text('Lampiran / Link Modul', style: AppTypography.buttonLabel(color: Colors.black54, fontWeight: FontWeight.bold)),
                     const SizedBox(height: 6),
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -648,7 +649,7 @@ class _EditClassPageState extends State<EditClassPage> {
                       ),
                       child: TextField(
                         controller: docController,
-                        style: GoogleFonts.dmSans(fontSize: 15.2),
+                        style: AppTypography.subtitle(),
                         decoration: const InputDecoration(border: InputBorder.none, hintText: 'modul.pdf atau link gdrive...'),
                       ),
                     ),
@@ -663,11 +664,11 @@ class _EditClassPageState extends State<EditClassPage> {
                     });
                     Navigator.pop(ctx);
                   },
-                  child: Text('Hapus', style: GoogleFonts.plusJakartaSans(color: Colors.redAccent, fontWeight: FontWeight.bold)),
+                  child: Text('Hapus', style: AppTypography.buttonLabel(color: Colors.redAccent, fontWeight: FontWeight.bold)),
                 ),
                 TextButton(
                   onPressed: () => Navigator.pop(ctx),
-                  child: Text('Batal', style: GoogleFonts.plusJakartaSans(color: Colors.black54, fontWeight: FontWeight.bold)),
+                  child: Text('Batal', style: AppTypography.buttonLabel(color: Colors.black54, fontWeight: FontWeight.bold)),
                 ),
                 ElevatedButton(
                   onPressed: () {
@@ -683,7 +684,7 @@ class _EditClassPageState extends State<EditClassPage> {
                     Navigator.pop(ctx);
                   },
                   style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF4F46E5), foregroundColor: Colors.white),
-                  child: Text('Simpan', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold)),
+                  child: Text('Simpan', style: AppTypography.buttonLabel(fontWeight: FontWeight.bold)),
                 ),
               ],
             );
@@ -730,16 +731,16 @@ class _EditClassPageState extends State<EditClassPage> {
                       textButtonTheme: TextButtonThemeData(
                         style: TextButton.styleFrom(
                           foregroundColor: Colors.black87,
-                          textStyle: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold),
+                          textStyle: AppTypography.buttonLabel(fontWeight: FontWeight.bold),
                         ),
                       ),
                       datePickerTheme: DatePickerThemeData(
                         backgroundColor: Colors.white,
                         headerBackgroundColor: Colors.black87,
                         headerForegroundColor: Colors.white,
-                        dayStyle: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w500),
-                        headerHeadlineStyle: GoogleFonts.plusJakartaSans(fontSize: 23.4, fontWeight: FontWeight.bold, color: Colors.white),
-                        headerHelpStyle: GoogleFonts.plusJakartaSans(fontSize: 14.0, color: Colors.white70),
+                        dayStyle: AppTypography.buttonLabel(fontWeight: FontWeight.w500),
+                        headerHeadlineStyle: AppTypography.pageTitle(color: Colors.white, fontWeight: FontWeight.bold),
+                        headerHelpStyle: AppTypography.buttonLabel(color: Colors.white70),
                       ),
                     ),
                     child: child!,
@@ -763,7 +764,7 @@ class _EditClassPageState extends State<EditClassPage> {
                 context: context,
                 builder: (context) {
                   return AlertDialog(
-                    title: Text('Masukkan Nama Dokumen', style: GoogleFonts.plusJakartaSans(fontSize: 16.4, fontWeight: FontWeight.bold)),
+                    title: Text('Masukkan Nama Dokumen', style: AppTypography.cardTitle(fontWeight: FontWeight.bold)),
                     backgroundColor: Colors.white,
                     content: TextField(
                       controller: controller,
@@ -780,7 +781,7 @@ class _EditClassPageState extends State<EditClassPage> {
                           });
                           Navigator.pop(context);
                         },
-                        child: Text('Simpan', style: GoogleFonts.plusJakartaSans(color: Colors.black, fontWeight: FontWeight.bold)),
+                        child: Text('Simpan', style: AppTypography.buttonLabel(color: Colors.black, fontWeight: FontWeight.bold)),
                       )
                     ],
                   );
@@ -816,22 +817,14 @@ class _EditClassPageState extends State<EditClassPage> {
                     const SizedBox(height: 20),
                     Text(
                       'Hei, buat kegiatan baru',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 23.4,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black,
-                      ),
+                      style: AppTypography.pageTitle(color: Colors.black, fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 20),
                     
                     // Tipe Item Selector
                     Text(
                       'Tipe Item',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.black54,
-                      ),
+                      style: AppTypography.buttonLabel(color: Colors.black54, fontWeight: FontWeight.w600),
                     ),
                     const SizedBox(height: 8),
                     Row(
@@ -849,11 +842,7 @@ class _EditClassPageState extends State<EditClassPage> {
                               alignment: Alignment.center,
                               child: Text(
                                 'Tugas',
-                                style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w600,
-                                  color: itemType == 'tugas' ? Colors.white : Colors.black87,
-                                ),
+                                style: AppTypography.buttonLabel(color: itemType == 'tugas' ? Colors.white : Colors.black87, fontWeight: FontWeight.w600),
                               ),
                             ),
                           ),
@@ -872,11 +861,7 @@ class _EditClassPageState extends State<EditClassPage> {
                               alignment: Alignment.center,
                               child: Text(
                                 'Quiz',
-                                style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w600,
-                                  color: itemType == 'quiz' ? Colors.white : Colors.black87,
-                                ),
+                                style: AppTypography.buttonLabel(color: itemType == 'quiz' ? Colors.white : Colors.black87, fontWeight: FontWeight.w600),
                               ),
                             ),
                           ),
@@ -895,11 +880,7 @@ class _EditClassPageState extends State<EditClassPage> {
                               alignment: Alignment.center,
                               child: Text(
                                 '📄 Materi PDF',
-                                style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w600,
-                                  color: itemType == 'pdf' ? Colors.white : Colors.black87,
-                                ),
+                                style: AppTypography.buttonLabel(color: itemType == 'pdf' ? Colors.white : Colors.black87, fontWeight: FontWeight.w600),
                               ),
                             ),
                           ),
@@ -910,11 +891,7 @@ class _EditClassPageState extends State<EditClassPage> {
 
                     Text(
                       'Detail kegiatan',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.black54,
-                      ),
+                      style: AppTypography.buttonLabel(color: Colors.black54, fontWeight: FontWeight.w600),
                     ),
                     const SizedBox(height: 8),
                     Container(
@@ -924,11 +901,11 @@ class _EditClassPageState extends State<EditClassPage> {
                       ),
                       child: TextField(
                         maxLines: 2,
-                        style: GoogleFonts.dmSans(fontSize: 16.4),
+                        style: AppTypography.replySubtitle(),
                         onChanged: (val) => taskTitle = val,
                         decoration: InputDecoration(
                           hintText: 'Tulis di sini...',
-                          hintStyle: GoogleFonts.dmSans(color: Colors.black26),
+                          hintStyle: AppTypography.timestamp(color: Colors.black26),
                           border: InputBorder.none,
                           contentPadding: const EdgeInsets.all(16),
                         ),
@@ -945,11 +922,7 @@ class _EditClassPageState extends State<EditClassPage> {
                               children: [
                                 Text(
                                   'Tanggal mulai',
-                                  style: GoogleFonts.plusJakartaSans(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w600,
-                                    color: Colors.black54,
-                                  ),
+                                  style: AppTypography.buttonLabel(color: Colors.black54, fontWeight: FontWeight.w600),
                                 ),
                                 const SizedBox(height: 8),
                                 GestureDetector(
@@ -968,10 +941,7 @@ class _EditClassPageState extends State<EditClassPage> {
                                           startDate == null
                                               ? 'DD/MM/YYYY'
                                               : '${startDate!.day.toString().padLeft(2, '0')}/${startDate!.month.toString().padLeft(2, '0')}/${startDate!.year}',
-                                          style: GoogleFonts.dmSans(
-                                            fontSize: 15.2,
-                                            color: startDate == null ? Colors.black38 : Colors.black87,
-                                          ),
+                                          style: AppTypography.subtitle(color: startDate == null ? Colors.black38 : Colors.black87),
                                         ),
                                       ],
                                     ),
@@ -987,11 +957,7 @@ class _EditClassPageState extends State<EditClassPage> {
                               children: [
                                 Text(
                                   'Tanggal selesai',
-                                  style: GoogleFonts.plusJakartaSans(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w600,
-                                    color: Colors.black54,
-                                  ),
+                                  style: AppTypography.buttonLabel(color: Colors.black54, fontWeight: FontWeight.w600),
                                 ),
                                 const SizedBox(height: 8),
                                 GestureDetector(
@@ -1010,10 +976,7 @@ class _EditClassPageState extends State<EditClassPage> {
                                           endDate == null
                                               ? 'DD/MM/YYYY'
                                               : '${endDate!.day.toString().padLeft(2, '0')}/${endDate!.month.toString().padLeft(2, '0')}/${endDate!.year}',
-                                          style: GoogleFonts.dmSans(
-                                            fontSize: 15.2,
-                                            color: endDate == null ? Colors.black38 : Colors.black87,
-                                          ),
+                                          style: AppTypography.subtitle(color: endDate == null ? Colors.black38 : Colors.black87),
                                         ),
                                       ],
                                     ),
@@ -1029,11 +992,7 @@ class _EditClassPageState extends State<EditClassPage> {
                     const SizedBox(height: 20),
                     Text(
                       'Lampiran',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.black54,
-                      ),
+                      style: AppTypography.buttonLabel(color: Colors.black54, fontWeight: FontWeight.w600),
                     ),
                     const SizedBox(height: 8),
                     GestureDetector(
@@ -1056,11 +1015,7 @@ class _EditClassPageState extends State<EditClassPage> {
                             Expanded(
                               child: Text(
                                 docName,
-                                style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 15.2,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.black87,
-                                ),
+                                style: AppTypography.buttonLabel(color: Colors.black87, fontWeight: FontWeight.w600),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                               ),
@@ -1111,10 +1066,7 @@ class _EditClassPageState extends State<EditClassPage> {
                         ),
                         child: Text(
                           'Buat kegiatan',
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 16.4,
-                            fontWeight: FontWeight.bold,
-                          ),
+                          style: AppTypography.cardTitle(fontWeight: FontWeight.bold),
                         ),
                       ),
                     ),
@@ -1408,7 +1360,7 @@ Sertakan HANYA JSON tersebut tanpa penjelasan markdown apa pun di luar JSON.
                   Expanded(
                     child: Text(
                       'Materi dan tugas Classroom berhasil dirancang dengan Gemini AI!',
-                      style: GoogleFonts.dmSans(fontSize: 14),
+                      style: AppTypography.timestamp(),
                     ),
                   ),
                 ],
@@ -1461,11 +1413,7 @@ Sertakan HANYA JSON tersebut tanpa penjelasan markdown apa pun di luar JSON.
         // Project Icon Choice List
         Text(
           'Pilih Icon Classroom',
-          style: GoogleFonts.plusJakartaSans(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-            color: Colors.black87,
-          ),
+          style: AppTypography.buttonLabel(color: Colors.black87, fontWeight: FontWeight.w600),
         ),
         const SizedBox(height: 10),
         ScrollConfiguration(
@@ -1511,11 +1459,7 @@ Sertakan HANYA JSON tersebut tanpa penjelasan markdown apa pun di luar JSON.
         // Card Color Choice List
         Text(
           'Pilih Warna Card Classroom',
-          style: GoogleFonts.plusJakartaSans(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-            color: Colors.black87,
-          ),
+          style: AppTypography.buttonLabel(color: Colors.black87, fontWeight: FontWeight.w600),
         ),
         const SizedBox(height: 10),
         Builder(
@@ -1569,11 +1513,7 @@ Sertakan HANYA JSON tersebut tanpa penjelasan markdown apa pun di luar JSON.
                 children: [
                   Text(
                     'Tingkat Kelas',
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.black87,
-                    ),
+                    style: AppTypography.buttonLabel(color: Colors.black87, fontWeight: FontWeight.w600),
                   ),
                   const SizedBox(height: 6),
                   Container(
@@ -1591,13 +1531,13 @@ Sertakan HANYA JSON tersebut tanpa penjelasan markdown apa pun di luar JSON.
                         value: _selectedGradeLevel,
                         isExpanded: true,
                         icon: const Icon(Icons.keyboard_arrow_down_rounded, color: Colors.black45, size: 18),
-                        style: GoogleFonts.plusJakartaSans(fontSize: 15.2, fontWeight: FontWeight.bold, color: Colors.black87),
+                        style: AppTypography.buttonLabel(color: Colors.black87, fontWeight: FontWeight.bold),
                         items: _gradeOptions.map((String grade) {
                           return DropdownMenuItem<String>(
                             value: grade,
                             child: Padding(
                               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                              child: Text(grade, style: GoogleFonts.dmSans(fontSize: 14)),
+                              child: Text(grade, style: AppTypography.timestamp()),
                             ),
                           );
                         }).toList(),
@@ -1619,11 +1559,7 @@ Sertakan HANYA JSON tersebut tanpa penjelasan markdown apa pun di luar JSON.
         const SizedBox(height: 12),
         Text(
           'Capaian Pembelajaran (CP) / Tujuan',
-          style: GoogleFonts.plusJakartaSans(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-            color: Colors.black87,
-          ),
+          style: AppTypography.buttonLabel(color: Colors.black87, fontWeight: FontWeight.w600),
         ),
         const SizedBox(height: 6),
         if (isDesktop)
@@ -1635,7 +1571,7 @@ Sertakan HANYA JSON tersebut tanpa penjelasan markdown apa pun di luar JSON.
               textAlignVertical: TextAlignVertical.top,
               decoration: InputDecoration(
                 hintText: 'Tuliskan Capaian Pembelajaran (CP) yang ingin dicapai dalam kelas ini...',
-                hintStyle: GoogleFonts.dmSans(fontSize: 14, color: Colors.black26),
+                hintStyle: AppTypography.timestamp(color: Colors.black26),
                 filled: true,
                 fillColor: const Color(0xFFF8FAFC),
                 contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -1679,10 +1615,7 @@ Sertakan HANYA JSON tersebut tanpa penjelasan markdown apa pun di luar JSON.
             Text(
               'Sedang merancang elemen pembelajaran & materi secara otomatis...',
               textAlign: TextAlign.center,
-              style: GoogleFonts.dmSans(
-                fontSize: 14.0,
-                color: const Color(0xFF475569),
-              ),
+              style: AppTypography.timestamp(color: const Color(0xFF475569),
             ),
           ],
         ),
@@ -1708,22 +1641,14 @@ Sertakan HANYA JSON tersebut tanpa penjelasan markdown apa pun di luar JSON.
               const SizedBox(width: 8),
               Text(
                 'Rancang dengan Gemini AI',
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 15.2,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
-                ),
+                style: AppTypography.buttonLabel(color: Colors.black87, fontWeight: FontWeight.bold),
               ),
             ],
           ),
           const SizedBox(height: 6),
           Text(
             'Buat materi & tugas otomatis secara instan berdasarkan Capaian Pembelajaran (CP) kelas Anda.',
-            style: GoogleFonts.dmSans(
-              fontSize: 14.0,
-              color: Colors.black45,
-              height: 1.4,
-            ),
+            style: AppTypography.timestamp(color: Colors.black45, height: 1.4),
           ),
           const SizedBox(height: 12),
           SizedBox(
@@ -1733,11 +1658,7 @@ Sertakan HANYA JSON tersebut tanpa penjelasan markdown apa pun di luar JSON.
               icon: const GeminiIcon(size: 12),
               label: Text(
                 'Buat Materi dengan AI',
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.black87,
-                ),
+                style: AppTypography.buttonLabel(color: Colors.black87, fontWeight: FontWeight.w600),
               ),
               style: OutlinedButton.styleFrom(
                 side: const BorderSide(color: Colors.black87, width: 1.2),
@@ -1767,11 +1688,7 @@ Sertakan HANYA JSON tersebut tanpa penjelasan markdown apa pun di luar JSON.
           children: [
             Text(
               'Elemen Pembelajaran & Materi',
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 16.4,
-                fontWeight: FontWeight.w600,
-                color: Colors.black87,
-              ),
+              style: AppTypography.cardTitle(color: Colors.black87, fontWeight: FontWeight.w600),
             ),
             GestureDetector(
               onTap: _addStage,
@@ -1788,11 +1705,7 @@ Sertakan HANYA JSON tersebut tanpa penjelasan markdown apa pun di luar JSON.
                     const SizedBox(width: 4),
                     Text(
                       'Elemen',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 14.0,
-                        color: Colors.black,
-                        fontWeight: FontWeight.w600,
-                      ),
+                      style: AppTypography.buttonLabel(color: Colors.black, fontWeight: FontWeight.w600),
                     ),
                   ],
                 ),
@@ -1901,10 +1814,7 @@ Sertakan HANYA JSON tersebut tanpa penjelasan markdown apa pun di luar JSON.
               padding: const EdgeInsets.symmetric(vertical: 24.0),
               child: Text(
                 'Belum ada elemen pembelajaran. Tap + Elemen untuk memulai.',
-                style: GoogleFonts.dmSans(
-                  fontSize: 14,
-                  color: Colors.black38,
-                ),
+                style: AppTypography.timestamp(color: Colors.black38),
               ),
             ),
           )
@@ -1943,11 +1853,7 @@ Sertakan HANYA JSON tersebut tanpa penjelasan markdown apa pun di luar JSON.
                           alignment: Alignment.center,
                           child: Text(
                             '${index + 1}',
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 16.4,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black87,
-                            ),
+                            style: AppTypography.cardTitle(color: Colors.black87, fontWeight: FontWeight.bold),
                           ),
                         ),
                         Row(
@@ -1964,11 +1870,7 @@ Sertakan HANYA JSON tersebut tanpa penjelasan markdown apa pun di luar JSON.
                                 children: [
                                   Text(
                                     'Tampilkan ke siswa',
-                                    style: GoogleFonts.plusJakartaSans(
-                                      fontSize: 14.0,
-                                      fontWeight: FontWeight.w600,
-                                      color: Colors.black54,
-                                    ),
+                                    style: AppTypography.buttonLabel(color: Colors.black54, fontWeight: FontWeight.w600),
                                   ),
                                   const SizedBox(width: 6),
                                   AnimatedContainer(
@@ -2012,7 +1914,7 @@ Sertakan HANYA JSON tersebut tanpa penjelasan markdown apa pun di luar JSON.
                       controller: _stageNameControllers[index],
                       decoration: InputDecoration(
                         hintText: 'Nama Elemen (contoh: Elemen 1: Proses Bisnis IT)...',
-                        hintStyle: GoogleFonts.dmSans(fontSize: 15.2, color: Colors.black26),
+                        hintStyle: AppTypography.subtitle(color: Colors.black26),
                         filled: true,
                         fillColor: const Color(0xFFF8FAFC),
                         contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
@@ -2025,11 +1927,7 @@ Sertakan HANYA JSON tersebut tanpa penjelasan markdown apa pun di luar JSON.
                           borderSide: const BorderSide(color: Colors.black87),
                         ),
                       ),
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 15.8,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.black87,
-                      ),
+                      style: AppTypography.cardTitle(color: Colors.black87, fontWeight: FontWeight.w600),
                       onChanged: (val) {
                         _stages[index]['name'] = val;
                       },
@@ -2041,7 +1939,7 @@ Sertakan HANYA JSON tersebut tanpa penjelasan markdown apa pun di luar JSON.
                       maxLines: 2,
                       decoration: InputDecoration(
                         hintText: 'Ringkasan / deskripsi elemen...',
-                        hintStyle: GoogleFonts.dmSans(fontSize: 14.0, color: Colors.black38),
+                        hintStyle: AppTypography.timestamp(color: Colors.black38),
                         filled: true,
                         fillColor: const Color(0xFFF8FAFC),
                         contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -2054,14 +1952,14 @@ Sertakan HANYA JSON tersebut tanpa penjelasan markdown apa pun di luar JSON.
                           borderSide: const BorderSide(color: Colors.black87),
                         ),
                       ),
-                      style: GoogleFonts.plusJakartaSans(fontSize: 14.0, color: Colors.black87),
+                      style: AppTypography.buttonLabel(color: Colors.black87),
                       onChanged: (val) {
                         _stages[index]['summary'] = val;
                       },
                     ),
                     const SizedBox(height: 12),
 
-                    Text('Daftar Materi', style: GoogleFonts.plusJakartaSans(fontSize: 14.0, fontWeight: FontWeight.bold, color: Colors.black54)),
+                    Text('Daftar Materi', style: AppTypography.buttonLabel(color: Colors.black54, fontWeight: FontWeight.bold)),
                     const SizedBox(height: 8),
                     ...List.generate(materis.length, (mIdx) {
                       return Padding(
@@ -2073,7 +1971,7 @@ Sertakan HANYA JSON tersebut tanpa penjelasan markdown apa pun di luar JSON.
                                 controller: _materiTitleControllers[index][mIdx],
                                 decoration: InputDecoration(
                                   hintText: 'Nama materi...',
-                                  hintStyle: GoogleFonts.dmSans(fontSize: 14, color: Colors.black26),
+                                  hintStyle: AppTypography.timestamp(color: Colors.black26),
                                   filled: true,
                                   fillColor: const Color(0xFFF8FAFC),
                                   contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
@@ -2086,7 +1984,7 @@ Sertakan HANYA JSON tersebut tanpa penjelasan markdown apa pun di luar JSON.
                                     borderSide: const BorderSide(color: Colors.black87),
                                   ),
                                 ),
-                                style: GoogleFonts.dmSans(fontSize: 14, color: Colors.black87),
+                                style: AppTypography.timestamp(color: Colors.black87),
                                 onChanged: (val) {
                                   _stages[index]['materis'][mIdx]['title'] = val;
                                 },
@@ -2122,11 +2020,7 @@ Sertakan HANYA JSON tersebut tanpa penjelasan markdown apa pun di luar JSON.
                           const SizedBox(width: 4),
                           Text(
                             'Tambah Materi',
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 14.0,
-                              fontWeight: FontWeight.bold,
-                              color: const Color(0xFF2563EB),
-                            ),
+                            style: AppTypography.buttonLabel(color: const Color(0xFF2563EB, fontWeight: FontWeight.bold),
                           ),
                         ],
                       ),
@@ -2172,11 +2066,7 @@ Sertakan HANYA JSON tersebut tanpa penjelasan markdown apa pun di luar JSON.
                 children: [
                   Text(
                     'Edit Classroom',
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 23.4,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
-                    ),
+                    style: AppTypography.pageTitle(color: Colors.black, fontWeight: FontWeight.bold),
                   ),
                   const Spacer(),
                   GestureDetector(
@@ -2195,11 +2085,7 @@ Sertakan HANYA JSON tersebut tanpa penjelasan markdown apa pun di luar JSON.
                             )
                           : Text(
                               'Perbarui Classroom',
-                              style: GoogleFonts.plusJakartaSans(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 15,
-                              ),
+                              style: AppTypography.buttonLabel(color: Colors.white, fontWeight: FontWeight.bold),
                             ),
                     ),
                   ),
@@ -2334,11 +2220,7 @@ Sertakan HANYA JSON tersebut tanpa penjelasan markdown apa pun di luar JSON.
                         ),
                         Text(
                           'Edit Classroom',
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 21.1,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.black,
-                          ),
+                          style: AppTypography.chatHeaderTitle(color: Colors.black, fontWeight: FontWeight.w600),
                         ),
                         const SizedBox(width: 44),
                       ],
@@ -2375,11 +2257,7 @@ Sertakan HANYA JSON tersebut tanpa penjelasan markdown apa pun di luar JSON.
       children: [
         Text(
           label,
-          style: GoogleFonts.plusJakartaSans(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-            color: Colors.black87,
-          ),
+          style: AppTypography.buttonLabel(color: Colors.black87, fontWeight: FontWeight.w600),
         ),
         const SizedBox(height: 6),
         TextField(
@@ -2388,7 +2266,7 @@ Sertakan HANYA JSON tersebut tanpa penjelasan markdown apa pun di luar JSON.
           maxLength: maxLength,
           decoration: InputDecoration(
             hintText: hint,
-            hintStyle: GoogleFonts.dmSans(fontSize: 14, color: Colors.black26),
+            hintStyle: AppTypography.timestamp(color: Colors.black26),
             filled: true,
             fillColor: const Color(0xFFF8FAFC),
             contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -2486,11 +2364,7 @@ class _AnimatedWorkingDotsTextState extends State<AnimatedWorkingDotsText> {
     final dots = '.' * _dotCount;
     return Text(
       'Gemini AI sedang bekerja$dots',
-      style: GoogleFonts.plusJakartaSans(
-        fontSize: 15,
-        fontWeight: FontWeight.bold,
-        color: const Color(0xFF0F172A),
-      ),
+      style: AppTypography.buttonLabel(color: const Color(0xFF0F172A, fontWeight: FontWeight.bold),
     );
   }
 }

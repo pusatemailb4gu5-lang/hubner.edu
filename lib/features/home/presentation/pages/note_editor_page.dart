@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../../core/theme/app_colors.dart';
+import 'package:hubner/core/theme/app_typography.dart';
 
 class NoteEditorPage extends StatefulWidget {
   final String? noteId;
@@ -132,13 +133,6 @@ class _NoteEditorPageState extends State<NoteEditorPage> {
                               color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
                               width: 1.2,
                             ),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.04),
-                                blurRadius: 8,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
                           ),
                           child: Icon(
                             Icons.arrow_back_rounded,
@@ -149,9 +143,7 @@ class _NoteEditorPageState extends State<NoteEditorPage> {
                       ),
                       Text(
                         widget.noteId == null ? 'Catatan Baru' : 'Edit Catatan',
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 18.0,
-                          fontWeight: FontWeight.w700,
+                        style: AppTypography.chatHeaderTitle(
                           color: isDark ? Colors.white : Colors.black,
                         ),
                       ),
@@ -180,13 +172,6 @@ class _NoteEditorPageState extends State<NoteEditorPage> {
                                     color: isDark ? const Color(0xFF27272A) : Colors.black,
                                     width: 1.2,
                                   ),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.15),
-                                      blurRadius: 8,
-                                      offset: const Offset(0, 2),
-                                    ),
-                                  ],
                                 ),
                                 child: const Icon(
                                   Icons.check_rounded,
@@ -214,16 +199,12 @@ class _NoteEditorPageState extends State<NoteEditorPage> {
                           controller: _titleController,
                           maxLines: 1,
                           cursorColor: isDark ? Colors.white : Colors.black,
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 24.0,
-                            fontWeight: FontWeight.bold,
+                          style: AppTypography.pageTitle(
                             color: isDark ? Colors.white : Colors.black87,
                           ),
                           decoration: InputDecoration(
                             hintText: 'Judul Catatan',
-                            hintStyle: GoogleFonts.plusJakartaSans(
-                              fontSize: 24.0,
-                              fontWeight: FontWeight.bold,
+                            hintStyle: AppTypography.pageTitle(
                               color: isDark ? Colors.white30 : Colors.black26,
                             ),
                             border: InputBorder.none,
@@ -235,15 +216,13 @@ class _NoteEditorPageState extends State<NoteEditorPage> {
                           controller: _contentController,
                           maxLines: null,
                           cursorColor: isDark ? Colors.white : Colors.black,
-                          style: GoogleFonts.dmSans(
-                            fontSize: 16.5,
+                          style: AppTypography.chatBody(
                             color: isDark ? const Color(0xFFE2E8F0) : Colors.black87,
                             height: 1.6,
                           ),
                           decoration: InputDecoration(
                             hintText: 'Mulai menulis catatan Anda di sini...',
-                            hintStyle: GoogleFonts.dmSans(
-                              fontSize: 16.5,
+                            hintStyle: AppTypography.chatBody(
                               color: isDark ? Colors.white30 : Colors.black26,
                             ),
                             border: InputBorder.none,

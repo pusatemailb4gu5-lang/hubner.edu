@@ -18,6 +18,7 @@ import 'package:googleapis/drive/v3.dart' as drive;
 import 'package:url_launcher/url_launcher.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:hubner/core/theme/app_colors.dart';
+import 'package:hubner/core/theme/app_typography.dart';
 import 'package:hubner/main.dart' show HubnerApp;
 import 'home_page.dart' show BouncyButton;
 import 'package:hubner/features/projects/presentation/pages/detail_cp_page.dart';
@@ -322,13 +323,10 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
       // Only highlight the @name part — no background block, just colored text
       spans.add(TextSpan(
         text: mention,
-        style: GoogleFonts.plusJakartaSans(
-          fontSize: 20.0,
-          fontWeight: FontWeight.bold,
-          // Pastel purple for mentions that include you; subtle purple for others
+        style: AppTypography.mentionTag(
           color: isMeMentioned
-              ? const Color(0xFFB57BEE) // vibrant pastel purple for self-mention
-              : const Color(0xFFAF8FD4), // soft muted purple for other mentions
+              ? const Color(0xFFB57BEE)
+              : const Color(0xFFAF8FD4),
         ),
       ));
       
@@ -1647,13 +1645,6 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                     decoration: BoxDecoration(
                       color: badgeColor,
                       borderRadius: BorderRadius.circular(8),
-                      boxShadow: [
-                        BoxShadow(
-                          color: badgeColor.withValues(alpha: 0.3),
-                          blurRadius: 4,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
                     ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -2406,13 +2397,6 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
               decoration: BoxDecoration(
                 color: isDark ? const Color(0xFF141416) : Colors.white,
                 borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: isDark ? 0.5 : 0.15),
-                    blurRadius: 20,
-                    offset: const Offset(0, -4),
-                  ),
-                ],
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -2460,13 +2444,6 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                     color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
                                     width: 1.2,
                                   ),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.04),
-                                      blurRadius: 8,
-                                      offset: const Offset(0, 2),
-                                    ),
-                                  ],
                                 ),
                                 child: Icon(
                                   Icons.arrow_back_rounded,
@@ -3243,10 +3220,8 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
         Text.rich(
           TextSpan(
             children: _buildMessageSpans(text, _currentUserName, context, isMe),
-            style: GoogleFonts.dmSans(
-              fontSize: 20.0,
+            style: AppTypography.chatBody(
               color: isMe ? Colors.white : (isDark ? Colors.white : Colors.black87),
-              height: 1.3,
             ),
           ),
         ),
@@ -3255,8 +3230,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
             padding: const EdgeInsets.only(top: 2),
             child: Text(
               timeText,
-              style: GoogleFonts.dmSans(
-                fontSize: 15.0,
+              style: AppTypography.timestamp(
                 color: isMe ? Colors.white60 : (isDark ? Colors.white38 : Colors.black38),
               ),
             ),
@@ -3436,13 +3410,6 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                             color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
                             width: 1.0,
                           ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.12),
-                              blurRadius: 10,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
                         ),
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(20),
@@ -3513,13 +3480,6 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                     : (isDark ? const Color(0xFF3F3F46) : const Color(0xFFE2E8F0)),
                                 width: 1.0,
                               ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.35),
-                                  blurRadius: 16,
-                                  offset: const Offset(0, 4),
-                                ),
-                              ],
                             ),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -3637,13 +3597,6 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                             color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
                             width: 1.0,
                           ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.10),
-                              blurRadius: 14,
-                              offset: const Offset(0, 3),
-                            ),
-                          ],
                         ),
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(14),
@@ -3918,9 +3871,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                 children: [
                                   Text(
                                     channelTitle,
-                                    style: GoogleFonts.plusJakartaSans(
-                                      fontSize: 18.5,
-                                      fontWeight: FontWeight.bold,
+                                    style: AppTypography.chatHeaderTitle(
                                       color: isDark ? Colors.white : Colors.black87,
                                     ),
                                     maxLines: 1,
@@ -3929,10 +3880,8 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                   const SizedBox(height: 2),
                                   Text(
                                     subtitle,
-                                    style: GoogleFonts.dmSans(
-                                      fontSize: 18.0,
+                                    style: AppTypography.chatHeaderSubtitle(
                                       color: isDark ? Colors.white60 : Colors.black45,
-                                      fontWeight: FontWeight.w500,
                                     ),
                                   ),
                                 ],

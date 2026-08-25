@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:hubner/core/widgets/three_dots_loader.dart';
 import 'package:flutter/material.dart';
+import 'package:hubner/core/theme/app_typography.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:hubner/core/theme/app_colors.dart';
@@ -190,13 +191,6 @@ class _ClassLearningReportPageState extends State<ClassLearningReportPage>
                                                 : Colors.white.withValues(alpha: 0.6),
                                             width: 1.0,
                                           ),
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color: Colors.black.withValues(alpha: 0.08),
-                                              blurRadius: 6,
-                                              offset: const Offset(0, 2),
-                                            ),
-                                          ],
                                         ),
                                         child: Icon(
                                           Icons.arrow_back_rounded,
@@ -277,22 +271,13 @@ class _ClassLearningReportPageState extends State<ClassLearningReportPage>
                           children: [
                             Text(
                               'Laporan Hasil Belajar',
-                              style: GoogleFonts.plusJakartaSans(
-                                fontSize: 24,
-                                fontWeight: FontWeight.w900,
-                                color: const Color(0xFF0F172A),
-                                letterSpacing: -0.5,
-                              ),
+                              style: AppTypography.pageTitle(color: const Color(0xFF0F172A, fontWeight: FontWeight.w900, letterSpacing: -0.5),
                             ),
                             Text(
                               widget.projectName,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              style: GoogleFonts.dmSans(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                                color: const Color(0xFF4C0519),
-                              ),
+                              style: AppTypography.timestamp(color: const Color(0xFF4C0519, fontWeight: FontWeight.w600),
                             ),
                           ],
                         ),
@@ -315,11 +300,7 @@ class _ClassLearningReportPageState extends State<ClassLearningReportPage>
                             const SizedBox(width: 5),
                             Text(
                               '$studentCount Siswa',
-                              style: GoogleFonts.plusJakartaSans(
-                                fontSize: 14.0,
-                                fontWeight: FontWeight.bold,
-                                color: const Color(0xFF0F172A),
-                              ),
+                              style: AppTypography.buttonLabel(color: const Color(0xFF0F172A, fontWeight: FontWeight.bold),
                             ),
                           ],
                         ),
@@ -338,11 +319,7 @@ class _ClassLearningReportPageState extends State<ClassLearningReportPage>
                             const SizedBox(width: 5),
                             Text(
                               '$totalStages Tahapan · $totalTasks Tugas',
-                              style: GoogleFonts.plusJakartaSans(
-                                fontSize: 14.0,
-                                fontWeight: FontWeight.bold,
-                                color: const Color(0xFF0F172A),
-                              ),
+                              style: AppTypography.buttonLabel(color: const Color(0xFF0F172A, fontWeight: FontWeight.bold),
                             ),
                           ],
                         ),
@@ -368,10 +345,7 @@ class _ClassLearningReportPageState extends State<ClassLearningReportPage>
       return Center(
         child: Text(
           'Belum ada tahapan capaian pembelajaran.',
-          style: GoogleFonts.dmSans(
-            fontSize: 14,
-            color: isDark ? Colors.white54 : Colors.black45,
-          ),
+          style: AppTypography.timestamp(color: isDark ? Colors.white54 : Colors.black45),
         ),
       );
     }
@@ -421,13 +395,6 @@ class _ClassLearningReportPageState extends State<ClassLearningReportPage>
               color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
               width: 1.2,
             ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.04),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -444,11 +411,7 @@ class _ClassLearningReportPageState extends State<ClassLearningReportPage>
                     child: Center(
                       child: Text(
                         (index + 1).toString().padLeft(2, '0'),
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w900,
-                          color: const Color(0xFFBE123C),
-                        ),
+                        style: AppTypography.buttonLabel(color: const Color(0xFFBE123C, fontWeight: FontWeight.w900),
                       ),
                     ),
                   ),
@@ -459,11 +422,7 @@ class _ClassLearningReportPageState extends State<ClassLearningReportPage>
                       children: [
                         Text(
                           name,
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 15,
-                            fontWeight: FontWeight.bold,
-                            color: isDark ? Colors.white : const Color(0xFF0F172A),
-                          ),
+                          style: AppTypography.buttonLabel(color: isDark ? Colors.white : const Color(0xFF0F172A, fontWeight: FontWeight.bold),
                         ),
                         if (summary.isNotEmpty) ...[
                           const SizedBox(height: 2),
@@ -471,10 +430,7 @@ class _ClassLearningReportPageState extends State<ClassLearningReportPage>
                             summary,
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
-                            style: GoogleFonts.dmSans(
-                              fontSize: 14.0,
-                              color: isDark ? Colors.white54 : Colors.black54,
-                            ),
+                            style: AppTypography.timestamp(color: isDark ? Colors.white54 : Colors.black54),
                           ),
                         ],
                       ],
@@ -488,11 +444,7 @@ class _ClassLearningReportPageState extends State<ClassLearningReportPage>
                     ),
                     child: Text(
                       statusLabel,
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 14.0,
-                        fontWeight: FontWeight.bold,
-                        color: isDark ? Colors.white : statusFg,
-                      ),
+                      style: AppTypography.buttonLabel(color: isDark ? Colors.white : statusFg, fontWeight: FontWeight.bold),
                     ),
                   ),
                 ],
@@ -542,10 +494,7 @@ class _ClassLearningReportPageState extends State<ClassLearningReportPage>
       return Center(
         child: Text(
           'Belum ada siswa terdaftar di kelas ini.',
-          style: GoogleFonts.dmSans(
-            fontSize: 14,
-            color: isDark ? Colors.white54 : Colors.black45,
-          ),
+          style: AppTypography.timestamp(color: isDark ? Colors.white54 : Colors.black45),
         ),
       );
     }
@@ -576,13 +525,6 @@ class _ClassLearningReportPageState extends State<ClassLearningReportPage>
               color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
               width: 1.2,
             ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.04),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -603,11 +545,7 @@ class _ClassLearningReportPageState extends State<ClassLearningReportPage>
                     child: Center(
                       child: Text(
                         name.isNotEmpty ? name.substring(0, 1).toUpperCase() : 'S',
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w900,
-                          color: const Color(0xFF0F172A),
-                        ),
+                        style: AppTypography.cardTitle(color: const Color(0xFF0F172A, fontWeight: FontWeight.w900),
                       ),
                     ),
                   ),
@@ -618,21 +556,14 @@ class _ClassLearningReportPageState extends State<ClassLearningReportPage>
                       children: [
                         Text(
                           name,
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 15,
-                            fontWeight: FontWeight.bold,
-                            color: isDark ? Colors.white : const Color(0xFF0F172A),
-                          ),
+                          style: AppTypography.buttonLabel(color: isDark ? Colors.white : const Color(0xFF0F172A, fontWeight: FontWeight.bold),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
                         const SizedBox(height: 2),
                         Text(
                           'ID: $userId',
-                          style: GoogleFonts.dmSans(
-                            fontSize: 14.0,
-                            color: isDark ? Colors.white54 : Colors.black45,
-                          ),
+                          style: AppTypography.timestamp(color: isDark ? Colors.white54 : Colors.black45),
                         ),
                       ],
                     ),
@@ -647,11 +578,7 @@ class _ClassLearningReportPageState extends State<ClassLearningReportPage>
                     ),
                     child: Text(
                       '$completedCount/$totalTasks Selesai',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 14.0,
-                        fontWeight: FontWeight.bold,
-                        color: progress >= 1.0 ? const Color(0xFF10B981) : const Color(0xFF2563EB),
-                      ),
+                      style: AppTypography.buttonLabel(color: progress >= 1.0 ? const Color(0xFF10B981, fontWeight: FontWeight.bold),
                     ),
                   ),
                 ],
@@ -691,18 +618,11 @@ class _ClassLearningReportPageState extends State<ClassLearningReportPage>
           children: [
             Text(
               value,
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 14,
-                fontWeight: FontWeight.w800,
-                color: isDark ? Colors.white : const Color(0xFF0F172A),
-              ),
+              style: AppTypography.buttonLabel(color: isDark ? Colors.white : const Color(0xFF0F172A, fontWeight: FontWeight.w800),
             ),
             Text(
               label,
-              style: GoogleFonts.dmSans(
-                fontSize: 14.0,
-                color: isDark ? Colors.white54 : Colors.black54,
-              ),
+              style: AppTypography.timestamp(color: isDark ? Colors.white54 : Colors.black54),
             ),
           ],
         ),
@@ -742,18 +662,11 @@ class _SliverTabHeaderDelegate extends SliverPersistentHeaderDelegate {
           indicator: BoxDecoration(
             color: isDark ? const Color(0xFF27272A) : Colors.white,
             borderRadius: BorderRadius.circular(24),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.06),
-                blurRadius: 4,
-                offset: const Offset(0, 2),
-              ),
-            ],
           ),
           labelColor: isDark ? Colors.white : const Color(0xFF0F172A),
           unselectedLabelColor: isDark ? Colors.white54 : Colors.black54,
-          labelStyle: GoogleFonts.plusJakartaSans(fontSize: 14.0, fontWeight: FontWeight.bold),
-          unselectedLabelStyle: GoogleFonts.plusJakartaSans(fontSize: 14.0, fontWeight: FontWeight.w600),
+          labelStyle: AppTypography.buttonLabel(fontWeight: FontWeight.bold),
+          unselectedLabelStyle: AppTypography.buttonLabel(fontWeight: FontWeight.w600),
           tabs: const [
             Tab(text: 'Capaian Elemen CP'),
             Tab(text: 'Rekap Progres Siswa'),

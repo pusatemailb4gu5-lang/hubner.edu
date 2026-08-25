@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hubner/core/theme/app_typography.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:qr_flutter/qr_flutter.dart';
@@ -190,13 +191,6 @@ class DesktopDetailKelasTab extends StatelessWidget {
                         decoration: BoxDecoration(
                           color: accentColor,
                           borderRadius: BorderRadius.circular(22),
-                          boxShadow: [
-                            BoxShadow(
-                              color: accentColor.withValues(alpha: 0.3),
-                              blurRadius: 16,
-                              offset: const Offset(0, 6),
-                            ),
-                          ],
                         ),
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(22),
@@ -230,22 +224,10 @@ class DesktopDetailKelasTab extends StatelessWidget {
                                             color: Colors.white,
                                             borderRadius:
                                                 BorderRadius.circular(20),
-                                            boxShadow: [
-                                              BoxShadow(
-                                                color: Colors.black
-                                                    .withValues(alpha: 0.08),
-                                                blurRadius: 6,
-                                                offset: const Offset(0, 2),
-                                              ),
-                                            ],
                                           ),
                                           child: Text(
                                             'Tingkat $gradeLevel • $major',
-                                            style: GoogleFonts.plusJakartaSans(
-                                              fontSize: 14,
-                                              fontWeight: FontWeight.bold,
-                                              color: const Color(0xFF000000),
-                                            ),
+                                            style: AppTypography.buttonLabel(color: const Color(0xFF000000, fontWeight: FontWeight.bold),
                                           ),
                                         ),
                                         GestureDetector(
@@ -270,14 +252,6 @@ class DesktopDetailKelasTab extends StatelessWidget {
                                               color: const Color(0xFFFFD600),
                                               borderRadius:
                                                   BorderRadius.circular(14),
-                                              boxShadow: [
-                                                BoxShadow(
-                                                  color: Colors.black
-                                                      .withValues(alpha: 0.12),
-                                                  blurRadius: 8,
-                                                  offset: const Offset(0, 3),
-                                                ),
-                                              ],
                                             ),
                                             child: Row(
                                               children: [
@@ -289,11 +263,7 @@ class DesktopDetailKelasTab extends StatelessWidget {
                                                 const SizedBox(width: 6),
                                                 Text(
                                                   'Atur Ulang',
-                                                  style: GoogleFonts.plusJakartaSans(
-                                                    fontSize: 14,
-                                                    fontWeight: FontWeight.bold,
-                                                    color: Colors.black,
-                                                  ),
+                                                  style: AppTypography.buttonLabel(color: Colors.black, fontWeight: FontWeight.bold),
                                                 ),
                                               ],
                                             ),
@@ -341,18 +311,7 @@ class DesktopDetailKelasTab extends StatelessWidget {
                                                 projectTitle,
                                                 maxLines: 3,
                                                 overflow: TextOverflow.ellipsis,
-                                                style: GoogleFonts.plusJakartaSans(
-                                                  fontSize: () {
-                                                    final len = projectTitle.length;
-                                                    if (len > 70) return 18.0;
-                                                    if (len > 50) return 21.0;
-                                                    if (len > 32) return 24.0;
-                                                    return 28.1;
-                                                  }(),
-                                                  fontWeight: FontWeight.bold,
-                                                  color: heroTextColor,
-                                                  height: 1.2,
-                                                ),
+                                                style: AppTypography.buttonLabel(color: heroTextColor, fontWeight: FontWeight.bold, height: 1.2),
                                               ),
                                               const SizedBox(height: 6),
                                               Row(
@@ -365,11 +324,7 @@ class DesktopDetailKelasTab extends StatelessWidget {
                                                   const SizedBox(width: 4),
                                                   Text(
                                                     teacherName,
-                                                    style: GoogleFonts.plusJakartaSans(
-                                                      fontSize: 15.2,
-                                                      fontWeight: FontWeight.w600,
-                                                      color: heroTextColor,
-                                                    ),
+                                                    style: AppTypography.buttonLabel(color: heroTextColor, fontWeight: FontWeight.w600),
                                                   ),
                                                   const SizedBox(width: 14),
                                                   Container(
@@ -390,10 +345,7 @@ class DesktopDetailKelasTab extends StatelessWidget {
                                                   const SizedBox(width: 4),
                                                   Text(
                                                     scheduleText,
-                                                    style: GoogleFonts.dmSans(
-                                                      fontSize: 15.2,
-                                                      color: heroSubtextColor,
-                                                    ),
+                                                    style: AppTypography.subtitle(color: heroSubtextColor),
                                                   ),
                                                 ],
                                               ),
@@ -402,10 +354,7 @@ class DesktopDetailKelasTab extends StatelessWidget {
                                                 description,
                                                 maxLines: 2,
                                                 overflow: TextOverflow.ellipsis,
-                                                style: GoogleFonts.dmSans(
-                                                  fontSize: 14.7,
-                                                  color: heroSubtextColor,
-                                                ),
+                                                style: AppTypography.subtitle(color: heroSubtextColor),
                                               ),
                                             ],
                                           ),
@@ -554,11 +503,7 @@ class DesktopDetailKelasTab extends StatelessWidget {
                   const SizedBox(width: 5),
                   Text(
                     tagLabel,
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 14.0,
-                      fontWeight: FontWeight.bold,
-                      color: accentColor,
-                    ),
+                    style: AppTypography.buttonLabel(color: accentColor, fontWeight: FontWeight.bold),
                   ),
                 ],
               ),
@@ -566,20 +511,12 @@ class DesktopDetailKelasTab extends StatelessWidget {
             const SizedBox(height: 12),
             Text(
               title,
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 21.1,
-                fontWeight: FontWeight.bold,
-                color: const Color(0xFF000000),
-              ),
+              style: AppTypography.chatHeaderTitle(color: const Color(0xFF000000, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 4),
             Text(
               subtitle,
-              style: GoogleFonts.dmSans(
-                fontSize: 14.0,
-                color: const Color(0xFF000000),
-                height: 1.3,
-              ),
+              style: AppTypography.timestamp(color: const Color(0xFF000000, height: 1.3),
             ),
           ],
         ),
@@ -603,13 +540,6 @@ class DesktopDetailKelasTab extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.circular(22),
         border: Border.all(color: const Color(0xFFE2E8F0), width: 1.0),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 14,
-            offset: const Offset(0, 4),
-          ),
-        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -671,11 +601,7 @@ class DesktopDetailKelasTab extends StatelessWidget {
             Expanded(
               child: Text(
                 combinedTitle,
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 17,
-                  fontWeight: FontWeight.w600, // NOT BOLD AS REQUESTED
-                  color: const Color(0xFF000000),
-                ),
+                style: AppTypography.cardTitle(color: const Color(0xFF000000, fontWeight: FontWeight.w600),
               ),
             ),
           ],
@@ -723,11 +649,7 @@ class DesktopDetailKelasTab extends StatelessWidget {
                               ),
                               child: Text(
                                 badgeText,
-                                style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 14.0,
-                                  fontWeight: FontWeight.bold,
-                                  color: accentColor,
-                                ),
+                                style: AppTypography.buttonLabel(color: accentColor, fontWeight: FontWeight.bold),
                               ),
                             ),
                           ),
@@ -801,13 +723,6 @@ class DesktopDetailKelasTab extends StatelessWidget {
             color: Colors.white,
             borderRadius: BorderRadius.circular(22),
             border: Border.all(color: const Color(0xFFE2E8F0), width: 1.0),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.04),
-                blurRadius: 14,
-                offset: const Offset(0, 4),
-              ),
-            ],
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -823,11 +738,7 @@ class DesktopDetailKelasTab extends StatelessWidget {
                   const SizedBox(width: 10),
                   Text(
                     'Aktivitas Kelas Terbaru',
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 18.7,
-                      fontWeight: FontWeight.bold,
-                      color: const Color(0xFF000000),
-                    ),
+                    style: AppTypography.chatHeaderTitle(color: const Color(0xFF000000, fontWeight: FontWeight.bold),
                   ),
 
                 ],
@@ -849,19 +760,12 @@ class DesktopDetailKelasTab extends StatelessWidget {
                         const SizedBox(height: 10),
                         Text(
                           'Belum ada aktivitas kelas.',
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            color: const Color(0xFF94A3B8),
-                          ),
+                          style: AppTypography.buttonLabel(color: const Color(0xFF94A3B8, fontWeight: FontWeight.w600),
                         ),
                         const SizedBox(height: 4),
                         Text(
                           'Aktivitas akan muncul saat ada perubahan di kelas ini.',
-                          style: GoogleFonts.dmSans(
-                            fontSize: 14.0,
-                            color: const Color(0xFF94A3B8),
-                          ),
+                          style: AppTypography.timestamp(color: const Color(0xFF94A3B8),
                         ),
                       ],
                     ),
@@ -965,11 +869,7 @@ class DesktopDetailKelasTab extends StatelessWidget {
             children: [
               RichText(
                 text: TextSpan(
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 14.7,
-                    color: const Color(0xFF000000),
-                    height: 1.35,
-                  ),
+                  style: AppTypography.buttonLabel(color: const Color(0xFF000000, height: 1.35),
                   children: [
                     TextSpan(
                       text: '$actor ',
@@ -990,10 +890,7 @@ class DesktopDetailKelasTab extends StatelessWidget {
               const SizedBox(height: 3),
               Text(
                 timeStr,
-                style: GoogleFonts.dmSans(
-                  fontSize: 14.0,
-                  color: const Color(0xFF000000),
-                ),
+                style: AppTypography.timestamp(color: const Color(0xFF000000),
               ),
             ],
           ),

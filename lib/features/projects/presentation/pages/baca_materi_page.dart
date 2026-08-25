@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hubner/core/theme/app_typography.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -57,11 +58,7 @@ class _BacaMateriPageState extends State<BacaMateriPage> {
         ),
         title: Text(
           'Materi Pembelajaran',
-          style: GoogleFonts.plusJakartaSans(
-            color: Colors.black87,
-            fontWeight: FontWeight.bold,
-            fontSize: 18.7,
-          ),
+          style: AppTypography.chatHeaderTitle(color: Colors.black87, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
       ),
@@ -79,13 +76,6 @@ class _BacaMateriPageState extends State<BacaMateriPage> {
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(color: const Color(0xFF0D9488).withOpacity(0.2)),
-                  boxShadow: [
-                    BoxShadow(
-                      color: const Color(0xFF0D9488).withOpacity(0.05),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -103,11 +93,7 @@ class _BacaMateriPageState extends State<BacaMateriPage> {
                           const SizedBox(width: 6),
                           Text(
                             'Modul Materi PDF',
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 14.0,
-                              fontWeight: FontWeight.bold,
-                              color: const Color(0xFF0D9488),
-                            ),
+                            style: AppTypography.buttonLabel(color: const Color(0xFF0D9488, fontWeight: FontWeight.bold),
                           ),
                         ],
                       ),
@@ -115,11 +101,7 @@ class _BacaMateriPageState extends State<BacaMateriPage> {
                     const SizedBox(height: 12),
                     Text(
                       widget.title,
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 21.1,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black87,
-                      ),
+                      style: AppTypography.chatHeaderTitle(color: Colors.black87, fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 8),
                     Row(
@@ -128,7 +110,7 @@ class _BacaMateriPageState extends State<BacaMateriPage> {
                         const SizedBox(width: 6),
                         Text(
                           widget.docName.startsWith('http') ? '📄 Berkas Materi (Google Drive)' : (widget.docName.isNotEmpty ? widget.docName : 'Berkas_Materi.pdf'),
-                          style: GoogleFonts.dmSans(fontSize: 14, color: Colors.black54, fontWeight: FontWeight.w500),
+                          style: AppTypography.timestamp(color: Colors.black54, fontWeight: FontWeight.w500),
                         ),
                       ],
                     ),
@@ -160,13 +142,13 @@ class _BacaMateriPageState extends State<BacaMateriPage> {
                     const SizedBox(height: 16),
                     Text(
                       widget.docName.startsWith('http') ? 'Materi Pembelajaran (Google Drive)' : (widget.docName.isNotEmpty ? widget.docName : 'Modul Pembelajaran Elemen.pdf'),
-                      style: GoogleFonts.plusJakartaSans(fontSize: 16.4, fontWeight: FontWeight.bold, color: Colors.black87),
+                      style: AppTypography.cardTitle(color: Colors.black87, fontWeight: FontWeight.bold),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 8),
                     Text(
                       'Silakan pelajari dokumen modul di atas hingga tuntas. Setelah selesai membaca, tekan tombol di bawah untuk menyelesaikan materi.',
-                      style: GoogleFonts.dmSans(fontSize: 14, color: Colors.black54, height: 1.5),
+                      style: AppTypography.timestamp(color: Colors.black54, height: 1.5),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 20),
@@ -193,7 +175,7 @@ class _BacaMateriPageState extends State<BacaMateriPage> {
                         }
                       },
                       icon: const Icon(Icons.open_in_new_rounded, size: 16),
-                      label: Text('Buka Dokumen Fullscreen', style: GoogleFonts.plusJakartaSans(fontSize: 14, fontWeight: FontWeight.bold)),
+                      label: Text('Buka Dokumen Fullscreen', style: AppTypography.buttonLabel(fontWeight: FontWeight.bold)),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: const Color(0xFF0D9488),
                         side: const BorderSide(color: Color(0xFF0D9488)),
@@ -219,7 +201,7 @@ class _BacaMateriPageState extends State<BacaMateriPage> {
                   ),
                   child: Text(
                     'Tandai Sudah Dibaca & Selesai',
-                    style: GoogleFonts.plusJakartaSans(fontSize: 16.4, fontWeight: FontWeight.bold),
+                    style: AppTypography.cardTitle(fontWeight: FontWeight.bold),
                   ),
                 ),
               ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hubner/core/widgets/three_dots_loader.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:hubner/core/theme/app_typography.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../projects/presentation/pages/class_page.dart';
 
@@ -49,10 +50,8 @@ class _NotificationsPageState extends State<NotificationsPage> {
         ),
         title: Text(
           'Notifikasi & Aktivitas',
-          style: GoogleFonts.plusJakartaSans(
+          style: AppTypography.chatHeaderTitle(
             color: Colors.black,
-            fontSize: 21.1,
-            fontWeight: FontWeight.bold,
           ),
         ),
         centerTitle: true,
@@ -205,13 +204,13 @@ class _NotificationsPageState extends State<NotificationsPage> {
                               const SizedBox(height: 12),
                               Text(
                                 'Belum Ada Notifikasi',
-                                style: GoogleFonts.plusJakartaSans(fontSize: 17.6, fontWeight: FontWeight.bold, color: Colors.black54),
+                                style: AppTypography.sectionHeader(color: Colors.black54),
                               ),
                               const SizedBox(height: 4),
                               Text(
                                 'Pemberitahuan aktivitas classroom dan tugas baru akan muncul di sini.',
                                 textAlign: TextAlign.center,
-                                style: GoogleFonts.dmSans(fontSize: 14, color: Colors.black38),
+                                style: AppTypography.subtitle(color: Colors.black38),
                               ),
                             ],
                           ),
@@ -293,9 +292,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
       },
       selectedColor: Colors.black,
       backgroundColor: const Color(0xFFF8FAFC),
-      labelStyle: GoogleFonts.plusJakartaSans(
-        fontSize: 14,
-        fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+      labelStyle: AppTypography.buttonLabel(
         color: isSelected ? Colors.white : Colors.black54,
       ),
       side: BorderSide(

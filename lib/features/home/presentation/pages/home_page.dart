@@ -22,6 +22,7 @@ import 'package:qr_flutter/qr_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:hubner/main.dart';
 import 'package:hubner/core/theme/app_colors.dart';
+import 'package:hubner/core/theme/app_typography.dart';
 import 'package:hubner/core/services/google_drive_service.dart';
 import 'package:hubner/core/services/classroom_export_service.dart';
 import 'package:hubner/core/services/login_history_service.dart';
@@ -3000,10 +3001,9 @@ class _HomePageState extends State<HomePage> {
                             children: [
                               Text(
                                 'Classroom Saya',
-                                style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 23.4,
-                                  fontWeight: FontWeight.w600,
+                                style: AppTypography.pageTitle(
                                   color: AppColors.isDarkMode ? Colors.white : Colors.black,
+                                  fontWeight: FontWeight.w700,
                                 ),
                               ),
                               Row(
@@ -3036,10 +3036,8 @@ class _HomePageState extends State<HomePage> {
                                                 const SizedBox(width: 5),
                                                 Text(
                                                   'Selesai',
-                                                  style: GoogleFonts.plusJakartaSans(
-                                                    fontSize: 14.0,
-                                                    fontWeight: FontWeight.bold,
-                                                    color: Color(0xFF7C3AED), // Text Ungu
+                                                  style: AppTypography.buttonLabel(
+                                                    color: const Color(0xFF7C3AED),
                                                   ),
                                                 ),
                                               ],
@@ -5414,11 +5412,8 @@ class _HomePageState extends State<HomePage> {
             Text(
               title,
               maxLines: 3,
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: title.length > 55 ? 14.5 : 16.4,
-                fontWeight: FontWeight.bold,
+              style: AppTypography.cardTitle(
                 color: textColor,
-                height: 1.2,
               ),
             ),
           ],
@@ -6301,9 +6296,7 @@ class _QuickNotesDropdownContent extends StatelessWidget {
               children: [
                 Text(
                   'Catatan Cepat',
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 15,
-                    fontWeight: FontWeight.bold,
+                  style: AppTypography.sectionHeader(
                     color: isDark ? Colors.white : const Color(0xFF0F172A),
                   ),
                 ),
@@ -6334,10 +6327,8 @@ class _QuickNotesDropdownContent extends StatelessWidget {
                         const SizedBox(width: 2),
                         Text(
                           'Tambah',
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 14.0,
+                          style: AppTypography.buttonLabel(
                             color: isDark ? const Color(0xFF38BDF8) : const Color(0xFF2563EB),
-                            fontWeight: FontWeight.bold,
                           ),
                         ),
                       ],
@@ -6441,11 +6432,8 @@ class _QuickNotesDropdownContent extends StatelessWidget {
                                   Expanded(
                                     child: Text(
                                       title.isNotEmpty ? title : 'Tanpa Judul',
-                                      style: GoogleFonts.plusJakartaSans(
-                                        fontSize: 15.0,
-                                        fontWeight: FontWeight.w700,
+                                      style: AppTypography.cardTitle(
                                         color: isDark ? Colors.white : const Color(0xFF0F172A),
-                                        height: 1.2,
                                       ),
                                       maxLines: 2,
                                       softWrap: true,
@@ -6460,9 +6448,7 @@ class _QuickNotesDropdownContent extends StatelessWidget {
                                     children: [
                                       Text(
                                         dateStr,
-                                        style: GoogleFonts.dmSans(
-                                          fontSize: 14.0,
-                                          fontWeight: FontWeight.w500,
+                                        style: AppTypography.timestamp(
                                           color: isDark ? Colors.white38 : const Color(0xFF94A3B8),
                                         ),
                                       ),
@@ -7091,11 +7077,8 @@ class _AnimatedScheduleCapsuleState extends State<_AnimatedScheduleCapsule> {
             const SizedBox(width: 8),
             Text(
               'Jadwal belum diatur',
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 14.0,
-                fontWeight: FontWeight.w700,
+              style: AppTypography.timestamp(
                 color: isDark ? Colors.white : Colors.black87,
-                letterSpacing: -0.2,
               ),
             ),
           ],
@@ -7152,11 +7135,8 @@ class _AnimatedScheduleCapsuleState extends State<_AnimatedScheduleCapsule> {
             const SizedBox(width: 8),
             Text(
               '$dayStr, $timeStr',
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 14.0,
-                fontWeight: FontWeight.w700,
+              style: AppTypography.timestamp(
                 color: isDark ? Colors.white : Colors.black87,
-                letterSpacing: -0.2,
               ),
             ),
           ],
@@ -7280,15 +7260,13 @@ class _HomeSearchAndNotesRowState extends State<_HomeSearchAndNotesRow> {
                         setState(() {});
                         _onChanged(val);
                       },
-                      style: GoogleFonts.dmSans(
-                        fontSize: 20.0,
+                      style: AppTypography.searchInput(
                         color: isDark ? Colors.white : Colors.black87,
                       ),
                       decoration: InputDecoration(
                         hintText: 'Cari kelas / materi...',
-                        hintStyle: GoogleFonts.dmSans(
+                        hintStyle: AppTypography.searchInput(
                           color: isDark ? Colors.white38 : Colors.black38,
-                          fontSize: 20.0,
                         ),
                         border: InputBorder.none,
                         isDense: true,
@@ -7317,9 +7295,7 @@ class _HomeSearchAndNotesRowState extends State<_HomeSearchAndNotesRow> {
                           const SizedBox(width: 5),
                           Text(
                             'Tutup',
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 14.0,
-                              fontWeight: FontWeight.bold,
+                            style: AppTypography.buttonLabel(
                               color: Colors.white,
                             ),
                           ),
@@ -7367,9 +7343,7 @@ class _HomeSearchAndNotesRowState extends State<_HomeSearchAndNotesRow> {
                         const SizedBox(width: 10),
                         Text(
                           'Catatan',
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
+                          style: AppTypography.buttonLabel(
                             color: isDark ? Colors.white : Colors.black87,
                           ),
                         ),

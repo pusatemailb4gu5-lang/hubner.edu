@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hubner/core/theme/app_typography.dart';
 import 'package:hubner/core/widgets/three_dots_loader.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -90,13 +91,6 @@ class _DesktopJadwalPembelajaranTabState
                   decoration: BoxDecoration(
                     color: const Color(0xFF059669),
                     borderRadius: BorderRadius.circular(22),
-                    boxShadow: [
-                      BoxShadow(
-                        color: const Color(0xFF059669).withValues(alpha: 0.2),
-                        blurRadius: 14,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
                   ),
                   child: Row(
                     children: [
@@ -120,19 +114,12 @@ class _DesktopJadwalPembelajaranTabState
                           children: [
                             Text(
                               'Jadwal Pembelajaran Kelas',
-                              style: GoogleFonts.plusJakartaSans(
-                                fontSize: 23.4,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
+                              style: AppTypography.pageTitle(color: Colors.white, fontWeight: FontWeight.bold),
                             ),
                             const SizedBox(height: 2),
                             Text(
                               '${schedules.length} Sesi Belajar Mengajar Terjadwal Otomatis',
-                              style: GoogleFonts.dmSans(
-                                fontSize: 14,
-                                color: Colors.white.withValues(alpha: 0.85),
-                              ),
+                              style: AppTypography.timestamp(color: Colors.white.withValues(alpha: 0.85),
                             ),
                           ],
                         ),
@@ -144,10 +131,7 @@ class _DesktopJadwalPembelajaranTabState
                           icon: const Icon(Icons.alarm_add_rounded, size: 18),
                           label: Text(
                             'Atur & Tambah Jadwal',
-                            style: GoogleFonts.plusJakartaSans(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 14,
-                            ),
+                            style: AppTypography.buttonLabel(fontWeight: FontWeight.bold),
                           ),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xFFFFD600),
@@ -216,14 +200,7 @@ class _DesktopJadwalPembelajaranTabState
                           },
                           selectedColor: activeColor,
                           backgroundColor: Colors.white,
-                          labelStyle: GoogleFonts.plusJakartaSans(
-                            fontSize: 14,
-                            fontWeight:
-                                isSelected ? FontWeight.bold : FontWeight.w500,
-                            color: isSelected
-                                ? Colors.white
-                                : const Color(0xFF475569),
-                          ),
+                          labelStyle: AppTypography.buttonLabel(color: isSelected, fontWeight: isSelected ? FontWeight.bold : FontWeight.w500),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(16),
                             side: BorderSide(
@@ -255,19 +232,11 @@ class _DesktopJadwalPembelajaranTabState
                             children: [
                               Text(
                                 'Sesi Pembelajaran (${_selectedDayFilter})',
-                                style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 18.7,
-                                  fontWeight: FontWeight.bold,
-                                  color: const Color(0xFF000000),
-                                ),
+                                style: AppTypography.chatHeaderTitle(color: const Color(0xFF000000, fontWeight: FontWeight.bold),
                               ),
                               Text(
                                 '${filteredSchedules.length} Sesi',
-                                style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w600,
-                                  color: const Color(0xFF000000),
-                                ),
+                                style: AppTypography.buttonLabel(color: const Color(0xFF000000, fontWeight: FontWeight.w600),
                               ),
                             ],
                           ),
@@ -293,10 +262,7 @@ class _DesktopJadwalPembelajaranTabState
                                     const SizedBox(height: 12),
                                     Text(
                                       'Belum ada jadwal pembelajaran untuk ${_selectedDayFilter}.',
-                                      style: GoogleFonts.dmSans(
-                                        fontSize: 15.2,
-                                        color: const Color(0xFF000000),
-                                      ),
+                                      style: AppTypography.subtitle(color: const Color(0xFF000000),
                                     ),
                                   ],
                                 ),
@@ -372,13 +338,6 @@ class _DesktopJadwalPembelajaranTabState
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: const Color(0xFFE2E8F0)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 10,
-            offset: const Offset(0, 3),
-          ),
-        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -394,11 +353,7 @@ class _DesktopJadwalPembelajaranTabState
                 ),
                 child: Text(
                   day,
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 14.0,
-                    fontWeight: FontWeight.bold,
-                    color: accentColor,
-                  ),
+                  style: AppTypography.buttonLabel(color: accentColor, fontWeight: FontWeight.bold),
                 ),
               ),
               const SizedBox(width: 8),
@@ -419,11 +374,7 @@ class _DesktopJadwalPembelajaranTabState
                     const SizedBox(width: 4),
                     Text(
                       time,
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 14.0,
-                        fontWeight: FontWeight.bold,
-                        color: const Color(0xFF0284C7),
-                      ),
+                      style: AppTypography.buttonLabel(color: const Color(0xFF0284C7, fontWeight: FontWeight.bold),
                     ),
                   ],
                 ),
@@ -441,11 +392,7 @@ class _DesktopJadwalPembelajaranTabState
           const SizedBox(height: 12),
           Text(
             topic,
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: 17.6,
-              fontWeight: FontWeight.bold,
-              color: const Color(0xFF000000),
-            ),
+            style: AppTypography.chatHeaderTitle(color: const Color(0xFF000000, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 6),
           Row(
@@ -458,10 +405,7 @@ class _DesktopJadwalPembelajaranTabState
               const SizedBox(width: 4),
               Text(
                 room,
-                style: GoogleFonts.dmSans(
-                  fontSize: 14.7,
-                  color: const Color(0xFF000000),
-                ),
+                style: AppTypography.subtitle(color: const Color(0xFF000000),
               ),
               const SizedBox(width: 14),
               const Icon(
@@ -472,10 +416,7 @@ class _DesktopJadwalPembelajaranTabState
               const SizedBox(width: 4),
               Text(
                 teacher,
-                style: GoogleFonts.dmSans(
-                  fontSize: 14.7,
-                  color: const Color(0xFF000000),
-                ),
+                style: AppTypography.subtitle(color: const Color(0xFF000000),
               ),
             ],
           ),
@@ -495,13 +436,6 @@ class _DesktopJadwalPembelajaranTabState
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: const Color(0xFFE2E8F0)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 10,
-            offset: const Offset(0, 3),
-          ),
-        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -519,22 +453,14 @@ class _DesktopJadwalPembelajaranTabState
               const SizedBox(width: 10),
               Text(
                 'Ringkasan Jadwal Mingguan',
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 17.6,
-                  fontWeight: FontWeight.bold,
-                  color: const Color(0xFF000000),
-                ),
+                style: AppTypography.chatHeaderTitle(color: const Color(0xFF000000, fontWeight: FontWeight.bold),
               ),
             ],
           ),
           const SizedBox(height: 14),
           Text(
             'Total ${schedules.length} sesi pembelajaran terkonfigurasi di kelas ini.',
-            style: GoogleFonts.dmSans(
-              fontSize: 14,
-              color: const Color(0xFF000000),
-              height: 1.35,
-            ),
+            style: AppTypography.timestamp(color: const Color(0xFF000000, height: 1.35),
           ),
           const SizedBox(height: 12),
           Container(
@@ -555,11 +481,7 @@ class _DesktopJadwalPembelajaranTabState
                 Expanded(
                   child: Text(
                     'Seluruh jadwal tersinkronisasi otomatis dengan siswa.',
-                    style: GoogleFonts.dmSans(
-                      fontSize: 14.0,
-                      fontWeight: FontWeight.w500,
-                      color: const Color(0xFF000000),
-                    ),
+                    style: AppTypography.timestamp(color: const Color(0xFF000000, fontWeight: FontWeight.w500),
                   ),
                 ),
               ],
@@ -578,13 +500,6 @@ class _DesktopJadwalPembelajaranTabState
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: const Color(0xFFE2E8F0)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 10,
-            offset: const Offset(0, 3),
-          ),
-        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -599,22 +514,14 @@ class _DesktopJadwalPembelajaranTabState
               const SizedBox(width: 8),
               Text(
                 'Catatan Pembelajaran',
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 17.6,
-                  fontWeight: FontWeight.bold,
-                  color: const Color(0xFF000000),
-                ),
+                style: AppTypography.chatHeaderTitle(color: const Color(0xFF000000, fontWeight: FontWeight.bold),
               ),
             ],
           ),
           const SizedBox(height: 12),
           Text(
             'Pastikan siswa telah menerima notifikasi sebelum sesi pembelajaran dimulai.',
-            style: GoogleFonts.dmSans(
-              fontSize: 14,
-              color: const Color(0xFF000000),
-              height: 1.35,
-            ),
+            style: AppTypography.timestamp(color: const Color(0xFF000000, height: 1.35),
           ),
         ],
       ),
@@ -662,11 +569,7 @@ class _DesktopJadwalPembelajaranTabState
                   const SizedBox(width: 8),
                   Text(
                     'Atur Jadwal Belajar',
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: const Color(0xFF1E293B),
-                    ),
+                    style: AppTypography.chatHeaderTitle(color: const Color(0xFF1E293B, fontWeight: FontWeight.bold),
                   ),
                 ],
               ),
@@ -690,11 +593,7 @@ class _DesktopJadwalPembelajaranTabState
                           children: [
                             Text(
                               'Hari Belajar',
-                              style: GoogleFonts.plusJakartaSans(
-                                fontSize: 14.0,
-                                fontWeight: FontWeight.w600,
-                                color: const Color(0xFF475569),
-                              ),
+                              style: AppTypography.buttonLabel(color: const Color(0xFF475569, fontWeight: FontWeight.w600),
                             ),
                             const SizedBox(height: 6),
                             Container(
@@ -713,11 +612,7 @@ class _DesktopJadwalPembelajaranTabState
                                   itemHeight: null,
                                   dropdownColor: Colors.white,
                                   borderRadius: BorderRadius.circular(14),
-                                  style: GoogleFonts.plusJakartaSans(
-                                    fontSize: 14.0,
-                                    fontWeight: FontWeight.w600,
-                                    color: const Color(0xFF1E293B),
-                                  ),
+                                  style: AppTypography.buttonLabel(color: const Color(0xFF1E293B, fontWeight: FontWeight.w600),
                                   items: availableDays.map((d) {
                                     return DropdownMenuItem(
                                       value: d,
@@ -737,19 +632,12 @@ class _DesktopJadwalPembelajaranTabState
                             const SizedBox(height: 12),
                             Text(
                               'Jam Pelajaran',
-                              style: GoogleFonts.plusJakartaSans(
-                                fontSize: 14.0,
-                                fontWeight: FontWeight.w600,
-                                color: const Color(0xFF475569),
-                              ),
+                              style: AppTypography.buttonLabel(color: const Color(0xFF475569, fontWeight: FontWeight.w600),
                             ),
                             const SizedBox(height: 6),
                             TextField(
                               controller: timeController,
-                              style: GoogleFonts.plusJakartaSans(
-                                fontSize: 14.0,
-                                color: const Color(0xFF1E293B),
-                              ),
+                              style: AppTypography.buttonLabel(color: const Color(0xFF1E293B),
                               decoration: InputDecoration(
                                 hintText: 'Contoh: 08:00 - 09:30',
                                 isDense: true,
@@ -805,10 +693,7 @@ class _DesktopJadwalPembelajaranTabState
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(12),
                                   ),
-                                  textStyle: GoogleFonts.plusJakartaSans(
-                                    fontSize: 14.0,
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                                  textStyle: AppTypography.buttonLabel(fontWeight: FontWeight.bold),
                                 ),
                               ),
                             ),
@@ -823,11 +708,7 @@ class _DesktopJadwalPembelajaranTabState
                         children: [
                           Text(
                             'Daftar Jadwal (${tempSchedules.length})',
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 14.0,
-                              fontWeight: FontWeight.bold,
-                              color: const Color(0xFF1E293B),
-                            ),
+                            style: AppTypography.buttonLabel(color: const Color(0xFF1E293B, fontWeight: FontWeight.bold),
                           ),
                           if (tempSchedules.isNotEmpty)
                             GestureDetector(
@@ -838,11 +719,7 @@ class _DesktopJadwalPembelajaranTabState
                               },
                               child: Text(
                                 'Hapus Semua',
-                                style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 14.0,
-                                  fontWeight: FontWeight.bold,
-                                  color: const Color(0xFFEF4444),
-                                ),
+                                style: AppTypography.buttonLabel(color: const Color(0xFFEF4444, fontWeight: FontWeight.bold),
                               ),
                             ),
                         ],
@@ -859,10 +736,7 @@ class _DesktopJadwalPembelajaranTabState
                           child: Center(
                             child: Text(
                               'Belum ada jadwal yang ditambahkan.',
-                              style: GoogleFonts.dmSans(
-                                fontSize: 14.0,
-                                color: const Color(0xFF64748B),
-                              ),
+                              style: AppTypography.timestamp(color: const Color(0xFF64748B),
                             ),
                           ),
                         )
@@ -925,22 +799,14 @@ class _DesktopJadwalPembelajaranTabState
                                       ),
                                       child: Text(
                                         dayName,
-                                        style: GoogleFonts.plusJakartaSans(
-                                          fontSize: 14.0,
-                                          fontWeight: FontWeight.bold,
-                                          color: dayBadgeColor,
-                                        ),
+                                        style: AppTypography.buttonLabel(color: dayBadgeColor, fontWeight: FontWeight.bold),
                                       ),
                                     ),
                                     const SizedBox(width: 10),
                                     Expanded(
                                       child: Text(
                                         timeVal,
-                                        style: GoogleFonts.plusJakartaSans(
-                                          fontSize: 14.0,
-                                          fontWeight: FontWeight.w600,
-                                          color: const Color(0xFF1E293B),
-                                        ),
+                                        style: AppTypography.buttonLabel(color: const Color(0xFF1E293B, fontWeight: FontWeight.w600),
                                       ),
                                     ),
                                     IconButton(
@@ -977,10 +843,7 @@ class _DesktopJadwalPembelajaranTabState
                   onPressed: () => Navigator.pop(context),
                   style: TextButton.styleFrom(
                     foregroundColor: const Color(0xFFEF4444),
-                    textStyle: GoogleFonts.plusJakartaSans(
-                      fontSize: 14.0,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    textStyle: AppTypography.buttonLabel(fontWeight: FontWeight.bold),
                   ),
                   child: const Text('Batal'),
                 ),
@@ -1009,10 +872,7 @@ class _DesktopJadwalPembelajaranTabState
                   },
                   child: Text(
                     'Simpan Jadwal',
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 14.0,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: AppTypography.buttonLabel(fontWeight: FontWeight.bold),
                   ),
                 ),
               ],

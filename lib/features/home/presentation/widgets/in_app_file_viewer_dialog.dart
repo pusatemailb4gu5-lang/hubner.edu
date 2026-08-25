@@ -178,13 +178,10 @@ class _InAppFileViewerDialogState extends State<InAppFileViewerDialog> {
         decoration: BoxDecoration(
           color: isDark ? const Color(0xFF18181B) : Colors.white,
           borderRadius: BorderRadius.circular(28),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.3),
-              blurRadius: 24,
-              offset: const Offset(0, 10),
-            ),
-          ],
+          border: Border.all(
+            color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+            width: 1.2,
+          ),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,

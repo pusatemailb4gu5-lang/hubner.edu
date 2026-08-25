@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:hubner/core/widgets/three_dots_loader.dart';
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:hubner/core/theme/app_typography.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -203,7 +204,7 @@ class _MengerjakanQuizPageState extends State<MengerjakanQuizPage> with TickerPr
         SnackBar(
           content: Text(
             'Bantuan petunjuk telah habis!',
-            style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold),
+            style: AppTypography.buttonLabel(fontWeight: FontWeight.bold),
           ),
           backgroundColor: const Color(0xFFEF4444),
         ),
@@ -233,14 +234,14 @@ class _MengerjakanQuizPageState extends State<MengerjakanQuizPage> with TickerPr
             Expanded(
               child: Text(
                 'Petunjuk Soal',
-                style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, fontSize: 17),
+                style: AppTypography.cardTitle(fontWeight: FontWeight.bold),
               ),
             ),
           ],
         ),
         content: Text(
           hintText,
-          style: GoogleFonts.dmSans(fontSize: 14, color: const Color(0xFF334155), height: 1.45),
+          style: AppTypography.timestamp(color: const Color(0xFF334155, height: 1.45),
         ),
         actions: [
           ElevatedButton(
@@ -256,7 +257,7 @@ class _MengerjakanQuizPageState extends State<MengerjakanQuizPage> with TickerPr
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
             ),
-            child: Text('Mengerti', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold)),
+            child: Text('Mengerti', style: AppTypography.buttonLabel(fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -290,20 +291,12 @@ class _MengerjakanQuizPageState extends State<MengerjakanQuizPage> with TickerPr
                         children: [
                           Text(
                             'Daftar Nomor Soal',
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 17.5,
-                              fontWeight: FontWeight.bold,
-                              color: kTextDark,
-                            ),
+                            style: AppTypography.chatHeaderTitle(color: kTextDark, fontWeight: FontWeight.bold),
                           ),
                           const SizedBox(height: 2),
                           Text(
                             '$_answeredCount/${_questions.length} Soal Dijawab',
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 14.0,
-                              fontWeight: FontWeight.bold,
-                              color: kThemePurple,
-                            ),
+                            style: AppTypography.buttonLabel(color: kThemePurple, fontWeight: FontWeight.bold),
                           ),
                         ],
                       ),
@@ -366,11 +359,7 @@ class _MengerjakanQuizPageState extends State<MengerjakanQuizPage> with TickerPr
                         child: Center(
                           child: Text(
                             '${idx + 1}',
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 15,
-                              fontWeight: FontWeight.bold,
-                              color: textColor,
-                            ),
+                            style: AppTypography.buttonLabel(color: textColor, fontWeight: FontWeight.bold),
                           ),
                         ),
                       ),
@@ -394,20 +383,20 @@ class _MengerjakanQuizPageState extends State<MengerjakanQuizPage> with TickerPr
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         title: Text(
           'Selesaikan Kuis?',
-          style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, fontSize: 18),
+          style: AppTypography.chatHeaderTitle(fontWeight: FontWeight.bold),
         ),
         content: Text(
           unAnswered > 0
               ? 'Masih ada $unAnswered soal yang belum dijawab. Apakah Anda yakin ingin menyelesaikan kuis sekarang?'
               : 'Anda telah menjawab semua soal. Kirim lembar kuis sekarang?',
-          style: GoogleFonts.dmSans(fontSize: 14, color: const Color(0xFF334155)),
+          style: AppTypography.timestamp(color: const Color(0xFF334155),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
             child: Text(
               'Batal',
-              style: GoogleFonts.dmSans(color: const Color(0xFF64748B), fontWeight: FontWeight.bold),
+              style: AppTypography.timestamp(color: const Color(0xFF64748B, fontWeight: FontWeight.bold),
             ),
           ),
           ElevatedButton(
@@ -423,7 +412,7 @@ class _MengerjakanQuizPageState extends State<MengerjakanQuizPage> with TickerPr
             ),
             child: Text(
               'Ya, Selesai',
-              style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold),
+              style: AppTypography.buttonLabel(fontWeight: FontWeight.bold),
             ),
           ),
         ],
@@ -900,11 +889,7 @@ class _MengerjakanQuizPageState extends State<MengerjakanQuizPage> with TickerPr
                             const SizedBox(width: 6),
                             Text(
                               _formatTime(_secondsLeft),
-                              style: GoogleFonts.plusJakartaSans(
-                                color: kTextDark,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 14.0,
-                              ),
+                              style: AppTypography.buttonLabel(color: kTextDark, fontWeight: FontWeight.bold),
                             ),
                           ],
                         ),
@@ -981,11 +966,7 @@ class _MengerjakanQuizPageState extends State<MengerjakanQuizPage> with TickerPr
                         ),
                         label: Text(
                           'Sebelumnya',
-                          style: GoogleFonts.plusJakartaSans(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14.0,
-                            color: _currentQuestionIdx > 0 ? kTextDark : Colors.black26,
-                          ),
+                          style: AppTypography.buttonLabel(color: _currentQuestionIdx > 0 ? kTextDark : Colors.black26, fontWeight: FontWeight.bold),
                         ),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: _currentQuestionIdx > 0
@@ -1031,11 +1012,7 @@ class _MengerjakanQuizPageState extends State<MengerjakanQuizPage> with TickerPr
                                 ),
                                 child: Text(
                                   '$_hintsLeft',
-                                  style: GoogleFonts.plusJakartaSans(
-                                    color: Colors.white,
-                                    fontSize: 14.0,
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                                  style: AppTypography.buttonLabel(color: Colors.white, fontWeight: FontWeight.bold),
                                 ),
                               ),
                             ),
@@ -1063,11 +1040,7 @@ class _MengerjakanQuizPageState extends State<MengerjakanQuizPage> with TickerPr
                           children: [
                             Text(
                               _currentQuestionIdx < _questions.length - 1 ? 'Selanjutnya' : 'Selesai',
-                              style: GoogleFonts.plusJakartaSans(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 14.0,
-                                color: kTextDark,
-                              ),
+                              style: AppTypography.buttonLabel(color: kTextDark, fontWeight: FontWeight.bold),
                             ),
                             const SizedBox(width: 4),
                             Icon(
@@ -1120,20 +1093,12 @@ class _MengerjakanQuizPageState extends State<MengerjakanQuizPage> with TickerPr
                   children: [
                     Text(
                       '${opt['label']}. ',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontWeight: FontWeight.w900,
-                        fontSize: 16,
-                        color: kTextDark,
-                      ),
+                      style: AppTypography.cardTitle(color: kTextDark, fontWeight: FontWeight.w900),
                     ),
                     Expanded(
                       child: Text(
                         opt['text']!,
-                        style: GoogleFonts.plusJakartaSans(
-                          fontWeight: FontWeight.w700,
-                          fontSize: 15,
-                          color: kTextDark,
-                        ),
+                        style: AppTypography.buttonLabel(color: kTextDark, fontWeight: FontWeight.w700),
                       ),
                     ),
                   ],
@@ -1168,20 +1133,12 @@ class _MengerjakanQuizPageState extends State<MengerjakanQuizPage> with TickerPr
                     children: [
                       Text(
                         '${opt['label']}. ',
-                        style: GoogleFonts.plusJakartaSans(
-                          fontWeight: FontWeight.w900,
-                          fontSize: 15.5,
-                          color: kTextDark,
-                        ),
+                        style: AppTypography.cardTitle(color: kTextDark, fontWeight: FontWeight.w900),
                       ),
                       Expanded(
                         child: Text(
                           opt['text']!,
-                          style: GoogleFonts.plusJakartaSans(
-                            fontWeight: FontWeight.w700,
-                            fontSize: 14.5,
-                            color: kTextDark,
-                          ),
+                          style: AppTypography.buttonLabel(color: kTextDark, fontWeight: FontWeight.w700),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -1205,18 +1162,18 @@ class _MengerjakanQuizPageState extends State<MengerjakanQuizPage> with TickerPr
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         title: Text(
           'Keluar dari Kuis?',
-          style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, fontSize: 18),
+          style: AppTypography.chatHeaderTitle(fontWeight: FontWeight.bold),
         ),
         content: Text(
           'Progres kuis saat ini tidak akan tersimpan jika Anda keluar sebelum menyelesaikan.',
-          style: GoogleFonts.dmSans(fontSize: 14, color: const Color(0xFF334155)),
+          style: AppTypography.timestamp(color: const Color(0xFF334155),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
             child: Text(
               'Lanjutkan Kuis',
-              style: GoogleFonts.dmSans(color: const Color(0xFF64748B), fontWeight: FontWeight.bold),
+              style: AppTypography.timestamp(color: const Color(0xFF64748B, fontWeight: FontWeight.bold),
             ),
           ),
           ElevatedButton(
@@ -1231,7 +1188,7 @@ class _MengerjakanQuizPageState extends State<MengerjakanQuizPage> with TickerPr
             ),
             child: Text(
               'Keluar',
-              style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold),
+              style: AppTypography.buttonLabel(fontWeight: FontWeight.bold),
             ),
           ),
         ],
@@ -1285,21 +1242,11 @@ class _MengerjakanQuizPageState extends State<MengerjakanQuizPage> with TickerPr
                               const Icon(Icons.star_rounded, color: Color(0xFFB45309), size: 32),
                               Text(
                                 '$_finalScore',
-                                style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 48,
-                                  fontWeight: FontWeight.w900,
-                                  color: kTextDark,
-                                  height: 1.0,
-                                ),
+                                style: AppTypography.pageTitle(color: kTextDark, fontWeight: FontWeight.w900, height: 1.0),
                               ),
                               Text(
                                 'POIN',
-                                style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 14.0,
-                                  fontWeight: FontWeight.w900,
-                                  color: kTextDark,
-                                  letterSpacing: 2,
-                                ),
+                                style: AppTypography.buttonLabel(color: kTextDark, fontWeight: FontWeight.w900, letterSpacing: 2),
                               ),
                             ],
                           ),
@@ -1315,12 +1262,7 @@ class _MengerjakanQuizPageState extends State<MengerjakanQuizPage> with TickerPr
                           : _finalScore >= 75
                               ? 'HEBAT SEKALI! 👏'
                               : 'KUIS SELESAI! 👍',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 26,
-                        fontWeight: FontWeight.w900,
-                        color: Colors.white,
-                        letterSpacing: 0.5,
-                      ),
+                      style: AppTypography.pageTitle(color: Colors.white, fontWeight: FontWeight.w900, letterSpacing: 0.5),
                     ),
                     const SizedBox(height: 10),
                     Container(
@@ -1331,22 +1273,14 @@ class _MengerjakanQuizPageState extends State<MengerjakanQuizPage> with TickerPr
                       ),
                       child: Text(
                         'Predikat: $_predikat',
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 14.0,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
+                        style: AppTypography.buttonLabel(color: Colors.white, fontWeight: FontWeight.bold),
                       ),
                     ),
                     const SizedBox(height: 8),
                     Text(
                       'Kamu berhasil menjawab $_correctCount dari ${_questions.length} soal dengan benar.',
                       textAlign: TextAlign.center,
-                      style: GoogleFonts.dmSans(
-                        fontSize: 15,
-                        color: Colors.white.withValues(alpha: 0.9),
-                        height: 1.4,
-                      ),
+                      style: AppTypography.subtitle(color: Colors.white.withValues(alpha: 0.9, height: 1.4),
                     ),
 
                     const SizedBox(height: 36),
@@ -1375,11 +1309,7 @@ class _MengerjakanQuizPageState extends State<MengerjakanQuizPage> with TickerPr
                             const SizedBox(width: 8),
                             Text(
                               'Lihat Papan Peringkat (${_leaderboardCountdown}s)',
-                              style: GoogleFonts.plusJakartaSans(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
-                                color: kTextDark,
-                              ),
+                              style: AppTypography.cardTitle(color: kTextDark, fontWeight: FontWeight.bold),
                             ),
                             const SizedBox(width: 6),
                             const Icon(Icons.arrow_forward_rounded, color: kTextDark, size: 20),
@@ -1394,11 +1324,7 @@ class _MengerjakanQuizPageState extends State<MengerjakanQuizPage> with TickerPr
                       onPressed: () => Navigator.pop(context),
                       child: Text(
                         'Kembali ke Kelas',
-                        style: GoogleFonts.plusJakartaSans(
-                          color: Colors.white.withValues(alpha: 0.85),
-                          fontWeight: FontWeight.w600,
-                          fontSize: 14,
-                        ),
+                        style: AppTypography.buttonLabel(color: Colors.white.withValues(alpha: 0.85, fontWeight: FontWeight.w600),
                       ),
                     ),
                   ],
@@ -1453,11 +1379,7 @@ class _MengerjakanQuizPageState extends State<MengerjakanQuizPage> with TickerPr
                       const SizedBox(width: 38),
                       Text(
                         'Papan Peringkat',
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 19,
-                          fontWeight: FontWeight.bold,
-                          color: kTextDark,
-                        ),
+                        style: AppTypography.chatHeaderTitle(color: kTextDark, fontWeight: FontWeight.bold),
                       ),
                       GestureDetector(
                         onTap: () => Navigator.pop(context),
@@ -1507,7 +1429,7 @@ class _MengerjakanQuizPageState extends State<MengerjakanQuizPage> with TickerPr
                           ? Center(
                               child: Text(
                                 'Belum ada data pengerjaan kuis.',
-                                style: GoogleFonts.dmSans(color: const Color(0xFF64748B), fontSize: 14),
+                                style: AppTypography.timestamp(color: const Color(0xFF64748B),
                               ),
                             )
                           : SingleChildScrollView(
@@ -1561,13 +1483,6 @@ class _MengerjakanQuizPageState extends State<MengerjakanQuizPage> with TickerPr
                                           color: const Color(0xFFE2E8F0), // Frameless soft border tipis
                                           width: 1.0,
                                         ),
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: Colors.black.withValues(alpha: 0.03),
-                                            blurRadius: 6,
-                                            offset: const Offset(0, 2),
-                                          ),
-                                        ],
                                       ),
                                       child: Row(
                                         children: [
@@ -1595,11 +1510,7 @@ class _MengerjakanQuizPageState extends State<MengerjakanQuizPage> with TickerPr
                                                   child: Center(
                                                     child: Text(
                                                       '$rankNum',
-                                                      style: GoogleFonts.plusJakartaSans(
-                                                        color: badgeTextColor,
-                                                        fontSize: 14.0,
-                                                        fontWeight: FontWeight.w900,
-                                                      ),
+                                                      style: AppTypography.buttonLabel(color: badgeTextColor, fontWeight: FontWeight.w900),
                                                     ),
                                                   ),
                                                 ),
@@ -1616,21 +1527,14 @@ class _MengerjakanQuizPageState extends State<MengerjakanQuizPage> with TickerPr
                                               children: [
                                                 Text(
                                                   item['name'] ?? 'Siswa',
-                                                  style: GoogleFonts.plusJakartaSans(
-                                                    fontSize: 15,
-                                                    fontWeight: FontWeight.bold,
-                                                    color: kTextDark,
-                                                  ),
+                                                  style: AppTypography.buttonLabel(color: kTextDark, fontWeight: FontWeight.bold),
                                                   maxLines: 1,
                                                   overflow: TextOverflow.ellipsis,
                                                 ),
                                                 const SizedBox(height: 2),
                                                 Text(
                                                   subText,
-                                                  style: GoogleFonts.dmSans(
-                                                    fontSize: 14.0,
-                                                    color: const Color(0xFF64748B),
-                                                  ),
+                                                  style: AppTypography.timestamp(color: const Color(0xFF64748B),
                                                 ),
                                               ],
                                             ),
@@ -1655,11 +1559,7 @@ class _MengerjakanQuizPageState extends State<MengerjakanQuizPage> with TickerPr
                                                 const SizedBox(width: 4),
                                                 Text(
                                                   '${item['points']} Poin',
-                                                  style: GoogleFonts.plusJakartaSans(
-                                                    fontSize: 14.0,
-                                                    fontWeight: FontWeight.w900,
-                                                    color: const Color(0xFFB45309),
-                                                  ),
+                                                  style: AppTypography.buttonLabel(color: const Color(0xFFB45309, fontWeight: FontWeight.w900),
                                                 ),
                                               ],
                                             ),
@@ -1695,11 +1595,7 @@ class _MengerjakanQuizPageState extends State<MengerjakanQuizPage> with TickerPr
           child: Center(
             child: Text(
               tabName,
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 14.0,
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
-                color: isSelected ? Colors.white : const Color(0xFF475569),
-              ),
+              style: AppTypography.buttonLabel(color: isSelected ? Colors.white : const Color(0xFF475569, fontWeight: isSelected ? FontWeight.bold : FontWeight.w600),
             ),
           ),
         ),
@@ -1807,22 +1703,14 @@ class _MengerjakanQuizPageState extends State<MengerjakanQuizPage> with TickerPr
         // Name
         Text(
           hasScore ? sName : '',
-          style: GoogleFonts.plusJakartaSans(
-            fontSize: 14.0,
-            fontWeight: FontWeight.bold,
-            color: kTextDark,
-          ),
+          style: AppTypography.buttonLabel(color: kTextDark, fontWeight: FontWeight.bold),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
         // Points
         Text(
           hasScore ? '$points Poin' : '0 Poin',
-          style: GoogleFonts.plusJakartaSans(
-            fontSize: 14.0,
-            fontWeight: FontWeight.w700,
-            color: hasScore ? const Color(0xFFD97706) : const Color(0xFF94A3B8),
-          ),
+          style: AppTypography.buttonLabel(color: hasScore ? const Color(0xFFD97706, fontWeight: FontWeight.w700),
         ),
         const SizedBox(height: 6),
 
@@ -1856,11 +1744,7 @@ class _MengerjakanQuizPageState extends State<MengerjakanQuizPage> with TickerPr
                       child: Center(
                         child: Text(
                           '$rank',
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w900,
-                            color: kTextDark,
-                          ),
+                          style: AppTypography.buttonLabel(color: kTextDark, fontWeight: FontWeight.w900),
                         ),
                       ),
                     ),
@@ -1877,11 +1761,7 @@ class _MengerjakanQuizPageState extends State<MengerjakanQuizPage> with TickerPr
                     child: Center(
                       child: Text(
                         '$rank',
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 14.0,
-                          fontWeight: FontWeight.w900,
-                          color: kTextDark,
-                        ),
+                        style: AppTypography.buttonLabel(color: kTextDark, fontWeight: FontWeight.w900),
                       ),
                     ),
                   ),
@@ -1976,11 +1856,7 @@ class _MengerjakanQuizPageState extends State<MengerjakanQuizPage> with TickerPr
                 child: Center(
                   child: Text(
                     initial,
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: radius * 0.85,
-                      fontWeight: FontWeight.bold,
-                      color: accentColor,
-                    ),
+                    style: AppTypography.buttonLabel(color: accentColor, fontWeight: FontWeight.bold),
                   ),
                 ),
               );

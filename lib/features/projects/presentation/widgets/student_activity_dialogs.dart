@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:hubner/core/widgets/three_dots_loader.dart';
 import 'package:flutter/material.dart';
+import 'package:hubner/core/theme/app_typography.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -32,7 +33,7 @@ void showMateriPreviewDialog({
                 Expanded(
                   child: Text(
                     'Preview Modul PDF',
-                    style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, fontSize: 18.7),
+                    style: AppTypography.chatHeaderTitle(fontWeight: FontWeight.bold),
                   ),
                 ),
                 if (isTeacher && onEdit != null) ...[
@@ -74,14 +75,14 @@ void showMateriPreviewDialog({
                       children: [
                         Text(
                           title,
-                          style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black87),
+                          style: AppTypography.buttonLabel(color: Colors.black87, fontWeight: FontWeight.bold),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
                         const SizedBox(height: 4),
                         Text(
                           docName.isNotEmpty ? docName : 'modul_pembelajaran.pdf',
-                          style: GoogleFonts.dmSans(fontSize: 14.0, color: Colors.black45),
+                          style: AppTypography.timestamp(color: Colors.black45),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -108,7 +109,7 @@ void showMateriPreviewDialog({
                   const SizedBox(height: 8),
                   Text(
                     'Preview Halaman 1 dari 12',
-                    style: GoogleFonts.plusJakartaSans(fontSize: 14.0, color: Colors.black45, fontWeight: FontWeight.w600),
+                    style: AppTypography.buttonLabel(color: Colors.black45, fontWeight: FontWeight.w600),
                   ),
                   const SizedBox(height: 4),
                   Container(
@@ -144,7 +145,7 @@ void showMateriPreviewDialog({
               icon: const Icon(Icons.download_rounded, size: 16),
               label: Text(
                 'Unduh File',
-                style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, fontSize: 15.2),
+                style: AppTypography.buttonLabel(fontWeight: FontWeight.bold),
               ),
             ),
           ],
@@ -275,7 +276,7 @@ class _TugasSubmissionDialogContentState extends State<TugasSubmissionDialogCont
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           title: Text(
             'Tambah Anggota Kelompok',
-            style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, fontSize: 16.4),
+            style: AppTypography.cardTitle(fontWeight: FontWeight.bold),
           ),
           content: SizedBox(
             width: double.maxFinite,
@@ -284,7 +285,7 @@ class _TugasSubmissionDialogContentState extends State<TugasSubmissionDialogCont
                     padding: const EdgeInsets.symmetric(vertical: 20),
                     child: Text(
                       'Tidak ada siswa lain yang bergabung di kelas ini.',
-                      style: GoogleFonts.dmSans(fontSize: 14, color: Colors.black45),
+                      style: AppTypography.timestamp(color: Colors.black45),
                       textAlign: TextAlign.center,
                     ),
                   )
@@ -305,11 +306,7 @@ class _TugasSubmissionDialogContentState extends State<TugasSubmissionDialogCont
                         dense: true,
                         title: Text(
                           sName,
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            color: canSelect ? Colors.black87 : Colors.black38,
-                          ),
+                          style: AppTypography.buttonLabel(color: canSelect ? Colors.black87 : Colors.black38, fontWeight: FontWeight.w600),
                         ),
                         trailing: isAlreadySubmitted
                             ? Container(
@@ -320,7 +317,7 @@ class _TugasSubmissionDialogContentState extends State<TugasSubmissionDialogCont
                                 ),
                                 child: Text(
                                   'Sudah mengerjakan',
-                                  style: GoogleFonts.plusJakartaSans(fontSize: 14.0, color: Colors.red[700], fontWeight: FontWeight.bold),
+                                  style: AppTypography.buttonLabel(color: Colors.red[700], fontWeight: FontWeight.bold),
                                 ),
                               )
                             : isAlreadySelected
@@ -343,7 +340,7 @@ class _TugasSubmissionDialogContentState extends State<TugasSubmissionDialogCont
               onPressed: () => Navigator.pop(dialogCtx),
               child: Text(
                 'Batal',
-                style: GoogleFonts.plusJakartaSans(color: Colors.black54, fontWeight: FontWeight.bold, fontSize: 14),
+                style: AppTypography.buttonLabel(color: Colors.black54, fontWeight: FontWeight.bold),
               ),
             ),
           ],
@@ -375,7 +372,7 @@ class _TugasSubmissionDialogContentState extends State<TugasSubmissionDialogCont
                 Expanded(
                   child: Text(
                     widget.isTeacher ? 'Detail Tugas' : 'Kerjakan Tugas',
-                    style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, fontSize: 18.7),
+                    style: AppTypography.chatHeaderTitle(fontWeight: FontWeight.bold),
                   ),
                 ),
                 if (widget.isTeacher && widget.onEdit != null) ...[
@@ -401,7 +398,7 @@ class _TugasSubmissionDialogContentState extends State<TugasSubmissionDialogCont
             const SizedBox(height: 8),
             Text(
               widget.title,
-              style: GoogleFonts.dmSans(fontSize: 14, color: Colors.black54),
+              style: AppTypography.timestamp(color: Colors.black54),
             ),
             const SizedBox(height: 16),
 
@@ -423,7 +420,7 @@ class _TugasSubmissionDialogContentState extends State<TugasSubmissionDialogCont
                         const SizedBox(width: 8),
                         Text(
                           'Mode Preview Guru',
-                          style: GoogleFonts.plusJakartaSans(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.blue[900]),
+                          style: AppTypography.buttonLabel(color: Colors.blue[900], fontWeight: FontWeight.bold),
                         ),
                       ],
                     ),
@@ -432,7 +429,7 @@ class _TugasSubmissionDialogContentState extends State<TugasSubmissionDialogCont
                       widget.assignmentType == 'kelompok'
                           ? 'Tugas ini merupakan tugas kelompok. Siswa dapat membentuk kelompok saat mengirimkan tugas.'
                           : 'Siswa dapat mengerjakan tugas ini dengan mengisi lembar jawaban langsung (teks) atau mengunggah berkas tugas format PDF.',
-                      style: GoogleFonts.dmSans(fontSize: 14.0, color: Colors.blue[800], height: 1.4),
+                      style: AppTypography.timestamp(color: Colors.blue[800], height: 1.4),
                     ),
                   ],
                 ),
@@ -447,7 +444,7 @@ class _TugasSubmissionDialogContentState extends State<TugasSubmissionDialogCont
                 ),
                 child: Text(
                   'Tutup',
-                  style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, fontSize: 15.2, color: Colors.black87),
+                  style: AppTypography.buttonLabel(color: Colors.black87, fontWeight: FontWeight.bold),
                 ),
               ),
             ] else ...[
@@ -460,7 +457,7 @@ class _TugasSubmissionDialogContentState extends State<TugasSubmissionDialogCont
                     children: [
                       Text(
                         '👥 Anggota Kelompok',
-                        style: GoogleFonts.plusJakartaSans(fontSize: 14.0, fontWeight: FontWeight.bold, color: Colors.black87),
+                        style: AppTypography.buttonLabel(color: Colors.black87, fontWeight: FontWeight.bold),
                       ),
                       GestureDetector(
                         onTap: _showAddMemberDialog,
@@ -477,7 +474,7 @@ class _TugasSubmissionDialogContentState extends State<TugasSubmissionDialogCont
                               const SizedBox(width: 4),
                               Text(
                                 'Tambah Teman',
-                                style: GoogleFonts.plusJakartaSans(fontSize: 14.0, color: Colors.blueAccent, fontWeight: FontWeight.bold),
+                                style: AppTypography.buttonLabel(color: Colors.blueAccent, fontWeight: FontWeight.bold),
                               ),
                             ],
                           ),
@@ -491,7 +488,7 @@ class _TugasSubmissionDialogContentState extends State<TugasSubmissionDialogCont
                     runSpacing: 6,
                     children: [
                       Chip(
-                        label: Text('Saya', style: GoogleFonts.plusJakartaSans(fontSize: 14.0, fontWeight: FontWeight.bold, color: Colors.blue[900])),
+                        label: Text('Saya', style: AppTypography.buttonLabel(color: Colors.blue[900], fontWeight: FontWeight.bold)),
                         backgroundColor: Colors.blue[50],
                         padding: EdgeInsets.zero,
                         materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -499,7 +496,7 @@ class _TugasSubmissionDialogContentState extends State<TugasSubmissionDialogCont
                       ),
                       ..._selectedMembers.map((m) {
                         return Chip(
-                          label: Text(m['name'] ?? '', style: GoogleFonts.plusJakartaSans(fontSize: 14.0, fontWeight: FontWeight.bold, color: Colors.black87)),
+                          label: Text(m['name'] ?? '', style: AppTypography.buttonLabel(color: Colors.black87, fontWeight: FontWeight.bold)),
                           backgroundColor: const Color(0xFFF1F5F9),
                           onDeleted: () {
                             setState(() {
@@ -521,7 +518,7 @@ class _TugasSubmissionDialogContentState extends State<TugasSubmissionDialogCont
               // Option A: Jawab Langsung (Text field)
               Text(
                 'Jawab Langsung (Text)',
-                style: GoogleFonts.plusJakartaSans(fontSize: 14.0, fontWeight: FontWeight.bold, color: Colors.black87),
+                style: AppTypography.buttonLabel(color: Colors.black87, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 6),
               Container(
@@ -533,11 +530,11 @@ class _TugasSubmissionDialogContentState extends State<TugasSubmissionDialogCont
                 child: TextField(
                   controller: _answerController,
                   maxLines: 4,
-                  style: GoogleFonts.dmSans(fontSize: 14),
+                  style: AppTypography.timestamp(),
                   decoration: InputDecoration(
                     border: InputBorder.none,
                     hintText: 'Tuliskan jawaban Anda di sini...',
-                    hintStyle: GoogleFonts.dmSans(fontSize: 14.0, color: Colors.black38),
+                    hintStyle: AppTypography.timestamp(color: Colors.black38),
                     contentPadding: const EdgeInsets.all(12),
                   ),
                 ),
@@ -547,7 +544,7 @@ class _TugasSubmissionDialogContentState extends State<TugasSubmissionDialogCont
               // Option B: Upload File
               Text(
                 'Unggah Berkas (Upload File)',
-                style: GoogleFonts.plusJakartaSans(fontSize: 14.0, fontWeight: FontWeight.bold, color: Colors.black87),
+                style: AppTypography.buttonLabel(color: Colors.black87, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 6),
               _uploadedFileName.isEmpty
@@ -568,7 +565,7 @@ class _TugasSubmissionDialogContentState extends State<TugasSubmissionDialogCont
                             const SizedBox(height: 4),
                             Text(
                               'Pilih file untuk diunggah',
-                              style: GoogleFonts.plusJakartaSans(fontSize: 14.0, color: Colors.blueAccent, fontWeight: FontWeight.bold),
+                              style: AppTypography.buttonLabel(color: Colors.blueAccent, fontWeight: FontWeight.bold),
                             ),
                           ],
                         ),
@@ -588,7 +585,7 @@ class _TugasSubmissionDialogContentState extends State<TugasSubmissionDialogCont
                           Expanded(
                             child: Text(
                               _uploadedFileName,
-                              style: GoogleFonts.plusJakartaSans(fontSize: 14.0, color: Colors.green[800], fontWeight: FontWeight.bold),
+                              style: AppTypography.buttonLabel(color: Colors.green[800], fontWeight: FontWeight.bold),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -673,7 +670,7 @@ class _TugasSubmissionDialogContentState extends State<TugasSubmissionDialogCont
                 ),
                 child: Text(
                   'Kirim Tugas',
-                  style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, fontSize: 15.2),
+                  style: AppTypography.buttonLabel(fontWeight: FontWeight.bold),
                 ),
               ),
             ],
@@ -990,13 +987,13 @@ class _QuizViewDialogContentState extends State<QuizViewDialogContent> with Widg
             const SizedBox(height: 16),
             Text(
               'Quiz Terkunci!',
-              style: GoogleFonts.plusJakartaSans(fontSize: 21.1, fontWeight: FontWeight.bold, color: Colors.black87),
+              style: AppTypography.chatHeaderTitle(color: Colors.black87, fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 8),
             Text(
               'Anda terdeteksi menutup atau keluar dari aplikasi saat kuis berlangsung.\n\nHarap hubungi Guru Anda untuk membuka akses kuis kembali.',
-              style: GoogleFonts.dmSans(fontSize: 14, color: Colors.black54, height: 1.5),
+              style: AppTypography.timestamp(color: Colors.black54, height: 1.5),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),
@@ -1011,7 +1008,7 @@ class _QuizViewDialogContentState extends State<QuizViewDialogContent> with Widg
                 ),
                 child: Text(
                   'Tutup Layar',
-                  style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, fontSize: 15.2, color: Colors.black87),
+                  style: AppTypography.buttonLabel(color: Colors.black87, fontWeight: FontWeight.bold),
                 ),
               ),
             ),
@@ -1046,14 +1043,14 @@ class _QuizViewDialogContentState extends State<QuizViewDialogContent> with Widg
                       const SizedBox(width: 4),
                       Text(
                         _formatTime(_secondsLeft),
-                        style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, fontSize: 14.0, color: Colors.redAccent),
+                        style: AppTypography.buttonLabel(color: Colors.redAccent, fontWeight: FontWeight.bold),
                       ),
                     ],
                   ),
                 ),
                 Text(
                   'Soal ${_currentQuestionIdx + 1}/${_questions.length}',
-                  style: GoogleFonts.plusJakartaSans(fontSize: 14.0, fontWeight: FontWeight.bold, color: Colors.black54),
+                  style: AppTypography.buttonLabel(color: Colors.black54, fontWeight: FontWeight.bold),
                 ),
               ],
             ),
@@ -1081,7 +1078,7 @@ class _QuizViewDialogContentState extends State<QuizViewDialogContent> with Widg
                   Expanded(
                     child: Text(
                       'Perhatian: Menutup aplikasi akan mengunci kuis Anda!',
-                      style: GoogleFonts.plusJakartaSans(fontSize: 14.0, fontWeight: FontWeight.bold, color: Colors.orange[800]),
+                      style: AppTypography.buttonLabel(color: Colors.orange[800], fontWeight: FontWeight.bold),
                     ),
                   ),
                 ],
@@ -1092,7 +1089,7 @@ class _QuizViewDialogContentState extends State<QuizViewDialogContent> with Widg
             // Question text
             Text(
               q['question'],
-              style: GoogleFonts.plusJakartaSans(fontSize: 15.2, fontWeight: FontWeight.w600, color: Colors.black87),
+              style: AppTypography.buttonLabel(color: Colors.black87, fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 12),
 
@@ -1113,7 +1110,7 @@ class _QuizViewDialogContentState extends State<QuizViewDialogContent> with Widg
                   activeColor: Colors.orange,
                   title: Text(
                     q['options'][optIdx],
-                    style: GoogleFonts.dmSans(fontSize: 14, color: Colors.black87),
+                    style: AppTypography.timestamp(color: Colors.black87),
                   ),
                   onChanged: (val) {
                     setState(() {
@@ -1139,7 +1136,7 @@ class _QuizViewDialogContentState extends State<QuizViewDialogContent> with Widg
                           side: const BorderSide(color: Colors.black26),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                         ),
-                        child: Text('Kembali', style: GoogleFonts.dmSans(fontSize: 14.0, color: Colors.black87)),
+                        child: Text('Kembali', style: AppTypography.timestamp(color: Colors.black87)),
                       )
                     : const SizedBox(),
                 
@@ -1156,7 +1153,7 @@ class _QuizViewDialogContentState extends State<QuizViewDialogContent> with Widg
                           elevation: 0,
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                         ),
-                        child: Text('Lanjut', style: GoogleFonts.plusJakartaSans(fontSize: 14.0, fontWeight: FontWeight.bold)),
+                        child: Text('Lanjut', style: AppTypography.buttonLabel(fontWeight: FontWeight.bold)),
                       )
                     : ElevatedButton(
                         onPressed: _submitQuiz,
@@ -1166,7 +1163,7 @@ class _QuizViewDialogContentState extends State<QuizViewDialogContent> with Widg
                           elevation: 0,
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                         ),
-                        child: Text('Kirim Kuis', style: GoogleFonts.plusJakartaSans(fontSize: 14.0, fontWeight: FontWeight.bold)),
+                        child: Text('Kirim Kuis', style: AppTypography.buttonLabel(fontWeight: FontWeight.bold)),
                       ),
               ],
             ),
@@ -1189,7 +1186,7 @@ class _QuizViewDialogContentState extends State<QuizViewDialogContent> with Widg
               Expanded(
                 child: Text(
                   'Preview Quiz',
-                  style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, fontSize: 18.7),
+                  style: AppTypography.chatHeaderTitle(fontWeight: FontWeight.bold),
                 ),
               ),
               if (widget.isTeacher && widget.onEdit != null) ...[
@@ -1215,7 +1212,7 @@ class _QuizViewDialogContentState extends State<QuizViewDialogContent> with Widg
           const SizedBox(height: 12),
           Text(
             widget.title,
-            style: GoogleFonts.plusJakartaSans(fontSize: 16.4, fontWeight: FontWeight.bold, color: Colors.orange[800]),
+            style: AppTypography.cardTitle(color: Colors.orange[800], fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),
 
@@ -1242,14 +1239,14 @@ class _QuizViewDialogContentState extends State<QuizViewDialogContent> with Widg
                     const SizedBox(width: 8),
                     Text(
                       'Anti-Curang Offline Mode',
-                      style: GoogleFonts.plusJakartaSans(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.red[900]),
+                      style: AppTypography.buttonLabel(color: Colors.red[900], fontWeight: FontWeight.bold),
                     ),
                   ],
                 ),
                 const SizedBox(height: 8),
                 Text(
                   'Ketika quiz dimulai, sistem akan memantau aktivitas Anda. Jika Anda menutup aplikasi, keluar dari layar kuis, atau membuka aplikasi lain, kuis akan otomatis terkunci.\n\nAnda tidak akan bisa membukanya kembali kecuali Guru membuka kunci akses.',
-                  style: GoogleFonts.dmSans(fontSize: 14.0, color: Colors.red[800], height: 1.4),
+                  style: AppTypography.timestamp(color: Colors.red[800], height: 1.4),
                 ),
               ],
             ),
@@ -1266,7 +1263,7 @@ class _QuizViewDialogContentState extends State<QuizViewDialogContent> with Widg
                   ),
                   child: Text(
                     'Tutup',
-                    style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, fontSize: 15.2, color: Colors.black87),
+                    style: AppTypography.buttonLabel(color: Colors.black87, fontWeight: FontWeight.bold),
                   ),
                 )
               : ElevatedButton(
@@ -1280,7 +1277,7 @@ class _QuizViewDialogContentState extends State<QuizViewDialogContent> with Widg
                   ),
                   child: Text(
                     'Mulai Quiz',
-                    style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, fontSize: 15.2),
+                    style: AppTypography.buttonLabel(fontWeight: FontWeight.bold),
                   ),
                 ),
         ],
@@ -1295,11 +1292,11 @@ class _QuizViewDialogContentState extends State<QuizViewDialogContent> with Widg
         const SizedBox(width: 10),
         Text(
           '$label: ',
-          style: GoogleFonts.plusJakartaSans(fontSize: 14, color: Colors.black54),
+          style: AppTypography.buttonLabel(color: Colors.black54),
         ),
         Text(
           value,
-          style: GoogleFonts.plusJakartaSans(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.black87),
+          style: AppTypography.buttonLabel(color: Colors.black87, fontWeight: FontWeight.bold),
         ),
       ],
     );

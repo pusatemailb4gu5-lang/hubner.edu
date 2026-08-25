@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hubner/core/theme/app_typography.dart';
 import 'package:hubner/core/widgets/three_dots_loader.dart';
 import 'package:flutter/services.dart';
 import 'dart:ui';
@@ -258,13 +259,10 @@ class _DesktopClassroomPageState extends State<DesktopClassroomPage>
               ),
             ),
             child: TextField(
-              style: GoogleFonts.dmSans(fontSize: 15.2, color: Colors.white),
+              style: AppTypography.subtitle(color: Colors.white),
               decoration: InputDecoration(
                 hintText: 'Cari sesuatu...',
-                hintStyle: GoogleFonts.dmSans(
-                  color: Colors.white70,
-                  fontSize: 15.2,
-                ),
+                hintStyle: AppTypography.subtitle(color: Colors.white70),
                 prefixIcon: const Icon(
                   Icons.search_rounded,
                   color: Colors.white70,
@@ -310,11 +308,7 @@ class _DesktopClassroomPageState extends State<DesktopClassroomPage>
                   const SizedBox(width: 5),
                   Text(
                     'Kode: ${widget.projectId}',
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 14.0,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
+                    style: AppTypography.buttonLabel(color: Colors.white, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(width: 5),
                   const Icon(
@@ -339,11 +333,7 @@ class _DesktopClassroomPageState extends State<DesktopClassroomPage>
             ),
             child: Text(
               _userRole,
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 14.0,
-                fontWeight: FontWeight.w600,
-                color: Colors.white,
-              ),
+              style: AppTypography.buttonLabel(color: Colors.white, fontWeight: FontWeight.w600),
             ),
           ),
           const SizedBox(width: 12),
@@ -372,11 +362,7 @@ class _DesktopClassroomPageState extends State<DesktopClassroomPage>
                         displayName.isNotEmpty
                             ? displayName[0].toUpperCase()
                             : 'U',
-                        style: GoogleFonts.plusJakartaSans(
-                          color: Colors.white,
-                          fontSize: 15.2,
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style: AppTypography.buttonLabel(color: Colors.white, fontWeight: FontWeight.bold),
                       ),
                     ),
                   ),
@@ -394,10 +380,7 @@ class _DesktopClassroomPageState extends State<DesktopClassroomPage>
       size: const Size(38, 20),
       painter: CutoutTextPainter(
         text: 'edu',
-        textStyle: GoogleFonts.plusJakartaSans(
-          fontSize: 14.0,
-          fontWeight: FontWeight.bold,
-        ),
+        textStyle: AppTypography.buttonLabel(fontWeight: FontWeight.bold),
       ),
     );
   }
@@ -444,11 +427,7 @@ class _DesktopClassroomPageState extends State<DesktopClassroomPage>
                       const SizedBox(width: 8),
                       Text(
                         'Kembali',
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: const Color(0xFF000000),
-                        ),
+                        style: AppTypography.buttonLabel(color: const Color(0xFF000000, fontWeight: FontWeight.w600),
                       ),
                     ],
                   ),
@@ -572,13 +551,6 @@ class _DesktopSidebarItemState extends State<DesktopSidebarItem> {
       iconDecoration = BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.12),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
       );
     } else if (_isHovered) {
       iconColor = Colors.black87;
@@ -586,13 +558,6 @@ class _DesktopSidebarItemState extends State<DesktopSidebarItem> {
       iconDecoration = BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.06),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
       );
     } else {
       iconColor = Colors.black45;
@@ -627,13 +592,7 @@ class _DesktopSidebarItemState extends State<DesktopSidebarItem> {
               Expanded(
                 child: Text(
                   widget.label,
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 14,
-                    fontWeight:
-                        widget.isSelected ? FontWeight.w600 : FontWeight.w500,
-                    color: textColor,
-                    height: 1.15,
-                  ),
+                  style: AppTypography.buttonLabel(color: textColor, fontWeight: widget.isSelected ? FontWeight.w600 : FontWeight.w500, height: 1.15),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),

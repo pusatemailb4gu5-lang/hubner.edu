@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hubner/core/theme/app_typography.dart';
 import 'package:hubner/core/widgets/three_dots_loader.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -151,13 +152,6 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                       color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
                       width: 1.2,
                     ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: isDark ? 0.45 : 0.12),
-                        blurRadius: 16,
-                        offset: const Offset(0, 6),
-                      ),
-                    ],
                   ),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(20),
@@ -263,13 +257,6 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                       color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
                       width: 1.2,
                     ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: isDark ? 0.45 : 0.12),
-                        blurRadius: 16,
-                        offset: const Offset(0, 6),
-                      ),
-                    ],
                   ),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(20),
@@ -428,13 +415,6 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                       color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
                       width: 1.2,
                     ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: isDark ? 0.45 : 0.12),
-                        blurRadius: 16,
-                        offset: const Offset(0, 6),
-                      ),
-                    ],
                   ),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(20),
@@ -896,29 +876,17 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
           children: [
             Text(
               'Detail Jawaban Tugas',
-              style: GoogleFonts.plusJakartaSans(
-                fontWeight: FontWeight.bold,
-                fontSize: 18.0,
-                color: isDark ? Colors.white : const Color(0xFF0F172A),
-              ),
+              style: AppTypography.chatHeaderTitle(color: isDark ? Colors.white : const Color(0xFF0F172A, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 6),
             Text(
               'Siswa: $studentName',
-              style: GoogleFonts.dmSans(
-                fontSize: 14.0,
-                color: isDark ? const Color(0xFFD4D4D8) : const Color(0xFF475569),
-                fontWeight: FontWeight.w500,
-              ),
+              style: AppTypography.timestamp(color: isDark ? const Color(0xFFD4D4D8, fontWeight: FontWeight.w500),
             ),
             const SizedBox(height: 2),
             Text(
               'Tugas: $taskTitle',
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 14.0,
-                color: isDark ? const Color(0xFFD6A5F8) : const Color(0xFF7C3AED),
-                fontWeight: FontWeight.w600,
-              ),
+              style: AppTypography.buttonLabel(color: isDark ? const Color(0xFFD6A5F8, fontWeight: FontWeight.w600),
             ),
           ],
         ),
@@ -929,11 +897,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
             if (textAns.isNotEmpty) ...[
               Text(
                 'Jawaban Teks:',
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 13.5,
-                  fontWeight: FontWeight.bold,
-                  color: isDark ? const Color(0xFFD4D4D8) : const Color(0xFF475569),
-                ),
+                style: AppTypography.buttonLabel(color: isDark ? const Color(0xFFD4D4D8, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 6),
               Container(
@@ -948,11 +912,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                 ),
                 child: Text(
                   textAns,
-                  style: GoogleFonts.dmSans(
-                    fontSize: 14.5,
-                    color: isDark ? Colors.white : const Color(0xFF0F172A),
-                    height: 1.45,
-                  ),
+                  style: AppTypography.subtitle(color: isDark ? Colors.white : const Color(0xFF0F172A, height: 1.45),
                 ),
               ),
               const SizedBox(height: 12),
@@ -960,11 +920,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
             if (fileAns.isNotEmpty) ...[
               Text(
                 'Berkas Lampiran:',
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 13.5,
-                  fontWeight: FontWeight.bold,
-                  color: isDark ? const Color(0xFFD4D4D8) : const Color(0xFF475569),
-                ),
+                style: AppTypography.buttonLabel(color: isDark ? const Color(0xFFD4D4D8, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 6),
               GestureDetector(
@@ -1002,12 +958,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                       Expanded(
                         child: Text(
                           fileAns,
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 13.5,
-                            color: isDark ? const Color(0xFF93C5FD) : const Color(0xFF2563EB),
-                            fontWeight: FontWeight.bold,
-                            decoration: TextDecoration.underline,
-                          ),
+                          style: AppTypography.buttonLabel(color: isDark ? const Color(0xFF93C5FD, fontWeight: FontWeight.bold),
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
@@ -1020,11 +971,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
             if (groupMembers != null && groupMembers.isNotEmpty) ...[
               Text(
                 'Anggota Kelompok:',
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 13.5,
-                  fontWeight: FontWeight.bold,
-                  color: isDark ? const Color(0xFFD4D4D8) : const Color(0xFF475569),
-                ),
+                style: AppTypography.buttonLabel(color: isDark ? const Color(0xFFD4D4D8, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 6),
               Wrap(
@@ -1043,11 +990,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                     ),
                     child: Text(
                       uid.toString() == progressData['uid'].toString() ? '$studentName (Pengirim)' : 'UID: $displayUid',
-                      style: GoogleFonts.dmSans(
-                        fontSize: 13.0,
-                        color: isDark ? const Color(0xFF93C5FD) : const Color(0xFF2563EB),
-                        fontWeight: FontWeight.w600,
-                      ),
+                      style: AppTypography.fileSize(color: isDark ? const Color(0xFF93C5FD, fontWeight: FontWeight.w600),
                     ),
                   );
                 }).toList(),
@@ -1057,11 +1000,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
             if (textAns.isEmpty && fileAns.isEmpty)
               Text(
                 'Siswa belum mengunggah berkas atau jawaban.',
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 14.0,
-                  color: isDark ? const Color(0xFF71717A) : Colors.black45,
-                  fontStyle: FontStyle.italic,
-                ),
+                style: AppTypography.buttonLabel(color: isDark ? const Color(0xFF71717A),
               ),
           ],
         ),
@@ -1070,11 +1009,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
             onPressed: () => Navigator.pop(ctx),
             child: Text(
               'Tutup',
-              style: GoogleFonts.plusJakartaSans(
-                fontWeight: FontWeight.bold,
-                fontSize: 14.5,
-                color: isDark ? const Color(0xFFD6A5F8) : const Color(0xFF7C3AED),
-              ),
+              style: AppTypography.buttonLabel(color: isDark ? const Color(0xFFD6A5F8, fontWeight: FontWeight.bold),
             ),
           )
         ],
@@ -1189,22 +1124,12 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                     children: [
                                       Text(
                                         'Laporan Perkembangan Kelas',
-                                        style: GoogleFonts.plusJakartaSans(
-                                          fontSize: 22,
-                                          fontWeight: FontWeight.w900,
-                                          color: Colors.white,
-                                          letterSpacing: -0.4,
-                                          height: 1.2,
-                                        ),
+                                        style: AppTypography.pageTitle(color: Colors.white, fontWeight: FontWeight.w900, height: 1.2, letterSpacing: -0.4),
                                       ),
                                       const SizedBox(height: 5),
                                       Text(
                                         'Pantau presensi, progres tugas, dan evaluasi hasil belajar siswa.',
-                                        style: GoogleFonts.dmSans(
-                                          fontSize: 14.0,
-                                          color: Colors.white.withValues(alpha: 0.92),
-                                          fontWeight: FontWeight.w500,
-                                        ),
+                                        style: AppTypography.timestamp(color: Colors.white.withValues(alpha: 0.92, fontWeight: FontWeight.w500),
                                       ),
                                     ],
                                   ),
@@ -1230,13 +1155,6 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                                  color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
                                                  width: 1.2,
                                                ),
-                                               boxShadow: [
-                                                 BoxShadow(
-                                                   color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.08),
-                                                   blurRadius: 8,
-                                                   offset: const Offset(0, 2),
-                                                 ),
-                                               ],
                                              ),
                                              child: Row(
                                                children: [
@@ -1246,12 +1164,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                                  Expanded(
                                                    child: Text(
                                                      className,
-                                                     style: GoogleFonts.plusJakartaSans(
-                                                       fontSize: 13.0,
-                                                       fontWeight: FontWeight.bold,
-                                                       color: isDark ? Colors.white : Colors.black87,
-                                                       height: 1.15,
-                                                     ),
+                                                     style: AppTypography.channelTag(color: isDark ? Colors.white : Colors.black87, fontWeight: FontWeight.bold, height: 1.15),
                                                      maxLines: 2,
                                                      overflow: TextOverflow.ellipsis,
                                                    ),
@@ -1301,13 +1214,6 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                               color: isDark ? const Color(0xFF27272A) : Colors.transparent,
                                               width: 1.2,
                                             ),
-                                            boxShadow: [
-                                              BoxShadow(
-                                                color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.2),
-                                                blurRadius: 8,
-                                                offset: const Offset(0, 2),
-                                              ),
-                                            ],
                                           ),
                                           child: Row(
                                             mainAxisSize: MainAxisSize.min,
@@ -1316,11 +1222,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                               const SizedBox(width: 6),
                                               Text(
                                                 'Atur Presensi',
-                                                style: GoogleFonts.plusJakartaSans(
-                                                  fontSize: 14.0,
-                                                  fontWeight: FontWeight.bold,
-                                                  color: Colors.white,
-                                                ),
+                                                style: AppTypography.buttonLabel(color: Colors.white, fontWeight: FontWeight.bold),
                                               ),
                                             ],
                                           ),
@@ -1347,13 +1249,6 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                               color: isDark ? const Color(0xFFC76D10).withValues(alpha: 0.4) : Colors.transparent,
                                               width: 1.1,
                                             ),
-                                            boxShadow: [
-                                              BoxShadow(
-                                                color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.08),
-                                                blurRadius: 8,
-                                                offset: const Offset(0, 2),
-                                              ),
-                                            ],
                                           ),
                                           child: Row(
                                             crossAxisAlignment: CrossAxisAlignment.center,
@@ -1373,21 +1268,12 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                                   children: [
                                                     Text(
                                                       '${masterList.length}',
-                                                      style: GoogleFonts.plusJakartaSans(
-                                                        fontSize: 24,
-                                                        fontWeight: FontWeight.w900,
-                                                        color: isDark ? const Color(0xFFFDE68A) : const Color(0xFF92400E),
-                                                        height: 1.0,
-                                                      ),
+                                                      style: AppTypography.pageTitle(color: isDark ? const Color(0xFFFDE68A, fontWeight: FontWeight.w900, height: 1.0),
                                                     ),
                                                     const SizedBox(height: 3),
                                                     Text(
                                                       'Total Siswa',
-                                                      style: GoogleFonts.plusJakartaSans(
-                                                        fontSize: 14.0,
-                                                        fontWeight: FontWeight.w700,
-                                                        color: isDark ? const Color(0xFFFDBA74) : const Color(0xFFB45309),
-                                                      ),
+                                                      style: AppTypography.buttonLabel(color: isDark ? const Color(0xFFFDBA74, fontWeight: FontWeight.w700),
                                                       maxLines: 1,
                                                       overflow: TextOverflow.ellipsis,
                                                     ),
@@ -1412,13 +1298,6 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                               color: isDark ? const Color(0xFF147D75).withValues(alpha: 0.4) : Colors.transparent,
                                               width: 1.1,
                                             ),
-                                            boxShadow: [
-                                              BoxShadow(
-                                                color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.08),
-                                                blurRadius: 8,
-                                                offset: const Offset(0, 2),
-                                              ),
-                                            ],
                                           ),
                                           child: Row(
                                             crossAxisAlignment: CrossAxisAlignment.center,
@@ -1438,21 +1317,12 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                                   children: [
                                                     Text(
                                                       '${masterList.where((s) => s['joined'] == true).length}',
-                                                      style: GoogleFonts.plusJakartaSans(
-                                                        fontSize: 24,
-                                                        fontWeight: FontWeight.w900,
-                                                        color: isDark ? const Color(0xFFA7F3D0) : const Color(0xFF065F46),
-                                                        height: 1.0,
-                                                      ),
+                                                      style: AppTypography.pageTitle(color: isDark ? const Color(0xFFA7F3D0, fontWeight: FontWeight.w900, height: 1.0),
                                                     ),
                                                     const SizedBox(height: 3),
                                                     Text(
                                                       'Telah Bergabung',
-                                                      style: GoogleFonts.plusJakartaSans(
-                                                        fontSize: 14.0,
-                                                        fontWeight: FontWeight.w700,
-                                                        color: isDark ? const Color(0xFF6EE7B7) : const Color(0xFF047857),
-                                                      ),
+                                                      style: AppTypography.buttonLabel(color: isDark ? const Color(0xFF6EE7B7, fontWeight: FontWeight.w700),
                                                       maxLines: 1,
                                                       overflow: TextOverflow.ellipsis,
                                                     ),
@@ -1487,13 +1357,6 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                                 color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
                                                 width: 1.2,
                                               ),
-                                              boxShadow: [
-                                                BoxShadow(
-                                                  color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.06),
-                                                  blurRadius: 6,
-                                                  offset: const Offset(0, 2),
-                                                ),
-                                              ],
                                             ),
                                             child: Row(
                                               children: [
@@ -1505,12 +1368,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                                             .toString()
                                                             .replaceFirst(RegExp(r'^Materi\s*\d*:\s*', caseSensitive: false), '')
                                                             .trim()),
-                                                    style: GoogleFonts.plusJakartaSans(
-                                                      fontSize: 13.0,
-                                                      fontWeight: FontWeight.bold,
-                                                      color: isDark ? Colors.white : Colors.black87,
-                                                      height: 1.15,
-                                                    ),
+                                                    style: AppTypography.channelTag(color: isDark ? Colors.white : Colors.black87, fontWeight: FontWeight.bold, height: 1.15),
                                                     overflow: TextOverflow.ellipsis,
                                                     maxLines: 2,
                                                   ),
@@ -1547,13 +1405,6 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                                 color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
                                                 width: 1.2,
                                               ),
-                                              boxShadow: [
-                                                BoxShadow(
-                                                  color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.06),
-                                                  blurRadius: 6,
-                                                  offset: const Offset(0, 2),
-                                                ),
-                                              ],
                                             ),
                                             child: Row(
                                               children: [
@@ -1569,14 +1420,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                                       }
                                                       return 'Materi';
                                                     })(),
-                                                    style: GoogleFonts.plusJakartaSans(
-                                                      fontSize: 13.0,
-                                                      fontWeight: FontWeight.bold,
-                                                      color: isDark
-                                                          ? (_selectedStageFilterIdx == null ? Colors.white38 : Colors.white)
-                                                          : (_selectedStageFilterIdx == null ? Colors.black38 : Colors.black87),
-                                                      height: 1.15,
-                                                    ),
+                                                    style: AppTypography.channelTag(color: isDark, fontWeight: FontWeight.bold, height: 1.15),
                                                     overflow: TextOverflow.ellipsis,
                                                     maxLines: 2,
                                                   ),
@@ -1620,13 +1464,6 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                             decoration: BoxDecoration(
                               color: isDark ? const Color(0xFF141416) : Colors.white,
                               borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withValues(alpha: isDark ? 0.4 : 0.12),
-                                  blurRadius: 18,
-                                  offset: const Offset(0, -6),
-                                ),
-                              ],
                             ),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -1723,13 +1560,6 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                               decoration: BoxDecoration(
                                                 shape: BoxShape.circle,
                                                 color: const Color(0xFF7C3AED),
-                                                boxShadow: [
-                                                  BoxShadow(
-                                                    color: Colors.black.withValues(alpha: 0.14),
-                                                    blurRadius: 4,
-                                                    offset: const Offset(0, 1.5),
-                                                  ),
-                                                ],
                                               ),
                                               alignment: Alignment.center,
                                               child: const Icon(
@@ -1767,13 +1597,6 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                           width: 1,
                                         ),
                                         borderRadius: BorderRadius.circular(12),
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: Colors.black.withValues(alpha: 0.03),
-                                            blurRadius: 12,
-                                            offset: const Offset(0, 4),
-                                          ),
-                                        ],
                                       ),
                                       child: ClipRRect(
                                         borderRadius: BorderRadius.circular(11),
@@ -1808,11 +1631,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                                         ),
                                                         child: Text(
                                                           'Nama Siswa (${masterList.length})',
-                                                          style: GoogleFonts.plusJakartaSans(
-                                                            fontSize: 14.0,
-                                                            fontWeight: FontWeight.w800,
-                                                            color: Colors.white,
-                                                          ),
+                                                          style: AppTypography.buttonLabel(color: Colors.white, fontWeight: FontWeight.w800),
                                                         ),
                                                       ),
                                                       // Kolom 2: Progress (Biru Sky Blue 02, Lebar 90)
@@ -1833,11 +1652,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                                         child: Text(
                                                           'Progress',
                                                           textAlign: TextAlign.center,
-                                                          style: GoogleFonts.plusJakartaSans(
-                                                            fontSize: 14.0,
-                                                            fontWeight: FontWeight.w800,
-                                                            color: Colors.white,
-                                                          ),
+                                                          style: AppTypography.buttonLabel(color: Colors.white, fontWeight: FontWeight.w800),
                                                         ),
                                                       ),
                                                       // Kolom 3..7: Tugas 1 s/d 5 (Toska Emerald 03, 5 x 70)
@@ -1861,11 +1676,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                                             child: Text(
                                                               'Tugas ${i + 1}',
                                                               textAlign: TextAlign.center,
-                                                              style: GoogleFonts.plusJakartaSans(
-                                                                fontSize: 14.0,
-                                                                fontWeight: FontWeight.w800,
-                                                                color: Colors.white,
-                                                              ),
+                                                              style: AppTypography.buttonLabel(color: Colors.white, fontWeight: FontWeight.w800),
                                                             ),
                                                           );
                                                         }),
@@ -1890,11 +1701,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                                             child: Text(
                                                               'Quiz ${i + 1}',
                                                               textAlign: TextAlign.center,
-                                                              style: GoogleFonts.plusJakartaSans(
-                                                                fontSize: 14.0,
-                                                                fontWeight: FontWeight.w800,
-                                                                color: Colors.white,
-                                                              ),
+                                                              style: AppTypography.buttonLabel(color: Colors.white, fontWeight: FontWeight.w800),
                                                             ),
                                                           );
                                                         }),
@@ -1912,10 +1719,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                                           child: Center(
                                                             child: Text(
                                                               'Belum ada siswa di kelas ini.',
-                                                              style: GoogleFonts.dmSans(
-                                                                color: isDark ? Colors.white38 : Colors.black38,
-                                                                fontSize: 14.0,
-                                                              ),
+                                                              style: AppTypography.timestamp(color: isDark ? Colors.white38 : Colors.black38),
                                                             ),
                                                           ),
                                                         )
@@ -2032,15 +1836,6 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                                                                             color: isDark ? const Color(0xFF334155) : const Color(0xFFCBD5E1),
                                                                                             width: 1.2,
                                                                                           ),
-                                                                                    boxShadow: joined
-                                                                                        ? [
-                                                                                            BoxShadow(
-                                                                                              color: Colors.black.withValues(alpha: 0.06),
-                                                                                              blurRadius: 4,
-                                                                                              offset: const Offset(0, 1.5),
-                                                                                            ),
-                                                                                          ]
-                                                                                        : null,
                                                                                   ),
                                                                                   child: joined
                                                                                       ? StudentAvatarWidget(
@@ -2065,14 +1860,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                                                                     children: [
                                                                                       Text(
                                                                                         sName,
-                                                                                        style: GoogleFonts.plusJakartaSans(
-                                                                                          fontSize: 14.0,
-                                                                                          fontWeight: FontWeight.bold,
-                                                                                          color: joined
-                                                                                              ? (isDark ? Colors.white : Colors.black87)
-                                                                                              : (isDark ? Colors.white38 : Colors.black38),
-                                                                                          height: 1.15,
-                                                                                        ),
+                                                                                        style: AppTypography.buttonLabel(color: joined, fontWeight: FontWeight.bold, height: 1.15),
                                                                                         maxLines: 2,
                                                                                         softWrap: true,
                                                                                         overflow: TextOverflow.ellipsis,
@@ -2082,11 +1870,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                                                                         joined
                                                                                             ? 'ID: ${userAccountIds[sUid] ?? studentData['userId'] ?? student['userId'] ?? (sUid.isNotEmpty ? (sUid.length > 6 ? sUid.substring(0, 6) : sUid) : defaultId)}'
                                                                                             : 'Belum Bergabung',
-                                                                                        style: GoogleFonts.dmSans(
-                                                                                          fontSize: 14.0,
-                                                                                          color: joined ? (isDark ? Colors.white54 : Colors.black45) : Colors.redAccent,
-                                                                                          fontWeight: FontWeight.w500,
-                                                                                        ),
+                                                                                        style: AppTypography.timestamp(color: joined ? (isDark ? Colors.white54 : Colors.black45, fontWeight: FontWeight.w500),
                                                                                       ),
                                                                                     ],
                                                                                   ),
@@ -2115,11 +1899,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                                                               children: [
                                                                                 Text(
                                                                                   filteredTasks.isNotEmpty ? '$filteredDoneCount/${filteredTasks.length}' : '-',
-                                                                                  style: GoogleFonts.plusJakartaSans(
-                                                                                    fontSize: 14.0,
-                                                                                    fontWeight: FontWeight.w800,
-                                                                                    color: isDark ? Colors.white : Colors.black87,
-                                                                                  ),
+                                                                                  style: AppTypography.buttonLabel(color: isDark ? Colors.white : Colors.black87, fontWeight: FontWeight.w800),
                                                                                   textAlign: TextAlign.center,
                                                                                 ),
                                                                                 if (filteredTasks.isNotEmpty) ...[
@@ -2170,11 +1950,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                                                                 child: (!joined || task == null)
                                                                                     ? Text(
                                                                                         '-',
-                                                                                        style: GoogleFonts.plusJakartaSans(
-                                                                                          fontSize: 14.0,
-                                                                                          fontWeight: FontWeight.w600,
-                                                                                          color: isDark ? Colors.white24 : Colors.black26,
-                                                                                        ),
+                                                                                        style: AppTypography.buttonLabel(color: isDark ? Colors.white24 : Colors.black26, fontWeight: FontWeight.w600),
                                                                                       )
                                                                                     : Tooltip(
                                                                                         message: '📝 Tugas: $tTitle\n${isDone ? "Sudah dikerjakan (Klik untuk lihat)" : "Belum dikerjakan"}',
@@ -2201,11 +1977,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                                                                                 ? Icon(Icons.check_rounded, size: 13, color: isDark ? const Color(0xFF6EE7B7) : const Color(0xFF15803D))
                                                                                                 : Text(
                                                                                                     '-',
-                                                                                                    style: GoogleFonts.plusJakartaSans(
-                                                                                                      fontSize: 14.0,
-                                                                                                      fontWeight: FontWeight.bold,
-                                                                                                      color: isDark ? const Color(0xFF71717A) : Colors.black38,
-                                                                                                    ),
+                                                                                                    style: AppTypography.buttonLabel(color: isDark ? const Color(0xFF71717A, fontWeight: FontWeight.bold),
                                                                                                   ),
                                                                                           ),
                                                                                         ),
@@ -2239,11 +2011,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                                                                 child: (!joined || quiz == null)
                                                                                     ? Text(
                                                                                         '-',
-                                                                                        style: GoogleFonts.plusJakartaSans(
-                                                                                          fontSize: 14.0,
-                                                                                          fontWeight: FontWeight.w600,
-                                                                                          color: isDark ? Colors.white24 : Colors.black26,
-                                                                                        ),
+                                                                                        style: AppTypography.buttonLabel(color: isDark ? Colors.white24 : Colors.black26, fontWeight: FontWeight.w600),
                                                                                       )
                                                                                     : Tooltip(
                                                                                         message: '❓ Quiz: $qTitle\nNilai: ${quizScore ?? "Belum dikerjakan"}',
@@ -2316,13 +2084,6 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                       border: Border(
                         left: BorderSide(color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0), width: 1),
                       ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.08),
-                          blurRadius: 12,
-                          offset: const Offset(-4, 0),
-                        ),
-                      ],
                     ),
                     child: Column(
                       children: [
@@ -2342,11 +2103,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                               Expanded(
                                 child: Text(
                                   'Atur Presensi',
-                                  style: GoogleFonts.plusJakartaSans(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                    color: isDark ? Colors.white : Colors.black87,
-                                  ),
+                                  style: AppTypography.cardTitle(color: isDark ? Colors.white : Colors.black87, fontWeight: FontWeight.bold),
                                 ),
                               ),
                               IconButton(
@@ -2390,13 +2147,13 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
             const SizedBox(height: 16),
             Text(
               title,
-              style: GoogleFonts.plusJakartaSans(fontSize: 17.6, fontWeight: FontWeight.bold, color: Colors.black87),
+              style: AppTypography.chatHeaderTitle(color: Colors.black87, fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 8),
             Text(
               subtitle,
-              style: GoogleFonts.dmSans(fontSize: 14.0, color: Colors.black38, height: 1.5),
+              style: AppTypography.timestamp(color: Colors.black38, height: 1.5),
               textAlign: TextAlign.center,
             ),
           ],
@@ -2509,13 +2266,6 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             color: _getAvatarColor(studentName),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.08),
-                                blurRadius: 6,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
                           ),
                           child: StudentAvatarWidget(
                             uid: studentUid,
@@ -2531,21 +2281,12 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                             children: [
                               Text(
                                 'Detail Aktivitas Siswa',
-                                style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 17.5,
-                                  fontWeight: FontWeight.w800,
-                                  color: isDark ? Colors.white : const Color(0xFF0F172A),
-                                  letterSpacing: -0.2,
-                                ),
+                                style: AppTypography.chatHeaderTitle(color: isDark ? Colors.white : const Color(0xFF0F172A, fontWeight: FontWeight.w800, letterSpacing: -0.2),
                               ),
                               const SizedBox(height: 2),
                               Text(
                                 studentName,
-                                style: GoogleFonts.dmSans(
-                                  fontSize: 14.5,
-                                  fontWeight: FontWeight.w600,
-                                  color: isDark ? const Color(0xFFD4D4D8) : const Color(0xFF475569),
-                                ),
+                                style: AppTypography.subtitle(color: isDark ? const Color(0xFFD4D4D8, fontWeight: FontWeight.w600),
                               ),
                             ],
                           ),
@@ -2563,11 +2304,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                           ),
                           child: Text(
                             '${completedTasks.length}/${activities.length} Selesai',
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 12.5,
-                              fontWeight: FontWeight.bold,
-                              color: isDark ? const Color(0xFF6EE7B7) : const Color(0xFF15803D),
-                            ),
+                            style: AppTypography.channelTag(color: isDark ? const Color(0xFF6EE7B7, fontWeight: FontWeight.bold),
                           ),
                         ),
                       ],
@@ -2580,10 +2317,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                           ? Center(
                               child: Text(
                                 'Belum ada kegiatan di classroom ini.',
-                                style: GoogleFonts.dmSans(
-                                  fontSize: 14.5,
-                                  color: isDark ? const Color(0xFF71717A) : const Color(0xFF94A3B8),
-                                ),
+                                style: AppTypography.subtitle(color: isDark ? const Color(0xFF71717A),
                               ),
                             )
                           : ListView.separated(
@@ -2619,11 +2353,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                           ),
                                           child: Text(
                                             'Jawaban: "$textAns"',
-                                            style: GoogleFonts.dmSans(
-                                              fontSize: 13.5,
-                                              fontStyle: FontStyle.italic,
-                                              color: isDark ? const Color(0xFFE4E4E7) : const Color(0xFF334155),
-                                            ),
+                                            style: AppTypography.timestamp(color: isDark ? const Color(0xFFE4E4E7),
                                           ),
                                         ),
                                       ],
@@ -2658,12 +2388,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                                 Expanded(
                                                   child: Text(
                                                     fileAns,
-                                                    style: GoogleFonts.plusJakartaSans(
-                                                      fontSize: 13.0,
-                                                      color: isDark ? const Color(0xFF93C5FD) : const Color(0xFF2563EB),
-                                                      fontWeight: FontWeight.bold,
-                                                      decoration: TextDecoration.underline,
-                                                    ),
+                                                    style: AppTypography.channelTag(color: isDark ? const Color(0xFF93C5FD, fontWeight: FontWeight.bold),
                                                     overflow: TextOverflow.ellipsis,
                                                   ),
                                                 ),
@@ -2676,11 +2401,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                         const SizedBox(height: 4),
                                         Text(
                                           'Belum mengumpulkan jawaban',
-                                          style: GoogleFonts.dmSans(
-                                            fontSize: 13.0,
-                                            color: isDark ? const Color(0xFF71717A) : const Color(0xFF94A3B8),
-                                            fontStyle: FontStyle.italic,
-                                          ),
+                                          style: AppTypography.fileSize(color: isDark ? const Color(0xFF71717A),
                                         ),
                                       ]
                                     ],
@@ -2707,20 +2428,13 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                                 ),
                                                 child: Text(
                                                   'Nilai: $score / 100',
-                                                  style: GoogleFonts.plusJakartaSans(
-                                                    fontSize: 13.0,
-                                                    fontWeight: FontWeight.bold,
-                                                    color: isDark ? const Color(0xFFFDBA74) : const Color(0xFFC2410C),
-                                                  ),
+                                                  style: AppTypography.channelTag(color: isDark ? const Color(0xFFFDBA74, fontWeight: FontWeight.bold),
                                                 ),
                                               )
                                             else
                                               Text(
                                                 'Belum mengerjakan kuis',
-                                                style: GoogleFonts.dmSans(
-                                                  fontSize: 13.0,
-                                                  color: isDark ? const Color(0xFF71717A) : const Color(0xFF94A3B8),
-                                                ),
+                                                style: AppTypography.fileSize(color: isDark ? const Color(0xFF71717A),
                                               ),
                                             if (isLocked) ...[
                                               const SizedBox(height: 6),
@@ -2730,11 +2444,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                                   const SizedBox(width: 4),
                                                   Text(
                                                     'Kuis Terkunci (Keluar Aplikasi)',
-                                                    style: GoogleFonts.plusJakartaSans(
-                                                      fontSize: 12.5,
-                                                      color: Colors.redAccent,
-                                                      fontWeight: FontWeight.bold,
-                                                    ),
+                                                    style: AppTypography.channelTag(color: Colors.redAccent, fontWeight: FontWeight.bold),
                                                   ),
                                                 ],
                                               ),
@@ -2779,10 +2489,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                           ),
                                           child: Text(
                                             'Buka Kunci',
-                                            style: GoogleFonts.plusJakartaSans(
-                                              fontSize: 13.0,
-                                              fontWeight: FontWeight.bold,
-                                            ),
+                                            style: AppTypography.channelTag(fontWeight: FontWeight.bold),
                                           ),
                                         ),
                                     ],
@@ -2819,11 +2526,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                                 Expanded(
                                                   child: Text(
                                                     title,
-                                                    style: GoogleFonts.plusJakartaSans(
-                                                      fontSize: 14.5,
-                                                      fontWeight: FontWeight.bold,
-                                                      color: isDark ? Colors.white : const Color(0xFF0F172A),
-                                                    ),
+                                                    style: AppTypography.buttonLabel(color: isDark ? Colors.white : const Color(0xFF0F172A, fontWeight: FontWeight.bold),
                                                   ),
                                                 ),
                                               ],
@@ -2860,11 +2563,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                         padding: const EdgeInsets.only(left: 25.0),
                                         child: Text(
                                           '${act['stageName']} > ${act['materiTitle']}',
-                                          style: GoogleFonts.dmSans(
-                                            fontSize: 12.5,
-                                            color: isDark ? const Color(0xFF71717A) : const Color(0xFF64748B),
-                                            fontWeight: FontWeight.w500,
-                                          ),
+                                          style: AppTypography.fileSize(color: isDark ? const Color(0xFF71717A, fontWeight: FontWeight.w500),
                                         ),
                                       ),
                                       const SizedBox(height: 6),
@@ -2950,13 +2649,6 @@ class _BouncyMenuSliderCardState extends State<_BouncyMenuSliderCard> with Singl
           decoration: BoxDecoration(
             color: widget.cardBg,
             borderRadius: BorderRadius.circular(24),
-            boxShadow: [
-              BoxShadow(
-                color: widget.cardBg.withValues(alpha: 0.35),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
-              ),
-            ],
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -2981,23 +2673,14 @@ class _BouncyMenuSliderCardState extends State<_BouncyMenuSliderCard> with Singl
                 children: [
                   Text(
                     widget.title,
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 14.0,
-                      fontWeight: FontWeight.bold,
-                      color: const Color(0xFF7C3AED),
-                      height: 1.15,
-                    ),
+                    style: AppTypography.buttonLabel(color: const Color(0xFF7C3AED, fontWeight: FontWeight.bold, height: 1.15),
                   ),
                   const SizedBox(height: 1.5),
                   ConstrainedBox(
                     constraints: const BoxConstraints(maxWidth: 130),
                     child: Text(
                       widget.subtitle,
-                      style: GoogleFonts.dmSans(
-                        fontSize: 14.0,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.black54,
-                      ),
+                      style: AppTypography.timestamp(color: Colors.black54, fontWeight: FontWeight.w600),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -3285,11 +2968,7 @@ class _StudentAvatarWidgetState extends State<StudentAvatarWidget> {
             color: _getAvatarColor(widget.studentName),
             child: Text(
               _getInitials(widget.studentName),
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 14.0,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
+              style: AppTypography.buttonLabel(color: Colors.white, fontWeight: FontWeight.bold),
             ),
           ),
         ),

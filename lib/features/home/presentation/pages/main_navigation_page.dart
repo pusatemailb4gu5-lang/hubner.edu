@@ -21,6 +21,7 @@ import 'package:hubner/core/services/google_drive_service.dart';
 import 'package:hubner/features/home/presentation/widgets/in_app_file_viewer_dialog.dart';
 import 'package:hubner/main.dart';
 import 'package:hubner/core/theme/app_colors.dart';
+import 'package:hubner/core/theme/app_typography.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -722,13 +723,6 @@ class _FluidIPhoneBottomNavBarState extends State<_FluidIPhoneBottomNavBar>
                     : const Color(0xFFE2E8F0),
                 width: 1.0,
               ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.08),
-                  blurRadius: 16,
-                  offset: const Offset(0, 4),
-                ),
-              ],
             ),
             child: Stack(
               alignment: Alignment.centerLeft,
@@ -1225,13 +1219,6 @@ class _DiscussionTabState extends State<DiscussionTab> {
                                 color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
                                 width: 1.2,
                               ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.04),
-                                  blurRadius: 8,
-                                  offset: const Offset(0, 2),
-                                ),
-                              ],
                             ),
                             child: Icon(
                               Icons.people_outline_rounded,
@@ -1274,15 +1261,13 @@ class _DiscussionTabState extends State<DiscussionTab> {
                                   _searchQuery = val;
                                 });
                               },
-                              style: GoogleFonts.dmSans(
-                                fontSize: 20.0,
+                              style: AppTypography.searchInput(
                                 color: isDark ? Colors.white : Colors.black87,
                               ),
                               decoration: InputDecoration(
                                 hintText: 'Cari thread diskusi...',
-                                hintStyle: GoogleFonts.dmSans(
+                                hintStyle: AppTypography.searchInput(
                                   color: isDark ? Colors.white38 : Colors.black38,
-                                  fontSize: 20.0,
                                 ),
                                 border: InputBorder.none,
                                 isDense: true,
@@ -1665,13 +1650,6 @@ class _DiscussionTabState extends State<DiscussionTab> {
                       decoration: BoxDecoration(
                         color: isDark ? Colors.white : Colors.black,
                         shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: isDark ? 0.4 : 0.25),
-                            blurRadius: 10,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
                       ),
                       child: Icon(
                         Icons.add_rounded,
@@ -1800,13 +1778,6 @@ class _DiscussionTabState extends State<DiscussionTab> {
                                     color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
                                     width: 1.2,
                                   ),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.04),
-                                      blurRadius: 8,
-                                      offset: const Offset(0, 2),
-                                    ),
-                                  ],
                                 ),
                                 child: Icon(
                                   Icons.people_outline_rounded,
@@ -1835,13 +1806,6 @@ class _DiscussionTabState extends State<DiscussionTab> {
                     decoration: BoxDecoration(
                       color: isDark ? Colors.white : Colors.black,
                       shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: isDark ? 0.4 : 0.25),
-                          blurRadius: 10,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
                     ),
                     child: Icon(
                       Icons.add_rounded,
@@ -1966,13 +1930,6 @@ class _WhatsAppStyleNewChatModalState extends State<_WhatsAppStyleNewChatModal> 
                       color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
                       width: 1.2,
                     ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: isDark ? 0.5 : 0.12),
-                        blurRadius: 16,
-                        offset: const Offset(0, 6),
-                      ),
-                    ],
                   ),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(16),
@@ -2580,13 +2537,6 @@ class _WhatsAppStyleNewChatModalState extends State<_WhatsAppStyleNewChatModal> 
       decoration: BoxDecoration(
         color: isDark ? const Color(0xFF141416) : Colors.white,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.5 : 0.15),
-            blurRadius: 20,
-            offset: const Offset(0, -4),
-          ),
-        ],
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -2632,13 +2582,6 @@ class _WhatsAppStyleNewChatModalState extends State<_WhatsAppStyleNewChatModal> 
                               color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
                               width: 1.2,
                             ),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.04),
-                                blurRadius: 8,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
                           ),
                           child: Icon(
                             Icons.close_rounded,
@@ -2665,13 +2608,6 @@ class _WhatsAppStyleNewChatModalState extends State<_WhatsAppStyleNewChatModal> 
                               color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
                               width: 1.2,
                             ),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.04),
-                                blurRadius: 8,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
                           ),
                           child: Icon(
                             Icons.arrow_back_rounded,
@@ -2709,13 +2645,6 @@ class _WhatsAppStyleNewChatModalState extends State<_WhatsAppStyleNewChatModal> 
                           color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
                           width: 1.2,
                         ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.04),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
                       ),
                       child: Icon(
                         Icons.close_rounded,
@@ -3914,13 +3843,6 @@ class _WhatsAppStyleNewChatModalState extends State<_WhatsAppStyleNewChatModal> 
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
                                   color: isDark ? const Color(0xFF18181B) : const Color(0xFFF1F5F9),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.06),
-                                      blurRadius: 8,
-                                      offset: const Offset(0, 3),
-                                    ),
-                                  ],
                                 ),
                                 child: _isDefaultGroupIcon
                                     ? Center(
@@ -5787,13 +5709,6 @@ class _DocumentsTabState extends State<DocumentsTab> {
       decoration: BoxDecoration(
         color: const Color(0xFF8B5CF6), // Ungu seperti di halaman laporan
         borderRadius: BorderRadius.circular(28), // Round sesuai tema
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF8B5CF6).withValues(alpha: 0.35),
-            blurRadius: 18,
-            offset: const Offset(0, 8),
-          ),
-        ],
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(28),
@@ -5809,13 +5724,6 @@ class _DocumentsTabState extends State<DocumentsTab> {
                   decoration: BoxDecoration(
                     color: Colors.white,
                     shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.12),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
                   ),
                   child: const Center(
                     child: GoogleDriveLogoWidget(size: 26),
@@ -5851,13 +5759,6 @@ class _DocumentsTabState extends State<DocumentsTab> {
                       decoration: BoxDecoration(
                         color: Colors.black, // Tombol round warna hitam
                         borderRadius: BorderRadius.circular(24), // Round
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.25),
-                            blurRadius: 8,
-                            offset: const Offset(0, 3),
-                          ),
-                        ],
                       ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -6466,13 +6367,6 @@ class _ProfilePageState extends State<ProfilePage> {
                                         decoration: BoxDecoration(
                                           shape: BoxShape.circle,
                                           border: Border.all(color: Colors.black, width: 2),
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color: Colors.black.withValues(alpha: 0.05),
-                                              blurRadius: 8,
-                                              offset: const Offset(0, 4),
-                                            ),
-                                          ],
                                         ),
                                         child: ClipOval(
                                           child: Transform.scale(
@@ -6865,13 +6759,6 @@ class _ProfilePageState extends State<ProfilePage> {
                                   color: Colors.white.withValues(alpha: 0.88),
                                   borderRadius: BorderRadius.circular(20),
                                   border: Border.all(color: const Color(0xFFE2E8F0)),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withValues(alpha: 0.08),
-                                      blurRadius: 16,
-                                      offset: const Offset(0, 6),
-                                    ),
-                                  ],
                                 ),
                                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                                 child: ListView.builder(
@@ -7486,13 +7373,6 @@ class _SidebarNavigationItemState extends State<SidebarNavigationItem> {
       iconDecoration = BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.12),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
       );
     } else if (_isHovered) {
       iconColor = Colors.black87;
@@ -7500,13 +7380,6 @@ class _SidebarNavigationItemState extends State<SidebarNavigationItem> {
       iconDecoration = BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.06),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
       );
     } else {
       iconColor = Colors.black45;

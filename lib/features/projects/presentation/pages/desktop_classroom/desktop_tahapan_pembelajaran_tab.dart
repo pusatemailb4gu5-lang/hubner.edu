@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hubner/core/theme/app_typography.dart';
 import 'package:hubner/core/widgets/three_dots_loader.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -309,13 +310,6 @@ class _DesktopTahapanPembelajaranTabState
                   decoration: BoxDecoration(
                     color: sidebarHeroColor,
                     borderRadius: BorderRadius.circular(22),
-                    boxShadow: [
-                      BoxShadow(
-                        color: sidebarHeroColor.withValues(alpha: 0.25),
-                        blurRadius: 14,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
                   ),
                   child: Row(
                     children: [
@@ -339,19 +333,12 @@ class _DesktopTahapanPembelajaranTabState
                           children: [
                             Text(
                               'Tahapan Belajar & Kurikulum',
-                              style: GoogleFonts.plusJakartaSans(
-                                fontSize: 23.4,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
+                              style: AppTypography.pageTitle(color: Colors.white, fontWeight: FontWeight.bold),
                             ),
                             const SizedBox(height: 2),
                             Text(
                               '${stages.length} Elemen Tahapan Pembelajaran Terdaftar dalam Kelas',
-                              style: GoogleFonts.dmSans(
-                                fontSize: 14,
-                                color: Colors.white.withValues(alpha: 0.85),
-                              ),
+                              style: AppTypography.timestamp(color: Colors.white.withValues(alpha: 0.85),
                             ),
                           ],
                         ),
@@ -374,13 +361,6 @@ class _DesktopTahapanPembelajaranTabState
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(20),
                           border: Border.all(color: const Color(0xFFE2E8F0)),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.03),
-                              blurRadius: 10,
-                              offset: const Offset(0, 3),
-                            ),
-                          ],
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -398,11 +378,7 @@ class _DesktopTahapanPembelajaranTabState
                                     const SizedBox(width: 8),
                                     Text(
                                       'Daftar Elemen Belajar',
-                                      style: GoogleFonts.plusJakartaSans(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
-                                        color: const Color(0xFF000000),
-                                      ),
+                                      style: AppTypography.cardTitle(color: const Color(0xFF000000, fontWeight: FontWeight.bold),
                                     ),
                                   ],
                                 ),
@@ -431,11 +407,7 @@ class _DesktopTahapanPembelajaranTabState
                                           ),
                                           child: Text(
                                             'Kelola',
-                                            style: GoogleFonts.plusJakartaSans(
-                                              fontSize: 14.0,
-                                              fontWeight: FontWeight.bold,
-                                              color: const Color(0xFF334155),
-                                            ),
+                                            style: AppTypography.buttonLabel(color: const Color(0xFF334155, fontWeight: FontWeight.bold),
                                           ),
                                         ),
                                       ),
@@ -466,12 +438,7 @@ class _DesktopTahapanPembelajaranTabState
                                               Text(
                                                 'Tambah',
                                                 style:
-                                                    GoogleFonts.plusJakartaSans(
-                                                      fontSize: 14.0,
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                      color: Colors.white,
-                                                    ),
+                                                    AppTypography.buttonLabel(color: Colors.white, fontWeight: FontWeight.bold),
                                               ),
                                             ],
                                           ),
@@ -499,11 +466,7 @@ class _DesktopTahapanPembelajaranTabState
                                       ),
                                       child: Text(
                                         'Selesai',
-                                        style: GoogleFonts.plusJakartaSans(
-                                          fontSize: 14.0,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.white,
-                                        ),
+                                        style: AppTypography.buttonLabel(color: Colors.white, fontWeight: FontWeight.bold),
                                       ),
                                     ),
                                   ),
@@ -564,11 +527,7 @@ class _DesktopTahapanPembelajaranTabState
                                         const SizedBox(width: 8),
                                         Text(
                                           'Pilih Semua (${_selectedManageIndices.length}/${stages.length})',
-                                          style: GoogleFonts.plusJakartaSans(
-                                            fontSize: 14.0,
-                                            fontWeight: FontWeight.bold,
-                                            color: const Color(0xFF1E293B),
-                                          ),
+                                          style: AppTypography.buttonLabel(color: const Color(0xFF1E293B, fontWeight: FontWeight.bold),
                                         ),
                                       ],
                                     ),
@@ -603,10 +562,7 @@ class _DesktopTahapanPembelajaranTabState
                                           ),
                                           child: Text(
                                             'Hapus',
-                                            style: GoogleFonts.plusJakartaSans(
-                                              fontSize: 14.0,
-                                              fontWeight: FontWeight.bold,
-                                            ),
+                                            style: AppTypography.buttonLabel(fontWeight: FontWeight.bold),
                                           ),
                                         ),
                                         ElevatedButton(
@@ -637,10 +593,7 @@ class _DesktopTahapanPembelajaranTabState
                                           ),
                                           child: Text(
                                             'Akan Datang',
-                                            style: GoogleFonts.plusJakartaSans(
-                                              fontSize: 14.0,
-                                              fontWeight: FontWeight.bold,
-                                            ),
+                                            style: AppTypography.buttonLabel(fontWeight: FontWeight.bold),
                                           ),
                                         ),
                                         ElevatedButton(
@@ -671,10 +624,7 @@ class _DesktopTahapanPembelajaranTabState
                                           ),
                                           child: Text(
                                             'Proses Pembelajaran',
-                                            style: GoogleFonts.plusJakartaSans(
-                                              fontSize: 14.0,
-                                              fontWeight: FontWeight.bold,
-                                            ),
+                                            style: AppTypography.buttonLabel(fontWeight: FontWeight.bold),
                                           ),
                                         ),
                                         ElevatedButton(
@@ -705,10 +655,7 @@ class _DesktopTahapanPembelajaranTabState
                                           ),
                                           child: Text(
                                             'Selesai',
-                                            style: GoogleFonts.plusJakartaSans(
-                                              fontSize: 14.0,
-                                              fontWeight: FontWeight.bold,
-                                            ),
+                                            style: AppTypography.buttonLabel(fontWeight: FontWeight.bold),
                                           ),
                                         ),
                                       ],
@@ -724,10 +671,7 @@ class _DesktopTahapanPembelajaranTabState
                                 child: Center(
                                   child: Text(
                                     'Belum ada elemen pembelajaran.',
-                                    style: GoogleFonts.dmSans(
-                                      fontSize: 14.7,
-                                      color: const Color(0xFF000000),
-                                    ),
+                                    style: AppTypography.subtitle(color: const Color(0xFF000000),
                                   ),
                                 ),
                               )
@@ -822,12 +766,7 @@ class _DesktopTahapanPembelajaranTabState
                                               child: Text(
                                                 '${index + 1}',
                                                 style:
-                                                    GoogleFonts.plusJakartaSans(
-                                                      fontSize: 14.0,
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                      color: Colors.white, // Teks selalu PUTIH!
-                                                    ),
+                                                    AppTypography.buttonLabel(color: Colors.white, fontWeight: FontWeight.bold),
                                               ),
                                             ),
                                           ),
@@ -840,26 +779,11 @@ class _DesktopTahapanPembelajaranTabState
                                                 Text(
                                                   stageTitle,
                                                   style:
-                                                      GoogleFonts.plusJakartaSans(
-                                                        fontSize: 14.2,
-                                                        fontWeight: isSelected
-                                                            ? FontWeight.bold
-                                                            : FontWeight.w600,
-                                                        color: isSelected
-                                                            ? elemColor
-                                                            : const Color(
-                                                                0xFF1E293B,
-                                                              ),
-                                                      ),
+                                                      AppTypography.buttonLabel(color: isSelected, fontWeight: isSelected),
                                                 ),
                                                 Text(
                                                   '${materis.length} Materi',
-                                                  style: GoogleFonts.dmSans(
-                                                    fontSize: 14.0,
-                                                    color: const Color(
-                                                      0xFF64748B,
-                                                    ),
-                                                  ),
+                                                  style: AppTypography.timestamp(color: const Color(),
                                                 ),
                                               ],
                                             ),
@@ -923,10 +847,7 @@ class _DesktopTahapanPembelajaranTabState
               const SizedBox(height: 12),
               Text(
                 'Pilih elemen pembelajaran di kolom kiri untuk melihat detail.',
-                style: GoogleFonts.dmSans(
-                  fontSize: 15.2,
-                  color: const Color(0xFF000000),
-                ),
+                style: AppTypography.subtitle(color: const Color(0xFF000000),
               ),
             ],
           ),
@@ -964,11 +885,7 @@ class _DesktopTahapanPembelajaranTabState
               Expanded(
                 child: Text(
                   'Klik 2x pada Judul, Deskripsi Elemen, atau Materi untuk mengedit langsung. Tekan tombol hijau atau Enter untuk menyimpan.',
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 14.0,
-                    fontWeight: FontWeight.w600,
-                    color: const Color(0xFF0369A1),
-                  ),
+                  style: AppTypography.buttonLabel(color: const Color(0xFF0369A1, fontWeight: FontWeight.w600),
                 ),
               ),
             ],
@@ -983,13 +900,6 @@ class _DesktopTahapanPembelajaranTabState
             color: Colors.white,
             borderRadius: BorderRadius.circular(20),
             border: Border.all(color: const Color(0xFFE2E8F0)),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.03),
-                blurRadius: 10,
-                offset: const Offset(0, 3),
-              ),
-            ],
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -1010,11 +920,7 @@ class _DesktopTahapanPembelajaranTabState
                         ),
                         child: Text(
                           'Elemen ke-${selectedIndex + 1}',
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 14.0,
-                            fontWeight: FontWeight.bold,
-                            color: activeElemColor,
-                          ),
+                          style: AppTypography.buttonLabel(color: activeElemColor, fontWeight: FontWeight.bold),
                         ),
                       ),
                       const SizedBox(width: 10),
@@ -1078,11 +984,7 @@ class _DesktopTahapanPembelajaranTabState
                                   const SizedBox(width: 8),
                                   Text(
                                     statusText,
-                                    style: GoogleFonts.plusJakartaSans(
-                                      fontSize: 14.0,
-                                      fontWeight: FontWeight.w600,
-                                      color: const Color(0xFF1E293B),
-                                    ),
+                                    style: AppTypography.buttonLabel(color: const Color(0xFF1E293B, fontWeight: FontWeight.w600),
                                   ),
                                 ],
                               ),
@@ -1124,11 +1026,7 @@ class _DesktopTahapanPembelajaranTabState
                                 ].contains(selectedStage['status'])
                                     ? selectedStage['status']
                                     : 'Proses Pembelajaran',
-                                style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 14.0,
-                                  fontWeight: FontWeight.w600,
-                                  color: const Color(0xFF1E293B),
-                                ),
+                                style: AppTypography.buttonLabel(color: const Color(0xFF1E293B, fontWeight: FontWeight.w600),
                               ),
                               const SizedBox(width: 4),
                               const Icon(
@@ -1144,11 +1042,7 @@ class _DesktopTahapanPembelajaranTabState
                   ),
                   Text(
                     '${materis.length} Materi Terlampir',
-                    style: GoogleFonts.dmSans(
-                      fontSize: 14.0,
-                      fontWeight: FontWeight.w500,
-                      color: const Color(0xFF000000),
-                    ),
+                    style: AppTypography.timestamp(color: const Color(0xFF000000, fontWeight: FontWeight.w500),
                   ),
                 ],
               ),
@@ -1160,11 +1054,7 @@ class _DesktopTahapanPembelajaranTabState
                       child: TextField(
                         controller: _stageTitleController,
                         autofocus: true,
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: const Color(0xFF000000),
-                        ),
+                        style: AppTypography.chatHeaderTitle(color: const Color(0xFF000000, fontWeight: FontWeight.bold),
                         decoration: InputDecoration(
                           isDense: true,
                           contentPadding: const EdgeInsets.symmetric(
@@ -1230,11 +1120,7 @@ class _DesktopTahapanPembelajaranTabState
                       Expanded(
                         child: Text(
                           stageTitle,
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: const Color(0xFF000000),
-                          ),
+                          style: AppTypography.chatHeaderTitle(color: const Color(0xFF000000, fontWeight: FontWeight.bold),
                         ),
                       ),
                     ],
@@ -1249,10 +1135,7 @@ class _DesktopTahapanPembelajaranTabState
                       controller: _stageDescController,
                       autofocus: true,
                       maxLines: null,
-                      style: GoogleFonts.dmSans(
-                        fontSize: 14,
-                        color: const Color(0xFF000000),
-                      ),
+                      style: AppTypography.timestamp(color: const Color(0xFF000000),
                       decoration: InputDecoration(
                         hintText: 'Tulis deskripsi elemen...',
                         isDense: true,
@@ -1308,10 +1191,7 @@ class _DesktopTahapanPembelajaranTabState
                               horizontal: 10,
                               vertical: 4,
                             ),
-                            textStyle: GoogleFonts.plusJakartaSans(
-                              fontSize: 14.0,
-                              fontWeight: FontWeight.bold,
-                            ),
+                            textStyle: AppTypography.buttonLabel(fontWeight: FontWeight.bold),
                           ),
                         ),
                         const SizedBox(width: 8),
@@ -1323,10 +1203,7 @@ class _DesktopTahapanPembelajaranTabState
                           },
                           style: TextButton.styleFrom(
                             foregroundColor: const Color(0xFFEF4444),
-                            textStyle: GoogleFonts.plusJakartaSans(
-                              fontSize: 14.0,
-                              fontWeight: FontWeight.bold,
-                            ),
+                            textStyle: AppTypography.buttonLabel(fontWeight: FontWeight.bold),
                           ),
                           child: const Text('Batal'),
                         ),
@@ -1347,10 +1224,7 @@ class _DesktopTahapanPembelajaranTabState
                       : null,
                   child: Text(
                     stageDesc,
-                    style: GoogleFonts.dmSans(
-                      fontSize: 14,
-                      color: const Color(0xFF000000),
-                    ),
+                    style: AppTypography.timestamp(color: const Color(0xFF000000),
                   ),
                 ),
             ],
@@ -1364,11 +1238,7 @@ class _DesktopTahapanPembelajaranTabState
           children: [
             Text(
               'Detail Materi & Modul',
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 17.6,
-                fontWeight: FontWeight.bold,
-                color: const Color(0xFF000000),
-              ),
+              style: AppTypography.chatHeaderTitle(color: const Color(0xFF000000, fontWeight: FontWeight.bold),
             ),
             if (isOwner)
               GestureDetector(
@@ -1381,13 +1251,6 @@ class _DesktopTahapanPembelajaranTabState
                   decoration: BoxDecoration(
                     color: const Color(0xFF7C3AED), // Violet
                     borderRadius: BorderRadius.circular(10),
-                    boxShadow: [
-                      BoxShadow(
-                        color: const Color(0xFF7C3AED).withValues(alpha: 0.25),
-                        blurRadius: 4,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
                   ),
                   child: Row(
                     children: [
@@ -1399,11 +1262,7 @@ class _DesktopTahapanPembelajaranTabState
                       const SizedBox(width: 4),
                       Text(
                         'Materi Baru',
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 14.0,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
+                        style: AppTypography.buttonLabel(color: Colors.white, fontWeight: FontWeight.bold),
                       ),
                     ],
                   ),
@@ -1424,10 +1283,7 @@ class _DesktopTahapanPembelajaranTabState
             child: Center(
               child: Text(
                 'Belum ada materi dalam elemen ini.',
-                style: GoogleFonts.dmSans(
-                  fontSize: 14.7,
-                  color: const Color(0xFF000000),
-                ),
+                style: AppTypography.subtitle(color: const Color(0xFF000000),
               ),
             ),
           )
@@ -1439,13 +1295,6 @@ class _DesktopTahapanPembelajaranTabState
               color: Colors.white,
               borderRadius: BorderRadius.circular(20),
               border: Border.all(color: const Color(0xFFE2E8F0)),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.03),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
-                ),
-              ],
             ),
             child: ListView.separated(
               shrinkWrap: true,
@@ -1491,11 +1340,7 @@ class _DesktopTahapanPembelajaranTabState
                               child: TextField(
                                 controller: _materiTitleController,
                                 autofocus: true,
-                                style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 15.2,
-                                  fontWeight: FontWeight.bold,
-                                  color: const Color(0xFF000000),
-                                ),
+                                style: AppTypography.buttonLabel(color: const Color(0xFF000000, fontWeight: FontWeight.bold),
                                 decoration: InputDecoration(
                                   isDense: true,
                                   contentPadding: const EdgeInsets.symmetric(
@@ -1576,11 +1421,7 @@ class _DesktopTahapanPembelajaranTabState
                               Expanded(
                                 child: Text(
                                   mTitle,
-                                  style: GoogleFonts.plusJakartaSans(
-                                    fontSize: 15.2,
-                                    fontWeight: FontWeight.bold,
-                                    color: const Color(0xFF000000),
-                                  ),
+                                  style: AppTypography.buttonLabel(color: const Color(0xFF000000, fontWeight: FontWeight.bold),
                                 ),
                               ),
                             ],
@@ -1613,11 +1454,7 @@ class _DesktopTahapanPembelajaranTabState
                                         const SizedBox(width: 4),
                                         Text(
                                           '${pdfs.length} File PDF',
-                                          style: GoogleFonts.plusJakartaSans(
-                                            fontSize: 14.0,
-                                            fontWeight: FontWeight.bold,
-                                            color: const Color(0xFF0284C7),
-                                          ),
+                                          style: AppTypography.buttonLabel(color: const Color(0xFF0284C7, fontWeight: FontWeight.bold),
                                         ),
                                       ],
                                     ),
@@ -1645,11 +1482,7 @@ class _DesktopTahapanPembelajaranTabState
                                         const SizedBox(width: 4),
                                         Text(
                                           '${tasks.length} Tugas/Quiz',
-                                          style: GoogleFonts.plusJakartaSans(
-                                            fontSize: 14.0,
-                                            fontWeight: FontWeight.bold,
-                                            color: const Color(0xFFE11D48),
-                                          ),
+                                          style: AppTypography.buttonLabel(color: const Color(0xFFE11D48, fontWeight: FontWeight.bold),
                                         ),
                                       ],
                                     ),

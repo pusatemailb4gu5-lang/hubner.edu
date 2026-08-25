@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hubner/core/theme/app_typography.dart';
 import 'package:hubner/core/widgets/three_dots_loader.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -118,11 +119,7 @@ class _EditCpPageState extends State<EditCpPage> {
                         children: [
                           Text(
                             'Capaian Pembelajaran',
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 17,
-                              fontWeight: FontWeight.bold,
-                              color: isDark ? Colors.white : const Color(0xFF0F172A),
-                            ),
+                            style: AppTypography.cardTitle(color: isDark ? Colors.white : const Color(0xFF0F172A, fontWeight: FontWeight.bold),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             textAlign: TextAlign.center,
@@ -131,10 +128,7 @@ class _EditCpPageState extends State<EditCpPage> {
                             const SizedBox(height: 2),
                             Text(
                               widget.projectName,
-                              style: GoogleFonts.dmSans(
-                                fontSize: 14.0,
-                                color: isDark ? Colors.white54 : Colors.black45,
-                              ),
+                              style: AppTypography.timestamp(color: isDark ? Colors.white54 : Colors.black45),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               textAlign: TextAlign.center,
@@ -215,19 +209,12 @@ class _EditCpPageState extends State<EditCpPage> {
                               children: [
                                 Text(
                                   'Target & Tujuan Kompetensi',
-                                  style: GoogleFonts.plusJakartaSans(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.bold,
-                                    color: isDark ? Colors.white : const Color(0xFF0F172A),
-                                  ),
+                                  style: AppTypography.buttonLabel(color: isDark ? Colors.white : const Color(0xFF0F172A, fontWeight: FontWeight.bold),
                                 ),
                                 const SizedBox(height: 2),
                                 Text(
                                   'Tuliskan kompetensi pembelajaran dan materi inti fase kelas ini.',
-                                  style: GoogleFonts.dmSans(
-                                    fontSize: 14.0,
-                                    color: isDark ? Colors.white70 : const Color(0xFF334155),
-                                  ),
+                                  style: AppTypography.timestamp(color: isDark ? Colors.white70 : const Color(0xFF334155),
                                 ),
                               ],
                             ),
@@ -243,18 +230,10 @@ class _EditCpPageState extends State<EditCpPage> {
                       controller: _controller,
                       maxLines: null,
                       autofocus: true,
-                      style: GoogleFonts.dmSans(
-                        fontSize: 15,
-                        height: 1.7,
-                        color: isDark ? Colors.white : const Color(0xFF0F172A),
-                      ),
+                      style: AppTypography.subtitle(color: isDark ? Colors.white : const Color(0xFF0F172A, height: 1.7),
                       decoration: InputDecoration(
                         hintText: 'Mulai menuliskan Capaian Pembelajaran (CP) di sini...\n\nContoh:\nPada akhir fase ini, peserta didik mampu memahami konsep dasar, menganalisis permasalahan, dan mempresentasikan hasil proyek secara mandiri maupun berkelompok.',
-                        hintStyle: GoogleFonts.dmSans(
-                          fontSize: 14.5,
-                          height: 1.7,
-                          color: isDark ? Colors.white30 : Colors.black38,
-                        ),
+                        hintStyle: AppTypography.subtitle(color: isDark ? Colors.white30 : Colors.black38, height: 1.7),
                         border: InputBorder.none,
                       ),
                     ),

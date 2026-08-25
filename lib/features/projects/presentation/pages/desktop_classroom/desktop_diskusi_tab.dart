@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:hubner/core/theme/app_typography.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -130,11 +131,7 @@ class _DesktopDiskusiTabState extends State<DesktopDiskusiTab> {
                     const SizedBox(height: 20),
                     Text(
                       'Buat Diskusi Baru',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 21.1,
-                        fontWeight: FontWeight.bold,
-                        color: isDark ? Colors.white : Colors.black,
-                      ),
+                      style: AppTypography.chatHeaderTitle(color: isDark ? Colors.white : Colors.black, fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 18),
 
@@ -162,20 +159,12 @@ class _DesktopDiskusiTabState extends State<DesktopDiskusiTab> {
                               children: [
                                 Text(
                                   'Grup Kelas',
-                                  style: GoogleFonts.dmSans(
-                                    fontSize: 13.0,
-                                    fontWeight: FontWeight.w500,
-                                    color: Colors.white.withValues(alpha: 0.7),
-                                  ),
+                                  style: AppTypography.fileSize(color: Colors.white.withValues(alpha: 0.7, fontWeight: FontWeight.w500),
                                 ),
                                 const SizedBox(height: 2),
                                 Text(
                                   widget.currentProjectTitle,
-                                  style: GoogleFonts.plusJakartaSans(
-                                    fontSize: 16.0,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white,
-                                  ),
+                                  style: AppTypography.cardTitle(color: Colors.white, fontWeight: FontWeight.bold),
                                 ),
                               ],
                             ),
@@ -187,11 +176,7 @@ class _DesktopDiskusiTabState extends State<DesktopDiskusiTab> {
                     const SizedBox(height: 16),
                     Text(
                       'Anggota Diskusi',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: isDark ? Colors.white70 : Colors.black54,
-                      ),
+                      style: AppTypography.buttonLabel(color: isDark ? Colors.white70 : Colors.black54, fontWeight: FontWeight.w600),
                     ),
                     const SizedBox(height: 8),
                     if (isLoadingMembers)
@@ -210,11 +195,7 @@ class _DesktopDiskusiTabState extends State<DesktopDiskusiTab> {
                             ListTile(
                               title: Text(
                                 'Pilih Semua',
-                                style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.bold,
-                                  color: isDark ? Colors.white : Colors.black87,
-                                ),
+                                style: AppTypography.buttonLabel(color: isDark ? Colors.white : Colors.black87, fontWeight: FontWeight.bold),
                               ),
                               contentPadding: const EdgeInsets.symmetric(horizontal: 14),
                               trailing: AnimatedContainer(
@@ -271,18 +252,11 @@ class _DesktopDiskusiTabState extends State<DesktopDiskusiTab> {
                                   return ListTile(
                                     title: Text(
                                       m['name'],
-                                      style: GoogleFonts.plusJakartaSans(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w600,
-                                        color: isDark ? Colors.white : Colors.black87,
-                                      ),
+                                      style: AppTypography.buttonLabel(color: isDark ? Colors.white : Colors.black87, fontWeight: FontWeight.w600),
                                     ),
                                     subtitle: Text(
                                       'ID: ${m['userId']}',
-                                      style: GoogleFonts.plusJakartaSans(
-                                        fontSize: 13.0,
-                                        color: isDark ? Colors.white38 : Colors.black38,
-                                      ),
+                                      style: AppTypography.channelTag(color: isDark ? Colors.white38 : Colors.black38),
                                     ),
                                     leading: Container(
                                       width: 28,
@@ -336,25 +310,15 @@ class _DesktopDiskusiTabState extends State<DesktopDiskusiTab> {
                     const SizedBox(height: 16),
                     Text(
                       'Nama Saluran (Channel)',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: isDark ? Colors.white70 : Colors.black54,
-                      ),
+                      style: AppTypography.buttonLabel(color: isDark ? Colors.white70 : Colors.black54, fontWeight: FontWeight.w600),
                     ),
                     const SizedBox(height: 8),
                     TextField(
                       controller: channelController,
-                      style: GoogleFonts.dmSans(
-                        fontSize: 15.2,
-                        color: isDark ? Colors.white : Colors.black87,
-                      ),
+                      style: AppTypography.subtitle(color: isDark ? Colors.white : Colors.black87),
                       decoration: InputDecoration(
                         hintText: 'Contoh: #diskusi-materi',
-                        hintStyle: GoogleFonts.dmSans(
-                          color: isDark ? Colors.white38 : Colors.black26,
-                          fontSize: 15.2,
-                        ),
+                        hintStyle: AppTypography.subtitle(color: isDark ? Colors.white38 : Colors.black26),
                         filled: true,
                         fillColor: isDark ? const Color(0xFF141416) : const Color(0xFFF8FAFC),
                         contentPadding: const EdgeInsets.all(16),
@@ -371,25 +335,15 @@ class _DesktopDiskusiTabState extends State<DesktopDiskusiTab> {
                     const SizedBox(height: 16),
                     Text(
                       'Judul Diskusi',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: isDark ? Colors.white70 : Colors.black54,
-                      ),
+                      style: AppTypography.buttonLabel(color: isDark ? Colors.white70 : Colors.black54, fontWeight: FontWeight.w600),
                     ),
                     const SizedBox(height: 8),
                     TextField(
                       controller: titleController,
-                      style: GoogleFonts.dmSans(
-                        fontSize: 15.2,
-                        color: isDark ? Colors.white : Colors.black87,
-                      ),
+                      style: AppTypography.subtitle(color: isDark ? Colors.white : Colors.black87),
                       decoration: InputDecoration(
                         hintText: 'Contoh: Diskusi Belajar Kelas',
-                        hintStyle: GoogleFonts.dmSans(
-                          color: isDark ? Colors.white38 : Colors.black26,
-                          fontSize: 15.2,
-                        ),
+                        hintStyle: AppTypography.subtitle(color: isDark ? Colors.white38 : Colors.black26),
                         filled: true,
                         fillColor: isDark ? const Color(0xFF141416) : const Color(0xFFF8FAFC),
                         contentPadding: const EdgeInsets.all(16),
@@ -406,11 +360,7 @@ class _DesktopDiskusiTabState extends State<DesktopDiskusiTab> {
                     const SizedBox(height: 16),
                     Text(
                       'Pilih Avatar Diskusi',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: isDark ? Colors.white70 : Colors.black54,
-                      ),
+                      style: AppTypography.buttonLabel(color: isDark ? Colors.white70 : Colors.black54, fontWeight: FontWeight.w600),
                     ),
                     const SizedBox(height: 8),
                     SizedBox(
@@ -483,18 +433,11 @@ class _DesktopDiskusiTabState extends State<DesktopDiskusiTab> {
                               children: [
                                 Text(
                                   'Folder Penyimpanan Data',
-                                  style: GoogleFonts.plusJakartaSans(
-                                    fontSize: 13.5,
-                                    fontWeight: FontWeight.bold,
-                                    color: isDark ? Colors.white : const Color(0xFF0F172A),
-                                  ),
+                                  style: AppTypography.buttonLabel(color: isDark ? Colors.white : const Color(0xFF0F172A, fontWeight: FontWeight.bold),
                                 ),
                                 Text(
                                   'Buat folder arsip berkas grup otomatis',
-                                  style: GoogleFonts.dmSans(
-                                    fontSize: 11.5,
-                                    color: isDark ? Colors.white60 : const Color(0xFF64748B),
-                                  ),
+                                  style: AppTypography.fileSize(color: isDark ? Colors.white60 : const Color(0xFF64748B),
                                 ),
                               ],
                             ),
@@ -566,7 +509,7 @@ class _DesktopDiskusiTabState extends State<DesktopDiskusiTab> {
                         ),
                         child: Text(
                           'Buat Diskusi',
-                          style: GoogleFonts.plusJakartaSans(fontSize: 16.4, fontWeight: FontWeight.bold),
+                          style: AppTypography.cardTitle(fontWeight: FontWeight.bold),
                         ),
                       ),
                     ),
@@ -616,11 +559,7 @@ class _DesktopDiskusiTabState extends State<DesktopDiskusiTab> {
                         children: [
                           Text(
                             'Diskusi',
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 22,
-                              fontWeight: FontWeight.bold,
-                              color: isDark ? Colors.white : const Color(0xFF0F172A),
-                            ),
+                            style: AppTypography.pageTitle(color: isDark ? Colors.white : const Color(0xFF0F172A, fontWeight: FontWeight.bold),
                           ),
                           const Spacer(),
                           // Manage Friends / Members button
@@ -676,16 +615,10 @@ class _DesktopDiskusiTabState extends State<DesktopDiskusiTab> {
                       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
                       child: TextField(
                         onChanged: (val) => setState(() => _searchQuery = val.trim().toLowerCase()),
-                        style: GoogleFonts.dmSans(
-                          fontSize: 14.0,
-                          color: isDark ? Colors.white : const Color(0xFF0F172A),
-                        ),
+                        style: AppTypography.timestamp(color: isDark ? Colors.white : const Color(0xFF0F172A),
                         decoration: InputDecoration(
                           hintText: 'Cari thread diskusi...',
-                          hintStyle: GoogleFonts.dmSans(
-                            fontSize: 14.0,
-                            color: isDark ? Colors.white38 : const Color(0xFF94A3B8),
-                          ),
+                          hintStyle: AppTypography.timestamp(color: isDark ? Colors.white38 : const Color(0xFF94A3B8),
                           prefixIcon: Icon(
                             Icons.search_rounded,
                             size: 18,
@@ -781,10 +714,7 @@ class _DesktopDiskusiTabState extends State<DesktopDiskusiTab> {
                                           ? 'Belum ada thread diskusi untuk kelas ini.'
                                           : 'Thread diskusi tidak ditemukan.',
                                       textAlign: TextAlign.center,
-                                      style: GoogleFonts.dmSans(
-                                        fontSize: 14.0,
-                                        color: isDark ? Colors.white60 : const Color(0xFF94A3B8),
-                                      ),
+                                      style: AppTypography.timestamp(color: isDark ? Colors.white60 : const Color(0xFF94A3B8),
                                     ),
                                     const SizedBox(height: 16),
                                     ElevatedButton.icon(
@@ -797,10 +727,7 @@ class _DesktopDiskusiTabState extends State<DesktopDiskusiTab> {
                                       icon: const Icon(Icons.add_rounded, size: 18),
                                       label: Text(
                                         'Buat Diskusi Baru',
-                                        style: GoogleFonts.plusJakartaSans(
-                                          fontSize: 14.0,
-                                          fontWeight: FontWeight.bold,
-                                        ),
+                                        style: AppTypography.buttonLabel(fontWeight: FontWeight.bold),
                                       ),
                                     ),
                                   ],
@@ -876,32 +803,21 @@ class _DesktopDiskusiTabState extends State<DesktopDiskusiTab> {
                                               channelName,
                                               maxLines: 1,
                                               overflow: TextOverflow.ellipsis,
-                                              style: GoogleFonts.plusJakartaSans(
-                                                fontSize: 13.0,
-                                                fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
-                                                color: isDark ? const Color(0xFF2DD4BF) : const Color(0xFF0F766E),
-                                              ),
+                                              style: AppTypography.channelTag(color: isDark ? const Color(0xFF2DD4BF, fontWeight: isSelected ? FontWeight.bold : FontWeight.w600),
                                             ),
                                             const SizedBox(height: 2),
                                             Text(
                                               title,
                                               maxLines: 1,
                                               overflow: TextOverflow.ellipsis,
-                                              style: GoogleFonts.plusJakartaSans(
-                                                fontSize: 14.5,
-                                                fontWeight: FontWeight.w600,
-                                                color: isDark ? Colors.white : const Color(0xFF0F172A),
-                                              ),
+                                              style: AppTypography.buttonLabel(color: isDark ? Colors.white : const Color(0xFF0F172A, fontWeight: FontWeight.w600),
                                             ),
                                             const SizedBox(height: 2),
                                             Text(
                                               lastMsg,
                                               maxLines: 1,
                                               overflow: TextOverflow.ellipsis,
-                                              style: GoogleFonts.dmSans(
-                                                fontSize: 13.5,
-                                                color: isDark ? const Color(0xFFD4D4D8) : const Color(0xFF64748B),
-                                              ),
+                                              style: AppTypography.timestamp(color: isDark ? const Color(0xFFD4D4D8),
                                             ),
                                           ],
                                         ),
@@ -917,11 +833,7 @@ class _DesktopDiskusiTabState extends State<DesktopDiskusiTab> {
                                           ),
                                           child: Text(
                                             '$unreadCount',
-                                            style: GoogleFonts.plusJakartaSans(
-                                              fontSize: 12.0,
-                                              fontWeight: FontWeight.bold,
-                                              color: Colors.white,
-                                            ),
+                                            style: AppTypography.channelTag(color: Colors.white, fontWeight: FontWeight.bold),
                                           ),
                                         ),
                                       ],
@@ -955,10 +867,7 @@ class _DesktopDiskusiTabState extends State<DesktopDiskusiTab> {
                     : Center(
                         child: Text(
                           'Pilih atau buat thread diskusi untuk memulai obrolan.',
-                          style: GoogleFonts.dmSans(
-                            fontSize: 14,
-                            color: isDark ? Colors.white38 : const Color(0xFF94A3B8),
-                          ),
+                          style: AppTypography.timestamp(color: isDark ? Colors.white38 : const Color(0xFF94A3B8),
                         ),
                       ),
               ),

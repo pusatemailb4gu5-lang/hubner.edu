@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hubner/core/theme/app_typography.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -43,11 +44,7 @@ class DesktopGudangMateriTab extends StatelessWidget {
             children: [
               Text(
                 'Gudang Materi Pembelajaran',
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 21.1,
-                  fontWeight: FontWeight.bold,
-                  color: const Color(0xFF000000),
-                ),
+                style: AppTypography.chatHeaderTitle(color: const Color(0xFF000000, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 16),
               Expanded(
@@ -55,9 +52,7 @@ class DesktopGudangMateriTab extends StatelessWidget {
                     ? Center(
                         child: Text(
                           'Belum ada materi pembelajaran.',
-                          style: GoogleFonts.dmSans(
-                            color: const Color(0xFF000000),
-                          ),
+                          style: AppTypography.timestamp(color: const Color(0xFF000000),
                         ),
                       )
                     : ListView.builder(
@@ -99,18 +94,11 @@ class DesktopGudangMateriTab extends StatelessWidget {
                                     children: [
                                       Text(
                                         mTitle,
-                                        style: GoogleFonts.plusJakartaSans(
-                                          fontSize: 16.4,
-                                          fontWeight: FontWeight.bold,
-                                          color: const Color(0xFF000000),
-                                        ),
+                                        style: AppTypography.cardTitle(color: const Color(0xFF000000, fontWeight: FontWeight.bold),
                                       ),
                                       Text(
                                         '$stageName • ${tasks.length} Aktivitas',
-                                        style: GoogleFonts.dmSans(
-                                          fontSize: 14,
-                                          color: const Color(0xFF000000),
-                                        ),
+                                        style: AppTypography.timestamp(color: const Color(0xFF000000),
                                       ),
                                     ],
                                   ),

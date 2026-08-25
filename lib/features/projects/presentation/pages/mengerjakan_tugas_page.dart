@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hubner/core/theme/app_typography.dart';
 import 'package:hubner/core/widgets/three_dots_loader.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -165,7 +166,7 @@ class _MengerjakanTugasPageState extends State<MengerjakanTugasPage> {
         backgroundColor: Colors.white,
         title: Text(
           'Gagal Mengunggah Otomatis',
-          style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, color: Colors.redAccent),
+          style: AppTypography.buttonLabel(color: Colors.redAccent, fontWeight: FontWeight.bold),
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
@@ -173,19 +174,19 @@ class _MengerjakanTugasPageState extends State<MengerjakanTugasPage> {
           children: [
             Text(
               'Koneksi Google Drive Guru kedaluwarsa atau belum disinkronisasi.',
-              style: GoogleFonts.plusJakartaSans(fontSize: 15.2, fontWeight: FontWeight.bold, color: Colors.black87),
+              style: AppTypography.buttonLabel(color: Colors.black87, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 10),
             Text(
               'Anda dapat mengunggah berkas secara manual ke folder kelas (Akses Bebas) berikut, lalu menempelkan tautan berkas Anda di kolom input.',
-              style: GoogleFonts.dmSans(fontSize: 14, color: Colors.black54),
+              style: AppTypography.timestamp(color: Colors.black54),
             ),
           ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: Text('Tutup', style: GoogleFonts.dmSans(color: Colors.black54)),
+            child: Text('Tutup', style: AppTypography.timestamp(color: Colors.black54)),
           ),
           ElevatedButton.icon(
             onPressed: () async {
@@ -201,7 +202,7 @@ class _MengerjakanTugasPageState extends State<MengerjakanTugasPage> {
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
             icon: const Icon(Icons.open_in_new_rounded, size: 16),
-            label: Text('Buka Folder Google Drive', style: GoogleFonts.plusJakartaSans(fontSize: 14, fontWeight: FontWeight.w600)),
+            label: Text('Buka Folder Google Drive', style: AppTypography.buttonLabel(fontWeight: FontWeight.w600)),
           ),
         ],
       ),
@@ -325,11 +326,7 @@ class _MengerjakanTugasPageState extends State<MengerjakanTugasPage> {
         ),
         title: Text(
           'Mengerjakan Tugas',
-          style: GoogleFonts.plusJakartaSans(
-            color: Colors.black87,
-            fontWeight: FontWeight.bold,
-            fontSize: 18.7,
-          ),
+          style: AppTypography.chatHeaderTitle(color: Colors.black87, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
       ),
@@ -370,11 +367,7 @@ class _MengerjakanTugasPageState extends State<MengerjakanTugasPage> {
                               const SizedBox(width: 6),
                               Text(
                                 isKelompok ? 'Tugas Kelompok' : 'Tugas Mandiri',
-                                style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 14.0,
-                                  fontWeight: FontWeight.bold,
-                                  color: const Color(0xFF2563EB),
-                                ),
+                                style: AppTypography.buttonLabel(color: const Color(0xFF2563EB, fontWeight: FontWeight.bold),
                               ),
                             ],
                           ),
@@ -389,11 +382,7 @@ class _MengerjakanTugasPageState extends State<MengerjakanTugasPage> {
                             ),
                             child: Text(
                               'Sudah Terkumpul',
-                              style: GoogleFonts.plusJakartaSans(
-                                fontSize: 14.0,
-                                fontWeight: FontWeight.bold,
-                                color: const Color(0xFF059669),
-                              ),
+                              style: AppTypography.buttonLabel(color: const Color(0xFF059669, fontWeight: FontWeight.bold),
                             ),
                           ),
                       ],
@@ -401,21 +390,13 @@ class _MengerjakanTugasPageState extends State<MengerjakanTugasPage> {
                     const SizedBox(height: 12),
                     Text(
                       widget.title,
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 18.7,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black87,
-                      ),
+                      style: AppTypography.chatHeaderTitle(color: Colors.black87, fontWeight: FontWeight.bold),
                     ),
                     if (widget.taskText != null && widget.taskText!.isNotEmpty) ...[
                       const SizedBox(height: 8),
                       Text(
                         widget.taskText!,
-                        style: GoogleFonts.dmSans(
-                          fontSize: 14,
-                          color: Colors.black54,
-                          height: 1.5,
-                        ),
+                        style: AppTypography.timestamp(color: Colors.black54, height: 1.5),
                       ),
                     ],
                     if (widget.docName != null && widget.docName!.isNotEmpty) ...[
@@ -451,7 +432,7 @@ class _MengerjakanTugasPageState extends State<MengerjakanTugasPage> {
                                 widget.docName!.startsWith('http')
                                     ? '📄 Buka Lampiran Berkas (Google Drive)'
                                     : widget.docName!,
-                                style: GoogleFonts.plusJakartaSans(fontSize: 14.0, color: const Color(0xFF1E40AF), fontWeight: FontWeight.bold),
+                                style: AppTypography.buttonLabel(color: const Color(0xFF1E40AF, fontWeight: FontWeight.bold),
                               ),
                             ],
                           ),
@@ -467,11 +448,7 @@ class _MengerjakanTugasPageState extends State<MengerjakanTugasPage> {
               if (isKelompok) ...[
                 Text(
                   'Anggota Kelompok',
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 15.2,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black87,
-                  ),
+                  style: AppTypography.buttonLabel(color: Colors.black87, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8),
                 Container(
@@ -486,7 +463,7 @@ class _MengerjakanTugasPageState extends State<MengerjakanTugasPage> {
                     children: [
                       Text(
                         'Pilih anggota kelompok yang mengerjakan tugas ini:',
-                        style: GoogleFonts.dmSans(fontSize: 14.0, color: Colors.black54),
+                        style: AppTypography.timestamp(color: Colors.black54),
                       ),
                       const SizedBox(height: 10),
                       Wrap(
@@ -498,11 +475,7 @@ class _MengerjakanTugasPageState extends State<MengerjakanTugasPage> {
                           return FilterChip(
                             selected: isSelected,
                             label: Text(name),
-                            labelStyle: GoogleFonts.plusJakartaSans(
-                              fontSize: 14.0,
-                              color: isSelected ? Colors.white : Colors.black87,
-                              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                            ),
+                            labelStyle: AppTypography.buttonLabel(color: isSelected ? Colors.white : Colors.black87, fontWeight: isSelected ? FontWeight.bold : FontWeight.normal),
                             selectedColor: const Color(0xFF2563EB),
                             backgroundColor: const Color(0xFFF1F5F9),
                             onSelected: (selected) {
@@ -526,11 +499,7 @@ class _MengerjakanTugasPageState extends State<MengerjakanTugasPage> {
               // Answer Input Card
               Text(
                 'Jawaban & Catatan Siswa',
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 15.2,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
-                ),
+                style: AppTypography.buttonLabel(color: Colors.black87, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
               Container(
@@ -543,10 +512,10 @@ class _MengerjakanTugasPageState extends State<MengerjakanTugasPage> {
                 child: TextField(
                   controller: _noteController,
                   maxLines: 5,
-                  style: GoogleFonts.dmSans(fontSize: 15.2),
+                  style: AppTypography.subtitle(),
                   decoration: InputDecoration(
                     hintText: 'Tulis uraian jawaban atau rangkuman tugas di sini...',
-                    hintStyle: GoogleFonts.dmSans(fontSize: 14, color: Colors.black38),
+                    hintStyle: AppTypography.timestamp(color: Colors.black38),
                     border: InputBorder.none,
                   ),
                 ),
@@ -556,11 +525,7 @@ class _MengerjakanTugasPageState extends State<MengerjakanTugasPage> {
               // File Link & PDF Upload Card
               Text(
                 'Upload Berkas PDF / Link Berkas Tugas',
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 15.2,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
-                ),
+                style: AppTypography.buttonLabel(color: Colors.black87, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
               Container(
@@ -581,7 +546,7 @@ class _MengerjakanTugasPageState extends State<MengerjakanTugasPage> {
                         icon: const Icon(Icons.picture_as_pdf_rounded, size: 20, color: Colors.white),
                         label: Text(
                           '📄 Unggah Berkas PDF / Dokumen',
-                          style: GoogleFonts.plusJakartaSans(fontSize: 14.5, fontWeight: FontWeight.bold),
+                          style: AppTypography.buttonLabel(fontWeight: FontWeight.bold),
                         ),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFFDC2626), // Red for PDF
@@ -596,7 +561,7 @@ class _MengerjakanTugasPageState extends State<MengerjakanTugasPage> {
                     const SizedBox(height: 14),
                     Text(
                       'Atau tempelkan tautan berkas (Google Drive / GitHub / URL):',
-                      style: GoogleFonts.dmSans(fontSize: 14.0, color: Colors.black54),
+                      style: AppTypography.timestamp(color: Colors.black54),
                     ),
                     const SizedBox(height: 6),
                     Container(
@@ -608,11 +573,11 @@ class _MengerjakanTugasPageState extends State<MengerjakanTugasPage> {
                       ),
                       child: TextField(
                         controller: _linkController,
-                        style: GoogleFonts.dmSans(fontSize: 14.5),
+                        style: AppTypography.subtitle(),
                         decoration: InputDecoration(
                           icon: const Icon(Icons.link_rounded, color: Color(0xFF2563EB), size: 18),
                           hintText: 'https://drive.google.com/...',
-                          hintStyle: GoogleFonts.dmSans(fontSize: 14.0, color: Colors.black38),
+                          hintStyle: AppTypography.timestamp(color: Colors.black38),
                           border: InputBorder.none,
                         ),
                         onChanged: (val) => setState(() {}),
@@ -638,13 +603,13 @@ class _MengerjakanTugasPageState extends State<MengerjakanTugasPage> {
                                 children: [
                                   Text(
                                     'Berkas Terlampir:',
-                                    style: GoogleFonts.plusJakartaSans(fontSize: 14.0, fontWeight: FontWeight.bold, color: const Color(0xFF1E40AF)),
+                                    style: AppTypography.buttonLabel(color: const Color(0xFF1E40AF, fontWeight: FontWeight.bold),
                                   ),
                                   Text(
                                     _linkController.text,
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
-                                    style: GoogleFonts.dmSans(fontSize: 14.0, color: const Color(0xFF2563EB)),
+                                    style: AppTypography.timestamp(color: const Color(0xFF2563EB),
                                   ),
                                 ],
                               ),
@@ -689,10 +654,7 @@ class _MengerjakanTugasPageState extends State<MengerjakanTugasPage> {
                         )
                       : Text(
                           _hasSubmitted ? 'Perbarui Pengiriman' : 'Kirim Tugas',
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 16.4,
-                            fontWeight: FontWeight.bold,
-                          ),
+                          style: AppTypography.cardTitle(fontWeight: FontWeight.bold),
                         ),
                 ),
               ),
