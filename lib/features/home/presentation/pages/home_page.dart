@@ -4838,50 +4838,110 @@ class _HomePageState extends State<HomePage> {
               insetPadding: const EdgeInsets.symmetric(horizontal: 16),
               backgroundColor: isDark ? const Color(0xFF141416) : const Color(0xFFF1F5F9),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(24),
+                borderRadius: BorderRadius.circular(28),
               ),
+              clipBehavior: Clip.antiAlias,
               child: Container(
-                padding: const EdgeInsets.all(16),
-                constraints: const BoxConstraints(maxWidth: 390),
+                constraints: const BoxConstraints(maxWidth: 420),
+                decoration: BoxDecoration(
+                  color: isDark ? const Color(0xFF141416) : const Color(0xFFF1F5F9),
+                  borderRadius: BorderRadius.circular(28),
+                  border: Border.all(
+                    color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+                    width: 1.2,
+                  ),
+                ),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Header: Title & Close Button
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'Preview Statistik',
-                          style: AppTypography.chatHeaderTitle(
-                            fontSize: 18.5,
-                            fontWeight: FontWeight.bold,
-                            color: isDark ? Colors.white : Colors.black,
+                    // Header: Magenta style identical to Slider Statistik
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.fromLTRB(18, 16, 16, 16),
+                      decoration: BoxDecoration(
+                        color: isDark ? const Color(0xFFA82658) : const Color(0xFFF794BE),
+                        border: Border(
+                          bottom: BorderSide(
+                            color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+                            width: 1.0,
                           ),
                         ),
-                        GestureDetector(
-                          onTap: () => Navigator.pop(context),
-                          behavior: HitTestBehavior.opaque,
-                          child: Container(
-                            padding: const EdgeInsets.all(4),
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 42,
+                            height: 42,
                             decoration: BoxDecoration(
-                              color: isDark ? Colors.white12 : Colors.white,
+                              color: isDark ? Colors.white.withValues(alpha: 0.15) : Colors.white,
                               shape: BoxShape.circle,
-                              border: Border.all(
-                                color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
-                                width: 1.0,
+                            ),
+                            child: Center(
+                              child: Icon(
+                                Icons.insights_rounded,
+                                color: isDark ? Colors.white : Colors.black,
+                                size: 22,
                               ),
                             ),
-                            child: Icon(
-                              Icons.close_rounded,
-                              color: isDark ? Colors.white70 : Colors.black87,
-                              size: 18,
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  'Preview Statistik',
+                                  style: AppTypography.cardTitle(
+                                    color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  'Ringkasan Progres & Nilai Kelas',
+                                  style: AppTypography.timestamp(
+                                    color: isDark ? Colors.white70 : const Color(0xFF334155),
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ],
                             ),
                           ),
-                        ),
-                      ],
+                          const SizedBox(width: 6),
+                          GestureDetector(
+                            onTap: () => Navigator.pop(context),
+                            behavior: HitTestBehavior.opaque,
+                            child: Container(
+                              width: 36,
+                              height: 36,
+                              decoration: BoxDecoration(
+                                color: isDark
+                                    ? const Color(0xFF27272A)
+                                    : Colors.white.withValues(alpha: 0.8),
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(
+                                Icons.close_rounded,
+                                color: isDark ? Colors.white : Colors.black87,
+                                size: 18,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                    const SizedBox(height: 14),
+
+                    // Body: Progress Cards
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
 
                     // Segmented Progress Cards (Without Icons, Clean & Round)
                     _buildStatProgressCard(
@@ -4927,9 +4987,12 @@ class _HomePageState extends State<HomePage> {
                   ],
                 ),
               ),
-            );
-          },
-        );
+            ],
+          ),
+        ),
+      );
+    },
+  );
       },
     );
   }
@@ -7272,9 +7335,10 @@ class _HomeSearchAndNotesRowState extends State<_HomeSearchAndNotesRow> {
                   key: widget.notesKey,
                   onTap: widget.onNotesTap,
                   child: Container(
-                    padding: const EdgeInsets.fromLTRB(6, 6, 16, 6),
+                    height: 48,
+                    padding: const EdgeInsets.fromLTRB(6, 0, 16, 0),
                     decoration: BoxDecoration(
-                      color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
+                      color: isDark ? const Color(0xFF18181B) : Colors.white,
                       borderRadius: BorderRadius.circular(30),
                       border: Border.all(
                         color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
@@ -7283,6 +7347,7 @@ class _HomeSearchAndNotesRowState extends State<_HomeSearchAndNotesRow> {
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Container(
                           width: 36,

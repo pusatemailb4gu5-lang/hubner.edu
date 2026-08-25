@@ -1,9 +1,10 @@
 import 'dart:convert';
 import 'package:hubner/core/widgets/three_dots_loader.dart';
 import 'dart:async';
-import 'dart:ui';
+import 'dart:ui' as ui;
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:hubner/core/theme/app_typography.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -11,6 +12,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:hubner/features/home/presentation/pages/main_navigation_page.dart';
 import 'package:hubner/features/notifications/domain/notification_service.dart';
 import 'package:hubner/core/theme/app_colors.dart';
+import 'package:hubner/core/widgets/classroom_card_pattern_painter.dart';
 
 class AddClassPage extends StatefulWidget {
   final Map<String, String>? registrationData;
@@ -48,6 +50,8 @@ class _AddClassPageState extends State<AddClassPage> {
 
   bool _isSaving = false;
   bool _isAiGenerating = false;
+  bool _showAvatarSlider = false;
+  bool _isDefaultIcon = true;
 
   final Map<int, int> _selectedMateriIndex = {};
   final List<List<TextEditingController>> _materiTitleControllers = [];
@@ -81,9 +85,16 @@ class _AddClassPageState extends State<AddClassPage> {
   ];
   final List<Map<String, dynamic>> _stages = [];
 
+  void _onFieldChanged() {
+    if (mounted) setState(() {});
+  }
+
   @override
   void initState() {
     super.initState();
+    _nameController.addListener(_onFieldChanged);
+    _majorController.addListener(_onFieldChanged);
+
     if (widget.initialClassData != null) {
       final data = widget.initialClassData!;
       _nameController.text = data['name'] ?? '';
@@ -97,10 +108,16 @@ class _AddClassPageState extends State<AddClassPage> {
         _selectedColorIndex = data['colorIndex'];
       }
       final rawIcon = (data['icon'] ?? '').toString();
-      final iconMatch = RegExp(r'project_(\d+)').firstMatch(rawIcon);
-      if (iconMatch != null) {
-        final parsed = int.tryParse(iconMatch.group(1) ?? '1') ?? 1;
-        _selectedIconIndex = (parsed - 1).clamp(0, 11);
+      if (rawIcon == 'default_icon' || rawIcon.isEmpty) {
+        _isDefaultIcon = true;
+        _selectedIconIndex = 0;
+      } else {
+        final iconMatch = RegExp(r'project_(\d+)').firstMatch(rawIcon);
+        if (iconMatch != null) {
+          final parsed = int.tryParse(iconMatch.group(1) ?? '1') ?? 1;
+          _selectedIconIndex = (parsed - 1).clamp(0, 11);
+          _isDefaultIcon = false;
+        }
       }
       final rawStages = data['stages'] as List? ?? [];
       for (var s in rawStages) {
@@ -139,10 +156,16 @@ class _AddClassPageState extends State<AddClassPage> {
         _selectedColorIndex = data['colorIndex'];
       }
       final rawIcon = (data['icon'] ?? '').toString();
-      final iconMatch = RegExp(r'project_(\d+)').firstMatch(rawIcon);
-      if (iconMatch != null) {
-        final parsed = int.tryParse(iconMatch.group(1) ?? '1') ?? 1;
-        _selectedIconIndex = (parsed - 1).clamp(0, 11);
+      if (rawIcon == 'default_icon' || rawIcon.isEmpty) {
+        _isDefaultIcon = true;
+        _selectedIconIndex = 0;
+      } else {
+        final iconMatch = RegExp(r'project_(\d+)').firstMatch(rawIcon);
+        if (iconMatch != null) {
+          final parsed = int.tryParse(iconMatch.group(1) ?? '1') ?? 1;
+          _selectedIconIndex = (parsed - 1).clamp(0, 11);
+          _isDefaultIcon = false;
+        }
       }
       _stages.clear();
       _stageNameControllers.clear();
@@ -814,7 +837,7 @@ class _AddClassPageState extends State<AddClassPage> {
         'major': _majorController.text.trim(),
         'cp': _cpController.text.trim(),
         'deadline': deadlineStr,
-        'icon': 'project_${_selectedIconIndex + 1}.png',
+        'icon': _isDefaultIcon ? 'default_icon' : 'project_${_selectedIconIndex + 1}.png',
         'colorIndex': _selectedColorIndex,
         'ownerUid': ownerUid,
         'createdAt': FieldValue.serverTimestamp(),
@@ -1002,6 +1025,8 @@ class _AddClassPageState extends State<AddClassPage> {
 
   @override
   void dispose() {
+    _nameController.removeListener(_onFieldChanged);
+    _majorController.removeListener(_onFieldChanged);
     _nameController.dispose();
     _descController.dispose();
     _cpController.dispose();
@@ -1080,104 +1105,466 @@ class _AddClassPageState extends State<AddClassPage> {
     });
   }
 
-    Widget buildLeftColumn({bool isDesktop = false}) {
+  Widget _buildClassroomCardPreview(bool isDark) {
+    final activeColors = isDark ? _classroomDarkColors : _classroomAccentColors;
+    final Color currentColor = activeColors[_selectedColorIndex.clamp(0, activeColors.length - 1)];
+    final String subjectTitle = _nameController.text.trim().isEmpty ? 'Nama Mata Pelajaran' : _nameController.text.trim();
+    final String majorText = _majorController.text.trim().isEmpty ? 'Umum' : _majorController.text.trim();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Swipeable Classroom Card Container
+        GestureDetector(
+          onHorizontalDragEnd: (details) {
+            if (details.primaryVelocity != null) {
+              if (details.primaryVelocity! < -150) {
+                // Swipe Left -> Next color
+                setState(() {
+                  _selectedColorIndex = (_selectedColorIndex + 1) % activeColors.length;
+                });
+              } else if (details.primaryVelocity! > 150) {
+                // Swipe Right -> Prev color
+                setState(() {
+                  _selectedColorIndex = (_selectedColorIndex - 1 + activeColors.length) % activeColors.length;
+                });
+              }
+            }
+          },
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 250),
+            height: 155,
+            width: double.infinity,
+            clipBehavior: Clip.antiAlias,
+            decoration: BoxDecoration(
+              color: currentColor,
+              borderRadius: BorderRadius.circular(24),
+              border: isDark
+                  ? Border.all(
+                      color: Colors.white.withValues(alpha: 0.15),
+                      width: 1.0,
+                    )
+                  : null,
+            ),
+            child: Stack(
+              children: [
+                // Geometric Pattern matching home page
+                Positioned.fill(
+                  child: CustomPaint(
+                    painter: ClassroomCardPatternPainter(
+                      patternIndex: _selectedColorIndex % 5,
+                      accentColor: Colors.white.withValues(alpha: 0.20),
+                      isDark: isDark,
+                    ),
+                  ),
+                ),
+
+                // Card Content
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+                  child: Row(
+                    children: [
+                      // Left content column
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            // Top Tag: Live Preview pill
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: isDark
+                                    ? Colors.black.withValues(alpha: 0.35)
+                                    : Colors.white.withValues(alpha: 0.85),
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.visibility_rounded,
+                                    size: 13,
+                                    color: isDark ? Colors.white70 : Colors.black87,
+                                  ),
+                                  const SizedBox(width: 5),
+                                  Text(
+                                    'Preview Card Classroom',
+                                    style: AppTypography.timestamp(
+                                      color: isDark ? Colors.white70 : Colors.black87,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 11.5,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+
+                            // Middle: Subject Name
+                            Padding(
+                              padding: const EdgeInsets.only(right: 8.0),
+                              child: Text(
+                                subjectTitle,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 18.5,
+                                  fontWeight: FontWeight.w800,
+                                  color: isDark ? Colors.white : Colors.black87,
+                                ),
+                              ),
+                            ),
+
+                            // Bottom Tags: Tingkat & Elemen
+                            Row(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(20),
+                                    color: isDark
+                                        ? Colors.black.withValues(alpha: 0.30)
+                                        : Colors.black.withValues(alpha: 0.08),
+                                    border: Border.all(
+                                      color: isDark
+                                          ? Colors.white.withValues(alpha: 0.20)
+                                          : Colors.black.withValues(alpha: 0.15),
+                                      width: 1.0,
+                                    ),
+                                  ),
+                                  child: Text(
+                                    '$_selectedGradeLevel · $majorText',
+                                    style: AppTypography.fileSize(
+                                      color: isDark ? Colors.white : Colors.black87,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      // Right Illustration/Avatar inside card
+                      SizedBox(
+                        width: 88,
+                        height: 88,
+                        child: Center(
+                          child: _isDefaultIcon
+                              ? Container(
+                                  width: 76,
+                                  height: 76,
+                                  decoration: BoxDecoration(
+                                    color: isDark
+                                        ? Colors.black.withValues(alpha: 0.35)
+                                        : Colors.white.withValues(alpha: 0.30),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Icon(
+                                    Icons.school_rounded,
+                                    size: 44,
+                                    color: isDark ? Colors.white : Colors.black87,
+                                  ),
+                                )
+                              : Image.asset(
+                                  'assets/icon_pack/project/project_${_selectedIconIndex + 1}.png',
+                                  fit: BoxFit.contain,
+                                  errorBuilder: (_, __, ___) => Icon(
+                                    Icons.school_rounded,
+                                    size: 44,
+                                    color: isDark ? Colors.white : Colors.black87,
+                                  ),
+                                ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 10),
+
+        // Color Swatches & Swipe Hint
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Warna Card & Pola',
+              style: AppTypography.fileSize(
+                color: isDark ? Colors.white60 : Colors.black54,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            Text(
+              'Geser kartu ↔ untuk ubah',
+              style: AppTypography.fileSize(
+                color: isDark ? Colors.white38 : Colors.black38,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        SizedBox(
+          height: 34,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            itemCount: activeColors.length,
+            itemBuilder: (context, idx) {
+              final isSelected = _selectedColorIndex == idx;
+              final Color color = activeColors[idx];
+              return GestureDetector(
+                onTap: () {
+                  setState(() {
+                    _selectedColorIndex = idx;
+                  });
+                },
+                child: Container(
+                  margin: const EdgeInsets.only(right: 8),
+                  width: 32,
+                  height: 32,
+                  decoration: BoxDecoration(
+                    color: color,
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: isSelected ? (isDark ? Colors.white : Colors.black87) : Colors.transparent,
+                      width: 2.2,
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildAvatarAndTitleSection(bool isDark) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            // Left: Avatar Preview (Tap to toggle frameless slider overlay)
+            GestureDetector(
+              onTap: () {
+                setState(() {
+                  _showAvatarSlider = !_showAvatarSlider;
+                });
+              },
+              child: Stack(
+                children: [
+                  Container(
+                    width: 72,
+                    height: 72,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: isDark ? const Color(0xFF18181B) : const Color(0xFFF1F5F9),
+                      border: Border.all(
+                        color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                        width: 1.2,
+                      ),
+                    ),
+                    child: _isDefaultIcon
+                        ? Center(
+                            child: Icon(
+                              Icons.school_rounded,
+                              color: isDark ? Colors.white : const Color(0xFF7C3AED),
+                              size: 36,
+                            ),
+                          )
+                        : ClipOval(
+                            child: Padding(
+                              padding: const EdgeInsets.all(6.0),
+                              child: Image.asset(
+                                'assets/icon_pack/project/project_${_selectedIconIndex + 1}.png',
+                                fit: BoxFit.contain,
+                                errorBuilder: (_, __, ___) => const Icon(
+                                  Icons.school_rounded,
+                                  size: 36,
+                                  color: Color(0xFF7C3AED),
+                                ),
+                              ),
+                            ),
+                          ),
+                  ),
+                  Positioned(
+                    bottom: 0,
+                    right: 0,
+                    child: Container(
+                      padding: const EdgeInsets.all(5),
+                      decoration: BoxDecoration(
+                        color: isDark ? Colors.white : Colors.black,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        _showAvatarSlider ? Icons.check_rounded : Icons.camera_alt_rounded,
+                        size: 13,
+                        color: isDark ? Colors.black : Colors.white,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 14),
+
+            // Right: Mata Pelajaran Input
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Mata Pelajaran',
+                    style: AppTypography.channelTag(
+                      color: isDark ? Colors.white70 : Colors.black87,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  TextField(
+                    controller: _nameController,
+                    style: AppTypography.buttonLabel(
+                      color: isDark ? Colors.white : Colors.black87,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    decoration: InputDecoration(
+                      hintText: 'contoh: Pemrograman Web (Wajib)',
+                      hintStyle: AppTypography.timestamp(
+                        color: isDark ? Colors.white38 : Colors.black38,
+                      ),
+                      filled: true,
+                      fillColor: isDark ? const Color(0xFF18181B) : const Color(0xFFF8FAFC),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(24),
+                        borderSide: BorderSide(
+                          color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                        ),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(24),
+                        borderSide: BorderSide(
+                          color: isDark ? Colors.white : Colors.black,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+
+        // Frameless Floating Avatar Slider Overlay
+        if (_showAvatarSlider) ...[
+          const SizedBox(height: 12),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(32),
+            child: BackdropFilter(
+              filter: ui.ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+              child: Container(
+                width: double.infinity,
+                height: 58,
+                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                decoration: BoxDecoration(
+                  color: isDark
+                      ? Colors.black.withValues(alpha: 0.50)
+                      : Colors.white.withValues(alpha: 0.50),
+                  borderRadius: BorderRadius.circular(32),
+                  border: Border.all(
+                    color: isDark
+                        ? Colors.white.withValues(alpha: 0.12)
+                        : Colors.black.withValues(alpha: 0.08),
+                    width: 1.0,
+                  ),
+                ),
+                child: ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  itemCount: 11, // 0 is default icon, 1-10 are project icons
+                  separatorBuilder: (_, __) => const SizedBox(width: 8),
+                  itemBuilder: (ctx, i) {
+                    final bool isDefault = i == 0;
+                    final int projectIdx = i - 1;
+                    final bool isSelected = isDefault ? _isDefaultIcon : (!_isDefaultIcon && _selectedIconIndex == projectIdx);
+
+                    return GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          if (isDefault) {
+                            _isDefaultIcon = true;
+                            _selectedIconIndex = 0;
+                          } else {
+                            _isDefaultIcon = false;
+                            _selectedIconIndex = projectIdx;
+                          }
+                          _showAvatarSlider = false;
+                        });
+                      },
+                      child: Container(
+                        width: 48,
+                        height: 48,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: isSelected
+                              ? Border.all(
+                                  color: const Color(0xFF7C3AED),
+                                  width: 2.4,
+                                )
+                              : Border.all(color: Colors.transparent, width: 2.4),
+                          color: isDark ? const Color(0xFF18181B) : const Color(0xFFF1F5F9),
+                        ),
+                        child: isDefault
+                            ? const Center(
+                                child: Icon(
+                                  Icons.school_rounded,
+                                  color: Color(0xFF7C3AED),
+                                  size: 24,
+                                ),
+                              )
+                            : Padding(
+                                padding: const EdgeInsets.all(4.0),
+                                child: Image.asset(
+                                  'assets/icon_pack/project/project_$i.png',
+                                  fit: BoxFit.contain,
+                                  errorBuilder: (_, __, ___) => const Icon(
+                                    Icons.school_rounded,
+                                    size: 22,
+                                    color: Color(0xFF7C3AED),
+                                  ),
+                                ),
+                              ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget buildLeftColumn({bool isDesktop = false}) {
     final bool isDark = AppColors.isDarkMode;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Project Icon Choice List
-        Text(
-          'Pilih Icon Classroom',
-          style: AppTypography.buttonLabel(color: isDark ? Colors.white70 : Colors.black87, fontWeight: FontWeight.w600),
-        ),
-        const SizedBox(height: 10),
-        ScrollConfiguration(
-          behavior: DesktopScrollBehavior(),
-          child: SizedBox(
-            height: 60,
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              itemCount: 10,
-              itemBuilder: (context, idx) {
-                final isSelected = _selectedIconIndex == idx;
-                return GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      _selectedIconIndex = idx;
-                    });
-                  },
-                  child: Container(
-                    margin: const EdgeInsets.only(right: 12),
-                    padding: const EdgeInsets.all(3),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: isSelected ? (isDark ? Colors.white : Colors.black) : Colors.transparent,
-                        width: 2,
-                      ),
-                    ),
-                    child: CircleAvatar(
-                      radius: 22,
-                      backgroundColor: Colors.transparent,
-                      backgroundImage: AssetImage(
-                        'assets/icon_pack/project/project_${idx + 1}.png',
-                      ),
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
-        ),
-        const SizedBox(height: 16),
+        // 1. Live Card Classroom Preview with color/pattern swipe
+        _buildClassroomCardPreview(isDark),
+        const SizedBox(height: 18),
 
-        // Card Color Choice List
-        Text(
-          'Pilih Warna Card Classroom',
-          style: AppTypography.buttonLabel(color: isDark ? Colors.white70 : Colors.black87, fontWeight: FontWeight.w600),
-        ),
-        const SizedBox(height: 10),
-        Builder(
-          builder: (context) {
-            final activeColors = isDark ? _classroomDarkColors : _classroomAccentColors;
-            return SizedBox(
-              height: 44,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: activeColors.length,
-                itemBuilder: (context, idx) {
-                  final isSelected = _selectedColorIndex == idx;
-                  final Color color = activeColors[idx];
-                  return GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        _selectedColorIndex = idx;
-                      });
-                    },
-                    child: Container(
-                      margin: const EdgeInsets.only(right: 12),
-                      width: 36,
-                      height: 36,
-                      decoration: BoxDecoration(
-                        color: color,
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: isSelected ? (isDark ? Colors.white : Colors.black87) : Colors.transparent,
-                          width: 2.5,
-                        ),
-                      ),
-                    ),
-                  );
-                },
-              ),
-            );
-          },
-        ),
-        const SizedBox(height: 16),
+        // 2. Avatar Picker & Mata Pelajaran (sama dengan Buat Grup Diskusi)
+        _buildAvatarAndTitleSection(isDark),
+        const SizedBox(height: 14),
 
-        // Project Fields (Nama Kelas, Tingkat, Jurusan, CP)
-        _buildInputField('Mata Pelajaran', _nameController, maxLength: 80, hint: 'contoh: Pemrograman Web / Bahasa Indonesia'),
-        const SizedBox(height: 12),
+        // 3. Project Fields (Tingkat, Kelas, CP)
         
         Row(
           children: [
@@ -1275,10 +1662,10 @@ class _AddClassPageState extends State<AddClassPage> {
     if (_isAiGenerating) {
       return Container(
         width: double.infinity,
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(22),
         decoration: BoxDecoration(
           color: isDark ? const Color(0xFF18181B) : const Color(0xFFF8FAFC),
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(28),
           border: Border.all(
             color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
             width: 1.2,
@@ -1302,10 +1689,10 @@ class _AddClassPageState extends State<AddClassPage> {
     }
 
     return Container(
-      padding: const EdgeInsets.all(18),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: isDark ? const Color(0xFF18181B) : const Color(0xFFF8FAFC),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(28),
         border: Border.all(
           color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
           width: 1.2,
@@ -1329,9 +1716,9 @@ class _AddClassPageState extends State<AddClassPage> {
             'Buat materi & tugas otomatis secara instan berdasarkan Capaian Pembelajaran (CP) kelas Anda.',
             style: AppTypography.timestamp(color: isDark ? Colors.white60 : Colors.black45, height: 1.4),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 14),
           SizedBox(
-            height: 42,
+            height: 46,
             child: OutlinedButton.icon(
               onPressed: () {
                 final cp = _cpController.text.trim();
@@ -1346,17 +1733,20 @@ class _AddClassPageState extends State<AddClassPage> {
                 }
                 _runAiGeneration(cp);
               },
-              icon: const GeminiIcon(size: 14),
+              icon: const GeminiIcon(size: 15),
               label: Text(
                 'Buat Materi dengan AI',
                 style: AppTypography.buttonLabel(color: isDark ? Colors.white : Colors.black87, fontWeight: FontWeight.bold),
               ),
               style: OutlinedButton.styleFrom(
-                side: BorderSide(color: isDark ? const Color(0xFF3F3F46) : Colors.black87, width: 1.2),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
+                side: BorderSide(
+                  color: isDark ? const Color(0xFF3F3F46) : const Color(0xFFCBD5E1),
+                  width: 1.2,
                 ),
-                backgroundColor: isDark ? const Color(0xFF27272A).withOpacity(0.4) : Colors.transparent,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(24),
+                ),
+                backgroundColor: isDark ? const Color(0xFF27272A).withValues(alpha: 0.6) : Colors.white,
                 padding: EdgeInsets.zero,
               ),
             ),
@@ -1375,7 +1765,7 @@ class _AddClassPageState extends State<AddClassPage> {
         _buildGeminiCard(),
         const SizedBox(height: 24),
 
-        // 2. Stages Header Row (Without the small "Buat Classroom" button!)
+        // 2. Stages Header Row with Solid "+ Elemen" Button
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -1386,19 +1776,19 @@ class _AddClassPageState extends State<AddClassPage> {
             GestureDetector(
               onTap: _addStage,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
                 decoration: BoxDecoration(
-                  color: isDark ? const Color(0xFF7C3AED).withOpacity(0.2) : const Color(0xFFF3E8FF),
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: const Color(0xFF7C3AED), width: 1.2),
+                  color: const Color(0xFF7C3AED),
+                  borderRadius: BorderRadius.circular(20),
                 ),
                 child: Row(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.add_rounded, color: Color(0xFF7C3AED), size: 16),
+                    const Icon(Icons.add_rounded, color: Colors.white, size: 16),
                     const SizedBox(width: 4),
                     Text(
                       'Elemen',
-                      style: AppTypography.buttonLabel(color: isDark ? Colors.white : const Color(0xFF7C3AED), fontWeight: FontWeight.bold),
+                      style: AppTypography.buttonLabel(color: Colors.white, fontWeight: FontWeight.bold),
                     ),
                   ],
                 ),
@@ -1798,20 +2188,20 @@ class _AddClassPageState extends State<AddClassPage> {
                         GestureDetector(
                           onTap: _showCopyDataBottomSheet,
                           child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
                             decoration: BoxDecoration(
-                              color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
-                              borderRadius: BorderRadius.circular(14),
-                              border: Border.all(color: isDark ? const Color(0xFF3F3F46) : const Color(0xFFE2E8F0)),
+                              color: isDark ? const Color(0xFF27272A) : const Color(0xFF1E293B),
+                              borderRadius: BorderRadius.circular(20),
+                              border: isDark ? Border.all(color: const Color(0xFF3F3F46), width: 1.0) : null,
                             ),
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                const Icon(Icons.content_copy_rounded, size: 15, color: Color(0xFF7C3AED)),
+                                const Icon(Icons.content_copy_rounded, size: 14, color: Colors.white),
                                 const SizedBox(width: 6),
                                 Text(
                                   'Salin Data',
-                                  style: AppTypography.buttonLabel(color: const Color(0xFF7C3AED), fontWeight: FontWeight.bold),
+                                  style: AppTypography.buttonLabel(color: Colors.white, fontWeight: FontWeight.bold),
                                 ),
                               ],
                             ),
@@ -1968,22 +2358,20 @@ class _AddClassPageState extends State<AddClassPage> {
                         GestureDetector(
                           onTap: _showCopyDataBottomSheet,
                           child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                            padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 6.5),
                             decoration: BoxDecoration(
-                              color: isDark ? const Color(0xFF18181B) : const Color(0xFFF1F5F9),
-                              borderRadius: BorderRadius.circular(14),
-                              border: Border.all(
-                                color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
-                              ),
+                              color: isDark ? const Color(0xFF27272A) : const Color(0xFF1E293B),
+                              borderRadius: BorderRadius.circular(20),
+                              border: isDark ? Border.all(color: const Color(0xFF3F3F46), width: 1.0) : null,
                             ),
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                const Icon(Icons.content_copy_rounded, size: 14, color: Color(0xFF7C3AED)),
-                                const SizedBox(width: 4),
+                                const Icon(Icons.content_copy_rounded, size: 13, color: Colors.white),
+                                const SizedBox(width: 5),
                                 Text(
                                   'Salin Data',
-                                  style: AppTypography.channelTag(color: const Color(0xFF7C3AED), fontWeight: FontWeight.bold),
+                                  style: AppTypography.buttonLabel(color: Colors.white, fontWeight: FontWeight.bold),
                                 ),
                               ],
                             ),
@@ -3129,8 +3517,8 @@ class _ShimmerSkeletonBoxState extends State<ShimmerSkeletonBox> with SingleTick
 
 class DesktopScrollBehavior extends MaterialScrollBehavior {
   @override
-  Set<PointerDeviceKind> get dragDevices => {
-    PointerDeviceKind.touch,
-    PointerDeviceKind.mouse,
+  Set<ui.PointerDeviceKind> get dragDevices => {
+    ui.PointerDeviceKind.touch,
+    ui.PointerDeviceKind.mouse,
   };
 }

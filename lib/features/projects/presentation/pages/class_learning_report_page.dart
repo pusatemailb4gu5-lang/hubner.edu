@@ -230,7 +230,7 @@ class _ClassLearningReportPageState extends State<ClassLearningReportPage>
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF2E1325) : const Color(0xFFF794BE),
+        color: isDark ? const Color(0xFFC76D10) : const Color(0xFFF7BD84),
         borderRadius: const BorderRadius.vertical(bottom: Radius.circular(36)),
       ),
       child: Stack(

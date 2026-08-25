@@ -535,10 +535,10 @@ class _ClassPageState extends State<ClassPage> {
           ),
           const SizedBox(width: 8),
 
-          // 4. Statistik Lengkap (2 Baris + Bounce)
+          // 4. Statistik Lengkap (2 Baris + Bounce - Magenta)
           _BouncyMenuSliderCard(
             icon: Icons.insights_rounded,
-            cardBg: const Color(0xFFF7BD84),
+            cardBg: const Color(0xFFF794BE),
             title: 'Statistik\nLengkap',
             onTap: () {
               Navigator.of(context).push(
@@ -555,10 +555,10 @@ class _ClassPageState extends State<ClassPage> {
           ),
           const SizedBox(width: 8),
 
-          // 5. Laporan Hasil Belajar (2 Baris + Bounce)
+          // 5. Laporan Hasil Belajar (2 Baris + Bounce - Orange)
           _BouncyMenuSliderCard(
             icon: Icons.assignment_outlined,
-            cardBg: const Color(0xFFF794BE),
+            cardBg: const Color(0xFFF7BD84),
             title: 'Laporan Hasil\nBelajar',
             onTap: () {
               Navigator.of(context).push(

@@ -29,8 +29,8 @@ class AppTypography {
   static const double sizeDocumentTitle      = 18.5; // Nama Berkas Dokumen (Disamakan dengan Judul Chat Grup 18.5px)
   static const double sizeButtonAction       = 15.0; // Tombol Aksi ("Catatan", "Statistik", dsb.)
   static const double sizeTagChannel         = 13.5; // Tag Channel (#umum, #diskusi)
-  static const double sizeDropdown           = 18.0; // Tombol & Opsi Menu Dropdown Selector
-  static const double sizeCheckbox           = 18.0; // Teks Label Checkbox & Multi-selector (18px)
+  static const double sizeDropdown           = 15.0; // Tombol & Opsi Menu Dropdown Selector
+  static const double sizeCheckbox           = 15.0; // Teks Label Checkbox & Multi-selector (18px)
   static const double sizeFileSize           = 12.0; // Ukuran Berkas Lampiran (KB/MB)
   static const double sizeMicroBadge         = 11.0; // Tag Status / HD Badge / Counter Reaksi
 
