@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:hubner/core/theme/app_typography.dart';
 import 'package:hubner/core/theme/app_colors.dart';
+import 'package:hubner/features/notifications/domain/notification_service.dart';
 import '../../../projects/presentation/pages/class_page.dart';
 
 class NotificationsPage extends StatefulWidget {
@@ -15,46 +15,18 @@ class NotificationsPage extends StatefulWidget {
 }
 
 class _NotificationsPageState extends State<NotificationsPage> {
-  Set<String> _readItemIds = {};
-
   @override
   void initState() {
     super.initState();
-    _loadReadItems();
-  }
-
-  Future<void> _loadReadItems() async {
-    final prefs = await SharedPreferences.getInstance();
-    final list = prefs.getStringList('read_notifications_ids') ?? [];
-    if (mounted) {
-      setState(() {
-        _readItemIds = list.toSet();
-      });
-    }
+    NotificationService.initReadIds();
   }
 
   Future<void> _markItemAsRead(String id) async {
-    if (id.isEmpty || _readItemIds.contains(id)) return;
-    final prefs = await SharedPreferences.getInstance();
-    _readItemIds.add(id);
-    await prefs.setStringList('read_notifications_ids', _readItemIds.toList());
-    if (mounted) {
-      setState(() {});
-    }
+    await NotificationService.markAsRead(id);
   }
 
   Future<void> _markAllAsRead(List<Map<String, dynamic>> items) async {
-    final prefs = await SharedPreferences.getInstance();
-    for (var it in items) {
-      final id = it['id']?.toString() ?? '';
-      if (id.isNotEmpty) {
-        _readItemIds.add(id);
-      }
-    }
-    await prefs.setStringList('read_notifications_ids', _readItemIds.toList());
-    if (mounted) {
-      setState(() {});
-    }
+    await NotificationService.markAllAsRead(items.map((it) => it['id']?.toString() ?? ''));
   }
 
   String _formatTime(dynamic createdAt) {
@@ -302,10 +274,12 @@ class _NotificationsPageState extends State<NotificationsPage> {
                     // Cap to 30 items max
                     final finalItems = items.take(30).toList();
 
-                    // Calculate unread count
-                    final int unreadCount = finalItems.where((it) => !_readItemIds.contains(it['id'])).length;
+                    return ValueListenableBuilder<Set<String>>(
+                      valueListenable: NotificationService.readNotificationIdsNotifier,
+                      builder: (context, readIds, _) {
+                        final int unreadCount = finalItems.where((it) => !readIds.contains(it['id'])).length;
 
-                    return Scaffold(
+                        return Scaffold(
                       backgroundColor: isDark ? const Color(0xFF000000) : Colors.white,
                       appBar: AppBar(
                         backgroundColor: isDark ? const Color(0xFF000000) : Colors.white,
@@ -428,84 +402,86 @@ class _NotificationsPageState extends State<NotificationsPage> {
                                 color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
                               ),
                               itemBuilder: (context, index) {
-                                final item = finalItems[index];
-                                final String itemId = item['id'] ?? '';
-                                final bool isRead = _readItemIds.contains(itemId);
+                                 final item = finalItems[index];
+                                 final String itemId = item['id'] ?? '';
+                                 final bool isRead = readIds.contains(itemId);
 
-                                return InkWell(
-                                  onTap: () {
-                                    _markItemAsRead(itemId);
-                                    if (item['projectId'] != null && (item['projectId'] as String).isNotEmpty) {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (_) => ClassPage(
-                                            projectId: item['projectId'],
-                                            projectTitle: 'Detail Classroom',
-                                          ),
-                                        ),
-                                      );
-                                    }
-                                  },
-                                  borderRadius: BorderRadius.circular(12),
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(vertical: 6.0, horizontal: 4.0),
-                                    child: Row(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        // Notification Text (Normal weight, font size 18, no icon)
-                                        Expanded(
-                                          child: Text(
-                                            item['text'],
-                                            style: AppTypography.chatBody(
-                                              fontSize: 18.0,
-                                              color: isDark ? Colors.white : Colors.black87,
-                                              fontWeight: FontWeight.normal,
-                                              height: 1.35,
-                                            ),
-                                          ),
-                                        ),
-                                        const SizedBox(width: 12),
+                                 return InkWell(
+                                   onTap: () {
+                                     _markItemAsRead(itemId);
+                                     if (item['projectId'] != null && (item['projectId'] as String).isNotEmpty) {
+                                       Navigator.push(
+                                         context,
+                                         MaterialPageRoute(
+                                           builder: (_) => ClassPage(
+                                             projectId: item['projectId'],
+                                             projectTitle: 'Detail Classroom',
+                                           ),
+                                         ),
+                                       );
+                                     }
+                                   },
+                                   borderRadius: BorderRadius.circular(12),
+                                   child: Padding(
+                                     padding: const EdgeInsets.symmetric(vertical: 6.0, horizontal: 4.0),
+                                     child: Row(
+                                       crossAxisAlignment: CrossAxisAlignment.start,
+                                       children: [
+                                         // Notification Text (Normal weight, font size 18, no icon)
+                                         Expanded(
+                                           child: Text(
+                                             item['text'],
+                                             style: AppTypography.chatBody(
+                                               fontSize: 18.0,
+                                               color: isDark ? Colors.white : Colors.black87,
+                                               fontWeight: FontWeight.normal,
+                                               height: 1.35,
+                                             ),
+                                           ),
+                                         ),
+                                         const SizedBox(width: 12),
 
-                                        // Trailing Timestamp & Small Unread Indicator Dot
-                                        Column(
-                                          crossAxisAlignment: CrossAxisAlignment.end,
-                                          children: [
-                                            if (!isRead) ...[
-                                              Container(
-                                                width: 7,
-                                                height: 7,
-                                                margin: const EdgeInsets.only(bottom: 4, top: 4),
-                                                decoration: const BoxDecoration(
-                                                  shape: BoxShape.circle,
-                                                  color: Color(0xFFEF4444), // Red Indicator Dot
-                                                ),
-                                              ),
-                                            ],
-                                            Text(
-                                              _formatTime(item['createdAt']),
-                                              style: AppTypography.timestamp(
-                                                fontSize: 13,
-                                                color: isDark ? Colors.white38 : Colors.black38,
-                                                fontWeight: FontWeight.w500,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                );
-                              },
-                            ),
-                    );
-                  },
-                );
-              },
-            );
-          },
-        ),
-      ),
-    );
-  }
+                                         // Trailing Timestamp & Small Unread Indicator Dot
+                                         Column(
+                                           crossAxisAlignment: CrossAxisAlignment.end,
+                                           children: [
+                                             if (!isRead) ...[
+                                               Container(
+                                                 width: 7,
+                                                 height: 7,
+                                                 margin: const EdgeInsets.only(bottom: 4, top: 4),
+                                                 decoration: const BoxDecoration(
+                                                   shape: BoxShape.circle,
+                                                   color: Color(0xFFEF4444), // Red Indicator Dot
+                                                 ),
+                                               ),
+                                             ],
+                                             Text(
+                                               _formatTime(item['createdAt']),
+                                               style: AppTypography.timestamp(
+                                                 fontSize: 13,
+                                                 color: isDark ? Colors.white38 : Colors.black38,
+                                                 fontWeight: FontWeight.w500,
+                                               ),
+                                             ),
+                                           ],
+                                         ),
+                                       ],
+                                     ),
+                                   ),
+                                 );
+                               },
+                             ),
+                     );
+                   },
+                 );
+               },
+             );
+           },
+         );
+       },
+     ),
+   ),
+ );
+}
 }

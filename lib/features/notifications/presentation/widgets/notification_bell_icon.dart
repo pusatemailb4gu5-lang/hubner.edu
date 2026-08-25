@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:hubner/features/notifications/domain/notification_service.dart';
 import '../pages/notifications_page.dart';
 
 class NotificationBellIcon extends StatefulWidget {
@@ -19,22 +19,10 @@ class NotificationBellIcon extends StatefulWidget {
 }
 
 class _NotificationBellIconState extends State<NotificationBellIcon> {
-  Set<String> _readIds = {};
-
   @override
   void initState() {
     super.initState();
-    _loadReadIds();
-  }
-
-  Future<void> _loadReadIds() async {
-    final prefs = await SharedPreferences.getInstance();
-    final list = prefs.getStringList('read_notifications_ids') ?? [];
-    if (mounted) {
-      setState(() {
-        _readIds = list.toSet();
-      });
-    }
+    NotificationService.initReadIds();
   }
 
   @override
@@ -63,7 +51,12 @@ class _NotificationBellIconState extends State<NotificationBellIcon> {
                 final userProjects = projDocs.where((doc) {
                   final pData = doc.data() as Map<String, dynamic>;
                   final pId = doc.id;
-                  final creatorId = pData['creatorId'] ?? pData['ownerUid'] ?? pData['teacherId'] ?? '';
+                  final creatorId = pData['creatorId'] ??
+                      pData['ownerUid'] ??
+                      pData['teacherId'] ??
+                      pData['teacherUid'] ??
+                      pData['uid'] ??
+                      '';
                   final members = List.from(pData['members'] ?? []);
                   final studentIds = List.from(pData['studentIds'] ?? []);
 
@@ -74,7 +67,7 @@ class _NotificationBellIconState extends State<NotificationBellIcon> {
                 }).toList();
 
                 final validProjectIds = userProjects.map((p) => p.id).toSet();
-                int unreadCount = 0;
+                final List<String> allItemIds = [];
 
                 // 1. Direct Notifications
                 for (var doc in notifDocs) {
@@ -88,9 +81,7 @@ class _NotificationBellIconState extends State<NotificationBellIcon> {
                   final bool isRoleMatch = targetRole == 'all' || targetRole == userRole;
 
                   if ((isMyUser || isMyClass) && isRoleMatch) {
-                    if (!_readIds.contains(doc.id)) {
-                      unreadCount++;
-                    }
+                    allItemIds.add(doc.id);
                   }
                 }
 
@@ -105,27 +96,38 @@ class _NotificationBellIconState extends State<NotificationBellIcon> {
                     final tasks = List.from(st['tasks'] ?? st['tugas'] ?? []);
                     for (var t in tasks) {
                       final tTitle = t['title'] ?? t['name'] ?? 'Tugas';
-                      final String itemId = 'task_${pId}_$tTitle';
-                      if (!_readIds.contains(itemId)) unreadCount++;
+                      allItemIds.add('task_${pId}_$tTitle');
                     }
                     // Materis
                     final materis = List.from(st['materis'] ?? st['materi'] ?? st['materials'] ?? []);
                     for (var m in materis) {
                       final mTitle = m['title'] ?? m['name'] ?? 'Materi Pembelajaran';
-                      final String itemId = 'materi_${pId}_$mTitle';
-                      if (!_readIds.contains(itemId)) unreadCount++;
+                      allItemIds.add('materi_${pId}_$mTitle');
                     }
                     // Quizzes
                     final quizzes = List.from(st['quizzes'] ?? st['quiz'] ?? st['soal'] ?? []);
                     for (var q in quizzes) {
                       final qTitle = q['title'] ?? q['name'] ?? 'Quiz Kelas';
-                      final String itemId = 'quiz_${pId}_$qTitle';
-                      if (!_readIds.contains(itemId)) unreadCount++;
+                      allItemIds.add('quiz_${pId}_$qTitle');
                     }
+                  }
+
+                  final pStatus = (pData['status'] ?? '').toString();
+                  if (pStatus == 'Selesai') {
+                    allItemIds.add('classroom_done_$pId');
                   }
                 }
 
-                return _buildBellContainer(unreadCount);
+                // Cap to 30 most recent IDs
+                final topIds = allItemIds.toSet().take(30).toList();
+
+                return ValueListenableBuilder<Set<String>>(
+                  valueListenable: NotificationService.readNotificationIdsNotifier,
+                  builder: (context, readIds, _) {
+                    final int unreadCount = topIds.where((id) => !readIds.contains(id)).length;
+                    return _buildBellContainer(unreadCount);
+                  },
+                );
               },
             );
           },
@@ -136,14 +138,13 @@ class _NotificationBellIconState extends State<NotificationBellIcon> {
 
   Widget _buildBellContainer(int unreadCount) {
     return GestureDetector(
-      onTap: () async {
-        await Navigator.push(
+      onTap: () {
+        Navigator.push(
           context,
           MaterialPageRoute(
             builder: (_) => const NotificationsPage(),
           ),
         );
-        _loadReadIds();
       },
       behavior: HitTestBehavior.opaque,
       child: Container(
@@ -168,11 +169,11 @@ class _NotificationBellIconState extends State<NotificationBellIcon> {
             ),
             if (unreadCount > 0)
               Positioned(
-                top: 2,
-                right: 2,
+                top: -3,
+                right: -3,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
-                  constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
+                  padding: const EdgeInsets.symmetric(horizontal: 4.5, vertical: 1.5),
+                  constraints: const BoxConstraints(minWidth: 18, minHeight: 18),
                   decoration: BoxDecoration(
                     color: const Color(0xFFEF4444),
                     shape: BoxShape.circle,
@@ -186,7 +187,7 @@ class _NotificationBellIconState extends State<NotificationBellIcon> {
                       unreadCount > 99 ? '99+' : '$unreadCount',
                       style: const TextStyle(
                         color: Colors.white,
-                        fontSize: 9.0,
+                        fontSize: 9.5,
                         fontWeight: FontWeight.bold,
                         height: 1.0,
                       ),
