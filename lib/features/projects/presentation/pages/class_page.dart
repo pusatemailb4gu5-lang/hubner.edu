@@ -431,13 +431,6 @@ class _ClassPageState extends State<ClassPage> {
           color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
           width: 1.2,
         ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.05),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
       ),
       child: Row(
         children: [
@@ -656,13 +649,6 @@ class _ClassPageState extends State<ClassPage> {
           decoration: BoxDecoration(
             color: isDark ? const Color(0xFF18181B) : Colors.white,
             borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.2),
-                blurRadius: 16,
-                offset: const Offset(0, -4),
-              ),
-            ],
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,

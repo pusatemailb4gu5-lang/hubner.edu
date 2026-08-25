@@ -2489,22 +2489,6 @@ class _HomePageState extends State<HomePage> {
                                                             BorderRadius.circular(
                                                               9,
                                                             ),
-                                                        boxShadow: [
-                                                          BoxShadow(
-                                                            color:
-                                                                const Color(
-                                                                  0xFF7E22CE,
-                                                                ).withValues(
-                                                                  alpha: 0.25,
-                                                                ),
-                                                            blurRadius: 4,
-                                                            offset:
-                                                                const Offset(
-                                                                  0,
-                                                                  2,
-                                                                ),
-                                                          ),
-                                                        ],
                                                       ),
                                                       child: const Icon(
                                                         Icons
@@ -2724,24 +2708,6 @@ class _HomePageState extends State<HomePage> {
                                                                       BorderRadius.circular(
                                                                         9,
                                                                       ),
-                                                                  boxShadow: [
-                                                                    BoxShadow(
-                                                                      color:
-                                                                          const Color(
-                                                                            0xFFD97706,
-                                                                          ).withValues(
-                                                                            alpha:
-                                                                                0.25,
-                                                                          ),
-                                                                      blurRadius:
-                                                                          4,
-                                                                      offset:
-                                                                          const Offset(
-                                                                            0,
-                                                                            2,
-                                                                          ),
-                                                                    ),
-                                                                  ],
                                                                 ),
                                                                 child: const Icon(
                                                                   Icons
