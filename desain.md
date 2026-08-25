@@ -212,7 +212,7 @@ Standar tipografi resmi Hubner Edu mengacu pada arsitektur baku **Area Pesan Hal
 | :--- | :--- | :--- | :--- | :--- |
 | **Large Page Title** | `28.0` – `30.0` px | `FontWeight.bold` (w700/w800) | Plus Jakarta Sans | Judul halaman besar ("Chat", "Laporan Perkembangan", "Hubner Edu") |
 | **Chat Header Title (AppBar)** | `18.0` – `20.0` px | `FontWeight.bold` (w700) | Plus Jakarta Sans | **Nama grup / kontak di Header Chat** ("#umum", "Kelas Matematika", "Bagus") |
-| **Chat Header Subtitle** | `14.5` – `15.0` px | `FontWeight.w500` (w500) | DM Sans | Keterangan status di header ("3 anggota", "Online", "Terakhir dilihat...") |
+| **Chat Header Subtitle** | `18.0` px | `FontWeight.w500` (w500) | DM Sans | Keterangan status di header ("3 anggota", "Online", "Terakhir dilihat...") |
 | **Chat Message / Primary Body** | `20.0` px | `FontWeight.normal` (w400) | DM Sans | **Isi teks bubble pesan chat** ("tes", "Selamat pagi semuanya..."), deskripsi utama materi |
 | **Input TextField Chat / Form** | `20.0` px | `FontWeight.normal` (w400) | DM Sans | Kolom input pesan ("Tulis pesan...", "Cari...", "Keterangan...") |
 | **Sender Display Name** | `18.0` px | `FontWeight.bold` (w700) | Plus Jakarta Sans | **Nama pengirim di bubble chat** ("Bagus Setia Budi", "Pak Guru") |

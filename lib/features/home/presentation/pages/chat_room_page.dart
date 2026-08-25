@@ -3930,7 +3930,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                   Text(
                                     subtitle,
                                     style: GoogleFonts.dmSans(
-                                      fontSize: 14.5,
+                                      fontSize: 18.0,
                                       color: isDark ? Colors.white60 : Colors.black45,
                                       fontWeight: FontWeight.w500,
                                     ),
@@ -4388,11 +4388,11 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                             ),
                                             const SizedBox(height: 12),
                                             Text(
-                                              'Belum ada pesan di sini.\nMulai obrolan sekarang!',
-                                              textAlign: TextAlign.center,
+                                              subtitle,
                                               style: GoogleFonts.dmSans(
-                                                fontSize: 15,
+                                                fontSize: 18.0,
                                                 color: isDark ? Colors.white60 : Colors.black45,
+                                                fontWeight: FontWeight.w500,
                                               ),
                                             ),
                                           ],

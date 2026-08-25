@@ -1257,13 +1257,6 @@ class _DiscussionTabState extends State<DiscussionTab> {
                           color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
                           width: 1.2,
                         ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.05),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
                       ),
                       child: Row(
                         children: [
@@ -1281,15 +1274,15 @@ class _DiscussionTabState extends State<DiscussionTab> {
                                   _searchQuery = val;
                                 });
                               },
-                              style: GoogleFonts.plusJakartaSans(
-                                fontSize: 14,
+                              style: GoogleFonts.dmSans(
+                                fontSize: 20.0,
                                 color: isDark ? Colors.white : Colors.black87,
                               ),
                               decoration: InputDecoration(
                                 hintText: 'Cari thread diskusi...',
                                 hintStyle: GoogleFonts.dmSans(
                                   color: isDark ? Colors.white38 : Colors.black38,
-                                  fontSize: 14,
+                                  fontSize: 20.0,
                                 ),
                                 border: InputBorder.none,
                                 isDense: true,
@@ -2838,15 +2831,15 @@ class _WhatsAppStyleNewChatModalState extends State<_WhatsAppStyleNewChatModal> 
                             _contactSearch = val.trim().toLowerCase();
                           });
                         },
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 13.5,
+                        style: GoogleFonts.dmSans(
+                          fontSize: 20.0,
                           color: isDark ? Colors.white : Colors.black87,
                         ),
                         decoration: InputDecoration(
                           hintText: 'Cari kontak, kelas, atau teman',
                           hintStyle: GoogleFonts.dmSans(
                             color: isDark ? Colors.white38 : Colors.black38,
-                            fontSize: 13.5,
+                            fontSize: 20.0,
                           ),
                           border: InputBorder.none,
                           isDense: true,
@@ -3279,15 +3272,15 @@ class _WhatsAppStyleNewChatModalState extends State<_WhatsAppStyleNewChatModal> 
                                   _memberSearch = val.trim().toLowerCase();
                                 });
                               },
-                              style: GoogleFonts.plusJakartaSans(
-                                fontSize: 13.5,
+                              style: GoogleFonts.dmSans(
+                                fontSize: 20.0,
                                 color: isDark ? Colors.white : Colors.black87,
                               ),
                               decoration: InputDecoration(
                                 hintText: 'Cari teman',
                                 hintStyle: GoogleFonts.dmSans(
                                   color: isDark ? Colors.white38 : Colors.black38,
-                                  fontSize: 13.5,
+                                  fontSize: 20.0,
                                 ),
                                 border: InputBorder.none,
                                 isDense: true,
@@ -3662,15 +3655,15 @@ class _WhatsAppStyleNewChatModalState extends State<_WhatsAppStyleNewChatModal> 
                                     _memberSearch = val.trim().toLowerCase();
                                   });
                                 },
-                                style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 13.5,
+                                style: GoogleFonts.dmSans(
+                                  fontSize: 20.0,
                                   color: isDark ? Colors.white : Colors.black87,
                                 ),
                                 decoration: InputDecoration(
                                   hintText: 'Cari anggota kelas',
                                   hintStyle: GoogleFonts.dmSans(
                                     color: isDark ? Colors.white38 : Colors.black38,
-                                    fontSize: 13.5,
+                                    fontSize: 20.0,
                                   ),
                                   border: InputBorder.none,
                                   isDense: true,
