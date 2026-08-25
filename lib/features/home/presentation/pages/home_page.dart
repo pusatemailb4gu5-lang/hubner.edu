@@ -1692,6 +1692,7 @@ class _HomePageState extends State<HomePage> {
                       .trim();
 
                   return SafeArea(
+                    bottom: false,
                     child: Stack(
                       children: [
                         SingleChildScrollView(

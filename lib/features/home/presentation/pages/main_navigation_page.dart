@@ -4625,6 +4625,7 @@ class _DocumentsTabState extends State<DocumentsTab> {
               child: Container(
                 constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width > 500 ? double.infinity : 500),
                 child: SafeArea(
+                  bottom: false,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -5945,6 +5946,7 @@ class _ProfilePageState extends State<ProfilePage> {
             child: Container(
               constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width > 500 ? double.infinity : 500),
               child: SafeArea(
+                bottom: false,
                 child: Stack(
                   children: [
                     SingleChildScrollView(

@@ -1505,6 +1505,7 @@ class _MonitoringPageState extends State<MonitoringPage> {
       body: AnimatedRainbowBackground(
         child: SafeArea(
           top: false,
+          bottom: false,
           child: SingleChildScrollView(
             physics: const BouncingScrollPhysics(),
             child: Align(

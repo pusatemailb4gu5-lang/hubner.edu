@@ -135,6 +135,7 @@ class _TodoPageState extends State<TodoPage> {
         child: Container(
           constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width > 500 ? double.infinity : 500),
           child: SafeArea(
+            bottom: false,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [

@@ -17,6 +17,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:googleapis/drive/v3.dart' as drive;
 import 'package:url_launcher/url_launcher.dart';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:hubner/core/theme/app_colors.dart';
 import 'package:hubner/core/theme/app_typography.dart';
 import 'package:hubner/main.dart' show HubnerApp;
@@ -901,15 +902,9 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
       }
     }
 
-    // Coba dapatkan access token aktif secara silent (TIDAK membuka prompt interaktif agar tidak kedip-kedip)
-    if (driveAccessToken == null || driveAccessToken.isEmpty) {
-      try {
-        final account = await GoogleSignIn.instance.attemptLightweightAuthentication();
-        if (account != null) {
-          final auth = await account.authorizationClient.authorizeScopes([drive.DriveApi.driveFileScope]);
-          driveAccessToken = auth.accessToken;
-        }
-      } catch (_) {}
+    // Gunakan access token dari project/discussion jika tersedia
+    if (driveAccessToken != null && driveAccessToken.isEmpty) {
+      driveAccessToken = null;
     }
 
     // Jika rootFolderId dan driveAccessToken tersedia, pastikan struktur subfolder Data/diskusi/{Id diskusi} dibuat
@@ -978,7 +973,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
         'color': const Color(0xFF7C3AED),
         'onTap': () {
           setState(() => _showAttachmentPanel = false);
-          _pickAndSendMedia(isImage: true);
+          _pickAndSendMedia(imageSource: ImageSource.camera);
         },
       },
       {
@@ -988,7 +983,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
         'color': const Color(0xFFEC4899),
         'onTap': () {
           setState(() => _showAttachmentPanel = false);
-          _pickAndSendMedia(isImage: true);
+          _pickAndSendMedia(imageSource: ImageSource.gallery);
         },
       },
       {
@@ -998,7 +993,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
         'color': const Color(0xFF2563EB),
         'onTap': () {
           setState(() => _showAttachmentPanel = false);
-          _pickAndSendMedia(isImage: false);
+          _pickAndSendMedia(isDocument: true);
         },
       },
       if (showCpFeatures) ...[
@@ -1671,20 +1666,46 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
     );
   }
 
-  Future<void> _pickAndSendMedia({required bool isImage}) async {
+  Future<void> _pickAndSendMedia({
+    ImageSource? imageSource,
+    bool isDocument = false,
+  }) async {
     try {
-      final result = await FilePicker.pickFiles(
-        type: isImage ? FileType.image : FileType.any,
-      );
-      if (result == null || result.files.isEmpty) return;
-      final pickedFile = result.files.first;
-
       Uint8List rawBytes;
-      if (kIsWeb) {
-        rawBytes = pickedFile.bytes!;
+      String fileName;
+      int fileSize;
+
+      if (imageSource != null) {
+        final picker = ImagePicker();
+        final XFile? picked = await picker.pickImage(
+          source: imageSource,
+          imageQuality: 95,
+        );
+        if (picked == null) return;
+        rawBytes = await picked.readAsBytes();
+        fileName = picked.name.isNotEmpty ? picked.name : 'photo_${DateTime.now().millisecondsSinceEpoch}.jpg';
+        fileSize = rawBytes.length;
       } else {
-        rawBytes = await File(pickedFile.path!).readAsBytes();
+        final result = await FilePicker.pickFiles(
+          type: isDocument ? FileType.any : FileType.image,
+        );
+        if (result == null || result.files.isEmpty) return;
+        final pickedFile = result.files.first;
+        if (kIsWeb) {
+          rawBytes = pickedFile.bytes!;
+        } else {
+          rawBytes = await File(pickedFile.path!).readAsBytes();
+        }
+        fileName = pickedFile.name;
+        fileSize = pickedFile.size;
       }
+
+      final bool isImage = imageSource != null ||
+          fileName.toLowerCase().endsWith('.jpg') ||
+          fileName.toLowerCase().endsWith('.jpeg') ||
+          fileName.toLowerCase().endsWith('.png') ||
+          fileName.toLowerCase().endsWith('.webp') ||
+          fileName.toLowerCase().endsWith('.gif');
 
       bool isHd = false;
       String caption = '';
@@ -1696,7 +1717,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
           MaterialPageRoute(
             builder: (dialogCtx) => ImagePreviewSendDialog(
               imageBytes: rawBytes,
-              fileName: pickedFile.name,
+              fileName: fileName,
               isDark: isDark,
             ),
             fullscreenDialog: true,
@@ -1729,7 +1750,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
       );
 
       Uint8List uploadBytes = rawBytes;
-      String uploadFileName = pickedFile.name;
+      String uploadFileName = fileName;
       String thumbnailLink = '';
 
       if (isImage) {
@@ -1753,33 +1774,34 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
         imageLink = 'data:image/jpeg;base64,${base64Encode(uploadBytes)}';
       }
 
-      // Check Drive info silently without triggering interactive OAuth prompts
+      // Check Drive info ONLY for non-image files, completely silently without Google login popups
       String? driveFolderId;
-      String? driveAccessToken;
       String driveFolderUrl = '';
 
-      try {
-        final driveInfo = await _getDiscussionDriveInfo();
-        driveFolderId = driveInfo['folderId'];
-        driveAccessToken = driveInfo['accessToken'];
-        driveFolderUrl = driveInfo['folderUrl'] ?? '';
+      if (!isImage) {
+        try {
+          final driveInfo = await _getDiscussionDriveInfo();
+          driveFolderId = driveInfo['folderId'];
+          final driveAccessToken = driveInfo['accessToken'];
+          driveFolderUrl = driveInfo['folderUrl'] ?? '';
 
-        // If it's a non-image file and drive token is already ready, upload to drive
-        if (!isImage && driveFolderId != null && driveFolderId.isNotEmpty && driveAccessToken != null && driveAccessToken.isNotEmpty) {
-          final uploadResult = await GoogleDriveService.uploadFile(
-            accessToken: driveAccessToken,
-            folderId: driveFolderId,
-            fileName: uploadFileName,
-            bytes: uploadBytes,
-          );
-          fileLink = uploadResult['directLink'] ?? uploadResult['viewLink'] ?? driveFolderUrl;
+          // If it's a non-image file and drive token is already ready, upload to drive
+          if (driveFolderId != null && driveFolderId.isNotEmpty && driveAccessToken != null && driveAccessToken.isNotEmpty) {
+            final uploadResult = await GoogleDriveService.uploadFile(
+              accessToken: driveAccessToken,
+              folderId: driveFolderId,
+              fileName: uploadFileName,
+              bytes: uploadBytes,
+            );
+            fileLink = uploadResult['directLink'] ?? uploadResult['viewLink'] ?? driveFolderUrl;
+          }
+        } catch (e) {
+          debugPrint('Silent drive check error: $e');
         }
-      } catch (e) {
-        debugPrint('Silent drive check error: $e');
-      }
 
-      if (!isImage && fileLink.isEmpty) {
-        fileLink = driveFolderUrl;
+        if (fileLink.isEmpty) {
+          fileLink = driveFolderUrl;
+        }
       }
 
       final user = FirebaseAuth.instance.currentUser;
@@ -1818,8 +1840,8 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
         if (mounted) setState(() {});
       }
 
-      final String fileExt = pickedFile.name.contains('.') ? pickedFile.name.split('.').last.toLowerCase() : '';
-      final String formattedSize = _formatFileSize(pickedFile.size);
+      final String fileExt = fileName.contains('.') ? fileName.split('.').last.toLowerCase() : '';
+      final String formattedSize = _formatFileSize(fileSize);
 
       // Send message with media info
       await FirebaseFirestore.instance
@@ -1917,7 +1939,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
           'uploaderName': senderName,
           'uploaderAvatar': senderAvatar,
           'discussionId': targetDocId,
-          'fileSize': pickedFile.size,
+          'fileSize': fileSize,
           'uploadedAt': FieldValue.serverTimestamp(),
         });
       } catch (e) {
