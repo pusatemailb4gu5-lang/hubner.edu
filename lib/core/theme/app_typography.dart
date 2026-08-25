@@ -11,6 +11,19 @@ class AppTypography {
   AppTypography._();
 
   // =========================================================================
+  // 0. SCREEN HORIZONTAL MARGIN TOKENS (Acuan Standar Tampilan Layar Full App)
+  // =========================================================================
+  /// Margin / Padding horizontal layar acuan Home Page (kiri & kanan: 14.0px)
+  static const double screenHorizontalMargin = 14.0;
+  static const double horizontalPadding = 14.0;
+  static const EdgeInsets screenPadding = EdgeInsets.symmetric(horizontal: screenHorizontalMargin);
+  static const EdgeInsets pageHorizontalPadding = EdgeInsets.symmetric(horizontal: screenHorizontalMargin);
+
+  /// Helper untuk membuat EdgeInsets dengan margin horizontal standar
+  static EdgeInsets pagePadding({double top = 0, double bottom = 0}) =>
+      EdgeInsets.only(left: screenHorizontalMargin, right: screenHorizontalMargin, top: top, bottom: bottom);
+
+  // =========================================================================
   // 1. MASTER SCALE TOKENS (Ubah angka di sini, seluruh aplikasi otomatis berubah!)
   // =========================================================================
   static const double sizePageTitle          = 28.0; // Judul Halaman Utama / Profil Display

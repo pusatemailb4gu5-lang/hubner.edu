@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:googleapis/drive/v3.dart' as drive;
 import 'package:http/http.dart' as http;
@@ -40,6 +41,21 @@ class GoogleDriveService {
       final prefs = await SharedPreferences.getInstance();
       final bool isSaved = prefs.getBool(_prefKeyConnected) ?? false;
       if (isSaved) return true;
+
+      // Cek apakah di Firestore user dokumen Google Drive berstatus terhubung / memiliki folder
+      final currentUid = FirebaseAuth.instance.currentUser?.uid;
+      if (currentUid != null && currentUid.isNotEmpty) {
+        final doc = await FirebaseFirestore.instance.collection('users').doc(currentUid).get();
+        if (doc.exists) {
+          final data = doc.data();
+          final bool isConnectedFs = data?['isDriveConnected'] == true;
+          final String folderId = data?['publicDriveFolderId'] ?? '';
+          if (isConnectedFs || folderId.isNotEmpty) {
+            await prefs.setBool(_prefKeyConnected, true);
+            return true;
+          }
+        }
+      }
 
       // Cek apakah ada session aktif
       final account = await GoogleSignIn.instance.attemptLightweightAuthentication();

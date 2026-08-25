@@ -6,6 +6,7 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:hubner/main.dart';
+import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 
 class InAppFileViewerDialog extends StatefulWidget {
   final String fileName;
@@ -491,6 +492,30 @@ class _InAppFileViewerDialogState extends State<InAppFileViewerDialog> {
             child: Center(
               child: _buildCascadingImage(imageUrls, 0, isDark),
             ),
+          ),
+        ),
+      );
+    }
+
+    if (_isPdf) {
+      final downloadUrl = _resolveDownloadUrl(widget.fileUrl);
+      return Container(
+        height: 480,
+        decoration: BoxDecoration(
+          color: isDark ? const Color(0xFF18181B) : const Color(0xFFF1F5F9),
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0)),
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(18),
+          child: SfPdfViewer.network(
+            downloadUrl,
+            canShowScrollHead: true,
+            canShowScrollStatus: true,
+            canShowPaginationDialog: true,
+            onDocumentLoadFailed: (PdfDocumentLoadFailedDetails details) {
+              debugPrint('PDF load failed: ${details.description}');
+            },
           ),
         ),
       );

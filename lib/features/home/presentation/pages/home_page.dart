@@ -83,64 +83,115 @@ class _HomePageState extends State<HomePage> {
       final bool? confirm = await showDialog<bool>(
         context: context,
         builder: (dialogCtx) {
-          return AlertDialog(
-            backgroundColor: Colors.white,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-            title: Text(
-              'Hapus & Cadangkan',
-              style: GoogleFonts.plusJakartaSans(
-                fontWeight: FontWeight.bold,
-                fontSize: 18,
-                color: Colors.black,
-              ),
-            ),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Data classroom "$title" akan dicadangkan secara otomatis ke Google Drive Anda sebelum dihapus dari sistem.',
-                  style: GoogleFonts.dmSans(fontSize: 14, color: Colors.black87),
-                ),
-                const SizedBox(height: 12),
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFECFDF5),
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: const Color(0xFFA7F3D0)),
-                  ),
-                  child: Row(
+          final bool isDark = AppColors.isDarkMode;
+          return Dialog(
+            insetPadding: const EdgeInsets.symmetric(horizontal: 16),
+            backgroundColor: isDark ? const Color(0xFF141416) : Colors.white,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+            child: Container(
+              padding: const EdgeInsets.all(22),
+              constraints: const BoxConstraints(maxWidth: 400),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Icon(Icons.cloud_done_rounded, color: Color(0xFF059669), size: 18),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          'Google Drive terhubung. Salinan data akan tersimpan di folder Hubner_Backups.',
-                          style: GoogleFonts.plusJakartaSans(fontSize: 14.0, color: const Color(0xFF047857), fontWeight: FontWeight.w600),
+                      Row(
+                        children: [
+                          const Icon(Icons.cloud_done_rounded, color: Color(0xFF10B981), size: 22),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Hapus Classroom',
+                            style: AppTypography.chatHeaderTitle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 17.5,
+                              color: isDark ? Colors.white : Colors.black,
+                            ),
+                          ),
+                        ],
+                      ),
+                      GestureDetector(
+                        onTap: () => Navigator.pop(dialogCtx, false),
+                        behavior: HitTestBehavior.opaque,
+                        child: Container(
+                          width: 36,
+                          height: 36,
+                          decoration: BoxDecoration(
+                            color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            Icons.close_rounded,
+                            color: isDark ? Colors.white70 : Colors.black87,
+                            size: 18,
+                          ),
                         ),
                       ),
                     ],
                   ),
-                ),
-              ],
+                  const SizedBox(height: 14),
+                  Text(
+                    'Data classroom "$title" akan dicadangkan secara otomatis ke Google Drive Anda sebelum dihapus dari sistem.',
+                    style: AppTypography.bodySubtitle(color: isDark ? Colors.white70 : Colors.black87),
+                  ),
+                  const SizedBox(height: 12),
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: isDark ? const Color(0xFF064E3B).withValues(alpha: 0.3) : const Color(0xFFECFDF5),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: isDark ? const Color(0xFF065F46) : const Color(0xFFA7F3D0)),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.check_circle_rounded, color: Color(0xFF10B981), size: 18),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            'Google Drive terhubung. Salinan data akan tersimpan aman.',
+                            style: AppTypography.timestamp(
+                              color: isDark ? const Color(0xFF6EE7B7) : const Color(0xFF047857),
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextButton(
+                          onPressed: () => Navigator.pop(dialogCtx, false),
+                          style: TextButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                          ),
+                          child: Text('Batal', style: AppTypography.buttonLabel(color: isDark ? Colors.white60 : Colors.black54)),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () => Navigator.pop(dialogCtx, true),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFFEF4444),
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                            elevation: 0,
+                          ),
+                          child: Text('Cadangkan & Hapus', style: AppTypography.buttonLabel(color: Colors.white, fontWeight: FontWeight.bold)),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(dialogCtx, false),
-                child: Text('Batal', style: GoogleFonts.plusJakartaSans(color: Colors.black54, fontWeight: FontWeight.w600)),
-              ),
-              ElevatedButton(
-                onPressed: () => Navigator.pop(dialogCtx, true),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFEF4444),
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  elevation: 0,
-                ),
-                child: Text('Cadangkan & Hapus', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold)),
-              ),
-            ],
           );
         },
       );
@@ -191,9 +242,9 @@ class _HomePageState extends State<HomePage> {
           return Dialog(
             insetPadding: const EdgeInsets.symmetric(horizontal: 16),
             backgroundColor: isDark ? const Color(0xFF141416) : Colors.white,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
             child: Container(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.all(22),
               constraints: const BoxConstraints(maxWidth: 400),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -221,14 +272,11 @@ class _HomePageState extends State<HomePage> {
                         onTap: () => Navigator.pop(dialogCtx, 0),
                         behavior: HitTestBehavior.opaque,
                         child: Container(
-                          padding: const EdgeInsets.all(4),
+                          width: 36,
+                          height: 36,
                           decoration: BoxDecoration(
-                            color: isDark ? Colors.white12 : const Color(0xFFF1F5F9),
+                            color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
                             shape: BoxShape.circle,
-                            border: Border.all(
-                              color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
-                              width: 1.0,
-                            ),
                           ),
                           child: Icon(
                             Icons.close_rounded,

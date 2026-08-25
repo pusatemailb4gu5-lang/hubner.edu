@@ -1115,13 +1115,16 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
       _messageController.selection = TextSelection.fromPosition(
         TextPosition(offset: _messageController.text.length),
       );
+      SystemChannels.textInput.invokeMethod('TextInput.show');
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
           _inputFocusNode.requestFocus();
+          SystemChannels.textInput.invokeMethod('TextInput.show');
         }
       });
     } else {
       _inputFocusNode.unfocus();
+      SystemChannels.textInput.invokeMethod('TextInput.hide');
       setState(() {
         _showAttachmentPanel = true;
       });
@@ -5581,6 +5584,8 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                                 if (_showAttachmentPanel) {
                                                   setState(() => _showAttachmentPanel = false);
                                                 }
+                                                _inputFocusNode.requestFocus();
+                                                SystemChannels.textInput.invokeMethod('TextInput.show');
                                               },
                                               style: GoogleFonts.dmSans(
                                                 fontSize: 20.0,

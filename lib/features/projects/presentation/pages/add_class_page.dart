@@ -247,34 +247,58 @@ class _AddClassPageState extends State<AddClassPage> {
               );
             }
             return Container(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-              constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.6),
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
+              constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.65),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Header Title & Sleek Close Button X
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        'Salin Data dari Classroom Lain',
-                        style: AppTypography.cardTitle(color: isDark ? Colors.white : Colors.black87, fontWeight: FontWeight.bold),
+                      Row(
+                        children: [
+                          const Icon(Icons.copy_all_rounded, color: Color(0xFF7C3AED), size: 22),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Salin Data Classroom',
+                            style: AppTypography.chatHeaderTitle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 17.5,
+                              color: isDark ? Colors.white : Colors.black,
+                            ),
+                          ),
+                        ],
                       ),
-                      IconButton(
-                        icon: Icon(Icons.close_rounded, color: isDark ? Colors.white70 : Colors.black87),
-                        onPressed: () => Navigator.pop(sheetContext),
+                      GestureDetector(
+                        onTap: () => Navigator.pop(sheetContext),
+                        behavior: HitTestBehavior.opaque,
+                        child: Container(
+                          width: 36,
+                          height: 36,
+                          decoration: BoxDecoration(
+                            color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            Icons.close_rounded,
+                            color: isDark ? Colors.white70 : Colors.black87,
+                            size: 18,
+                          ),
+                        ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 6),
                   Text(
-                    'Pilih salah satu classroom untuk menyalin seluruh struktur materi & elemen ke form ini.',
+                    'Pilih salah satu classroom untuk menyalin seluruh materi & struktur elemen ke form ini.',
                     style: AppTypography.timestamp(color: isDark ? Colors.white60 : Colors.black54),
                   ),
-                  const SizedBox(height: 14),
+                  const SizedBox(height: 16),
                   Expanded(
                     child: ListView.separated(
                       itemCount: docs.length,
-                      separatorBuilder: (_, __) => const SizedBox(height: 8),
+                      separatorBuilder: (_, __) => const SizedBox(height: 10),
                       itemBuilder: (ctx, i) {
                         final pData = docs[i].data() as Map<String, dynamic>;
                         final pName = pData['name'] ?? 'Classroom';
@@ -282,37 +306,94 @@ class _AddClassPageState extends State<AddClassPage> {
                         final pMajor = pData['major'] ?? '';
                         final pIcon = pData['icon'] ?? 'project_1.png';
 
-                        return ListTile(
-                          onTap: () {
-                            _populateFormFromData(pData);
-                            Navigator.pop(sheetContext);
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text('Data dari "$pName" berhasil disalin ke form!'),
-                                backgroundColor: const Color(0xFF10B981),
+                        return Material(
+                          color: Colors.transparent,
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(36),
+                            onTap: () {
+                              _populateFormFromData(pData);
+                              Navigator.pop(sheetContext);
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('Data dari "$pName" berhasil disalin ke form!'),
+                                  backgroundColor: const Color(0xFF10B981),
+                                ),
+                              );
+                            },
+                            child: Container(
+                              height: 64,
+                              padding: const EdgeInsets.fromLTRB(5, 5, 14, 5),
+                              decoration: BoxDecoration(
+                                color: isDark ? const Color(0xFF18181B) : Colors.white,
+                                borderRadius: BorderRadius.circular(36),
+                                border: Border.all(
+                                  color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                                  width: 1.2,
+                                ),
                               ),
-                            );
-                          },
-                          tileColor: isDark ? const Color(0xFF121215) : const Color(0xFFF8FAFC),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                            side: BorderSide(color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0)),
+                              child: Row(
+                                children: [
+                                  // Icon frameless circular matching kelola teman
+                                  Container(
+                                    width: 54,
+                                    height: 54,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                                    ),
+                                    child: ClipOval(
+                                      child: Transform.scale(
+                                        scale: 1.35,
+                                        child: Image.asset(
+                                          'assets/icon_pack/project/$pIcon',
+                                          fit: BoxFit.cover,
+                                          errorBuilder: (_, __, ___) => const Icon(Icons.school_rounded, color: Color(0xFF7C3AED)),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Text(
+                                          pName,
+                                          style: AppTypography.cardTitle(
+                                            color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                        const SizedBox(height: 2),
+                                        Text(
+                                          '$pStages Elemen ${pMajor.isNotEmpty ? '· $pMajor' : ''}',
+                                          style: AppTypography.timestamp(
+                                            color: isDark ? Colors.white54 : const Color(0xFF64748B),
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Container(
+                                    width: 32,
+                                    height: 32,
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFF7C3AED).withValues(alpha: isDark ? 0.2 : 0.1),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: const Icon(Icons.content_copy_rounded, size: 15, color: Color(0xFF7C3AED)),
+                                  ),
+                                ],
+                              ),
+                            ),
                           ),
-                          leading: Image.asset(
-                            'assets/icon_pack/project/$pIcon',
-                            width: 36,
-                            height: 36,
-                            errorBuilder: (_, __, ___) => const Icon(Icons.school_rounded, color: Color(0xFF7C3AED)),
-                          ),
-                          title: Text(
-                            pName,
-                            style: AppTypography.buttonLabel(color: isDark ? Colors.white : Colors.black87, fontWeight: FontWeight.bold),
-                          ),
-                          subtitle: Text(
-                            '$pStages Elemen ${pMajor.isNotEmpty ? '· $pMajor' : ''}',
-                            style: AppTypography.fileSize(color: isDark ? Colors.white60 : Colors.black54),
-                          ),
-                          trailing: const Icon(Icons.content_copy_rounded, size: 18, color: Color(0xFF7C3AED)),
                         );
                       },
                     ),

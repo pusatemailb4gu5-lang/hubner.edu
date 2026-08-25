@@ -1473,7 +1473,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                               const Icon(Icons.manage_accounts_rounded, color: Colors.white, size: 16),
                                               const SizedBox(width: 5),
                                               Text(
-                                                'Atur Presensi',
+                                                'Presensi',
                                                 style: AppTypography.buttonLabel(color: Colors.white, fontWeight: FontWeight.bold),
                                               ),
                                             ],

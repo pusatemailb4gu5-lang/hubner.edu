@@ -22,35 +22,53 @@ class NotificationService {
     } catch (_) {}
   }
 
-  /// Mark a single notification item as read
+  /// Mark a single notification item as read and delete from Firestore if it exists
   static Future<void> markAsRead(String id) async {
     if (id.isEmpty) return;
     final current = Set<String>.from(readNotificationIdsNotifier.value);
-    if (!current.contains(id)) {
-      current.add(id);
-      readNotificationIdsNotifier.value = current;
+    current.add(id);
+    readNotificationIdsNotifier.value = current;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setStringList('read_notifications_ids', current.toList());
+    } catch (_) {}
+
+    // Hapus langsung dari database Firestore agar hanya menyimpan yang belum dibaca
+    if (!id.startsWith('task_') && !id.startsWith('materi_') && !id.startsWith('quiz_') && !id.startsWith('classroom_')) {
       try {
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setStringList('read_notifications_ids', current.toList());
+        await _firestore.collection('notifications').doc(id).delete();
       } catch (_) {}
     }
   }
 
-  /// Mark multiple items as read
+  /// Mark multiple items as read and batch-delete them from Firestore database
   static Future<void> markAllAsRead(Iterable<String> ids) async {
     final current = Set<String>.from(readNotificationIdsNotifier.value);
-    bool changed = false;
+    final List<String> firestoreIdsToDelete = [];
+
     for (var id in ids) {
-      if (id.isNotEmpty && !current.contains(id)) {
+      if (id.isNotEmpty) {
         current.add(id);
-        changed = true;
+        if (!id.startsWith('task_') && !id.startsWith('materi_') && !id.startsWith('quiz_') && !id.startsWith('classroom_')) {
+          firestoreIdsToDelete.add(id);
+        }
       }
     }
-    if (changed) {
-      readNotificationIdsNotifier.value = current;
+
+    readNotificationIdsNotifier.value = current;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setStringList('read_notifications_ids', current.toList());
+    } catch (_) {}
+
+    // Hapus seluruh dokumen yang dibaca dari koleksi Firestore
+    if (firestoreIdsToDelete.isNotEmpty) {
+      final batch = _firestore.batch();
+      for (var docId in firestoreIdsToDelete) {
+        batch.delete(_firestore.collection('notifications').doc(docId));
+      }
       try {
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setStringList('read_notifications_ids', current.toList());
+        await batch.commit();
       } catch (_) {}
     }
   }

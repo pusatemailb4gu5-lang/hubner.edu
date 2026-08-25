@@ -4376,9 +4376,6 @@ class _DocumentsTabState extends State<DocumentsTab> {
         'isDriveConnected': false,
       }).catchError((_) {});
     }
-    try {
-      await GoogleDriveService.disconnectGoogleDrive();
-    } catch (_) {}
     if (mounted) {
       setState(() {
         _driveAccount = null;
@@ -4387,7 +4384,7 @@ class _DocumentsTabState extends State<DocumentsTab> {
       });
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Google Drive telah diputuskan. Dokumen yang ada tetap dapat dibuka.'),
+          content: Text('Google Drive telah diputuskan.'),
           backgroundColor: Colors.orange,
         ),
       );
@@ -4724,10 +4721,8 @@ class _DocumentsTabState extends State<DocumentsTab> {
           builder: (context, userSnap) {
             final bool isUserLoading = userSnap.connectionState == ConnectionState.waiting && !userSnap.hasData;
             final userData = userSnap.data?.data() as Map<String, dynamic>?;
-            final String publicDriveUrl = userData?['publicDriveFolderUrl'] ?? '';
             final String publicDriveFolderId = userData?['publicDriveFolderId'] ?? '';
-            final String connectedEmail = userData?['publicDriveConnectedEmail'] ?? _driveEmail;
-            final bool isDriveConnected = (userData?['isDriveConnected'] ?? (connectedEmail.isNotEmpty && publicDriveFolderId.isNotEmpty)) == true && connectedEmail.isNotEmpty;
+            final bool isDriveConnected = (userData?['isDriveConnected'] ?? publicDriveFolderId.isNotEmpty) == true;
 
             return StreamBuilder<QuerySnapshot>(
               stream: FirebaseFirestore.instance
@@ -4746,7 +4741,7 @@ class _DocumentsTabState extends State<DocumentsTab> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Top Main Header
+                          // Top Main Header (Title & Subtitle)
                           Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
                             child: Row(
@@ -4769,65 +4764,18 @@ class _DocumentsTabState extends State<DocumentsTab> {
                                     ],
                                   ),
                                 ),
-                                Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    if (_isUploading)
-                                      const ThreeDotsLoader(size: 6, bounceHeight: 3)
-                                    else ...[
-                                      BouncyButton(
-                                        onTap: () => _createFolderInDrive(
-                                          parentFolderId: publicDriveFolderId,
-                                          isDriveConnected: isDriveConnected,
-                                        ),
-                                        child: Container(
-                                          width: 40,
-                                          height: 40,
-                                          decoration: BoxDecoration(
-                                            color: isDark ? const Color(0xFF18181B) : const Color(0xFFF1F5F9),
-                                            shape: BoxShape.circle,
-                                            border: Border.all(color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0)),
-                                          ),
-                                          child: Icon(
-                                            Icons.create_new_folder_rounded,
-                                            color: isDark ? Colors.white70 : Colors.black87,
-                                            size: 19,
-                                          ),
-                                        ),
-                                      ),
-                                      const SizedBox(width: 8),
-                                      BouncyButton(
-                                        onTap: () => _uploadFileToDrive(
-                                          targetFolderId: publicDriveFolderId,
-                                          isDriveConnected: isDriveConnected,
-                                        ),
-                                        child: Container(
-                                          width: 40,
-                                          height: 40,
-                                          decoration: const BoxDecoration(
-                                            color: Color(0xFFF97316), // Orange
-                                            shape: BoxShape.circle,
-                                          ),
-                                          child: const Icon(
-                                            Icons.cloud_upload_rounded,
-                                            color: Colors.white,
-                                            size: 19,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
+                                if (_isUploading)
+                                  const ThreeDotsLoader(size: 6, bounceHeight: 3),
                               ],
                             ),
                           ),
 
-                          // Status Bar Google Drive: Terhubung (dengan tombol Putuskan round) atau Belum Terhubung
+                          // Status Bar Google Drive: Terhubung (Google Drive -> Terhubung dengan dot hijau -> Tombol Putuskan di bawahnya)
                           if (isDriveConnected)
                             Padding(
                               padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 4.0),
                               child: Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                                 decoration: BoxDecoration(
                                   color: isDark ? const Color(0xFF18181B) : const Color(0xFFF8FAFC),
                                   borderRadius: BorderRadius.circular(20),
@@ -4836,72 +4784,79 @@ class _DocumentsTabState extends State<DocumentsTab> {
                                     width: 1.0,
                                   ),
                                 ),
-                                child: Row(
+                                child: Column(
                                   children: [
-                                    const GoogleDriveLogoWidget(size: 22),
-                                    const SizedBox(width: 12),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Row(
+                                    Row(
+                                      children: [
+                                        const GoogleDriveLogoWidget(size: 26),
+                                        const SizedBox(width: 12),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
                                             children: [
-                                              Container(
-                                                width: 7,
-                                                height: 7,
-                                                decoration: const BoxDecoration(
-                                                  color: Color(0xFF10B981),
-                                                  shape: BoxShape.circle,
-                                                ),
-                                              ),
-                                              const SizedBox(width: 6),
                                               Text(
-                                                'Google Drive Terhubung',
+                                                'Google Drive',
                                                 style: AppTypography.buttonLabel(
                                                   color: isDark ? Colors.white : const Color(0xFF0F172A),
                                                   fontWeight: FontWeight.bold,
                                                 ),
                                               ),
+                                              const SizedBox(height: 3),
+                                              Row(
+                                                children: [
+                                                  Container(
+                                                    width: 7,
+                                                    height: 7,
+                                                    decoration: const BoxDecoration(
+                                                      color: Color(0xFF10B981),
+                                                      shape: BoxShape.circle,
+                                                    ),
+                                                  ),
+                                                  const SizedBox(width: 6),
+                                                  Text(
+                                                    'Terhubung',
+                                                    style: AppTypography.fileSize(
+                                                      color: const Color(0xFF10B981),
+                                                      fontWeight: FontWeight.w600,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
                                             ],
                                           ),
-                                          const SizedBox(height: 2),
-                                          Text(
-                                            connectedEmail,
-                                            style: AppTypography.fileSize(
-                                              color: isDark ? Colors.white60 : const Color(0xFF64748B),
-                                            ),
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    const SizedBox(width: 10),
-                                    BouncyButton(
-                                      onTap: _disconnectGoogleDrive,
-                                      child: Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
-                                        decoration: BoxDecoration(
-                                          color: isDark ? Colors.red.withValues(alpha: 0.12) : const Color(0xFFFEE2E2),
-                                          borderRadius: BorderRadius.circular(20),
-                                          border: Border.all(
-                                            color: isDark ? Colors.red.withValues(alpha: 0.3) : const Color(0xFFFECACA),
-                                            width: 1.0,
-                                          ),
                                         ),
-                                        child: Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            const Icon(Icons.link_off_rounded, color: Color(0xFFDC2626), size: 14),
-                                            const SizedBox(width: 5),
-                                            Text(
-                                              'Putuskan',
-                                              style: AppTypography.buttonLabel(
-                                                color: const Color(0xFFDC2626),
-                                                fontWeight: FontWeight.bold,
-                                              ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 10),
+                                    SizedBox(
+                                      width: double.infinity,
+                                      child: BouncyButton(
+                                        onTap: _disconnectGoogleDrive,
+                                        child: Container(
+                                          padding: const EdgeInsets.symmetric(vertical: 8),
+                                          alignment: Alignment.center,
+                                          decoration: BoxDecoration(
+                                            color: isDark ? Colors.red.withValues(alpha: 0.12) : const Color(0xFFFEE2E2),
+                                            borderRadius: BorderRadius.circular(20),
+                                            border: Border.all(
+                                              color: isDark ? Colors.red.withValues(alpha: 0.3) : const Color(0xFFFECACA),
+                                              width: 1.0,
                                             ),
-                                          ],
+                                          ),
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              const Icon(Icons.link_off_rounded, color: Color(0xFFDC2626), size: 14),
+                                              const SizedBox(width: 6),
+                                              Text(
+                                                'Putuskan',
+                                                style: AppTypography.buttonLabel(
+                                                  color: const Color(0xFFDC2626),
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
                                         ),
                                       ),
                                     ),
@@ -4999,32 +4954,58 @@ class _DocumentsTabState extends State<DocumentsTab> {
                         ),
                       ),
 
-                      // Search Input
+                      // Search Input with Upload Button placed next to it
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 4.0),
-                        child: TextField(
-                          onChanged: (v) => setState(() => _searchQuery = v.toLowerCase()),
-                          style: AppTypography.timestamp(color: isDark ? Colors.white : Colors.black87),
-                          decoration: InputDecoration(
-                            hintText: 'Cari berkas di $_currentFolderName...',
-                            hintStyle: AppTypography.timestamp(color: isDark ? Colors.white38 : Colors.black26),
-                            filled: true,
-                            fillColor: isDark ? const Color(0xFF18181B) : const Color(0xFFF8FAFC),
-                            prefixIcon: Icon(Icons.search_rounded, color: isDark ? Colors.white38 : Colors.black38, size: 18),
-                            contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(24),
-                              borderSide: BorderSide(color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9)),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: TextField(
+                                onChanged: (v) => setState(() => _searchQuery = v.toLowerCase()),
+                                style: AppTypography.timestamp(color: isDark ? Colors.white : Colors.black87),
+                                decoration: InputDecoration(
+                                  hintText: 'Cari berkas di $_currentFolderName...',
+                                  hintStyle: AppTypography.timestamp(color: isDark ? Colors.white38 : Colors.black26),
+                                  filled: true,
+                                  fillColor: isDark ? const Color(0xFF18181B) : const Color(0xFFF8FAFC),
+                                  prefixIcon: Icon(Icons.search_rounded, color: isDark ? Colors.white38 : Colors.black38, size: 18),
+                                  contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+                                  enabledBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(24),
+                                    borderSide: BorderSide(color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9)),
+                                  ),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(24),
+                                    borderSide: BorderSide(color: isDark ? Colors.white : Colors.black),
+                                  ),
+                                ),
+                              ),
                             ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(24),
-                              borderSide: BorderSide(color: isDark ? Colors.white : Colors.black),
+                            const SizedBox(width: 8),
+                            BouncyButton(
+                              onTap: () => _uploadFileToDrive(
+                                targetFolderId: publicDriveFolderId,
+                                isDriveConnected: isDriveConnected,
+                              ),
+                              child: Container(
+                                width: 42,
+                                height: 42,
+                                decoration: const BoxDecoration(
+                                  color: Color(0xFFF97316), // Orange
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(
+                                  Icons.cloud_upload_rounded,
+                                  color: Colors.white,
+                                  size: 20,
+                                ),
+                              ),
                             ),
-                          ),
+                          ],
                         ),
                       ),
 
-                      // Sub-Bar: Sort text with A Arrow Up icon ("A Panah Naik") & View Mode Toggle
+                      // Sub-Bar: Sort text with A Arrow Up icon ("A Panah Naik") & Add Folder below textbox + View Mode Toggle
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 4.0),
                         child: Row(
@@ -5058,7 +5039,7 @@ class _DocumentsTabState extends State<DocumentsTab> {
                                       _sortBy == 'name_asc'
                                           ? 'Nama (A - Z)'
                                           : (_sortBy == 'name_desc' ? 'Nama (Z - A)' : 'Terbaru'),
-                                      style: AppTypography.caption(
+                                      style: AppTypography.timestamp(
                                         color: isDark ? Colors.white70 : const Color(0xFF475569),
                                         fontWeight: FontWeight.w600,
                                       ),
@@ -5073,22 +5054,48 @@ class _DocumentsTabState extends State<DocumentsTab> {
                                 ),
                               ),
                             ),
-                            BouncyButton(
-                              onTap: () => setState(() => _isGridView = !_isGridView),
-                              child: Container(
-                                width: 34,
-                                height: 34,
-                                decoration: BoxDecoration(
-                                  color: isDark ? const Color(0xFF18181B) : const Color(0xFFF1F5F9),
-                                  shape: BoxShape.circle,
-                                  border: Border.all(color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0)),
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                BouncyButton(
+                                  onTap: () => _createFolderInDrive(
+                                    parentFolderId: publicDriveFolderId,
+                                    isDriveConnected: isDriveConnected,
+                                  ),
+                                  child: Container(
+                                    width: 34,
+                                    height: 34,
+                                    decoration: BoxDecoration(
+                                      color: isDark ? const Color(0xFF18181B) : const Color(0xFFF1F5F9),
+                                      shape: BoxShape.circle,
+                                      border: Border.all(color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0)),
+                                    ),
+                                    child: Icon(
+                                      Icons.create_new_folder_rounded,
+                                      color: isDark ? Colors.white70 : Colors.black87,
+                                      size: 16,
+                                    ),
+                                  ),
                                 ),
-                                child: Icon(
-                                  _isGridView ? Icons.format_list_bulleted_rounded : Icons.grid_view_rounded,
-                                  color: isDark ? Colors.white70 : Colors.black87,
-                                  size: 16,
+                                const SizedBox(width: 8),
+                                BouncyButton(
+                                  onTap: () => setState(() => _isGridView = !_isGridView),
+                                  child: Container(
+                                    width: 34,
+                                    height: 34,
+                                    decoration: BoxDecoration(
+                                      color: isDark ? const Color(0xFF18181B) : const Color(0xFFF1F5F9),
+                                      shape: BoxShape.circle,
+                                      border: Border.all(color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0)),
+                                    ),
+                                    child: Icon(
+                                      _isGridView ? Icons.format_list_bulleted_rounded : Icons.grid_view_rounded,
+                                      color: isDark ? Colors.white70 : Colors.black87,
+                                      size: 16,
+                                    ),
+                                  ),
                                 ),
-                              ),
+                              ],
                             ),
                           ],
                         ),
@@ -5344,6 +5351,11 @@ class _DocumentsTabState extends State<DocumentsTab> {
                       fileSize: fileSize is int ? fileSize : 0,
                     );
                   }
+                } else if (val == 'download') {
+                  final uri = Uri.parse(driveLink);
+                  if (await canLaunchUrl(uri)) {
+                    await launchUrl(uri, mode: LaunchMode.externalApplication);
+                  }
                 } else if (val == 'rename') {
                   _renameItem(docId, fileName, isFolder);
                 } else if (val == 'copy') {
@@ -5392,6 +5404,17 @@ class _DocumentsTabState extends State<DocumentsTab> {
                     ],
                   ),
                 ),
+                if (!isFolder && driveLink.isNotEmpty)
+                  PopupMenuItem(
+                    value: 'download',
+                    child: Row(
+                      children: [
+                        const Icon(Icons.download_rounded, size: 16, color: Color(0xFF10B981)),
+                        const SizedBox(width: 8),
+                        Text('Unduh', style: AppTypography.buttonLabel(color: const Color(0xFF10B981), fontWeight: FontWeight.w600)),
+                      ],
+                    ),
+                  ),
                 PopupMenuItem(
                   value: 'rename',
                   child: Row(
@@ -5512,6 +5535,11 @@ class _DocumentsTabState extends State<DocumentsTab> {
                           fileSize: fileSize is int ? fileSize : 0,
                         );
                       }
+                    } else if (val == 'download') {
+                      final uri = Uri.parse(driveLink);
+                      if (await canLaunchUrl(uri)) {
+                        await launchUrl(uri, mode: LaunchMode.externalApplication);
+                      }
                     } else if (val == 'rename') {
                       _renameItem(docId, fileName, isFolder);
                     } else if (val == 'copy') {
@@ -5554,6 +5582,17 @@ class _DocumentsTabState extends State<DocumentsTab> {
                       value: 'view',
                       child: Text(isFolder ? 'Buka Folder' : 'Buka di Aplikasi', style: AppTypography.buttonLabel()),
                     ),
+                    if (!isFolder && driveLink.isNotEmpty)
+                      PopupMenuItem(
+                        value: 'download',
+                        child: Row(
+                          children: [
+                            const Icon(Icons.download_rounded, size: 16, color: Color(0xFF10B981)),
+                            const SizedBox(width: 8),
+                            Text('Unduh', style: AppTypography.buttonLabel(color: const Color(0xFF10B981), fontWeight: FontWeight.w600)),
+                          ],
+                        ),
+                      ),
                     PopupMenuItem(
                       value: 'rename',
                       child: Text('Ganti Nama', style: AppTypography.buttonLabel()),
