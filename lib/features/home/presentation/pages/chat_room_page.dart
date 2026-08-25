@@ -213,38 +213,52 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
     if (selection.baseOffset < 0) return;
 
     final textBeforeCursor = text.substring(0, selection.baseOffset);
-    final words = textBeforeCursor.split(RegExp(r'\s+'));
-    final lastWord = words.isNotEmpty ? words.last : '';
+    final lastAtIndex = textBeforeCursor.lastIndexOf('@');
 
-    if (lastWord.startsWith('@')) {
-      final query = lastWord.substring(1).toLowerCase();
-      setState(() {
-        // Filter out self from mention list
-        final List<Map<String, dynamic>> matches = _discussionMembers.where((m) {
-          if (m['uid'] == _currentUserUid) return false; // Cannot mention yourself
-          final name = (m['name'] as String).toLowerCase();
-          final username = (m['userId'] as String).toLowerCase();
-          return name.contains(query) || username.contains(query);
-        }).toList();
+    if (lastAtIndex >= 0) {
+      final queryText = textBeforeCursor.substring(lastAtIndex + 1);
+      final hasNewline = queryText.contains('\n');
+      final isStartOrAfterSpace = lastAtIndex == 0 ||
+          textBeforeCursor[lastAtIndex - 1] == ' ' ||
+          textBeforeCursor[lastAtIndex - 1] == '\n';
 
-        if (query.isEmpty || 'all'.contains(query)) {
-          matches.insert(0, {
+      if (!hasNewline && isStartOrAfterSpace && !queryText.contains(' ')) {
+        final query = queryText.toLowerCase();
+        final List<Map<String, dynamic>> matches = [];
+
+        // 1. "paling atas mention semua"
+        if (query.isEmpty || 'semua'.contains(query) || 'all'.contains(query)) {
+          matches.add({
             'uid': 'all',
-            'name': 'Semua Orang',
-            'userId': 'all',
-            'avatar': 'assets/icon_pack/chat/chat_1.png',
+            'name': 'Semua',
+            'userId': 'semua',
+            'avatar': 'assets/icon_pack/avatar/avatar_group.png',
+            'isAll': true,
           });
         }
 
-        _filteredMentionMembers = matches;
-        _showMentionPopup = matches.isNotEmpty;
-      });
-    } else {
-      if (_showMentionPopup) {
+        // 2. Member list (siswa)
+        final memberMatches = _discussionMembers.where((m) {
+          if (m['uid'] == _currentUserUid) return false; // Cannot mention yourself
+          final name = (m['name'] as String? ?? '').toLowerCase();
+          final username = (m['userId'] as String? ?? '').toLowerCase();
+          return name.contains(query) || username.contains(query);
+        }).toList();
+
+        matches.addAll(memberMatches);
+
         setState(() {
-          _showMentionPopup = false;
+          _filteredMentionMembers = matches;
+          _showMentionPopup = matches.isNotEmpty;
         });
+        return;
       }
+    }
+
+    if (_showMentionPopup) {
+      setState(() {
+        _showMentionPopup = false;
+      });
     }
   }
 
@@ -255,13 +269,14 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
 
     final textBeforeCursor = text.substring(0, selection.baseOffset);
     final textAfterCursor = text.substring(selection.baseOffset);
-    
+
     final lastAtIndex = textBeforeCursor.lastIndexOf('@');
     if (lastAtIndex < 0) return;
 
-    final mentionText = member['uid'] == 'all' ? '@all ' : '@${member['name']} ';
+    final bool isAll = member['isAll'] == true || member['uid'] == 'all';
+    final mentionText = isAll ? '@Semua ' : '@${member['name']} ';
     final newText = text.substring(0, lastAtIndex) + mentionText + textAfterCursor;
-    
+
     _messageController.value = TextEditingValue(
       text: newText,
       selection: TextSelection.collapsed(offset: lastAtIndex + mentionText.length),
@@ -270,6 +285,139 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
     setState(() {
       _showMentionPopup = false;
     });
+    _inputFocusNode.requestFocus();
+  }
+
+  Widget _buildMentionPopup(bool isDark) {
+    if (!_showMentionPopup || _filteredMentionMembers.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    // Maksimal 6 baris, jika lebih dari 6 di-scroll dengan scrollbar terlihat
+    final int visibleCount = _filteredMentionMembers.length > 6 ? 6 : _filteredMentionMembers.length;
+    final double itemHeight = 50.0;
+    final double totalHeight = (visibleCount * itemHeight) + 12.0;
+
+    return Container(
+      height: totalHeight,
+      margin: const EdgeInsets.only(bottom: 8),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF18181B) : Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+          width: 1.0,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: isDark ? 0.4 : 0.08),
+            blurRadius: 16,
+            offset: const Offset(0, -4),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16),
+        child: Scrollbar(
+          thumbVisibility: _filteredMentionMembers.length > 6,
+          child: ListView.separated(
+            padding: const EdgeInsets.symmetric(vertical: 6),
+            itemCount: _filteredMentionMembers.length,
+            physics: const AlwaysScrollableScrollPhysics(parent: ClampingScrollPhysics()),
+            separatorBuilder: (context, index) => Divider(
+              height: 1,
+              thickness: 0.6,
+              indent: 52,
+              color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+            ),
+            itemBuilder: (context, index) {
+              final member = _filteredMentionMembers[index];
+              final bool isAll = member['isAll'] == true || member['uid'] == 'all';
+              final String name = member['name'] as String? ?? 'User';
+              final String avatar = member['avatar'] as String? ?? 'assets/icon_pack/avatar/avatar_2.png';
+              final String username = member['userId'] as String? ?? '';
+
+              return Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: () => _selectMention(member),
+                  child: Container(
+                    height: itemHeight,
+                    padding: const EdgeInsets.symmetric(horizontal: 14),
+                    child: Row(
+                      children: [
+                        if (isAll)
+                          Container(
+                            width: 36,
+                            height: 36,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF7C3AED).withValues(alpha: 0.15),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.group_rounded,
+                              color: Color(0xFF7C3AED),
+                              size: 20,
+                            ),
+                          )
+                        else
+                          SizedBox(
+                            width: 36,
+                            height: 36,
+                            child: ClipOval(
+                              child: Transform.scale(
+                                scale: 1.45,
+                                child: _buildSafeAvatar(avatar),
+                              ),
+                            ),
+                          ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                isAll ? 'Semua Orang (@Semua)' : name,
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 14.5,
+                                  fontWeight: isAll ? FontWeight.bold : FontWeight.w600,
+                                  color: isAll
+                                      ? const Color(0xFF7C3AED)
+                                      : (isDark ? Colors.white : const Color(0xFF0F172A)),
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              if (isAll)
+                                Text(
+                                  'Beritahu semua orang di grup ini',
+                                  style: GoogleFonts.dmSans(
+                                    fontSize: 11.5,
+                                    color: isDark ? Colors.white60 : Colors.black45,
+                                  ),
+                                )
+                              else if (username.isNotEmpty)
+                                Text(
+                                  '@$username',
+                                  style: GoogleFonts.dmSans(
+                                    fontSize: 11.5,
+                                    color: isDark ? Colors.white60 : Colors.black45,
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    );
   }
 
   void _loadDiscussionMembersOnce(List<String> memberUids) async {
@@ -300,7 +448,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
   List<InlineSpan> _buildMessageSpans(String text, String currentUserName, BuildContext context, bool isMe) {
     final List<InlineSpan> spans = [];
     // Match @name (allowing letters, digits, spaces, underscores)
-    final RegExp mentionRegex = RegExp(r'@(?:all|[A-Za-z0-9_]+(?: [A-Za-z0-9_]+)*)');
+    final RegExp mentionRegex = RegExp(r'@(?:all|semua|[A-Za-z0-9_]+(?: [A-Za-z0-9_]+)*)', caseSensitive: false);
     
     int lastIndex = 0;
     final matches = mentionRegex.allMatches(text);
@@ -313,7 +461,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
       }
       
       final mention = match.group(0)!;
-      final bool isMentionAll = mention.toLowerCase() == '@all';
+      final bool isMentionAll = mention.toLowerCase() == '@all' || mention.toLowerCase() == '@semua';
       final bool isMeMentioned = isMentionAll || 
           (currentUserName.isNotEmpty && 
            mention.substring(1).trim().toLowerCase() == currentUserName.toLowerCase());
@@ -539,28 +687,39 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                     const SizedBox(height: 12),
                     ElevatedButton.icon(
                       onPressed: () async {
+                        final isDark = HubnerApp.themeNotifier.value == 'Gelap' || HubnerApp.themeNotifier.value == 'Hitam';
                         final folderNameController = TextEditingController();
                         final newFolderName = await showDialog<String>(
                           context: context,
-                          builder: (context) => AlertDialog(
-                            backgroundColor: Colors.white,
-                            title: Text('Buat Folder Baru', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold)),
+                          builder: (dialogCtx) => AlertDialog(
+                            backgroundColor: isDark ? const Color(0xFF1E1E22) : Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20),
+                              side: BorderSide(color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0)),
+                            ),
+                            title: Text(
+                              'Buat Folder Baru',
+                              style: GoogleFonts.plusJakartaSans(
+                                fontWeight: FontWeight.bold,
+                                color: isDark ? Colors.white : const Color(0xFF0F172A),
+                              ),
+                            ),
                             content: TextField(
                               controller: folderNameController,
                               autofocus: true,
                               decoration: InputDecoration(
                                 hintText: 'Nama Folder',
-                                hintStyle: GoogleFonts.dmSans(color: Colors.black26),
+                                hintStyle: GoogleFonts.dmSans(color: isDark ? Colors.white38 : Colors.black26),
                               ),
-                              style: GoogleFonts.dmSans(),
+                              style: GoogleFonts.dmSans(color: isDark ? Colors.white : Colors.black87),
                             ),
                             actions: [
                               TextButton(
-                                onPressed: () => Navigator.pop(context),
-                                child: Text('Batal', style: GoogleFonts.plusJakartaSans(color: Colors.black54)),
+                                onPressed: () => Navigator.pop(dialogCtx),
+                                child: Text('Batal', style: GoogleFonts.plusJakartaSans(color: isDark ? Colors.white60 : Colors.black54)),
                               ),
                               TextButton(
-                                onPressed: () => Navigator.pop(context, folderNameController.text.trim()),
+                                onPressed: () => Navigator.pop(dialogCtx, folderNameController.text.trim()),
                                 child: Text('Buat', style: GoogleFonts.plusJakartaSans(color: const Color(0xFF2563EB), fontWeight: FontWeight.bold)),
                               ),
                             ],
@@ -953,6 +1112,11 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
         _showAttachmentPanel = false;
       });
       _inputFocusNode.requestFocus();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          _inputFocusNode.requestFocus();
+        }
+      });
     } else {
       _inputFocusNode.unfocus();
       setState(() {
@@ -1030,18 +1194,18 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 200),
       curve: Curves.easeInOut,
-      height: showCpFeatures ? 175 : 90,
+      height: showCpFeatures ? 195 : 95,
       width: double.infinity,
-      padding: const EdgeInsets.only(top: 12, bottom: 2),
+      padding: const EdgeInsets.only(top: 12, bottom: 6),
       color: Colors.transparent,
       child: GridView.builder(
         padding: EdgeInsets.zero,
         physics: const NeverScrollableScrollPhysics(),
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 4,
-          mainAxisSpacing: 10,
+          mainAxisSpacing: 8,
           crossAxisSpacing: 8,
-          childAspectRatio: 0.95,
+          childAspectRatio: 0.88,
         ),
         itemCount: items.length,
         itemBuilder: (context, index) {
@@ -1057,8 +1221,8 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Container(
-                  width: 50,
-                  height: 50,
+                  width: 48,
+                  height: 48,
                   decoration: BoxDecoration(
                     color: color,
                     shape: BoxShape.circle,
@@ -1066,7 +1230,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                   child: Icon(
                     icon,
                     color: Colors.white,
-                    size: 24,
+                    size: 23,
                   ),
                 ),
                 const SizedBox(height: 5),
@@ -3386,7 +3550,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
     bool showAvatar = true,
   }) {
     HapticFeedback.mediumImpact();
-    final isDark = AppColors.isDarkMode;
+    final isDark = HubnerApp.themeNotifier.value == 'Gelap' || HubnerApp.themeNotifier.value == 'Hitam';
     final currentUid = FirebaseAuth.instance.currentUser?.uid ?? '';
     final bool canEdit = isMe && message.isNotEmpty && imageUrl.isEmpty;
     final bool canDelete = isMe || _userRole == 'guru';
@@ -3487,18 +3651,18 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                             padding: EdgeInsets.fromLTRB(12, replyData != null ? 6 : 8, 12, 8),
                             decoration: BoxDecoration(
                               color: isMe
-                                  ? (isDark ? const Color(0xFF141416).withValues(alpha: 0.85) : Colors.black)
-                                  : (isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9)),
+                                  ? (isDark ? const Color(0xFF3B185F) : const Color(0xFF7C3AED))
+                                  : (isDark ? const Color(0xFF1C1C1E) : Colors.white),
                               borderRadius: BorderRadius.only(
-                                topLeft: const Radius.circular(16),
-                                topRight: const Radius.circular(16),
-                                bottomLeft: isMe ? const Radius.circular(16) : const Radius.circular(4),
-                                bottomRight: isMe ? const Radius.circular(4) : const Radius.circular(16),
+                                topLeft: const Radius.circular(18),
+                                topRight: const Radius.circular(18),
+                                bottomLeft: isMe ? const Radius.circular(18) : const Radius.circular(4),
+                                bottomRight: isMe ? const Radius.circular(4) : const Radius.circular(18),
                               ),
                               border: Border.all(
                                 color: isMe
-                                    ? (isDark ? Colors.white.withValues(alpha: 0.12) : Colors.transparent)
-                                    : (isDark ? const Color(0xFF3F3F46) : const Color(0xFFE2E8F0)),
+                                    ? (isDark ? const Color(0xFF6B21A8).withValues(alpha: 0.35) : Colors.transparent)
+                                    : (isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0)),
                                 width: 1.0,
                               ),
                             ),
@@ -3593,19 +3757,6 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                               ],
                             ),
                           ),
-                          if (isMe && showAvatar) ...[
-                            const SizedBox(width: 4),
-                            SizedBox(
-                              width: 32,
-                              height: 32,
-                              child: ClipOval(
-                                child: Transform.scale(
-                                  scale: 1.45,
-                                  child: _buildSafeAvatar(avatar),
-                                ),
-                              ),
-                            ),
-                          ],
                         ],
                       ),
                       const SizedBox(height: 4),
@@ -3696,18 +3847,45 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                     Navigator.pop(dialogContext);
                                     final confirm = await showDialog<bool>(
                                       context: context,
-                                      builder: (context) => AlertDialog(
-                                        backgroundColor: Colors.white,
-                                        title: Text('Hapus Pesan', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold)),
-                                        content: Text('Apakah Anda yakin ingin menghapus pesan ini?', style: GoogleFonts.plusJakartaSans()),
+                                      builder: (dialogCtx) => AlertDialog(
+                                        backgroundColor: isDark ? const Color(0xFF1E1E22) : Colors.white,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(20),
+                                          side: BorderSide(color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0)),
+                                        ),
+                                        title: Text(
+                                          'Hapus Pesan',
+                                          style: GoogleFonts.plusJakartaSans(
+                                            fontWeight: FontWeight.bold,
+                                            color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                          ),
+                                        ),
+                                        content: Text(
+                                          'Apakah Anda yakin ingin menghapus pesan ini?',
+                                          style: GoogleFonts.plusJakartaSans(
+                                            color: isDark ? Colors.white70 : const Color(0xFF334155),
+                                          ),
+                                        ),
                                         actions: [
                                           TextButton(
-                                            onPressed: () => Navigator.pop(context, false),
-                                            child: Text('Batal', style: GoogleFonts.plusJakartaSans(color: Colors.black54)),
+                                            onPressed: () => Navigator.pop(dialogCtx, false),
+                                            child: Text(
+                                              'Batal',
+                                              style: GoogleFonts.plusJakartaSans(
+                                                color: isDark ? Colors.white60 : Colors.black54,
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                            ),
                                           ),
                                           TextButton(
-                                            onPressed: () => Navigator.pop(context, true),
-                                            child: Text('Hapus', style: GoogleFonts.plusJakartaSans(color: Colors.redAccent, fontWeight: FontWeight.bold)),
+                                            onPressed: () => Navigator.pop(dialogCtx, true),
+                                            child: Text(
+                                              'Hapus',
+                                              style: GoogleFonts.plusJakartaSans(
+                                                color: Colors.redAccent,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
                                           ),
                                         ],
                                       ),
@@ -3801,12 +3979,27 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
               final bool showCpFeatures = !isPrivate && projectId.isNotEmpty;
               final isOwner = discData?['creatorUid'] == currentUid || _userRole == 'guru';
 
+              String privateAvatar = widget.targetUserAvatar ?? '';
+              if (privateAvatar.isEmpty && isPrivate && memberUids.isNotEmpty) {
+                final otherUid = memberUids.firstWhere((uid) => uid != currentUid, orElse: () => '');
+                if (otherUid.isNotEmpty) {
+                  final otherMember = _discussionMembers.firstWhere(
+                    (m) => m['uid'] == otherUid,
+                    orElse: () => <String, dynamic>{},
+                  );
+                  privateAvatar = (otherMember['avatar'] ?? (discData?['avatar'] ?? '')).toString();
+                }
+              }
+              if (privateAvatar.isEmpty && discData?['avatar'] != null) {
+                privateAvatar = (discData?['avatar'] ?? '').toString();
+              }
+              if (privateAvatar.isEmpty) {
+                privateAvatar = 'assets/icon_pack/avatar/avatar_2.png';
+              }
+
               if (memberUids.isNotEmpty && _discussionMembers.isEmpty) {
                 _loadDiscussionMembersOnce(memberUids);
               }
-
-              final double fullScreenHeight = MediaQuery.of(context).size.height;
-              final double fullScreenWidth = MediaQuery.of(context).size.width;
 
               return AnnotatedRegion<SystemUiOverlayStyle>(
                 value: SystemUiOverlayStyle(
@@ -3832,402 +4025,8 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                         ),
                       ),
 
-                      // 2. Main Column: Solid White Header + Full Viewport Messages Stack + Solid White Input Bar
-                      Positioned.fill(
-                        child: Column(
-                          children: [
-                          // Header Bar (Transparan 50% + Blur Glassmorphic dengan Border Bawah)
-                          ClipRect(
-                            child: BackdropFilter(
-                              filter: ui.ImageFilter.blur(sigmaX: 16, sigmaY: 16),
-                              child: Container(
-                                width: double.infinity,
-                                padding: EdgeInsets.fromLTRB(
-                                  14.0,
-                                  MediaQuery.of(context).padding.top + 10.0,
-                                  14.0,
-                                  12.0,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: isDark
-                                      ? const Color(0xFF000000).withValues(alpha: 0.75)
-                                      : Colors.white.withValues(alpha: 0.70),
-                                  border: Border(
-                                    bottom: BorderSide(
-                                      color: isDark
-                                          ? const Color(0xFF27272A)
-                                          : const Color(0xFFF1F5F9),
-                                      width: 1.0,
-                                    ),
-                                  ),
-                                ),
-                            child: Row(
-                              children: [
-                                if (!widget.isEmbedded) ...[
-                                  BouncyButton(
-                                    onTap: () => Navigator.pop(context),
-                                    child: Container(
-                                      width: 42,
-                                      height: 42,
-                                      decoration: BoxDecoration(
-                                        color: isDark ? const Color(0xFF18181B) : Colors.white,
-                                        shape: BoxShape.circle,
-                                        border: Border.all(
-                                          color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
-                                          width: 1.2,
-                                        ),
-                                      ),
-                                      child: Icon(
-                                        Icons.arrow_back_rounded,
-                                        color: isDark ? Colors.white : Colors.black,
-                                        size: 20,
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 14),
-                                ],
-                                Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    channelTitle,
-                                    style: AppTypography.chatHeaderTitle(
-                                      color: isDark ? Colors.white : Colors.black87,
-                                    ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    subtitle,
-                                    style: AppTypography.chatHeaderSubtitle(
-                                      color: isDark ? Colors.white60 : Colors.black45,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            PopupMenuButton<String>(
-                              tooltip: '',
-                              padding: EdgeInsets.zero,
-                              constraints: const BoxConstraints(),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(16),
-                                side: BorderSide(
-                                  color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
-                                  width: 1.0,
-                                ),
-                              ),
-                              elevation: 0,
-                              color: isDark ? const Color(0xFF141416) : Colors.white,
-                              icon: Container(
-                                width: 42,
-                                height: 42,
-                                decoration: BoxDecoration(
-                                  color: isDark ? const Color(0xFF18181B) : Colors.white,
-                                  shape: BoxShape.circle,
-                                  border: Border.all(
-                                    color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
-                                    width: 1.2,
-                                  ),
-                                ),
-                                child: Icon(
-                                  Icons.more_horiz_rounded,
-                                  color: isDark ? Colors.white : Colors.black,
-                                  size: 20,
-                                ),
-                              ),
-                              onSelected: (val) async {
-                                if (val == 'edit') {
-                                  if (discData != null) {
-                                    _openEditDiscussionSettings(context, discData);
-                                  }
-                                } else if (val == 'clear') {
-                                  final confirm = await showDialog<bool>(
-                                    context: context,
-                                    builder: (context) => AlertDialog(
-                                      backgroundColor: Colors.white,
-                                      title: const Text('Bersihkan Obrolan', style: TextStyle(fontWeight: FontWeight.bold)),
-                                      content: Text(
-                                        isPrivate
-                                            ? 'Apakah Anda yakin ingin menghapus semua pesan di obrolan pribadi ini?'
-                                            : 'Apakah Anda yakin ingin membersihkan semua pesan di grup diskusi ini?',
-                                      ),
-                                      actions: [
-                                        TextButton(
-                                          onPressed: () => Navigator.pop(context, false),
-                                          child: Text('Batal', style: GoogleFonts.plusJakartaSans(color: Colors.black54)),
-                                        ),
-                                        TextButton(
-                                          onPressed: () => Navigator.pop(context, true),
-                                          child: Text('Bersihkan', style: GoogleFonts.plusJakartaSans(color: Colors.redAccent, fontWeight: FontWeight.bold)),
-                                        ),
-                                      ],
-                                    ),
-                                  );
-                                  if (confirm == true && !_isDraft && _currentDiscussionId.isNotEmpty) {
-                                    final msgs = await FirebaseFirestore.instance
-                                        .collection('discussions')
-                                        .doc(_currentDiscussionId)
-                                        .collection('messages')
-                                        .get();
-                                    for (var doc in msgs.docs) {
-                                      await doc.reference.delete();
-                                    }
-                                    await FirebaseFirestore.instance
-                                        .collection('discussions')
-                                        .doc(_currentDiscussionId)
-                                        .update({
-                                      'lastMessage': isPrivate ? 'Mulai obrolan privat...' : 'Obrolan telah dibersihkan...',
-                                    });
-                                    if (context.mounted) {
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        const SnackBar(content: Text('Obrolan berhasil dibersihkan!')),
-                                      );
-                                    }
-                                  }
-                                } else if (val == 'leave') {
-                                  final confirm = await showDialog<bool>(
-                                    context: context,
-                                    builder: (context) => AlertDialog(
-                                      backgroundColor: Colors.white,
-                                      title: Text('Keluar dari Grup', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold)),
-                                      content: Text('Apakah Anda yakin ingin keluar dari grup diskusi ini?', style: GoogleFonts.plusJakartaSans()),
-                                      actions: [
-                                        TextButton(
-                                          onPressed: () => Navigator.pop(context, false),
-                                          child: Text('Batal', style: GoogleFonts.plusJakartaSans(color: Colors.black54)),
-                                        ),
-                                        TextButton(
-                                          onPressed: () => Navigator.pop(context, true),
-                                          child: Text('Keluar', style: GoogleFonts.plusJakartaSans(color: Colors.redAccent, fontWeight: FontWeight.bold)),
-                                        ),
-                                      ],
-                                    ),
-                                  );
-                                  if (confirm == true && !_isDraft && _currentDiscussionId.isNotEmpty) {
-                                    await FirebaseFirestore.instance
-                                        .collection('discussions')
-                                        .doc(_currentDiscussionId)
-                                        .update({
-                                      'memberUids': FieldValue.arrayRemove([currentUid]),
-                                    });
-                                    if (context.mounted) {
-                                      Navigator.pop(context);
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        const SnackBar(content: Text('Anda telah keluar dari grup diskusi.')),
-                                      );
-                                    }
-                                  }
-                                } else if (val == 'delete') {
-                                  final confirm = await showDialog<bool>(
-                                    context: context,
-                                    builder: (context) => AlertDialog(
-                                      backgroundColor: Colors.white,
-                                      title: Text(
-                                        isPrivate ? 'Hapus Obrolan' : 'Hapus Diskusi',
-                                        style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold),
-                                      ),
-                                      content: Text(
-                                        isPrivate
-                                            ? 'Apakah Anda yakin ingin menghapus obrolan ini secara permanen?'
-                                            : 'Apakah Anda yakin ingin menghapus grup diskusi ini? Semua pesan di dalamnya akan terhapus secara permanen.',
-                                        style: GoogleFonts.plusJakartaSans(),
-                                      ),
-                                      actions: [
-                                        TextButton(
-                                          onPressed: () => Navigator.pop(context, false),
-                                          child: Text('Batal', style: GoogleFonts.plusJakartaSans(color: Colors.black54)),
-                                        ),
-                                        TextButton(
-                                          onPressed: () => Navigator.pop(context, true),
-                                          child: Text('Hapus', style: GoogleFonts.plusJakartaSans(color: Colors.redAccent, fontWeight: FontWeight.bold)),
-                                        ),
-                                      ],
-                                    ),
-                                  );
-                                  if (confirm == true) {
-                                    if (!_isDraft && _currentDiscussionId.isNotEmpty) {
-                                      final msgs = await FirebaseFirestore.instance
-                                          .collection('discussions')
-                                          .doc(_currentDiscussionId)
-                                          .collection('messages')
-                                          .get();
-                                      for (var doc in msgs.docs) {
-                                        await doc.reference.delete();
-                                      }
-                                      await FirebaseFirestore.instance
-                                          .collection('discussions')
-                                          .doc(_currentDiscussionId)
-                                          .delete();
-                                    }
-                                    if (context.mounted) {
-                                      Navigator.pop(context);
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        SnackBar(content: Text(isPrivate ? 'Obrolan berhasil dihapus!' : 'Diskusi berhasil dihapus!')),
-                                      );
-                                    }
-                                  }
-                                }
-                              },
-                              itemBuilder: (context) {
-                                if (isPrivate) {
-                                  return [
-                                    PopupMenuItem(
-                                      value: 'clear',
-                                      height: 36,
-                                      padding: EdgeInsets.zero,
-                                      child: Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
-                                        child: Row(
-                                          children: [
-                                            const Icon(Icons.cleaning_services_rounded, size: 18, color: Color(0xFF06B6D4)),
-                                            const SizedBox(width: 10),
-                                            Text(
-                                              'Bersihkan Obrolan',
-                                              style: GoogleFonts.plusJakartaSans(
-                                                fontSize: 14.0,
-                                                fontWeight: FontWeight.w600,
-                                                color: isDark ? Colors.white : const Color(0xFF0F172A),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                    PopupMenuItem(
-                                      value: 'delete',
-                                      height: 36,
-                                      padding: EdgeInsets.zero,
-                                      child: Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
-                                        child: Row(
-                                          children: [
-                                            const Icon(Icons.delete_outline_rounded, size: 18, color: Color(0xFFEF4444)),
-                                            const SizedBox(width: 10),
-                                            Text(
-                                              'Hapus Obrolan',
-                                              style: GoogleFonts.plusJakartaSans(
-                                                fontSize: 14.0,
-                                                fontWeight: FontWeight.w600,
-                                                color: const Color(0xFFEF4444),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                  ];
-                                }
-
-                                return [
-                                  if (isOwner) ...[
-                                    PopupMenuItem(
-                                      value: 'edit',
-                                      height: 36,
-                                      padding: EdgeInsets.zero,
-                                      child: Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
-                                        child: Row(
-                                          children: [
-                                            const Icon(Icons.settings_outlined, size: 18, color: Color(0xFF7C3AED)),
-                                            const SizedBox(width: 10),
-                                            Text(
-                                              'Pengaturan',
-                                              style: GoogleFonts.plusJakartaSans(
-                                                fontSize: 14.0,
-                                                fontWeight: FontWeight.w600,
-                                                color: isDark ? Colors.white : const Color(0xFF0F172A),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                  PopupMenuItem(
-                                    value: 'leave',
-                                    height: 36,
-                                    padding: EdgeInsets.zero,
-                                    child: Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
-                                      child: Row(
-                                        children: [
-                                          const Icon(Icons.logout_rounded, size: 18, color: Color(0xFFF59E0B)),
-                                          const SizedBox(width: 10),
-                                          Text(
-                                            'Keluar Diskusi',
-                                            style: GoogleFonts.plusJakartaSans(
-                                              fontSize: 14.0,
-                                              fontWeight: FontWeight.w600,
-                                              color: const Color(0xFFF59E0B),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                  PopupMenuItem(
-                                    value: 'clear',
-                                    height: 36,
-                                    padding: EdgeInsets.zero,
-                                    child: Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
-                                      child: Row(
-                                        children: [
-                                          const Icon(Icons.cleaning_services_rounded, size: 18, color: Color(0xFF06B6D4)),
-                                          const SizedBox(width: 10),
-                                          Text(
-                                            'Bersihkan Obrolan',
-                                            style: GoogleFonts.plusJakartaSans(
-                                              fontSize: 14.0,
-                                              fontWeight: FontWeight.w600,
-                                              color: isDark ? Colors.white : const Color(0xFF0F172A),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                  if (isOwner) ...[
-                                    PopupMenuItem(
-                                      value: 'delete',
-                                      height: 36,
-                                      padding: EdgeInsets.zero,
-                                      child: Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
-                                        child: Row(
-                                          children: [
-                                            const Icon(Icons.delete_outline_rounded, size: 18, color: Color(0xFFEF4444)),
-                                            const SizedBox(width: 10),
-                                            Text(
-                                              'Hapus Diskusi',
-                                              style: GoogleFonts.plusJakartaSans(
-                                                fontSize: 14.0,
-                                                fontWeight: FontWeight.w600,
-                                                color: const Color(0xFFEF4444),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ];
-                              },
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-
-                      // Messages and Floating Controls Viewport
-                      Expanded(
-                        child: Stack(
-                            children: [
-                              // 1. Full Screen Messages ListView with 94px bottom padding (completely unobstructed)
+                      // 2. Full Viewport Messages ListView (Mengalir bebas di belakang header & input bar transparan buram)
+                      // 1. Full Screen Messages ListView with 94px bottom padding (completely unobstructed)
                               Positioned.fill(
                                 child: StreamBuilder<QuerySnapshot>(
                                   stream: (_currentDiscussionId.isNotEmpty || widget.discussionId.isNotEmpty)
@@ -4373,12 +4172,14 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                     return ListView.builder(
                                       controller: _scrollController,
                                       physics: const AlwaysScrollableScrollPhysics(parent: ClampingScrollPhysics()),
-                                      cacheExtent: 500,
-                                      padding: const EdgeInsets.only(
+                                      cacheExtent: 500.0,
+                                      padding: EdgeInsets.only(
                                         left: 14,
                                         right: 14,
-                                        top: 16,
-                                        bottom: 16,
+                                        top: MediaQuery.of(context).padding.top + 76.0,
+                                        bottom: MediaQuery.of(context).viewInsets.bottom > 0
+                                            ? (MediaQuery.of(context).viewInsets.bottom + 84.0)
+                                            : (MediaQuery.of(context).padding.bottom + (_showAttachmentPanel ? (showCpFeatures ? 295.0 : 195.0) : 84.0)),
                                       ),
                                       itemCount: messageDocs.length,
                                       itemBuilder: (context, index) {
@@ -4417,6 +4218,24 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                         }
                                         final isMe = senderUid == currentUid;
                                         final String displayName = senderName.trim().isEmpty ? 'User' : senderName.trim().split(' ')[0];
+
+                                        bool isNextFromSameUser = false;
+                                        if (index + 1 < messageDocs.length) {
+                                          final nextMsgData = messageDocs[index + 1].data() as Map<String, dynamic>;
+                                          final nextSenderUid = nextMsgData['senderUid'] ?? '';
+                                          if (nextSenderUid == senderUid) {
+                                            isNextFromSameUser = true;
+                                          }
+                                        }
+
+                                        bool isPrevFromSameUser = false;
+                                        if (index > 0) {
+                                          final prevMsgData = messageDocs[index - 1].data() as Map<String, dynamic>;
+                                          final prevSenderUid = prevMsgData['senderUid'] ?? '';
+                                          if (prevSenderUid == senderUid) {
+                                            isPrevFromSameUser = true;
+                                          }
+                                        }
 
                                         final lines = message.split('\n');
                                         final bool isLongMessage = lines.length > 15;
@@ -4499,27 +4318,31 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                               crossAxisAlignment: CrossAxisAlignment.end,
                                               children: [
                                                 if (!isMe && !isPrivate) ...[
-                                                  GestureDetector(
-                                                    onTap: () {
-                                                      _startPrivateChat(
-                                                        context,
-                                                        senderUid,
-                                                        senderName,
-                                                        avatar,
-                                                      );
-                                                    },
-                                                    child: SizedBox(
-                                                      width: 32,
-                                                      height: 32,
-                                                      child: ClipOval(
-                                                        child: Transform.scale(
-                                                          scale: 1.45,
-                                                          child: _buildSafeAvatar(avatar),
+                                                  if (!isNextFromSameUser) ...[
+                                                    GestureDetector(
+                                                      onTap: () {
+                                                        _startPrivateChat(
+                                                          context,
+                                                          senderUid,
+                                                          senderName,
+                                                          avatar,
+                                                        );
+                                                      },
+                                                      child: SizedBox(
+                                                        width: 32,
+                                                        height: 32,
+                                                        child: ClipOval(
+                                                          child: Transform.scale(
+                                                            scale: 1.45,
+                                                            child: _buildSafeAvatar(avatar),
+                                                          ),
                                                         ),
                                                       ),
                                                     ),
-                                                  ),
-                                                  const SizedBox(width: 4),
+                                                    const SizedBox(width: 4),
+                                                  ] else ...[
+                                                    const SizedBox(width: 36),
+                                                  ],
                                                 ],
                                                 Flexible(
                                                   child: GestureDetector(
@@ -4537,7 +4360,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                                         senderColor: senderColor,
                                                         avatar: avatar,
                                                         reactions: reactionList,
-                                                        showAvatar: !isPrivate,
+                                                        showAvatar: !isPrivate && !isMe,
                                                       );
                                                     },
                                                     child: Stack(
@@ -4631,7 +4454,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                                                   ),
                                                                 ),
                                                               ],
-                                                              if (!isMe) ...[
+                                                              if (!isMe && !isPrivate && !isPrevFromSameUser) ...[
                                                                 Text(
                                                                   displayName,
                                                                   style: GoogleFonts.plusJakartaSans(
@@ -4919,19 +4742,6 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                                     ),
                                                   ),
                                                 ),
-                                                if (isMe && !isPrivate) ...[
-                                                  const SizedBox(width: 4),
-                                                  SizedBox(
-                                                    width: 32,
-                                                    height: 32,
-                                                    child: ClipOval(
-                                                      child: Transform.scale(
-                                                        scale: 1.45,
-                                                        child: Image.asset(avatar, fit: BoxFit.cover),
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ],
                                               ],
                                             ),
                                           ),
@@ -4942,10 +4752,10 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                 ),
                               ),
 
-                              // 2. Mention Banner
+                      // 2. Mention Banner
                               if (!isPrivate)
                                 Positioned(
-                                  top: 0,
+                                  top: MediaQuery.of(context).padding.top + 64.0,
                                   left: 0,
                                   right: 0,
                                   child: ValueListenableBuilder<List<String>>(
@@ -4998,10 +4808,12 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                   ),
                                 ),
 
-                              // 3. Floating Scroll-To-Bottom Button (Kanan di luar card textbox, circular button dengan shadow)
+                      // 3. Floating Scroll-To-Bottom Button (Kanan di luar card textbox, circular button dengan shadow)
                               Positioned(
                                 right: 18,
-                                bottom: 16,
+                                bottom: MediaQuery.of(context).viewInsets.bottom > 0
+                                    ? (MediaQuery.of(context).viewInsets.bottom + 80.0)
+                                    : (MediaQuery.of(context).padding.bottom + (_showAttachmentPanel ? (showCpFeatures ? 290.0 : 190.0) : 80.0)),
                                 child: ValueListenableBuilder<bool>(
                                   valueListenable: _showScrollToBottom,
                                   builder: (context, show, _) {
@@ -5031,25 +4843,506 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                   },
                                 ),
                               ),
-                            ],
-                          ),
-                        ),
 
-                        // 3. Glassmorphic Flat Input Bar (Full width flush to bottom acting as backdrop for Android buttons)
+                      // 5. Header Bar (Transparan Glassmorphic Blur Tinggi 20px)
+                      Positioned(
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        child: // Header Bar (Transparan 50% + Blur Glassmorphic dengan Border Bawah)
+                          ClipRect(
+                            child: BackdropFilter(
+                              filter: ui.ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+                              child: Container(
+                                width: double.infinity,
+                                padding: EdgeInsets.fromLTRB(
+                                  14.0,
+                                  MediaQuery.of(context).padding.top + 10.0,
+                                  14.0,
+                                  12.0,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: isDark
+                                      ? const Color(0xFF000000).withValues(alpha: 0.60)
+                                      : Colors.white.withValues(alpha: 0.65),
+                                  border: Border(
+                                    bottom: BorderSide(
+                                      color: isDark
+                                          ? const Color(0xFF27272A)
+                                          : const Color(0xFFF1F5F9).withValues(alpha: 0.9),
+                                      width: 1.0,
+                                    ),
+                                  ),
+                                ),
+                            child: Row(
+                              children: [
+                                if (!widget.isEmbedded) ...[
+                                  BouncyButton(
+                                    onTap: () => Navigator.pop(context),
+                                    child: Container(
+                                      width: 42,
+                                      height: 42,
+                                      decoration: BoxDecoration(
+                                        color: isDark ? const Color(0xFF18181B) : Colors.white,
+                                        shape: BoxShape.circle,
+                                        border: Border.all(
+                                          color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+                                          width: 1.2,
+                                        ),
+                                      ),
+                                      child: Icon(
+                                        Icons.arrow_back_rounded,
+                                        color: isDark ? Colors.white : Colors.black,
+                                        size: 20,
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 10),
+                                ],
+                                if (isPrivate) ...[
+                                  SizedBox(
+                                    width: 40,
+                                    height: 40,
+                                    child: ClipOval(
+                                      child: Transform.scale(
+                                        scale: 1.45,
+                                        child: _buildSafeAvatar(privateAvatar),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 10),
+                                ],
+                                Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    channelTitle,
+                                    style: AppTypography.chatHeaderTitle(
+                                      color: isDark ? Colors.white : Colors.black87,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    subtitle,
+                                    style: AppTypography.chatHeaderSubtitle(
+                                      color: isDark ? Colors.white60 : Colors.black45,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            PopupMenuButton<String>(
+                              tooltip: '',
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                                side: BorderSide(
+                                  color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+                                  width: 1.0,
+                                ),
+                              ),
+                              elevation: 0,
+                              color: isDark ? const Color(0xFF141416) : Colors.white,
+                              icon: Container(
+                                width: 42,
+                                height: 42,
+                                decoration: BoxDecoration(
+                                  color: isDark ? const Color(0xFF18181B) : Colors.white,
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+                                    width: 1.2,
+                                  ),
+                                ),
+                                child: Icon(
+                                  Icons.more_horiz_rounded,
+                                  color: isDark ? Colors.white : Colors.black,
+                                  size: 20,
+                                ),
+                              ),
+                              onSelected: (val) async {
+                                if (val == 'edit') {
+                                  if (discData != null) {
+                                    _openEditDiscussionSettings(context, discData);
+                                  }
+                                } else if (val == 'clear') {
+                                  final confirm = await showDialog<bool>(
+                                    context: context,
+                                    builder: (dialogCtx) => AlertDialog(
+                                      backgroundColor: isDark ? const Color(0xFF1E1E22) : Colors.white,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(20),
+                                        side: BorderSide(color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0)),
+                                      ),
+                                      title: Text(
+                                        'Bersihkan Obrolan',
+                                        style: GoogleFonts.plusJakartaSans(
+                                          fontWeight: FontWeight.bold,
+                                          color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                        ),
+                                      ),
+                                      content: Text(
+                                        isPrivate
+                                            ? 'Apakah Anda yakin ingin menghapus semua pesan di obrolan pribadi ini?'
+                                            : 'Apakah Anda yakin ingin membersihkan semua pesan di grup diskusi ini?',
+                                        style: GoogleFonts.plusJakartaSans(
+                                          color: isDark ? Colors.white70 : const Color(0xFF334155),
+                                        ),
+                                      ),
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () => Navigator.pop(dialogCtx, false),
+                                          child: Text(
+                                            'Batal',
+                                            style: GoogleFonts.plusJakartaSans(
+                                              color: isDark ? Colors.white60 : Colors.black54,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                        ),
+                                        TextButton(
+                                          onPressed: () => Navigator.pop(dialogCtx, true),
+                                          child: Text(
+                                            'Bersihkan',
+                                            style: GoogleFonts.plusJakartaSans(
+                                              color: Colors.redAccent,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                  if (confirm == true && !_isDraft && _currentDiscussionId.isNotEmpty) {
+                                    final msgs = await FirebaseFirestore.instance
+                                        .collection('discussions')
+                                        .doc(_currentDiscussionId)
+                                        .collection('messages')
+                                        .get();
+                                    for (var doc in msgs.docs) {
+                                      await doc.reference.delete();
+                                    }
+                                    await FirebaseFirestore.instance
+                                        .collection('discussions')
+                                        .doc(_currentDiscussionId)
+                                        .update({
+                                      'lastMessage': isPrivate ? 'Mulai obrolan privat...' : 'Obrolan telah dibersihkan...',
+                                    });
+                                    if (context.mounted) {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(content: Text('Obrolan berhasil dibersihkan!')),
+                                      );
+                                    }
+                                  }
+                                } else if (val == 'leave') {
+                                  final confirm = await showDialog<bool>(
+                                    context: context,
+                                    builder: (dialogCtx) => AlertDialog(
+                                      backgroundColor: isDark ? const Color(0xFF1E1E22) : Colors.white,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(20),
+                                        side: BorderSide(color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0)),
+                                      ),
+                                      title: Text(
+                                        'Keluar dari Grup',
+                                        style: GoogleFonts.plusJakartaSans(
+                                          fontWeight: FontWeight.bold,
+                                          color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                        ),
+                                      ),
+                                      content: Text(
+                                        'Apakah Anda yakin ingin keluar dari grup diskusi ini?',
+                                        style: GoogleFonts.plusJakartaSans(
+                                          color: isDark ? Colors.white70 : const Color(0xFF334155),
+                                        ),
+                                      ),
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () => Navigator.pop(dialogCtx, false),
+                                          child: Text(
+                                            'Batal',
+                                            style: GoogleFonts.plusJakartaSans(
+                                              color: isDark ? Colors.white60 : Colors.black54,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                        ),
+                                        TextButton(
+                                          onPressed: () => Navigator.pop(dialogCtx, true),
+                                          child: Text(
+                                            'Keluar',
+                                            style: GoogleFonts.plusJakartaSans(
+                                              color: Colors.redAccent,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                  if (confirm == true && !_isDraft && _currentDiscussionId.isNotEmpty) {
+                                    await FirebaseFirestore.instance
+                                        .collection('discussions')
+                                        .doc(_currentDiscussionId)
+                                        .update({
+                                      'memberUids': FieldValue.arrayRemove([currentUid]),
+                                    });
+                                    if (context.mounted) {
+                                      Navigator.pop(context);
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(content: Text('Anda telah keluar dari grup diskusi.')),
+                                      );
+                                    }
+                                  }
+                                } else if (val == 'delete') {
+                                  final confirm = await showDialog<bool>(
+                                    context: context,
+                                    builder: (dialogCtx) => AlertDialog(
+                                      backgroundColor: isDark ? const Color(0xFF1E1E22) : Colors.white,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(20),
+                                        side: BorderSide(color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0)),
+                                      ),
+                                      title: Text(
+                                        isPrivate ? 'Hapus Obrolan' : 'Hapus Diskusi',
+                                        style: GoogleFonts.plusJakartaSans(
+                                          fontWeight: FontWeight.bold,
+                                          color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                        ),
+                                      ),
+                                      content: Text(
+                                        isPrivate
+                                            ? 'Apakah Anda yakin ingin menghapus obrolan ini secara permanen?'
+                                            : 'Apakah Anda yakin ingin menghapus grup diskusi ini? Semua pesan di dalamnya akan terhapus secara permanen.',
+                                        style: GoogleFonts.plusJakartaSans(
+                                          color: isDark ? Colors.white70 : const Color(0xFF334155),
+                                        ),
+                                      ),
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () => Navigator.pop(dialogCtx, false),
+                                          child: Text(
+                                            'Batal',
+                                            style: GoogleFonts.plusJakartaSans(
+                                              color: isDark ? Colors.white60 : Colors.black54,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                        ),
+                                        TextButton(
+                                          onPressed: () => Navigator.pop(dialogCtx, true),
+                                          child: Text(
+                                            'Hapus',
+                                            style: GoogleFonts.plusJakartaSans(
+                                              color: Colors.redAccent,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                  if (confirm == true) {
+                                    if (!_isDraft && _currentDiscussionId.isNotEmpty) {
+                                      final msgs = await FirebaseFirestore.instance
+                                          .collection('discussions')
+                                          .doc(_currentDiscussionId)
+                                          .collection('messages')
+                                          .get();
+                                      for (var doc in msgs.docs) {
+                                        await doc.reference.delete();
+                                      }
+                                      await FirebaseFirestore.instance
+                                          .collection('discussions')
+                                          .doc(_currentDiscussionId)
+                                          .delete();
+                                    }
+                                    if (context.mounted) {
+                                      Navigator.pop(context);
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(content: Text(isPrivate ? 'Obrolan berhasil dihapus!' : 'Diskusi berhasil dihapus!')),
+                                      );
+                                    }
+                                  }
+                                }
+                              },
+                              itemBuilder: (context) {
+                                if (isPrivate) {
+                                  return [
+                                    PopupMenuItem(
+                                      value: 'clear',
+                                      height: 36,
+                                      padding: EdgeInsets.zero,
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+                                        child: Row(
+                                          children: [
+                                            const Icon(Icons.cleaning_services_rounded, size: 18, color: Color(0xFF06B6D4)),
+                                            const SizedBox(width: 10),
+                                            Text(
+                                              'Bersihkan Obrolan',
+                                              style: GoogleFonts.plusJakartaSans(
+                                                fontSize: 14.0,
+                                                fontWeight: FontWeight.w600,
+                                                color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                    PopupMenuItem(
+                                      value: 'delete',
+                                      height: 36,
+                                      padding: EdgeInsets.zero,
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+                                        child: Row(
+                                          children: [
+                                            const Icon(Icons.delete_outline_rounded, size: 18, color: Color(0xFFEF4444)),
+                                            const SizedBox(width: 10),
+                                            Text(
+                                              'Hapus Obrolan',
+                                              style: GoogleFonts.plusJakartaSans(
+                                                fontSize: 14.0,
+                                                fontWeight: FontWeight.w600,
+                                                color: const Color(0xFFEF4444),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ];
+                                }
+
+                                return [
+                                  if (isOwner) ...[
+                                    PopupMenuItem(
+                                      value: 'edit',
+                                      height: 36,
+                                      padding: EdgeInsets.zero,
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+                                        child: Row(
+                                          children: [
+                                            const Icon(Icons.settings_outlined, size: 18, color: Color(0xFF7C3AED)),
+                                            const SizedBox(width: 10),
+                                            Text(
+                                              'Pengaturan',
+                                              style: GoogleFonts.plusJakartaSans(
+                                                fontSize: 14.0,
+                                                fontWeight: FontWeight.w600,
+                                                color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                  PopupMenuItem(
+                                    value: 'leave',
+                                    height: 36,
+                                    padding: EdgeInsets.zero,
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+                                      child: Row(
+                                        children: [
+                                          const Icon(Icons.logout_rounded, size: 18, color: Color(0xFFF59E0B)),
+                                          const SizedBox(width: 10),
+                                          Text(
+                                            'Keluar Diskusi',
+                                            style: GoogleFonts.plusJakartaSans(
+                                              fontSize: 14.0,
+                                              fontWeight: FontWeight.w600,
+                                              color: const Color(0xFFF59E0B),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                  PopupMenuItem(
+                                    value: 'clear',
+                                    height: 36,
+                                    padding: EdgeInsets.zero,
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+                                      child: Row(
+                                        children: [
+                                          const Icon(Icons.cleaning_services_rounded, size: 18, color: Color(0xFF06B6D4)),
+                                          const SizedBox(width: 10),
+                                          Text(
+                                            'Bersihkan Obrolan',
+                                            style: GoogleFonts.plusJakartaSans(
+                                              fontSize: 14.0,
+                                              fontWeight: FontWeight.w600,
+                                              color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                  if (isOwner) ...[
+                                    PopupMenuItem(
+                                      value: 'delete',
+                                      height: 36,
+                                      padding: EdgeInsets.zero,
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+                                        child: Row(
+                                          children: [
+                                            const Icon(Icons.delete_outline_rounded, size: 18, color: Color(0xFFEF4444)),
+                                            const SizedBox(width: 10),
+                                            Text(
+                                              'Hapus Diskusi',
+                                              style: GoogleFonts.plusJakartaSans(
+                                                fontSize: 14.0,
+                                                fontWeight: FontWeight.w600,
+                                                color: const Color(0xFFEF4444),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ];
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                      ),
+
+                      // 6. Glassmorphic Flat Input Bar (Transparan Glassmorphic Blur Tinggi 20px)
+                      Positioned(
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        child: // 3. Glassmorphic Flat Input Bar (Full width flush to bottom acting as backdrop for Android buttons)
                         ClipRect(
                           child: BackdropFilter(
-                            filter: ui.ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+                            filter: ui.ImageFilter.blur(sigmaX: 20, sigmaY: 20),
                             child: Container(
                               width: double.infinity,
                               decoration: BoxDecoration(
                                 color: isDark
-                                    ? const Color(0xFF000000).withValues(alpha: 0.85)
-                                    : Colors.white.withValues(alpha: 0.85),
+                                    ? const Color(0xFF000000).withValues(alpha: 0.60)
+                                    : Colors.white.withValues(alpha: 0.65),
                                 border: Border(
                                   top: BorderSide(
                                     color: isDark
                                         ? const Color(0xFF27272A)
-                                        : const Color(0xFFF1F5F9),
+                                        : const Color(0xFFF1F5F9).withValues(alpha: 0.9),
                                     width: 1.0,
                                   ),
                                 ),
@@ -5068,6 +5361,10 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                 mainAxisSize: MainAxisSize.min,
                                 crossAxisAlignment: CrossAxisAlignment.stretch,
                                 children: [
+                                  // Mention Popup
+                                  if (_showMentionPopup && !isPrivate)
+                                    _buildMentionPopup(isDark),
+
                                   // Replying Banner
                                   if (_replyingToMessage != null) ...[
                                     Container(
@@ -5334,19 +5631,17 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                             ),
                           ),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-            ),
-          );
-          },
-        ),
-      );
-    },
-  );
-}
+                ),
+              );
+            },
+          ),
+        );
+      },
+    );
+  }
 }
 
 class ClassroomCardPatternPainter extends CustomPainter {
@@ -5529,7 +5824,7 @@ class _ImagePreviewSendDialogState extends State<ImagePreviewSendDialog> {
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
 
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: widget.isDark ? Colors.black : const Color(0xFFF8FAFC),
       resizeToAvoidBottomInset: false,
       body: Stack(
         fit: StackFit.expand,
@@ -5559,7 +5854,7 @@ class _ImagePreviewSendDialogState extends State<ImagePreviewSendDialog> {
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
-                      Colors.black.withValues(alpha: 0.75),
+                      (widget.isDark ? Colors.black : Colors.white).withValues(alpha: widget.isDark ? 0.75 : 0.85),
                       Colors.transparent,
                     ],
                     begin: Alignment.topCenter,
@@ -5576,13 +5871,17 @@ class _ImagePreviewSendDialogState extends State<ImagePreviewSendDialog> {
                         width: 40,
                         height: 40,
                         decoration: BoxDecoration(
-                          color: Colors.black.withValues(alpha: 0.45),
+                          color: widget.isDark ? Colors.black.withValues(alpha: 0.45) : Colors.white,
                           shape: BoxShape.circle,
+                          border: Border.all(
+                            color: widget.isDark ? Colors.white24 : const Color(0xFFE2E8F0),
+                            width: 1.2,
+                          ),
                         ),
-                        child: const Icon(
+                        child: Icon(
                           Icons.close_rounded,
-                          color: Colors.white,
-                          size: 24,
+                          color: widget.isDark ? Colors.white : Colors.black87,
+                          size: 22,
                         ),
                       ),
                     ),
@@ -5602,10 +5901,12 @@ class _ImagePreviewSendDialogState extends State<ImagePreviewSendDialog> {
                         decoration: BoxDecoration(
                           color: _isHd
                               ? const Color(0xFF7C3AED)
-                              : Colors.black.withValues(alpha: 0.5),
+                              : (widget.isDark ? Colors.black.withValues(alpha: 0.5) : Colors.white),
                           borderRadius: BorderRadius.circular(20),
                           border: Border.all(
-                            color: _isHd ? const Color(0xFFA78BFA) : Colors.white38,
+                            color: _isHd
+                                ? const Color(0xFFA78BFA)
+                                : (widget.isDark ? Colors.white38 : const Color(0xFFE2E8F0)),
                             width: 1.2,
                           ),
                         ),
@@ -5615,7 +5916,9 @@ class _ImagePreviewSendDialogState extends State<ImagePreviewSendDialog> {
                             Icon(
                               _isHd ? Icons.check_circle_rounded : Icons.high_quality_rounded,
                               size: 18,
-                              color: Colors.white,
+                              color: _isHd
+                                  ? Colors.white
+                                  : (widget.isDark ? Colors.white : const Color(0xFF7C3AED)),
                             ),
                             const SizedBox(width: 5),
                             Text(
@@ -5623,7 +5926,9 @@ class _ImagePreviewSendDialogState extends State<ImagePreviewSendDialog> {
                               style: GoogleFonts.plusJakartaSans(
                                 fontSize: 13.0,
                                 fontWeight: FontWeight.bold,
-                                color: Colors.white,
+                                color: _isHd
+                                    ? Colors.white
+                                    : (widget.isDark ? Colors.white : const Color(0xFF1E293B)),
                               ),
                             ),
                           ],
@@ -5647,7 +5952,7 @@ class _ImagePreviewSendDialogState extends State<ImagePreviewSendDialog> {
                 gradient: LinearGradient(
                   colors: [
                     Colors.transparent,
-                    Colors.black.withValues(alpha: 0.8),
+                    (widget.isDark ? Colors.black : Colors.white).withValues(alpha: widget.isDark ? 0.8 : 0.95),
                   ],
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
@@ -5660,11 +5965,11 @@ class _ImagePreviewSendDialogState extends State<ImagePreviewSendDialog> {
                     child: Container(
                       constraints: const BoxConstraints(minHeight: 46),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF1E1E22).withValues(alpha: 0.8),
+                        color: widget.isDark ? const Color(0xFF1E1E22).withValues(alpha: 0.8) : Colors.white,
                         borderRadius: BorderRadius.circular(24),
                         border: Border.all(
-                          color: Colors.white.withValues(alpha: 0.25),
-                          width: 1.0,
+                          color: widget.isDark ? Colors.white.withValues(alpha: 0.25) : const Color(0xFFCBD5E1),
+                          width: 1.2,
                         ),
                       ),
                       alignment: Alignment.center,
@@ -5673,13 +5978,13 @@ class _ImagePreviewSendDialogState extends State<ImagePreviewSendDialog> {
                         controller: _captionController,
                         style: GoogleFonts.dmSans(
                           fontSize: 15.0,
-                          color: Colors.white,
+                          color: widget.isDark ? Colors.white : const Color(0xFF0F172A),
                         ),
                         decoration: InputDecoration(
                           hintText: 'Tambah keterangan...',
                           hintStyle: GoogleFonts.dmSans(
                             fontSize: 15.0,
-                            color: Colors.white60,
+                            color: widget.isDark ? Colors.white60 : const Color(0xFF94A3B8),
                           ),
                           border: InputBorder.none,
                           isDense: true,
@@ -6080,7 +6385,7 @@ class _AnimatedPurpleMicroPatternBackgroundState extends State<AnimatedPurpleMic
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 16),
+      duration: const Duration(seconds: 120),
     )..repeat();
   }
 
@@ -6191,18 +6496,18 @@ class _PurpleMicroPatternPainter extends CustomPainter {
     for (int i = 0; i < _squiggles.length; i++) {
       final sq = _squiggles[i];
 
-      // Gerak mengambang dinamis ke sana ke mari secara organik
+      // Gerak mengambang dinamis ke sana ke mari secara organik (sangat halus & perlahan)
       final double progressX = (animationValue * sq.speedX) % 1.0;
       final double progressY = (animationValue * sq.speedY) % 1.0;
 
-      final double floatX = sin(progressX * 2 * pi) * sq.driftX;
-      final double floatY = cos(progressY * 2 * pi) * sq.driftY;
+      final double floatX = sin(progressX * 2 * pi) * (sq.driftX * 0.35);
+      final double floatY = cos(progressY * 2 * pi) * (sq.driftY * 0.35);
 
       final double cx = (sq.xFrac * size.width + floatX);
       final double cy = (sq.yFrac * size.height + floatY);
 
       // Rotasi dan goyangan halus tak beraturan
-      final double angle = sq.baseAngle + sin(animationValue * 2 * pi * sq.rotSpeed + i) * 0.30;
+      final double angle = sq.baseAngle + sin(animationValue * 2 * pi * (sq.rotSpeed * 0.5) + i) * 0.08;
 
       canvas.save();
       canvas.translate(cx, cy);
@@ -6283,8 +6588,8 @@ class _PurpleMicroPatternPainter extends CustomPainter {
       // Aksen titik mikro mengambang di sekitar oletan
       canvas.drawCircle(
         Offset(
-          sin(animationValue * 2 * pi * 0.8 + i) * 16.0,
-          cos(animationValue * 2 * pi * 0.6 + i) * 16.0,
+          sin(animationValue * 2 * pi * 0.3 + i) * 6.0,
+          cos(animationValue * 2 * pi * 0.25 + i) * 6.0,
         ),
         1.4,
         dotPaint,

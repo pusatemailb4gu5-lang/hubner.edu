@@ -26,7 +26,8 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
   String? _selectedProjectId;
   int? _selectedStageFilterIdx;
   int? _selectedMateriFilterIdx;
-  String _selectedTypeFilter = 'all'; // 'all', 'tugas', 'quiz'
+  bool _filterTugas = true;
+  bool _filterQuiz = true;
 
   final GlobalKey _classDropdownKey = GlobalKey();
   final GlobalKey _elemenDropdownKey = GlobalKey();
@@ -685,8 +686,8 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
           final type = tasks[tIdx]['type'] ?? 'tugas';
           if (type == 'pdf') continue;
 
-          if (_selectedTypeFilter == 'tugas' && type != 'tugas') continue;
-          if (_selectedTypeFilter == 'quiz' && type != 'quiz') continue;
+          if (!_filterTugas && type == 'tugas') continue;
+          if (!_filterQuiz && type == 'quiz') continue;
 
           final String tId = tasks[tIdx]['id']?.toString() ?? '${sIdx}_${mIdx}_$tIdx';
           if (!list.any((item) => item['id'] == tId)) {
@@ -706,8 +707,8 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
         final type = t['type'] ?? 'tugas';
         if (type == 'pdf') continue;
 
-        if (_selectedTypeFilter == 'tugas' && type != 'tugas') continue;
-        if (_selectedTypeFilter == 'quiz' && type != 'quiz') continue;
+        if (!_filterTugas && type == 'tugas') continue;
+        if (!_filterQuiz && type == 'quiz') continue;
 
         final String tId = t['id']?.toString() ?? '${sIdx}_st_$stIdx';
         if (!list.any((item) => item['id'] == tId)) {
@@ -1105,205 +1106,154 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                   const SizedBox(height: 16),
 
                                    // ==========================================
-                                   // 2. PILIH CLASSROOM (BOUNCY BUTTON DENGAN DROPDOWN OVERLAY PERSIS CATATAN) & ATUR PRESENSI
+                                   // 2. PILIH CLASSROOM (BOUNCY BUTTON DENGAN DROPDOWN OVERLAY PERSIS CATATAN)
+                                   // ==========================================
+                                   BouncyButton(
+                                     key: _classDropdownKey,
+                                     onTap: () => _openClassDropdown(context, _classDropdownKey, classrooms),
+                                     child: Container(
+                                       height: 52,
+                                       padding: const EdgeInsets.fromLTRB(4, 4, 16, 4),
+                                       decoration: BoxDecoration(
+                                         color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
+                                         borderRadius: BorderRadius.circular(30),
+                                         border: Border.all(
+                                           color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+                                           width: 1.2,
+                                         ),
+                                       ),
+                                       child: Row(
+                                         children: [
+                                           // Real Classroom Icon (Besar & mepet batas kiri card)
+                                           _buildClassIcon(classroomData, size: 44),
+                                           const SizedBox(width: 10),
+                                           Expanded(
+                                             child: Text(
+                                               className,
+                                               style: AppTypography.dropdown(color: isDark ? Colors.white : Colors.black87, fontWeight: FontWeight.bold, height: 1.15),
+                                               maxLines: 2,
+                                               overflow: TextOverflow.ellipsis,
+                                             ),
+                                           ),
+                                           const SizedBox(width: 4),
+                                           Icon(
+                                             Icons.keyboard_arrow_down_rounded,
+                                             color: isDark ? Colors.white70 : Colors.black54,
+                                             size: 22,
+                                           ),
+                                         ],
+                                       ),
+                                     ),
+                                   ),
+                                   const SizedBox(height: 12),
+
+                                   // ==========================================
+                                   // 3. TOTAL SISWA & TELAH BERGABUNG (IKON KIRI, ANGKA & TULISAN DI KANAN)
                                    // ==========================================
                                    Row(
                                      children: [
-                                       // Pilih Kelas Selector (BouncyButton)
+                                       // Total Siswa Card (Solid Orange - Design System #04)
                                        Expanded(
-                                         child: BouncyButton(
-                                           key: _classDropdownKey,
-                                           onTap: () => _openClassDropdown(context, _classDropdownKey, classrooms),
-                                           child: Container(
-                                             height: 52,
-                                             padding: const EdgeInsets.fromLTRB(4, 4, 16, 4),
-                                             decoration: BoxDecoration(
-                                               color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
-                                               borderRadius: BorderRadius.circular(30),
-                                               border: Border.all(
-                                                 color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
-                                                 width: 1.2,
+                                         child: Container(
+                                           height: 78,
+                                           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                                           decoration: BoxDecoration(
+                                             color: isDark ? const Color(0xFFC76D10) : const Color(0xFFF7BD84),
+                                             borderRadius: BorderRadius.circular(20),
+                                             border: Border.all(
+                                               color: isDark ? const Color(0xFFE28A2B).withValues(alpha: 0.3) : Colors.transparent,
+                                               width: 1.1,
+                                             ),
+                                           ),
+                                           child: Row(
+                                             crossAxisAlignment: CrossAxisAlignment.center,
+                                             children: [
+                                               // Ikon Frameless di Kiri
+                                               Icon(
+                                                 Icons.people_alt_rounded,
+                                                 color: isDark ? Colors.white : const Color(0xFF7C2D12),
+                                                 size: 28,
                                                ),
-                                             ),
-                                             child: Row(
-                                               children: [
-                                                 // Real Classroom Icon (Besar & mepet batas kiri card)
-                                                 _buildClassIcon(classroomData, size: 44),
-                                                 const SizedBox(width: 10),
-                                                 Expanded(
-                                                   child: Text(
-                                                     className,
-                                                     style: AppTypography.dropdown(color: isDark ? Colors.white : Colors.black87, fontWeight: FontWeight.bold, height: 1.15),
-                                                     maxLines: 2,
-                                                     overflow: TextOverflow.ellipsis,
-                                                   ),
+                                               const SizedBox(width: 10),
+                                               // Angka & Tulisan di Kanan
+                                               Expanded(
+                                                 child: Column(
+                                                   crossAxisAlignment: CrossAxisAlignment.start,
+                                                   mainAxisAlignment: MainAxisAlignment.center,
+                                                   children: [
+                                                     Text(
+                                                       '${masterList.length}',
+                                                       style: AppTypography.pageTitle(color: isDark ? Colors.white : const Color(0xFF431407), fontWeight: FontWeight.w900, height: 1.0),
+                                                     ),
+                                                     const SizedBox(height: 3),
+                                                     FittedBox(
+                                                       fit: BoxFit.scaleDown,
+                                                       alignment: Alignment.centerLeft,
+                                                       child: Text(
+                                                         'Total Siswa',
+                                                         style: AppTypography.buttonLabel(color: isDark ? Colors.white.withValues(alpha: 0.9) : const Color(0xFF7C2D12), fontWeight: FontWeight.w800),
+                                                       ),
+                                                     ),
+                                                   ],
                                                  ),
-                                                 const SizedBox(width: 4),
-                                                 Icon(
-                                                   Icons.keyboard_arrow_down_rounded,
-                                                   color: isDark ? Colors.white70 : Colors.black54,
-                                                   size: 22,
-                                                 ),
-                                               ],
-                                             ),
+                                               ),
+                                             ],
                                            ),
                                          ),
                                        ),
-                                      const SizedBox(width: 8),
+                                       const SizedBox(width: 10),
 
-                                      // Atur Presensi Button
-                                      BouncyButton(
-                                        onTap: () {
-                                          final screenWidth = MediaQuery.of(context).size.width;
-                                          if (screenWidth > 900) {
-                                            if (_showAttendancePanel && _attendancePanelProjectId == _selectedProjectId) {
-                                              _closeAttendancePanel();
-                                            } else {
-                                              _openAttendancePanel(_selectedProjectId!, masterList);
-                                            }
-                                          } else {
-                                            Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                builder: (_) => ManageAttendancePage(
-                                                  projectId: _selectedProjectId!,
-                                                  currentMasterList: masterList,
-                                                ),
-                                              ),
-                                            );
-                                          }
-                                        },
-                                        child: Container(
-                                          height: 52,
-                                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                                          decoration: BoxDecoration(
-                                            color: isDark ? const Color(0xFF1C1C1E) : Colors.black,
-                                            borderRadius: BorderRadius.circular(30),
-                                            border: Border.all(
-                                              color: isDark ? const Color(0xFF27272A) : Colors.transparent,
-                                              width: 1.2,
-                                            ),
-                                          ),
-                                          child: Row(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              const Icon(Icons.manage_accounts_rounded, color: Colors.white, size: 18),
-                                              const SizedBox(width: 6),
-                                              Text(
-                                                'Atur Presensi',
-                                                style: AppTypography.buttonLabel(color: Colors.white, fontWeight: FontWeight.bold),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 12),
-
-                                  // ==========================================
-                                  // 3. TOTAL SISWA & TELAH BERGABUNG (IKON KIRI, ANGKA & TULISAN DI KANAN)
-                                  // ==========================================
-                                  Row(
-                                    children: [
-                                      // Total Siswa Card
-                                      Expanded(
-                                        child: Container(
-                                          height: 78,
-                                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                                          decoration: BoxDecoration(
-                                            color: isDark ? const Color(0xFF451A03) : const Color(0xFFFFFBEB),
-                                            borderRadius: BorderRadius.circular(20),
-                                            border: Border.all(
-                                              color: isDark ? const Color(0xFFC76D10).withValues(alpha: 0.4) : Colors.transparent,
-                                              width: 1.1,
-                                            ),
-                                          ),
-                                          child: Row(
-                                            crossAxisAlignment: CrossAxisAlignment.center,
-                                            children: [
-                                              // Ikon Frameless di Kiri
-                                              Icon(
-                                                Icons.people_alt_rounded,
-                                                color: isDark ? const Color(0xFFFBBF24) : const Color(0xFFD97706),
-                                                size: 28,
-                                              ),
-                                              const SizedBox(width: 10),
-                                              // Angka & Tulisan di Kanan
-                                              Expanded(
-                                                child: Column(
-                                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                                  mainAxisAlignment: MainAxisAlignment.center,
-                                                  children: [
-                                                    Text(
-                                                      '${masterList.length}',
-                                                      style: AppTypography.pageTitle(color: isDark ? const Color(0xFFFDE68A) : const Color(0xFF475569), fontWeight: FontWeight.w900, height: 1.0),
-                                                    ),
-                                                    const SizedBox(height: 3),
-                                                    Text(
-                                                      'Total Siswa',
-                                                      style: AppTypography.buttonLabel(color: isDark ? const Color(0xFFFDBA74) : const Color(0xFF475569), fontWeight: FontWeight.w700),
-                                                      maxLines: 1,
-                                                      overflow: TextOverflow.ellipsis,
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                      const SizedBox(width: 10),
-
-                                      // Telah Bergabung Card
-                                      Expanded(
-                                        child: Container(
-                                          height: 78,
-                                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                                          decoration: BoxDecoration(
-                                            color: isDark ? const Color(0xFF064E3B) : const Color(0xFFECFDF5),
-                                            borderRadius: BorderRadius.circular(20),
-                                            border: Border.all(
-                                              color: isDark ? const Color(0xFF147D75).withValues(alpha: 0.4) : Colors.transparent,
-                                              width: 1.1,
-                                            ),
-                                          ),
-                                          child: Row(
-                                            crossAxisAlignment: CrossAxisAlignment.center,
-                                            children: [
-                                              // Ikon Frameless di Kiri
-                                              Icon(
-                                                Icons.how_to_reg_rounded,
-                                                color: isDark ? const Color(0xFF34D399) : const Color(0xFF059669),
-                                                size: 28,
-                                              ),
-                                              const SizedBox(width: 10),
-                                              // Angka & Tulisan di Kanan
-                                              Expanded(
-                                                child: Column(
-                                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                                  mainAxisAlignment: MainAxisAlignment.center,
-                                                  children: [
-                                                    Text(
-                                                      '${masterList.where((s) => s['joined'] == true).length}',
-                                                      style: AppTypography.pageTitle(color: isDark ? const Color(0xFFA7F3D0) : const Color(0xFF475569), fontWeight: FontWeight.w900, height: 1.0),
-                                                    ),
-                                                    const SizedBox(height: 3),
-                                                    Text(
-                                                      'Telah Bergabung',
-                                                      style: AppTypography.buttonLabel(color: isDark ? const Color(0xFF6EE7B7) : const Color(0xFF475569), fontWeight: FontWeight.w700),
-                                                      maxLines: 1,
-                                                      overflow: TextOverflow.ellipsis,
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
+                                       // Telah Bergabung Card (Solid Tosca - Design System #03)
+                                       Expanded(
+                                         child: Container(
+                                           height: 78,
+                                           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                                           decoration: BoxDecoration(
+                                             color: isDark ? const Color(0xFF147D75) : const Color(0xFF7DE3D0),
+                                             borderRadius: BorderRadius.circular(20),
+                                             border: Border.all(
+                                               color: isDark ? const Color(0xFF2DD4BF).withValues(alpha: 0.3) : Colors.transparent,
+                                               width: 1.1,
+                                             ),
+                                           ),
+                                           child: Row(
+                                             crossAxisAlignment: CrossAxisAlignment.center,
+                                             children: [
+                                               // Ikon Frameless di Kiri
+                                               Icon(
+                                                 Icons.how_to_reg_rounded,
+                                                 color: isDark ? Colors.white : const Color(0xFF064E3B),
+                                                 size: 28,
+                                               ),
+                                               const SizedBox(width: 10),
+                                               // Angka & Tulisan di Kanan
+                                               Expanded(
+                                                 child: Column(
+                                                   crossAxisAlignment: CrossAxisAlignment.start,
+                                                   mainAxisAlignment: MainAxisAlignment.center,
+                                                   children: [
+                                                     Text(
+                                                       '${masterList.where((s) => s['joined'] == true).length}',
+                                                       style: AppTypography.pageTitle(color: isDark ? Colors.white : const Color(0xFF022C22), fontWeight: FontWeight.w900, height: 1.0),
+                                                     ),
+                                                     const SizedBox(height: 3),
+                                                     FittedBox(
+                                                       fit: BoxFit.scaleDown,
+                                                       alignment: Alignment.centerLeft,
+                                                       child: Text(
+                                                         'Telah Bergabung',
+                                                         style: AppTypography.buttonLabel(color: isDark ? Colors.white.withValues(alpha: 0.9) : const Color(0xFF064E3B), fontWeight: FontWeight.w800),
+                                                       ),
+                                                     ),
+                                                   ],
+                                                 ),
+                                               ),
+                                             ],
+                                           ),
+                                         ),
+                                       ),
+                                     ],
+                                   ),
                                   const SizedBox(height: 12),
 
                                   // ==========================================
@@ -1419,14 +1369,14 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                       // LAYER 1: DRAGGABLE SCROLLABLE SHEET PUTIH FULL KE BAWAH (Seperti Detail Classroom)
                       // ==========================================
                       DraggableScrollableSheet(
-                        initialChildSize: 0.58,
-                        minChildSize: 0.58,
+                        initialChildSize: 0.50,
+                        minChildSize: 0.50,
                         maxChildSize: 0.96,
                         snap: true,
-                        snapSizes: const [0.58, 0.96],
+                        snapSizes: const [0.50, 0.96],
                         builder: (context, scrollController) {
-                          final bool showTugas = _selectedTypeFilter == 'all' || _selectedTypeFilter == 'tugas';
-                          final bool showQuiz = _selectedTypeFilter == 'all' || _selectedTypeFilter == 'quiz';
+                          final bool showTugas = _filterTugas;
+                          final bool showQuiz = _filterQuiz;
                           final double tableWidth = 200.0 + 90.0 + (showTugas ? 350.0 : 0.0) + (showQuiz ? 350.0 : 0.0);
 
                           return Container(
@@ -1451,32 +1401,20 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                 ),
                                 const SizedBox(height: 12),
                                 // ==========================================
-                                // SIMPLE TOOLBAR: CHECKBOX MODE & IKON UNDUH (STICKY)
+                                // SIMPLE TOOLBAR: CHECKBOX TUGAS & QUIZ, ATUR PRESENSI & IKON UNDUH (STICKY)
                                 // ==========================================
                                 Padding(
                                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
                                   child: Row(
                                     children: [
-                                      // Mode Checkbox: Semua
-                                      _buildModeCheckbox(
-                                        label: 'Semua',
-                                        isSelected: _selectedTypeFilter == 'all',
-                                        onTap: () {
-                                          setState(() {
-                                            _selectedTypeFilter = 'all';
-                                          });
-                                        },
-                                        isDark: isDark,
-                                      ),
-                                      const SizedBox(width: 8),
-
                                       // Mode Checkbox: Tugas
                                       _buildModeCheckbox(
                                         label: 'Tugas',
-                                        isSelected: _selectedTypeFilter == 'tugas',
+                                        isSelected: _filterTugas,
                                         onTap: () {
                                           setState(() {
-                                            _selectedTypeFilter = 'tugas';
+                                            if (_filterTugas && !_filterQuiz) return;
+                                            _filterTugas = !_filterTugas;
                                           });
                                         },
                                         isDark: isDark,
@@ -1486,16 +1424,63 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                       // Mode Checkbox: Quiz
                                       _buildModeCheckbox(
                                         label: 'Quiz',
-                                        isSelected: _selectedTypeFilter == 'quiz',
+                                        isSelected: _filterQuiz,
                                         onTap: () {
                                           setState(() {
-                                            _selectedTypeFilter = 'quiz';
+                                            if (_filterQuiz && !_filterTugas) return;
+                                            _filterQuiz = !_filterQuiz;
                                           });
                                         },
                                         isDark: isDark,
                                       ),
 
                                       const Spacer(),
+
+                                      // Tombol Atur Presensi (Merah, Text Putih, Ukuran sesuai tombol unduh)
+                                      BouncyButton(
+                                        scaleDown: 0.92,
+                                        onTap: () {
+                                          final screenWidth = MediaQuery.of(context).size.width;
+                                          if (screenWidth > 900) {
+                                            if (_showAttendancePanel && _attendancePanelProjectId == _selectedProjectId) {
+                                              _closeAttendancePanel();
+                                            } else {
+                                              _openAttendancePanel(_selectedProjectId!, masterList);
+                                            }
+                                          } else {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (_) => ManageAttendancePage(
+                                                  projectId: _selectedProjectId!,
+                                                  currentMasterList: masterList,
+                                                ),
+                                              ),
+                                            );
+                                          }
+                                        },
+                                        child: Container(
+                                          height: 34,
+                                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                                          decoration: BoxDecoration(
+                                            color: const Color(0xFFEF4444),
+                                            borderRadius: BorderRadius.circular(17),
+                                          ),
+                                          alignment: Alignment.center,
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              const Icon(Icons.manage_accounts_rounded, color: Colors.white, size: 16),
+                                              const SizedBox(width: 5),
+                                              Text(
+                                                'Atur Presensi',
+                                                style: AppTypography.buttonLabel(color: Colors.white, fontWeight: FontWeight.bold),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
 
                                       // Simple Unduh CSV Icon Saja
                                       StreamBuilder<QuerySnapshot>(
@@ -1526,9 +1511,9 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                             child: Container(
                                               width: 34,
                                               height: 34,
-                                              decoration: BoxDecoration(
+                                              decoration: const BoxDecoration(
                                                 shape: BoxShape.circle,
-                                                color: const Color(0xFF7C3AED),
+                                                color: Color(0xFF7C3AED),
                                               ),
                                               alignment: Alignment.center,
                                               child: const Icon(

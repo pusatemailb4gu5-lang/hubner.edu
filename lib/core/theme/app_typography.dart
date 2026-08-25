@@ -14,10 +14,10 @@ class AppTypography {
   // 1. MASTER SCALE TOKENS (Ubah angka di sini, seluruh aplikasi otomatis berubah!)
   // =========================================================================
   static const double sizePageTitle          = 28.0; // Judul Halaman Utama / Profil Display
-  static const double sizeChatHeaderTitle    = 18.5; // Judul Header Chat (Nama Grup/Kontak)
+  static const double sizeChatHeaderTitle    = 18.0; // Judul Header Chat (Nama Grup/Kontak)
   static const double sizeChatHeaderSubtitle = 18.0; // Subjudul Header Chat (Status/Anggota)
   static const double sizeDiscussionTitle    = 18.0; // Judul Item di Tab Diskusi
-  static const double sizeChatBody           = 20.0; // Isi Teks Pesan di Daun/Bubble Chat
+  static const double sizeChatBody           = 18.0; // Isi Teks Pesan di Daun/Bubble Chat
   static const double sizeSearchInput        = 17.0; // Kolom Input Pencarian & Hint
   static const double sizeSenderName         = 18.0; // Nama Pengirim di Daun Chat
   static const double sizeReplyTitle         = 16.5; // Nama Pengirim Reply

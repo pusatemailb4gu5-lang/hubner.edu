@@ -766,27 +766,36 @@ class _FluidIPhoneBottomNavBarState extends State<_FluidIPhoneBottomNavBar>
                                     ),
                                   ),
                                   if (unread > 0)
-                                    Positioned(
-                                      top: -3,
-                                      right: -7,
-                                      child: Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1.5),
-                                        decoration: BoxDecoration(
-                                          color: const Color(0xFF7C3AED),
-                                          borderRadius: BorderRadius.circular(10),
-                                        ),
-                                        constraints: const BoxConstraints(
-                                          minWidth: 16,
-                                          minHeight: 16,
-                                        ),
-                                        child: Center(
-                                          child: Text(
-                                            '$unread',
-                                            style: AppTypography.microBadge(color: Colors.white, fontWeight: FontWeight.bold),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
+                                     Positioned(
+                                       top: -3,
+                                       right: -7,
+                                       child: Container(
+                                         padding: const EdgeInsets.symmetric(horizontal: 4.5, vertical: 1.5),
+                                         decoration: BoxDecoration(
+                                           color: const Color(0xFFEF4444),
+                                           shape: BoxShape.circle,
+                                           border: Border.all(
+                                             color: isDark ? const Color(0xFF18181B) : Colors.white,
+                                             width: 1.2,
+                                           ),
+                                         ),
+                                         constraints: const BoxConstraints(
+                                           minWidth: 17,
+                                           minHeight: 17,
+                                         ),
+                                         child: Center(
+                                           child: Text(
+                                             unread > 99 ? '99+' : '$unread',
+                                             style: const TextStyle(
+                                               color: Colors.white,
+                                               fontSize: 9.5,
+                                               fontWeight: FontWeight.bold,
+                                               height: 1.0,
+                                             ),
+                                           ),
+                                         ),
+                                       ),
+                                     ),
                                 ],
                               ),
                               const SizedBox(height: 2.5),
@@ -1404,6 +1413,7 @@ class _DiscussionTabState extends State<DiscussionTab> {
                           child: Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                             child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
                                 Container(
                                   width: 50,
@@ -1436,82 +1446,82 @@ class _DiscussionTabState extends State<DiscussionTab> {
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       if (isGroupChat) ...[
-                                        Row(
-                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Expanded(
-                                              child: Text(
-                                                projectName.isNotEmpty
-                                                    ? '$channelName • Kelas $projectName'
-                                                    : ((chat['isFriendGroup'] == true || channelName.contains('teman'))
-                                                        ? '$channelName • Teman'
-                                                        : channelName),
-                                                maxLines: 1,
-                                                overflow: TextOverflow.ellipsis,
-                                                style: AppTypography.buttonLabel(color: isDark ? const Color(0xFF2DD4BF) : const Color(0xFF475569), fontWeight: FontWeight.w600),
-                                              ),
-                                            ),
-                                            Text(
-                                              time,
-                                              style: AppTypography.subtitle(color: isDark ? Colors.white38 : Colors.black38),
-                                            ),
-                                          ],
-                                        ),
-                                        const SizedBox(height: 4),
                                         Text(
-                                          title,
-                                          style: AppTypography.chatHeaderTitle(color: isDark ? Colors.white : Colors.black87, fontWeight: FontWeight.bold),
+                                          projectName.isNotEmpty
+                                              ? '$channelName • Kelas $projectName'
+                                              : ((chat['isFriendGroup'] == true || channelName.contains('teman'))
+                                                  ? '$channelName • Teman'
+                                                  : channelName),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: AppTypography.buttonLabel(
+                                            color: isDark ? const Color(0xFF2DD4BF) : const Color(0xFF475569),
+                                            fontWeight: FontWeight.w600,
+                                          ),
                                         ),
-                                      ] else ...[
-                                        Row(
-                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Expanded(
-                                              child: Text(
-                                                title,
-                                                maxLines: 1,
-                                                overflow: TextOverflow.ellipsis,
-                                                style: AppTypography.chatHeaderTitle(color: isDark ? Colors.white : Colors.black87, fontWeight: FontWeight.bold),
-                                              ),
-                                            ),
-                                            const SizedBox(width: 8),
-                                            Text(
-                                              time,
-                                              style: AppTypography.subtitle(color: isDark ? Colors.white38 : Colors.black38),
-                                            ),
-                                          ],
-                                        ),
+                                        const SizedBox(height: 2),
                                       ],
+                                      Text(
+                                        title,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: AppTypography.chatHeaderTitle(
+                                          color: isDark ? Colors.white : Colors.black87,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
                                       const SizedBox(height: 4),
                                       Text(
                                         lastMsg,
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
-                                        style: AppTypography.subtitle(color: isDark ? Colors.white60 : Colors.black54),
+                                        style: AppTypography.subtitle(
+                                          color: isDark ? Colors.white60 : Colors.black54,
+                                        ),
                                       ),
                                     ],
                                   ),
                                 ),
-                                if (unreadCount > 0) ...[
-                                  const SizedBox(width: 10),
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
-                                    decoration: BoxDecoration(
-                                      color: const Color(0xFF7C3AED),
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    constraints: const BoxConstraints(
-                                      minWidth: 20,
-                                      minHeight: 20,
-                                    ),
-                                    child: Center(
-                                      child: Text(
-                                        '$unreadCount',
-                                        style: AppTypography.microBadge(color: Colors.white, fontWeight: FontWeight.bold),
+                                const SizedBox(width: 8),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      time,
+                                      style: AppTypography.subtitle(
+                                        color: unreadCount > 0
+                                            ? (isDark ? const Color(0xFF14B8A6) : const Color(0xFF7C3AED))
+                                            : (isDark ? Colors.white38 : Colors.black38),
                                       ),
                                     ),
-                                  ),
-                                ],
+                                    const SizedBox(height: 5),
+                                    if (unreadCount > 0)
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                        decoration: BoxDecoration(
+                                          color: isDark ? const Color(0xFF14B8A6) : const Color(0xFF7C3AED),
+                                          borderRadius: BorderRadius.circular(10),
+                                        ),
+                                        constraints: const BoxConstraints(
+                                          minWidth: 20,
+                                          minHeight: 20,
+                                        ),
+                                        alignment: Alignment.center,
+                                        child: Text(
+                                          unreadCount > 99 ? '99+' : '$unreadCount',
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.bold,
+                                            height: 1.0,
+                                          ),
+                                        ),
+                                      )
+                                    else
+                                      const SizedBox(height: 20),
+                                  ],
+                                ),
                               ],
                             ),
                           ),

@@ -822,17 +822,16 @@ class _DesktopDiskusiTabState extends State<DesktopDiskusiTab> {
                                           ],
                                         ),
                                       ),
-
                                       if (unreadCount > 0) ...[
                                         const SizedBox(width: 8),
                                         Container(
                                           padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
                                           decoration: BoxDecoration(
-                                            color: const Color(0xFF7C3AED),
+                                            color: isDark ? const Color(0xFF14B8A6) : const Color(0xFF7C3AED),
                                             borderRadius: BorderRadius.circular(12),
                                           ),
                                           child: Text(
-                                            '$unreadCount',
+                                            unreadCount > 99 ? '99+' : '$unreadCount',
                                             style: AppTypography.channelTag(color: Colors.white, fontWeight: FontWeight.bold),
                                           ),
                                         ),
