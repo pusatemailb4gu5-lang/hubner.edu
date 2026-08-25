@@ -3,7 +3,6 @@ import 'package:hubner/core/widgets/three_dots_loader.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:hubner/core/widgets/google_sign_in_button.dart';
 import 'home_page.dart';
@@ -279,8 +278,7 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
                                          children: [
                                            Text(
                                              'Hubner',
-                                             style: GoogleFonts.poppins(
-                                               fontSize: 28,
+                                             style: AppTypography.pageTitle(
                                                fontWeight: FontWeight.normal,
                                                letterSpacing: -1,
                                                color: Colors.white,
@@ -816,11 +814,10 @@ class _FluidIPhoneBottomNavBarState extends State<_FluidIPhoneBottomNavBar>
                               const SizedBox(height: 2.5),
                               Text(
                                 label,
-                                style: GoogleFonts.plusJakartaSans(
+                                style: AppTypography.microBadge(
                                   color: isDark
                                       ? Color.lerp(Colors.white38, Colors.white, activeFactor)
                                       : Color.lerp(const Color(0xFF64748B), const Color(0xFF0F172A), activeFactor),
-                                  fontSize: 10.5,
                                   fontWeight: isClosest ? FontWeight.w800 : FontWeight.w500,
                                   letterSpacing: -0.2,
                                 ),
@@ -1908,8 +1905,7 @@ class _WhatsAppStyleNewChatModalState extends State<_WhatsAppStyleNewChatModal> 
                                 Expanded(
                                   child: Text(
                                     pName,
-                                    style: GoogleFonts.plusJakartaSans(
-                                      fontSize: 13.5,
+                                    style: AppTypography.dropdownItem(
                                       fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
                                       color: isSelected
                                           ? (isDark ? const Color(0xFFD6A5F8) : const Color(0xFF7C3AED))
@@ -2581,8 +2577,7 @@ class _WhatsAppStyleNewChatModalState extends State<_WhatsAppStyleNewChatModal> 
                       ),
                       child: Text(
                         'Selanjutnya',
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 13.0,
+                        style: AppTypography.buttonLabel(
                           fontWeight: FontWeight.bold,
                           color: ((isFriendMode || _selectedProjectId != null) && _selectedMemberUids.isNotEmpty)
                               ? (isDark ? Colors.black : Colors.white)
@@ -6801,23 +6796,60 @@ class ThemeSetupForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final themes = ['Light', 'Dark (Segera Hadir)'];
-    return ListView.separated(
-      shrinkWrap: true,
-      itemCount: themes.length,
-      separatorBuilder: (_, __) => const Divider(color: Color(0xFFF1F5F9)),
-      itemBuilder: (context, idx) {
-        final th = themes[idx];
-        final isSelected = th == 'Light';
-        return ListTile(
-          contentPadding: EdgeInsets.zero,
-          title: Text(th, style: AppTypography.cardTitle(color: th.contains('Segera') ? Colors.black38 : Colors.black87, fontWeight: isSelected ? FontWeight.bold : FontWeight.normal)),
-          trailing: isSelected ? const Icon(Icons.check_circle_rounded, color: Colors.black) : null,
-          onTap: th.contains('Segera') ? null : () async {
-            await FirebaseFirestore.instance.collection('users').doc(uid).update({'themeMode': th});
-            if (context.mounted) {
-              Navigator.pop(context);
-            }
+    final bool isDark = AppColors.isDarkMode;
+    return ValueListenableBuilder<String>(
+      valueListenable: HubnerApp.themeNotifier,
+      builder: (context, activeTheme, _) {
+        final themes = [
+          {'key': 'System', 'label': 'Ikuti Pengaturan HP (Otomatis)'},
+          {'key': 'Terang', 'label': 'Mode Terang (Light)'},
+          {'key': 'Gelap', 'label': 'Mode Gelap (Dark)'},
+        ];
+
+        return ListView.separated(
+          shrinkWrap: true,
+          itemCount: themes.length,
+          separatorBuilder: (_, __) => Divider(color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9)),
+          itemBuilder: (context, idx) {
+            final th = themes[idx];
+            final key = th['key']!;
+            final isSelected = key == 'System'
+                ? false
+                : (activeTheme == key);
+
+            return ListTile(
+              contentPadding: EdgeInsets.zero,
+              title: Text(
+                th['label']!,
+                style: AppTypography.cardTitle(
+                  color: isDark ? Colors.white : Colors.black87,
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                ),
+              ),
+              trailing: isSelected
+                  ? Icon(Icons.check_circle_rounded, color: isDark ? Colors.white : const Color(0xFF7F52FC))
+                  : null,
+              onTap: () async {
+                String newTheme;
+                final prefs = await SharedPreferences.getInstance();
+                if (key == 'System') {
+                  final sysBrightness = WidgetsBinding.instance.platformDispatcher.platformBrightness;
+                  newTheme = sysBrightness == Brightness.dark ? 'Gelap' : 'Terang';
+                  await prefs.setString('lastSystemBrightness', sysBrightness == Brightness.dark ? 'dark' : 'light');
+                } else {
+                  newTheme = key;
+                }
+
+                HubnerApp.themeNotifier.value = newTheme;
+                await prefs.setString('themeMode', newTheme);
+                if (uid.isNotEmpty) {
+                  await FirebaseFirestore.instance.collection('users').doc(uid).update({'themeMode': newTheme}).catchError((_) {});
+                }
+                if (context.mounted) {
+                  Navigator.pop(context);
+                }
+              },
+            );
           },
         );
       },

@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:hubner/core/widgets/three_dots_loader.dart';
 import 'package:flutter/services.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:hubner/features/auth/presentation/pages/login_page.dart';
-import 'package:hubner/features/home/presentation/widgets/animated_rainbow_background.dart';
 import 'package:hubner/main.dart';
+import 'package:hubner/core/theme/app_typography.dart';
 import 'package:hubner/core/theme/app_colors.dart';
 
 
@@ -198,14 +196,7 @@ class _OnboardingPageState extends State<OnboardingPage> with SingleTickerProvid
                   borderRadius: const BorderRadius.vertical(
                     top: Radius.circular(32),
                   ),
-                  border: isDark ? const Border(top: BorderSide(color: Color(0xFF27272A), width: 1.0)) : null,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: isDark ? 0.4 : 0.08),
-                      blurRadius: 20,
-                      offset: const Offset(0, -6),
-                    ),
-                  ],
+                  border: Border.all(color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0), width: 1.0),
                 ),
                 padding: EdgeInsets.fromLTRB(
                   28.0,
@@ -219,8 +210,7 @@ class _OnboardingPageState extends State<OnboardingPage> with SingleTickerProvid
                   children: [
                     Text(
                       'Belajar & tumbuh bersama Hubner',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: screenWidth > 360 ? 32 : 28,
+                      style: AppTypography.pageTitle(
                         fontWeight: FontWeight.w900,
                         height: 1.2,
                         color: isDark ? Colors.white : Colors.black,
@@ -229,8 +219,7 @@ class _OnboardingPageState extends State<OnboardingPage> with SingleTickerProvid
                     const SizedBox(height: 14),
                     Text(
                       'Kelola kelas, tugas sekolah, dan kolaborasi belajar secara praktis dan menyenangkan.',
-                      style: GoogleFonts.dmSans(
-                        fontSize: 18.0,
+                      style: AppTypography.chatBody(
                         color: isDark ? Colors.white70 : Colors.black87,
                         height: 1.5,
                       ),
@@ -242,13 +231,6 @@ class _OnboardingPageState extends State<OnboardingPage> with SingleTickerProvid
                       decoration: BoxDecoration(
                         color: const Color(0xFF7F52FC), // Solid brand violet
                         borderRadius: BorderRadius.circular(28),
-                        boxShadow: [
-                          BoxShadow(
-                            color: const Color(0xFF7F52FC).withValues(alpha: 0.24),
-                            blurRadius: 16,
-                            offset: const Offset(0, 6),
-                          ),
-                        ],
                       ),
                       child: ElevatedButton(
                         onPressed: _completeOnboarding,
@@ -261,8 +243,7 @@ class _OnboardingPageState extends State<OnboardingPage> with SingleTickerProvid
                         ),
                         child: Text(
                           'Masuk',
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 17,
+                          style: AppTypography.buttonLabel(
                             fontWeight: FontWeight.bold,
                             color: Colors.white,
                           ),

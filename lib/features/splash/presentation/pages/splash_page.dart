@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:async';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:hubner/core/theme/app_typography.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:hubner/features/onboarding/presentation/pages/onboarding_page.dart';
@@ -210,14 +209,7 @@ class _SplashPageState extends State<SplashPage> with SingleTickerProviderStateM
                   decoration: BoxDecoration(
                     color: isDark ? const Color(0xFF18181B) : Colors.white,
                     shape: BoxShape.circle,
-                    border: isDark ? Border.all(color: const Color(0xFF27272A), width: 1.5) : null,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: isDark ? 0.4 : 0.12),
-                        blurRadius: 24,
-                        offset: const Offset(0, 8),
-                      ),
-                    ],
+                    border: Border.all(color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0), width: 1.5),
                   ),
                   child: Icon(
                     Icons.school_rounded,
@@ -241,8 +233,7 @@ class _SplashPageState extends State<SplashPage> with SingleTickerProviderStateM
                     children: [
                       Text(
                         'Hubner',
-                        style: GoogleFonts.poppins(
-                          fontSize: logoFontSize * 0.75,
+                        style: AppTypography.pageTitle(
                           fontWeight: FontWeight.normal,
                           letterSpacing: -1.0,
                           color: Colors.white,

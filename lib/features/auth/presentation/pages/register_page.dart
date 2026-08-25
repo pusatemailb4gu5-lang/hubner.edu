@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:google_fonts/google_fonts.dart';
+import 'package:hubner/core/theme/app_typography.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -381,13 +382,6 @@ class _RegisterPageState extends State<RegisterPage> {
                 color: isDark ? const Color(0xFF18181B) : Colors.white,
                 shape: BoxShape.circle,
                 border: Border.all(color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0)),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.04),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
               ),
               child: Icon(
                 Icons.chevron_left_rounded,
@@ -425,41 +419,30 @@ class _RegisterPageState extends State<RegisterPage> {
           // Create Account Title
                 Text(
                   isTablet ? 'Buat Akun' : 'Daftar',
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: isTablet ? 23.4 : 32.0,
-                    fontWeight: FontWeight.bold,
-                    color: isDark ? Colors.white : Colors.black,
-                  ),
+                  style: AppTypography.buttonLabel(color: isDark ? Colors.white : Colors.black, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 6),
                 Text(
                   isTablet
                       ? 'Daftar untuk mengelola tugas Anda dengan mudah.'
                       : 'Dengan mendaftar, Anda menyetujui Ketentuan Layanan kami.',
-                  style: GoogleFonts.dmSans(
-                    fontSize: 14.5,
-                    color: isDark ? Colors.white60 : (isTablet ? Colors.black38 : Colors.black45),
-                  ),
+                  style: AppTypography.timestamp(color: isDark ? Colors.white60 : (isTablet ? Colors.black38 : Colors.black45)),
                 ),
                 const SizedBox(height: 24),
 
                 // Full Name Field
                 Text(
                   'Nama Lengkap',
-                  style: GoogleFonts.dmSans(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                    color: isDark ? Colors.white70 : Colors.black54,
-                  ),
+                  style: AppTypography.timestamp(color: isDark ? Colors.white70 : Colors.black54, fontWeight: FontWeight.w500),
                 ),
                 const SizedBox(height: 6),
                 TextField(
                   controller: _nameController,
                   keyboardType: TextInputType.name,
-                  style: GoogleFonts.dmSans(color: isDark ? Colors.white : Colors.black87),
+                  style: AppTypography.timestamp(color: isDark ? Colors.white : Colors.black87),
                   decoration: InputDecoration(
                     hintText: 'Masukkan nama lengkap Anda',
-                    hintStyle: GoogleFonts.dmSans(color: isDark ? Colors.white38 : Colors.black26, fontSize: 16.4),
+                    hintStyle: AppTypography.subtitle(color: isDark ? Colors.white38 : Colors.black26),
                     filled: true,
                     fillColor: isDark ? const Color(0xFF18181B) : Colors.white,
                     contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
@@ -481,11 +464,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   children: [
                     Text(
                       'Alamat Email',
-                      style: GoogleFonts.dmSans(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                        color: isDark ? Colors.white70 : Colors.black54,
-                      ),
+                      style: AppTypography.timestamp(color: isDark ? Colors.white70 : Colors.black54, fontWeight: FontWeight.w500),
                     ),
                     if (widget.isGoogleSignIn) ...[
                       const SizedBox(width: 6),
@@ -502,11 +481,7 @@ class _RegisterPageState extends State<RegisterPage> {
                             const SizedBox(width: 3),
                             Text(
                               'Terverifikasi Google',
-                              style: GoogleFonts.plusJakartaSans(
-                                fontSize: 14.0,
-                                fontWeight: FontWeight.w600,
-                                color: const Color(0xFF16A34A),
-                              ),
+                              style: AppTypography.buttonLabel(color: const Color(0xFF16A34A), fontWeight: FontWeight.w600),
                             ),
                           ],
                         ),
@@ -520,14 +495,10 @@ class _RegisterPageState extends State<RegisterPage> {
                   readOnly: widget.isGoogleSignIn,
                   enabled: !widget.isGoogleSignIn,
                   keyboardType: TextInputType.emailAddress,
-                  style: GoogleFonts.dmSans(
-                    color: widget.isGoogleSignIn
-                        ? (isDark ? Colors.white60 : Colors.black54)
-                        : (isDark ? Colors.white : Colors.black87),
-                  ),
+                  style: AppTypography.timestamp(color: widget.isGoogleSignIn ? (isDark ? Colors.white38 : Colors.black38) : (isDark ? Colors.white : Colors.black87)),
                   decoration: InputDecoration(
                     hintText: 'Masukkan email Anda',
-                    hintStyle: GoogleFonts.dmSans(color: isDark ? Colors.white38 : Colors.black26, fontSize: 16.4),
+                    hintStyle: AppTypography.subtitle(color: isDark ? Colors.white38 : Colors.black26),
                     filled: true,
                     fillColor: widget.isGoogleSignIn
                         ? (isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9))
@@ -561,20 +532,16 @@ class _RegisterPageState extends State<RegisterPage> {
                 // Password Field
                 Text(
                   'Kata Sandi',
-                  style: GoogleFonts.dmSans(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                    color: isDark ? Colors.white70 : Colors.black54,
-                  ),
+                  style: AppTypography.timestamp(color: isDark ? Colors.white70 : Colors.black54, fontWeight: FontWeight.w500),
                 ),
                 const SizedBox(height: 6),
                 TextField(
                   controller: _passwordController,
                   obscureText: _obscurePassword,
-                  style: GoogleFonts.dmSans(color: isDark ? Colors.white : Colors.black87),
+                  style: AppTypography.timestamp(color: isDark ? Colors.white : Colors.black87),
                   decoration: InputDecoration(
                     hintText: 'Buat kata sandi',
-                    hintStyle: GoogleFonts.dmSans(color: isDark ? Colors.white38 : Colors.black26, fontSize: 16.4),
+                    hintStyle: AppTypography.subtitle(color: isDark ? Colors.white38 : Colors.black26),
                     filled: true,
                     fillColor: isDark ? const Color(0xFF18181B) : Colors.white,
                     contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
@@ -606,20 +573,16 @@ class _RegisterPageState extends State<RegisterPage> {
                 // Confirm Password Field
                 Text(
                   'Konfirmasi Kata Sandi',
-                  style: GoogleFonts.dmSans(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                    color: isDark ? Colors.white70 : Colors.black54,
-                  ),
+                  style: AppTypography.timestamp(color: isDark ? Colors.white70 : Colors.black54, fontWeight: FontWeight.w500),
                 ),
                 const SizedBox(height: 6),
                 TextField(
                   controller: _confirmPasswordController,
                   obscureText: _obscureConfirmPassword,
-                  style: GoogleFonts.dmSans(color: isDark ? Colors.white : Colors.black87),
+                  style: AppTypography.timestamp(color: isDark ? Colors.white : Colors.black87),
                   decoration: InputDecoration(
                     hintText: 'Konfirmasi kata sandi Anda',
-                    hintStyle: GoogleFonts.dmSans(color: isDark ? Colors.white38 : Colors.black26, fontSize: 16.4),
+                    hintStyle: AppTypography.subtitle(color: isDark ? Colors.white38 : Colors.black26),
                     filled: true,
                     fillColor: isDark ? const Color(0xFF18181B) : Colors.white,
                     contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
@@ -651,11 +614,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 // Gender Selection
                 Text(
                   'Jenis Kelamin',
-                  style: GoogleFonts.dmSans(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                    color: isDark ? Colors.white70 : Colors.black54,
-                  ),
+                  style: AppTypography.timestamp(color: isDark ? Colors.white70 : Colors.black54, fontWeight: FontWeight.w500),
                 ),
                 const SizedBox(height: 6),
                 Row(
@@ -687,11 +646,7 @@ class _RegisterPageState extends State<RegisterPage> {
                               const SizedBox(width: 4),
                               Text(
                                 'Laki-laki',
-                                style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w600,
-                                  color: _selectedGender == 'Laki-laki' ? Colors.white : (isDark ? Colors.white70 : Colors.black38),
-                                ),
+                                style: AppTypography.buttonLabel(color: _selectedGender == 'Laki-laki' ? Colors.white : (isDark ? Colors.white70 : Colors.black38), fontWeight: FontWeight.w600),
                               ),
                             ],
                           ),
@@ -726,11 +681,7 @@ class _RegisterPageState extends State<RegisterPage> {
                               const SizedBox(width: 4),
                               Text(
                                 'Perempuan',
-                                style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w600,
-                                  color: _selectedGender == 'Perempuan' ? Colors.white : (isDark ? Colors.white70 : Colors.black38),
-                                ),
+                                style: AppTypography.buttonLabel(color: _selectedGender == 'Perempuan' ? Colors.white : (isDark ? Colors.white70 : Colors.black38), fontWeight: FontWeight.w600),
                               ),
                             ],
                           ),
@@ -744,11 +695,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 // Role Selection (Guru vs Siswa)
                 Text(
                   'Peran / Role Pengguna',
-                  style: GoogleFonts.dmSans(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                    color: isDark ? Colors.white70 : Colors.black54,
-                  ),
+                  style: AppTypography.timestamp(color: isDark ? Colors.white70 : Colors.black54, fontWeight: FontWeight.w500),
                 ),
                 const SizedBox(height: 6),
                 Row(
@@ -777,11 +724,7 @@ class _RegisterPageState extends State<RegisterPage> {
                               const SizedBox(width: 6),
                               Text(
                                 'Guru',
-                                style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w600,
-                                  color: _selectedRole == 'Guru' ? Colors.white : (isDark ? Colors.white : Colors.black87),
-                                ),
+                                style: AppTypography.buttonLabel(color: _selectedRole == 'Guru' ? Colors.white : (isDark ? Colors.white : Colors.black87), fontWeight: FontWeight.w600),
                               ),
                             ],
                           ),
@@ -813,11 +756,7 @@ class _RegisterPageState extends State<RegisterPage> {
                               const SizedBox(width: 6),
                               Text(
                                 'Siswa',
-                                style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w600,
-                                  color: _selectedRole == 'Siswa' ? Colors.white : (isDark ? Colors.white : Colors.black87),
-                                ),
+                                style: AppTypography.buttonLabel(color: _selectedRole == 'Siswa' ? Colors.white : (isDark ? Colors.white : Colors.black87), fontWeight: FontWeight.w600),
                               ),
                             ],
                           ),
@@ -830,11 +769,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   const SizedBox(height: 14),
                   Text(
                     'Tingkat Sekolah',
-                    style: GoogleFonts.dmSans(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.black54,
-                    ),
+                    style: AppTypography.timestamp(color: Colors.black54, fontWeight: FontWeight.w500),
                   ),
                   const SizedBox(height: 6),
                   Container(
@@ -852,11 +787,7 @@ class _RegisterPageState extends State<RegisterPage> {
                         value: _selectedSchoolLevel,
                         isExpanded: true,
                         icon: const Icon(Icons.keyboard_arrow_down_rounded, color: Colors.black54),
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 15.2,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.black87,
-                        ),
+                        style: AppTypography.buttonLabel(color: Colors.black87, fontWeight: FontWeight.w600),
                         onChanged: (String? newValue) {
                           if (newValue != null) {
                             setState(() {
@@ -884,11 +815,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   const SizedBox(height: 14),
                   Text(
                     'Kelas Siswa',
-                    style: GoogleFonts.dmSans(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.black54,
-                    ),
+                    style: AppTypography.timestamp(color: Colors.black54, fontWeight: FontWeight.w500),
                   ),
                   const SizedBox(height: 6),
                   Container(
@@ -906,11 +833,7 @@ class _RegisterPageState extends State<RegisterPage> {
                         value: _selectedStudentClass,
                         isExpanded: true,
                         icon: const Icon(Icons.keyboard_arrow_down_rounded, color: Colors.black54),
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 15.2,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.black87,
-                        ),
+                        style: AppTypography.buttonLabel(color: Colors.black87, fontWeight: FontWeight.w600),
                         onChanged: (String? newValue) {
                           if (newValue != null) {
                             setState(() {
@@ -937,11 +860,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     const SizedBox(height: 14),
                     Text(
                       'Tingkat Sekolah',
-                      style: GoogleFonts.dmSans(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                        color: Colors.black54,
-                      ),
+                      style: AppTypography.timestamp(color: Colors.black54, fontWeight: FontWeight.w500),
                     ),
                     const SizedBox(height: 6),
                     Container(
@@ -959,11 +878,7 @@ class _RegisterPageState extends State<RegisterPage> {
                           value: _selectedSchoolLevelForStudent,
                           isExpanded: true,
                           icon: const Icon(Icons.keyboard_arrow_down_rounded, color: Colors.black54),
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 15.2,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.black87,
-                          ),
+                          style: AppTypography.buttonLabel(color: Colors.black87, fontWeight: FontWeight.w600),
                           onChanged: (String? newValue) {
                             if (newValue != null) {
                               setState(() {
@@ -995,13 +910,6 @@ class _RegisterPageState extends State<RegisterPage> {
                   decoration: BoxDecoration(
                     color: const Color(0xFF7F52FC), // Solid brand violet
                     borderRadius: BorderRadius.circular(30),
-                    boxShadow: [
-                      BoxShadow(
-                        color: const Color(0xFF7F52FC).withValues(alpha: 0.35),
-                        blurRadius: 16,
-                        offset: const Offset(0, 6),
-                      ),
-                    ],
                   ),
                   child: ElevatedButton(
                     onPressed: _isLoading ? null : _handleRegister,
@@ -1020,11 +928,7 @@ class _RegisterPageState extends State<RegisterPage> {
                           )
                         : Text(
                             'Daftar',
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 17.6,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
+                            style: AppTypography.cardTitle(color: Colors.white, fontWeight: FontWeight.bold),
                           ),
                   ),
                 ),
@@ -1037,10 +941,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       padding: const EdgeInsets.symmetric(horizontal: 12.0),
                       child: Text(
                         'Atau lanjutkan dengan',
-                        style: GoogleFonts.dmSans(
-                          fontSize: 14,
-                          color: Colors.black38,
-                        ),
+                        style: AppTypography.timestamp(color: Colors.black38),
                       ),
                     ),
                     const Expanded(child: Divider(color: Color(0xFFF1F5F9), thickness: 1.5)),
@@ -1055,11 +956,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     icon: const GoogleLogoWidget(size: 20),
                     label: Text(
                       'Daftar dengan Google',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 15.2,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.black87,
-                      ),
+                      style: AppTypography.buttonLabel(color: Colors.black87, fontWeight: FontWeight.w600),
                     ),
                     style: OutlinedButton.styleFrom(
                       backgroundColor: Colors.white,
@@ -1076,17 +973,13 @@ class _RegisterPageState extends State<RegisterPage> {
                   children: [
                     Text(
                       'Sudah punya akun? ',
-                      style: GoogleFonts.plusJakartaSans(fontSize: 15.2, color: Colors.black54),
+                      style: AppTypography.buttonLabel(color: Colors.black54),
                     ),
                     GestureDetector(
                       onTap: () => Navigator.of(context).pop(),
                       child: Text(
                         'Masuk',
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 15.2,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black87,
-                        ),
+                        style: AppTypography.buttonLabel(color: Colors.black87, fontWeight: FontWeight.bold),
                       ),
                     ),
                   ],
@@ -1105,11 +998,7 @@ class _RegisterPageState extends State<RegisterPage> {
             children: [
               Text(
                 'Hubner ',
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 28.1,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
-                ),
+                style: AppTypography.pageTitle(color: Colors.black87, fontWeight: FontWeight.bold),
               ),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
@@ -1119,11 +1008,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 ),
                 child: Text(
                   'edu',
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 14.0,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
+                  style: AppTypography.buttonLabel(color: Colors.white, fontWeight: FontWeight.bold),
                 ),
               ),
             ],
@@ -1131,12 +1016,7 @@ class _RegisterPageState extends State<RegisterPage> {
           const Spacer(flex: 2),
           Text(
             'Kelola\nclassroom Anda\ndengan mudah',
-            style: GoogleFonts.dmSans(
-              fontSize: 42.1,
-              fontWeight: FontWeight.normal,
-              height: 1.2,
-              color: Colors.black,
-            ),
+            style: AppTypography.chatBody(color: Colors.black, fontWeight: FontWeight.normal, height: 1.2),
           ),
           const Spacer(flex: 3),
           Center(

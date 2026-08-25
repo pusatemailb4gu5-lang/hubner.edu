@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hubner/core/widgets/three_dots_loader.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:hubner/core/theme/app_typography.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -224,38 +225,27 @@ class _CompleteCompanyProfilePageState extends State<CompleteCompanyProfilePage>
 
                   Text(
                     'Lengkapi Profil Perusahaan',
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 28.1,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
-                    ),
+                    style: AppTypography.pageTitle(color: Colors.black, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 6),
                   Text(
                     'Langkah terakhir sebelum mengelola proyek Anda.',
-                    style: GoogleFonts.dmSans(
-                      fontSize: 16.4,
-                      color: Colors.black38,
-                    ),
+                    style: AppTypography.subtitle(color: Colors.black38),
                   ),
                   const SizedBox(height: 32),
 
                   // Company Name Input
                   Text(
                     'Nama Perusahaan',
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.black54,
-                    ),
+                    style: AppTypography.buttonLabel(color: Colors.black54, fontWeight: FontWeight.w600),
                   ),
                   const SizedBox(height: 8),
                   TextField(
                     controller: _companyNameController,
-                    style: GoogleFonts.dmSans(fontSize: 16.4),
+                    style: AppTypography.subtitle(),
                     decoration: InputDecoration(
                       hintText: 'Contoh: Hubner Studio Tech',
-                      hintStyle: GoogleFonts.dmSans(color: Colors.black26),
+                      hintStyle: AppTypography.timestamp(color: Colors.black26),
                       filled: true,
                       fillColor: const Color(0xFFF8FAFC),
                       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
@@ -274,19 +264,15 @@ class _CompleteCompanyProfilePageState extends State<CompleteCompanyProfilePage>
                   // Workspace Name Input
                   Text(
                     'Nama Workspace',
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.black54,
-                    ),
+                    style: AppTypography.buttonLabel(color: Colors.black54, fontWeight: FontWeight.w600),
                   ),
                   const SizedBox(height: 8),
                   TextField(
                     controller: _workspaceController,
-                    style: GoogleFonts.dmSans(fontSize: 16.4),
+                    style: AppTypography.subtitle(),
                     decoration: InputDecoration(
                       hintText: 'Contoh: Design Team Workspace',
-                      hintStyle: GoogleFonts.dmSans(color: Colors.black26),
+                      hintStyle: AppTypography.timestamp(color: Colors.black26),
                       filled: true,
                       fillColor: const Color(0xFFF8FAFC),
                       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
@@ -305,11 +291,7 @@ class _CompleteCompanyProfilePageState extends State<CompleteCompanyProfilePage>
                   // Team Size Dropdown
                   Text(
                     'Ukuran Tim',
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.black54,
-                    ),
+                    style: AppTypography.buttonLabel(color: Colors.black54, fontWeight: FontWeight.w600),
                   ),
                   const SizedBox(height: 8),
                   Container(
@@ -324,7 +306,7 @@ class _CompleteCompanyProfilePageState extends State<CompleteCompanyProfilePage>
                         value: _selectedTeamSize,
                         isExpanded: true,
                         icon: const Icon(Icons.keyboard_arrow_down_rounded, color: Colors.black45),
-                        style: GoogleFonts.dmSans(fontSize: 16.4, color: Colors.black87, fontWeight: FontWeight.w500),
+                        style: AppTypography.subtitle(color: Colors.black87, fontWeight: FontWeight.w500),
                         items: _teamSizes.map((String size) {
                           return DropdownMenuItem<String>(
                             value: size,
@@ -365,10 +347,7 @@ class _CompleteCompanyProfilePageState extends State<CompleteCompanyProfilePage>
                             )
                           : Text(
                               'Simpan & Mulai',
-                              style: GoogleFonts.plusJakartaSans(
-                                fontSize: 17.6,
-                                fontWeight: FontWeight.w600,
-                              ),
+                              style: AppTypography.cardTitle(fontWeight: FontWeight.w600),
                             ),
                     ),
                   ),

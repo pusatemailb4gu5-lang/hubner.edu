@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:google_fonts/google_fonts.dart';
+import 'package:hubner/core/theme/app_typography.dart';
 import 'package:hubner/features/home/presentation/pages/main_navigation_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -301,13 +302,6 @@ class _LoginPageState extends State<LoginPage> {
                 color: Colors.white,
                 shape: BoxShape.circle,
                 border: Border.all(color: const Color(0xFFE2E8F0)),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.04),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
               ),
               child: const Icon(
                 Icons.chevron_left_rounded,
@@ -346,32 +340,21 @@ class _LoginPageState extends State<LoginPage> {
           // Welcome Titles
           Text(
             isTablet ? 'Selamat datang kembali!' : 'Masuk',
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: isTablet ? 23.4 : 32.0,
-              fontWeight: FontWeight.bold,
-              color: isDark ? Colors.white : Colors.black,
-            ),
+            style: AppTypography.buttonLabel(color: isDark ? Colors.white : Colors.black, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 6),
           Text(
             isTablet
                 ? 'Masuk untuk mengelola tugas Anda dengan mudah.'
                 : 'Dengan masuk, Anda menyetujui Ketentuan Layanan kami.',
-            style: GoogleFonts.dmSans(
-              fontSize: 14.5,
-              color: isDark ? Colors.white60 : (isTablet ? Colors.black38 : Colors.black45),
-            ),
+            style: AppTypography.timestamp(color: isDark ? Colors.white60 : (isTablet ? Colors.black38 : Colors.black45)),
           ),
           const SizedBox(height: 24),
 
           // Email Input Field
           Text(
             'Email / ID User',
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-              color: isDark ? Colors.white70 : Colors.black45,
-            ),
+            style: AppTypography.buttonLabel(color: isDark ? Colors.white70 : Colors.black45, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
           Container(
@@ -382,10 +365,10 @@ class _LoginPageState extends State<LoginPage> {
             ),
             child: TextField(
               controller: _emailController,
-              style: GoogleFonts.dmSans(fontSize: 15.2, color: isDark ? Colors.white : Colors.black87),
+              style: AppTypography.timestamp(color: isDark ? Colors.white : Colors.black87),
               decoration: InputDecoration(
                 hintText: 'Masukkan email atau ID User Anda...',
-                hintStyle: GoogleFonts.dmSans(color: isDark ? Colors.white38 : Colors.black38, fontSize: 15.2),
+                hintStyle: AppTypography.timestamp(color: isDark ? Colors.white38 : Colors.black38),
                 prefixIcon: Icon(Icons.person_outline_rounded, color: isDark ? Colors.white38 : Colors.black38),
                 border: InputBorder.none,
                 contentPadding: const EdgeInsets.symmetric(vertical: 14),
@@ -397,11 +380,7 @@ class _LoginPageState extends State<LoginPage> {
           // Password Input Field
           Text(
             'Kata Sandi',
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-              color: isDark ? Colors.white70 : Colors.black45,
-            ),
+            style: AppTypography.buttonLabel(color: isDark ? Colors.white70 : Colors.black45, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
           Container(
@@ -413,10 +392,10 @@ class _LoginPageState extends State<LoginPage> {
             child: TextField(
               controller: _passwordController,
               obscureText: _obscurePassword,
-              style: GoogleFonts.dmSans(fontSize: 15.2, color: isDark ? Colors.white : Colors.black87),
+              style: AppTypography.timestamp(color: isDark ? Colors.white : Colors.black87),
               decoration: InputDecoration(
                 hintText: 'Masukkan kata sandi Anda',
-                hintStyle: GoogleFonts.dmSans(color: isDark ? Colors.white38 : Colors.black38, fontSize: 15.2),
+                hintStyle: AppTypography.timestamp(color: isDark ? Colors.white38 : Colors.black38),
                 prefixIcon: Icon(Icons.lock_outline_rounded, color: isDark ? Colors.white38 : Colors.black38),
                 suffixIcon: IconButton(
                   icon: Icon(
@@ -440,11 +419,7 @@ class _LoginPageState extends State<LoginPage> {
               onPressed: () {},
               child: Text(
                 'Lupa Kata Sandi?',
-                style: GoogleFonts.dmSans(
-                  fontSize: 15.2,
-                  fontWeight: FontWeight.w500,
-                  color: isDark ? const Color(0xFFA78BFA) : Colors.black54,
-                ),
+                style: AppTypography.timestamp(color: isDark ? const Color(0xFFA78BFA) : const Color(0xFF6D28D9), fontWeight: FontWeight.w500),
               ),
             ),
           ),
@@ -457,13 +432,6 @@ class _LoginPageState extends State<LoginPage> {
             decoration: BoxDecoration(
               color: const Color(0xFF7F52FC), // Solid brand violet
               borderRadius: BorderRadius.circular(30),
-              boxShadow: [
-                BoxShadow(
-                  color: const Color(0xFF7F52FC).withValues(alpha: 0.35),
-                  blurRadius: 16,
-                  offset: const Offset(0, 6),
-                ),
-              ],
             ),
             child: ElevatedButton(
               onPressed: _isLoading ? null : _handleLogin,
@@ -482,11 +450,7 @@ class _LoginPageState extends State<LoginPage> {
                     )
                   : Text(
                       'Masuk',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 17.6,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
+                      style: AppTypography.cardTitle(color: Colors.white, fontWeight: FontWeight.bold),
                     ),
             ),
           ),
@@ -499,10 +463,7 @@ class _LoginPageState extends State<LoginPage> {
                 padding: const EdgeInsets.symmetric(horizontal: 12.0),
                 child: Text(
                   'Atau lanjutkan dengan',
-                  style: GoogleFonts.dmSans(
-                    fontSize: 14,
-                    color: isDark ? Colors.white38 : Colors.black38,
-                  ),
+                  style: AppTypography.timestamp(color: isDark ? Colors.white38 : Colors.black38),
                 ),
               ),
               Expanded(child: Divider(color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9), thickness: 1.5)),
@@ -517,11 +478,7 @@ class _LoginPageState extends State<LoginPage> {
               icon: const GoogleLogoWidget(size: 20),
               label: Text(
                 'Masuk dengan Google',
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 15.2,
-                  fontWeight: FontWeight.w600,
-                  color: isDark ? Colors.white : Colors.black87,
-                ),
+                style: AppTypography.buttonLabel(color: isDark ? Colors.white : Colors.black87, fontWeight: FontWeight.w600),
               ),
               style: OutlinedButton.styleFrom(
                 backgroundColor: isDark ? const Color(0xFF18181B) : Colors.white,
@@ -538,7 +495,7 @@ class _LoginPageState extends State<LoginPage> {
             children: [
               Text(
                 'Belum punya akun? ',
-                style: GoogleFonts.dmSans(fontSize: 15.2, color: isDark ? Colors.white60 : Colors.black54),
+                style: AppTypography.timestamp(color: isDark ? Colors.white60 : Colors.black54),
               ),
               GestureDetector(
                 onTap: () {
@@ -548,11 +505,7 @@ class _LoginPageState extends State<LoginPage> {
                 },
                 child: Text(
                   'Daftar Sekarang',
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 15.2,
-                    fontWeight: FontWeight.bold,
-                    color: isDark ? const Color(0xFFA78BFA) : Colors.black87,
-                  ),
+                  style: AppTypography.buttonLabel(color: isDark ? const Color(0xFFA78BFA) : const Color(0xFF6D28D9), fontWeight: FontWeight.bold),
                 ),
               ),
             ],
@@ -571,11 +524,7 @@ class _LoginPageState extends State<LoginPage> {
             children: [
               Text(
                 'Hubner ',
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 28.1,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
-                ),
+                style: AppTypography.pageTitle(color: Colors.black87, fontWeight: FontWeight.bold),
               ),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
@@ -585,11 +534,7 @@ class _LoginPageState extends State<LoginPage> {
                 ),
                 child: Text(
                   'edu',
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 14.0,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
+                  style: AppTypography.buttonLabel(color: Colors.white, fontWeight: FontWeight.bold),
                 ),
               ),
             ],
@@ -597,12 +542,7 @@ class _LoginPageState extends State<LoginPage> {
           const Spacer(flex: 2),
           Text(
             'Kelola\nclassroom Anda\ndengan mudah',
-            style: GoogleFonts.dmSans(
-              fontSize: 42.1,
-              fontWeight: FontWeight.normal,
-              height: 1.2,
-              color: Colors.black,
-            ),
+            style: AppTypography.chatBody(color: Colors.black, fontWeight: FontWeight.normal, height: 1.2),
           ),
           const Spacer(flex: 3),
           Center(

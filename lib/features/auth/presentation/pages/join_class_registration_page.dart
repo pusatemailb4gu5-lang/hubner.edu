@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hubner/core/widgets/three_dots_loader.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:hubner/core/theme/app_typography.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -286,12 +287,12 @@ class _JoinClassRegistrationPageState extends State<JoinClassRegistrationPage> {
                   const SizedBox(height: 20),
                   Text(
                     'Gabung Classroom',
-                    style: GoogleFonts.plusJakartaSans(fontSize: 30.4, fontWeight: FontWeight.bold, color: Colors.black),
+                    style: AppTypography.pageTitle(color: Colors.black, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     'Masukkan ID Classroom atau scan QR code untuk bergabung. Permintaan akan dikirim ke Guru.',
-                    style: GoogleFonts.dmSans(fontSize: 15.2, color: Colors.black45, height: 1.5),
+                    style: AppTypography.timestamp(color: Colors.black45, height: 1.5),
                   ),
                   const SizedBox(height: 28),
                   Container(
@@ -308,7 +309,7 @@ class _JoinClassRegistrationPageState extends State<JoinClassRegistrationPage> {
                         Expanded(
                           child: Text(
                             'Anda akan masuk dashboard dengan status pending. Classroom aktif setelah Guru menyetujui.',
-                            style: GoogleFonts.dmSans(fontSize: 14.0, color: Color(0xFFD97706), height: 1.5),
+                            style: AppTypography.timestamp(color: const Color(0xFFD97706), height: 1.5),
                           ),
                         ),
                       ],
@@ -345,23 +346,23 @@ class _JoinClassRegistrationPageState extends State<JoinClassRegistrationPage> {
                         onPressed: () => setState(() => _isScanning = false),
                         icon: const Icon(Icons.close_rounded, size: 16, color: Colors.redAccent),
                         label: Text('Batal Scan',
-                            style: GoogleFonts.plusJakartaSans(color: Colors.redAccent, fontWeight: FontWeight.bold)),
+                            style: AppTypography.buttonLabel(color: Colors.redAccent, fontWeight: FontWeight.bold)),
                       ),
                     ),
                     const SizedBox(height: 16),
                   ] else if (!_isClassroomLoaded) ...[
                     Text('ID Classroom',
-                        style: GoogleFonts.plusJakartaSans(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.black54)),
+                        style: AppTypography.buttonLabel(color: Colors.black54, fontWeight: FontWeight.w600)),
                     const SizedBox(height: 8),
                     Row(
                       children: [
                         Expanded(
                           child: TextField(
                             controller: _projectIdController,
-                            style: GoogleFonts.plusJakartaSans(fontSize: 16.4, fontWeight: FontWeight.w600),
+                            style: AppTypography.cardTitle(fontWeight: FontWeight.w600),
                             decoration: InputDecoration(
                               hintText: 'Masukkan ID Classroom...',
-                              hintStyle: GoogleFonts.plusJakartaSans(color: Colors.black26, fontWeight: FontWeight.normal),
+                              hintStyle: AppTypography.buttonLabel(color: Colors.black26, fontWeight: FontWeight.normal),
                               filled: true,
                               fillColor: const Color(0xFFF8FAFC),
                               contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
@@ -398,7 +399,7 @@ class _JoinClassRegistrationPageState extends State<JoinClassRegistrationPage> {
                       const SizedBox(height: 12),
                       Text(
                         _errorMessage!,
-                        style: GoogleFonts.dmSans(color: Colors.redAccent, fontSize: 14, fontWeight: FontWeight.w500),
+                        style: AppTypography.timestamp(color: Colors.redAccent, fontWeight: FontWeight.w500),
                       ),
                     ],
                     const SizedBox(height: 32),
@@ -422,7 +423,7 @@ class _JoinClassRegistrationPageState extends State<JoinClassRegistrationPage> {
                             : const Icon(Icons.search_rounded, size: 18),
                         label: Text(
                           'Periksa Kelas',
-                          style: GoogleFonts.plusJakartaSans(fontSize: 16.4, fontWeight: FontWeight.bold),
+                          style: AppTypography.cardTitle(fontWeight: FontWeight.bold),
                         ),
                       ),
                     ),
@@ -443,11 +444,11 @@ class _JoinClassRegistrationPageState extends State<JoinClassRegistrationPage> {
                               children: [
                                 Text(
                                   'Nama Kelas',
-                                  style: GoogleFonts.plusJakartaSans(fontSize: 14.0, color: Colors.black45),
+                                  style: AppTypography.buttonLabel(color: Colors.black45),
                                 ),
                                 Text(
                                   _classroomName ?? '',
-                                  style: GoogleFonts.plusJakartaSans(fontSize: 16.4, fontWeight: FontWeight.bold, color: Colors.black87),
+                                  style: AppTypography.cardTitle(color: Colors.black87, fontWeight: FontWeight.bold),
                                 ),
                               ],
                             ),
@@ -466,7 +467,7 @@ class _JoinClassRegistrationPageState extends State<JoinClassRegistrationPage> {
                         ),
                         child: Text(
                           _errorMessage!,
-                          style: GoogleFonts.dmSans(color: Colors.redAccent, fontSize: 14, fontWeight: FontWeight.w500),
+                          style: AppTypography.timestamp(color: Colors.redAccent, fontWeight: FontWeight.w500),
                         ),
                       ),
                       const SizedBox(height: 20),
@@ -482,18 +483,14 @@ class _JoinClassRegistrationPageState extends State<JoinClassRegistrationPage> {
                           },
                           child: Text(
                             'Kembali',
-                            style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, color: Colors.black87),
+                            style: AppTypography.buttonLabel(color: Colors.black87, fontWeight: FontWeight.bold),
                           ),
                         ),
                       ),
                     ] else ...[
                       Text(
                         'Pilih Nama Anda dari Daftar Induk',
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.black54,
-                        ),
+                        style: AppTypography.buttonLabel(color: Colors.black54, fontWeight: FontWeight.w600),
                       ),
                       const SizedBox(height: 8),
                       DropdownButtonFormField<String>(
@@ -514,11 +511,11 @@ class _JoinClassRegistrationPageState extends State<JoinClassRegistrationPage> {
                         items: _availableNames.map((name) {
                           return DropdownMenuItem<String>(
                             value: name,
-                            child: Text(name, style: GoogleFonts.plusJakartaSans(fontSize: 15.2, fontWeight: FontWeight.w600)),
+                            child: Text(name, style: AppTypography.buttonLabel(fontWeight: FontWeight.w600)),
                           );
                         }).toList(),
                         value: _selectedName,
-                        hint: Text('Pilih Nama Anda...', style: GoogleFonts.dmSans(fontSize: 15.2, color: Colors.black26)),
+                        hint: Text('Pilih Nama Anda...', style: AppTypography.timestamp(color: Colors.black26)),
                         onChanged: (val) {
                           setState(() {
                             _selectedName = val;
@@ -545,7 +542,7 @@ class _JoinClassRegistrationPageState extends State<JoinClassRegistrationPage> {
                               ),
                               child: Text(
                                 'Kembali',
-                                style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, color: Colors.black87),
+                                style: AppTypography.buttonLabel(color: Colors.black87, fontWeight: FontWeight.bold),
                               ),
                             ),
                           ),
@@ -571,7 +568,7 @@ class _JoinClassRegistrationPageState extends State<JoinClassRegistrationPage> {
                                   : const Icon(Icons.group_add_rounded, size: 18),
                               label: Text(
                                 _isLoading ? 'Mendaftar...' : 'Daftar & Gabung',
-                                style: GoogleFonts.plusJakartaSans(fontSize: 16.4, fontWeight: FontWeight.bold),
+                                style: AppTypography.cardTitle(fontWeight: FontWeight.bold),
                               ),
                             ),
                           ),

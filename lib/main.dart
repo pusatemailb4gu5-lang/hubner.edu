@@ -52,13 +52,28 @@ void main() async {
     await prefs.setBool('isLoggedIn', true);
   }
 
-  final savedTheme = prefs.getString('themeMode') ?? 'Terang';
+  final currentSystemBrightness = WidgetsBinding.instance.platformDispatcher.platformBrightness;
+  final currentBrightnessStr = currentSystemBrightness == Brightness.dark ? 'dark' : 'light';
+  final lastSavedSystemBrightness = prefs.getString('lastSystemBrightness');
+  final savedTheme = prefs.getString('themeMode');
+
+  String effectiveTheme;
+  // If system brightness changed while app was closed (or first launch), follow the device theme!
+  if (lastSavedSystemBrightness == null || lastSavedSystemBrightness != currentBrightnessStr) {
+    effectiveTheme = currentSystemBrightness == Brightness.dark ? 'Gelap' : 'Terang';
+    await prefs.setString('themeMode', effectiveTheme);
+    await prefs.setString('lastSystemBrightness', currentBrightnessStr);
+  } else {
+    // System brightness has not changed, respect user's manual choice if saved
+    effectiveTheme = savedTheme ?? (currentSystemBrightness == Brightness.dark ? 'Gelap' : 'Terang');
+  }
+
   final savedLanguage = prefs.getString('language') ?? 'Bahasa Indonesia';
 
-  HubnerApp.themeNotifier.value = savedTheme;
+  HubnerApp.themeNotifier.value = effectiveTheme;
   HubnerApp.languageNotifier.value = savedLanguage;
 
-  final bool initialIsDark = savedTheme == 'Gelap' || savedTheme == 'Hitam';
+  final bool initialIsDark = effectiveTheme == 'Gelap' || effectiveTheme == 'Hitam';
   if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
@@ -86,7 +101,7 @@ void main() async {
   runApp(HubnerApp(isLoggedIn: isLoggedIn));
 }
 
-class HubnerApp extends StatelessWidget {
+class HubnerApp extends StatefulWidget {
   final bool isLoggedIn;
   const HubnerApp({super.key, required this.isLoggedIn});
 
@@ -100,9 +115,45 @@ class HubnerApp extends StatelessWidget {
   static final showBorderNotifier = ValueNotifier<bool>(true);
 
   @override
+  State<HubnerApp> createState() => _HubnerAppState();
+}
+
+class _HubnerAppState extends State<HubnerApp> with WidgetsBindingObserver {
+  Brightness? _lastObservedBrightness;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _lastObservedBrightness = WidgetsBinding.instance.platformDispatcher.platformBrightness;
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangePlatformBrightness() {
+    super.didChangePlatformBrightness();
+    final newBrightness = WidgetsBinding.instance.platformDispatcher.platformBrightness;
+    // When the phone brightness changes, reset the theme to follow the new phone mode!
+    if (_lastObservedBrightness != newBrightness) {
+      _lastObservedBrightness = newBrightness;
+      final newTheme = newBrightness == Brightness.dark ? 'Gelap' : 'Terang';
+      HubnerApp.themeNotifier.value = newTheme;
+      SharedPreferences.getInstance().then((prefs) {
+        prefs.setString('themeMode', newTheme);
+        prefs.setString('lastSystemBrightness', newBrightness == Brightness.dark ? 'dark' : 'light');
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<String>(
-      valueListenable: themeNotifier,
+      valueListenable: HubnerApp.themeNotifier,
       builder: (context, themeMode, child) {
         AppColors.themeMode = themeMode;
         final bool isDark = themeMode == 'Gelap' || themeMode == 'Hitam';
@@ -126,7 +177,7 @@ class HubnerApp extends StatelessWidget {
             ),
             builder: (context, child) {
               return ValueListenableBuilder<bool>(
-                valueListenable: showBorderNotifier,
+                valueListenable: HubnerApp.showBorderNotifier,
                 builder: (context, showBorder, _) {
                   Widget currentBody = child!;
                   final double screenWidth = MediaQuery.of(context).size.width;
@@ -157,7 +208,7 @@ class HubnerApp extends StatelessWidget {
                 },
               );
             },
-            home: kIsWeb && !isLoggedIn ? const LandingPage() : const SplashPage(),
+            home: kIsWeb && !widget.isLoggedIn ? const LandingPage() : const SplashPage(),
           ),
         );
       },

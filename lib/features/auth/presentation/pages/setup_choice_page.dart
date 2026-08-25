@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hubner/core/widgets/three_dots_loader.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:hubner/core/theme/app_typography.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:hubner/features/projects/presentation/pages/add_class_page.dart';
 import 'join_class_registration_page.dart';
@@ -168,30 +169,19 @@ class _SetupChoicePageState extends State<SetupChoicePage> {
                   const SizedBox(height: 24),
                   Text(
                     'Halo, ${widget.name.split(' ')[0]}!',
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 32.8,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
-                    ),
+                    style: AppTypography.pageTitle(color: Colors.black, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     'Konfigurasikan ID User unik Anda sebelum memulai.',
-                    style: GoogleFonts.dmSans(
-                      fontSize: 16.4,
-                      color: Colors.black45,
-                    ),
+                    style: AppTypography.subtitle(color: Colors.black45),
                   ),
                   const SizedBox(height: 32),
 
                   // User ID Field
                   Text(
                     'ID User Anda',
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.black54,
-                    ),
+                    style: AppTypography.buttonLabel(color: Colors.black54, fontWeight: FontWeight.w600),
                   ),
                   const SizedBox(height: 8),
                   Row(
@@ -199,11 +189,7 @@ class _SetupChoicePageState extends State<SetupChoicePage> {
                       Expanded(
                         child: TextField(
                           controller: _userIdController,
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 16.4,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.black87,
-                          ),
+                          style: AppTypography.cardTitle(color: Colors.black87, fontWeight: FontWeight.w600),
                           onChanged: (val) {
                             setState(() {
                               _hasChecked = false;
@@ -211,7 +197,7 @@ class _SetupChoicePageState extends State<SetupChoicePage> {
                           },
                           decoration: InputDecoration(
                             hintText: 'Contoh: marie12',
-                            hintStyle: GoogleFonts.dmSans(color: Colors.black26),
+                            hintStyle: AppTypography.timestamp(color: Colors.black26),
                             filled: true,
                             fillColor: const Color(0xFFF8FAFC),
                             contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
@@ -247,11 +233,7 @@ class _SetupChoicePageState extends State<SetupChoicePage> {
                                 )
                               : Text(
                                   'Periksa',
-                                  style: GoogleFonts.plusJakartaSans(
-                                    fontSize: 15.2,
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.w600,
-                                  ),
+                                  style: AppTypography.buttonLabel(color: Colors.white, fontWeight: FontWeight.w600),
                                 ),
                         ),
                       ),
@@ -276,13 +258,7 @@ class _SetupChoicePageState extends State<SetupChoicePage> {
                             _isIdUnique && _idErrorMessage == null
                                 ? 'ID tersedia dan dapat digunakan.'
                                 : (_idErrorMessage ?? 'ID tidak valid.'),
-                            style: GoogleFonts.dmSans(
-                              fontSize: 14,
-                              color: _isIdUnique && _idErrorMessage == null
-                                  ? Colors.green
-                                  : Colors.redAccent,
-                              fontWeight: FontWeight.w500,
-                            ),
+                            style: AppTypography.timestamp(color: _isIdUnique && _idErrorMessage == null ? Colors.green : Colors.redAccent, fontWeight: FontWeight.w500),
                           ),
                         ),
                       ],
@@ -292,11 +268,7 @@ class _SetupChoicePageState extends State<SetupChoicePage> {
 
                   Text(
                     'Pilih Cara Memulai',
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 18.7,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black87,
-                    ),
+                    style: AppTypography.cardTitle(color: Colors.black87, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 16),
 
@@ -309,13 +281,6 @@ class _SetupChoicePageState extends State<SetupChoicePage> {
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(20),
                         border: Border.all(color: const Color(0xFFF1F5F9), width: 1.5),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.02),
-                            blurRadius: 10,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
                       ),
                       child: Row(
                         children: [
@@ -339,19 +304,12 @@ class _SetupChoicePageState extends State<SetupChoicePage> {
                               children: [
                                 Text(
                                   'Melengkapi Data Kelas',
-                                  style: GoogleFonts.plusJakartaSans(
-                                    fontSize: 17.6,
-                                    fontWeight: FontWeight.w600,
-                                    color: Colors.black87,
-                                  ),
+                                  style: AppTypography.cardTitle(color: Colors.black87, fontWeight: FontWeight.w600),
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
                                   'Atur nama kelas & materi pembelajaran (dapat diatur nanti).',
-                                  style: GoogleFonts.dmSans(
-                                    fontSize: 14,
-                                    color: Colors.black38,
-                                  ),
+                                  style: AppTypography.timestamp(color: Colors.black38),
                                 ),
                               ],
                             ),
