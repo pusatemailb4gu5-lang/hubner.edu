@@ -29,6 +29,12 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
   bool _isSaving = false;
 
+  final GlobalKey _genderKey = GlobalKey();
+  final GlobalKey _schoolLevelKey = GlobalKey();
+  final GlobalKey _classKey = GlobalKey();
+  final GlobalKey _timezoneKey = GlobalKey();
+  final GlobalKey _languageKey = GlobalKey();
+
   @override
   void initState() {
     super.initState();
@@ -36,7 +42,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
     _nameController = TextEditingController(text: data['name'] ?? '');
     _userRole = data['role'] ?? 'Siswa';
     _selectedGender = data['gender'] ?? 'Laki-laki';
-    _selectedSchoolLevel = data['schoolLevel'] ?? (_userRole.toLowerCase() == 'guru' ? 'SMA' : 'SMA');
+    _selectedSchoolLevel = data['schoolLevel'] ?? 'SMA';
     _selectedClass = data['grade'] ?? '10';
     _selectedTimezone = data['timezone'] ?? 'Asia/Jakarta (GMT+07:00)';
     _selectedLanguage = data['language'] ?? 'Bahasa Indonesia';
@@ -109,6 +115,31 @@ class _EditProfilePageState extends State<EditProfilePage> {
   @override
   Widget build(BuildContext context) {
     final bool isDark = AppColors.isDarkMode;
+
+    final genderOptions = [
+      {'value': 'Laki-laki', 'label': 'Laki-laki'},
+      {'value': 'Perempuan', 'label': 'Perempuan'},
+    ];
+
+    final schoolLevelOptions = [
+      {'value': 'SD', 'label': 'SD (Sekolah Dasar)'},
+      {'value': 'SMP', 'label': 'SMP (Sekolah Menengah Pertama)'},
+      {'value': 'SMA', 'label': 'SMA (Sekolah Menengah Atas)'},
+      {'value': 'SMK', 'label': 'SMK (Sekolah Menengah Kejuruan)'},
+    ];
+
+    final gradeOptions = _getGradeOptionsForLevel(_selectedSchoolLevel);
+
+    final timezoneOptions = [
+      {'value': 'Asia/Jakarta (GMT+07:00)', 'label': 'WIB - Asia/Jakarta (GMT+07:00)'},
+      {'value': 'Asia/Makassar (GMT+08:00)', 'label': 'WITA - Asia/Makassar (GMT+08:00)'},
+      {'value': 'Asia/Jayapura (GMT+09:00)', 'label': 'WIT - Asia/Jayapura (GMT+09:00)'},
+    ];
+
+    final languageOptions = [
+      {'value': 'Bahasa Indonesia', 'label': 'Bahasa Indonesia (ID)'},
+      {'value': 'English (US)', 'label': 'English (US)'},
+    ];
 
     return Scaffold(
       backgroundColor: isDark ? const Color(0xFF000000) : const Color(0xFFF8FAFC),
@@ -187,7 +218,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                     decoration: _inputDecoration(
                       hintText: 'Masukkan nama lengkap',
                       prefixIcon: Icons.person_outline_rounded,
-                      prefixIconColor: const Color(0xFF7F52FC), // Colored icon
+                      prefixIconColor: const Color(0xFF7F52FC),
                       isDark: isDark,
                     ),
                   ),
@@ -196,26 +227,15 @@ class _EditProfilePageState extends State<EditProfilePage> {
                   // Jenis Kelamin
                   _buildFieldLabel('Jenis Kelamin', isDark),
                   const SizedBox(height: 8),
-                  DropdownButtonFormField<String>(
-                    value: _selectedGender,
-                    dropdownColor: isDark ? const Color(0xFF18181B) : Colors.white,
-                    borderRadius: BorderRadius.circular(20),
-                    style: AppTypography.cardTitle(
-                      color: isDark ? Colors.white : Colors.black87,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 16,
-                    ),
-                    decoration: _inputDecoration(
-                      prefixIcon: Icons.wc_rounded,
-                      prefixIconColor: const Color(0xFFEC4899), // Colored icon
-                      isDark: isDark,
-                    ),
-                    items: const [
-                      DropdownMenuItem(value: 'Laki-laki', child: Text('Laki-laki')),
-                      DropdownMenuItem(value: 'Perempuan', child: Text('Perempuan')),
-                    ],
+                  _buildCustomDropdownField(
+                    dropdownKey: _genderKey,
+                    prefixIcon: Icons.wc_rounded,
+                    prefixIconColor: const Color(0xFFEC4899),
+                    selectedValue: _selectedGender,
+                    items: genderOptions,
+                    isDark: isDark,
                     onChanged: (val) {
-                      if (val != null) setState(() => _selectedGender = val);
+                      setState(() => _selectedGender = val);
                     },
                   ),
                   const SizedBox(height: 18),
@@ -223,39 +243,24 @@ class _EditProfilePageState extends State<EditProfilePage> {
                   // Tingkat Sekolah
                   _buildFieldLabel('Tingkat Sekolah', isDark),
                   const SizedBox(height: 8),
-                  DropdownButtonFormField<String>(
-                    value: _selectedSchoolLevel,
-                    dropdownColor: isDark ? const Color(0xFF18181B) : Colors.white,
-                    borderRadius: BorderRadius.circular(20),
-                    style: AppTypography.cardTitle(
-                      color: isDark ? Colors.white : Colors.black87,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 16,
-                    ),
-                    decoration: _inputDecoration(
-                      prefixIcon: Icons.school_outlined,
-                      prefixIconColor: const Color(0xFF0D9488), // Colored icon
-                      isDark: isDark,
-                    ),
-                    items: const [
-                      DropdownMenuItem(value: 'SD', child: Text('SD (Sekolah Dasar)')),
-                      DropdownMenuItem(value: 'SMP', child: Text('SMP (Sekolah Menengah Pertama)')),
-                      DropdownMenuItem(value: 'SMA', child: Text('SMA (Sekolah Menengah Atas)')),
-                      DropdownMenuItem(value: 'SMK', child: Text('SMK (Sekolah Menengah Kejuruan)')),
-                    ],
+                  _buildCustomDropdownField(
+                    dropdownKey: _schoolLevelKey,
+                    prefixIcon: Icons.school_outlined,
+                    prefixIconColor: const Color(0xFF0D9488),
+                    selectedValue: _selectedSchoolLevel,
+                    items: schoolLevelOptions,
+                    isDark: isDark,
                     onChanged: (val) {
-                      if (val != null) {
-                        setState(() {
-                          _selectedSchoolLevel = val;
-                          if (val == 'SD') {
-                            _selectedClass = '1';
-                          } else if (val == 'SMP') {
-                            _selectedClass = '7';
-                          } else {
-                            _selectedClass = '10';
-                          }
-                        });
-                      }
+                      setState(() {
+                        _selectedSchoolLevel = val;
+                        if (val == 'SD') {
+                          _selectedClass = '1';
+                        } else if (val == 'SMP') {
+                          _selectedClass = '7';
+                        } else {
+                          _selectedClass = '10';
+                        }
+                      });
                     },
                   ),
 
@@ -264,23 +269,15 @@ class _EditProfilePageState extends State<EditProfilePage> {
                     const SizedBox(height: 18),
                     _buildFieldLabel('Tingkat Kelas', isDark),
                     const SizedBox(height: 8),
-                    DropdownButtonFormField<String>(
-                      value: _getValidGradeForLevel(_selectedSchoolLevel, _selectedClass),
-                      dropdownColor: isDark ? const Color(0xFF18181B) : Colors.white,
-                      borderRadius: BorderRadius.circular(20),
-                      style: AppTypography.cardTitle(
-                        color: isDark ? Colors.white : Colors.black87,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 16,
-                      ),
-                      decoration: _inputDecoration(
-                        prefixIcon: Icons.grade_outlined,
-                        prefixIconColor: const Color(0xFFF59E0B), // Colored icon
-                        isDark: isDark,
-                      ),
-                      items: _getGradeItemsForLevel(_selectedSchoolLevel),
+                    _buildCustomDropdownField(
+                      dropdownKey: _classKey,
+                      prefixIcon: Icons.grade_outlined,
+                      prefixIconColor: const Color(0xFFF59E0B),
+                      selectedValue: _getValidGradeForLevel(_selectedSchoolLevel, _selectedClass),
+                      items: gradeOptions,
+                      isDark: isDark,
                       onChanged: (val) {
-                        if (val != null) setState(() => _selectedClass = val);
+                        setState(() => _selectedClass = val);
                       },
                     ),
                   ],
@@ -308,36 +305,15 @@ class _EditProfilePageState extends State<EditProfilePage> {
                   // Zona Waktu
                   _buildFieldLabel('Zona Waktu', isDark),
                   const SizedBox(height: 8),
-                  DropdownButtonFormField<String>(
-                    value: _selectedTimezone,
-                    dropdownColor: isDark ? const Color(0xFF1C1C1E) : Colors.white,
-                    borderRadius: BorderRadius.circular(20),
-                    style: AppTypography.cardTitle(
-                      color: isDark ? Colors.white : Colors.black87,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 16,
-                    ),
-                    decoration: _inputDecoration(
-                      prefixIcon: Icons.public_rounded,
-                      prefixIconColor: const Color(0xFF3B82F6), // Colored icon
-                      isDark: isDark,
-                    ),
-                    items: const [
-                      DropdownMenuItem(
-                        value: 'Asia/Jakarta (GMT+07:00)',
-                        child: Text('WIB - Asia/Jakarta (GMT+07:00)'),
-                      ),
-                      DropdownMenuItem(
-                        value: 'Asia/Makassar (GMT+08:00)',
-                        child: Text('WITA - Asia/Makassar (GMT+08:00)'),
-                      ),
-                      DropdownMenuItem(
-                        value: 'Asia/Jayapura (GMT+09:00)',
-                        child: Text('WIT - Asia/Jayapura (GMT+09:00)'),
-                      ),
-                    ],
+                  _buildCustomDropdownField(
+                    dropdownKey: _timezoneKey,
+                    prefixIcon: Icons.public_rounded,
+                    prefixIconColor: const Color(0xFF3B82F6),
+                    selectedValue: _selectedTimezone,
+                    items: timezoneOptions,
+                    isDark: isDark,
                     onChanged: (val) {
-                      if (val != null) setState(() => _selectedTimezone = val);
+                      setState(() => _selectedTimezone = val);
                     },
                   ),
                   const SizedBox(height: 18),
@@ -345,32 +321,15 @@ class _EditProfilePageState extends State<EditProfilePage> {
                   // Bahasa
                   _buildFieldLabel('Bahasa Aplikasi', isDark),
                   const SizedBox(height: 8),
-                  DropdownButtonFormField<String>(
-                    value: _selectedLanguage,
-                    dropdownColor: isDark ? const Color(0xFF1C1C1E) : Colors.white,
-                    borderRadius: BorderRadius.circular(20),
-                    style: AppTypography.cardTitle(
-                      color: isDark ? Colors.white : Colors.black87,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 16,
-                    ),
-                    decoration: _inputDecoration(
-                      prefixIcon: Icons.language_rounded,
-                      prefixIconColor: const Color(0xFF6366F1), // Colored icon
-                      isDark: isDark,
-                    ),
-                    items: const [
-                      DropdownMenuItem(
-                        value: 'Bahasa Indonesia',
-                        child: Text('Bahasa Indonesia (ID)'),
-                      ),
-                      DropdownMenuItem(
-                        value: 'English (US)',
-                        child: Text('English (US)'),
-                      ),
-                    ],
+                  _buildCustomDropdownField(
+                    dropdownKey: _languageKey,
+                    prefixIcon: Icons.language_rounded,
+                    prefixIconColor: const Color(0xFF6366F1),
+                    selectedValue: _selectedLanguage,
+                    items: languageOptions,
+                    isDark: isDark,
                     onChanged: (val) {
-                      if (val != null) setState(() => _selectedLanguage = val);
+                      setState(() => _selectedLanguage = val);
                     },
                   ),
                 ],
@@ -456,7 +415,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
       fillColor: isDark ? const Color(0xFF2C2C2E) : const Color(0xFFF8FAFC),
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(20), // Solid round
+        borderRadius: BorderRadius.circular(20),
         borderSide: BorderSide(
           color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
           width: 1.0,
@@ -464,11 +423,187 @@ class _EditProfilePageState extends State<EditProfilePage> {
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(20),
-        borderSide: const BorderSide(
-          color: Color(0xFF7F52FC),
-          width: 1.8,
+        borderSide: BorderSide(
+          color: isDark ? Colors.white : Colors.black, // Focused border matching register page
+          width: 1.2,
         ),
       ),
+    );
+  }
+
+  Widget _buildCustomDropdownField({
+    required GlobalKey dropdownKey,
+    required IconData prefixIcon,
+    required Color prefixIconColor,
+    required String selectedValue,
+    required List<Map<String, String>> items,
+    required ValueChanged<String> onChanged,
+    required bool isDark,
+  }) {
+    final currentItem = items.firstWhere(
+      (item) => item['value'] == selectedValue,
+      orElse: () => items.isNotEmpty ? items.first : {'value': selectedValue, 'label': selectedValue},
+    );
+    final displayLabel = currentItem['label'] ?? selectedValue;
+
+    return GestureDetector(
+      key: dropdownKey,
+      onTap: () => _openCustomDropdown(
+        context: context,
+        buttonKey: dropdownKey,
+        items: items,
+        selectedValue: selectedValue,
+        onChanged: onChanged,
+        isDark: isDark,
+      ),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        decoration: BoxDecoration(
+          color: isDark ? const Color(0xFF2C2C2E) : const Color(0xFFF8FAFC),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+            width: 1.0,
+          ),
+        ),
+        child: Row(
+          children: [
+            Icon(prefixIcon, color: prefixIconColor, size: 20),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                displayLabel,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: AppTypography.cardTitle(
+                  color: isDark ? Colors.white : Colors.black87,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 16,
+                ),
+              ),
+            ),
+            Icon(
+              Icons.keyboard_arrow_down_rounded,
+              color: isDark ? Colors.white54 : const Color(0xFF64748B),
+              size: 22,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _openCustomDropdown({
+    required BuildContext context,
+    required GlobalKey buttonKey,
+    required List<Map<String, String>> items,
+    required String selectedValue,
+    required ValueChanged<String> onChanged,
+    required bool isDark,
+  }) {
+    final RenderBox? renderBox = buttonKey.currentContext?.findRenderObject() as RenderBox?;
+    if (renderBox == null) return;
+
+    final size = renderBox.size;
+    final offset = renderBox.localToGlobal(Offset.zero);
+    final double width = size.width;
+    final double top = offset.dy + size.height + 6;
+    double left = offset.dx;
+
+    showDialog(
+      context: context,
+      barrierColor: Colors.transparent,
+      builder: (dialogCtx) {
+        return Stack(
+          children: [
+            // Tap outside to close
+            Positioned.fill(
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () => Navigator.pop(dialogCtx),
+                child: Container(color: Colors.transparent),
+              ),
+            ),
+            Positioned(
+              top: top,
+              left: left,
+              width: width,
+              child: Material(
+                color: Colors.transparent,
+                child: Container(
+                  constraints: const BoxConstraints(maxHeight: 260),
+                  decoration: BoxDecoration(
+                    color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                      width: 1.2,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: isDark ? 0.45 : 0.12),
+                        blurRadius: 16,
+                        offset: const Offset(0, 6),
+                      ),
+                    ],
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(20),
+                    child: ListView.separated(
+                      shrinkWrap: true,
+                      padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 6),
+                      itemCount: items.length,
+                      separatorBuilder: (_, _) => Divider(
+                        height: 1,
+                        color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+                      ),
+                      itemBuilder: (context, index) {
+                        final item = items[index];
+                        final val = item['value']!;
+                        final label = item['label']!;
+                        final isSelected = val == selectedValue;
+
+                        return InkWell(
+                          borderRadius: BorderRadius.circular(14),
+                          onTap: () {
+                            Navigator.pop(dialogCtx);
+                            onChanged(val);
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    label,
+                                    style: AppTypography.cardTitle(
+                                      fontSize: 15,
+                                      fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                                      color: isSelected
+                                          ? const Color(0xFF7F52FC)
+                                          : (isDark ? Colors.white : const Color(0xFF0F172A)),
+                                    ),
+                                  ),
+                                ),
+                                if (isSelected)
+                                  const Icon(
+                                    Icons.check_rounded,
+                                    color: Color(0xFF7F52FC),
+                                    size: 18,
+                                  ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -485,21 +620,21 @@ class _EditProfilePageState extends State<EditProfilePage> {
     }
   }
 
-  List<DropdownMenuItem<String>> _getGradeItemsForLevel(String level) {
+  List<Map<String, String>> _getGradeOptionsForLevel(String level) {
     if (level == 'SD') {
       return List.generate(6, (i) {
         final g = '${i + 1}';
-        return DropdownMenuItem(value: g, child: Text('Kelas $g (SD)'));
+        return {'value': g, 'label': 'Kelas $g (SD)'};
       });
     } else if (level == 'SMP') {
       return List.generate(3, (i) {
         final g = '${i + 7}';
-        return DropdownMenuItem(value: g, child: Text('Kelas $g (SMP)'));
+        return {'value': g, 'label': 'Kelas $g (SMP)'};
       });
     } else {
       return List.generate(3, (i) {
         final g = '${i + 10}';
-        return DropdownMenuItem(value: g, child: Text('Kelas $g (SMA/SMK)'));
+        return {'value': g, 'label': 'Kelas $g (SMA/SMK)'};
       });
     }
   }

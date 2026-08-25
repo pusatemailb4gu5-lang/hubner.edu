@@ -7212,7 +7212,10 @@ class _EditNameFormState extends State<EditNameForm> {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16),
-              borderSide: const BorderSide(color: Color(0xFF7F52FC), width: 1.8),
+              borderSide: BorderSide(
+                color: isDark ? Colors.white : Colors.black,
+                width: 1.2,
+              ),
             ),
           ),
         ),
@@ -7342,7 +7345,10 @@ class _ChangePasswordFormState extends State<ChangePasswordForm> {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16),
-              borderSide: const BorderSide(color: Color(0xFF7F52FC), width: 1.8),
+              borderSide: BorderSide(
+                color: isDark ? Colors.white : Colors.black,
+                width: 1.2,
+              ),
             ),
           ),
         ),
