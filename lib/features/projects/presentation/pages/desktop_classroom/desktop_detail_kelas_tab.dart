@@ -227,7 +227,7 @@ class DesktopDetailKelasTab extends StatelessWidget {
                                           ),
                                           child: Text(
                                             'Tingkat $gradeLevel • $major',
-                                            style: AppTypography.buttonLabel(color: const Color(0xFF000000, fontWeight: FontWeight.bold),
+                                            style: AppTypography.buttonLabel(color: const Color(0xFF000000), fontWeight: FontWeight.bold),
                                           ),
                                         ),
                                         GestureDetector(
@@ -511,12 +511,12 @@ class DesktopDetailKelasTab extends StatelessWidget {
             const SizedBox(height: 12),
             Text(
               title,
-              style: AppTypography.chatHeaderTitle(color: const Color(0xFF000000, fontWeight: FontWeight.bold),
+              style: AppTypography.chatHeaderTitle(color: const Color(0xFF000000), fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 4),
             Text(
               subtitle,
-              style: AppTypography.timestamp(color: const Color(0xFF000000, height: 1.3),
+              style: AppTypography.timestamp(color: const Color(0xFF000000, height: 1.3)),
             ),
           ],
         ),
@@ -601,7 +601,7 @@ class DesktopDetailKelasTab extends StatelessWidget {
             Expanded(
               child: Text(
                 combinedTitle,
-                style: AppTypography.cardTitle(color: const Color(0xFF000000, fontWeight: FontWeight.w600),
+                style: AppTypography.cardTitle(color: const Color(0xFF000000), fontWeight: FontWeight.w600),
               ),
             ),
           ],
@@ -738,7 +738,7 @@ class DesktopDetailKelasTab extends StatelessWidget {
                   const SizedBox(width: 10),
                   Text(
                     'Aktivitas Kelas Terbaru',
-                    style: AppTypography.chatHeaderTitle(color: const Color(0xFF000000, fontWeight: FontWeight.bold),
+                    style: AppTypography.chatHeaderTitle(color: const Color(0xFF000000), fontWeight: FontWeight.bold),
                   ),
 
                 ],
@@ -760,12 +760,12 @@ class DesktopDetailKelasTab extends StatelessWidget {
                         const SizedBox(height: 10),
                         Text(
                           'Belum ada aktivitas kelas.',
-                          style: AppTypography.buttonLabel(color: const Color(0xFF94A3B8, fontWeight: FontWeight.w600),
+                          style: AppTypography.buttonLabel(color: const Color(0xFF94A3B8), fontWeight: FontWeight.w600),
                         ),
                         const SizedBox(height: 4),
                         Text(
                           'Aktivitas akan muncul saat ada perubahan di kelas ini.',
-                          style: AppTypography.timestamp(color: const Color(0xFF94A3B8),
+                          style: AppTypography.timestamp(color: const Color(0xFF94A3B8)),
                         ),
                       ],
                     ),
@@ -869,7 +869,7 @@ class DesktopDetailKelasTab extends StatelessWidget {
             children: [
               RichText(
                 text: TextSpan(
-                  style: AppTypography.buttonLabel(color: const Color(0xFF000000, height: 1.35),
+                  style: AppTypography.buttonLabel(color: const Color(0xFF000000, height: 1.35)),
                   children: [
                     TextSpan(
                       text: '$actor ',
@@ -890,7 +890,7 @@ class DesktopDetailKelasTab extends StatelessWidget {
               const SizedBox(height: 3),
               Text(
                 timeStr,
-                style: AppTypography.timestamp(color: const Color(0xFF000000),
+                style: AppTypography.timestamp(color: const Color(0xFF000000)),
               ),
             ],
           ),

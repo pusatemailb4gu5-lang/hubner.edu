@@ -424,14 +424,14 @@ class _TodoPageState extends State<TodoPage> {
                                                 const SizedBox(height: 4),
                                                 Text(
                                                   'Classroom: ${task['projectName']} | Materi: ${task['stageName']}',
-                                                  style: AppTypography.timestamp(color: cardTextColor.withOpacity(0.8),
+                                                  style: AppTypography.timestamp(color: cardTextColor.withOpacity(0.8)),
                                                 ),
                                                 const SizedBox(height: 6),
                                                 Text(
                                                   task['isPendingApproval'] == true
                                                       ? 'Status: Menunggu Acc Guru'
                                                       : 'Status: $progressStr',
-                                                  style: AppTypography.buttonLabel(color: cardTextColor.withOpacity(0.6, fontWeight: FontWeight.bold),
+                                                  style: AppTypography.buttonLabel(color: cardTextColor.withOpacity(0.6, fontWeight: FontWeight.bold)),
                                                 ),
                                               ],
                                             ),

@@ -207,7 +207,7 @@ class _DesktopTugasTabState extends State<DesktopTugasTab> {
                           const SizedBox(height: 2),
                           Text(
                             'Kelola & Evaluasi Tugas Siswa per Elemen Pembelajaran',
-                            style: AppTypography.timestamp(color: Colors.white.withValues(alpha: 0.85),
+                            style: AppTypography.timestamp(color: Colors.white.withValues(alpha: 0.85)),
                           ),
                         ],
                       ),
@@ -297,7 +297,7 @@ class _DesktopTugasTabState extends State<DesktopTugasTab> {
               const SizedBox(height: 12),
               Text(
                 'Belum ada elemen pembelajaran di kelas ini.',
-                style: AppTypography.subtitle(color: const Color(0xFF64748B),
+                style: AppTypography.subtitle(color: const Color(0xFF64748B)),
               ),
             ],
           ),
@@ -310,7 +310,7 @@ class _DesktopTugasTabState extends State<DesktopTugasTab> {
       children: [
         Text(
           'Daftar Elemen & Tugas',
-          style: AppTypography.chatHeaderTitle(color: const Color(0xFF0F172A, fontWeight: FontWeight.bold),
+          style: AppTypography.chatHeaderTitle(color: const Color(0xFF0F172A), fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 12),
         Container(
@@ -373,11 +373,11 @@ class _DesktopTugasTabState extends State<DesktopTugasTab> {
                             children: [
                               Text(
                                 stageTitle,
-                                style: AppTypography.buttonLabel(color: const Color(0xFF0F172A, fontWeight: FontWeight.bold),
+                                style: AppTypography.buttonLabel(color: const Color(0xFF0F172A), fontWeight: FontWeight.bold),
                               ),
                               Text(
                                 '${materis.length} Materi • ${stageTasks.length} Tugas',
-                                style: AppTypography.timestamp(color: const Color(0xFF64748B),
+                                style: AppTypography.timestamp(color: const Color(0xFF64748B)),
                               ),
                             ],
                           ),
@@ -400,7 +400,7 @@ class _DesktopTugasTabState extends State<DesktopTugasTab> {
                             child: Center(
                               child: Text(
                                 'Belum ada tugas di elemen ini.',
-                                style: AppTypography.timestamp(color: const Color(0xFF94A3B8),
+                                style: AppTypography.timestamp(color: const Color(0xFF94A3B8)),
                               ),
                             ),
                           )
@@ -479,7 +479,7 @@ class _DesktopTugasTabState extends State<DesktopTugasTab> {
                                             ),
                                             Text(
                                               'Materi: ${t['materiTitle'] ?? '-'}',
-                                              style: AppTypography.timestamp(color: const Color(0xFF64748B),
+                                              style: AppTypography.timestamp(color: const Color(0xFF64748B)),
                                             ),
                                           ],
                                         ),
@@ -526,7 +526,7 @@ class _DesktopTugasTabState extends State<DesktopTugasTab> {
               const SizedBox(height: 12),
               Text(
                 'Pilih salah satu tugas di kolom kiri untuk melihat preview.',
-                style: AppTypography.subtitle(color: const Color(0xFF64748B),
+                style: AppTypography.subtitle(color: const Color(0xFF64748B)),
               ),
             ],
           ),
@@ -555,7 +555,7 @@ class _DesktopTugasTabState extends State<DesktopTugasTab> {
         children: [
           Text(
             title,
-            style: AppTypography.pageTitle(color: const Color(0xFF0F172A, fontWeight: FontWeight.bold, height: 1.25),
+            style: AppTypography.pageTitle(color: const Color(0xFF0F172A), fontWeight: FontWeight.bold, height: 1.25),
           ),
           const SizedBox(height: 8),
 
@@ -565,7 +565,7 @@ class _DesktopTugasTabState extends State<DesktopTugasTab> {
               const SizedBox(width: 6),
               Text(
                 '$_selectedStageTitle • $materiTitle',
-                style: AppTypography.timestamp(color: const Color(0xFF475569),
+                style: AppTypography.timestamp(color: const Color(0xFF475569)),
               ),
             ],
           ),
@@ -577,7 +577,7 @@ class _DesktopTugasTabState extends State<DesktopTugasTab> {
                 const SizedBox(width: 6),
                 Text(
                   'Tenggat: ${startDateStr.isNotEmpty ? startDateStr : '-'} s/d ${endDateStr.isNotEmpty ? endDateStr : 'Selesai'}',
-                  style: AppTypography.timestamp(color: const Color(0xFF475569),
+                  style: AppTypography.timestamp(color: const Color(0xFF475569)),
                 ),
               ],
             ),
@@ -606,11 +606,11 @@ class _DesktopTugasTabState extends State<DesktopTugasTab> {
                       children: [
                         Text(
                           'Dokumen Soal PDF',
-                          style: AppTypography.buttonLabel(color: const Color(0xFF9F1239, fontWeight: FontWeight.bold),
+                          style: AppTypography.buttonLabel(color: const Color(0xFF9F1239), fontWeight: FontWeight.bold),
                         ),
                         Text(
                           docName.isNotEmpty ? docName : 'tugas_soal.pdf',
-                          style: AppTypography.timestamp(color: const Color(0xFFBE123C),
+                          style: AppTypography.timestamp(color: const Color(0xFFBE123C)),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -645,12 +645,12 @@ class _DesktopTugasTabState extends State<DesktopTugasTab> {
                 children: [
                   Text(
                     'Pertanyaan / Instruksi Tugas:',
-                    style: AppTypography.buttonLabel(color: const Color(0xFF64748B, fontWeight: FontWeight.bold),
+                    style: AppTypography.buttonLabel(color: const Color(0xFF64748B), fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     docName.isNotEmpty ? docName : 'Teks pertanyaan kosong.',
-                    style: AppTypography.subtitle(color: const Color(0xFF1E293B, height: 1.5),
+                    style: AppTypography.subtitle(color: const Color(0xFF1E293B, height: 1.5)),
                   ),
                 ],
               ),
@@ -695,7 +695,7 @@ class _DesktopTugasTabState extends State<DesktopTugasTab> {
                     icon: const Icon(Icons.delete_outline_rounded, size: 18, color: Color(0xFFEF4444)),
                     label: Text(
                       'Hapus',
-                      style: AppTypography.buttonLabel(color: const Color(0xFFEF4444),
+                      style: AppTypography.buttonLabel(color: const Color(0xFFEF4444)),
                     ),
                     style: OutlinedButton.styleFrom(
                       backgroundColor: const Color(0xFFFEF2F2),
@@ -749,7 +749,7 @@ class _DesktopTugasTabState extends State<DesktopTugasTab> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: Text('Batal', style: AppTypography.buttonLabel(color: const Color(0xFF64748B)),
+            child: Text('Batal', style: AppTypography.buttonLabel(color: const Color(0xFF64748B))),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
@@ -1106,7 +1106,7 @@ class _DesktopTugasTabState extends State<DesktopTugasTab> {
                                 children: [
                                   Text(
                                     'Pilih Elemen Pembelajaran',
-                                    style: AppTypography.buttonLabel(color: const Color(0xFF475569, fontWeight: FontWeight.bold),
+                                    style: AppTypography.buttonLabel(color: const Color(0xFF475569), fontWeight: FontWeight.bold),
                                   ),
                                   const SizedBox(height: 6),
                                   Container(
@@ -1151,7 +1151,7 @@ class _DesktopTugasTabState extends State<DesktopTugasTab> {
 
                                   Text(
                                     'Pilih Materi',
-                                    style: AppTypography.buttonLabel(color: const Color(0xFF475569, fontWeight: FontWeight.bold),
+                                    style: AppTypography.buttonLabel(color: const Color(0xFF475569), fontWeight: FontWeight.bold),
                                   ),
                                   const SizedBox(height: 6),
                                   Container(
@@ -1196,7 +1196,7 @@ class _DesktopTugasTabState extends State<DesktopTugasTab> {
 
                                   Text(
                                     'Judul Tugas',
-                                    style: AppTypography.buttonLabel(color: const Color(0xFF475569, fontWeight: FontWeight.bold),
+                                    style: AppTypography.buttonLabel(color: const Color(0xFF475569), fontWeight: FontWeight.bold),
                                   ),
                                   const SizedBox(height: 6),
                                   TextField(
@@ -1204,7 +1204,7 @@ class _DesktopTugasTabState extends State<DesktopTugasTab> {
                                     style: AppTypography.subtitle(),
                                     decoration: InputDecoration(
                                       hintText: 'Masukkan judul...',
-                                      hintStyle: AppTypography.timestamp(color: const Color(0xFF94A3B8),
+                                      hintStyle: AppTypography.timestamp(color: const Color(0xFF94A3B8)),
                                       isDense: true,
                                       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                                       fillColor: const Color(0xFFF8FAFC),
@@ -1229,7 +1229,7 @@ class _DesktopTugasTabState extends State<DesktopTugasTab> {
                                           children: [
                                             Text(
                                               'Tanggal Mulai',
-                                              style: AppTypography.buttonLabel(color: const Color(0xFF475569, fontWeight: FontWeight.bold),
+                                              style: AppTypography.buttonLabel(color: const Color(0xFF475569), fontWeight: FontWeight.bold),
                                             ),
                                             const SizedBox(height: 6),
                                             TextField(
@@ -1239,7 +1239,7 @@ class _DesktopTugasTabState extends State<DesktopTugasTab> {
                                               onChanged: (_) => _formatDateInput(startDateController),
                                               decoration: InputDecoration(
                                                 hintText: 'HH/BB/TTTT',
-                                                hintStyle: AppTypography.timestamp(color: const Color(0xFF94A3B8),
+                                                hintStyle: AppTypography.timestamp(color: const Color(0xFF94A3B8)),
                                                 prefixIcon: Icon(Icons.calendar_today_rounded, size: 16, color: mainThemeColor),
                                                 isDense: true,
                                                 contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
@@ -1265,7 +1265,7 @@ class _DesktopTugasTabState extends State<DesktopTugasTab> {
                                           children: [
                                             Text(
                                               'Tanggal Selesai / Tenggat',
-                                              style: AppTypography.buttonLabel(color: const Color(0xFF475569, fontWeight: FontWeight.bold),
+                                              style: AppTypography.buttonLabel(color: const Color(0xFF475569), fontWeight: FontWeight.bold),
                                             ),
                                             const SizedBox(height: 6),
                                             TextField(
@@ -1275,7 +1275,7 @@ class _DesktopTugasTabState extends State<DesktopTugasTab> {
                                               onChanged: (_) => _formatDateInput(endDateController),
                                               decoration: InputDecoration(
                                                 hintText: 'HH/BB/TTTT',
-                                                hintStyle: AppTypography.timestamp(color: const Color(0xFF94A3B8),
+                                                hintStyle: AppTypography.timestamp(color: const Color(0xFF94A3B8)),
                                                 prefixIcon: Icon(Icons.calendar_today_rounded, size: 16, color: mainThemeColor),
                                                 isDense: true,
                                                 contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
@@ -1327,7 +1327,7 @@ class _DesktopTugasTabState extends State<DesktopTugasTab> {
                                               border: Border.all(color: assignmentType == 'individu' ? mainThemeColor : const Color(0xFFE2E8F0)),
                                             ),
                                             child: Center(
-                                              child: Text('Tugas Individu', style: AppTypography.buttonLabel(color: assignmentType == 'individu' ? mainThemeColor : const Color(0xFF475569, fontWeight: FontWeight.bold)),
+                                              child: Text('Tugas Individu', style: AppTypography.buttonLabel(color: assignmentType == 'individu' ? mainThemeColor : const Color(0xFF475569), fontWeight: FontWeight.bold)),
                                             ),
                                           ),
                                         ),
@@ -1344,7 +1344,7 @@ class _DesktopTugasTabState extends State<DesktopTugasTab> {
                                               border: Border.all(color: assignmentType == 'kelompok' ? mainThemeColor : const Color(0xFFE2E8F0)),
                                             ),
                                             child: Center(
-                                              child: Text('Tugas Kelompok', style: AppTypography.buttonLabel(color: assignmentType == 'kelompok' ? mainThemeColor : const Color(0xFF475569, fontWeight: FontWeight.bold)),
+                                              child: Text('Tugas Kelompok', style: AppTypography.buttonLabel(color: assignmentType == 'kelompok' ? mainThemeColor : const Color(0xFF475569), fontWeight: FontWeight.bold)),
                                             ),
                                           ),
                                         ),
@@ -1357,7 +1357,7 @@ class _DesktopTugasTabState extends State<DesktopTugasTab> {
                                     children: [
                                       Text(
                                         'Mode Pengumpulan Tugas: ',
-                                        style: AppTypography.buttonLabel(color: const Color(0xFF475569, fontWeight: FontWeight.bold),
+                                        style: AppTypography.buttonLabel(color: const Color(0xFF475569), fontWeight: FontWeight.bold),
                                       ),
                                       const SizedBox(width: 14),
                                       Row(
@@ -1394,7 +1394,7 @@ class _DesktopTugasTabState extends State<DesktopTugasTab> {
                                   if (tugasMode == 'text') ...[
                                     Text(
                                       'Teks Soal / Pertanyaan Tugas',
-                                      style: AppTypography.buttonLabel(color: const Color(0xFF475569, fontWeight: FontWeight.bold),
+                                      style: AppTypography.buttonLabel(color: const Color(0xFF475569), fontWeight: FontWeight.bold),
                                     ),
                                     const SizedBox(height: 6),
                                     TextField(
@@ -1403,7 +1403,7 @@ class _DesktopTugasTabState extends State<DesktopTugasTab> {
                                       style: AppTypography.timestamp(),
                                       decoration: InputDecoration(
                                         hintText: 'Tulis pertanyaan / instruksi tugas di sini...',
-                                        hintStyle: AppTypography.timestamp(color: const Color(0xFF94A3B8),
+                                        hintStyle: AppTypography.timestamp(color: const Color(0xFF94A3B8)),
                                         contentPadding: const EdgeInsets.all(14),
                                         fillColor: const Color(0xFFF8FAFC),
                                         filled: true,
@@ -1420,7 +1420,7 @@ class _DesktopTugasTabState extends State<DesktopTugasTab> {
                                   ] else ...[
                                     Text(
                                       'Link / Berkas Soal PDF',
-                                      style: AppTypography.buttonLabel(color: const Color(0xFF475569, fontWeight: FontWeight.bold),
+                                      style: AppTypography.buttonLabel(color: const Color(0xFF475569), fontWeight: FontWeight.bold),
                                     ),
                                     const SizedBox(height: 6),
                                     Row(
@@ -1431,7 +1431,7 @@ class _DesktopTugasTabState extends State<DesktopTugasTab> {
                                             style: AppTypography.timestamp(),
                                             decoration: InputDecoration(
                                               hintText: 'Masukkan link/nama file PDF tugas...',
-                                              hintStyle: AppTypography.timestamp(color: const Color(0xFF94A3B8),
+                                              hintStyle: AppTypography.timestamp(color: const Color(0xFF94A3B8)),
                                               prefixIcon: const Icon(Icons.picture_as_pdf_rounded, size: 18, color: Color(0xFFE11D48)),
                                               isDense: true,
                                               contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
@@ -1535,7 +1535,7 @@ class _DesktopTugasTabState extends State<DesktopTugasTab> {
                             ),
                             Text(
                               '${submissions.length} Pengumpulan Siswa',
-                              style: AppTypography.timestamp(color: Colors.white.withValues(alpha: 0.85),
+                              style: AppTypography.timestamp(color: Colors.white.withValues(alpha: 0.85)),
                             ),
                           ],
                         ),
@@ -1556,7 +1556,7 @@ class _DesktopTugasTabState extends State<DesktopTugasTab> {
                             children: [
                               Icon(Icons.assignment_late_outlined, size: 48, color: const Color(0xFF94A3B8)),
                               const SizedBox(height: 12),
-                              Text('Belum ada siswa yang mengumpulkan tugas ini.', style: AppTypography.subtitle(color: const Color(0xFF64748B)),
+                              Text('Belum ada siswa yang mengumpulkan tugas ini.', style: AppTypography.subtitle(color: const Color(0xFF64748B))),
                             ],
                           ),
                         )
@@ -1600,7 +1600,7 @@ class _DesktopTugasTabState extends State<DesktopTugasTab> {
                                           children: [
                                             Text(
                                               studentName,
-                                              style: AppTypography.cardTitle(color: const Color(0xFF000000, fontWeight: FontWeight.bold),
+                                              style: AppTypography.cardTitle(color: const Color(0xFF000000), fontWeight: FontWeight.bold),
                                             ),
                                             Container(
                                               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
@@ -1610,12 +1610,12 @@ class _DesktopTugasTabState extends State<DesktopTugasTab> {
                                               ),
                                               child: Text(
                                                 'Nilai: $score',
-                                                style: AppTypography.buttonLabel(color: const Color(0xFF059669, fontWeight: FontWeight.bold),
+                                                style: AppTypography.buttonLabel(color: const Color(0xFF059669), fontWeight: FontWeight.bold),
                                               ),
                                             ),
                                           ],
                                         ),
-                                        Text('Dikumpulkan: $submittedAt', style: AppTypography.timestamp(color: const Color(0xFF64748B)),
+                                        Text('Dikumpulkan: $submittedAt', style: AppTypography.timestamp(color: const Color(0xFF64748B))),
                                         const SizedBox(height: 8),
 
                                         if (fileUrl != null && fileUrl.isNotEmpty) ...[
@@ -1640,14 +1640,14 @@ class _DesktopTugasTabState extends State<DesktopTugasTab> {
                                                   const SizedBox(width: 6),
                                                   Text(
                                                     'Buka File Lampiran Tugas',
-                                                    style: AppTypography.buttonLabel(color: const Color(0xFF0284C7, fontWeight: FontWeight.bold),
+                                                    style: AppTypography.buttonLabel(color: const Color(0xFF0284C7), fontWeight: FontWeight.bold),
                                                   ),
                                                 ],
                                               ),
                                             ),
                                           ),
                                         ] else ...[
-                                          Text(answerText, style: AppTypography.timestamp(color: const Color(0xFF334155)),
+                                          Text(answerText, style: AppTypography.timestamp(color: const Color(0xFF334155))),
                                         ],
                                       ],
                                     ),
@@ -1715,7 +1715,7 @@ class _DesktopTugasTabState extends State<DesktopTugasTab> {
                       children: [
                         Text(
                           'Pertanyaan / Instruksi Tugas:',
-                          style: AppTypography.buttonLabel(color: const Color(0xFF475569, fontWeight: FontWeight.bold),
+                          style: AppTypography.buttonLabel(color: const Color(0xFF475569), fontWeight: FontWeight.bold),
                         ),
                         const SizedBox(height: 10),
                         if (mode == 'pdf') ...[
@@ -1733,7 +1733,7 @@ class _DesktopTugasTabState extends State<DesktopTugasTab> {
                                 Expanded(
                                   child: Text(
                                     content.isNotEmpty ? content : 'berkas_soal.pdf',
-                                    style: AppTypography.timestamp(color: const Color(0xFF9F1239, fontWeight: FontWeight.w600),
+                                    style: AppTypography.timestamp(color: const Color(0xFF9F1239), fontWeight: FontWeight.w600),
                                   ),
                                 ),
                               ],
@@ -1750,7 +1750,7 @@ class _DesktopTugasTabState extends State<DesktopTugasTab> {
                             ),
                             child: Text(
                               content.isNotEmpty ? content : 'Teks pertanyaan kosong.',
-                              style: AppTypography.subtitle(color: const Color(0xFF334155, height: 1.5),
+                              style: AppTypography.subtitle(color: const Color(0xFF334155, height: 1.5)),
                             ),
                           ),
                         ],

@@ -44,7 +44,7 @@ class DesktopGudangMateriTab extends StatelessWidget {
             children: [
               Text(
                 'Gudang Materi Pembelajaran',
-                style: AppTypography.chatHeaderTitle(color: const Color(0xFF000000, fontWeight: FontWeight.bold),
+                style: AppTypography.chatHeaderTitle(color: const Color(0xFF000000), fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 16),
               Expanded(
@@ -52,7 +52,7 @@ class DesktopGudangMateriTab extends StatelessWidget {
                     ? Center(
                         child: Text(
                           'Belum ada materi pembelajaran.',
-                          style: AppTypography.timestamp(color: const Color(0xFF000000),
+                          style: AppTypography.timestamp(color: const Color(0xFF000000)),
                         ),
                       )
                     : ListView.builder(
@@ -94,11 +94,11 @@ class DesktopGudangMateriTab extends StatelessWidget {
                                     children: [
                                       Text(
                                         mTitle,
-                                        style: AppTypography.cardTitle(color: const Color(0xFF000000, fontWeight: FontWeight.bold),
+                                        style: AppTypography.cardTitle(color: const Color(0xFF000000), fontWeight: FontWeight.bold),
                                       ),
                                       Text(
                                         '$stageName • ${tasks.length} Aktivitas',
-                                        style: AppTypography.timestamp(color: const Color(0xFF000000),
+                                        style: AppTypography.timestamp(color: const Color(0xFF000000)),
                                       ),
                                     ],
                                   ),

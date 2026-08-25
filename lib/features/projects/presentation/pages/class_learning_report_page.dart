@@ -271,13 +271,13 @@ class _ClassLearningReportPageState extends State<ClassLearningReportPage>
                           children: [
                             Text(
                               'Laporan Hasil Belajar',
-                              style: AppTypography.pageTitle(color: const Color(0xFF0F172A, fontWeight: FontWeight.w900, letterSpacing: -0.5),
+                              style: AppTypography.pageTitle(color: const Color(0xFF0F172A), fontWeight: FontWeight.w900, letterSpacing: -0.5),
                             ),
                             Text(
                               widget.projectName,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              style: AppTypography.timestamp(color: const Color(0xFF4C0519, fontWeight: FontWeight.w600),
+                              style: AppTypography.timestamp(color: const Color(0xFF4C0519), fontWeight: FontWeight.w600),
                             ),
                           ],
                         ),
@@ -300,7 +300,7 @@ class _ClassLearningReportPageState extends State<ClassLearningReportPage>
                             const SizedBox(width: 5),
                             Text(
                               '$studentCount Siswa',
-                              style: AppTypography.buttonLabel(color: const Color(0xFF0F172A, fontWeight: FontWeight.bold),
+                              style: AppTypography.buttonLabel(color: const Color(0xFF0F172A), fontWeight: FontWeight.bold),
                             ),
                           ],
                         ),
@@ -319,7 +319,7 @@ class _ClassLearningReportPageState extends State<ClassLearningReportPage>
                             const SizedBox(width: 5),
                             Text(
                               '$totalStages Tahapan · $totalTasks Tugas',
-                              style: AppTypography.buttonLabel(color: const Color(0xFF0F172A, fontWeight: FontWeight.bold),
+                              style: AppTypography.buttonLabel(color: const Color(0xFF0F172A), fontWeight: FontWeight.bold),
                             ),
                           ],
                         ),
@@ -411,7 +411,7 @@ class _ClassLearningReportPageState extends State<ClassLearningReportPage>
                     child: Center(
                       child: Text(
                         (index + 1).toString().padLeft(2, '0'),
-                        style: AppTypography.buttonLabel(color: const Color(0xFFBE123C, fontWeight: FontWeight.w900),
+                        style: AppTypography.buttonLabel(color: const Color(0xFFBE123C), fontWeight: FontWeight.w900),
                       ),
                     ),
                   ),
@@ -422,7 +422,7 @@ class _ClassLearningReportPageState extends State<ClassLearningReportPage>
                       children: [
                         Text(
                           name,
-                          style: AppTypography.buttonLabel(color: isDark ? Colors.white : const Color(0xFF0F172A, fontWeight: FontWeight.bold),
+                          style: AppTypography.buttonLabel(color: isDark ? Colors.white : const Color(0xFF0F172A), fontWeight: FontWeight.bold),
                         ),
                         if (summary.isNotEmpty) ...[
                           const SizedBox(height: 2),
@@ -545,7 +545,7 @@ class _ClassLearningReportPageState extends State<ClassLearningReportPage>
                     child: Center(
                       child: Text(
                         name.isNotEmpty ? name.substring(0, 1).toUpperCase() : 'S',
-                        style: AppTypography.cardTitle(color: const Color(0xFF0F172A, fontWeight: FontWeight.w900),
+                        style: AppTypography.cardTitle(color: const Color(0xFF0F172A), fontWeight: FontWeight.w900),
                       ),
                     ),
                   ),
@@ -556,7 +556,7 @@ class _ClassLearningReportPageState extends State<ClassLearningReportPage>
                       children: [
                         Text(
                           name,
-                          style: AppTypography.buttonLabel(color: isDark ? Colors.white : const Color(0xFF0F172A, fontWeight: FontWeight.bold),
+                          style: AppTypography.buttonLabel(color: isDark ? Colors.white : const Color(0xFF0F172A), fontWeight: FontWeight.bold),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -578,7 +578,7 @@ class _ClassLearningReportPageState extends State<ClassLearningReportPage>
                     ),
                     child: Text(
                       '$completedCount/$totalTasks Selesai',
-                      style: AppTypography.buttonLabel(color: progress >= 1.0 ? const Color(0xFF10B981, fontWeight: FontWeight.bold),
+                      style: AppTypography.buttonLabel(color: progress >= 1.0 ? const Color(0xFF10B981) : const Color(0xFF3B82F6), fontWeight: FontWeight.bold),
                     ),
                   ),
                 ],
@@ -618,7 +618,7 @@ class _ClassLearningReportPageState extends State<ClassLearningReportPage>
           children: [
             Text(
               value,
-              style: AppTypography.buttonLabel(color: isDark ? Colors.white : const Color(0xFF0F172A, fontWeight: FontWeight.w800),
+              style: AppTypography.buttonLabel(color: isDark ? Colors.white : const Color(0xFF0F172A), fontWeight: FontWeight.w800),
             ),
             Text(
               label,

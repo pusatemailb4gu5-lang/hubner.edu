@@ -765,7 +765,7 @@ class _MonitoringPageState extends State<MonitoringPage> {
                                           ),
                                           child: Text(
                                             'Guru',
-                                            style: AppTypography.buttonLabel(color: const Color(0xFFD97706, fontWeight: FontWeight.bold),
+                                            style: AppTypography.buttonLabel(color: const Color(0xFFD97706), fontWeight: FontWeight.bold),
                                           ),
                                         ),
                                       ],
@@ -792,7 +792,7 @@ class _MonitoringPageState extends State<MonitoringPage> {
                                     ),
                                     child: Text(
                                       'Teman',
-                                      style: AppTypography.buttonLabel(color: const Color(0xFF15803D, fontWeight: FontWeight.bold),
+                                      style: AppTypography.buttonLabel(color: const Color(0xFF15803D), fontWeight: FontWeight.bold),
                                     ),
                                   )
                                 else
@@ -823,7 +823,7 @@ class _MonitoringPageState extends State<MonitoringPage> {
                                           const SizedBox(width: 4),
                                           Text(
                                             'Tambah',
-                                            style: AppTypography.buttonLabel(color: const Color(0xFF1D4ED8, fontWeight: FontWeight.bold),
+                                            style: AppTypography.buttonLabel(color: const Color(0xFF1D4ED8), fontWeight: FontWeight.bold),
                                           ),
                                         ],
                                       ),
@@ -938,7 +938,7 @@ class _MonitoringPageState extends State<MonitoringPage> {
                                                 ),
                                                 child: Text(
                                                   'Saya',
-                                                  style: AppTypography.buttonLabel(color: const Color(, fontWeight: FontWeight.bold),
+                                                  style: AppTypography.buttonLabel(color: const Color(, fontWeight: FontWeight.bold)),
                                                 ),
                                               ),
                                             ],
@@ -983,7 +983,7 @@ class _MonitoringPageState extends State<MonitoringPage> {
                                             const SizedBox(width: 4),
                                             Text(
                                               'Keluar',
-                                              style: AppTypography.buttonLabel(color: const Color(0xFFEF4444, fontWeight: FontWeight.bold),
+                                              style: AppTypography.buttonLabel(color: const Color(0xFFEF4444), fontWeight: FontWeight.bold),
                                             ),
                                           ],
                                         ),
@@ -1001,7 +1001,7 @@ class _MonitoringPageState extends State<MonitoringPage> {
                                       ),
                                       child: Text(
                                         'Teman',
-                                        style: AppTypography.buttonLabel(color: const Color(0xFF15803D, fontWeight: FontWeight.bold),
+                                        style: AppTypography.buttonLabel(color: const Color(0xFF15803D), fontWeight: FontWeight.bold),
                                       ),
                                     )
                                   else
@@ -1031,7 +1031,7 @@ class _MonitoringPageState extends State<MonitoringPage> {
                                             const SizedBox(width: 4),
                                             Text(
                                               'Tambah',
-                                              style: AppTypography.buttonLabel(color: const Color(0xFF1D4ED8, fontWeight: FontWeight.bold),
+                                              style: AppTypography.buttonLabel(color: const Color(0xFF1D4ED8), fontWeight: FontWeight.bold),
                                             ),
                                           ],
                                         ),
@@ -1396,7 +1396,7 @@ class _MonitoringPageState extends State<MonitoringPage> {
                     const SizedBox(width: 4),
                     Text(
                       'Selesai',
-                      style: AppTypography.buttonLabel(color: const Color(0xFF059669, fontWeight: FontWeight.bold),
+                      style: AppTypography.buttonLabel(color: const Color(0xFF059669), fontWeight: FontWeight.bold),
                     ),
                   ],
                 ),
@@ -2604,7 +2604,7 @@ class _MonitoringPageState extends State<MonitoringPage> {
                               const SizedBox(height: 6),
                               Text(
                                 stageDesc,
-                                style: AppTypography.timestamp(color: Colors.black87.withValues(alpha: 0.75, height: 1.4),
+                                style: AppTypography.timestamp(color: Colors.black87.withValues(alpha: 0.75, height: 1.4)),
                               ),
                             ],
                           ],
@@ -2667,7 +2667,7 @@ class _MonitoringPageState extends State<MonitoringPage> {
                                 ),
                                 child: Text(
                                   'Selesai',
-                                  style: AppTypography.buttonLabel(color: const Color(0xFF059669, fontWeight: FontWeight.bold),
+                                  style: AppTypography.buttonLabel(color: const Color(0xFF059669), fontWeight: FontWeight.bold),
                                 ),
                               ),
                             ),
@@ -2680,7 +2680,7 @@ class _MonitoringPageState extends State<MonitoringPage> {
                                 ),
                                 child: Text(
                                   'Proses Pembelajaran',
-                                  style: AppTypography.buttonLabel(color: const Color(0xFF1D4ED8, fontWeight: FontWeight.bold),
+                                  style: AppTypography.buttonLabel(color: const Color(0xFF1D4ED8), fontWeight: FontWeight.bold),
                                 ),
                               ),
                             ),

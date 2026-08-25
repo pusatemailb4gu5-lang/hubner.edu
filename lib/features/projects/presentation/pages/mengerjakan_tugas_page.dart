@@ -367,7 +367,7 @@ class _MengerjakanTugasPageState extends State<MengerjakanTugasPage> {
                               const SizedBox(width: 6),
                               Text(
                                 isKelompok ? 'Tugas Kelompok' : 'Tugas Mandiri',
-                                style: AppTypography.buttonLabel(color: const Color(0xFF2563EB, fontWeight: FontWeight.bold),
+                                style: AppTypography.buttonLabel(color: const Color(0xFF2563EB), fontWeight: FontWeight.bold),
                               ),
                             ],
                           ),
@@ -382,7 +382,7 @@ class _MengerjakanTugasPageState extends State<MengerjakanTugasPage> {
                             ),
                             child: Text(
                               'Sudah Terkumpul',
-                              style: AppTypography.buttonLabel(color: const Color(0xFF059669, fontWeight: FontWeight.bold),
+                              style: AppTypography.buttonLabel(color: const Color(0xFF059669), fontWeight: FontWeight.bold),
                             ),
                           ),
                       ],
@@ -432,7 +432,7 @@ class _MengerjakanTugasPageState extends State<MengerjakanTugasPage> {
                                 widget.docName!.startsWith('http')
                                     ? '📄 Buka Lampiran Berkas (Google Drive)'
                                     : widget.docName!,
-                                style: AppTypography.buttonLabel(color: const Color(0xFF1E40AF, fontWeight: FontWeight.bold),
+                                style: AppTypography.buttonLabel(color: const Color(0xFF1E40AF), fontWeight: FontWeight.bold),
                               ),
                             ],
                           ),
@@ -603,13 +603,13 @@ class _MengerjakanTugasPageState extends State<MengerjakanTugasPage> {
                                 children: [
                                   Text(
                                     'Berkas Terlampir:',
-                                    style: AppTypography.buttonLabel(color: const Color(0xFF1E40AF, fontWeight: FontWeight.bold),
+                                    style: AppTypography.buttonLabel(color: const Color(0xFF1E40AF), fontWeight: FontWeight.bold),
                                   ),
                                   Text(
                                     _linkController.text,
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
-                                    style: AppTypography.timestamp(color: const Color(0xFF2563EB),
+                                    style: AppTypography.timestamp(color: const Color(0xFF2563EB)),
                                   ),
                                 ],
                               ),

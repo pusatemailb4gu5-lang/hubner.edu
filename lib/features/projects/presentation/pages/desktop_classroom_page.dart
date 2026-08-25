@@ -427,7 +427,7 @@ class _DesktopClassroomPageState extends State<DesktopClassroomPage>
                       const SizedBox(width: 8),
                       Text(
                         'Kembali',
-                        style: AppTypography.buttonLabel(color: const Color(0xFF000000, fontWeight: FontWeight.w600),
+                        style: AppTypography.buttonLabel(color: const Color(0xFF000000), fontWeight: FontWeight.w600),
                       ),
                     ],
                   ),

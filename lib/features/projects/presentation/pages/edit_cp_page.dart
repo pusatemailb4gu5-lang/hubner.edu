@@ -119,7 +119,7 @@ class _EditCpPageState extends State<EditCpPage> {
                         children: [
                           Text(
                             'Capaian Pembelajaran',
-                            style: AppTypography.cardTitle(color: isDark ? Colors.white : const Color(0xFF0F172A, fontWeight: FontWeight.bold),
+                            style: AppTypography.cardTitle(color: isDark ? Colors.white : const Color(0xFF0F172A), fontWeight: FontWeight.bold),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             textAlign: TextAlign.center,
@@ -209,12 +209,12 @@ class _EditCpPageState extends State<EditCpPage> {
                               children: [
                                 Text(
                                   'Target & Tujuan Kompetensi',
-                                  style: AppTypography.buttonLabel(color: isDark ? Colors.white : const Color(0xFF0F172A, fontWeight: FontWeight.bold),
+                                  style: AppTypography.buttonLabel(color: isDark ? Colors.white : const Color(0xFF0F172A), fontWeight: FontWeight.bold),
                                 ),
                                 const SizedBox(height: 2),
                                 Text(
                                   'Tuliskan kompetensi pembelajaran dan materi inti fase kelas ini.',
-                                  style: AppTypography.timestamp(color: isDark ? Colors.white70 : const Color(0xFF334155),
+                                  style: AppTypography.timestamp(color: isDark ? Colors.white70 : const Color(0xFF334155)),
                                 ),
                               ],
                             ),
@@ -230,7 +230,7 @@ class _EditCpPageState extends State<EditCpPage> {
                       controller: _controller,
                       maxLines: null,
                       autofocus: true,
-                      style: AppTypography.subtitle(color: isDark ? Colors.white : const Color(0xFF0F172A, height: 1.7),
+                      style: AppTypography.subtitle(color: isDark ? Colors.white : const Color(0xFF0F172A, height: 1.7)),
                       decoration: InputDecoration(
                         hintText: 'Mulai menuliskan Capaian Pembelajaran (CP) di sini...\n\nContoh:\nPada akhir fase ini, peserta didik mampu memahami konsep dasar, menganalisis permasalahan, dan mempresentasikan hasil proyek secara mandiri maupun berkelompok.',
                         hintStyle: AppTypography.subtitle(color: isDark ? Colors.white30 : Colors.black38, height: 1.7),

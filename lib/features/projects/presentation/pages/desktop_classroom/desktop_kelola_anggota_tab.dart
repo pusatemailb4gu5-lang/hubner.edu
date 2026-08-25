@@ -111,7 +111,7 @@ class _DesktopKelolaAnggotaTabState extends State<DesktopKelolaAnggotaTab> {
                             const SizedBox(height: 2),
                             Text(
                               'Undang Siswa, Konfirmasi Permintaan Bergabung, dan Kelola Anggota Kelas',
-                              style: AppTypography.timestamp(color: Colors.white.withValues(alpha: 0.85),
+                              style: AppTypography.timestamp(color: Colors.white.withValues(alpha: 0.85)),
                             ),
                           ],
                         ),
@@ -195,7 +195,7 @@ class _DesktopKelolaAnggotaTabState extends State<DesktopKelolaAnggotaTab> {
               const SizedBox(width: 8),
               Text(
                 'Undang Anggota',
-                style: AppTypography.chatHeaderTitle(color: const Color(0xFF000000, fontWeight: FontWeight.bold),
+                style: AppTypography.chatHeaderTitle(color: const Color(0xFF000000), fontWeight: FontWeight.bold),
               ),
             ],
           ),
@@ -204,7 +204,7 @@ class _DesktopKelolaAnggotaTabState extends State<DesktopKelolaAnggotaTab> {
           // Kode Kelas Container with Copy Action
           Text(
             'Kode Akses Kelas',
-            style: AppTypography.buttonLabel(color: const Color(0xFF000000, fontWeight: FontWeight.w600),
+            style: AppTypography.buttonLabel(color: const Color(0xFF000000), fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 6),
           Container(
@@ -222,7 +222,7 @@ class _DesktopKelolaAnggotaTabState extends State<DesktopKelolaAnggotaTab> {
                 Expanded(
                   child: Text(
                     projectId,
-                    style: AppTypography.buttonLabel(color: const Color(0xFF000000, fontWeight: FontWeight.bold),
+                    style: AppTypography.buttonLabel(color: const Color(0xFF000000), fontWeight: FontWeight.bold),
                   ),
                 ),
                 GestureDetector(
@@ -263,7 +263,7 @@ class _DesktopKelolaAnggotaTabState extends State<DesktopKelolaAnggotaTab> {
           // Invite Email Field
           Text(
             'Undang via Email Siswa',
-            style: AppTypography.buttonLabel(color: const Color(0xFF000000, fontWeight: FontWeight.w600),
+            style: AppTypography.buttonLabel(color: const Color(0xFF000000), fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 6),
           TextField(
@@ -326,7 +326,7 @@ class _DesktopKelolaAnggotaTabState extends State<DesktopKelolaAnggotaTab> {
                 const SizedBox(height: 6),
                 Text(
                   'Scan QR Code untuk Gabung Kelas',
-                  style: AppTypography.timestamp(color: const Color(0xFF000000),
+                  style: AppTypography.timestamp(color: const Color(0xFF000000)),
                 ),
               ],
             ),
@@ -372,7 +372,7 @@ class _DesktopKelolaAnggotaTabState extends State<DesktopKelolaAnggotaTab> {
                   const SizedBox(width: 8),
                   Text(
                     'Permintaan Bergabung',
-                    style: AppTypography.chatHeaderTitle(color: const Color(0xFF000000, fontWeight: FontWeight.bold),
+                    style: AppTypography.chatHeaderTitle(color: const Color(0xFF000000), fontWeight: FontWeight.bold),
                   ),
                   const Spacer(),
                   Container(
@@ -384,7 +384,7 @@ class _DesktopKelolaAnggotaTabState extends State<DesktopKelolaAnggotaTab> {
                     ),
                     child: Text(
                       '${docs.length}',
-                      style: AppTypography.buttonLabel(color: const Color(0xFF10B981, fontWeight: FontWeight.bold),
+                      style: AppTypography.buttonLabel(color: const Color(0xFF10B981), fontWeight: FontWeight.bold),
                     ),
                   ),
                 ],
@@ -408,7 +408,7 @@ class _DesktopKelolaAnggotaTabState extends State<DesktopKelolaAnggotaTab> {
                         Text(
                           'Tidak ada permintaan bergabung saat ini.',
                           textAlign: TextAlign.center,
-                          style: AppTypography.timestamp(color: const Color(0xFF000000),
+                          style: AppTypography.timestamp(color: const Color(0xFF000000)),
                         ),
                       ],
                     ),
@@ -458,11 +458,11 @@ class _DesktopKelolaAnggotaTabState extends State<DesktopKelolaAnggotaTab> {
                                   children: [
                                     Text(
                                       userName,
-                                      style: AppTypography.buttonLabel(color: const Color(0xFF000000, fontWeight: FontWeight.bold),
+                                      style: AppTypography.buttonLabel(color: const Color(0xFF000000), fontWeight: FontWeight.bold),
                                     ),
                                     Text(
                                       email,
-                                      style: AppTypography.timestamp(color: const Color(0xFF000000),
+                                      style: AppTypography.timestamp(color: const Color(0xFF000000)),
                                     ),
                                   ],
                                 ),
@@ -635,7 +635,7 @@ class _DesktopKelolaAnggotaTabState extends State<DesktopKelolaAnggotaTab> {
                   const SizedBox(width: 8),
                   Text(
                     'Daftar Anggota Kelas',
-                    style: AppTypography.chatHeaderTitle(color: const Color(0xFF000000, fontWeight: FontWeight.bold),
+                    style: AppTypography.chatHeaderTitle(color: const Color(0xFF000000), fontWeight: FontWeight.bold),
                   ),
                   const Spacer(),
                   Container(
@@ -647,7 +647,7 @@ class _DesktopKelolaAnggotaTabState extends State<DesktopKelolaAnggotaTab> {
                     ),
                     child: Text(
                       '${filteredMembers.length} Anggota',
-                      style: AppTypography.buttonLabel(color: const Color(0xFF0284C7, fontWeight: FontWeight.bold),
+                      style: AppTypography.buttonLabel(color: const Color(0xFF0284C7), fontWeight: FontWeight.bold),
                     ),
                   ),
                 ],
@@ -688,7 +688,7 @@ class _DesktopKelolaAnggotaTabState extends State<DesktopKelolaAnggotaTab> {
                   child: Center(
                     child: Text(
                       'Tidak ada anggota yang cocok.',
-                      style: AppTypography.timestamp(color: const Color(0xFF000000),
+                      style: AppTypography.timestamp(color: const Color(0xFF000000)),
                     ),
                   ),
                 )
@@ -784,7 +784,7 @@ class _DesktopKelolaAnggotaTabState extends State<DesktopKelolaAnggotaTab> {
                                 children: [
                                   Text(
                                     displayName,
-                                    style: AppTypography.buttonLabel(color: const Color(0xFF000000, fontWeight: FontWeight.bold),
+                                    style: AppTypography.buttonLabel(color: const Color(0xFF000000), fontWeight: FontWeight.bold),
                                   ),
                                   const SizedBox(height: 2),
                                   Text(

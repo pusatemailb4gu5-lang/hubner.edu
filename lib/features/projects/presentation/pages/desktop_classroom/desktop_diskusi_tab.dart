@@ -159,7 +159,7 @@ class _DesktopDiskusiTabState extends State<DesktopDiskusiTab> {
                               children: [
                                 Text(
                                   'Grup Kelas',
-                                  style: AppTypography.fileSize(color: Colors.white.withValues(alpha: 0.7, fontWeight: FontWeight.w500),
+                                  style: AppTypography.fileSize(color: Colors.white.withValues(alpha: 0.7, fontWeight: FontWeight.w500)),
                                 ),
                                 const SizedBox(height: 2),
                                 Text(
@@ -433,11 +433,11 @@ class _DesktopDiskusiTabState extends State<DesktopDiskusiTab> {
                               children: [
                                 Text(
                                   'Folder Penyimpanan Data',
-                                  style: AppTypography.buttonLabel(color: isDark ? Colors.white : const Color(0xFF0F172A, fontWeight: FontWeight.bold),
+                                  style: AppTypography.buttonLabel(color: isDark ? Colors.white : const Color(0xFF0F172A), fontWeight: FontWeight.bold),
                                 ),
                                 Text(
                                   'Buat folder arsip berkas grup otomatis',
-                                  style: AppTypography.fileSize(color: isDark ? Colors.white60 : const Color(0xFF64748B),
+                                  style: AppTypography.fileSize(color: isDark ? Colors.white60 : const Color(0xFF64748B)),
                                 ),
                               ],
                             ),
@@ -559,7 +559,7 @@ class _DesktopDiskusiTabState extends State<DesktopDiskusiTab> {
                         children: [
                           Text(
                             'Diskusi',
-                            style: AppTypography.pageTitle(color: isDark ? Colors.white : const Color(0xFF0F172A, fontWeight: FontWeight.bold),
+                            style: AppTypography.pageTitle(color: isDark ? Colors.white : const Color(0xFF0F172A), fontWeight: FontWeight.bold),
                           ),
                           const Spacer(),
                           // Manage Friends / Members button
@@ -615,10 +615,10 @@ class _DesktopDiskusiTabState extends State<DesktopDiskusiTab> {
                       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
                       child: TextField(
                         onChanged: (val) => setState(() => _searchQuery = val.trim().toLowerCase()),
-                        style: AppTypography.timestamp(color: isDark ? Colors.white : const Color(0xFF0F172A),
+                        style: AppTypography.timestamp(color: isDark ? Colors.white : const Color(0xFF0F172A)),
                         decoration: InputDecoration(
                           hintText: 'Cari thread diskusi...',
-                          hintStyle: AppTypography.timestamp(color: isDark ? Colors.white38 : const Color(0xFF94A3B8),
+                          hintStyle: AppTypography.timestamp(color: isDark ? Colors.white38 : const Color(0xFF94A3B8)),
                           prefixIcon: Icon(
                             Icons.search_rounded,
                             size: 18,
@@ -714,7 +714,7 @@ class _DesktopDiskusiTabState extends State<DesktopDiskusiTab> {
                                           ? 'Belum ada thread diskusi untuk kelas ini.'
                                           : 'Thread diskusi tidak ditemukan.',
                                       textAlign: TextAlign.center,
-                                      style: AppTypography.timestamp(color: isDark ? Colors.white60 : const Color(0xFF94A3B8),
+                                      style: AppTypography.timestamp(color: isDark ? Colors.white60 : const Color(0xFF94A3B8)),
                                     ),
                                     const SizedBox(height: 16),
                                     ElevatedButton.icon(
@@ -803,21 +803,21 @@ class _DesktopDiskusiTabState extends State<DesktopDiskusiTab> {
                                               channelName,
                                               maxLines: 1,
                                               overflow: TextOverflow.ellipsis,
-                                              style: AppTypography.channelTag(color: isDark ? const Color(0xFF2DD4BF, fontWeight: isSelected ? FontWeight.bold : FontWeight.w600),
+                                              style: AppTypography.channelTag(color: isDark ? const Color(0xFF2DD4BF), fontWeight: isSelected ? FontWeight.bold : FontWeight.w600),
                                             ),
                                             const SizedBox(height: 2),
                                             Text(
                                               title,
                                               maxLines: 1,
                                               overflow: TextOverflow.ellipsis,
-                                              style: AppTypography.buttonLabel(color: isDark ? Colors.white : const Color(0xFF0F172A, fontWeight: FontWeight.w600),
+                                              style: AppTypography.buttonLabel(color: isDark ? Colors.white : const Color(0xFF0F172A), fontWeight: FontWeight.w600),
                                             ),
                                             const SizedBox(height: 2),
                                             Text(
                                               lastMsg,
                                               maxLines: 1,
                                               overflow: TextOverflow.ellipsis,
-                                              style: AppTypography.timestamp(color: isDark ? const Color(0xFFD4D4D8),
+                                              style: AppTypography.timestamp(color: isDark ? const Color(0xFFD4D4D8)),
                                             ),
                                           ],
                                         ),
@@ -867,7 +867,7 @@ class _DesktopDiskusiTabState extends State<DesktopDiskusiTab> {
                     : Center(
                         child: Text(
                           'Pilih atau buat thread diskusi untuk memulai obrolan.',
-                          style: AppTypography.timestamp(color: isDark ? Colors.white38 : const Color(0xFF94A3B8),
+                          style: AppTypography.timestamp(color: isDark ? Colors.white38 : const Color(0xFF94A3B8)),
                         ),
                       ),
               ),

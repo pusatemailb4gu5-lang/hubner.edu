@@ -183,7 +183,7 @@ class _DetailCpPageState extends State<DetailCpPage> {
         title: Text(
           'Detail Capaian Pembelajaran',
           maxLines: 2,
-          style: AppTypography.chatHeaderTitle(color: isDark ? Colors.white : const Color(0xFF0F172A, fontWeight: FontWeight.w800, height: 1.15),
+          style: AppTypography.chatHeaderTitle(color: isDark ? Colors.white : const Color(0xFF0F172A), fontWeight: FontWeight.w800, height: 1.15),
         ),
         actions: [
           if (widget.isOwner)
@@ -333,7 +333,7 @@ class _DetailCpPageState extends State<DetailCpPage> {
                               top: 2,
                               child: Text(
                                 (widget.stageIdx + 1).toString().padLeft(2, '0'),
-                                style: AppTypography.pageTitle(color: badgeTextCol.withValues(alpha: 0.25, fontWeight: FontWeight.w900, height: 1.0, letterSpacing: -3.5),
+                                style: AppTypography.pageTitle(color: badgeTextCol.withValues(alpha: 0.25), fontWeight: FontWeight.w900, height: 1.0, letterSpacing: -3.5),
                               ),
                             ),
                             // Decorative Background Pattern Circles
@@ -398,7 +398,7 @@ class _DetailCpPageState extends State<DetailCpPage> {
                                             controller: _stageNameController,
                                             minLines: 1,
                                             maxLines: null,
-                                            style: AppTypography.pageTitle(color: isDark ? Colors.white : const Color(0xFF0F172A, fontWeight: FontWeight.w800, height: 1.25, letterSpacing: -0.4),
+                                            style: AppTypography.pageTitle(color: isDark ? Colors.white : const Color(0xFF0F172A), fontWeight: FontWeight.w800, height: 1.25, letterSpacing: -0.4),
                                             decoration: InputDecoration(
                                               isDense: true,
                                               filled: true,
@@ -420,13 +420,13 @@ class _DetailCpPageState extends State<DetailCpPage> {
                                         else
                                           Text(
                                             stageName,
-                                            style: AppTypography.pageTitle(color: isDark ? Colors.white : const Color(0xFF0F172A, fontWeight: FontWeight.w800, height: 1.25, letterSpacing: -0.4),
+                                            style: AppTypography.pageTitle(color: isDark ? Colors.white : const Color(0xFF0F172A), fontWeight: FontWeight.w800, height: 1.25, letterSpacing: -0.4),
                                           ),
                                         const SizedBox(height: 4),
                                         // Row 3: Text kecil mapel di bawahnya (Lengkap, tanpa ...)
                                         Text(
                                           widget.projectTitle,
-                                          style: AppTypography.timestamp(color: isDark ? Colors.white70 : const Color(0xFF334155, fontWeight: FontWeight.w600, height: 1.3),
+                                          style: AppTypography.timestamp(color: isDark ? Colors.white70 : const Color(0xFF334155), fontWeight: FontWeight.w600, height: 1.3),
                                         ),
                                       ],
                                     ),
@@ -458,7 +458,7 @@ class _DetailCpPageState extends State<DetailCpPage> {
                                           ? TextField(
                                               controller: _stageDescController,
                                               maxLines: null,
-                                              style: AppTypography.timestamp(color: isDark ? Colors.white : const Color(0xFF0F172A, fontWeight: FontWeight.w500, height: 1.5),
+                                              style: AppTypography.timestamp(color: isDark ? Colors.white : const Color(0xFF0F172A), fontWeight: FontWeight.w500, height: 1.5),
                                               decoration: InputDecoration(
                                                 border: InputBorder.none,
                                                 isDense: true,
@@ -470,7 +470,7 @@ class _DetailCpPageState extends State<DetailCpPage> {
                                             )
                                           : Text(
                                               stageDesc,
-                                              style: AppTypography.timestamp(color: isDark ? Colors.white : const Color(0xFF0F172A, fontWeight: FontWeight.w400, height: 1.5),
+                                              style: AppTypography.timestamp(color: isDark ? Colors.white : const Color(0xFF0F172A), fontWeight: FontWeight.w400, height: 1.5),
                                             ),
                                     ),
                                   ],
@@ -577,7 +577,7 @@ class _DetailCpPageState extends State<DetailCpPage> {
                                   const SizedBox(width: 4),
                                   Text(
                                     'Hapus',
-                                    style: AppTypography.buttonLabel(color: const Color(0xFFEF4444, fontWeight: FontWeight.bold),
+                                    style: AppTypography.buttonLabel(color: const Color(0xFFEF4444), fontWeight: FontWeight.bold),
                                   ),
                                 ],
                               ),
@@ -794,7 +794,7 @@ class _DetailCpPageState extends State<DetailCpPage> {
                                                       const SizedBox(width: 8),
                                                       Text(
                                                         displayTitle,
-                                                        style: AppTypography.buttonLabel(color: isDark ? Colors.white : const Color(0xFF0F172A, fontWeight: FontWeight.w600),
+                                                        style: AppTypography.buttonLabel(color: isDark ? Colors.white : const Color(0xFF0F172A), fontWeight: FontWeight.w600),
                                                       ),
                                                       if (_isEditMode && widget.isOwner) ...[
                                                         const SizedBox(width: 8),
@@ -970,7 +970,7 @@ class _DetailCpPageState extends State<DetailCpPage> {
             ),
             child: Text(
               'Proses',
-              style: AppTypography.buttonLabel(color: isDark ? Colors.white : const Color(0xFF0F172A, fontWeight: FontWeight.bold),
+              style: AppTypography.buttonLabel(color: isDark ? Colors.white : const Color(0xFF0F172A), fontWeight: FontWeight.bold),
             ),
           ),
         ),
@@ -992,7 +992,7 @@ class _DetailCpPageState extends State<DetailCpPage> {
             ),
             child: Text(
               'Selesai',
-              style: AppTypography.buttonLabel(color: isDark ? Colors.white : const Color(0xFF0F172A, fontWeight: FontWeight.bold),
+              style: AppTypography.buttonLabel(color: isDark ? Colors.white : const Color(0xFF0F172A), fontWeight: FontWeight.bold),
             ),
           ),
         ),
@@ -1006,7 +1006,7 @@ class _DetailCpPageState extends State<DetailCpPage> {
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Text(
               'Akan Datang',
-              style: AppTypography.buttonLabel(color: isDark ? Colors.white : const Color(0xFF0F172A, fontWeight: FontWeight.bold),
+              style: AppTypography.buttonLabel(color: isDark ? Colors.white : const Color(0xFF0F172A), fontWeight: FontWeight.bold),
             ),
           ),
         ),
@@ -1456,14 +1456,14 @@ class _DetailCpPageState extends State<DetailCpPage> {
                               children: [
                                 Text(
                                   isEditMode ? 'Edit Tugas' : 'Unggah / Buat Tugas',
-                                  style: AppTypography.cardTitle(color: isDark ? Colors.white : const Color(0xFF0F172A, fontWeight: FontWeight.bold),
+                                  style: AppTypography.cardTitle(color: isDark ? Colors.white : const Color(0xFF0F172A), fontWeight: FontWeight.bold),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                 ),
                                 const SizedBox(height: 2),
                                 Text(
                                   'Atur tugas, tenggat waktu & instruksi',
-                                  style: AppTypography.timestamp(color: isDark ? Colors.white70 : const Color(0xFF334155),
+                                  style: AppTypography.timestamp(color: isDark ? Colors.white70 : const Color(0xFF334155)),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                 ),
@@ -1505,7 +1505,7 @@ class _DetailCpPageState extends State<DetailCpPage> {
                             // 1. Pilih Elemen
                             Text(
                               'Pilih Elemen Pembelajaran',
-                              style: AppTypography.buttonLabel(color: isDark ? Colors.white70 : const Color(0xFF475569, fontWeight: FontWeight.bold),
+                              style: AppTypography.buttonLabel(color: isDark ? Colors.white70 : const Color(0xFF475569), fontWeight: FontWeight.bold),
                             ),
                             const SizedBox(height: 6),
                             PopupMenuButton<int>(
@@ -1585,7 +1585,7 @@ class _DetailCpPageState extends State<DetailCpPage> {
                             // 2. Pilih Materi
                             Text(
                               'Pilih Materi',
-                              style: AppTypography.buttonLabel(color: isDark ? Colors.white70 : const Color(0xFF475569, fontWeight: FontWeight.bold),
+                              style: AppTypography.buttonLabel(color: isDark ? Colors.white70 : const Color(0xFF475569), fontWeight: FontWeight.bold),
                             ),
                             const SizedBox(height: 6),
                             PopupMenuButton<int>(
@@ -1664,7 +1664,7 @@ class _DetailCpPageState extends State<DetailCpPage> {
                             // 3. Judul Tugas
                             Text(
                               'Judul Tugas',
-                              style: AppTypography.buttonLabel(color: isDark ? Colors.white70 : const Color(0xFF475569, fontWeight: FontWeight.bold),
+                              style: AppTypography.buttonLabel(color: isDark ? Colors.white70 : const Color(0xFF475569), fontWeight: FontWeight.bold),
                             ),
                             const SizedBox(height: 6),
                             TextField(
@@ -1672,7 +1672,7 @@ class _DetailCpPageState extends State<DetailCpPage> {
                               style: AppTypography.subtitle(color: isDark ? Colors.white : Colors.black87),
                               decoration: InputDecoration(
                                 hintText: 'Masukkan judul tugas...',
-                                hintStyle: AppTypography.timestamp(color: const Color(0xFF94A3B8),
+                                hintStyle: AppTypography.timestamp(color: const Color(0xFF94A3B8)),
                                 isDense: true,
                                 contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                                 fillColor: isDark ? const Color(0xFF1E1E24) : const Color(0xFFF8FAFC),
@@ -1698,7 +1698,7 @@ class _DetailCpPageState extends State<DetailCpPage> {
                                     children: [
                                       Text(
                                         'Tanggal Mulai',
-                                        style: AppTypography.buttonLabel(color: isDark ? Colors.white70 : const Color(0xFF475569, fontWeight: FontWeight.bold),
+                                        style: AppTypography.buttonLabel(color: isDark ? Colors.white70 : const Color(0xFF475569), fontWeight: FontWeight.bold),
                                       ),
                                       const SizedBox(height: 6),
                                       TextField(
@@ -1708,7 +1708,7 @@ class _DetailCpPageState extends State<DetailCpPage> {
                                         onChanged: (_) => formatDateInput(startDateController),
                                         decoration: InputDecoration(
                                           hintText: 'HH/BB/TTTT',
-                                          hintStyle: AppTypography.timestamp(color: const Color(0xFF94A3B8),
+                                          hintStyle: AppTypography.timestamp(color: const Color(0xFF94A3B8)),
                                           prefixIcon: const Icon(Icons.calendar_today_rounded, size: 16, color: Color(0xFF2563EB)),
                                           isDense: true,
                                           contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
@@ -1734,7 +1734,7 @@ class _DetailCpPageState extends State<DetailCpPage> {
                                     children: [
                                       Text(
                                         'Tanggal Selesai / Tenggat',
-                                        style: AppTypography.buttonLabel(color: isDark ? Colors.white70 : const Color(0xFF475569, fontWeight: FontWeight.bold),
+                                        style: AppTypography.buttonLabel(color: isDark ? Colors.white70 : const Color(0xFF475569), fontWeight: FontWeight.bold),
                                       ),
                                       const SizedBox(height: 6),
                                       TextField(
@@ -1744,7 +1744,7 @@ class _DetailCpPageState extends State<DetailCpPage> {
                                         onChanged: (_) => formatDateInput(endDateController),
                                         decoration: InputDecoration(
                                           hintText: 'HH/BB/TTTT',
-                                          hintStyle: AppTypography.timestamp(color: const Color(0xFF94A3B8),
+                                          hintStyle: AppTypography.timestamp(color: const Color(0xFF94A3B8)),
                                           prefixIcon: const Icon(Icons.calendar_today_rounded, size: 16, color: Color(0xFF2563EB)),
                                           isDense: true,
                                           contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
@@ -1770,7 +1770,7 @@ class _DetailCpPageState extends State<DetailCpPage> {
                             // 5. Pengaturan Jenis Tugas
                             Text(
                               'Jenis Penugasan',
-                              style: AppTypography.buttonLabel(color: isDark ? Colors.white70 : const Color(0xFF475569, fontWeight: FontWeight.bold),
+                              style: AppTypography.buttonLabel(color: isDark ? Colors.white70 : const Color(0xFF475569), fontWeight: FontWeight.bold),
                             ),
                             const SizedBox(height: 8),
                             Row(
@@ -1823,7 +1823,7 @@ class _DetailCpPageState extends State<DetailCpPage> {
                             // Mode Pengumpulan Tugas
                             Text(
                               'Mode Pengumpulan Tugas',
-                              style: AppTypography.buttonLabel(color: isDark ? Colors.white70 : const Color(0xFF475569, fontWeight: FontWeight.bold),
+                              style: AppTypography.buttonLabel(color: isDark ? Colors.white70 : const Color(0xFF475569), fontWeight: FontWeight.bold),
                             ),
                             const SizedBox(height: 8),
                             Row(
@@ -1884,7 +1884,7 @@ class _DetailCpPageState extends State<DetailCpPage> {
                             if (tugasMode == 'text') ...[
                               Text(
                                 'Teks Soal / Pertanyaan Tugas',
-                                style: AppTypography.buttonLabel(color: isDark ? Colors.white70 : const Color(0xFF475569, fontWeight: FontWeight.bold),
+                                style: AppTypography.buttonLabel(color: isDark ? Colors.white70 : const Color(0xFF475569), fontWeight: FontWeight.bold),
                               ),
                               const SizedBox(height: 6),
                               TextField(
@@ -1893,7 +1893,7 @@ class _DetailCpPageState extends State<DetailCpPage> {
                                 style: AppTypography.timestamp(color: isDark ? Colors.white : Colors.black87),
                                 decoration: InputDecoration(
                                   hintText: 'Tulis pertanyaan / instruksi tugas di sini...',
-                                  hintStyle: AppTypography.timestamp(color: const Color(0xFF94A3B8),
+                                  hintStyle: AppTypography.timestamp(color: const Color(0xFF94A3B8)),
                                   contentPadding: const EdgeInsets.all(14),
                                   fillColor: isDark ? const Color(0xFF1E1E24) : const Color(0xFFF8FAFC),
                                   filled: true,
@@ -1910,7 +1910,7 @@ class _DetailCpPageState extends State<DetailCpPage> {
                             ] else ...[
                               Text(
                                 'File / Nama Dokumen Modul Soal PDF',
-                                style: AppTypography.buttonLabel(color: isDark ? Colors.white70 : const Color(0xFF475569, fontWeight: FontWeight.bold),
+                                style: AppTypography.buttonLabel(color: isDark ? Colors.white70 : const Color(0xFF475569), fontWeight: FontWeight.bold),
                               ),
                               const SizedBox(height: 6),
                               TextField(
@@ -1918,7 +1918,7 @@ class _DetailCpPageState extends State<DetailCpPage> {
                                 style: AppTypography.timestamp(color: isDark ? Colors.white : Colors.black87),
                                 decoration: InputDecoration(
                                   hintText: 'Contoh: modul_tugas_01.pdf',
-                                  hintStyle: AppTypography.timestamp(color: const Color(0xFF94A3B8),
+                                  hintStyle: AppTypography.timestamp(color: const Color(0xFF94A3B8)),
                                   contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                                   fillColor: isDark ? const Color(0xFF1E1E24) : const Color(0xFFF8FAFC),
                                   filled: true,
@@ -2222,14 +2222,14 @@ int? taskIdxToEdit,
                               children: [
                                 Text(
                                   isEditMode ? 'Edit Quiz' : 'Unggah / Buat Quiz',
-                                  style: AppTypography.cardTitle(color: isDark ? Colors.white : const Color(0xFF0F172A, fontWeight: FontWeight.bold),
+                                  style: AppTypography.cardTitle(color: isDark ? Colors.white : const Color(0xFF0F172A), fontWeight: FontWeight.bold),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                 ),
                                 const SizedBox(height: 2),
                                 Text(
                                   'Atur soal quiz, batas waktu & jadwal pengerjaan',
-                                  style: AppTypography.timestamp(color: isDark ? Colors.white70 : const Color(0xFF334155),
+                                  style: AppTypography.timestamp(color: isDark ? Colors.white70 : const Color(0xFF334155)),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                 ),
@@ -2271,7 +2271,7 @@ int? taskIdxToEdit,
                             // 1. Pilih Elemen
                             Text(
                               'Pilih Elemen Pembelajaran',
-                              style: AppTypography.buttonLabel(color: isDark ? Colors.white70 : const Color(0xFF475569, fontWeight: FontWeight.bold),
+                              style: AppTypography.buttonLabel(color: isDark ? Colors.white70 : const Color(0xFF475569), fontWeight: FontWeight.bold),
                             ),
                             const SizedBox(height: 6),
                             PopupMenuButton<int>(
@@ -2351,7 +2351,7 @@ int? taskIdxToEdit,
                             // 2. Pilih Materi
                             Text(
                               'Pilih Materi',
-                              style: AppTypography.buttonLabel(color: isDark ? Colors.white70 : const Color(0xFF475569, fontWeight: FontWeight.bold),
+                              style: AppTypography.buttonLabel(color: isDark ? Colors.white70 : const Color(0xFF475569), fontWeight: FontWeight.bold),
                             ),
                             const SizedBox(height: 6),
                             PopupMenuButton<int>(
@@ -2430,7 +2430,7 @@ int? taskIdxToEdit,
                             // 3. Judul Quiz
                             Text(
                               'Judul Quiz',
-                              style: AppTypography.buttonLabel(color: isDark ? Colors.white70 : const Color(0xFF475569, fontWeight: FontWeight.bold),
+                              style: AppTypography.buttonLabel(color: isDark ? Colors.white70 : const Color(0xFF475569), fontWeight: FontWeight.bold),
                             ),
                             const SizedBox(height: 6),
                             TextField(
@@ -2438,7 +2438,7 @@ int? taskIdxToEdit,
                               style: AppTypography.subtitle(color: isDark ? Colors.white : Colors.black87),
                               decoration: InputDecoration(
                                 hintText: 'Masukkan judul quiz...',
-                                hintStyle: AppTypography.timestamp(color: const Color(0xFF94A3B8),
+                                hintStyle: AppTypography.timestamp(color: const Color(0xFF94A3B8)),
                                 isDense: true,
                                 contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                                 fillColor: isDark ? const Color(0xFF1E1E24) : const Color(0xFFF8FAFC),
@@ -2464,7 +2464,7 @@ int? taskIdxToEdit,
                                     children: [
                                       Text(
                                         'Tanggal Mulai',
-                                        style: AppTypography.buttonLabel(color: isDark ? Colors.white70 : const Color(0xFF475569, fontWeight: FontWeight.bold),
+                                        style: AppTypography.buttonLabel(color: isDark ? Colors.white70 : const Color(0xFF475569), fontWeight: FontWeight.bold),
                                       ),
                                       const SizedBox(height: 6),
                                       TextField(
@@ -2474,7 +2474,7 @@ int? taskIdxToEdit,
                                         onChanged: (_) => formatDateInput(startDateController),
                                         decoration: InputDecoration(
                                           hintText: 'HH/BB/TTTT',
-                                          hintStyle: AppTypography.timestamp(color: const Color(0xFF94A3B8),
+                                          hintStyle: AppTypography.timestamp(color: const Color(0xFF94A3B8)),
                                           prefixIcon: const Icon(Icons.calendar_today_rounded, size: 16, color: Color(0xFFD97706)),
                                           isDense: true,
                                           contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
@@ -2500,7 +2500,7 @@ int? taskIdxToEdit,
                                     children: [
                                       Text(
                                         'Tanggal Selesai / Tenggat',
-                                        style: AppTypography.buttonLabel(color: isDark ? Colors.white70 : const Color(0xFF475569, fontWeight: FontWeight.bold),
+                                        style: AppTypography.buttonLabel(color: isDark ? Colors.white70 : const Color(0xFF475569), fontWeight: FontWeight.bold),
                                       ),
                                       const SizedBox(height: 6),
                                       TextField(
@@ -2510,7 +2510,7 @@ int? taskIdxToEdit,
                                         onChanged: (_) => formatDateInput(endDateController),
                                         decoration: InputDecoration(
                                           hintText: 'HH/BB/TTTT',
-                                          hintStyle: AppTypography.timestamp(color: const Color(0xFF94A3B8),
+                                          hintStyle: AppTypography.timestamp(color: const Color(0xFF94A3B8)),
                                           prefixIcon: const Icon(Icons.calendar_today_rounded, size: 16, color: Color(0xFFD97706)),
                                           isDense: true,
                                           contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
@@ -2536,7 +2536,7 @@ int? taskIdxToEdit,
                             // 5. Batasan Waktu Pengerjaan
                             Text(
                               'Batasan Waktu Pengerjaan',
-                              style: AppTypography.buttonLabel(color: isDark ? Colors.white70 : const Color(0xFF475569, fontWeight: FontWeight.bold),
+                              style: AppTypography.buttonLabel(color: isDark ? Colors.white70 : const Color(0xFF475569), fontWeight: FontWeight.bold),
                             ),
                             const SizedBox(height: 8),
                             Row(
@@ -2665,7 +2665,7 @@ int? taskIdxToEdit,
                                       Row(
                                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                         children: [
-                                          Text('Soal ${qIdx + 1}', style: AppTypography.buttonLabel(color: const Color(0xFFD97706, fontWeight: FontWeight.bold)),
+                                          Text('Soal ${qIdx + 1}', style: AppTypography.buttonLabel(color: const Color(0xFFD97706), fontWeight: FontWeight.bold)),
                                           if (questionsList.length > 1)
                                             GestureDetector(
                                               onTap: () {
@@ -2776,7 +2776,7 @@ int? taskIdxToEdit,
                                               children: [
                                                 Icon(Icons.add_photo_alternate_rounded, size: 16, color: isDark ? Colors.white70 : const Color(0xFF2563EB)),
                                                 const SizedBox(width: 6),
-                                                Text('Tambah Gambar Soal', style: AppTypography.buttonLabel(color: isDark ? Colors.white70 : const Color(0xFF2563EB, fontWeight: FontWeight.bold)),
+                                                Text('Tambah Gambar Soal', style: AppTypography.buttonLabel(color: isDark ? Colors.white70 : const Color(0xFF2563EB), fontWeight: FontWeight.bold)),
                                               ],
                                             ),
                                           ),
@@ -2887,7 +2887,7 @@ int? taskIdxToEdit,
                                         children: [
                                           Row(
                                             children: [
-                                              Text('Kunci Jawaban: ', style: AppTypography.buttonLabel(color: isDark ? Colors.white70 : const Color(0xFF64748B, fontWeight: FontWeight.bold)),
+                                              Text('Kunci Jawaban: ', style: AppTypography.buttonLabel(color: isDark ? Colors.white70 : const Color(0xFF64748B), fontWeight: FontWeight.bold)),
                                               const SizedBox(width: 8),
                                               Row(
                                                 children: ['A', 'B', 'C', 'D'].map((opt) {
@@ -2942,7 +2942,7 @@ int? taskIdxToEdit,
                                   });
                                 },
                                 icon: const Icon(Icons.add_rounded, size: 16, color: Color(0xFF7C2D12)),
-                                label: Text('Tambah Soal', style: AppTypography.buttonLabel(color: const Color(0xFF7C2D12, fontWeight: FontWeight.bold)),
+                                label: Text('Tambah Soal', style: AppTypography.buttonLabel(color: const Color(0xFF7C2D12), fontWeight: FontWeight.bold)),
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: const Color(0xFFFDE68A),
                                   elevation: 0,
@@ -3003,7 +3003,7 @@ int? taskIdxToEdit,
                                     const SizedBox(width: 3),
                                     Text(
                                       'Preview',
-                                      style: AppTypography.buttonLabel(color: const Color(0xFFD97706, fontWeight: FontWeight.bold),
+                                      style: AppTypography.buttonLabel(color: const Color(0xFFD97706), fontWeight: FontWeight.bold),
                                     ),
                                   ],
                                 ),
@@ -3225,14 +3225,14 @@ int? taskIdxToEdit,
                               children: [
                                 Text(
                                   isEditMode ? 'Edit Materi' : 'Unggah / Buat Materi',
-                                  style: AppTypography.cardTitle(color: isDark ? Colors.white : const Color(0xFF0F172A, fontWeight: FontWeight.bold),
+                                  style: AppTypography.cardTitle(color: isDark ? Colors.white : const Color(0xFF0F172A), fontWeight: FontWeight.bold),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                 ),
                                 const SizedBox(height: 2),
                                 Text(
                                   'Bagikan materi bacaan & modul pembelajaran',
-                                  style: AppTypography.timestamp(color: isDark ? Colors.white70 : const Color(0xFF334155),
+                                  style: AppTypography.timestamp(color: isDark ? Colors.white70 : const Color(0xFF334155)),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                 ),
@@ -3274,7 +3274,7 @@ int? taskIdxToEdit,
                             // 1. Pilih Elemen
                             Text(
                               'Pilih Elemen Pembelajaran',
-                              style: AppTypography.buttonLabel(color: isDark ? Colors.white70 : const Color(0xFF475569, fontWeight: FontWeight.bold),
+                              style: AppTypography.buttonLabel(color: isDark ? Colors.white70 : const Color(0xFF475569), fontWeight: FontWeight.bold),
                             ),
                             const SizedBox(height: 6),
                             PopupMenuButton<int>(
@@ -3354,7 +3354,7 @@ int? taskIdxToEdit,
                             // 2. Pilih Materi
                             Text(
                               'Pilih Materi',
-                              style: AppTypography.buttonLabel(color: isDark ? Colors.white70 : const Color(0xFF475569, fontWeight: FontWeight.bold),
+                              style: AppTypography.buttonLabel(color: isDark ? Colors.white70 : const Color(0xFF475569), fontWeight: FontWeight.bold),
                             ),
                             const SizedBox(height: 6),
                             PopupMenuButton<int>(
@@ -3433,7 +3433,7 @@ int? taskIdxToEdit,
                             // 3. Judul Materi
                             Text(
                               'Judul Materi',
-                              style: AppTypography.buttonLabel(color: isDark ? Colors.white70 : const Color(0xFF475569, fontWeight: FontWeight.bold),
+                              style: AppTypography.buttonLabel(color: isDark ? Colors.white70 : const Color(0xFF475569), fontWeight: FontWeight.bold),
                             ),
                             const SizedBox(height: 6),
                             TextField(
@@ -3441,7 +3441,7 @@ int? taskIdxToEdit,
                               style: AppTypography.subtitle(color: isDark ? Colors.white : Colors.black87),
                               decoration: InputDecoration(
                                 hintText: 'Masukkan judul materi...',
-                                hintStyle: AppTypography.timestamp(color: const Color(0xFF94A3B8),
+                                hintStyle: AppTypography.timestamp(color: const Color(0xFF94A3B8)),
                                 isDense: true,
                                 contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                                 fillColor: isDark ? const Color(0xFF1E1E24) : const Color(0xFFF8FAFC),
@@ -3461,7 +3461,7 @@ int? taskIdxToEdit,
                             // 4. Ringkasan / Konten Materi
                             Text(
                               'Ringkasan / Konten Materi',
-                              style: AppTypography.buttonLabel(color: isDark ? Colors.white70 : const Color(0xFF475569, fontWeight: FontWeight.bold),
+                              style: AppTypography.buttonLabel(color: isDark ? Colors.white70 : const Color(0xFF475569), fontWeight: FontWeight.bold),
                             ),
                             const SizedBox(height: 6),
                             TextField(
@@ -3470,7 +3470,7 @@ int? taskIdxToEdit,
                               style: AppTypography.timestamp(color: isDark ? Colors.white : Colors.black87),
                               decoration: InputDecoration(
                                 hintText: 'Tulis penjelasan materi di sini...',
-                                hintStyle: AppTypography.timestamp(color: const Color(0xFF94A3B8),
+                                hintStyle: AppTypography.timestamp(color: const Color(0xFF94A3B8)),
                                 contentPadding: const EdgeInsets.all(14),
                                 fillColor: isDark ? const Color(0xFF1E1E24) : const Color(0xFFF8FAFC),
                                 filled: true,
@@ -3489,7 +3489,7 @@ int? taskIdxToEdit,
                             // 5. Nama Dokumen / PDF (Opsional)
                             Text(
                               'File Dokumen / Modul PDF (Opsional)',
-                              style: AppTypography.buttonLabel(color: isDark ? Colors.white70 : const Color(0xFF475569, fontWeight: FontWeight.bold),
+                              style: AppTypography.buttonLabel(color: isDark ? Colors.white70 : const Color(0xFF475569), fontWeight: FontWeight.bold),
                             ),
                             const SizedBox(height: 6),
                             TextField(
@@ -3497,7 +3497,7 @@ int? taskIdxToEdit,
                               style: AppTypography.timestamp(color: isDark ? Colors.white : Colors.black87),
                               decoration: InputDecoration(
                                 hintText: 'Contoh: modul_pembelajaran_01.pdf',
-                                hintStyle: AppTypography.timestamp(color: const Color(0xFF94A3B8),
+                                hintStyle: AppTypography.timestamp(color: const Color(0xFF94A3B8)),
                                 contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                                 fillColor: isDark ? const Color(0xFF1E1E24) : const Color(0xFFF8FAFC),
                                 filled: true,

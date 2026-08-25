@@ -876,17 +876,17 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
           children: [
             Text(
               'Detail Jawaban Tugas',
-              style: AppTypography.chatHeaderTitle(color: isDark ? Colors.white : const Color(0xFF0F172A, fontWeight: FontWeight.bold),
+              style: AppTypography.chatHeaderTitle(color: isDark ? Colors.white : const Color(0xFF0F172A), fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 6),
             Text(
               'Siswa: $studentName',
-              style: AppTypography.timestamp(color: isDark ? const Color(0xFFD4D4D8, fontWeight: FontWeight.w500),
+              style: AppTypography.timestamp(color: isDark ? const Color(0xFFD4D4D8), fontWeight: FontWeight.w500),
             ),
             const SizedBox(height: 2),
             Text(
               'Tugas: $taskTitle',
-              style: AppTypography.buttonLabel(color: isDark ? const Color(0xFFD6A5F8, fontWeight: FontWeight.w600),
+              style: AppTypography.buttonLabel(color: isDark ? const Color(0xFFD6A5F8), fontWeight: FontWeight.w600),
             ),
           ],
         ),
@@ -897,7 +897,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
             if (textAns.isNotEmpty) ...[
               Text(
                 'Jawaban Teks:',
-                style: AppTypography.buttonLabel(color: isDark ? const Color(0xFFD4D4D8, fontWeight: FontWeight.bold),
+                style: AppTypography.buttonLabel(color: isDark ? const Color(0xFFD4D4D8), fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 6),
               Container(
@@ -912,7 +912,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                 ),
                 child: Text(
                   textAns,
-                  style: AppTypography.subtitle(color: isDark ? Colors.white : const Color(0xFF0F172A, height: 1.45),
+                  style: AppTypography.subtitle(color: isDark ? Colors.white : const Color(0xFF0F172A, height: 1.45)),
                 ),
               ),
               const SizedBox(height: 12),
@@ -920,7 +920,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
             if (fileAns.isNotEmpty) ...[
               Text(
                 'Berkas Lampiran:',
-                style: AppTypography.buttonLabel(color: isDark ? const Color(0xFFD4D4D8, fontWeight: FontWeight.bold),
+                style: AppTypography.buttonLabel(color: isDark ? const Color(0xFFD4D4D8), fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 6),
               GestureDetector(
@@ -958,7 +958,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                       Expanded(
                         child: Text(
                           fileAns,
-                          style: AppTypography.buttonLabel(color: isDark ? const Color(0xFF93C5FD, fontWeight: FontWeight.bold),
+                          style: AppTypography.buttonLabel(color: isDark ? const Color(0xFF93C5FD), fontWeight: FontWeight.bold),
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
@@ -971,7 +971,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
             if (groupMembers != null && groupMembers.isNotEmpty) ...[
               Text(
                 'Anggota Kelompok:',
-                style: AppTypography.buttonLabel(color: isDark ? const Color(0xFFD4D4D8, fontWeight: FontWeight.bold),
+                style: AppTypography.buttonLabel(color: isDark ? const Color(0xFFD4D4D8), fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 6),
               Wrap(
@@ -990,7 +990,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                     ),
                     child: Text(
                       uid.toString() == progressData['uid'].toString() ? '$studentName (Pengirim)' : 'UID: $displayUid',
-                      style: AppTypography.fileSize(color: isDark ? const Color(0xFF93C5FD, fontWeight: FontWeight.w600),
+                      style: AppTypography.fileSize(color: isDark ? const Color(0xFF93C5FD), fontWeight: FontWeight.w600),
                     ),
                   );
                 }).toList(),
@@ -1000,7 +1000,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
             if (textAns.isEmpty && fileAns.isEmpty)
               Text(
                 'Siswa belum mengunggah berkas atau jawaban.',
-                style: AppTypography.buttonLabel(color: isDark ? const Color(0xFF71717A),
+                style: AppTypography.buttonLabel(color: isDark ? const Color(0xFF71717A)),
               ),
           ],
         ),
@@ -1009,7 +1009,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
             onPressed: () => Navigator.pop(ctx),
             child: Text(
               'Tutup',
-              style: AppTypography.buttonLabel(color: isDark ? const Color(0xFFD6A5F8, fontWeight: FontWeight.bold),
+              style: AppTypography.buttonLabel(color: isDark ? const Color(0xFFD6A5F8), fontWeight: FontWeight.bold),
             ),
           )
         ],
@@ -1129,7 +1129,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                       const SizedBox(height: 5),
                                       Text(
                                         'Pantau presensi, progres tugas, dan evaluasi hasil belajar siswa.',
-                                        style: AppTypography.timestamp(color: Colors.white.withValues(alpha: 0.92, fontWeight: FontWeight.w500),
+                                        style: AppTypography.timestamp(color: Colors.white.withValues(alpha: 0.92, fontWeight: FontWeight.w500)),
                                       ),
                                     ],
                                   ),
@@ -1268,12 +1268,12 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                                   children: [
                                                     Text(
                                                       '${masterList.length}',
-                                                      style: AppTypography.pageTitle(color: isDark ? const Color(0xFFFDE68A, fontWeight: FontWeight.w900, height: 1.0),
+                                                      style: AppTypography.pageTitle(color: isDark ? const Color(0xFFFDE68A), fontWeight: FontWeight.w900, height: 1.0),
                                                     ),
                                                     const SizedBox(height: 3),
                                                     Text(
                                                       'Total Siswa',
-                                                      style: AppTypography.buttonLabel(color: isDark ? const Color(0xFFFDBA74, fontWeight: FontWeight.w700),
+                                                      style: AppTypography.buttonLabel(color: isDark ? const Color(0xFFFDBA74), fontWeight: FontWeight.w700),
                                                       maxLines: 1,
                                                       overflow: TextOverflow.ellipsis,
                                                     ),
@@ -1317,12 +1317,12 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                                   children: [
                                                     Text(
                                                       '${masterList.where((s) => s['joined'] == true).length}',
-                                                      style: AppTypography.pageTitle(color: isDark ? const Color(0xFFA7F3D0, fontWeight: FontWeight.w900, height: 1.0),
+                                                      style: AppTypography.pageTitle(color: isDark ? const Color(0xFFA7F3D0), fontWeight: FontWeight.w900, height: 1.0),
                                                     ),
                                                     const SizedBox(height: 3),
                                                     Text(
                                                       'Telah Bergabung',
-                                                      style: AppTypography.buttonLabel(color: isDark ? const Color(0xFF6EE7B7, fontWeight: FontWeight.w700),
+                                                      style: AppTypography.buttonLabel(color: isDark ? const Color(0xFF6EE7B7), fontWeight: FontWeight.w700),
                                                       maxLines: 1,
                                                       overflow: TextOverflow.ellipsis,
                                                     ),
@@ -1870,7 +1870,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                                                                         joined
                                                                                             ? 'ID: ${userAccountIds[sUid] ?? studentData['userId'] ?? student['userId'] ?? (sUid.isNotEmpty ? (sUid.length > 6 ? sUid.substring(0, 6) : sUid) : defaultId)}'
                                                                                             : 'Belum Bergabung',
-                                                                                        style: AppTypography.timestamp(color: joined ? (isDark ? Colors.white54 : Colors.black45, fontWeight: FontWeight.w500),
+                                                                                        style: AppTypography.timestamp(color: joined ? (isDark ? Colors.white54 : Colors.black45, fontWeight: FontWeight.w500)),
                                                                                       ),
                                                                                     ],
                                                                                   ),
@@ -1977,7 +1977,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                                                                                 ? Icon(Icons.check_rounded, size: 13, color: isDark ? const Color(0xFF6EE7B7) : const Color(0xFF15803D))
                                                                                                 : Text(
                                                                                                     '-',
-                                                                                                    style: AppTypography.buttonLabel(color: isDark ? const Color(0xFF71717A, fontWeight: FontWeight.bold),
+                                                                                                    style: AppTypography.buttonLabel(color: isDark ? const Color(0xFF71717A), fontWeight: FontWeight.bold),
                                                                                                   ),
                                                                                           ),
                                                                                         ),
@@ -2281,12 +2281,12 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                             children: [
                               Text(
                                 'Detail Aktivitas Siswa',
-                                style: AppTypography.chatHeaderTitle(color: isDark ? Colors.white : const Color(0xFF0F172A, fontWeight: FontWeight.w800, letterSpacing: -0.2),
+                                style: AppTypography.chatHeaderTitle(color: isDark ? Colors.white : const Color(0xFF0F172A), fontWeight: FontWeight.w800, letterSpacing: -0.2),
                               ),
                               const SizedBox(height: 2),
                               Text(
                                 studentName,
-                                style: AppTypography.subtitle(color: isDark ? const Color(0xFFD4D4D8, fontWeight: FontWeight.w600),
+                                style: AppTypography.subtitle(color: isDark ? const Color(0xFFD4D4D8), fontWeight: FontWeight.w600),
                               ),
                             ],
                           ),
@@ -2304,7 +2304,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                           ),
                           child: Text(
                             '${completedTasks.length}/${activities.length} Selesai',
-                            style: AppTypography.channelTag(color: isDark ? const Color(0xFF6EE7B7, fontWeight: FontWeight.bold),
+                            style: AppTypography.channelTag(color: isDark ? const Color(0xFF6EE7B7), fontWeight: FontWeight.bold),
                           ),
                         ),
                       ],
@@ -2317,7 +2317,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                           ? Center(
                               child: Text(
                                 'Belum ada kegiatan di classroom ini.',
-                                style: AppTypography.subtitle(color: isDark ? const Color(0xFF71717A),
+                                style: AppTypography.subtitle(color: isDark ? const Color(0xFF71717A)),
                               ),
                             )
                           : ListView.separated(
@@ -2353,7 +2353,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                           ),
                                           child: Text(
                                             'Jawaban: "$textAns"',
-                                            style: AppTypography.timestamp(color: isDark ? const Color(0xFFE4E4E7),
+                                            style: AppTypography.timestamp(color: isDark ? const Color(0xFFE4E4E7)),
                                           ),
                                         ),
                                       ],
@@ -2388,7 +2388,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                                 Expanded(
                                                   child: Text(
                                                     fileAns,
-                                                    style: AppTypography.channelTag(color: isDark ? const Color(0xFF93C5FD, fontWeight: FontWeight.bold),
+                                                    style: AppTypography.channelTag(color: isDark ? const Color(0xFF93C5FD), fontWeight: FontWeight.bold),
                                                     overflow: TextOverflow.ellipsis,
                                                   ),
                                                 ),
@@ -2401,7 +2401,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                         const SizedBox(height: 4),
                                         Text(
                                           'Belum mengumpulkan jawaban',
-                                          style: AppTypography.fileSize(color: isDark ? const Color(0xFF71717A),
+                                          style: AppTypography.fileSize(color: isDark ? const Color(0xFF71717A)),
                                         ),
                                       ]
                                     ],
@@ -2428,13 +2428,13 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                                 ),
                                                 child: Text(
                                                   'Nilai: $score / 100',
-                                                  style: AppTypography.channelTag(color: isDark ? const Color(0xFFFDBA74, fontWeight: FontWeight.bold),
+                                                  style: AppTypography.channelTag(color: isDark ? const Color(0xFFFDBA74), fontWeight: FontWeight.bold),
                                                 ),
                                               )
                                             else
                                               Text(
                                                 'Belum mengerjakan kuis',
-                                                style: AppTypography.fileSize(color: isDark ? const Color(0xFF71717A),
+                                                style: AppTypography.fileSize(color: isDark ? const Color(0xFF71717A)),
                                               ),
                                             if (isLocked) ...[
                                               const SizedBox(height: 6),
@@ -2526,7 +2526,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                                 Expanded(
                                                   child: Text(
                                                     title,
-                                                    style: AppTypography.buttonLabel(color: isDark ? Colors.white : const Color(0xFF0F172A, fontWeight: FontWeight.bold),
+                                                    style: AppTypography.buttonLabel(color: isDark ? Colors.white : const Color(0xFF0F172A), fontWeight: FontWeight.bold),
                                                   ),
                                                 ),
                                               ],
@@ -2563,7 +2563,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                         padding: const EdgeInsets.only(left: 25.0),
                                         child: Text(
                                           '${act['stageName']} > ${act['materiTitle']}',
-                                          style: AppTypography.fileSize(color: isDark ? const Color(0xFF71717A, fontWeight: FontWeight.w500),
+                                          style: AppTypography.fileSize(color: isDark ? const Color(0xFF71717A), fontWeight: FontWeight.w500),
                                         ),
                                       ),
                                       const SizedBox(height: 6),
@@ -2673,7 +2673,7 @@ class _BouncyMenuSliderCardState extends State<_BouncyMenuSliderCard> with Singl
                 children: [
                   Text(
                     widget.title,
-                    style: AppTypography.buttonLabel(color: const Color(0xFF7C3AED, fontWeight: FontWeight.bold, height: 1.15),
+                    style: AppTypography.buttonLabel(color: const Color(0xFF7C3AED), fontWeight: FontWeight.bold, height: 1.15),
                   ),
                   const SizedBox(height: 1.5),
                   ConstrainedBox(

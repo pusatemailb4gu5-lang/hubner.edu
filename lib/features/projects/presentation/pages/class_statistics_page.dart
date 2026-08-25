@@ -190,7 +190,7 @@ class _ClassStatisticsPageState extends State<ClassStatisticsPage>
                                     const SizedBox(width: 6),
                                     Text(
                                       '$classLabel · $totalSiswa Siswa',
-                                      style: AppTypography.buttonLabel(color: isDark ? Colors.white70 : const Color(0xFF0F172A, fontWeight: FontWeight.bold),
+                                      style: AppTypography.buttonLabel(color: isDark ? Colors.white70 : const Color(0xFF0F172A), fontWeight: FontWeight.bold),
                                     ),
                                   ],
                                 ),
@@ -203,7 +203,7 @@ class _ClassStatisticsPageState extends State<ClassStatisticsPage>
                           // Header Title (Learning Pathway Status)
                           Text(
                             'Learning\nPathway Status',
-                            style: AppTypography.pageTitle(color: isDark ? Colors.white : const Color(0xFF0F172A, fontWeight: FontWeight.w900, height: 1.15, letterSpacing: -0.8),
+                            style: AppTypography.pageTitle(color: isDark ? Colors.white : const Color(0xFF0F172A), fontWeight: FontWeight.w900, height: 1.15, letterSpacing: -0.8),
                           ),
                           const SizedBox(height: 4),
                           Text(
@@ -325,7 +325,7 @@ class _ClassStatisticsPageState extends State<ClassStatisticsPage>
                                               const SizedBox(width: 12),
                                               Text(
                                                 'Progress',
-                                                style: AppTypography.chatHeaderTitle(color: const Color(0xFF0F172A, fontWeight: FontWeight.w800),
+                                                style: AppTypography.chatHeaderTitle(color: const Color(0xFF0F172A), fontWeight: FontWeight.w800),
                                               ),
                                             ],
                                           ),
@@ -367,11 +367,11 @@ class _ClassStatisticsPageState extends State<ClassStatisticsPage>
                                                   children: [
                                                     Text(
                                                       '$displayedScore',
-                                                      style: AppTypography.pageTitle(color: const Color(0xFF0F172A, fontWeight: FontWeight.w900, letterSpacing: -1.0),
+                                                      style: AppTypography.pageTitle(color: const Color(0xFF0F172A), fontWeight: FontWeight.w900, letterSpacing: -1.0),
                                                     ),
                                                     Text(
                                                       'Score',
-                                                      style: AppTypography.timestamp(color: const Color(0xFF4C1D95, fontWeight: FontWeight.w700),
+                                                      style: AppTypography.timestamp(color: const Color(0xFF4C1D95), fontWeight: FontWeight.w700),
                                                     ),
                                                     const SizedBox(height: 6),
                                                   ],
@@ -428,7 +428,7 @@ class _ClassStatisticsPageState extends State<ClassStatisticsPage>
                           // Section Title: Detail Tahapan Pembelajaran
                           Text(
                             'Distribusi Tahapan Pembelajaran',
-                            style: AppTypography.chatHeaderTitle(color: isDark ? Colors.white : const Color(0xFF0F172A, fontWeight: FontWeight.w800),
+                            style: AppTypography.chatHeaderTitle(color: isDark ? Colors.white : const Color(0xFF0F172A), fontWeight: FontWeight.w800),
                           ),
                           const SizedBox(height: 12),
 
@@ -492,7 +492,7 @@ class _ClassStatisticsPageState extends State<ClassStatisticsPage>
                                           child: Center(
                                             child: Text(
                                               (index + 1).toString().padLeft(2, '0'),
-                                              style: AppTypography.cardTitle(color: const Color(0xFF0F172A, fontWeight: FontWeight.w900),
+                                              style: AppTypography.cardTitle(color: const Color(0xFF0F172A), fontWeight: FontWeight.w900),
                                             ),
                                           ),
                                         ),
@@ -503,7 +503,7 @@ class _ClassStatisticsPageState extends State<ClassStatisticsPage>
                                             children: [
                                               Text(
                                                 name,
-                                                style: AppTypography.buttonLabel(color: isDark ? Colors.white : const Color(0xFF0F172A, fontWeight: FontWeight.bold),
+                                                style: AppTypography.buttonLabel(color: isDark ? Colors.white : const Color(0xFF0F172A), fontWeight: FontWeight.bold),
                                               ),
                                               const SizedBox(height: 2),
                                               Text(
@@ -523,7 +523,7 @@ class _ClassStatisticsPageState extends State<ClassStatisticsPage>
                                           ),
                                           child: Text(
                                             status == 'selesai' ? 'Selesai' : 'Aktif',
-                                            style: AppTypography.buttonLabel(color: status == 'selesai', fontWeight: FontWeight.bold),
+                                            style: AppTypography.buttonLabel(color: status == 'selesai' ? const Color(0xFF10B981) : const Color(0xFF6366F1), fontWeight: FontWeight.bold),
                                           ),
                                         ),
                                       ],
@@ -683,7 +683,7 @@ class _BouncyCardState extends State<_BouncyCard> with SingleTickerProviderState
                       Expanded(
                         child: Text(
                           widget.title,
-                          style: AppTypography.buttonLabel(color: const Color(0xFF0F172A, fontWeight: FontWeight.w800),
+                          style: AppTypography.buttonLabel(color: const Color(0xFF0F172A), fontWeight: FontWeight.w800),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -697,7 +697,7 @@ class _BouncyCardState extends State<_BouncyCard> with SingleTickerProviderState
                     children: [
                       Text(
                         widget.value,
-                        style: AppTypography.pageTitle(color: const Color(0xFF0F172A, fontWeight: FontWeight.w900, letterSpacing: -1.0),
+                        style: AppTypography.pageTitle(color: const Color(0xFF0F172A), fontWeight: FontWeight.w900, letterSpacing: -1.0),
                       ),
                       Container(
                         width: 40,

@@ -208,7 +208,7 @@ class _DesktopQuizTabState extends State<DesktopQuizTab> {
                           const SizedBox(height: 2),
                           Text(
                             'Kelola & Evaluasi Quiz Siswa secara Fleksibel',
-                            style: AppTypography.timestamp(color: Colors.white.withValues(alpha: 0.85),
+                            style: AppTypography.timestamp(color: Colors.white.withValues(alpha: 0.85)),
                           ),
                         ],
                       ),
@@ -298,7 +298,7 @@ class _DesktopQuizTabState extends State<DesktopQuizTab> {
               const SizedBox(height: 12),
               Text(
                 'Belum ada elemen pembelajaran di kelas ini.',
-                style: AppTypography.subtitle(color: const Color(0xFF64748B),
+                style: AppTypography.subtitle(color: const Color(0xFF64748B)),
               ),
             ],
           ),
@@ -311,7 +311,7 @@ class _DesktopQuizTabState extends State<DesktopQuizTab> {
       children: [
         Text(
           'Daftar Elemen & Quiz',
-          style: AppTypography.chatHeaderTitle(color: const Color(0xFF0F172A, fontWeight: FontWeight.bold),
+          style: AppTypography.chatHeaderTitle(color: const Color(0xFF0F172A), fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 12),
         Container(
@@ -374,11 +374,11 @@ class _DesktopQuizTabState extends State<DesktopQuizTab> {
                             children: [
                               Text(
                                 stageTitle,
-                                style: AppTypography.buttonLabel(color: const Color(0xFF0F172A, fontWeight: FontWeight.bold),
+                                style: AppTypography.buttonLabel(color: const Color(0xFF0F172A), fontWeight: FontWeight.bold),
                               ),
                               Text(
                                 '${materis.length} Materi • ${stageTasks.length} Quiz',
-                                style: AppTypography.timestamp(color: const Color(0xFF64748B),
+                                style: AppTypography.timestamp(color: const Color(0xFF64748B)),
                               ),
                             ],
                           ),
@@ -401,7 +401,7 @@ class _DesktopQuizTabState extends State<DesktopQuizTab> {
                             child: Center(
                               child: Text(
                                 'Belum ada quiz di elemen ini.',
-                                style: AppTypography.timestamp(color: const Color(0xFF94A3B8),
+                                style: AppTypography.timestamp(color: const Color(0xFF94A3B8)),
                               ),
                             ),
                           )
@@ -479,7 +479,7 @@ class _DesktopQuizTabState extends State<DesktopQuizTab> {
                                                 ),
                                                 Text(
                                                   'Materi: ${t['materiTitle'] ?? '-'}',
-                                                  style: AppTypography.timestamp(color: const Color(0xFF64748B),
+                                                  style: AppTypography.timestamp(color: const Color(0xFF64748B)),
                                                 ),
                                               ],
                                             ),
@@ -558,7 +558,7 @@ class _DesktopQuizTabState extends State<DesktopQuizTab> {
               const SizedBox(height: 12),
               Text(
                 'Pilih salah satu quiz di kolom kiri untuk melihat preview.',
-                style: AppTypography.subtitle(color: const Color(0xFF64748B),
+                style: AppTypography.subtitle(color: const Color(0xFF64748B)),
               ),
             ],
           ),
@@ -587,7 +587,7 @@ class _DesktopQuizTabState extends State<DesktopQuizTab> {
         children: [
           Text(
             title,
-            style: AppTypography.pageTitle(color: const Color(0xFF0F172A, fontWeight: FontWeight.bold, height: 1.25),
+            style: AppTypography.pageTitle(color: const Color(0xFF0F172A), fontWeight: FontWeight.bold, height: 1.25),
           ),
           const SizedBox(height: 8),
 
@@ -597,7 +597,7 @@ class _DesktopQuizTabState extends State<DesktopQuizTab> {
               const SizedBox(width: 6),
               Text(
                 '$_selectedStageTitle • $materiTitle',
-                style: AppTypography.timestamp(color: const Color(0xFF475569),
+                style: AppTypography.timestamp(color: const Color(0xFF475569)),
               ),
             ],
           ),
@@ -609,7 +609,7 @@ class _DesktopQuizTabState extends State<DesktopQuizTab> {
                 const SizedBox(width: 6),
                 Text(
                   'Tenggat: ${startDateStr.isNotEmpty ? startDateStr : '-'} s/d ${endDateStr.isNotEmpty ? endDateStr : 'Selesai'}',
-                  style: AppTypography.timestamp(color: const Color(0xFF475569),
+                  style: AppTypography.timestamp(color: const Color(0xFF475569)),
                 ),
               ],
             ),
@@ -623,7 +623,7 @@ class _DesktopQuizTabState extends State<DesktopQuizTab> {
             children: [
               Text(
                 'Pertanyaan Kuis (${questions.length})',
-                style: AppTypography.cardTitle(color: const Color(0xFF0F172A, fontWeight: FontWeight.bold),
+                style: AppTypography.cardTitle(color: const Color(0xFF0F172A), fontWeight: FontWeight.bold),
               ),
               const Spacer(),
               if (isOwner) ...[
@@ -640,7 +640,7 @@ class _DesktopQuizTabState extends State<DesktopQuizTab> {
                     icon: const Icon(Icons.edit_note_rounded, size: 16, color: Color(0xFF7C3AED)),
                     label: Text(
                       'Edit Soal',
-                      style: AppTypography.buttonLabel(color: const Color(0xFF7C3AED, fontWeight: FontWeight.bold),
+                      style: AppTypography.buttonLabel(color: const Color(0xFF7C3AED), fontWeight: FontWeight.bold),
                     ),
                     style: OutlinedButton.styleFrom(
                       side: const BorderSide(color: Color(0xFF7C3AED)),
@@ -660,7 +660,7 @@ class _DesktopQuizTabState extends State<DesktopQuizTab> {
                     icon: const Icon(Icons.cancel_outlined, size: 16, color: Color(0xFFEF4444)),
                     label: Text(
                       'Batal',
-                      style: AppTypography.buttonLabel(color: const Color(0xFFEF4444, fontWeight: FontWeight.bold),
+                      style: AppTypography.buttonLabel(color: const Color(0xFFEF4444), fontWeight: FontWeight.bold),
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -711,7 +711,7 @@ class _DesktopQuizTabState extends State<DesktopQuizTab> {
                       children: [
                         Text(
                           'Soal ${qIdx + 1}',
-                          style: AppTypography.buttonLabel(color: const Color(0xFF475569, fontWeight: FontWeight.bold),
+                          style: AppTypography.buttonLabel(color: const Color(0xFF475569), fontWeight: FontWeight.bold),
                         ),
                         const Spacer(),
                         if (_isInlineEditingQuiz && _inlineQuestions.length > 1)
@@ -733,7 +733,7 @@ class _DesktopQuizTabState extends State<DesktopQuizTab> {
                     if (!_isInlineEditingQuiz) ...[
                       Text(
                         qText.isNotEmpty ? qText : '(Teks soal kosong)',
-                        style: AppTypography.timestamp(color: const Color(0xFF1E293B, fontWeight: FontWeight.w600),
+                        style: AppTypography.timestamp(color: const Color(0xFF1E293B), fontWeight: FontWeight.w600),
                       ),
                       if (q['image'] != null && (q['image'] as String).isNotEmpty) ...[
                         const SizedBox(height: 10),
@@ -759,7 +759,7 @@ class _DesktopQuizTabState extends State<DesktopQuizTab> {
                                     Expanded(
                                       child: Text(
                                         'Gambar: ${q['image']}',
-                                        style: AppTypography.timestamp(color: const Color(0xFF64748B),
+                                        style: AppTypography.timestamp(color: const Color(0xFF64748B)),
                                       ),
                                     ),
                                   ],
@@ -815,7 +815,7 @@ class _DesktopQuizTabState extends State<DesktopQuizTab> {
                         children: [
                           Text(
                             'Jawaban Benar: ',
-                            style: AppTypography.buttonLabel(color: const Color(0xFF475569, fontWeight: FontWeight.bold),
+                            style: AppTypography.buttonLabel(color: const Color(0xFF475569), fontWeight: FontWeight.bold),
                           ),
                           const SizedBox(width: 8),
                           DropdownButton<String>(
@@ -939,7 +939,7 @@ class _DesktopQuizTabState extends State<DesktopQuizTab> {
                     icon: const Icon(Icons.delete_outline_rounded, size: 18, color: Color(0xFFEF4444)),
                     label: Text(
                       'Hapus',
-                      style: AppTypography.buttonLabel(color: const Color(0xFFEF4444),
+                      style: AppTypography.buttonLabel(color: const Color(0xFFEF4444)),
                     ),
                     style: OutlinedButton.styleFrom(
                       backgroundColor: const Color(0xFFFEF2F2),
@@ -993,7 +993,7 @@ class _DesktopQuizTabState extends State<DesktopQuizTab> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: Text('Batal', style: AppTypography.buttonLabel(color: const Color(0xFF64748B)),
+            child: Text('Batal', style: AppTypography.buttonLabel(color: const Color(0xFF64748B))),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
@@ -1181,14 +1181,14 @@ class _DesktopQuizTabState extends State<DesktopQuizTab> {
             ),
             child: Text(
               key,
-              style: AppTypography.buttonLabel(color: isCorrect ? Colors.white : const Color(0xFF64748B, fontWeight: FontWeight.bold),
+              style: AppTypography.buttonLabel(color: isCorrect ? Colors.white : const Color(0xFF64748B), fontWeight: FontWeight.bold),
             ),
           ),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
               text.isNotEmpty ? text : '(Opsi kosong)',
-              style: AppTypography.timestamp(color: isCorrect ? const Color(0xFF065F46),
+              style: AppTypography.timestamp(color: isCorrect ? const Color(0xFF065F46)),
             ),
           ),
         ],
@@ -1203,7 +1203,7 @@ class _DesktopQuizTabState extends State<DesktopQuizTab> {
       style: AppTypography.timestamp(),
       decoration: InputDecoration(
         prefixText: '$key: ',
-        prefixStyle: AppTypography.buttonLabel(color: const Color(0xFF64748B, fontWeight: FontWeight.bold),
+        prefixStyle: AppTypography.buttonLabel(color: const Color(0xFF64748B), fontWeight: FontWeight.bold),
         isDense: true,
         contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
         fillColor: Colors.white,
@@ -1495,7 +1495,7 @@ class _DesktopQuizTabState extends State<DesktopQuizTab> {
                                 children: [
                                   Text(
                                     'Pilih Elemen Pembelajaran',
-                                    style: AppTypography.buttonLabel(color: const Color(0xFF475569, fontWeight: FontWeight.bold),
+                                    style: AppTypography.buttonLabel(color: const Color(0xFF475569), fontWeight: FontWeight.bold),
                                   ),
                                   const SizedBox(height: 6),
                                   Container(
@@ -1540,7 +1540,7 @@ class _DesktopQuizTabState extends State<DesktopQuizTab> {
 
                                   Text(
                                     'Pilih Materi',
-                                    style: AppTypography.buttonLabel(color: const Color(0xFF475569, fontWeight: FontWeight.bold),
+                                    style: AppTypography.buttonLabel(color: const Color(0xFF475569), fontWeight: FontWeight.bold),
                                   ),
                                   const SizedBox(height: 6),
                                   Container(
@@ -1585,7 +1585,7 @@ class _DesktopQuizTabState extends State<DesktopQuizTab> {
 
                                   Text(
                                     'Judul Quiz',
-                                    style: AppTypography.buttonLabel(color: const Color(0xFF475569, fontWeight: FontWeight.bold),
+                                    style: AppTypography.buttonLabel(color: const Color(0xFF475569), fontWeight: FontWeight.bold),
                                   ),
                                   const SizedBox(height: 6),
                                   TextField(
@@ -1593,7 +1593,7 @@ class _DesktopQuizTabState extends State<DesktopQuizTab> {
                                     style: AppTypography.subtitle(),
                                     decoration: InputDecoration(
                                       hintText: 'Masukkan judul...',
-                                      hintStyle: AppTypography.timestamp(color: const Color(0xFF94A3B8),
+                                      hintStyle: AppTypography.timestamp(color: const Color(0xFF94A3B8)),
                                       isDense: true,
                                       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                                       fillColor: const Color(0xFFF8FAFC),
@@ -1618,7 +1618,7 @@ class _DesktopQuizTabState extends State<DesktopQuizTab> {
                                           children: [
                                             Text(
                                               'Tanggal Mulai',
-                                              style: AppTypography.buttonLabel(color: const Color(0xFF475569, fontWeight: FontWeight.bold),
+                                              style: AppTypography.buttonLabel(color: const Color(0xFF475569), fontWeight: FontWeight.bold),
                                             ),
                                             const SizedBox(height: 6),
                                             TextField(
@@ -1628,7 +1628,7 @@ class _DesktopQuizTabState extends State<DesktopQuizTab> {
                                               onChanged: (_) => _formatDateInput(startDateController),
                                               decoration: InputDecoration(
                                                 hintText: 'HH/BB/TTTT',
-                                                hintStyle: AppTypography.timestamp(color: const Color(0xFF94A3B8),
+                                                hintStyle: AppTypography.timestamp(color: const Color(0xFF94A3B8)),
                                                 prefixIcon: Icon(Icons.calendar_today_rounded, size: 16, color: mainThemeColor),
                                                 isDense: true,
                                                 contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
@@ -1654,7 +1654,7 @@ class _DesktopQuizTabState extends State<DesktopQuizTab> {
                                           children: [
                                             Text(
                                               'Tanggal Selesai / Tenggat',
-                                              style: AppTypography.buttonLabel(color: const Color(0xFF475569, fontWeight: FontWeight.bold),
+                                              style: AppTypography.buttonLabel(color: const Color(0xFF475569), fontWeight: FontWeight.bold),
                                             ),
                                             const SizedBox(height: 6),
                                             TextField(
@@ -1664,7 +1664,7 @@ class _DesktopQuizTabState extends State<DesktopQuizTab> {
                                               onChanged: (_) => _formatDateInput(endDateController),
                                               decoration: InputDecoration(
                                                 hintText: 'HH/BB/TTTT',
-                                                hintStyle: AppTypography.timestamp(color: const Color(0xFF94A3B8),
+                                                hintStyle: AppTypography.timestamp(color: const Color(0xFF94A3B8)),
                                                 prefixIcon: Icon(Icons.calendar_today_rounded, size: 16, color: mainThemeColor),
                                                 isDense: true,
                                                 contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
@@ -1689,7 +1689,7 @@ class _DesktopQuizTabState extends State<DesktopQuizTab> {
 
                                   Text(
                                     'Batasan Waktu Pengerjaan',
-                                    style: AppTypography.buttonLabel(color: const Color(0xFF475569, fontWeight: FontWeight.bold),
+                                    style: AppTypography.buttonLabel(color: const Color(0xFF475569), fontWeight: FontWeight.bold),
                                   ),
                                   const SizedBox(height: 6),
                                   Row(
@@ -1788,7 +1788,7 @@ class _DesktopQuizTabState extends State<DesktopQuizTab> {
                                             Row(
                                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                               children: [
-                                                Text('Soal ${qIdx + 1}', style: AppTypography.buttonLabel(color: const Color(0xFF475569, fontWeight: FontWeight.bold)),
+                                                Text('Soal ${qIdx + 1}', style: AppTypography.buttonLabel(color: const Color(0xFF475569), fontWeight: FontWeight.bold)),
                                                 if (questionsList.length > 1)
                                                   GestureDetector(
                                                     onTap: () {
@@ -1832,7 +1832,7 @@ class _DesktopQuizTabState extends State<DesktopQuizTab> {
                                                     decoration: InputDecoration(
                                                       hintText: 'Pilihan A',
                                                       prefixText: 'A. ',
-                                                      prefixStyle: AppTypography.buttonLabel(color: const Color(0xFF0F172A, fontWeight: FontWeight.bold),
+                                                      prefixStyle: AppTypography.buttonLabel(color: const Color(0xFF0F172A), fontWeight: FontWeight.bold),
                                                       isDense: true,
                                                       contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                                                       fillColor: (q['correct'] ?? 'A') == 'A' ? const Color(0xFFF0FDF4) : Colors.white,
@@ -1854,7 +1854,7 @@ class _DesktopQuizTabState extends State<DesktopQuizTab> {
                                                     decoration: InputDecoration(
                                                       hintText: 'Pilihan B',
                                                       prefixText: 'B. ',
-                                                      prefixStyle: AppTypography.buttonLabel(color: const Color(0xFF0F172A, fontWeight: FontWeight.bold),
+                                                      prefixStyle: AppTypography.buttonLabel(color: const Color(0xFF0F172A), fontWeight: FontWeight.bold),
                                                       isDense: true,
                                                       contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                                                       fillColor: (q['correct'] ?? 'A') == 'B' ? const Color(0xFFF0FDF4) : Colors.white,
@@ -1880,7 +1880,7 @@ class _DesktopQuizTabState extends State<DesktopQuizTab> {
                                                     decoration: InputDecoration(
                                                       hintText: 'Pilihan C',
                                                       prefixText: 'C. ',
-                                                      prefixStyle: AppTypography.buttonLabel(color: const Color(0xFF0F172A, fontWeight: FontWeight.bold),
+                                                      prefixStyle: AppTypography.buttonLabel(color: const Color(0xFF0F172A), fontWeight: FontWeight.bold),
                                                       isDense: true,
                                                       contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                                                       fillColor: (q['correct'] ?? 'A') == 'C' ? const Color(0xFFF0FDF4) : Colors.white,
@@ -1902,7 +1902,7 @@ class _DesktopQuizTabState extends State<DesktopQuizTab> {
                                                     decoration: InputDecoration(
                                                       hintText: 'Pilihan D',
                                                       prefixText: 'D. ',
-                                                      prefixStyle: AppTypography.buttonLabel(color: const Color(0xFF0F172A, fontWeight: FontWeight.bold),
+                                                      prefixStyle: AppTypography.buttonLabel(color: const Color(0xFF0F172A), fontWeight: FontWeight.bold),
                                                       isDense: true,
                                                       contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                                                       fillColor: (q['correct'] ?? 'A') == 'D' ? const Color(0xFFF0FDF4) : Colors.white,
@@ -1922,7 +1922,7 @@ class _DesktopQuizTabState extends State<DesktopQuizTab> {
                                               children: [
                                                 Row(
                                                   children: [
-                                                    Text('Kunci Jawaban: ', style: AppTypography.buttonLabel(color: const Color(0xFF64748B, fontWeight: FontWeight.bold)),
+                                                    Text('Kunci Jawaban: ', style: AppTypography.buttonLabel(color: const Color(0xFF64748B), fontWeight: FontWeight.bold)),
                                                     const SizedBox(width: 8),
                                                     Container(
                                                       padding: const EdgeInsets.symmetric(horizontal: 10),
@@ -1936,7 +1936,7 @@ class _DesktopQuizTabState extends State<DesktopQuizTab> {
                                                           value: q['correct'] ?? 'A',
                                                           dropdownColor: Colors.white,
                                                           borderRadius: BorderRadius.circular(12),
-                                                          style: AppTypography.buttonLabel(color: const Color(0xFF0F172A, fontWeight: FontWeight.bold),
+                                                          style: AppTypography.buttonLabel(color: const Color(0xFF0F172A), fontWeight: FontWeight.bold),
                                                           items: ['A', 'B', 'C', 'D'].map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
                                                           onChanged: (v) {
                                                             if (v != null) setDialogState(() => q['correct'] = v);
@@ -1964,7 +1964,7 @@ class _DesktopQuizTabState extends State<DesktopQuizTab> {
                                                         children: [
                                                           const Icon(Icons.add_photo_alternate_rounded, size: 16, color: Color(0xFF475569)),
                                                           const SizedBox(width: 6),
-                                                          Text('Upload Gambar', style: AppTypography.buttonLabel(color: const Color(0xFF475569, fontWeight: FontWeight.bold)),
+                                                          Text('Upload Gambar', style: AppTypography.buttonLabel(color: const Color(0xFF475569), fontWeight: FontWeight.bold)),
                                                         ],
                                                       ),
                                                     ),
@@ -1982,7 +1982,7 @@ class _DesktopQuizTabState extends State<DesktopQuizTab> {
                                                       children: [
                                                         const Icon(Icons.image_rounded, size: 15, color: Color(0xFF2563EB)),
                                                         const SizedBox(width: 6),
-                                                        Text('Gambar Ada', style: AppTypography.buttonLabel(color: const Color(0xFF1D4ED8, fontWeight: FontWeight.bold)),
+                                                        Text('Gambar Ada', style: AppTypography.buttonLabel(color: const Color(0xFF1D4ED8), fontWeight: FontWeight.bold)),
                                                         const SizedBox(width: 6),
                                                         InkWell(
                                                           onTap: () => setDialogState(() => q['image'] = ''),
@@ -2016,7 +2016,7 @@ class _DesktopQuizTabState extends State<DesktopQuizTab> {
                                         });
                                       },
                                       icon: const Icon(Icons.add_rounded, size: 16, color: Color(0xFF0F172A)),
-                                      label: Text('Tambah Soal', style: AppTypography.buttonLabel(color: const Color(0xFF0F172A, fontWeight: FontWeight.bold)),
+                                      label: Text('Tambah Soal', style: AppTypography.buttonLabel(color: const Color(0xFF0F172A), fontWeight: FontWeight.bold)),
                                       style: ElevatedButton.styleFrom(
                                         backgroundColor: const Color(0xFFFBBF24),
                                         elevation: 0,
@@ -2096,7 +2096,7 @@ class _DesktopQuizTabState extends State<DesktopQuizTab> {
                             ),
                             Text(
                               '${submissions.length} Percobaan Siswa',
-                              style: AppTypography.timestamp(color: Colors.white.withValues(alpha: 0.85),
+                              style: AppTypography.timestamp(color: Colors.white.withValues(alpha: 0.85)),
                             ),
                           ],
                         ),
@@ -2117,7 +2117,7 @@ class _DesktopQuizTabState extends State<DesktopQuizTab> {
                             children: [
                               Icon(Icons.assignment_late_outlined, size: 48, color: const Color(0xFF94A3B8)),
                               const SizedBox(height: 12),
-                              Text('Belum ada siswa yang mengerjakan quiz ini.', style: AppTypography.subtitle(color: const Color(0xFF64748B)),
+                              Text('Belum ada siswa yang mengerjakan quiz ini.', style: AppTypography.subtitle(color: const Color(0xFF64748B))),
                             ],
                           ),
                         )
@@ -2155,9 +2155,9 @@ class _DesktopQuizTabState extends State<DesktopQuizTab> {
                                       children: [
                                         Text(
                                           studentName,
-                                          style: AppTypography.cardTitle(color: const Color(0xFF000000, fontWeight: FontWeight.bold),
+                                          style: AppTypography.cardTitle(color: const Color(0xFF000000), fontWeight: FontWeight.bold),
                                         ),
-                                        Text('Dikerjakan pada: $completedAt', style: AppTypography.timestamp(color: const Color(0xFF64748B)),
+                                        Text('Dikerjakan pada: $completedAt', style: AppTypography.timestamp(color: const Color(0xFF64748B))),
                                       ],
                                     ),
                                   ),
@@ -2170,7 +2170,7 @@ class _DesktopQuizTabState extends State<DesktopQuizTab> {
                                     ),
                                     child: Text(
                                       'Skor: $score',
-                                      style: AppTypography.buttonLabel(color: const Color(0xFF059669, fontWeight: FontWeight.bold),
+                                      style: AppTypography.buttonLabel(color: const Color(0xFF059669), fontWeight: FontWeight.bold),
                                     ),
                                   ),
                                 ],
@@ -2241,11 +2241,11 @@ class _DesktopQuizTabState extends State<DesktopQuizTab> {
               ),
               child: Text(
                 key,
-                style: AppTypography.buttonLabel(color: isSelected ? Colors.white : const Color(0xFF64748B, fontWeight: FontWeight.bold),
+                style: AppTypography.buttonLabel(color: isSelected ? Colors.white : const Color(0xFF64748B), fontWeight: FontWeight.bold),
               ),
             ),
             const SizedBox(width: 12),
-            Expanded(child: Text(text, style: AppTypography.timestamp(color: const Color(0xFF334155))),
+            Expanded(child: Text(text, style: AppTypography.timestamp(color: const Color(0xFF334155)))),
           ],
         ),
       ),
@@ -2276,7 +2276,7 @@ class _DesktopQuizTabState extends State<DesktopQuizTab> {
             const SizedBox(height: 8),
             Text(
               'Anda menjawab benar $scoreSum dari ${questions.length} soal kuis.',
-              style: AppTypography.subtitle(color: const Color(0xFF64748B),
+              style: AppTypography.subtitle(color: const Color(0xFF64748B)),
             ),
             const SizedBox(height: 16),
             Container(
@@ -2284,7 +2284,7 @@ class _DesktopQuizTabState extends State<DesktopQuizTab> {
               decoration: BoxDecoration(color: const Color(0xFFF1F5F9), borderRadius: BorderRadius.circular(16)),
               child: Text(
                 'Skor: $finalScore / 100',
-                style: AppTypography.chatHeaderTitle(color: const Color(0xFF0F172A, fontWeight: FontWeight.bold),
+                style: AppTypography.chatHeaderTitle(color: const Color(0xFF0F172A), fontWeight: FontWeight.bold),
               ),
             ),
           ],
@@ -2330,13 +2330,13 @@ class _DesktopQuizTabState extends State<DesktopQuizTab> {
                 children: [
                   Text(
                     'Gambar Soal Terpasang',
-                    style: AppTypography.buttonLabel(color: const Color(0xFF0F172A, fontWeight: FontWeight.bold),
+                    style: AppTypography.buttonLabel(color: const Color(0xFF0F172A), fontWeight: FontWeight.bold),
                   ),
                   Text(
                     currentImage,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: AppTypography.timestamp(color: const Color(0xFF64748B),
+                    style: AppTypography.timestamp(color: const Color(0xFF64748B)),
                   ),
                 ],
               ),
@@ -2384,11 +2384,11 @@ class _DesktopQuizTabState extends State<DesktopQuizTab> {
               children: [
                 Text(
                   '+ Pilih / Upload Gambar Soal',
-                  style: AppTypography.buttonLabel(color: const Color(0xFF1E40AF, fontWeight: FontWeight.bold),
+                  style: AppTypography.buttonLabel(color: const Color(0xFF1E40AF), fontWeight: FontWeight.bold),
                 ),
                 Text(
                   'Unggah berkas dari perangkat atau masukkan URL gambar',
-                  style: AppTypography.timestamp(color: const Color(0xFF64748B),
+                  style: AppTypography.timestamp(color: const Color(0xFF64748B)),
                 ),
               ],
             ),

@@ -395,7 +395,7 @@ class _ManageMembersPageState extends State<ManageMembersPage> {
       child: Center(
         child: Text(
           initial,
-          style: AppTypography.chatHeaderTitle(color: const Color(0xFF1E293B, fontWeight: FontWeight.w900),
+          style: AppTypography.chatHeaderTitle(color: const Color(0xFF1E293B), fontWeight: FontWeight.w900),
         ),
       ),
     );
@@ -469,7 +469,7 @@ class _ManageMembersPageState extends State<ManageMembersPage> {
                         children: [
                           Text(
                             'Data Anggota Kelas',
-                            style: AppTypography.chatHeaderTitle(color: isDark ? Colors.white : const Color(0xFF0F172A, fontWeight: FontWeight.w800),
+                            style: AppTypography.chatHeaderTitle(color: isDark ? Colors.white : const Color(0xFF0F172A), fontWeight: FontWeight.w800),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             textAlign: TextAlign.center,
@@ -571,7 +571,7 @@ class _ManageMembersPageState extends State<ManageMembersPage> {
                       children: [
                         Text(
                           'Permintaan Bergabung (${docs.length})',
-                          style: AppTypography.cardTitle(color: isDark ? Colors.white70 : const Color(0xFF0F172A, fontWeight: FontWeight.w800),
+                          style: AppTypography.cardTitle(color: isDark ? Colors.white70 : const Color(0xFF0F172A), fontWeight: FontWeight.w800),
                         ),
                         const SizedBox(height: 8),
                         ListView.separated(
@@ -620,7 +620,7 @@ class _ManageMembersPageState extends State<ManageMembersPage> {
                                       children: [
                                         Text(
                                           requesterName,
-                                          style: AppTypography.cardTitle(color: isDark ? Colors.white : const Color(0xFF0F172A, fontWeight: FontWeight.bold),
+                                          style: AppTypography.cardTitle(color: isDark ? Colors.white : const Color(0xFF0F172A), fontWeight: FontWeight.bold),
                                           maxLines: 1,
                                           overflow: TextOverflow.ellipsis,
                                         ),
@@ -689,7 +689,7 @@ class _ManageMembersPageState extends State<ManageMembersPage> {
                       children: [
                         Text(
                           'Menunggu Persetujuan Siswa (${invDocs.length})',
-                          style: AppTypography.cardTitle(color: isDark ? Colors.white70 : const Color(0xFF0F172A, fontWeight: FontWeight.w800),
+                          style: AppTypography.cardTitle(color: isDark ? Colors.white70 : const Color(0xFF0F172A), fontWeight: FontWeight.w800),
                         ),
                         const SizedBox(height: 8),
                         ListView.separated(
@@ -734,13 +734,13 @@ class _ManageMembersPageState extends State<ManageMembersPage> {
                                       children: [
                                         Text(
                                           invitedName,
-                                          style: AppTypography.cardTitle(color: isDark ? Colors.white : const Color(0xFF0F172A, fontWeight: FontWeight.bold),
+                                          style: AppTypography.cardTitle(color: isDark ? Colors.white : const Color(0xFF0F172A), fontWeight: FontWeight.bold),
                                           maxLines: 1,
                                           overflow: TextOverflow.ellipsis,
                                         ),
                                         Text(
                                           'ID: $invitedUserId • Status: Pending',
-                                          style: AppTypography.subtitle(color: const Color(0xFF2563EB, fontWeight: FontWeight.w600),
+                                          style: AppTypography.subtitle(color: const Color(0xFF2563EB), fontWeight: FontWeight.w600),
                                         ),
                                       ],
                                     ),
@@ -774,7 +774,7 @@ class _ManageMembersPageState extends State<ManageMembersPage> {
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: Text(
                 'Data Anggota Kelas',
-                style: AppTypography.cardTitle(color: isDark ? Colors.white70 : const Color(0xFF0F172A, fontWeight: FontWeight.w800),
+                style: AppTypography.cardTitle(color: isDark ? Colors.white70 : const Color(0xFF0F172A), fontWeight: FontWeight.w800),
               ),
             ),
             const SizedBox(height: 10),
@@ -884,7 +884,7 @@ class _ManageMembersPageState extends State<ManageMembersPage> {
                                       // Nama Lengkap
                                       Text(
                                         displayName + (memberUid == currentUid ? ' (Anda)' : ''),
-                                        style: AppTypography.cardTitle(color: isDark ? Colors.white : const Color(0xFF0F172A, fontWeight: FontWeight.bold),
+                                        style: AppTypography.cardTitle(color: isDark ? Colors.white : const Color(0xFF0F172A), fontWeight: FontWeight.bold),
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
                                       ),

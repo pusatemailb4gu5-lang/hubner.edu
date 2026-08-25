@@ -93,7 +93,7 @@ class _BacaMateriPageState extends State<BacaMateriPage> {
                           const SizedBox(width: 6),
                           Text(
                             'Modul Materi PDF',
-                            style: AppTypography.buttonLabel(color: const Color(0xFF0D9488, fontWeight: FontWeight.bold),
+                            style: AppTypography.buttonLabel(color: const Color(0xFF0D9488), fontWeight: FontWeight.bold),
                           ),
                         ],
                       ),

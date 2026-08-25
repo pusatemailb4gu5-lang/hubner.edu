@@ -40,13 +40,22 @@ class AppTypography {
   static TextStyle pageTitle({
     Color? color,
     FontWeight fontWeight = FontWeight.bold,
+    FontStyle? fontStyle,
     double? letterSpacing,
+    double? height,
+    TextDecoration? decoration,
+    Color? decorationColor,
+    double? fontSize,
   }) {
     return GoogleFonts.plusJakartaSans(
-      fontSize: sizePageTitle,
+      fontSize: fontSize ?? sizePageTitle,
       fontWeight: fontWeight,
+      fontStyle: fontStyle,
       color: color,
       letterSpacing: letterSpacing,
+      height: height,
+      decoration: decoration,
+      decorationColor: decorationColor,
     );
   }
 
@@ -54,11 +63,22 @@ class AppTypography {
   static TextStyle chatHeaderTitle({
     Color? color,
     FontWeight fontWeight = FontWeight.bold,
+    FontStyle? fontStyle,
+    double? letterSpacing,
+    double? height,
+    TextDecoration? decoration,
+    Color? decorationColor,
+    double? fontSize,
   }) {
     return GoogleFonts.plusJakartaSans(
-      fontSize: sizeChatHeaderTitle,
+      fontSize: fontSize ?? sizeChatHeaderTitle,
       fontWeight: fontWeight,
+      fontStyle: fontStyle,
       color: color,
+      letterSpacing: letterSpacing,
+      height: height,
+      decoration: decoration,
+      decorationColor: decorationColor,
     );
   }
 
@@ -66,11 +86,22 @@ class AppTypography {
   static TextStyle chatHeaderSubtitle({
     Color? color,
     FontWeight fontWeight = FontWeight.w500,
+    FontStyle? fontStyle,
+    double? letterSpacing,
+    double? height,
+    TextDecoration? decoration,
+    Color? decorationColor,
+    double? fontSize,
   }) {
     return GoogleFonts.dmSans(
-      fontSize: sizeChatHeaderSubtitle,
+      fontSize: fontSize ?? sizeChatHeaderSubtitle,
       fontWeight: fontWeight,
+      fontStyle: fontStyle,
       color: color,
+      letterSpacing: letterSpacing,
+      height: height,
+      decoration: decoration,
+      decorationColor: decorationColor,
     );
   }
 
@@ -78,13 +109,22 @@ class AppTypography {
   static TextStyle chatBody({
     Color? color,
     FontWeight fontWeight = FontWeight.normal,
+    FontStyle? fontStyle,
+    double? letterSpacing,
     double height = 1.3,
+    TextDecoration? decoration,
+    Color? decorationColor,
+    double? fontSize,
   }) {
     return GoogleFonts.dmSans(
-      fontSize: sizeChatBody,
+      fontSize: fontSize ?? sizeChatBody,
       fontWeight: fontWeight,
+      fontStyle: fontStyle,
       color: color,
+      letterSpacing: letterSpacing,
       height: height,
+      decoration: decoration,
+      decorationColor: decorationColor,
     );
   }
 
@@ -92,11 +132,22 @@ class AppTypography {
   static TextStyle messageInput({
     Color? color,
     FontWeight fontWeight = FontWeight.normal,
+    FontStyle? fontStyle,
+    double? letterSpacing,
+    double? height,
+    TextDecoration? decoration,
+    Color? decorationColor,
+    double? fontSize,
   }) {
     return GoogleFonts.dmSans(
-      fontSize: sizeChatBody,
+      fontSize: fontSize ?? sizeChatBody,
       fontWeight: fontWeight,
+      fontStyle: fontStyle,
       color: color,
+      letterSpacing: letterSpacing,
+      height: height,
+      decoration: decoration,
+      decorationColor: decorationColor,
     );
   }
 
@@ -104,11 +155,22 @@ class AppTypography {
   static TextStyle searchInput({
     Color? color,
     FontWeight fontWeight = FontWeight.normal,
+    FontStyle? fontStyle,
+    double? letterSpacing,
+    double? height,
+    TextDecoration? decoration,
+    Color? decorationColor,
+    double? fontSize,
   }) {
     return GoogleFonts.dmSans(
-      fontSize: sizeSearchInput,
+      fontSize: fontSize ?? sizeSearchInput,
       fontWeight: fontWeight,
+      fontStyle: fontStyle,
       color: color,
+      letterSpacing: letterSpacing,
+      height: height,
+      decoration: decoration,
+      decorationColor: decorationColor,
     );
   }
 
@@ -116,11 +178,22 @@ class AppTypography {
   static TextStyle senderName({
     Color? color,
     FontWeight fontWeight = FontWeight.bold,
+    FontStyle? fontStyle,
+    double? letterSpacing,
+    double? height,
+    TextDecoration? decoration,
+    Color? decorationColor,
+    double? fontSize,
   }) {
     return GoogleFonts.plusJakartaSans(
-      fontSize: sizeSenderName,
+      fontSize: fontSize ?? sizeSenderName,
       fontWeight: fontWeight,
+      fontStyle: fontStyle,
       color: color,
+      letterSpacing: letterSpacing,
+      height: height,
+      decoration: decoration,
+      decorationColor: decorationColor,
     );
   }
 
@@ -128,11 +201,22 @@ class AppTypography {
   static TextStyle mentionTag({
     Color? color,
     FontWeight fontWeight = FontWeight.bold,
+    FontStyle? fontStyle,
+    double? letterSpacing,
+    double? height,
+    TextDecoration? decoration,
+    Color? decorationColor,
+    double? fontSize,
   }) {
     return GoogleFonts.plusJakartaSans(
-      fontSize: sizeChatBody,
+      fontSize: fontSize ?? sizeChatBody,
       fontWeight: fontWeight,
+      fontStyle: fontStyle,
       color: color,
+      letterSpacing: letterSpacing,
+      height: height,
+      decoration: decoration,
+      decorationColor: decorationColor,
     );
   }
 
@@ -140,11 +224,22 @@ class AppTypography {
   static TextStyle replyTitle({
     Color? color,
     FontWeight fontWeight = FontWeight.bold,
+    FontStyle? fontStyle,
+    double? letterSpacing,
+    double? height,
+    TextDecoration? decoration,
+    Color? decorationColor,
+    double? fontSize,
   }) {
     return GoogleFonts.plusJakartaSans(
-      fontSize: sizeReplyTitle,
+      fontSize: fontSize ?? sizeReplyTitle,
       fontWeight: fontWeight,
+      fontStyle: fontStyle,
       color: color,
+      letterSpacing: letterSpacing,
+      height: height,
+      decoration: decoration,
+      decorationColor: decorationColor,
     );
   }
 
@@ -152,23 +247,45 @@ class AppTypography {
   static TextStyle replySubtitle({
     Color? color,
     FontWeight fontWeight = FontWeight.normal,
+    FontStyle? fontStyle,
+    double? letterSpacing,
+    double? height,
+    TextDecoration? decoration,
+    Color? decorationColor,
+    double? fontSize,
   }) {
     return GoogleFonts.dmSans(
-      fontSize: sizeReplySubtitle,
+      fontSize: fontSize ?? sizeReplySubtitle,
       fontWeight: fontWeight,
+      fontStyle: fontStyle,
       color: color,
+      letterSpacing: letterSpacing,
+      height: height,
+      decoration: decoration,
+      decorationColor: decorationColor,
     );
   }
 
-  /// 11. Keterangan Waktu / Jam Pesan (.timestamp)
+  /// 11. Keterangan Waktu / Jam Pesan & Jadwal (.timestamp)
   static TextStyle timestamp({
     Color? color,
     FontWeight fontWeight = FontWeight.w500,
+    FontStyle? fontStyle,
+    double? letterSpacing,
+    double? height,
+    TextDecoration? decoration,
+    Color? decorationColor,
+    double? fontSize,
   }) {
     return GoogleFonts.dmSans(
-      fontSize: sizeTimestamp,
+      fontSize: fontSize ?? sizeTimestamp,
       fontWeight: fontWeight,
+      fontStyle: fontStyle,
       color: color,
+      letterSpacing: letterSpacing,
+      height: height,
+      decoration: decoration,
+      decorationColor: decorationColor,
     );
   }
 
@@ -176,11 +293,22 @@ class AppTypography {
   static TextStyle discussionTitle({
     Color? color,
     FontWeight fontWeight = FontWeight.bold,
+    FontStyle? fontStyle,
+    double? letterSpacing,
+    double? height,
+    TextDecoration? decoration,
+    Color? decorationColor,
+    double? fontSize,
   }) {
     return GoogleFonts.plusJakartaSans(
-      fontSize: sizeDiscussionTitle,
+      fontSize: fontSize ?? sizeDiscussionTitle,
       fontWeight: fontWeight,
+      fontStyle: fontStyle,
       color: color,
+      letterSpacing: letterSpacing,
+      height: height,
+      decoration: decoration,
+      decorationColor: decorationColor,
     );
   }
 
@@ -188,11 +316,22 @@ class AppTypography {
   static TextStyle channelTag({
     Color? color,
     FontWeight fontWeight = FontWeight.w600,
+    FontStyle? fontStyle,
+    double? letterSpacing,
+    double? height,
+    TextDecoration? decoration,
+    Color? decorationColor,
+    double? fontSize,
   }) {
     return GoogleFonts.plusJakartaSans(
-      fontSize: sizeTagChannel,
+      fontSize: fontSize ?? sizeTagChannel,
       fontWeight: fontWeight,
+      fontStyle: fontStyle,
       color: color,
+      letterSpacing: letterSpacing,
+      height: height,
+      decoration: decoration,
+      decorationColor: decorationColor,
     );
   }
 
@@ -200,11 +339,22 @@ class AppTypography {
   static TextStyle sectionHeader({
     Color? color,
     FontWeight fontWeight = FontWeight.bold,
+    FontStyle? fontStyle,
+    double? letterSpacing,
+    double? height,
+    TextDecoration? decoration,
+    Color? decorationColor,
+    double? fontSize,
   }) {
     return GoogleFonts.plusJakartaSans(
-      fontSize: sizeSectionHeader,
+      fontSize: fontSize ?? sizeSectionHeader,
       fontWeight: fontWeight,
+      fontStyle: fontStyle,
       color: color,
+      letterSpacing: letterSpacing,
+      height: height,
+      decoration: decoration,
+      decorationColor: decorationColor,
     );
   }
 
@@ -212,23 +362,45 @@ class AppTypography {
   static TextStyle cardTitle({
     Color? color,
     FontWeight fontWeight = FontWeight.bold,
+    FontStyle? fontStyle,
+    double? letterSpacing,
+    double? height,
+    TextDecoration? decoration,
+    Color? decorationColor,
+    double? fontSize,
   }) {
     return GoogleFonts.plusJakartaSans(
-      fontSize: sizeCardTitle,
+      fontSize: fontSize ?? sizeCardTitle,
       fontWeight: fontWeight,
+      fontStyle: fontStyle,
       color: color,
+      letterSpacing: letterSpacing,
+      height: height,
+      decoration: decoration,
+      decorationColor: decorationColor,
     );
   }
 
-  /// 16. Subjudul / Role Pengguna (.subtitle)
+  /// 16. Subjudul / Role Pengguna / Metadata Deskripsi (.subtitle)
   static TextStyle subtitle({
     Color? color,
     FontWeight fontWeight = FontWeight.w500,
+    FontStyle? fontStyle,
+    double? letterSpacing,
+    double? height,
+    TextDecoration? decoration,
+    Color? decorationColor,
+    double? fontSize,
   }) {
     return GoogleFonts.dmSans(
-      fontSize: sizeBodySubtitle,
+      fontSize: fontSize ?? sizeBodySubtitle,
       fontWeight: fontWeight,
+      fontStyle: fontStyle,
       color: color,
+      letterSpacing: letterSpacing,
+      height: height,
+      decoration: decoration,
+      decorationColor: decorationColor,
     );
   }
 
@@ -236,11 +408,22 @@ class AppTypography {
   static TextStyle documentTitle({
     Color? color,
     FontWeight fontWeight = FontWeight.bold,
+    FontStyle? fontStyle,
+    double? letterSpacing,
+    double? height,
+    TextDecoration? decoration,
+    Color? decorationColor,
+    double? fontSize,
   }) {
     return GoogleFonts.plusJakartaSans(
-      fontSize: sizeDocumentTitle,
+      fontSize: fontSize ?? sizeDocumentTitle,
       fontWeight: fontWeight,
+      fontStyle: fontStyle,
       color: color,
+      letterSpacing: letterSpacing,
+      height: height,
+      decoration: decoration,
+      decorationColor: decorationColor,
     );
   }
 
@@ -248,11 +431,22 @@ class AppTypography {
   static TextStyle fileSize({
     Color? color,
     FontWeight fontWeight = FontWeight.normal,
+    FontStyle? fontStyle,
+    double? letterSpacing,
+    double? height,
+    TextDecoration? decoration,
+    Color? decorationColor,
+    double? fontSize,
   }) {
     return GoogleFonts.dmSans(
-      fontSize: sizeFileSize,
+      fontSize: fontSize ?? sizeFileSize,
       fontWeight: fontWeight,
+      fontStyle: fontStyle,
       color: color,
+      letterSpacing: letterSpacing,
+      height: height,
+      decoration: decoration,
+      decorationColor: decorationColor,
     );
   }
 
@@ -260,11 +454,22 @@ class AppTypography {
   static TextStyle buttonLabel({
     Color? color,
     FontWeight fontWeight = FontWeight.bold,
+    FontStyle? fontStyle,
+    double? letterSpacing,
+    double? height,
+    TextDecoration? decoration,
+    Color? decorationColor,
+    double? fontSize,
   }) {
     return GoogleFonts.plusJakartaSans(
-      fontSize: sizeButtonAction,
+      fontSize: fontSize ?? sizeButtonAction,
       fontWeight: fontWeight,
+      fontStyle: fontStyle,
       color: color,
+      letterSpacing: letterSpacing,
+      height: height,
+      decoration: decoration,
+      decorationColor: decorationColor,
     );
   }
 
@@ -272,11 +477,22 @@ class AppTypography {
   static TextStyle microBadge({
     Color? color,
     FontWeight fontWeight = FontWeight.bold,
+    FontStyle? fontStyle,
+    double? letterSpacing,
+    double? height,
+    TextDecoration? decoration,
+    Color? decorationColor,
+    double? fontSize,
   }) {
     return GoogleFonts.plusJakartaSans(
-      fontSize: sizeMicroBadge,
+      fontSize: fontSize ?? sizeMicroBadge,
       fontWeight: fontWeight,
+      fontStyle: fontStyle,
       color: color,
+      letterSpacing: letterSpacing,
+      height: height,
+      decoration: decoration,
+      decorationColor: decorationColor,
     );
   }
 }

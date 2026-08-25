@@ -338,7 +338,7 @@ class _DesktopTahapanPembelajaranTabState
                             const SizedBox(height: 2),
                             Text(
                               '${stages.length} Elemen Tahapan Pembelajaran Terdaftar dalam Kelas',
-                              style: AppTypography.timestamp(color: Colors.white.withValues(alpha: 0.85),
+                              style: AppTypography.timestamp(color: Colors.white.withValues(alpha: 0.85)),
                             ),
                           ],
                         ),
@@ -378,7 +378,7 @@ class _DesktopTahapanPembelajaranTabState
                                     const SizedBox(width: 8),
                                     Text(
                                       'Daftar Elemen Belajar',
-                                      style: AppTypography.cardTitle(color: const Color(0xFF000000, fontWeight: FontWeight.bold),
+                                      style: AppTypography.cardTitle(color: const Color(0xFF000000), fontWeight: FontWeight.bold),
                                     ),
                                   ],
                                 ),
@@ -407,7 +407,7 @@ class _DesktopTahapanPembelajaranTabState
                                           ),
                                           child: Text(
                                             'Kelola',
-                                            style: AppTypography.buttonLabel(color: const Color(0xFF334155, fontWeight: FontWeight.bold),
+                                            style: AppTypography.buttonLabel(color: const Color(0xFF334155), fontWeight: FontWeight.bold),
                                           ),
                                         ),
                                       ),
@@ -527,7 +527,7 @@ class _DesktopTahapanPembelajaranTabState
                                         const SizedBox(width: 8),
                                         Text(
                                           'Pilih Semua (${_selectedManageIndices.length}/${stages.length})',
-                                          style: AppTypography.buttonLabel(color: const Color(0xFF1E293B, fontWeight: FontWeight.bold),
+                                          style: AppTypography.buttonLabel(color: const Color(0xFF1E293B), fontWeight: FontWeight.bold),
                                         ),
                                       ],
                                     ),
@@ -671,7 +671,7 @@ class _DesktopTahapanPembelajaranTabState
                                 child: Center(
                                   child: Text(
                                     'Belum ada elemen pembelajaran.',
-                                    style: AppTypography.subtitle(color: const Color(0xFF000000),
+                                    style: AppTypography.subtitle(color: const Color(0xFF000000)),
                                   ),
                                 ),
                               )
@@ -783,7 +783,7 @@ class _DesktopTahapanPembelajaranTabState
                                                 ),
                                                 Text(
                                                   '${materis.length} Materi',
-                                                  style: AppTypography.timestamp(color: const Color(),
+                                                  style: AppTypography.timestamp(color: const Color()),
                                                 ),
                                               ],
                                             ),
@@ -847,7 +847,7 @@ class _DesktopTahapanPembelajaranTabState
               const SizedBox(height: 12),
               Text(
                 'Pilih elemen pembelajaran di kolom kiri untuk melihat detail.',
-                style: AppTypography.subtitle(color: const Color(0xFF000000),
+                style: AppTypography.subtitle(color: const Color(0xFF000000)),
               ),
             ],
           ),
@@ -885,7 +885,7 @@ class _DesktopTahapanPembelajaranTabState
               Expanded(
                 child: Text(
                   'Klik 2x pada Judul, Deskripsi Elemen, atau Materi untuk mengedit langsung. Tekan tombol hijau atau Enter untuk menyimpan.',
-                  style: AppTypography.buttonLabel(color: const Color(0xFF0369A1, fontWeight: FontWeight.w600),
+                  style: AppTypography.buttonLabel(color: const Color(0xFF0369A1), fontWeight: FontWeight.w600),
                 ),
               ),
             ],
@@ -984,7 +984,7 @@ class _DesktopTahapanPembelajaranTabState
                                   const SizedBox(width: 8),
                                   Text(
                                     statusText,
-                                    style: AppTypography.buttonLabel(color: const Color(0xFF1E293B, fontWeight: FontWeight.w600),
+                                    style: AppTypography.buttonLabel(color: const Color(0xFF1E293B), fontWeight: FontWeight.w600),
                                   ),
                                 ],
                               ),
@@ -1026,7 +1026,7 @@ class _DesktopTahapanPembelajaranTabState
                                 ].contains(selectedStage['status'])
                                     ? selectedStage['status']
                                     : 'Proses Pembelajaran',
-                                style: AppTypography.buttonLabel(color: const Color(0xFF1E293B, fontWeight: FontWeight.w600),
+                                style: AppTypography.buttonLabel(color: const Color(0xFF1E293B), fontWeight: FontWeight.w600),
                               ),
                               const SizedBox(width: 4),
                               const Icon(
@@ -1042,7 +1042,7 @@ class _DesktopTahapanPembelajaranTabState
                   ),
                   Text(
                     '${materis.length} Materi Terlampir',
-                    style: AppTypography.timestamp(color: const Color(0xFF000000, fontWeight: FontWeight.w500),
+                    style: AppTypography.timestamp(color: const Color(0xFF000000), fontWeight: FontWeight.w500),
                   ),
                 ],
               ),
@@ -1054,7 +1054,7 @@ class _DesktopTahapanPembelajaranTabState
                       child: TextField(
                         controller: _stageTitleController,
                         autofocus: true,
-                        style: AppTypography.chatHeaderTitle(color: const Color(0xFF000000, fontWeight: FontWeight.bold),
+                        style: AppTypography.chatHeaderTitle(color: const Color(0xFF000000), fontWeight: FontWeight.bold),
                         decoration: InputDecoration(
                           isDense: true,
                           contentPadding: const EdgeInsets.symmetric(
@@ -1120,7 +1120,7 @@ class _DesktopTahapanPembelajaranTabState
                       Expanded(
                         child: Text(
                           stageTitle,
-                          style: AppTypography.chatHeaderTitle(color: const Color(0xFF000000, fontWeight: FontWeight.bold),
+                          style: AppTypography.chatHeaderTitle(color: const Color(0xFF000000), fontWeight: FontWeight.bold),
                         ),
                       ),
                     ],
@@ -1135,7 +1135,7 @@ class _DesktopTahapanPembelajaranTabState
                       controller: _stageDescController,
                       autofocus: true,
                       maxLines: null,
-                      style: AppTypography.timestamp(color: const Color(0xFF000000),
+                      style: AppTypography.timestamp(color: const Color(0xFF000000)),
                       decoration: InputDecoration(
                         hintText: 'Tulis deskripsi elemen...',
                         isDense: true,
@@ -1224,7 +1224,7 @@ class _DesktopTahapanPembelajaranTabState
                       : null,
                   child: Text(
                     stageDesc,
-                    style: AppTypography.timestamp(color: const Color(0xFF000000),
+                    style: AppTypography.timestamp(color: const Color(0xFF000000)),
                   ),
                 ),
             ],
@@ -1238,7 +1238,7 @@ class _DesktopTahapanPembelajaranTabState
           children: [
             Text(
               'Detail Materi & Modul',
-              style: AppTypography.chatHeaderTitle(color: const Color(0xFF000000, fontWeight: FontWeight.bold),
+              style: AppTypography.chatHeaderTitle(color: const Color(0xFF000000), fontWeight: FontWeight.bold),
             ),
             if (isOwner)
               GestureDetector(
@@ -1283,7 +1283,7 @@ class _DesktopTahapanPembelajaranTabState
             child: Center(
               child: Text(
                 'Belum ada materi dalam elemen ini.',
-                style: AppTypography.subtitle(color: const Color(0xFF000000),
+                style: AppTypography.subtitle(color: const Color(0xFF000000)),
               ),
             ),
           )
@@ -1340,7 +1340,7 @@ class _DesktopTahapanPembelajaranTabState
                               child: TextField(
                                 controller: _materiTitleController,
                                 autofocus: true,
-                                style: AppTypography.buttonLabel(color: const Color(0xFF000000, fontWeight: FontWeight.bold),
+                                style: AppTypography.buttonLabel(color: const Color(0xFF000000), fontWeight: FontWeight.bold),
                                 decoration: InputDecoration(
                                   isDense: true,
                                   contentPadding: const EdgeInsets.symmetric(
@@ -1421,7 +1421,7 @@ class _DesktopTahapanPembelajaranTabState
                               Expanded(
                                 child: Text(
                                   mTitle,
-                                  style: AppTypography.buttonLabel(color: const Color(0xFF000000, fontWeight: FontWeight.bold),
+                                  style: AppTypography.buttonLabel(color: const Color(0xFF000000), fontWeight: FontWeight.bold),
                                 ),
                               ),
                             ],
@@ -1454,7 +1454,7 @@ class _DesktopTahapanPembelajaranTabState
                                         const SizedBox(width: 4),
                                         Text(
                                           '${pdfs.length} File PDF',
-                                          style: AppTypography.buttonLabel(color: const Color(0xFF0284C7, fontWeight: FontWeight.bold),
+                                          style: AppTypography.buttonLabel(color: const Color(0xFF0284C7), fontWeight: FontWeight.bold),
                                         ),
                                       ],
                                     ),
@@ -1482,7 +1482,7 @@ class _DesktopTahapanPembelajaranTabState
                                         const SizedBox(width: 4),
                                         Text(
                                           '${tasks.length} Tugas/Quiz',
-                                          style: AppTypography.buttonLabel(color: const Color(0xFFE11D48, fontWeight: FontWeight.bold),
+                                          style: AppTypography.buttonLabel(color: const Color(0xFFE11D48), fontWeight: FontWeight.bold),
                                         ),
                                       ],
                                     ),

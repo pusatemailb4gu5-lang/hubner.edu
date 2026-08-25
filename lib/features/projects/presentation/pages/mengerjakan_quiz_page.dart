@@ -241,7 +241,7 @@ class _MengerjakanQuizPageState extends State<MengerjakanQuizPage> with TickerPr
         ),
         content: Text(
           hintText,
-          style: AppTypography.timestamp(color: const Color(0xFF334155, height: 1.45),
+          style: AppTypography.timestamp(color: const Color(0xFF334155), height: 1.45),
         ),
         actions: [
           ElevatedButton(
@@ -389,14 +389,14 @@ class _MengerjakanQuizPageState extends State<MengerjakanQuizPage> with TickerPr
           unAnswered > 0
               ? 'Masih ada $unAnswered soal yang belum dijawab. Apakah Anda yakin ingin menyelesaikan kuis sekarang?'
               : 'Anda telah menjawab semua soal. Kirim lembar kuis sekarang?',
-          style: AppTypography.timestamp(color: const Color(0xFF334155),
+          style: AppTypography.timestamp(color: const Color(0xFF334155)),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
             child: Text(
               'Batal',
-              style: AppTypography.timestamp(color: const Color(0xFF64748B, fontWeight: FontWeight.bold),
+              style: AppTypography.timestamp(color: const Color(0xFF64748B), fontWeight: FontWeight.bold),
             ),
           ),
           ElevatedButton(
@@ -1166,14 +1166,14 @@ class _MengerjakanQuizPageState extends State<MengerjakanQuizPage> with TickerPr
         ),
         content: Text(
           'Progres kuis saat ini tidak akan tersimpan jika Anda keluar sebelum menyelesaikan.',
-          style: AppTypography.timestamp(color: const Color(0xFF334155),
+          style: AppTypography.timestamp(color: const Color(0xFF334155)),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
             child: Text(
               'Lanjutkan Kuis',
-              style: AppTypography.timestamp(color: const Color(0xFF64748B, fontWeight: FontWeight.bold),
+              style: AppTypography.timestamp(color: const Color(0xFF64748B), fontWeight: FontWeight.bold),
             ),
           ),
           ElevatedButton(
@@ -1280,7 +1280,7 @@ class _MengerjakanQuizPageState extends State<MengerjakanQuizPage> with TickerPr
                     Text(
                       'Kamu berhasil menjawab $_correctCount dari ${_questions.length} soal dengan benar.',
                       textAlign: TextAlign.center,
-                      style: AppTypography.subtitle(color: Colors.white.withValues(alpha: 0.9, height: 1.4),
+                      style: AppTypography.subtitle(color: Colors.white.withValues(alpha: 0.9), height: 1.4),
                     ),
 
                     const SizedBox(height: 36),
@@ -1324,7 +1324,7 @@ class _MengerjakanQuizPageState extends State<MengerjakanQuizPage> with TickerPr
                       onPressed: () => Navigator.pop(context),
                       child: Text(
                         'Kembali ke Kelas',
-                        style: AppTypography.buttonLabel(color: Colors.white.withValues(alpha: 0.85, fontWeight: FontWeight.w600),
+                        style: AppTypography.buttonLabel(color: Colors.white.withValues(alpha: 0.85), fontWeight: FontWeight.w600),
                       ),
                     ),
                   ],
@@ -1429,7 +1429,7 @@ class _MengerjakanQuizPageState extends State<MengerjakanQuizPage> with TickerPr
                           ? Center(
                               child: Text(
                                 'Belum ada data pengerjaan kuis.',
-                                style: AppTypography.timestamp(color: const Color(0xFF64748B),
+                                style: AppTypography.timestamp(color: const Color(0xFF64748B)),
                               ),
                             )
                           : SingleChildScrollView(
@@ -1534,7 +1534,7 @@ class _MengerjakanQuizPageState extends State<MengerjakanQuizPage> with TickerPr
                                                 const SizedBox(height: 2),
                                                 Text(
                                                   subText,
-                                                  style: AppTypography.timestamp(color: const Color(0xFF64748B),
+                                                  style: AppTypography.timestamp(color: const Color(0xFF64748B)),
                                                 ),
                                               ],
                                             ),
@@ -1559,7 +1559,7 @@ class _MengerjakanQuizPageState extends State<MengerjakanQuizPage> with TickerPr
                                                 const SizedBox(width: 4),
                                                 Text(
                                                   '${item['points']} Poin',
-                                                  style: AppTypography.buttonLabel(color: const Color(0xFFB45309, fontWeight: FontWeight.w900),
+                                                  style: AppTypography.buttonLabel(color: const Color(0xFFB45309), fontWeight: FontWeight.w900),
                                                 ),
                                               ],
                                             ),
@@ -1595,7 +1595,7 @@ class _MengerjakanQuizPageState extends State<MengerjakanQuizPage> with TickerPr
           child: Center(
             child: Text(
               tabName,
-              style: AppTypography.buttonLabel(color: isSelected ? Colors.white : const Color(0xFF475569, fontWeight: isSelected ? FontWeight.bold : FontWeight.w600),
+              style: AppTypography.buttonLabel(color: isSelected ? Colors.white : const Color(0xFF475569), fontWeight: isSelected ? FontWeight.bold : FontWeight.w600),
             ),
           ),
         ),
@@ -1710,7 +1710,7 @@ class _MengerjakanQuizPageState extends State<MengerjakanQuizPage> with TickerPr
         // Points
         Text(
           hasScore ? '$points Poin' : '0 Poin',
-          style: AppTypography.buttonLabel(color: hasScore ? const Color(0xFFD97706, fontWeight: FontWeight.w700),
+          style: AppTypography.buttonLabel(color: hasScore ? const Color(0xFFD97706) : Colors.black54, fontWeight: FontWeight.w700),
         ),
         const SizedBox(height: 6),
 

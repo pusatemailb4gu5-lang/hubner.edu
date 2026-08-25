@@ -1615,7 +1615,7 @@ Sertakan HANYA JSON tersebut tanpa penjelasan markdown apa pun di luar JSON.
             Text(
               'Sedang merancang elemen pembelajaran & materi secara otomatis...',
               textAlign: TextAlign.center,
-              style: AppTypography.timestamp(color: const Color(0xFF475569),
+              style: AppTypography.timestamp(color: const Color(0xFF475569)),
             ),
           ],
         ),
@@ -2020,7 +2020,7 @@ Sertakan HANYA JSON tersebut tanpa penjelasan markdown apa pun di luar JSON.
                           const SizedBox(width: 4),
                           Text(
                             'Tambah Materi',
-                            style: AppTypography.buttonLabel(color: const Color(0xFF2563EB, fontWeight: FontWeight.bold),
+                            style: AppTypography.buttonLabel(color: const Color(0xFF2563EB), fontWeight: FontWeight.bold),
                           ),
                         ],
                       ),
@@ -2364,7 +2364,7 @@ class _AnimatedWorkingDotsTextState extends State<AnimatedWorkingDotsText> {
     final dots = '.' * _dotCount;
     return Text(
       'Gemini AI sedang bekerja$dots',
-      style: AppTypography.buttonLabel(color: const Color(0xFF0F172A, fontWeight: FontWeight.bold),
+      style: AppTypography.buttonLabel(color: const Color(0xFF0F172A), fontWeight: FontWeight.bold),
     );
   }
 }

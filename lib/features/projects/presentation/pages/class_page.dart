@@ -263,7 +263,7 @@ class _ClassPageState extends State<ClassPage> {
       child: Center(
         child: Text(
           initial,
-          style: AppTypography.buttonLabel(color: const Color(0xFF1E293B, fontWeight: FontWeight.w800),
+          style: AppTypography.buttonLabel(color: const Color(0xFF1E293B), fontWeight: FontWeight.w800),
         ),
       ),
     );
@@ -853,7 +853,7 @@ class _ClassPageState extends State<ClassPage> {
                           backgroundColor: const Color(0xFFE0F2FE),
                           child: Text(
                             '${idx + 1}',
-                            style: AppTypography.buttonLabel(color: const Color(0xFF0369A1, fontWeight: FontWeight.bold),
+                            style: AppTypography.buttonLabel(color: const Color(0xFF0369A1), fontWeight: FontWeight.bold),
                           ),
                         ),
                         const SizedBox(width: 10),
@@ -2084,7 +2084,7 @@ class _ClassPageState extends State<ClassPage> {
                     ),
                     child: Text(
                       'Batal',
-                      style: AppTypography.buttonLabel(color: isDark ? Colors.white70 : const Color(0xFF000000, fontWeight: FontWeight.w600),
+                      style: AppTypography.buttonLabel(color: isDark ? Colors.white70 : const Color(0xFF000000), fontWeight: FontWeight.w600),
                     ),
                   ),
                 ),
@@ -2145,7 +2145,7 @@ class _ClassPageState extends State<ClassPage> {
                     children: [
                       Text(
                         label,
-                        style: AppTypography.buttonLabel(color: isDark ? Colors.white : const Color(0xFF000000, fontWeight: FontWeight.bold),
+                        style: AppTypography.buttonLabel(color: isDark ? Colors.white : const Color(0xFF000000), fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 2),
                       Text(
@@ -2790,14 +2790,14 @@ class _ClassPageState extends State<ClassPage> {
                           children: [
                             Text(
                               'Capaian Pembelajaran',
-                              style: AppTypography.cardTitle(color: dark ? Colors.white : const Color(0xFF0F172A, fontWeight: FontWeight.bold),
+                              style: AppTypography.cardTitle(color: dark ? Colors.white : const Color(0xFF0F172A), fontWeight: FontWeight.bold),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
                             const SizedBox(height: 2),
                             Text(
                               'Target & Tujuan Kompetensi Siswa',
-                              style: AppTypography.timestamp(color: dark ? Colors.white70 : const Color(0xFF334155),
+                              style: AppTypography.timestamp(color: dark ? Colors.white70 : const Color(0xFF334155)),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -2887,7 +2887,7 @@ class _ClassPageState extends State<ClassPage> {
                             ),
                             child: Text(
                               currentCp,
-                              style: AppTypography.timestamp(color: dark ? Colors.white70 : const Color(0xFF334155, height: 1.6),
+                              style: AppTypography.timestamp(color: dark ? Colors.white70 : const Color(0xFF334155, height: 1.6)),
                             ),
                           ),
                         ] else ...[
@@ -3078,14 +3078,14 @@ class _ClassPageState extends State<ClassPage> {
                               children: [
                                 Text(
                                   isEditing ? 'Kelola Jadwal Kelas' : 'Jadwal Pembelajaran',
-                                  style: AppTypography.cardTitle(color: dark ? Colors.white : const Color(0xFF0F172A, fontWeight: FontWeight.bold),
+                                  style: AppTypography.cardTitle(color: dark ? Colors.white : const Color(0xFF0F172A), fontWeight: FontWeight.bold),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                 ),
                                 const SizedBox(height: 2),
                                 Text(
                                   'Hari & Jam Pertemuan Kelas',
-                                  style: AppTypography.timestamp(color: dark ? Colors.white70 : const Color(0xFF334155),
+                                  style: AppTypography.timestamp(color: dark ? Colors.white70 : const Color(0xFF334155)),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                 ),
@@ -3436,7 +3436,7 @@ class _ClassPageState extends State<ClassPage> {
                                         Expanded(
                                           child: Text(
                                             displayTime,
-                                            style: AppTypography.buttonLabel(color: dark ? Colors.white : const Color(0xFF0F172A, fontWeight: FontWeight.bold),
+                                            style: AppTypography.buttonLabel(color: dark ? Colors.white : const Color(0xFF0F172A), fontWeight: FontWeight.bold),
                                           ),
                                         ),
                                       ],
@@ -3912,14 +3912,14 @@ class _ClassPageState extends State<ClassPage> {
                           children: [
                             Text(
                               'Barcode Kelas',
-                              style: AppTypography.cardTitle(color: isDark ? Colors.white : const Color(0xFF0F172A, fontWeight: FontWeight.bold),
+                              style: AppTypography.cardTitle(color: isDark ? Colors.white : const Color(0xFF0F172A), fontWeight: FontWeight.bold),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
                             const SizedBox(height: 2),
                             Text(
                               title,
-                              style: AppTypography.timestamp(color: isDark ? Colors.white70 : const Color(0xFF334155),
+                              style: AppTypography.timestamp(color: isDark ? Colors.white70 : const Color(0xFF334155)),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -4011,7 +4011,7 @@ class _ClassPageState extends State<ClassPage> {
                                 children: [
                                   Text(
                                     'KODE KELAS',
-                                    style: AppTypography.buttonLabel(color: isDark ? const Color(0xFFC084FC, fontWeight: FontWeight.w800, letterSpacing: 0.5),
+                                    style: AppTypography.buttonLabel(color: isDark ? const Color(0xFFC084FC), fontWeight: FontWeight.w800, letterSpacing: 0.5),
                                   ),
                                   const SizedBox(height: 1),
                                   SelectableText(
@@ -4435,7 +4435,7 @@ class _ClassPageState extends State<ClassPage> {
                               const SizedBox(width: 4),
                               Text(
                                 'Hapus',
-                                style: AppTypography.buttonLabel(color: const Color(0xFFEF4444, fontWeight: FontWeight.bold),
+                                style: AppTypography.buttonLabel(color: const Color(0xFFEF4444), fontWeight: FontWeight.bold),
                               ),
                             ],
                           ),
@@ -4560,7 +4560,7 @@ class _ClassPageState extends State<ClassPage> {
                                                 ),
                                                 child: Text(
                                                   'Proses',
-                                                  style: AppTypography.buttonLabel(color: isDark ? Colors.white : const Color(0xFF0F172A, fontWeight: FontWeight.w700),
+                                                  style: AppTypography.buttonLabel(color: isDark ? Colors.white : const Color(0xFF0F172A), fontWeight: FontWeight.w700),
                                                 ),
                                               ),
                                             ),
@@ -4582,7 +4582,7 @@ class _ClassPageState extends State<ClassPage> {
                                                 ),
                                                 child: Text(
                                                   'Selesai',
-                                                  style: AppTypography.buttonLabel(color: isDark ? Colors.white : const Color(0xFF0F172A, fontWeight: FontWeight.w700),
+                                                  style: AppTypography.buttonLabel(color: isDark ? Colors.white : const Color(0xFF0F172A), fontWeight: FontWeight.w700),
                                                 ),
                                               ),
                                             ),
@@ -4596,7 +4596,7 @@ class _ClassPageState extends State<ClassPage> {
                                                 padding: const EdgeInsets.symmetric(horizontal: 10),
                                                 child: Text(
                                                   'Akan Datang',
-                                                  style: AppTypography.buttonLabel(color: isDark ? Colors.white : const Color(0xFF0F172A, fontWeight: FontWeight.w700),
+                                                  style: AppTypography.buttonLabel(color: isDark ? Colors.white : const Color(0xFF0F172A), fontWeight: FontWeight.w700),
                                                 ),
                                               ),
                                             ),
@@ -4622,7 +4622,7 @@ class _ClassPageState extends State<ClassPage> {
                                                 const SizedBox(width: 4.5),
                                                 Text(
                                                   statusLabel,
-                                                  style: AppTypography.buttonLabel(color: (stageStatus == 'proses', fontWeight: FontWeight.w700),
+                                                  style: AppTypography.buttonLabel(color: (stageStatus == 'proses', fontWeight: FontWeight.w700)),
                                                 ),
                                               ],
                                             ),
@@ -4744,7 +4744,7 @@ class _ClassPageState extends State<ClassPage> {
                                                    name,
                                                    maxLines: 3,
                                                    overflow: TextOverflow.ellipsis,
-                                                   style: AppTypography.buttonLabel(color: isDark ? Colors.white : const Color(0xFF0F172A, fontWeight: FontWeight.w900, height: 1.15, letterSpacing: -0.5),
+                                                   style: AppTypography.buttonLabel(color: isDark ? Colors.white : const Color(0xFF0F172A), fontWeight: FontWeight.w900, height: 1.15, letterSpacing: -0.5),
                                                  ),
                                                  const SizedBox(height: 4),
                                                  GestureDetector(
@@ -5158,7 +5158,7 @@ class _ClassPageState extends State<ClassPage> {
                                         const SizedBox(width: 10),
                                         Text(
                                           'Edit',
-                                          style: AppTypography.buttonLabel(color: isDark ? Colors.white : const Color(0xFF0F172A, fontWeight: FontWeight.w600),
+                                          style: AppTypography.buttonLabel(color: isDark ? Colors.white : const Color(0xFF0F172A), fontWeight: FontWeight.w600),
                                         ),
                                       ],
                                     ),
@@ -5176,7 +5176,7 @@ class _ClassPageState extends State<ClassPage> {
                                         const SizedBox(width: 10),
                                         Text(
                                           'Hapus',
-                                          style: AppTypography.buttonLabel(color: const Color(0xFFEF4444, fontWeight: FontWeight.w600),
+                                          style: AppTypography.buttonLabel(color: const Color(0xFFEF4444), fontWeight: FontWeight.w600),
                                         ),
                                       ],
                                     ),
@@ -5194,7 +5194,7 @@ class _ClassPageState extends State<ClassPage> {
                                         const SizedBox(width: 10),
                                         Text(
                                           'Export',
-                                          style: AppTypography.buttonLabel(color: isDark ? Colors.white : const Color(0xFF0F172A, fontWeight: FontWeight.w600),
+                                          style: AppTypography.buttonLabel(color: isDark ? Colors.white : const Color(0xFF0F172A), fontWeight: FontWeight.w600),
                                         ),
                                       ],
                                     ),
@@ -5320,7 +5320,7 @@ class _ClassPageState extends State<ClassPage> {
                     const SizedBox(width: 4),
                     Text(
                       'Selesai',
-                      style: AppTypography.buttonLabel(color: const Color(0xFF059669, fontWeight: FontWeight.bold),
+                      style: AppTypography.buttonLabel(color: const Color(0xFF059669), fontWeight: FontWeight.bold),
                     ),
                   ],
                 ),
@@ -8560,7 +8560,7 @@ class _AddActivityOverlayPageState extends State<AddActivityOverlayPage> {
                             const SizedBox(width: 8),
                             Text(
                               'Format Template Mass Upload:',
-                              style: AppTypography.buttonLabel(color: const Color(0xFFC2410C, fontWeight: FontWeight.bold),
+                              style: AppTypography.buttonLabel(color: const Color(0xFFC2410C), fontWeight: FontWeight.bold),
                             ),
                           ],
                         ),
