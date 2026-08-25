@@ -201,24 +201,50 @@ Spesifikasi baku untuk daftar teman, anggota classroom, daftar peserta ujian, da
 
 ---
 
-## 5. 🔤 Hierarki Tipografi (*Typography Scale*)
+## 5. 🔤 Standar Tipografi Resmi (*Typography Scale & Android Standard*)
 
-- **Headings, Tab Titles & Action Buttons**: Menggunakan `GoogleFonts.plusJakartaSans` (Tegas, solid, berkarakter modern seperti font sistem iOS WhatsApp).
-- **Body Text, Message Bubbles & Form Inputs**: Menggunakan `GoogleFonts.dmSans` (Sangat nyaman dan mudah dibaca pada paragraf chat, keterangan waktu, dan kolom form).
+Standar tipografi resmi Hubner Edu mengacu pada arsitektur halaman Chat:
+- **Headings, Display Names, Tab Titles & Action Buttons**: Menggunakan `GoogleFonts.plusJakartaSans` (Tegas, solid, modern, geometris).
+- **Body Text, Message Bubbles, Subtitles, Timestamps & Form Inputs**: Menggunakan `GoogleFonts.dmSans` (Sangat nyaman dan mudah dibaca pada paragraf chat, keterangan waktu, dan kolom form).
 
-| Kategori | Ukuran Font | Bobot (*Weight*) | Font Family | Contoh di Tampilan WhatsApp / Hubner |
+### A. Tabel Hierarki & Ukuran Font Baku
+| Kategori Komponen | Ukuran Font | Bobot (*Weight*) | Font Family | Contoh Implementasi |
 | :--- | :--- | :--- | :--- | :--- |
-| **Large Page Title** | `28.0` – `32.0` px | `FontWeight.bold` (w700) | Plus Jakarta Sans | Judul besar di atas ("Chat", "Komunitas", "Pembaruan") |
-| **AppBar Title** | `18.0` – `19.0` px | `FontWeight.bold` (w700) | Plus Jakarta Sans | Judul header ("SMKN 1 Kab. Tangerang", "Kode QR") |
-| **Group / Section Header** | `14.5` – `15.5` px | `FontWeight.bold` (w700) | Plus Jakarta Sans | Judul bagian ("Daftar Teman Anda", "Pembaruan terkini") |
-| **Card / Member Name** | `15.0` – `16.0` px | `FontWeight.bold` (w700) | Plus Jakarta Sans | Nama kontak ("agung", "ayong", "Bagus Setia Budi") |
-| **Chat Message / Body** | `14.0` – `14.5` px | `FontWeight.normal` (w400) | DM Sans | Isi pesan chat ("Syukur alhamdulillah...", "Paleng cepet...") |
-| **Input Search / TextField** | `14.0` – `14.5` px | `FontWeight.normal` (w400) | DM Sans | Kolom input "Tanya Meta AI atau cari", "Ketik pesan..." |
-| **Filter Chip Text** | `13.0` – `13.5` px | `FontWeight.w600` (w600) | Plus Jakarta Sans | Teks chip ("Semua", "Belum dibaca 140", "Favorit") |
-| **Timestamp / ID Subtitle**| `12.5` – `13.0` px | `FontWeight.normal` (w400) | DM Sans | ID user ("ID: swagun3348", "ID: swayon1903", "21.54") |
-| **Badge Counter Number** | `11.0` – `12.0` px | `FontWeight.bold` (w700) | Plus Jakarta Sans | Angka unread badge ("140", "18", "1") |
-| **Badge Number Bulat (01–10)**| `14.0` – `16.0` px | `FontWeight.bold` (w700) | Plus Jakarta Sans | Nomor lingkaran ("01", "02" ... "10") |
-| **Primary Pill Button** | `15.0` – `16.0` px | `FontWeight.bold` (w700) | Plus Jakarta Sans | Tombol CTA ("Pindai", "Lihat semua", "Simpan") |
+| **Large Page Title** | `26.0` – `30.0` px | `FontWeight.bold` (w700) | Plus Jakarta Sans | Judul halaman besar ("Chat", "Laporan Perkembangan", "Dokumen") |
+| **Header / Sender Name** | `18.0` px | `FontWeight.bold` (w700) | Plus Jakarta Sans | Nama pengirim di bubble chat ("Bagus Setia Budi", "Pak Guru") |
+| **Reply Sender / Card Title** | `16.5` px | `FontWeight.bold` (w700) | Plus Jakarta Sans | Nama pengirim reply, judul kartu ("agung", "ayong") |
+| **Chat Message / Body Text** | `16.5` px | `FontWeight.normal` (w400) | DM Sans | Isi pesan chat ("tes", "Selamat pagi semuanya...") |
+| **Input TextField Chat / Form**| `16.5` px | `FontWeight.normal` (w400) | DM Sans | Kolom input "Tulis pesan...", "Cari...", "Keterangan..." |
+| **Document Title / File Name** | `14.5` px | `FontWeight.bold` (w700) | Plus Jakarta Sans | Nama file attachment ("robbyfirmansyah...pdf", "Modul.docx") |
+| **Group Header / Filter Chip** | `13.5` px | `FontWeight.w600` (w600) | Plus Jakarta Sans | Chip tab ("Semua", "Tugas", "Quiz", "Favorit") |
+| **ID Subtitle / Description** | `13.0` px | `FontWeight.normal` (w400) | DM Sans | ID pengguna ("ID: swagun3348", "ID: 59382") |
+| **File Size / Sub-label** | `12.0` px | `FontWeight.normal` (w400) | DM Sans | Ukuran file ("927.3 KB", "1.2 MB", "2 halaman") |
+| **Timestamp / Waktu Pesan** | `12.0` px | `FontWeight.w500` (w500) | DM Sans | Keterangan jam bubble chat ("10:04", "10:06", "Kemarin") |
+| **Micro Badge / HD Tag** | `10.0` – `11.0` px | `FontWeight.bold` (w700) | Plus Jakarta Sans | Tag kecil ("HD", "PDF", "BARU") |
+
+### B. Aturan Mutlak Batas Ukuran Terkecil (*Android Minimum Legibility Rule*)
+1. **Batas Font Minimum**: Ukuran font terkecil yang diizinkan di seluruh aplikasi Android adalah **`10.0 px`** (khusus badge micro/HD tag).
+2. **Body & Isi Teks**: Tidak boleh ada teks deskripsi/konten/bacaan dengan ukuran di bawah **`12.0 px`** agar teks tidak buram (*pixelated*) atau sulit dibaca pada berbagai ukuran kerapatan layar (*DPI*) perangkat Android.
+3. **Format Penggunaan di Flutter**:
+   ```dart
+   // Contoh Headings & Labels:
+   GoogleFonts.plusJakartaSans(
+     fontSize: 18.0, // Header Nama
+     fontWeight: FontWeight.bold,
+   )
+   
+   // Contoh Pesan Chat & Body Text:
+   GoogleFonts.dmSans(
+     fontSize: 16.5, // Pesan Chat & Input
+     fontWeight: FontWeight.normal,
+   )
+   
+   // Contoh Keterangan Waktu & Ukuran File:
+   GoogleFonts.dmSans(
+     fontSize: 12.0, // Timestamp & File Size
+     fontWeight: FontWeight.w500,
+   )
+   ```
 
 ---
 
@@ -229,6 +255,7 @@ Spesifikasi baku untuk daftar teman, anggota classroom, daftar peserta ujian, da
 │                   STANDAR RADIUS                         │
 ├──────────────────────────┬───────────────────────────────┤
 │ Tombol Aksi & FAB        │ BoxShape.circle (Bulat Penuh) │
+│ Drawer Attachment Icons  │ BoxShape.circle (Bulat Penuh) │
 │ Badge Nomor (01–10)      │ BoxShape.circle (Bulat Penuh) │
 │ Color Picker Circles     │ BoxShape.circle (Bulat Penuh) │
 │ Pill Card (Member/Friend)│ BorderRadius.circular(32)     │
@@ -243,13 +270,45 @@ Spesifikasi baku untuk daftar teman, anggota classroom, daftar peserta ujian, da
 └──────────────────────────┴───────────────────────────────┘
 ```
 
-### 4.4 Aturan Hero Pills & Badge Nomor Tahapan di Dark Mode
-1. **Hero Pills Icons (Kelas & Siswa)**:
-   - **Ikon Kelas (School)**: Light Mode background `#FEF3C7` (Amber-100) / icon `#D97706` (Amber-600) -> **Dark Mode background `#451A03` (Amber-950) / icon `#FBBF24` (Amber-400)**.
-   - **Ikon Siswa (People)**: Light Mode background `#E0F2FE` (Sky-100) / icon `#2563EB` (Blue-600) -> **Dark Mode background `#172554` (Blue-950) / icon `#93C5FD` (Sky-300)**.
-2. **Badge Nomor Tahapan (01–10 Bulat)**:
-   - Light Mode: Latar warna slider pastel / angka putih.
-   - **Dark Mode**: Latar deep tinted container (`#2E1065`, `#172554`, `#064E3B`, `#451A03`, `#4C0519`) dengan **angka warna aksen pastel terang (`#D6A5F8`, `#93C5FD`, `#6EE7B7`, `#FDBA74`, `#F472B6`)**, tidak boleh menggunakan bulatan putih yang terlalu menyilaukan.
+---
+
+## 7. ⚪ Standar Ikon Aksi Bulat Solid & Aturan Bebas Bayangan (*Zero-Shadow Rule*)
+
+Seluruh tombol aksi bulat, tombol kirim, drawer lampiran media, dan container ikon wajib mengadopsi standar **Flat Round Solid** tanpa bayangan:
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│             STANDAR IKON AKSI BULAT SOLID & ZERO SHADOW                     │
+├─────────────────────────┬───────────────────────────────────────────────────┤
+│ Bentuk Container        │ BoxShape.circle (Lingkaran Sempurna)              │
+│ Gaya Warna Latar        │ Solid Flat Color (Tanpa Gradasi)                  │
+│ Efek Bayangan / Elevasi │ TIDAK ADA / HAPUS SELURUH BAYANGAN (boxShadow: [])│
+│ Warna Ikon di Dalam     │ Putih Bersih (Colors.white)                       │
+│ Ukuran Container Ikon   │ 52.0 – 56.0 px (Drawer) / 40.0 – 44.0 px (Chat)   │
+│ Label Teks di Bawah     │ Plus Jakarta Sans (13.0px, FontWeight.w600)       │
+└─────────────────────────┴───────────────────────────────────────────────────┘
+```
+
+### A. Palet Resmi Ikon Lampiran & Aksi Chat (*Attachment & Action Palette*)
+| Aksi / Tombol | Warna Latar Solid (Hex) | Ikon Material (White) | Deskripsi / Fungsi |
+| :--- | :--- | :--- | :--- |
+| **Kamera** | `#7C3AED` (Ungu) | `Icons.photo_camera_rounded` | Ambil foto / kamera langsung |
+| **Galeri** | `#EC4899` (Pink/Magenta) | `Icons.photo_library_rounded` | Unggah gambar / media galeri |
+| **Dokumen** | `#2563EB` (Biru) | `Icons.insert_drive_file_rounded` | Kirim berkas PDF / Word / Excel / ZIP |
+| **Link Tugas** | `#D97706` (Oranye/Amber) | `Icons.assignment_rounded` | Kirim tautan tugas kelas |
+| **Link Materi** | `#059669` (Hijau/Emerald)| `Icons.menu_book_rounded` | Kirim tautan materi belajar |
+| **Link Quiz** | `#6366F1` (Indigo/Violet)| `Icons.extension_rounded` | Kirim tautan kuis / asesmen |
+| **Tombol Kirim (Send)**| `#7C3AED` (Ungu Hubner) | `Icons.send_rounded` | Tombol kirim pesan / media |
+| **Toggle Keyboard/Panel**| Outline `#E2E8F0` / `#27272A` | `Icons.keyboard_alt_rounded` (`#10B981`) | Tombol keyboard hijau tanpa background |
+
+### B. Aturan Bebas Bayangan (*Zero-Shadow Rule*)
+- **DILARANG** menambahkan `BoxShadow`, `elevation`, atau gradasi pada:
+  1. Tombol Kirim / Send Button
+  2. Tombol Ikon Drawer Lampiran (*Camera, Gallery, Document, Task, Material, Quiz*)
+  3. Tombol HD Toggle & Tombol Batal/Close (X)
+  4. Gelembung Pesan Chat (*Chat Bubble*)
+  5. List Item Dokumen & File Manager Cards
+- **Tampilan Bersih & Rapat**: Seluruh komponen tampil *flat modern*, ringan, cepat dirender, dan tidak memiliki efek blur bayangan yang memberatkan performa rendering GPU Android.
 
 ---
 

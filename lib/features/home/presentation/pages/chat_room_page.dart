@@ -4492,8 +4492,13 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                         final bool isHdImage = msgData['isHd'] as bool? ?? false;
                                         final cpLinkData = msgData['cpLinkData'] as Map<String, dynamic>?;
                                         final bool isCpLink = cpLinkData != null;
-                                        final bool isOnlyImage = imageUrl.isNotEmpty && !isCpLink && (message.trim().isEmpty || message == '[Gambar Lampiran]');
-                                        final bool isOnlyFile = (fileUrl.isNotEmpty || fileName.isNotEmpty) && !isCpLink && (message.trim().isEmpty || message.startsWith('[Berkas:'));
+                                        final String rawMsg = message.trim();
+                                        String resolvedFileName = fileName;
+                                        if (resolvedFileName.isEmpty && rawMsg.startsWith('[Berkas:')) {
+                                          resolvedFileName = rawMsg.replaceFirst('[Berkas:', '').replaceAll(']', '').trim();
+                                        }
+                                        final bool isOnlyImage = imageUrl.isNotEmpty && !isCpLink && (rawMsg.isEmpty || rawMsg == '[Gambar Lampiran]');
+                                        final bool isOnlyFile = (fileUrl.isNotEmpty || resolvedFileName.isNotEmpty || rawMsg.startsWith('[Berkas:')) && !isCpLink && (rawMsg.isEmpty || rawMsg.startsWith('[Berkas:'));
 
                                         return Dismissible(
                                           key: Key('msg_$msgId'),
@@ -4607,13 +4612,6 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                                                   : (isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0)),
                                                               width: 1.0,
                                                             ),
-                                                            boxShadow: [
-                                                              BoxShadow(
-                                                                color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.05),
-                                                                blurRadius: 4,
-                                                                offset: const Offset(0, 1),
-                                                              ),
-                                                            ],
                                                           ),
                                                           child: Column(
                                                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -4766,103 +4764,113 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                                                   const SizedBox(height: 6),
                                                                 ],
                                                               ],
-                                                              if (fileUrl.isNotEmpty || fileName.isNotEmpty) ...[
-                                                                  GestureDetector(
-                                                                    onTap: () async {
-                                                                      if (fileUrl.isNotEmpty) {
-                                                                        final uri = Uri.parse(fileUrl);
-                                                                        if (await canLaunchUrl(uri)) {
-                                                                          await launchUrl(uri, mode: LaunchMode.externalApplication);
-                                                                        }
+                                                              if (fileUrl.isNotEmpty || resolvedFileName.isNotEmpty) ...[
+                                                                GestureDetector(
+                                                                  onTap: () async {
+                                                                    if (fileUrl.isNotEmpty) {
+                                                                      final uri = Uri.tryParse(fileUrl);
+                                                                      if (uri != null && await canLaunchUrl(uri)) {
+                                                                        await launchUrl(uri, mode: LaunchMode.externalApplication);
+                                                                        return;
                                                                       }
-                                                                    },
-                                                                    child: Container(
-                                                                      constraints: const BoxConstraints(maxWidth: 240),
-                                                                      padding: const EdgeInsets.all(10),
-                                                                      decoration: BoxDecoration(
-                                                                        color: isMe
-                                                                            ? (isDark ? const Color(0xFF581C87).withValues(alpha: 0.5) : const Color(0xFF6D28D9).withValues(alpha: 0.25))
-                                                                            : (isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9)),
-                                                                        borderRadius: BorderRadius.circular(12),
-                                                                        border: Border.all(
-                                                                          color: isMe
-                                                                              ? const Color(0xFFD6A5F8).withValues(alpha: 0.3)
-                                                                              : (isDark ? const Color(0xFF3F3F46) : const Color(0xFFE2E8F0)),
+                                                                    }
+                                                                    if (context.mounted) {
+                                                                      ScaffoldMessenger.of(context).showSnackBar(
+                                                                        SnackBar(
+                                                                          content: Text('Membuka informasi berkas: $resolvedFileName'),
+                                                                          behavior: SnackBarBehavior.floating,
+                                                                          duration: const Duration(seconds: 2),
                                                                         ),
-                                                                      ),
-                                                                      child: Row(
-                                                                        mainAxisSize: MainAxisSize.min,
-                                                                        children: [
-                                                                          (() {
-                                                                            final ext = fileName.contains('.') ? fileName.split('.').last.toLowerCase() : '';
-                                                                            Color badgeBg = const Color(0xFF2563EB);
-                                                                            IconData badgeIcon = Icons.insert_drive_file;
-                                                                            if (ext == 'pdf') {
-                                                                              badgeBg = const Color(0xFFEF4444);
-                                                                              badgeIcon = Icons.picture_as_pdf;
-                                                                            } else if (ext == 'doc' || ext == 'docx') {
-                                                                              badgeBg = const Color(0xFF2563EB);
-                                                                              badgeIcon = Icons.description;
-                                                                            } else if (ext == 'xls' || ext == 'xlsx') {
-                                                                              badgeBg = const Color(0xFF059669);
-                                                                              badgeIcon = Icons.table_chart;
-                                                                            } else if (ext == 'zip' || ext == 'rar') {
-                                                                              badgeBg = const Color(0xFFD97706);
-                                                                              badgeIcon = Icons.folder_zip;
-                                                                            } else if (['jpg', 'jpeg', 'png', 'webp'].contains(ext)) {
-                                                                              badgeBg = const Color(0xFF8B5CF6);
-                                                                              badgeIcon = Icons.image;
-                                                                            }
-                                                                            return Container(
-                                                                              width: 36,
-                                                                              height: 36,
-                                                                              decoration: BoxDecoration(
-                                                                                color: badgeBg.withValues(alpha: 0.2),
-                                                                                shape: BoxShape.circle,
-                                                                              ),
-                                                                              child: Icon(badgeIcon, color: badgeBg, size: 20),
-                                                                            );
-                                                                          })(),
-                                                                          const SizedBox(width: 10),
-                                                                          Expanded(
-                                                                            child: Column(
-                                                                              crossAxisAlignment: CrossAxisAlignment.start,
-                                                                              mainAxisSize: MainAxisSize.min,
-                                                                              children: [
-                                                                                Text(
-                                                                                  fileName.isNotEmpty ? fileName : 'Dokumen',
-                                                                                  maxLines: 1,
-                                                                                  overflow: TextOverflow.ellipsis,
-                                                                                  style: GoogleFonts.plusJakartaSans(
-                                                                                    fontSize: 14.5,
-                                                                                    fontWeight: FontWeight.bold,
-                                                                                    color: isMe ? Colors.white : (isDark ? Colors.white : const Color(0xFF0F172A)),
-                                                                                  ),
-                                                                                ),
-                                                                                if (fileSize.isNotEmpty) ...[
-                                                                                  const SizedBox(height: 2),
-                                                                                  Text(
-                                                                                    fileSize,
-                                                                                    style: GoogleFonts.dmSans(
-                                                                                      fontSize: 12.0,
-                                                                                      color: isMe ? Colors.white70 : (isDark ? Colors.white60 : Colors.black54),
-                                                                                    ),
-                                                                                  ),
-                                                                                ],
-                                                                              ],
-                                                                            ),
-                                                                          ),
-                                                                          const SizedBox(width: 6),
-                                                                          Icon(
-                                                                            Icons.file_download,
-                                                                            size: 18,
-                                                                            color: isMe ? Colors.white70 : (isDark ? Colors.white60 : Colors.black45),
-                                                                          ),
-                                                                        ],
+                                                                      );
+                                                                    }
+                                                                  },
+                                                                  child: Container(
+                                                                    constraints: const BoxConstraints(maxWidth: 240),
+                                                                    padding: const EdgeInsets.all(10),
+                                                                    decoration: BoxDecoration(
+                                                                      color: isMe
+                                                                          ? (isDark ? const Color(0xFF581C87).withValues(alpha: 0.5) : const Color(0xFF6D28D9).withValues(alpha: 0.25))
+                                                                          : (isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9)),
+                                                                      borderRadius: BorderRadius.circular(12),
+                                                                      border: Border.all(
+                                                                        color: isMe
+                                                                            ? const Color(0xFFD6A5F8).withValues(alpha: 0.3)
+                                                                            : (isDark ? const Color(0xFF3F3F46) : const Color(0xFFE2E8F0)),
                                                                       ),
                                                                     ),
+                                                                    child: Row(
+                                                                      mainAxisSize: MainAxisSize.min,
+                                                                      children: [
+                                                                        (() {
+                                                                          final ext = resolvedFileName.contains('.') ? resolvedFileName.split('.').last.toLowerCase() : '';
+                                                                          Color badgeBg = const Color(0xFF2563EB);
+                                                                          IconData badgeIcon = Icons.insert_drive_file;
+                                                                          if (ext == 'pdf') {
+                                                                            badgeBg = const Color(0xFFEF4444);
+                                                                            badgeIcon = Icons.picture_as_pdf;
+                                                                          } else if (ext == 'doc' || ext == 'docx') {
+                                                                            badgeBg = const Color(0xFF2563EB);
+                                                                            badgeIcon = Icons.description;
+                                                                          } else if (ext == 'xls' || ext == 'xlsx') {
+                                                                            badgeBg = const Color(0xFF059669);
+                                                                            badgeIcon = Icons.table_chart;
+                                                                          } else if (ext == 'zip' || ext == 'rar') {
+                                                                            badgeBg = const Color(0xFFD97706);
+                                                                            badgeIcon = Icons.folder_zip;
+                                                                          } else if (['jpg', 'jpeg', 'png', 'webp'].contains(ext)) {
+                                                                            badgeBg = const Color(0xFF8B5CF6);
+                                                                            badgeIcon = Icons.image;
+                                                                          }
+                                                                          return Container(
+                                                                            width: 36,
+                                                                            height: 36,
+                                                                            decoration: BoxDecoration(
+                                                                              color: badgeBg.withValues(alpha: 0.2),
+                                                                              shape: BoxShape.circle,
+                                                                            ),
+                                                                            child: Icon(badgeIcon, color: badgeBg, size: 20),
+                                                                          );
+                                                                        })(),
+                                                                        const SizedBox(width: 10),
+                                                                        Expanded(
+                                                                          child: Column(
+                                                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                                                            mainAxisSize: MainAxisSize.min,
+                                                                            children: [
+                                                                              Text(
+                                                                                resolvedFileName.isNotEmpty ? resolvedFileName : 'Dokumen',
+                                                                                maxLines: 1,
+                                                                                overflow: TextOverflow.ellipsis,
+                                                                                style: GoogleFonts.plusJakartaSans(
+                                                                                  fontSize: 14.5,
+                                                                                  fontWeight: FontWeight.bold,
+                                                                                  color: isMe ? Colors.white : (isDark ? Colors.white : const Color(0xFF0F172A)),
+                                                                                ),
+                                                                              ),
+                                                                              if (fileSize.isNotEmpty) ...[
+                                                                                const SizedBox(height: 2),
+                                                                                Text(
+                                                                                  fileSize,
+                                                                                  style: GoogleFonts.dmSans(
+                                                                                    fontSize: 12.0,
+                                                                                    color: isMe ? Colors.white70 : (isDark ? Colors.white60 : Colors.black54),
+                                                                                  ),
+                                                                                ),
+                                                                              ],
+                                                                            ],
+                                                                          ),
+                                                                        ),
+                                                                        const SizedBox(width: 6),
+                                                                        Icon(
+                                                                          Icons.file_download,
+                                                                          size: 18,
+                                                                          color: isMe ? Colors.white70 : (isDark ? Colors.white60 : Colors.black45),
+                                                                        ),
+                                                                      ],
+                                                                    ),
                                                                   ),
-                                                                  if (message.isNotEmpty && !message.startsWith('[Berkas:')) const SizedBox(height: 4),
+                                                                ),
+                                                                if (message.isNotEmpty && !message.startsWith('[Berkas:')) const SizedBox(height: 4),
                                                               ],
                                                               if (isCpLink) ...[
                                                                 _buildCpLinkCard(
@@ -4937,13 +4945,6 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                                                         color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
                                                                         width: 1.2,
                                                                       ),
-                                                                      boxShadow: [
-                                                                        BoxShadow(
-                                                                          color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.10),
-                                                                          blurRadius: 3,
-                                                                          offset: const Offset(0, 1),
-                                                                        ),
-                                                                      ],
                                                                     ),
                                                                     child: Text(
                                                                       '${reactionList.length}',
@@ -5062,13 +5063,6 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                             color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
                                             width: 1.0,
                                           ),
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color: Colors.black.withValues(alpha: isDark ? 0.40 : 0.12),
-                                              blurRadius: 10,
-                                              offset: const Offset(0, 3),
-                                            ),
-                                          ],
                                         ),
                                         alignment: Alignment.center,
                                         child: Icon(
@@ -5362,16 +5356,9 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                         child: Container(
                                           width: 40,
                                           height: 40,
-                                          decoration: BoxDecoration(
-                                            color: const Color(0xFF7C3AED),
+                                          decoration: const BoxDecoration(
+                                            color: Color(0xFF7C3AED),
                                             shape: BoxShape.circle,
-                                            boxShadow: [
-                                              BoxShadow(
-                                                color: const Color(0xFF7C3AED).withValues(alpha: 0.35),
-                                                blurRadius: 6,
-                                                offset: const Offset(0, 2),
-                                              ),
-                                            ],
                                           ),
                                           alignment: Alignment.center,
                                           child: Icon(
@@ -5644,48 +5631,41 @@ class _ImagePreviewSendDialogState extends State<ImagePreviewSendDialog> {
                       ),
                     ),
 
-                    // Tombol HD
-                    GestureDetector(
+                    // Tombol HD (Interactive with Haptic & Reliable Icons)
+                    BouncyButton(
+                      scaleDown: 0.9,
                       onTap: () {
                         setState(() {
                           _isHd = !_isHd;
                         });
+                        HapticFeedback.lightImpact();
                       },
                       child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 200),
-                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                        duration: const Duration(milliseconds: 180),
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
                         decoration: BoxDecoration(
                           color: _isHd
                               ? const Color(0xFF7C3AED)
-                              : Colors.black.withValues(alpha: 0.45),
+                              : Colors.black.withValues(alpha: 0.5),
                           borderRadius: BorderRadius.circular(20),
                           border: Border.all(
-                            color: _isHd ? const Color(0xFFA78BFA) : Colors.white30,
+                            color: _isHd ? const Color(0xFFA78BFA) : Colors.white38,
                             width: 1.2,
                           ),
-                          boxShadow: _isHd
-                              ? [
-                                  BoxShadow(
-                                    color: const Color(0xFF7C3AED).withValues(alpha: 0.5),
-                                    blurRadius: 8,
-                                    offset: const Offset(0, 2),
-                                  )
-                                ]
-                              : null,
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Icon(
-                              _isHd ? Icons.hd_rounded : Icons.hd_outlined,
+                              _isHd ? Icons.check_circle_rounded : Icons.high_quality_rounded,
                               size: 18,
                               color: Colors.white,
                             ),
-                            const SizedBox(width: 4),
+                            const SizedBox(width: 5),
                             Text(
                               'HD',
                               style: GoogleFonts.plusJakartaSans(
-                                fontSize: 12.0,
+                                fontSize: 13.0,
                                 fontWeight: FontWeight.bold,
                                 color: Colors.white,
                               ),
@@ -5767,16 +5747,9 @@ class _ImagePreviewSendDialogState extends State<ImagePreviewSendDialog> {
                     child: Container(
                       width: 44,
                       height: 44,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF7C3AED),
+                      decoration: const BoxDecoration(
+                        color: Color(0xFF7C3AED),
                         shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: const Color(0xFF7C3AED).withValues(alpha: 0.4),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
                       ),
                       alignment: Alignment.center,
                       child: const Icon(

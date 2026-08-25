@@ -5039,7 +5039,6 @@ class _DocumentsTabState extends State<DocumentsTab> {
                                 if (_isUploading)
                                   const ThreeDotsLoader(size: 6, bounceHeight: 3)
                                 else ...[
-                                  // Toggle Grid / List (Round Button)
                                   BouncyButton(
                                     onTap: () => setState(() => _isGridView = !_isGridView),
                                     child: Container(
@@ -5051,14 +5050,13 @@ class _DocumentsTabState extends State<DocumentsTab> {
                                         border: Border.all(color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0)),
                                       ),
                                       child: Icon(
-                                        _isGridView ? Icons.view_list : Icons.grid_view,
+                                        _isGridView ? Icons.format_list_bulleted_rounded : Icons.grid_view_rounded,
                                         color: isDark ? Colors.white70 : Colors.black87,
-                                        size: 18,
+                                        size: 19,
                                       ),
                                     ),
                                   ),
                                   const SizedBox(width: 8),
-                                  // Create Folder Button (Round Button)
                                   BouncyButton(
                                     onTap: () => _createFolderInDrive(parentFolderId: publicDriveFolderId),
                                     child: Container(
@@ -5070,14 +5068,13 @@ class _DocumentsTabState extends State<DocumentsTab> {
                                         border: Border.all(color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0)),
                                       ),
                                       child: Icon(
-                                        Icons.create_new_folder,
+                                        Icons.create_new_folder_rounded,
                                         color: isDark ? Colors.white70 : Colors.black87,
-                                        size: 18,
+                                        size: 19,
                                       ),
                                     ),
                                   ),
                                   const SizedBox(width: 8),
-                                  // Upload File Button (Round Black/White Button)
                                   BouncyButton(
                                     onTap: () => _uploadFileToDrive(targetFolderId: publicDriveFolderId),
                                     child: Container(
@@ -5088,9 +5085,9 @@ class _DocumentsTabState extends State<DocumentsTab> {
                                         shape: BoxShape.circle,
                                       ),
                                       child: Icon(
-                                        Icons.file_upload,
+                                        Icons.cloud_upload_rounded,
                                         color: isDark ? Colors.black : Colors.white,
-                                        size: 18,
+                                        size: 19,
                                       ),
                                     ),
                                   ),
@@ -5101,14 +5098,12 @@ class _DocumentsTabState extends State<DocumentsTab> {
                         ),
                       ),
 
-                      // Drive Banner (ONLY when repository doesn't exist and not connected)
                       if (!hasExistingRepo)
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 4.0),
                           child: _buildDriveNotConnectedCard(isDark),
                         ),
 
-                      // Breadcrumb Navigation Bar
                       Container(
                         width: double.infinity,
                         padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 8.0),
@@ -5116,7 +5111,6 @@ class _DocumentsTabState extends State<DocumentsTab> {
                           scrollDirection: Axis.horizontal,
                           child: Row(
                             children: [
-                              // Back Arrow if deep inside
                               if (_folderCrumbs.isNotEmpty) ...[
                                 GestureDetector(
                                   onTap: () {
@@ -5131,11 +5125,10 @@ class _DocumentsTabState extends State<DocumentsTab> {
                                       color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
                                       shape: BoxShape.circle,
                                     ),
-                                    child: Icon(Icons.arrow_back, size: 14, color: isDark ? Colors.white : Colors.black87),
+                                    child: Icon(Icons.arrow_back_ios_new_rounded, size: 14, color: isDark ? Colors.white : Colors.black87),
                                   ),
                                 ),
                               ],
-                              // Root Crumb
                               GestureDetector(
                                 onTap: () {
                                   setState(() {
@@ -5154,7 +5147,7 @@ class _DocumentsTabState extends State<DocumentsTab> {
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
                                       Icon(
-                                        Icons.home,
+                                        Icons.home_rounded,
                                         size: 16,
                                         color: _folderCrumbs.isEmpty ? const Color(0xFF2563EB) : (isDark ? Colors.white60 : Colors.black45),
                                       ),
@@ -5171,11 +5164,10 @@ class _DocumentsTabState extends State<DocumentsTab> {
                                   ),
                                 ),
                               ),
-                              // Subfolder Crumbs
                               for (int i = 0; i < _folderCrumbs.length; i++) ...[
                                 Padding(
                                   padding: const EdgeInsets.symmetric(horizontal: 4),
-                                  child: Icon(Icons.chevron_right, size: 16, color: isDark ? Colors.white38 : Colors.black26),
+                                  child: Icon(Icons.chevron_right_rounded, size: 16, color: isDark ? Colors.white38 : Colors.black26),
                                 ),
                                 GestureDetector(
                                   onTap: () {
@@ -5207,7 +5199,6 @@ class _DocumentsTabState extends State<DocumentsTab> {
                         ),
                       ),
 
-                      // Search Bar & Filter Row (Round styling)
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 6.0),
                         child: Row(
@@ -5221,7 +5212,7 @@ class _DocumentsTabState extends State<DocumentsTab> {
                                   hintStyle: GoogleFonts.dmSans(color: isDark ? Colors.white38 : Colors.black26, fontSize: 13.5),
                                   filled: true,
                                   fillColor: isDark ? const Color(0xFF18181B) : const Color(0xFFF8FAFC),
-                                  prefixIcon: Icon(Icons.search, color: isDark ? Colors.white38 : Colors.black38, size: 18),
+                                  prefixIcon: Icon(Icons.search_rounded, color: isDark ? Colors.white38 : Colors.black38, size: 18),
                                   contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
                                   enabledBorder: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(24),
@@ -5244,7 +5235,7 @@ class _DocumentsTabState extends State<DocumentsTab> {
                                   shape: BoxShape.circle,
                                   border: Border.all(color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0)),
                                 ),
-                                child: Icon(Icons.filter_list, color: isDark ? Colors.white70 : Colors.black54, size: 18),
+                                child: Icon(Icons.tune_rounded, color: isDark ? Colors.white70 : Colors.black54, size: 18),
                               ),
                               color: isDark ? const Color(0xFF18181B) : Colors.white,
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),

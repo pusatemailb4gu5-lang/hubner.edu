@@ -44,6 +44,71 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
   // Soft pattern animation controller for hero background
   late AnimationController _patternAnimController;
 
+  // Real-time table horizontal scroll tracking
+  final ScrollController _tableHorizontalScrollController = ScrollController();
+
+  Widget _buildTableScrollIndicator(bool isDark) {
+    return AnimatedBuilder(
+      animation: _tableHorizontalScrollController,
+      builder: (context, _) {
+        double maxScroll = 0.0;
+        double currentScroll = 0.0;
+        double viewportWidth = 1.0;
+        if (_tableHorizontalScrollController.hasClients &&
+            _tableHorizontalScrollController.position.hasContentDimensions) {
+          maxScroll = _tableHorizontalScrollController.position.maxScrollExtent;
+          currentScroll = _tableHorizontalScrollController.offset.clamp(0.0, maxScroll);
+          viewportWidth = _tableHorizontalScrollController.position.viewportDimension;
+        }
+
+        if (maxScroll <= 0) {
+          return const SizedBox.shrink();
+        }
+
+        final double totalContentWidth = viewportWidth + maxScroll;
+        final double thumbRatio = (viewportWidth / totalContentWidth).clamp(0.12, 0.9);
+        final double scrollProgress = maxScroll > 0 ? (currentScroll / maxScroll).clamp(0.0, 1.0) : 0.0;
+
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final double trackWidth = constraints.maxWidth;
+              final double thumbWidth = (trackWidth * thumbRatio).clamp(24.0, trackWidth);
+              final double availableDistance = trackWidth - thumbWidth;
+              final double thumbLeft = availableDistance * scrollProgress;
+
+              return Container(
+                height: 3.5,
+                width: trackWidth,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF7C3AED).withValues(alpha: isDark ? 0.22 : 0.14),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+                child: Stack(
+                  children: [
+                    Positioned(
+                      left: thumbLeft,
+                      top: 0,
+                      bottom: 0,
+                      width: thumbWidth,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF7C3AED),
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        );
+      },
+    );
+  }
+
   void _openClassDropdown(BuildContext context, GlobalKey buttonKey, List<QueryDocumentSnapshot> classrooms) {
     final RenderBox? renderBox = buttonKey.currentContext?.findRenderObject() as RenderBox?;
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -1681,47 +1746,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                 ),
                                 const SizedBox(height: 8),
 
-                                // Indikator Scroll Geser Horisontal Warna Ungu
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                                  child: Row(
-                                    children: [
-                                      Container(
-                                        width: 28,
-                                        height: 3.5,
-                                        decoration: BoxDecoration(
-                                          color: const Color(0xFF7C3AED),
-                                          borderRadius: BorderRadius.circular(2),
-                                        ),
-                                      ),
-                                      const SizedBox(width: 4),
-                                      Expanded(
-                                        child: Container(
-                                          height: 1.5,
-                                          decoration: BoxDecoration(
-                                            color: const Color(0xFF7C3AED).withValues(alpha: isDark ? 0.3 : 0.18),
-                                            borderRadius: BorderRadius.circular(1),
-                                          ),
-                                        ),
-                                      ),
-                                      const SizedBox(width: 8),
-                                      Icon(
-                                        Icons.swipe_left_rounded,
-                                        size: 13,
-                                        color: const Color(0xFF7C3AED).withValues(alpha: 0.85),
-                                      ),
-                                      const SizedBox(width: 4),
-                                      Text(
-                                        'Geser tabel',
-                                        style: GoogleFonts.plusJakartaSans(
-                                          fontSize: 11.0,
-                                          fontWeight: FontWeight.w600,
-                                          color: const Color(0xFF7C3AED).withValues(alpha: 0.85),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
+                                _buildTableScrollIndicator(isDark),
                                 const SizedBox(height: 8),
 
                                 // ==========================================
@@ -1729,6 +1754,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                 // ==========================================
                                 Expanded(
                                   child: SingleChildScrollView(
+                                    controller: _tableHorizontalScrollController,
                                     scrollDirection: Axis.horizontal,
                                     physics: const ClampingScrollPhysics(),
                                     padding: const EdgeInsets.symmetric(horizontal: 16),
