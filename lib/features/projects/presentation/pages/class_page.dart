@@ -23,6 +23,7 @@ import 'baca_materi_page.dart';
 import 'detail_cp_page.dart';
 import 'package:hubner/core/services/classroom_export_service.dart';
 import 'package:hubner/core/services/google_drive_service.dart';
+import 'package:hubner/core/services/app_sound_service.dart';
 import 'package:hubner/core/theme/app_colors.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
@@ -4422,7 +4423,13 @@ class _ClassPageState extends State<ClassPage> {
                         key: ValueKey('stage_${index}_${stageName}'),
                         direction: isOwner ? DismissDirection.endToStart : DismissDirection.none,
                         confirmDismiss: (direction) async {
+                          AppSoundService.playDeleteWhoosh();
                           return await _confirmDeleteElemen(context, index, liveStages);
+                        },
+                        onUpdate: (details) {
+                          if (details.reached && !details.previousReached) {
+                            AppSoundService.playDeleteWhoosh();
+                          }
                         },
                         background: Container(
                           alignment: Alignment.centerRight,

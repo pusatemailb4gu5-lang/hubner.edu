@@ -19,6 +19,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:hubner/core/theme/app_colors.dart';
+import 'package:hubner/core/services/app_sound_service.dart';
 import 'package:hubner/core/theme/app_typography.dart';
 import 'package:hubner/main.dart' show HubnerApp;
 import 'home_page.dart' show BouncyButton;
@@ -127,11 +128,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
   }
 
   Future<void> _playNotificationSound() async {
-    try {
-      await _audioPlayer.play(AssetSource('sounds/notification.wav'));
-    } catch (e) {
-      print('Error playing notification sound: $e');
-    }
+    await AppSoundService.playReceiveTingTung();
   }
 
   @override
@@ -1973,6 +1970,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
       if (mounted) {
         Navigator.pop(context); // Close loading dialog
       }
+      AppSoundService.playSendSwoosh();
       _scrollToBottom();
     } catch (e) {
       if (mounted) {
@@ -2099,7 +2097,8 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
           .doc(targetDocId)
           .update(updates);
 
-      // Scroll to bottom
+      // Play sound and scroll to bottom
+      AppSoundService.playSendSwoosh();
       _scrollToBottom();
     } catch (e) {
       if (mounted) {

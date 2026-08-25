@@ -3,16 +3,12 @@ import 'package:hubner/core/widgets/three_dots_loader.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
-import 'package:google_fonts/google_fonts.dart';
 import 'package:hubner/core/theme/app_typography.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:hubner/features/home/presentation/pages/main_navigation_page.dart';
-import 'package:hubner/core/widgets/google_sign_in_button.dart';
-import 'login_page.dart';
 import 'setup_choice_page.dart';
 import 'package:hubner/features/home/presentation/widgets/animated_rainbow_background.dart';
 import 'package:hubner/core/theme/app_colors.dart';
@@ -416,574 +412,613 @@ class _RegisterPageState extends State<RegisterPage> {
           if (!isTablet) _buildCircularBackButton(context, isDark),
           if (isTablet) const SizedBox(height: 32),
           
-          // Create Account Title
-                Text(
-                  isTablet ? 'Buat Akun' : 'Daftar',
-                  style: AppTypography.buttonLabel(color: isDark ? Colors.white : Colors.black, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  isTablet
-                      ? 'Daftar untuk mengelola tugas Anda dengan mudah.'
-                      : 'Dengan mendaftar, Anda menyetujui Ketentuan Layanan kami.',
-                  style: AppTypography.timestamp(color: isDark ? Colors.white60 : (isTablet ? Colors.black38 : Colors.black45)),
-                ),
-                const SizedBox(height: 24),
+          // Create Account Title (Judul 20, Deskripsi 18)
+          Text(
+            isTablet ? 'Buat Akun' : 'Daftar',
+            style: AppTypography.pageTitle(
+              fontSize: 20,
+              color: isDark ? Colors.white : Colors.black,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            isTablet
+                ? 'Daftar untuk mengelola tugas Anda dengan mudah.'
+                : 'Dengan mendaftar, Anda menyetujui Ketentuan Layanan kami.',
+            style: AppTypography.chatBody(
+              fontSize: 18,
+              color: isDark ? Colors.white60 : Colors.black54,
+              height: 1.4,
+            ),
+          ),
+          const SizedBox(height: 24),
 
-                // Full Name Field
-                Text(
-                  'Nama Lengkap',
-                  style: AppTypography.timestamp(color: isDark ? Colors.white70 : Colors.black54, fontWeight: FontWeight.w500),
-                ),
-                const SizedBox(height: 6),
-                TextField(
-                  controller: _nameController,
-                  keyboardType: TextInputType.name,
-                  style: AppTypography.timestamp(color: isDark ? Colors.white : Colors.black87),
-                  decoration: InputDecoration(
-                    hintText: 'Masukkan nama lengkap Anda',
-                    hintStyle: AppTypography.subtitle(color: isDark ? Colors.white38 : Colors.black26),
-                    filled: true,
-                    fillColor: isDark ? const Color(0xFF18181B) : Colors.white,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(24),
-                      borderSide: BorderSide(color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9)),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(24),
-                      borderSide: BorderSide(color: isDark ? Colors.white : Colors.black),
-                    ),
-                    prefixIcon: Icon(Icons.person_outline_rounded, color: isDark ? Colors.white38 : Colors.black38, size: 20),
+          // Full Name Field
+          Text(
+            'Nama Lengkap',
+            style: AppTypography.timestamp(color: isDark ? Colors.white70 : Colors.black54, fontWeight: FontWeight.w500),
+          ),
+          const SizedBox(height: 8),
+          TextField(
+            controller: _nameController,
+            keyboardType: TextInputType.name,
+            style: AppTypography.timestamp(color: isDark ? Colors.white : Colors.black87),
+            decoration: InputDecoration(
+              hintText: 'Masukkan nama lengkap Anda',
+              hintStyle: AppTypography.subtitle(color: isDark ? Colors.white38 : Colors.black26),
+              filled: true,
+              fillColor: isDark ? const Color(0xFF18181B) : Colors.white,
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(32),
+                borderSide: BorderSide(color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0), width: 1.2),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(32),
+                borderSide: BorderSide(color: isDark ? Colors.white : Colors.black, width: 1.2),
+              ),
+              prefixIcon: Icon(Icons.person_outline_rounded, color: isDark ? Colors.white38 : Colors.black38, size: 20),
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // Email Address Field
+          Row(
+            children: [
+              Text(
+                'Alamat Email',
+                style: AppTypography.timestamp(color: isDark ? Colors.white70 : Colors.black54, fontWeight: FontWeight.w500),
+              ),
+              if (widget.isGoogleSignIn) ...[
+                const SizedBox(width: 6),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFDCFCE7),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.verified_rounded, size: 12, color: Color(0xFF16A34A)),
+                      const SizedBox(width: 4),
+                      Text(
+                        'Terverifikasi Google',
+                        style: AppTypography.buttonLabel(color: const Color(0xFF16A34A), fontWeight: FontWeight.w600),
+                      ),
+                    ],
                   ),
                 ),
-                const SizedBox(height: 14),
+              ],
+            ],
+          ),
+          const SizedBox(height: 8),
+          TextField(
+            controller: _emailController,
+            readOnly: widget.isGoogleSignIn,
+            enabled: !widget.isGoogleSignIn,
+            keyboardType: TextInputType.emailAddress,
+            style: AppTypography.timestamp(color: widget.isGoogleSignIn ? (isDark ? Colors.white38 : Colors.black38) : (isDark ? Colors.white : Colors.black87)),
+            decoration: InputDecoration(
+              hintText: 'Masukkan email Anda',
+              hintStyle: AppTypography.subtitle(color: isDark ? Colors.white38 : Colors.black26),
+              filled: true,
+              fillColor: widget.isGoogleSignIn
+                  ? (isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9))
+                  : (isDark ? const Color(0xFF18181B) : Colors.white),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(32),
+                borderSide: BorderSide(
+                  color: widget.isGoogleSignIn
+                      ? (isDark ? const Color(0xFF3F3F46) : const Color(0xFFE2E8F0))
+                      : (isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0)),
+                  width: 1.2,
+                ),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(32),
+                borderSide: BorderSide(color: isDark ? Colors.white : Colors.black, width: 1.2),
+              ),
+              disabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(32),
+                borderSide: BorderSide(color: isDark ? const Color(0xFF3F3F46) : const Color(0xFFE2E8F0), width: 1.2),
+              ),
+              prefixIcon: Icon(Icons.mail_outline_rounded, color: isDark ? Colors.white38 : Colors.black38, size: 20),
+              suffixIcon: widget.isGoogleSignIn
+                  ? const Padding(
+                      padding: EdgeInsets.only(right: 16.0),
+                      child: Icon(Icons.check_circle_rounded, color: Color(0xFF16A34A), size: 20),
+                    )
+                  : null,
+            ),
+          ),
+          const SizedBox(height: 16),
 
-                // Email Address Field
-                Row(
-                  children: [
-                    Text(
-                      'Alamat Email',
-                      style: AppTypography.timestamp(color: isDark ? Colors.white70 : Colors.black54, fontWeight: FontWeight.w500),
+          // Password Field
+          Text(
+            'Kata Sandi',
+            style: AppTypography.timestamp(color: isDark ? Colors.white70 : Colors.black54, fontWeight: FontWeight.w500),
+          ),
+          const SizedBox(height: 8),
+          TextField(
+            controller: _passwordController,
+            obscureText: _obscurePassword,
+            style: AppTypography.timestamp(color: isDark ? Colors.white : Colors.black87),
+            decoration: InputDecoration(
+              hintText: 'Buat kata sandi',
+              hintStyle: AppTypography.subtitle(color: isDark ? Colors.white38 : Colors.black26),
+              filled: true,
+              fillColor: isDark ? const Color(0xFF18181B) : Colors.white,
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(32),
+                borderSide: BorderSide(color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0), width: 1.2),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(32),
+                borderSide: BorderSide(color: isDark ? Colors.white : Colors.black, width: 1.2),
+              ),
+              prefixIcon: Icon(Icons.lock_outline_rounded, color: isDark ? Colors.white38 : Colors.black38, size: 20),
+              suffixIcon: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () {
+                  setState(() {
+                    _obscurePassword = !_obscurePassword;
+                  });
+                },
+                child: Padding(
+                  padding: const EdgeInsets.only(right: 16.0),
+                  child: Icon(
+                    _obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                    color: isDark ? Colors.white38 : Colors.black38,
+                    size: 20,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // Confirm Password Field
+          Text(
+            'Konfirmasi Kata Sandi',
+            style: AppTypography.timestamp(color: isDark ? Colors.white70 : Colors.black54, fontWeight: FontWeight.w500),
+          ),
+          const SizedBox(height: 8),
+          TextField(
+            controller: _confirmPasswordController,
+            obscureText: _obscureConfirmPassword,
+            style: AppTypography.timestamp(color: isDark ? Colors.white : Colors.black87),
+            decoration: InputDecoration(
+              hintText: 'Konfirmasi kata sandi Anda',
+              hintStyle: AppTypography.subtitle(color: isDark ? Colors.white38 : Colors.black26),
+              filled: true,
+              fillColor: isDark ? const Color(0xFF18181B) : Colors.white,
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(32),
+                borderSide: BorderSide(color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0), width: 1.2),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(32),
+                borderSide: BorderSide(color: isDark ? Colors.white : Colors.black, width: 1.2),
+              ),
+              prefixIcon: Icon(Icons.lock_outline_rounded, color: isDark ? Colors.white38 : Colors.black38, size: 20),
+              suffixIcon: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () {
+                  setState(() {
+                    _obscureConfirmPassword = !_obscureConfirmPassword;
+                  });
+                },
+                child: Padding(
+                  padding: const EdgeInsets.only(right: 16.0),
+                  child: Icon(
+                    _obscureConfirmPassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                    color: isDark ? Colors.white38 : Colors.black38,
+                    size: 20,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // Gender Selection
+          Text(
+            'Jenis Kelamin',
+            style: AppTypography.timestamp(color: isDark ? Colors.white70 : Colors.black54, fontWeight: FontWeight.w500),
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Expanded(
+                child: GestureDetector(
+                  onTap: () => setState(() => _selectedGender = 'Laki-laki'),
+                  child: Container(
+                    height: 48,
+                    decoration: BoxDecoration(
+                      color: _selectedGender == 'Laki-laki'
+                          ? (isDark ? const Color(0xFF7F52FC) : Colors.black)
+                          : (isDark ? const Color(0xFF18181B) : Colors.white),
+                      borderRadius: BorderRadius.circular(32),
+                      border: Border.all(
+                        color: _selectedGender == 'Laki-laki'
+                            ? (isDark ? const Color(0xFF7F52FC) : Colors.black)
+                            : (isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0)),
+                        width: 1.2,
+                      ),
                     ),
-                    if (widget.isGoogleSignIn) ...[
-                      const SizedBox(width: 6),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFDCFCE7),
-                          borderRadius: BorderRadius.circular(20),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.male_rounded,
+                          color: _selectedGender == 'Laki-laki' ? Colors.white : (isDark ? Colors.white54 : Colors.black38),
+                          size: 18,
                         ),
+                        const SizedBox(width: 6),
+                        Text(
+                          'Laki-laki',
+                          style: AppTypography.buttonLabel(color: _selectedGender == 'Laki-laki' ? Colors.white : (isDark ? Colors.white70 : Colors.black38), fontWeight: FontWeight.w600),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: GestureDetector(
+                  onTap: () => setState(() => _selectedGender = 'Perempuan'),
+                  child: Container(
+                    height: 48,
+                    decoration: BoxDecoration(
+                      color: _selectedGender == 'Perempuan'
+                          ? (isDark ? const Color(0xFF7F52FC) : Colors.black)
+                          : (isDark ? const Color(0xFF18181B) : Colors.white),
+                      borderRadius: BorderRadius.circular(32),
+                      border: Border.all(
+                        color: _selectedGender == 'Perempuan'
+                            ? (isDark ? const Color(0xFF7F52FC) : Colors.black)
+                            : (isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0)),
+                        width: 1.2,
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.female_rounded,
+                          color: _selectedGender == 'Perempuan' ? Colors.white : (isDark ? Colors.white54 : Colors.black38),
+                          size: 18,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          'Perempuan',
+                          style: AppTypography.buttonLabel(color: _selectedGender == 'Perempuan' ? Colors.white : (isDark ? Colors.white70 : Colors.black38), fontWeight: FontWeight.w600),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+
+          // Role Selection (Guru vs Siswa)
+          Text(
+            'Peran / Role Pengguna',
+            style: AppTypography.timestamp(color: isDark ? Colors.white70 : Colors.black54, fontWeight: FontWeight.w500),
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Expanded(
+                child: GestureDetector(
+                  onTap: () => setState(() => _selectedRole = 'Guru'),
+                  child: Container(
+                    height: 48,
+                    decoration: BoxDecoration(
+                      color: _selectedRole == 'Guru' ? const Color(0xFF7F52FC) : (isDark ? const Color(0xFF18181B) : Colors.white),
+                      borderRadius: BorderRadius.circular(32),
+                      border: Border.all(
+                        color: const Color(0xFF7F52FC),
+                        width: _selectedRole == 'Guru' ? 1.5 : 1.0,
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.school_rounded,
+                          color: _selectedRole == 'Guru' ? Colors.white : (isDark ? Colors.white60 : Colors.black45),
+                          size: 18,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          'Guru',
+                          style: AppTypography.buttonLabel(color: _selectedRole == 'Guru' ? Colors.white : (isDark ? Colors.white : Colors.black87), fontWeight: FontWeight.w600),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: GestureDetector(
+                  onTap: () => setState(() => _selectedRole = 'Siswa'),
+                  child: Container(
+                    height: 48,
+                    decoration: BoxDecoration(
+                      color: _selectedRole == 'Siswa' ? const Color(0xFF7F52FC) : (isDark ? const Color(0xFF18181B) : Colors.white),
+                      borderRadius: BorderRadius.circular(32),
+                      border: Border.all(
+                        color: const Color(0xFF7F52FC),
+                        width: _selectedRole == 'Siswa' ? 1.5 : 1.0,
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.person_rounded,
+                          color: _selectedRole == 'Siswa' ? Colors.white : (isDark ? Colors.white60 : Colors.black45),
+                          size: 18,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          'Siswa',
+                          style: AppTypography.buttonLabel(color: _selectedRole == 'Siswa' ? Colors.white : (isDark ? Colors.white : Colors.black87), fontWeight: FontWeight.w600),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          if (_selectedRole == 'Guru') ...[
+            const SizedBox(height: 16),
+            Text(
+              'Tingkat Sekolah',
+              style: AppTypography.timestamp(color: isDark ? Colors.white70 : Colors.black54, fontWeight: FontWeight.w500),
+            ),
+            const SizedBox(height: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              decoration: BoxDecoration(
+                color: isDark ? const Color(0xFF18181B) : Colors.white,
+                borderRadius: BorderRadius.circular(32),
+                border: Border.all(
+                  color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                  width: 1.2,
+                ),
+              ),
+              child: DropdownButtonHideUnderline(
+                child: DropdownButton<String>(
+                  borderRadius: BorderRadius.circular(20),
+                  elevation: 3,
+                  dropdownColor: isDark ? const Color(0xFF18181B) : Colors.white,
+                  value: _selectedSchoolLevel,
+                  isExpanded: true,
+                  icon: Icon(Icons.keyboard_arrow_down_rounded, color: isDark ? Colors.white54 : Colors.black54),
+                  style: AppTypography.buttonLabel(color: isDark ? Colors.white : Colors.black87, fontWeight: FontWeight.w600),
+                  onChanged: (String? newValue) {
+                    if (newValue != null) {
+                      setState(() {
+                        _selectedSchoolLevel = newValue;
+                      });
+                    }
+                  },
+                  items: ['SD', 'SMP', 'SMA', 'SMK'].map<DropdownMenuItem<String>>((String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: Row(
+                        children: [
+                          const Icon(Icons.domain_rounded, size: 18, color: Color(0xFF7F52FC)),
+                          const SizedBox(width: 10),
+                          Text(
+                            'Jenjang $value',
+                            style: AppTypography.buttonLabel(color: isDark ? Colors.white : Colors.black87, fontWeight: FontWeight.w600),
+                          ),
+                        ],
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ),
+            ),
+          ],
+          if (_selectedRole == 'Siswa') ...[
+            const SizedBox(height: 16),
+            Text(
+              'Kelas Siswa',
+              style: AppTypography.timestamp(color: isDark ? Colors.white70 : Colors.black54, fontWeight: FontWeight.w500),
+            ),
+            const SizedBox(height: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              decoration: BoxDecoration(
+                color: isDark ? const Color(0xFF18181B) : Colors.white,
+                borderRadius: BorderRadius.circular(32),
+                border: Border.all(
+                  color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                  width: 1.2,
+                ),
+              ),
+              child: DropdownButtonHideUnderline(
+                child: DropdownButton<String>(
+                  borderRadius: BorderRadius.circular(20),
+                  elevation: 3,
+                  dropdownColor: isDark ? const Color(0xFF18181B) : Colors.white,
+                  value: _selectedStudentClass,
+                  isExpanded: true,
+                  icon: Icon(Icons.keyboard_arrow_down_rounded, color: isDark ? Colors.white54 : Colors.black54),
+                  style: AppTypography.buttonLabel(color: isDark ? Colors.white : Colors.black87, fontWeight: FontWeight.w600),
+                  onChanged: (String? newValue) {
+                    if (newValue != null) {
+                      setState(() {
+                        _selectedStudentClass = newValue;
+                      });
+                    }
+                  },
+                  items: List.generate(12, (index) => (index + 1).toString()).map<DropdownMenuItem<String>>((String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: Row(
+                        children: [
+                          const Icon(Icons.class_rounded, size: 18, color: Color(0xFF10B981)),
+                          const SizedBox(width: 10),
+                          Text(
+                            'Kelas $value',
+                            style: AppTypography.buttonLabel(color: isDark ? Colors.white : Colors.black87, fontWeight: FontWeight.w600),
+                          ),
+                        ],
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ),
+            ),
+            if (int.parse(_selectedStudentClass) >= 10) ...[
+              const SizedBox(height: 16),
+              Text(
+                'Tingkat Sekolah',
+                style: AppTypography.timestamp(color: isDark ? Colors.white70 : Colors.black54, fontWeight: FontWeight.w500),
+              ),
+              const SizedBox(height: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                decoration: BoxDecoration(
+                  color: isDark ? const Color(0xFF18181B) : Colors.white,
+                  borderRadius: BorderRadius.circular(32),
+                  border: Border.all(
+                    color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                    width: 1.2,
+                  ),
+                ),
+                child: DropdownButtonHideUnderline(
+                  child: DropdownButton<String>(
+                    borderRadius: BorderRadius.circular(20),
+                    elevation: 3,
+                    dropdownColor: isDark ? const Color(0xFF18181B) : Colors.white,
+                    value: _selectedSchoolLevelForStudent,
+                    isExpanded: true,
+                    icon: Icon(Icons.keyboard_arrow_down_rounded, color: isDark ? Colors.white54 : Colors.black54),
+                    style: AppTypography.buttonLabel(color: isDark ? Colors.white : Colors.black87, fontWeight: FontWeight.w600),
+                    onChanged: (String? newValue) {
+                      if (newValue != null) {
+                        setState(() {
+                          _selectedSchoolLevelForStudent = newValue;
+                        });
+                      }
+                    },
+                    items: ['SMA', 'SMK'].map<DropdownMenuItem<String>>((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
                         child: Row(
-                          mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Icon(Icons.verified_rounded, size: 11, color: Color(0xFF16A34A)),
-                            const SizedBox(width: 3),
+                            const Icon(Icons.domain_rounded, size: 18, color: Color(0xFF7F52FC)),
+                            const SizedBox(width: 10),
                             Text(
-                              'Terverifikasi Google',
-                              style: AppTypography.buttonLabel(color: const Color(0xFF16A34A), fontWeight: FontWeight.w600),
+                              value,
+                              style: AppTypography.buttonLabel(color: isDark ? Colors.white : Colors.black87, fontWeight: FontWeight.w600),
                             ),
                           ],
                         ),
-                      ),
-                    ],
-                  ],
-                ),
-                const SizedBox(height: 6),
-                TextField(
-                  controller: _emailController,
-                  readOnly: widget.isGoogleSignIn,
-                  enabled: !widget.isGoogleSignIn,
-                  keyboardType: TextInputType.emailAddress,
-                  style: AppTypography.timestamp(color: widget.isGoogleSignIn ? (isDark ? Colors.white38 : Colors.black38) : (isDark ? Colors.white : Colors.black87)),
-                  decoration: InputDecoration(
-                    hintText: 'Masukkan email Anda',
-                    hintStyle: AppTypography.subtitle(color: isDark ? Colors.white38 : Colors.black26),
-                    filled: true,
-                    fillColor: widget.isGoogleSignIn
-                        ? (isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9))
-                        : (isDark ? const Color(0xFF18181B) : Colors.white),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(24),
-                      borderSide: BorderSide(
-                        color: widget.isGoogleSignIn
-                            ? (isDark ? const Color(0xFF3F3F46) : const Color(0xFFE2E8F0))
-                            : (isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9)),
-                      ),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(24),
-                      borderSide: BorderSide(color: isDark ? Colors.white : Colors.black),
-                    ),
-                    disabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(24),
-                      borderSide: BorderSide(color: isDark ? const Color(0xFF3F3F46) : const Color(0xFFE2E8F0)),
-                    ),
-                    prefixIcon: Icon(Icons.mail_outline_rounded, color: isDark ? Colors.white38 : Colors.black38, size: 20),
-                    suffixIcon: widget.isGoogleSignIn
-                        ? const Icon(Icons.check_circle_rounded, color: Color(0xFF16A34A), size: 20)
-                        : null,
+                      );
+                    }).toList(),
                   ),
                 ),
-                const SizedBox(height: 14),
-
-
-                // Password Field
-                Text(
-                  'Kata Sandi',
-                  style: AppTypography.timestamp(color: isDark ? Colors.white70 : Colors.black54, fontWeight: FontWeight.w500),
+              ),
+            ],
+          ],
+          const SizedBox(height: 20),
+          Container(
+            width: double.infinity,
+            height: 52,
+            decoration: BoxDecoration(
+              color: const Color(0xFF7F52FC), // Solid brand violet
+              borderRadius: BorderRadius.circular(32),
+            ),
+            child: ElevatedButton(
+              onPressed: _isLoading ? null : _handleRegister,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.transparent,
+                shadowColor: Colors.transparent,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(32),
                 ),
-                const SizedBox(height: 6),
-                TextField(
-                  controller: _passwordController,
-                  obscureText: _obscurePassword,
-                  style: AppTypography.timestamp(color: isDark ? Colors.white : Colors.black87),
-                  decoration: InputDecoration(
-                    hintText: 'Buat kata sandi',
-                    hintStyle: AppTypography.subtitle(color: isDark ? Colors.white38 : Colors.black26),
-                    filled: true,
-                    fillColor: isDark ? const Color(0xFF18181B) : Colors.white,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(24),
-                      borderSide: BorderSide(color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9)),
+              ),
+              child: _isLoading
+                  ? const SizedBox(
+                      width: 22,
+                      height: 22,
+                      child: const ThreeDotsLoader(),
+                    )
+                  : Text(
+                      'Daftar',
+                      style: AppTypography.buttonLabel(color: Colors.white, fontWeight: FontWeight.w600),
                     ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(24),
-                      borderSide: BorderSide(color: isDark ? Colors.white : Colors.black),
-                    ),
-                    prefixIcon: Icon(Icons.lock_outline_rounded, color: isDark ? Colors.white38 : Colors.black38, size: 20),
-                    suffixIcon: GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          _obscurePassword = !_obscurePassword;
-                        });
-                      },
-                      child: Icon(
-                        _obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
-                        color: isDark ? Colors.white38 : Colors.black38,
-                        size: 20,
-                      ),
-                    ),
-                  ),
+            ),
+          ),
+          const SizedBox(height: 14),
+          // Divider
+          Row(
+            children: [
+              Expanded(child: Divider(color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9), thickness: 1.5)),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                child: Text(
+                  'Atau lanjutkan dengan',
+                  style: AppTypography.timestamp(color: isDark ? Colors.white38 : Colors.black38),
                 ),
-                const SizedBox(height: 14),
-
-                // Confirm Password Field
-                Text(
-                  'Konfirmasi Kata Sandi',
-                  style: AppTypography.timestamp(color: isDark ? Colors.white70 : Colors.black54, fontWeight: FontWeight.w500),
+              ),
+              Expanded(child: Divider(color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9), thickness: 1.5)),
+            ],
+          ),
+          const SizedBox(height: 14),
+          SizedBox(
+            width: double.infinity,
+            height: 52,
+            child: OutlinedButton.icon(
+              onPressed: _isLoading ? null : _handleGoogleRegister,
+              icon: const GoogleLogoWidget(size: 20),
+              label: Text(
+                'Daftar dengan Google',
+                style: AppTypography.buttonLabel(color: isDark ? Colors.white : Colors.black87, fontWeight: FontWeight.w600),
+              ),
+              style: OutlinedButton.styleFrom(
+                backgroundColor: isDark ? const Color(0xFF18181B) : Colors.white,
+                side: BorderSide(color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0), width: 1.2),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(32),
                 ),
-                const SizedBox(height: 6),
-                TextField(
-                  controller: _confirmPasswordController,
-                  obscureText: _obscureConfirmPassword,
-                  style: AppTypography.timestamp(color: isDark ? Colors.white : Colors.black87),
-                  decoration: InputDecoration(
-                    hintText: 'Konfirmasi kata sandi Anda',
-                    hintStyle: AppTypography.subtitle(color: isDark ? Colors.white38 : Colors.black26),
-                    filled: true,
-                    fillColor: isDark ? const Color(0xFF18181B) : Colors.white,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(24),
-                      borderSide: BorderSide(color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9)),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(24),
-                      borderSide: BorderSide(color: isDark ? Colors.white : Colors.black),
-                    ),
-                    prefixIcon: Icon(Icons.lock_outline_rounded, color: isDark ? Colors.white38 : Colors.black38, size: 20),
-                    suffixIcon: GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          _obscureConfirmPassword = !_obscureConfirmPassword;
-                        });
-                      },
-                      child: Icon(
-                        _obscureConfirmPassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
-                        color: isDark ? Colors.white38 : Colors.black38,
-                        size: 20,
-                      ),
-                    ),
-                  ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 20),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                'Sudah punya akun? ',
+                style: AppTypography.timestamp(color: isDark ? Colors.white60 : Colors.black54),
+              ),
+              GestureDetector(
+                onTap: () => Navigator.of(context).pop(),
+                child: Text(
+                  'Masuk',
+                  style: AppTypography.buttonLabel(color: isDark ? const Color(0xFFA78BFA) : const Color(0xFF6D28D9), fontWeight: FontWeight.bold),
                 ),
-                const SizedBox(height: 14),
-
-                // Gender Selection
-                Text(
-                  'Jenis Kelamin',
-                  style: AppTypography.timestamp(color: isDark ? Colors.white70 : Colors.black54, fontWeight: FontWeight.w500),
-                ),
-                const SizedBox(height: 6),
-                Row(
-                  children: [
-                    Expanded(
-                      child: GestureDetector(
-                        onTap: () => setState(() => _selectedGender = 'Laki-laki'),
-                        child: Container(
-                          height: 44,
-                          decoration: BoxDecoration(
-                            color: _selectedGender == 'Laki-laki'
-                                ? (isDark ? const Color(0xFF7F52FC) : Colors.black)
-                                : (isDark ? const Color(0xFF18181B) : Colors.white),
-                            borderRadius: BorderRadius.circular(20),
-                            border: Border.all(
-                              color: _selectedGender == 'Laki-laki'
-                                  ? (isDark ? const Color(0xFF7F52FC) : Colors.black)
-                                  : (isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9)),
-                            ),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.male_rounded,
-                                color: _selectedGender == 'Laki-laki' ? Colors.white : (isDark ? Colors.white54 : Colors.black38),
-                                size: 16,
-                              ),
-                              const SizedBox(width: 4),
-                              Text(
-                                'Laki-laki',
-                                style: AppTypography.buttonLabel(color: _selectedGender == 'Laki-laki' ? Colors.white : (isDark ? Colors.white70 : Colors.black38), fontWeight: FontWeight.w600),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: GestureDetector(
-                        onTap: () => setState(() => _selectedGender = 'Perempuan'),
-                        child: Container(
-                          height: 44,
-                          decoration: BoxDecoration(
-                            color: _selectedGender == 'Perempuan'
-                                ? (isDark ? const Color(0xFF7F52FC) : Colors.black)
-                                : (isDark ? const Color(0xFF18181B) : Colors.white),
-                            borderRadius: BorderRadius.circular(20),
-                            border: Border.all(
-                              color: _selectedGender == 'Perempuan'
-                                  ? (isDark ? const Color(0xFF7F52FC) : Colors.black)
-                                  : (isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9)),
-                            ),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.female_rounded,
-                                color: _selectedGender == 'Perempuan' ? Colors.white : (isDark ? Colors.white54 : Colors.black38),
-                                size: 16,
-                              ),
-                              const SizedBox(width: 4),
-                              Text(
-                                'Perempuan',
-                                style: AppTypography.buttonLabel(color: _selectedGender == 'Perempuan' ? Colors.white : (isDark ? Colors.white70 : Colors.black38), fontWeight: FontWeight.w600),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 14),
-
-                // Role Selection (Guru vs Siswa)
-                Text(
-                  'Peran / Role Pengguna',
-                  style: AppTypography.timestamp(color: isDark ? Colors.white70 : Colors.black54, fontWeight: FontWeight.w500),
-                ),
-                const SizedBox(height: 6),
-                Row(
-                  children: [
-                    Expanded(
-                      child: GestureDetector(
-                        onTap: () => setState(() => _selectedRole = 'Guru'),
-                        child: Container(
-                          height: 44,
-                          decoration: BoxDecoration(
-                            color: _selectedRole == 'Guru' ? const Color(0xFF7F52FC) : (isDark ? const Color(0xFF18181B) : Colors.white),
-                            borderRadius: BorderRadius.circular(20),
-                            border: Border.all(
-                              color: const Color(0xFF7F52FC),
-                              width: _selectedRole == 'Guru' ? 1.5 : 1.0,
-                            ),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.school_rounded,
-                                color: _selectedRole == 'Guru' ? Colors.white : (isDark ? Colors.white60 : Colors.black45),
-                                size: 16,
-                              ),
-                              const SizedBox(width: 6),
-                              Text(
-                                'Guru',
-                                style: AppTypography.buttonLabel(color: _selectedRole == 'Guru' ? Colors.white : (isDark ? Colors.white : Colors.black87), fontWeight: FontWeight.w600),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: GestureDetector(
-                        onTap: () => setState(() => _selectedRole = 'Siswa'),
-                        child: Container(
-                          height: 44,
-                          decoration: BoxDecoration(
-                            color: _selectedRole == 'Siswa' ? const Color(0xFF7F52FC) : (isDark ? const Color(0xFF18181B) : Colors.white),
-                            borderRadius: BorderRadius.circular(20),
-                            border: Border.all(
-                              color: const Color(0xFF7F52FC),
-                              width: _selectedRole == 'Siswa' ? 1.5 : 1.0,
-                            ),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.person_rounded,
-                                color: _selectedRole == 'Siswa' ? Colors.white : (isDark ? Colors.white60 : Colors.black45),
-                                size: 16,
-                              ),
-                              const SizedBox(width: 6),
-                              Text(
-                                'Siswa',
-                                style: AppTypography.buttonLabel(color: _selectedRole == 'Siswa' ? Colors.white : (isDark ? Colors.white : Colors.black87), fontWeight: FontWeight.w600),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                if (_selectedRole == 'Guru') ...[
-                  const SizedBox(height: 14),
-                  Text(
-                    'Tingkat Sekolah',
-                    style: AppTypography.timestamp(color: Colors.black54, fontWeight: FontWeight.w500),
-                  ),
-                  const SizedBox(height: 6),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 14),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: const Color(0xFFF1F5F9)),
-                    ),
-                    child: DropdownButtonHideUnderline(
-                      child: DropdownButton<String>(
-                        borderRadius: BorderRadius.circular(16),
-                        elevation: 3,
-                        dropdownColor: Colors.white,
-                        value: _selectedSchoolLevel,
-                        isExpanded: true,
-                        icon: const Icon(Icons.keyboard_arrow_down_rounded, color: Colors.black54),
-                        style: AppTypography.buttonLabel(color: Colors.black87, fontWeight: FontWeight.w600),
-                        onChanged: (String? newValue) {
-                          if (newValue != null) {
-                            setState(() {
-                              _selectedSchoolLevel = newValue;
-                            });
-                          }
-                        },
-                        items: ['SD', 'SMP', 'SMA', 'SMK'].map<DropdownMenuItem<String>>((String value) {
-                          return DropdownMenuItem<String>(
-                            value: value,
-                            child: Row(
-                              children: [
-                                const Icon(Icons.domain_rounded, size: 16, color: Color(0xFF7F52FC)),
-                                const SizedBox(width: 8),
-                                Text('Jenjang $value'),
-                              ],
-                            ),
-                          );
-                        }).toList(),
-                      ),
-                    ),
-                  ),
-                ],
-                if (_selectedRole == 'Siswa') ...[
-                  const SizedBox(height: 14),
-                  Text(
-                    'Kelas Siswa',
-                    style: AppTypography.timestamp(color: Colors.black54, fontWeight: FontWeight.w500),
-                  ),
-                  const SizedBox(height: 6),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 14),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: const Color(0xFFF1F5F9)),
-                    ),
-                    child: DropdownButtonHideUnderline(
-                      child: DropdownButton<String>(
-                        borderRadius: BorderRadius.circular(16),
-                        elevation: 3,
-                        dropdownColor: Colors.white,
-                        value: _selectedStudentClass,
-                        isExpanded: true,
-                        icon: const Icon(Icons.keyboard_arrow_down_rounded, color: Colors.black54),
-                        style: AppTypography.buttonLabel(color: Colors.black87, fontWeight: FontWeight.w600),
-                        onChanged: (String? newValue) {
-                          if (newValue != null) {
-                            setState(() {
-                              _selectedStudentClass = newValue;
-                            });
-                          }
-                        },
-                        items: List.generate(12, (index) => (index + 1).toString()).map<DropdownMenuItem<String>>((String value) {
-                          return DropdownMenuItem<String>(
-                            value: value,
-                            child: Row(
-                              children: [
-                                const Icon(Icons.class_rounded, size: 16, color: Color(0xFF10B981)),
-                                const SizedBox(width: 8),
-                                Text('Kelas $value'),
-                              ],
-                            ),
-                          );
-                        }).toList(),
-                      ),
-                    ),
-                  ),
-                  if (int.parse(_selectedStudentClass) >= 10) ...[
-                    const SizedBox(height: 14),
-                    Text(
-                      'Tingkat Sekolah',
-                      style: AppTypography.timestamp(color: Colors.black54, fontWeight: FontWeight.w500),
-                    ),
-                    const SizedBox(height: 6),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 14),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: const Color(0xFFF1F5F9)),
-                      ),
-                      child: DropdownButtonHideUnderline(
-                        child: DropdownButton<String>(
-                          borderRadius: BorderRadius.circular(16),
-                          elevation: 3,
-                          dropdownColor: Colors.white,
-                          value: _selectedSchoolLevelForStudent,
-                          isExpanded: true,
-                          icon: const Icon(Icons.keyboard_arrow_down_rounded, color: Colors.black54),
-                          style: AppTypography.buttonLabel(color: Colors.black87, fontWeight: FontWeight.w600),
-                          onChanged: (String? newValue) {
-                            if (newValue != null) {
-                              setState(() {
-                                _selectedSchoolLevelForStudent = newValue;
-                              });
-                            }
-                          },
-                          items: ['SMA', 'SMK'].map<DropdownMenuItem<String>>((String value) {
-                            return DropdownMenuItem<String>(
-                              value: value,
-                              child: Row(
-                                children: [
-                                  const Icon(Icons.domain_rounded, size: 16, color: Color(0xFF7F52FC)),
-                                  const SizedBox(width: 8),
-                                  Text(value),
-                                ],
-                              ),
-                            );
-                          }).toList(),
-                        ),
-                      ),
-                    ),
-                  ],
-                ],
-                const SizedBox(height: 16),
-                Container(
-                  width: double.infinity,
-                  height: 52,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF7F52FC), // Solid brand violet
-                    borderRadius: BorderRadius.circular(30),
-                  ),
-                  child: ElevatedButton(
-                    onPressed: _isLoading ? null : _handleRegister,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.transparent,
-                      shadowColor: Colors.transparent,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                    ),
-                    child: _isLoading
-                        ? const SizedBox(
-                            width: 22,
-                            height: 22,
-                            child: const ThreeDotsLoader(),
-                          )
-                        : Text(
-                            'Daftar',
-                            style: AppTypography.cardTitle(color: Colors.white, fontWeight: FontWeight.bold),
-                          ),
-                  ),
-                ),
-                const SizedBox(height: 14),
-                // Divider
-                Row(
-                  children: [
-                    const Expanded(child: Divider(color: Color(0xFFF1F5F9), thickness: 1.5)),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                      child: Text(
-                        'Atau lanjutkan dengan',
-                        style: AppTypography.timestamp(color: Colors.black38),
-                      ),
-                    ),
-                    const Expanded(child: Divider(color: Color(0xFFF1F5F9), thickness: 1.5)),
-                  ],
-                ),
-                const SizedBox(height: 14),
-                SizedBox(
-                  width: double.infinity,
-                  height: 48,
-                  child: OutlinedButton.icon(
-                    onPressed: _isLoading ? null : _handleGoogleRegister,
-                    icon: const GoogleLogoWidget(size: 20),
-                    label: Text(
-                      'Daftar dengan Google',
-                      style: AppTypography.buttonLabel(color: Colors.black87, fontWeight: FontWeight.w600),
-                    ),
-                    style: OutlinedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      side: const BorderSide(color: Color(0xFFE2E8F0), width: 1.5),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(24),
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 20),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      'Sudah punya akun? ',
-                      style: AppTypography.buttonLabel(color: Colors.black54),
-                    ),
-                    GestureDetector(
-                      onTap: () => Navigator.of(context).pop(),
-                      child: Text(
-                        'Masuk',
-                        style: AppTypography.buttonLabel(color: Colors.black87, fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                  ],
-                ),
+              ),
+            ],
+          ),
               ],
             ),
           );
@@ -1079,7 +1114,7 @@ class _RegisterPageState extends State<RegisterPage> {
       );
     } else {
       screenBody = Scaffold(
-        backgroundColor: isDark ? const Color(0xFF000000) : const Color(0xFFF8FAFC),
+        backgroundColor: isDark ? const Color(0xFF000000) : Colors.white,
         body: SafeArea(
           child: formContent,
         ),

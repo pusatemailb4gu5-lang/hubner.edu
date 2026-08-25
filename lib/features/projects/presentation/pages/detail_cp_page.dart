@@ -6,6 +6,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:async';
 import 'dart:ui';
 import 'package:hubner/core/theme/app_colors.dart';
+import 'package:hubner/core/services/app_sound_service.dart';
 import 'mengerjakan_quiz_page.dart';
 
 class DetailCpPage extends StatefulWidget {
@@ -564,7 +565,13 @@ class _DetailCpPageState extends State<DetailCpPage> {
                             key: ValueKey('materi_${widget.stageIdx}_${mIdx}_$mTitle'),
                             direction: widget.isOwner ? DismissDirection.endToStart : DismissDirection.none,
                             confirmDismiss: (direction) async {
+                              AppSoundService.playDeleteWhoosh();
                               return await _confirmDeleteMateri(context, stages, mIdx, mTitle);
+                            },
+                            onUpdate: (details) {
+                              if (details.reached && !details.previousReached) {
+                                AppSoundService.playDeleteWhoosh();
+                              }
                             },
                             background: Container(
                               alignment: Alignment.centerRight,

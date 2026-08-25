@@ -26,6 +26,7 @@ import 'package:hubner/core/theme/app_typography.dart';
 import 'package:hubner/core/services/google_drive_service.dart';
 import 'package:hubner/core/services/classroom_export_service.dart';
 import 'package:hubner/core/services/login_history_service.dart';
+import 'package:hubner/core/services/app_sound_service.dart';
 
 class HomePage extends StatefulWidget {
   final Function(int index, {String? projectId})? onNavigateTab;
@@ -3964,7 +3965,13 @@ class _HomePageState extends State<HomePage> {
               key: ValueKey('project_$projectId'),
               direction: DismissDirection.endToStart,
               confirmDismiss: (direction) async {
+                AppSoundService.playDeleteWhoosh();
                 return await _confirmDeleteProject(context, projectId, title);
+              },
+              onUpdate: (details) {
+                if (details.reached && !details.previousReached) {
+                  AppSoundService.playDeleteWhoosh();
+                }
               },
               onDismissed: (direction) {
                 if (mounted) {

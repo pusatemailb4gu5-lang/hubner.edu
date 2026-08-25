@@ -12,6 +12,7 @@ import 'dart:math' as math;
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:hubner/features/projects/presentation/pages/manage_attendance_page.dart';
+import 'package:hubner/core/widgets/classroom_card_pattern_painter.dart';
 import 'package:hubner/main.dart';
 
 class LaporanPage extends StatefulWidget {
@@ -42,8 +43,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
   late AnimationController _panelAnimController;
   late Animation<double> _panelSlideAnim;
 
-  // Soft pattern animation controller for hero background
-  late AnimationController _patternAnimController;
+
 
   // Real-time table horizontal scroll tracking
   final ScrollController _tableHorizontalScrollController = ScrollController();
@@ -620,16 +620,12 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
       curve: Curves.easeOutCubic,
     );
 
-    _patternAnimController = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 8),
-    )..repeat(reverse: true);
+
   }
 
   @override
   void dispose() {
     _panelAnimController.dispose();
-    _patternAnimController.dispose();
     super.dispose();
   }
 
@@ -1067,42 +1063,16 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                   body: Stack(
                     children: [
                       // ==========================================
-                      // LAYER 0: FULL SCREEN ANIMATED PATTERN BACKGROUND (Sampai Ke Bawah)
+                      // LAYER 0: FULL SCREEN CLASSROOM CARD STYLE PATTERN BACKGROUND (Sampai Ke Bawah)
                       // ==========================================
                       Positioned.fill(
-                        child: AnimatedBuilder(
-                          animation: _patternAnimController,
-                          builder: (context, _) {
-                            return CustomPaint(
-                              painter: _SoftAnimatedPatternPainter(
-                                animationValue: _patternAnimController.value,
-                                isDark: isDark,
-                              ),
-                            );
-                          },
+                        child: CustomPaint(
+                          painter: ClassroomCardPatternPainter(
+                            patternIndex: 0,
+                            accentColor: const Color(0xFF7F52FC),
+                            isDark: isDark,
+                          ),
                         ),
-                      ),
-
-                      // Decorative Soft Clouds and Stars (Full Background)
-                      Positioned(
-                        top: statusBarHeight + 8,
-                        left: -20,
-                        child: Icon(Icons.cloud_rounded, color: Colors.white.withValues(alpha: isDark ? 0.05 : 0.12), size: 100),
-                      ),
-                      Positioned(
-                        top: statusBarHeight + 16,
-                        right: -30,
-                        child: Icon(Icons.cloud_rounded, color: Colors.white.withValues(alpha: isDark ? 0.06 : 0.14), size: 120),
-                      ),
-                      Positioned(
-                        top: statusBarHeight + 30,
-                        left: 45,
-                        child: Icon(Icons.star_rounded, color: Colors.white.withValues(alpha: isDark ? 0.3 : 0.5), size: 14),
-                      ),
-                      Positioned(
-                        top: statusBarHeight + 60,
-                        right: 60,
-                        child: Icon(Icons.star_rounded, color: Colors.white.withValues(alpha: isDark ? 0.4 : 0.7), size: 18),
                       ),
 
                       // ==========================================
@@ -2690,72 +2660,7 @@ class _BouncyMenuSliderCardState extends State<_BouncyMenuSliderCard> with Singl
   }
 }
 
-// Soft Animated Pattern Custom Painter
-class _SoftAnimatedPatternPainter extends CustomPainter {
-  final double animationValue;
-  final bool isDark;
 
-  _SoftAnimatedPatternPainter({
-    required this.animationValue,
-    required this.isDark,
-  });
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final whiteDotPaint = Paint()
-      ..color = Colors.white.withValues(alpha: isDark ? 0.15 : 0.12)
-      ..style = PaintingStyle.fill;
-
-    final greyDotPaint = Paint()
-      ..color = Colors.white.withValues(alpha: isDark ? 0.08 : 0.08)
-      ..style = PaintingStyle.fill;
-
-    final blackDotPaint = Paint()
-      ..color = Colors.white.withValues(alpha: isDark ? 0.04 : 0.05)
-      ..style = PaintingStyle.fill;
-
-    final ringPaint = Paint()
-      ..color = Colors.white.withValues(alpha: isDark ? 0.10 : 0.08)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.4;
-
-    final blackRingPaint = Paint()
-      ..color = Colors.white.withValues(alpha: isDark ? 0.05 : 0.04)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 2.0;
-
-    const double spacing = 32.0;
-    final int cols = (size.width / spacing).ceil() + 1;
-    final int rows = (size.height / spacing).ceil() + 1;
-
-    for (int i = 0; i < cols; i++) {
-      for (int j = 0; j < rows; j++) {
-        final double x = i * spacing;
-        final double y = j * spacing;
-        final double wave = math.sin((i * 0.4) + (j * 0.4) + (animationValue * math.pi * 2));
-        final double radius = 1.5 + (wave * 0.75);
-        final int patternType = (i + j) % 3;
-        final Paint dotPaint = patternType == 0
-            ? whiteDotPaint
-            : (patternType == 1 ? greyDotPaint : blackDotPaint);
-
-        canvas.drawCircle(Offset(x, y), math.max(0.6, radius), dotPaint);
-      }
-    }
-
-    final double offset1 = math.sin(animationValue * math.pi * 2) * 12;
-    final double offset2 = math.cos(animationValue * math.pi * 2) * 10;
-
-    canvas.drawCircle(Offset(size.width * 0.2 + offset1, size.height * 0.3 + offset2), 42, ringPaint);
-    canvas.drawCircle(Offset(size.width * 0.85 - offset2, size.height * 0.65 + offset1), 54, blackRingPaint);
-    canvas.drawCircle(Offset(size.width * 0.5 + offset2, size.height * 0.85 - offset1), 32, ringPaint);
-  }
-
-  @override
-  bool shouldRepaint(covariant _SoftAnimatedPatternPainter oldDelegate) {
-    return oldDelegate.animationValue != animationValue || oldDelegate.isDark != isDark;
-  }
-}
 
 // BouncyButton Component (Liquid Spring Water Bounce with Squash, identical to Home)
 class BouncyButton extends StatefulWidget {
