@@ -1186,7 +1186,7 @@ class _DiscussionTabState extends State<DiscussionTab> {
 
         return CustomScrollView(
           controller: _discussionScrollController,
-          physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+          physics: const ClampingScrollPhysics(),
           slivers: [
             // Top Scrollable Header & Search Bar (Scrolls away seamlessly!)
             SliverToBoxAdapter(
@@ -2552,6 +2552,30 @@ class _WhatsAppStyleNewChatModalState extends State<_WhatsAppStyleNewChatModal> 
     }
   }
 
+  Widget _buildSafeAvatarImage(String? avatar) {
+    final av = (avatar ?? '').trim();
+    if (av.startsWith('http://') || av.startsWith('https://')) {
+      return Image.network(
+        av,
+        fit: BoxFit.cover,
+        errorBuilder: (ctx, err, stack) => const Icon(
+          Icons.person_rounded,
+          size: 22,
+          color: Colors.grey,
+        ),
+      );
+    }
+    return Image.asset(
+      av.isNotEmpty ? av : 'assets/icon_pack/avatar/avatar_2.png',
+      fit: BoxFit.cover,
+      errorBuilder: (ctx, err, stack) => const Icon(
+        Icons.person_rounded,
+        size: 22,
+        color: Colors.grey,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDark = widget.isDark;
@@ -3159,7 +3183,7 @@ class _WhatsAppStyleNewChatModalState extends State<_WhatsAppStyleNewChatModal> 
                                           child: ClipOval(
                                             child: Transform.scale(
                                               scale: 1.35,
-                                              child: Image.asset(avatarPath, fit: BoxFit.cover),
+                                              child: _buildSafeAvatarImage(avatarPath),
                                             ),
                                           ),
                                         ),
@@ -3466,10 +3490,7 @@ class _WhatsAppStyleNewChatModalState extends State<_WhatsAppStyleNewChatModal> 
                                     child: ClipOval(
                                       child: Transform.scale(
                                         scale: 1.35,
-                                        child: Image.asset(
-                                          m['avatar'] ?? 'assets/icon_pack/avatar/avatar_2.png',
-                                          fit: BoxFit.cover,
-                                        ),
+                                        child: _buildSafeAvatarImage(m['avatar'] as String?),
                                       ),
                                     ),
                                   ),
@@ -3803,10 +3824,7 @@ class _WhatsAppStyleNewChatModalState extends State<_WhatsAppStyleNewChatModal> 
                                       child: ClipOval(
                                         child: Transform.scale(
                                           scale: 1.35,
-                                          child: Image.asset(
-                                            m['avatar'] ?? 'assets/icon_pack/avatar/avatar_2.png',
-                                            fit: BoxFit.cover,
-                                          ),
+                                          child: _buildSafeAvatarImage(m['avatar'] as String?),
                                         ),
                                       ),
                                     ),
@@ -4912,17 +4930,17 @@ class _DocumentsTabState extends State<DocumentsTab> {
   }
 
   IconData _getFileIcon(String? mimeType, bool isFolder) {
-    if (isFolder || (mimeType != null && mimeType.contains('folder'))) return Icons.folder;
-    if (mimeType == null) return Icons.insert_drive_file;
-    if (mimeType.contains('pdf')) return Icons.picture_as_pdf;
-    if (mimeType.contains('image')) return Icons.image;
-    if (mimeType.contains('video')) return Icons.videocam;
-    if (mimeType.contains('audio')) return Icons.audiotrack;
-    if (mimeType.contains('spreadsheet') || mimeType.contains('excel')) return Icons.table_chart;
-    if (mimeType.contains('presentation') || mimeType.contains('powerpoint')) return Icons.slideshow;
-    if (mimeType.contains('document') || mimeType.contains('word')) return Icons.description;
-    if (mimeType.contains('zip') || mimeType.contains('compressed')) return Icons.folder;
-    return Icons.insert_drive_file;
+    if (isFolder || (mimeType != null && mimeType.contains('folder'))) return Icons.folder_rounded;
+    if (mimeType == null) return Icons.insert_drive_file_rounded;
+    if (mimeType.contains('pdf')) return Icons.picture_as_pdf_rounded;
+    if (mimeType.contains('image')) return Icons.image_rounded;
+    if (mimeType.contains('video')) return Icons.videocam_rounded;
+    if (mimeType.contains('audio')) return Icons.audiotrack_rounded;
+    if (mimeType.contains('spreadsheet') || mimeType.contains('excel')) return Icons.table_chart_rounded;
+    if (mimeType.contains('presentation') || mimeType.contains('powerpoint')) return Icons.slideshow_rounded;
+    if (mimeType.contains('document') || mimeType.contains('word')) return Icons.description_rounded;
+    if (mimeType.contains('zip') || mimeType.contains('compressed')) return Icons.folder_zip_rounded;
+    return Icons.insert_drive_file_rounded;
   }
 
   Color _getFileColor(String? mimeType, bool isFolder) {
@@ -5346,9 +5364,14 @@ class _DocumentsTabState extends State<DocumentsTab> {
                             }
 
                             return ListView.separated(
-                              padding: const EdgeInsets.only(left: 24.0, right: 24.0, bottom: 120.0, top: 8),
+                              padding: const EdgeInsets.only(left: 16.0, right: 16.0, bottom: 120.0, top: 4),
                               itemCount: filtered.length,
-                              separatorBuilder: (context, index) => const SizedBox(height: 10),
+                              separatorBuilder: (context, index) => Divider(
+                                height: 1,
+                                thickness: 0.8,
+                                color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+                                indent: 56,
+                              ),
                               itemBuilder: (context, index) {
                                 final docSnap = filtered[index];
                                 final data = docSnap.data() as Map<String, dynamic>;
@@ -5387,64 +5410,55 @@ class _DocumentsTabState extends State<DocumentsTab> {
     final fileColor = _getFileColor(mimeType, isFolder);
     final fileIcon = _getFileIcon(mimeType, isFolder);
 
-    return GestureDetector(
-      onTap: () {
-        if (isFolder) {
-          setState(() {
-            _folderCrumbs.add(_FolderCrumb(id: driveFileId.isNotEmpty ? driveFileId : docId, name: fileName));
-          });
-        } else {
-          _openFileInApp(
-            fileName: fileName,
-            mimeType: mimeType,
-            driveLink: driveLink,
-            uploaderName: uploaderName,
-            dateStr: dateStr,
-            fileSize: fileSize is int ? fileSize : 0,
-          );
-        }
-      },
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        decoration: BoxDecoration(
-          color: isDark ? const Color(0xFF18181B) : Colors.white,
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9)),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.02),
-              blurRadius: 8,
-              offset: const Offset(0, 3),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(
-                color: fileColor.withValues(alpha: isDark ? 0.2 : 0.1),
-                borderRadius: BorderRadius.circular(12),
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(12),
+        onTap: () {
+          if (isFolder) {
+            setState(() {
+              _folderCrumbs.add(_FolderCrumb(id: driveFileId.isNotEmpty ? driveFileId : docId, name: fileName));
+            });
+          } else {
+            _openFileInApp(
+              fileName: fileName,
+              mimeType: mimeType,
+              driveLink: driveLink,
+              uploaderName: uploaderName,
+              dateStr: dateStr,
+              fileSize: fileSize is int ? fileSize : 0,
+            );
+          }
+        },
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+          child: Row(
+            children: [
+              Container(
+                width: 42,
+                height: 42,
+                decoration: BoxDecoration(
+                  color: fileColor.withValues(alpha: isDark ? 0.22 : 0.12),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(fileIcon, color: fileColor, size: 22),
               ),
-              child: Icon(fileIcon, color: fileColor, size: 22),
-            ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    fileName,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 14.5,
-                      fontWeight: FontWeight.w600,
-                      color: isDark ? Colors.white : Colors.black87,
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      fileName,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 14.0,
+                        fontWeight: FontWeight.w600,
+                        color: isDark ? Colors.white : Colors.black87,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 3),
+                    const SizedBox(height: 2),
                   Row(
                     children: [
                       Text(
@@ -5607,8 +5621,9 @@ class _DocumentsTabState extends State<DocumentsTab> {
           ],
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildGridItem(BuildContext context, String docId, Map<String, dynamic> data, String currentUid, bool isDark) {
     final fileName = data['name'] ?? 'Untitled';
@@ -5646,18 +5661,11 @@ class _DocumentsTabState extends State<DocumentsTab> {
         }
       },
       child: Container(
-        padding: const EdgeInsets.all(14),
+        padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: isDark ? const Color(0xFF18181B) : Colors.white,
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9)),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.02),
-              blurRadius: 8,
-              offset: const Offset(0, 3),
-            ),
-          ],
+          color: isDark ? const Color(0xFF18181B) : const Color(0xFFF8FAFC),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0)),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -5667,16 +5675,16 @@ class _DocumentsTabState extends State<DocumentsTab> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Container(
-                  width: 40,
-                  height: 40,
+                  width: 38,
+                  height: 38,
                   decoration: BoxDecoration(
-                    color: fileColor.withValues(alpha: isDark ? 0.2 : 0.1),
-                    borderRadius: BorderRadius.circular(12),
+                    color: fileColor.withValues(alpha: isDark ? 0.22 : 0.12),
+                    shape: BoxShape.circle,
                   ),
                   child: Icon(fileIcon, color: fileColor, size: 20),
                 ),
                 PopupMenuButton<String>(
-                  icon: Icon(Icons.more_horiz, size: 16, color: isDark ? Colors.white38 : Colors.black38),
+                  icon: Icon(Icons.more_horiz_rounded, size: 16, color: isDark ? Colors.white38 : Colors.black38),
                   color: isDark ? const Color(0xFF18181B) : Colors.white,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                   onSelected: (val) async {

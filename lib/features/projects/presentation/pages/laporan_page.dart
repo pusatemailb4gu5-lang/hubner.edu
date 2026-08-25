@@ -1119,59 +1119,26 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                                   // 1. JUDUL LEBIH BESAR + PENJELASAN DIBAWAHNYA DENGAN JEDA
-                                  Row(
+                                  Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                       if (Navigator.canPop(context)) ...[
-                                        BouncyButton(
-                                          onTap: () => Navigator.pop(context),
-                                          child: Container(
-                                            width: 40,
-                                            height: 40,
-                                            decoration: BoxDecoration(
-                                              color: isDark ? const Color(0xFF1C1C1E) : Colors.white.withValues(alpha: 0.95),
-                                              shape: BoxShape.circle,
-                                              border: Border.all(
-                                                color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
-                                                width: 1.2,
-                                              ),
-                                              boxShadow: [
-                                                BoxShadow(
-                                                  color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.1),
-                                                  blurRadius: 6,
-                                                  offset: const Offset(0, 2),
-                                                ),
-                                              ],
-                                            ),
-                                            child: Icon(Icons.arrow_back_ios_new_rounded, color: isDark ? Colors.white : const Color(0xFF7F52FC), size: 17),
-                                          ),
+                                      Text(
+                                        'Laporan Perkembangan Kelas',
+                                        style: GoogleFonts.plusJakartaSans(
+                                          fontSize: 22,
+                                          fontWeight: FontWeight.w900,
+                                          color: Colors.white,
+                                          letterSpacing: -0.4,
+                                          height: 1.2,
                                         ),
-                                        const SizedBox(width: 12),
-                                      ],
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              'Laporan Perkembangan Kelas',
-                                              style: GoogleFonts.plusJakartaSans(
-                                                fontSize: 22,
-                                                fontWeight: FontWeight.w900,
-                                                color: isDark ? Colors.white : Colors.black87,
-                                                letterSpacing: -0.4,
-                                                height: 1.2,
-                                              ),
-                                            ),
-                                            const SizedBox(height: 5),
-                                            Text(
-                                              'Pantau presensi, progres tugas, dan evaluasi hasil belajar siswa.',
-                                              style: GoogleFonts.dmSans(
-                                                fontSize: 14.0,
-                                                color: Colors.white.withValues(alpha: 0.92),
-                                                fontWeight: FontWeight.w500,
-                                              ),
-                                            ),
-                                          ],
+                                      ),
+                                      const SizedBox(height: 5),
+                                      Text(
+                                        'Pantau presensi, progres tugas, dan evaluasi hasil belajar siswa.',
+                                        style: GoogleFonts.dmSans(
+                                          fontSize: 14.0,
+                                          color: Colors.white.withValues(alpha: 0.92),
+                                          fontWeight: FontWeight.w500,
                                         ),
                                       ),
                                     ],
@@ -1574,11 +1541,11 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                       // LAYER 1: DRAGGABLE SCROLLABLE SHEET PUTIH FULL KE BAWAH (Seperti Detail Classroom)
                       // ==========================================
                       DraggableScrollableSheet(
-                        initialChildSize: 0.48,
-                        minChildSize: 0.48,
+                        initialChildSize: 0.58,
+                        minChildSize: 0.58,
                         maxChildSize: 0.96,
                         snap: true,
-                        snapSizes: const [0.48, 0.96],
+                        snapSizes: const [0.58, 0.96],
                         builder: (context, scrollController) {
                           final bool showTugas = _selectedTypeFilter == 'all' || _selectedTypeFilter == 'tugas';
                           final bool showQuiz = _selectedTypeFilter == 'all' || _selectedTypeFilter == 'quiz';
@@ -1712,7 +1679,50 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                     ],
                                   ),
                                 ),
-                                const SizedBox(height: 10),
+                                const SizedBox(height: 8),
+
+                                // Indikator Scroll Geser Horisontal Warna Ungu
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                                  child: Row(
+                                    children: [
+                                      Container(
+                                        width: 28,
+                                        height: 3.5,
+                                        decoration: BoxDecoration(
+                                          color: const Color(0xFF7C3AED),
+                                          borderRadius: BorderRadius.circular(2),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Expanded(
+                                        child: Container(
+                                          height: 1.5,
+                                          decoration: BoxDecoration(
+                                            color: const Color(0xFF7C3AED).withValues(alpha: isDark ? 0.3 : 0.18),
+                                            borderRadius: BorderRadius.circular(1),
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Icon(
+                                        Icons.swipe_left_rounded,
+                                        size: 13,
+                                        color: const Color(0xFF7C3AED).withValues(alpha: 0.85),
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        'Geser tabel',
+                                        style: GoogleFonts.plusJakartaSans(
+                                          fontSize: 11.0,
+                                          fontWeight: FontWeight.w600,
+                                          color: const Color(0xFF7C3AED).withValues(alpha: 0.85),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
 
                                 // ==========================================
                                 // TABEL LAPORAN: STICKY HEADER & SCROLLABLE BODY

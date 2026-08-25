@@ -20,6 +20,7 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:hubner/core/theme/app_colors.dart';
 import 'package:hubner/main.dart' show HubnerApp;
 import 'home_page.dart' show BouncyButton;
+import 'package:hubner/features/projects/presentation/pages/detail_cp_page.dart';
 
 class ChatRoomPage extends StatefulWidget {
   final String discussionId;
@@ -75,6 +76,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
   Map<String, dynamic>? _replyingToMessage;
   String? _editingMessageId;
   final FocusNode _inputFocusNode = FocusNode();
+  bool _showAttachmentPanel = false;
   final ValueNotifier<bool> _showScrollToBottom = ValueNotifier<bool>(false);
 
   Stream<DocumentSnapshot>? _cachedProjectStream;
@@ -138,6 +140,13 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
     _initStreams();
     _messageController.addListener(_onTextChanged);
     _scrollController.addListener(_onScroll);
+    _inputFocusNode.addListener(() {
+      if (_inputFocusNode.hasFocus && _showAttachmentPanel) {
+        setState(() {
+          _showAttachmentPanel = false;
+        });
+      }
+    });
     _loadCurrentUserName();
     _checkExistingPrivateChatInBackground();
   }
@@ -948,93 +957,725 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
     return '${(bytes / pow(1024, i)).toStringAsFixed(1)} ${suffixes[i]}';
   }
 
-  void _showAttachmentPickerSheet() {
-    final bool isDark = AppColors.isDarkMode;
-    showModalBottomSheet(
+  void _toggleAttachmentPanel() {
+    if (_showAttachmentPanel) {
+      setState(() {
+        _showAttachmentPanel = false;
+      });
+      _inputFocusNode.requestFocus();
+    } else {
+      _inputFocusNode.unfocus();
+      setState(() {
+        _showAttachmentPanel = true;
+      });
+    }
+  }
+
+  Widget _buildAttachmentBottomPanel(bool isDark, bool showCpFeatures, String projectId) {
+    final List<Map<String, dynamic>> items = [
+      {
+        'id': 'camera',
+        'label': 'Kamera',
+        'icon': Icons.camera_alt_rounded,
+        'color': const Color(0xFF7C3AED),
+        'onTap': () {
+          setState(() => _showAttachmentPanel = false);
+          _pickAndSendMedia(isImage: true);
+        },
+      },
+      {
+        'id': 'gallery',
+        'label': 'Galeri',
+        'icon': Icons.photo_library_rounded,
+        'color': const Color(0xFFEC4899),
+        'onTap': () {
+          setState(() => _showAttachmentPanel = false);
+          _pickAndSendMedia(isImage: true);
+        },
+      },
+      {
+        'id': 'document',
+        'label': 'Dokumen',
+        'icon': Icons.insert_drive_file_rounded,
+        'color': const Color(0xFF2563EB),
+        'onTap': () {
+          setState(() => _showAttachmentPanel = false);
+          _pickAndSendMedia(isImage: false);
+        },
+      },
+      if (showCpFeatures) ...[
+        {
+          'id': 'tugas',
+          'label': 'Link Tugas',
+          'icon': Icons.assignment_rounded,
+          'color': const Color(0xFFD97706),
+          'onTap': () {
+            setState(() => _showAttachmentPanel = false);
+            _showSelectCpItemDialog(type: 'tugas', projectId: projectId, isDark: isDark);
+          },
+        },
+        {
+          'id': 'materi',
+          'label': 'Link Materi',
+          'icon': Icons.menu_book_rounded,
+          'color': const Color(0xFF059669),
+          'onTap': () {
+            setState(() => _showAttachmentPanel = false);
+            _showSelectCpItemDialog(type: 'materi', projectId: projectId, isDark: isDark);
+          },
+        },
+        {
+          'id': 'quiz',
+          'label': 'Link Quiz',
+          'icon': Icons.extension_rounded,
+          'color': const Color(0xFF6366F1),
+          'onTap': () {
+            setState(() => _showAttachmentPanel = false);
+            _showSelectCpItemDialog(type: 'quiz', projectId: projectId, isDark: isDark);
+          },
+        },
+      ],
+    ];
+
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
+      curve: Curves.easeInOut,
+      height: showCpFeatures ? 175 : 90,
+      width: double.infinity,
+      padding: const EdgeInsets.only(top: 12, bottom: 2),
+      color: Colors.transparent,
+      child: GridView.builder(
+        padding: EdgeInsets.zero,
+        physics: const NeverScrollableScrollPhysics(),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 4,
+          mainAxisSpacing: 10,
+          crossAxisSpacing: 8,
+          childAspectRatio: 0.95,
+        ),
+        itemCount: items.length,
+        itemBuilder: (context, index) {
+          final item = items[index];
+          final color = item['color'] as Color;
+          final icon = item['icon'] as IconData;
+          final label = item['label'] as String;
+          final onTap = item['onTap'] as VoidCallback;
+
+          return GestureDetector(
+            onTap: onTap,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 50,
+                  height: 50,
+                  decoration: BoxDecoration(
+                    color: color,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    icon,
+                    color: Colors.white,
+                    size: 24,
+                  ),
+                ),
+                const SizedBox(height: 5),
+                Text(
+                  label,
+                  textAlign: TextAlign.center,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 11.5,
+                    fontWeight: FontWeight.w600,
+                    color: isDark ? Colors.white : const Color(0xFF1E293B),
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Future<void> _showSelectCpItemDialog({
+    required String type, // 'tugas' | 'materi' | 'quiz'
+    required String projectId,
+    required bool isDark,
+  }) async {
+    if (projectId.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Tautan hanya tersedia untuk ruang diskusi kelas.'),
+          backgroundColor: Colors.orangeAccent,
+        ),
+      );
+      return;
+    }
+
+    showDialog(
       context: context,
+      barrierDismissible: false,
+      builder: (_) => const Center(child: ThreeDotsLoader()),
+    );
+
+    List<Map<String, dynamic>> stages = [];
+    String projectTitle = 'Kelas';
+    try {
+      final doc = await FirebaseFirestore.instance.collection('projects').doc(projectId).get();
+      if (doc.exists) {
+        final data = doc.data() ?? {};
+        projectTitle = data['title'] ?? 'Kelas';
+        final rawStages = data['stages'] ?? data['learningStages'] ?? [];
+        if (rawStages is List) {
+          stages = rawStages.map((e) => Map<String, dynamic>.from(e as Map)).toList();
+        }
+      }
+    } catch (e) {
+      debugPrint('Error fetching stages: $e');
+    }
+
+    if (mounted) {
+      Navigator.pop(context); // close loader
+    }
+
+    if (stages.isEmpty) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Belum ada Capaian Pembelajaran (CP) di kelas ini.'),
+            backgroundColor: Colors.orangeAccent,
+          ),
+        );
+      }
+      return;
+    }
+
+    if (!mounted) return;
+
+    int selectedCpIdx = 0;
+    int selectedItemIdx = 0;
+
+    String typeTitle = 'Tugas';
+    IconData typeIcon = Icons.assignment_rounded;
+    Color typeColor = const Color(0xFFF59E0B);
+    if (type == 'materi') {
+      typeTitle = 'Materi';
+      typeIcon = Icons.menu_book_rounded;
+      typeColor = const Color(0xFF10B981);
+    } else if (type == 'quiz') {
+      typeTitle = 'Quiz';
+      typeIcon = Icons.extension_rounded;
+      typeColor = const Color(0xFF6366F1);
+    }
+
+    await showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
       backgroundColor: isDark ? const Color(0xFF18181B) : Colors.white,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
-      builder: (sheetCtx) => SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: isDark ? const Color(0xFF3F3F46) : const Color(0xFFE2E8F0),
-                  borderRadius: BorderRadius.circular(2),
-                ),
+      builder: (sheetCtx) {
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            final currentStage = stages[selectedCpIdx];
+            final cpTitle = currentStage['title'] ?? currentStage['name'] ?? 'CP ${selectedCpIdx + 1}';
+
+            List<Map<String, dynamic>> itemsForType = [];
+            if (type == 'tugas') {
+              final raw = currentStage['tasks'] ?? currentStage['tugas'] ?? [];
+              if (raw is List) {
+                itemsForType = raw.map((e) => Map<String, dynamic>.from(e as Map)).toList();
+              }
+            } else if (type == 'materi') {
+              final raw = currentStage['materials'] ?? currentStage['materi'] ?? [];
+              if (raw is List) {
+                itemsForType = raw.map((e) => Map<String, dynamic>.from(e as Map)).toList();
+              }
+            } else if (type == 'quiz') {
+              final raw = currentStage['quizzes'] ?? currentStage['quiz'] ?? [];
+              if (raw is List) {
+                itemsForType = raw.map((e) => Map<String, dynamic>.from(e as Map)).toList();
+              }
+            }
+
+            if (selectedItemIdx >= itemsForType.length) {
+              selectedItemIdx = 0;
+            }
+
+            return Padding(
+              padding: EdgeInsets.only(
+                left: 20,
+                right: 20,
+                top: 20,
+                bottom: MediaQuery.of(context).viewInsets.bottom + 24,
               ),
-              const SizedBox(height: 20),
-              ListTile(
-                leading: Container(
-                  width: 44,
-                  height: 44,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF7C3AED).withValues(alpha: 0.12),
-                    shape: BoxShape.circle,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // Drag Handle
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: isDark ? const Color(0xFF3F3F46) : const Color(0xFFE2E8F0),
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
                   ),
-                  child: const Icon(Icons.image_rounded, color: Color(0xFF7C3AED), size: 22),
-                ),
-                title: Text(
-                  'Kirim Gambar / Foto',
-                  style: GoogleFonts.plusJakartaSans(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14.5,
-                    color: isDark ? Colors.white : const Color(0xFF0F172A),
+                  const SizedBox(height: 16),
+
+                  // Header
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: typeColor.withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Icon(typeIcon, color: typeColor, size: 22),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Pilih Link $typeTitle dari CP',
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: isDark ? Colors.white : const Color(0xFF0F172A),
+                              ),
+                            ),
+                            Text(
+                              'Tautan interaktif akan dikirim ke obrolan',
+                              style: GoogleFonts.dmSans(
+                                fontSize: 12,
+                                color: isDark ? Colors.white60 : Colors.black54,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-                subtitle: Text(
-                  'Format JPG, PNG, WEBP (Otomatis dikompresi)',
-                  style: GoogleFonts.dmSans(
-                    fontSize: 12.0,
-                    color: isDark ? Colors.white60 : Colors.black54,
+                  const SizedBox(height: 20),
+
+                  // Dropdown 1: Pilih Capaian Pembelajaran (CP)
+                  Text(
+                    '1. Pilih Capaian Pembelajaran (CP):',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                      color: isDark ? Colors.white70 : const Color(0xFF334155),
+                    ),
                   ),
-                ),
-                onTap: () {
-                  Navigator.pop(sheetCtx);
-                  _pickAndSendMedia(isImage: true);
-                },
+                  const SizedBox(height: 6),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 14),
+                    decoration: BoxDecoration(
+                      color: isDark ? const Color(0xFF27272A) : const Color(0xFFF8FAFC),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: isDark ? const Color(0xFF3F3F46) : const Color(0xFFCBD5E1),
+                      ),
+                    ),
+                    child: DropdownButtonHideUnderline(
+                      child: DropdownButton<int>(
+                        value: selectedCpIdx,
+                        isExpanded: true,
+                        dropdownColor: isDark ? const Color(0xFF1E1E22) : Colors.white,
+                        items: List.generate(stages.length, (idx) {
+                          final st = stages[idx];
+                          final name = st['title'] ?? st['name'] ?? 'CP ${idx + 1}';
+                          return DropdownMenuItem<int>(
+                            value: idx,
+                            child: Text(
+                              'CP ${idx + 1}: $name',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: GoogleFonts.dmSans(
+                                fontSize: 13.5,
+                                color: isDark ? Colors.white : const Color(0xFF0F172A),
+                              ),
+                            ),
+                          );
+                        }),
+                        onChanged: (val) {
+                          if (val != null) {
+                            setModalState(() {
+                              selectedCpIdx = val;
+                              selectedItemIdx = 0;
+                            });
+                          }
+                        },
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Dropdown 2: Pilih Item (Tugas / Materi / Quiz)
+                  Text(
+                    '2. Pilih $typeTitle:',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                      color: isDark ? Colors.white70 : const Color(0xFF334155),
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  if (itemsForType.isEmpty)
+                    Container(
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: Colors.orange.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Colors.orange.withValues(alpha: 0.3)),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.info_outline_rounded, color: Colors.orange, size: 18),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              'Belum ada $typeTitle di CP ini.',
+                              style: GoogleFonts.dmSans(
+                                fontSize: 13,
+                                color: Colors.orange.shade700,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                  else
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 14),
+                      decoration: BoxDecoration(
+                        color: isDark ? const Color(0xFF27272A) : const Color(0xFFF8FAFC),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: isDark ? const Color(0xFF3F3F46) : const Color(0xFFCBD5E1),
+                        ),
+                      ),
+                      child: DropdownButtonHideUnderline(
+                        child: DropdownButton<int>(
+                          value: selectedItemIdx,
+                          isExpanded: true,
+                          dropdownColor: isDark ? const Color(0xFF1E1E22) : Colors.white,
+                          items: List.generate(itemsForType.length, (i) {
+                            final it = itemsForType[i];
+                            final itemTitle = it['title'] ?? it['name'] ?? '$typeTitle ${i + 1}';
+                            return DropdownMenuItem<int>(
+                              value: i,
+                              child: Text(
+                                itemTitle,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: GoogleFonts.dmSans(
+                                  fontSize: 13.5,
+                                  fontWeight: FontWeight.w600,
+                                  color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                ),
+                              ),
+                            );
+                          }),
+                          onChanged: (val) {
+                            if (val != null) {
+                              setModalState(() {
+                                selectedItemIdx = val;
+                              });
+                            }
+                          },
+                        ),
+                      ),
+                    ),
+                  const SizedBox(height: 24),
+
+                  // Actions
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () => Navigator.pop(sheetCtx),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: isDark ? Colors.white70 : Colors.black87,
+                            side: BorderSide(
+                              color: isDark ? const Color(0xFF3F3F46) : const Color(0xFFE2E8F0),
+                            ),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            padding: const EdgeInsets.symmetric(vertical: 13),
+                          ),
+                          child: Text(
+                            'Batal',
+                            style: GoogleFonts.plusJakartaSans(fontSize: 14, fontWeight: FontWeight.w600),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: itemsForType.isEmpty
+                              ? null
+                              : () async {
+                                  final chosenItem = itemsForType[selectedItemIdx];
+                                  final chosenTitle = chosenItem['title'] ?? chosenItem['name'] ?? '$typeTitle ${selectedItemIdx + 1}';
+                                  Navigator.pop(sheetCtx);
+
+                                  final user = FirebaseAuth.instance.currentUser;
+                                  if (user == null) return;
+                                  final userDoc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
+                                  final senderName = userDoc.data()?['name'] ?? 'User';
+                                  final senderAvatar = userDoc.data()?['avatar'] ?? 'assets/icon_pack/avatar/avatar_2.png';
+                                  final targetDocId = _currentDiscussionId.isNotEmpty ? _currentDiscussionId : widget.discussionId;
+
+                                  final String msgText = type == 'tugas'
+                                      ? '📝 Tautan Tugas: $chosenTitle'
+                                      : (type == 'materi'
+                                          ? '📚 Tautan Materi: $chosenTitle'
+                                          : '🧩 Tautan Quiz: $chosenTitle');
+
+                                  await FirebaseFirestore.instance
+                                      .collection('discussions')
+                                      .doc(targetDocId)
+                                      .collection('messages')
+                                      .add({
+                                    'sender': senderName,
+                                    'senderUid': user.uid,
+                                    'avatar': senderAvatar,
+                                    'message': msgText,
+                                    'cpLinkType': type,
+                                    'cpLinkData': {
+                                      'type': type,
+                                      'projectId': projectId,
+                                      'projectTitle': projectTitle,
+                                      'cpIndex': selectedCpIdx,
+                                      'cpTitle': cpTitle,
+                                      'itemTitle': chosenTitle,
+                                      'itemData': chosenItem,
+                                    },
+                                    'time': FieldValue.serverTimestamp(),
+                                  });
+
+                                  final discDoc = await FirebaseFirestore.instance.collection('discussions').doc(targetDocId).get();
+                                  final memberUids = List<String>.from(discDoc.data()?['memberUids'] ?? []);
+
+                                  final Map<String, dynamic> updates = {
+                                    'lastMessage': '$senderName membagikan $typeTitle: $chosenTitle',
+                                    'time': _formatCurrentTime(),
+                                    'hasMessages': true,
+                                    'hiddenForUids': [],
+                                    'clearedByUids': [],
+                                  };
+                                  for (var mUid in memberUids) {
+                                    if (mUid != user.uid) {
+                                      updates['unreadCounts.$mUid'] = FieldValue.increment(1);
+                                    }
+                                  }
+                                  await FirebaseFirestore.instance.collection('discussions').doc(targetDocId).update(updates);
+                                  _scrollToBottom();
+                                },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: typeColor,
+                            foregroundColor: Colors.white,
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            padding: const EdgeInsets.symmetric(vertical: 13),
+                          ),
+                          child: Text(
+                            'Kirim Tautan',
+                            style: GoogleFonts.plusJakartaSans(fontSize: 14, fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
-              const Divider(height: 1),
-              ListTile(
-                leading: Container(
-                  width: 44,
-                  height: 44,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF2563EB).withValues(alpha: 0.12),
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(Icons.insert_drive_file_rounded, color: Color(0xFF2563EB), size: 22),
-                ),
-                title: Text(
-                  'Kirim Berkas / Dokumen',
-                  style: GoogleFonts.plusJakartaSans(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14.5,
-                    color: isDark ? Colors.white : const Color(0xFF0F172A),
-                  ),
-                ),
-                subtitle: Text(
-                  'PDF, Word, Excel, PPT, ZIP, dll ke Google Drive',
-                  style: GoogleFonts.dmSans(
-                    fontSize: 12.0,
-                    color: isDark ? Colors.white60 : Colors.black54,
-                  ),
-                ),
-                onTap: () {
-                  Navigator.pop(sheetCtx);
-                  _pickAndSendMedia(isImage: false);
-                },
-              ),
-            ],
-          ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildCpLinkCard({
+    required Map<String, dynamic> cpLinkData,
+    required bool isMe,
+    required bool isDark,
+    required String timeText,
+  }) {
+    final type = cpLinkData['type'] as String? ?? 'tugas';
+    final projectId = cpLinkData['projectId'] as String? ?? '';
+    final projectTitle = cpLinkData['projectTitle'] as String? ?? 'Kelas';
+    final cpIndex = cpLinkData['cpIndex'] as int? ?? 0;
+    final cpTitle = cpLinkData['cpTitle'] as String? ?? '';
+    final itemTitle = cpLinkData['itemTitle'] as String? ?? '';
+    final itemData = cpLinkData['itemData'] as Map<String, dynamic>? ?? {};
+
+    IconData typeIcon = Icons.assignment_rounded;
+    String badgeText = 'TUGAS CP';
+    Color badgeColor = const Color(0xFFF59E0B);
+    String buttonText = 'Buka Tugas';
+
+    if (type == 'materi') {
+      typeIcon = Icons.menu_book_rounded;
+      badgeText = 'MATERI CP';
+      badgeColor = const Color(0xFF10B981);
+      buttonText = 'Buka Materi';
+    } else if (type == 'quiz') {
+      typeIcon = Icons.extension_rounded;
+      badgeText = 'KUIS CP';
+      badgeColor = const Color(0xFF6366F1);
+      buttonText = 'Mulai Kuis';
+    }
+
+    return Container(
+      constraints: const BoxConstraints(maxWidth: 260),
+      margin: const EdgeInsets.only(top: 2, bottom: 2),
+      decoration: BoxDecoration(
+        color: isMe
+            ? (isDark ? const Color(0xFF4C1D95).withValues(alpha: 0.6) : Colors.white.withValues(alpha: 0.18))
+            : (isDark ? const Color(0xFF27272A) : const Color(0xFFF8FAFC)),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: badgeColor.withValues(alpha: 0.45),
+          width: 1.2,
         ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Header Badge
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            decoration: BoxDecoration(
+              color: badgeColor.withValues(alpha: 0.18),
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+            ),
+            child: Row(
+              children: [
+                Icon(typeIcon, color: badgeColor, size: 15),
+                const SizedBox(width: 6),
+                Text(
+                  badgeText,
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 10.5,
+                    fontWeight: FontWeight.bold,
+                    color: badgeColor,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+                const Spacer(),
+                Text(
+                  timeText,
+                  style: GoogleFonts.dmSans(
+                    fontSize: 10.5,
+                    color: isMe ? Colors.white60 : (isDark ? Colors.white54 : Colors.black45),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // Body: CP & Title
+          Padding(
+            padding: const EdgeInsets.fromLTRB(12, 8, 12, 10),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (cpTitle.isNotEmpty) ...[
+                  Text(
+                    cpTitle,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: GoogleFonts.dmSans(
+                      fontSize: 11.5,
+                      color: isMe ? Colors.white70 : (isDark ? Colors.white60 : const Color(0xFF64748B)),
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                ],
+                Text(
+                  itemTitle,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 14.0,
+                    fontWeight: FontWeight.bold,
+                    color: isMe ? Colors.white : (isDark ? Colors.white : const Color(0xFF0F172A)),
+                  ),
+                ),
+                const SizedBox(height: 10),
+
+                // Interactive Button
+                GestureDetector(
+                  onTap: () async {
+                    if (type == 'materi') {
+                      final driveLink = itemData['driveLink'] ?? itemData['fileUrl'] ?? itemData['link'] ?? '';
+                      if (driveLink.toString().isNotEmpty) {
+                        final uri = Uri.parse(driveLink.toString());
+                        if (await canLaunchUrl(uri)) {
+                          await launchUrl(uri, mode: LaunchMode.externalApplication);
+                          return;
+                        }
+                      }
+                    }
+                    if (context.mounted && projectId.isNotEmpty) {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => DetailCpPage(
+                            projectId: projectId,
+                            projectTitle: projectTitle,
+                            stageIdx: cpIndex,
+                            isOwner: _userRole == 'guru',
+                            accentColor: const Color(0xFF7C3AED),
+                            cardColor: const Color(0xFFD6A5F8),
+                          ),
+                        ),
+                      );
+                    }
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    decoration: BoxDecoration(
+                      color: badgeColor,
+                      borderRadius: BorderRadius.circular(8),
+                      boxShadow: [
+                        BoxShadow(
+                          color: badgeColor.withValues(alpha: 0.3),
+                          blurRadius: 4,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          buttonText,
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 12.0,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        const Icon(Icons.arrow_forward_rounded, color: Colors.white, size: 14),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -1060,12 +1701,14 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
       if (isImage) {
         if (!mounted) return;
         final bool isDark = Theme.of(context).brightness == Brightness.dark;
-        final previewResult = await showDialog<Map<String, dynamic>>(
-          context: context,
-          builder: (dialogCtx) => ImagePreviewSendDialog(
-            imageBytes: rawBytes,
-            fileName: pickedFile.name,
-            isDark: isDark,
+        final previewResult = await Navigator.of(context).push<Map<String, dynamic>>(
+          MaterialPageRoute(
+            builder: (dialogCtx) => ImagePreviewSendDialog(
+              imageBytes: rawBytes,
+              fileName: pickedFile.name,
+              isDark: isDark,
+            ),
+            fullscreenDialog: true,
           ),
         );
 
@@ -1489,10 +2132,13 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
       }
 
       // 2. Also get discussion's own members
-      final discDoc = await FirebaseFirestore.instance.collection('discussions').doc(widget.discussionId).get();
-      if (discDoc.exists) {
-        final discMemberUids = List<String>.from(discDoc.data()?['memberUids'] ?? []);
-        allMemberUidSet.addAll(discMemberUids);
+      final dId = _currentDiscussionId.isNotEmpty ? _currentDiscussionId : widget.discussionId;
+      if (dId.isNotEmpty) {
+        final discDoc = await FirebaseFirestore.instance.collection('discussions').doc(dId).get();
+        if (discDoc.exists) {
+          final discMemberUids = List<String>.from(discDoc.data()?['memberUids'] ?? []);
+          allMemberUidSet.addAll(discMemberUids);
+        }
       }
 
       if (allMemberUidSet.isEmpty) return [];
@@ -3177,7 +3823,8 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
               final memberUids = List<String>.from(discData?['memberUids'] ?? []);
               final memberCount = memberUids.isNotEmpty ? memberUids.length : 1;
               final subtitle = isPrivate ? 'Obrolan Pribadi' : '$channelDesc • $memberCount anggota';
-              final projectId = discData?['projectId'] as String? ?? '';
+              final projectId = discData?['projectId'] as String? ?? widget.projectId ?? '';
+              final bool showCpFeatures = !isPrivate && projectId.isNotEmpty;
               final isOwner = discData?['creatorUid'] == currentUid || _userRole == 'guru';
 
               if (memberUids.isNotEmpty && _discussionMembers.isEmpty) {
@@ -3197,7 +3844,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                   systemNavigationBarContrastEnforced: false,
                 ),
                 child: Scaffold(
-                  backgroundColor: isDark ? const Color(0xFF000000) : const Color(0xFFFAF8FF),
+                  backgroundColor: isDark ? const Color(0xFF000000) : const Color(0xFFF3EDFD),
                   body: Stack(
                     fit: StackFit.expand,
                     children: [
@@ -3627,11 +4274,13 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                               // 1. Full Screen Messages ListView with 94px bottom padding (completely unobstructed)
                               Positioned.fill(
                                 child: StreamBuilder<QuerySnapshot>(
-                                  stream: FirebaseFirestore.instance
-                                      .collection('discussions')
-                                      .doc(_currentDiscussionId.isNotEmpty ? _currentDiscussionId : widget.discussionId)
-                                      .collection('messages')
-                                      .snapshots(),
+                                  stream: (_currentDiscussionId.isNotEmpty || widget.discussionId.isNotEmpty)
+                                      ? FirebaseFirestore.instance
+                                          .collection('discussions')
+                                          .doc(_currentDiscussionId.isNotEmpty ? _currentDiscussionId : widget.discussionId)
+                                          .collection('messages')
+                                          .snapshots()
+                                      : null,
                                   builder: (context, snapshot) {
                                     if (snapshot.connectionState == ConnectionState.waiting && !snapshot.hasData) {
                                       return Center(
@@ -3841,8 +4490,10 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                             .toList();
                                         final String thumbnailUrl = msgData['thumbnailUrl'] as String? ?? msgData['thumbnailBase64'] as String? ?? '';
                                         final bool isHdImage = msgData['isHd'] as bool? ?? false;
-                                        final bool isOnlyImage = imageUrl.isNotEmpty && (message.trim().isEmpty || message == '[Gambar Lampiran]');
-                                        final bool isOnlyFile = fileUrl.isNotEmpty && (message.trim().isEmpty || message.startsWith('[Berkas:'));
+                                        final cpLinkData = msgData['cpLinkData'] as Map<String, dynamic>?;
+                                        final bool isCpLink = cpLinkData != null;
+                                        final bool isOnlyImage = imageUrl.isNotEmpty && !isCpLink && (message.trim().isEmpty || message == '[Gambar Lampiran]');
+                                        final bool isOnlyFile = (fileUrl.isNotEmpty || fileName.isNotEmpty) && !isCpLink && (message.trim().isEmpty || message.startsWith('[Berkas:'));
 
                                         return Dismissible(
                                           key: Key('msg_$msgId'),
@@ -4142,15 +4793,36 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                                                       child: Row(
                                                                         mainAxisSize: MainAxisSize.min,
                                                                         children: [
-                                                                          Container(
-                                                                            width: 36,
-                                                                            height: 36,
-                                                                            decoration: BoxDecoration(
-                                                                              color: const Color(0xFF2563EB).withValues(alpha: 0.15),
-                                                                              borderRadius: BorderRadius.circular(8),
-                                                                            ),
-                                                                            child: const Icon(Icons.insert_drive_file_rounded, color: Color(0xFF3B82F6), size: 20),
-                                                                          ),
+                                                                          (() {
+                                                                            final ext = fileName.contains('.') ? fileName.split('.').last.toLowerCase() : '';
+                                                                            Color badgeBg = const Color(0xFF2563EB);
+                                                                            IconData badgeIcon = Icons.insert_drive_file;
+                                                                            if (ext == 'pdf') {
+                                                                              badgeBg = const Color(0xFFEF4444);
+                                                                              badgeIcon = Icons.picture_as_pdf;
+                                                                            } else if (ext == 'doc' || ext == 'docx') {
+                                                                              badgeBg = const Color(0xFF2563EB);
+                                                                              badgeIcon = Icons.description;
+                                                                            } else if (ext == 'xls' || ext == 'xlsx') {
+                                                                              badgeBg = const Color(0xFF059669);
+                                                                              badgeIcon = Icons.table_chart;
+                                                                            } else if (ext == 'zip' || ext == 'rar') {
+                                                                              badgeBg = const Color(0xFFD97706);
+                                                                              badgeIcon = Icons.folder_zip;
+                                                                            } else if (['jpg', 'jpeg', 'png', 'webp'].contains(ext)) {
+                                                                              badgeBg = const Color(0xFF8B5CF6);
+                                                                              badgeIcon = Icons.image;
+                                                                            }
+                                                                            return Container(
+                                                                              width: 36,
+                                                                              height: 36,
+                                                                              decoration: BoxDecoration(
+                                                                                color: badgeBg.withValues(alpha: 0.2),
+                                                                                shape: BoxShape.circle,
+                                                                              ),
+                                                                              child: Icon(badgeIcon, color: badgeBg, size: 20),
+                                                                            );
+                                                                          })(),
                                                                           const SizedBox(width: 10),
                                                                           Expanded(
                                                                             child: Column(
@@ -4162,7 +4834,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                                                                   maxLines: 1,
                                                                                   overflow: TextOverflow.ellipsis,
                                                                                   style: GoogleFonts.plusJakartaSans(
-                                                                                    fontSize: 19.5,
+                                                                                    fontSize: 14.5,
                                                                                     fontWeight: FontWeight.bold,
                                                                                     color: isMe ? Colors.white : (isDark ? Colors.white : const Color(0xFF0F172A)),
                                                                                   ),
@@ -4172,7 +4844,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                                                                   Text(
                                                                                     fileSize,
                                                                                     style: GoogleFonts.dmSans(
-                                                                                      fontSize: 16.5,
+                                                                                      fontSize: 12.0,
                                                                                       color: isMe ? Colors.white70 : (isDark ? Colors.white60 : Colors.black54),
                                                                                     ),
                                                                                   ),
@@ -4182,7 +4854,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                                                           ),
                                                                           const SizedBox(width: 6),
                                                                           Icon(
-                                                                            Icons.download_rounded,
+                                                                            Icons.file_download,
                                                                             size: 18,
                                                                             color: isMe ? Colors.white70 : (isDark ? Colors.white60 : Colors.black45),
                                                                           ),
@@ -4192,7 +4864,15 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                                                   ),
                                                                   if (message.isNotEmpty && !message.startsWith('[Berkas:')) const SizedBox(height: 4),
                                                               ],
-                                                              if (message.isNotEmpty && !isOnlyImage && !isOnlyFile) ...[
+                                                              if (isCpLink) ...[
+                                                                _buildCpLinkCard(
+                                                                  cpLinkData: cpLinkData,
+                                                                  isMe: isMe,
+                                                                  isDark: isDark,
+                                                                  timeText: timeText,
+                                                                ),
+                                                              ],
+                                                              if (message.isNotEmpty && !isOnlyImage && !isOnlyFile && !isCpLink) ...[
                                                                 _buildMessageTextWithTime(
                                                                   text: displayMessage,
                                                                   timeText: timeText,
@@ -4594,28 +5274,30 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                   Row(
                                     crossAxisAlignment: CrossAxisAlignment.center,
                                     children: [
-                                        // Tombol Lampiran Berkas / Gambar
-                                        BouncyButton(
-                                          onTap: _showAttachmentPickerSheet,
-                                          child: Container(
-                                            width: 38,
-                                            height: 38,
-                                            margin: const EdgeInsets.only(right: 6),
-                                            decoration: BoxDecoration(
-                                              color: isDark ? const Color(0xFF18181B) : const Color(0xFFF8FAFC),
-                                              shape: BoxShape.circle,
-                                              border: Border.all(
-                                                color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
-                                                width: 1.0,
-                                              ),
-                                            ),
-                                            child: Icon(
-                                              Icons.attach_file_rounded,
-                                              color: isDark ? Colors.white70 : const Color(0xFF4F46E5),
-                                              size: 20,
+                                      // Tombol Lampiran Berkas / Gambar (Toggle Mode Lampiran & Keyboard)
+                                      BouncyButton(
+                                        onTap: _toggleAttachmentPanel,
+                                        child: Container(
+                                          width: 38,
+                                          height: 38,
+                                          margin: const EdgeInsets.only(right: 6),
+                                          decoration: BoxDecoration(
+                                            color: isDark ? const Color(0xFF18181B) : const Color(0xFFF8FAFC),
+                                            shape: BoxShape.circle,
+                                            border: Border.all(
+                                              color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                                              width: 1.2,
                                             ),
                                           ),
+                                          child: Icon(
+                                            _showAttachmentPanel ? Icons.keyboard_rounded : Icons.attach_file_rounded,
+                                            color: _showAttachmentPanel
+                                                ? const Color(0xFF10B981)
+                                                : (isDark ? Colors.white70 : const Color(0xFFEF4444)),
+                                            size: 20,
+                                          ),
                                         ),
+                                      ),
                                       // Text Field (1 Baris lurus sejajar)
                                       Expanded(
                                         child: Container(
@@ -4645,6 +5327,11 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                               keyboardType: TextInputType.multiline,
                                               textInputAction: TextInputAction.send,
                                               onSubmitted: (_) => _sendMessage(),
+                                              onTap: () {
+                                                if (_showAttachmentPanel) {
+                                                  setState(() => _showAttachmentPanel = false);
+                                                }
+                                              },
                                               style: GoogleFonts.dmSans(
                                                 fontSize: 20.0,
                                                 color: isDark ? Colors.white : Colors.black87,
@@ -4666,25 +5353,39 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                           ),
                                         ),
                                       ),
-                                      const SizedBox(width: 4),
-                                      // Tombol Kirim: Ikon saja warna ungu Hubner lurus sejajar dengan animasi bounce responsif
+                                      const SizedBox(width: 6),
+                                      // Tombol Kirim: Lingkaran background ungu ikon kirim putih
                                       BouncyButton(
-                                        scaleDown: 0.75,
+                                        scaleDown: 0.85,
                                         duration: const Duration(milliseconds: 100),
                                         onTap: _sendMessage,
                                         child: Container(
                                           width: 40,
                                           height: 40,
+                                          decoration: BoxDecoration(
+                                            color: const Color(0xFF7C3AED),
+                                            shape: BoxShape.circle,
+                                            boxShadow: [
+                                              BoxShadow(
+                                                color: const Color(0xFF7C3AED).withValues(alpha: 0.35),
+                                                blurRadius: 6,
+                                                offset: const Offset(0, 2),
+                                              ),
+                                            ],
+                                          ),
                                           alignment: Alignment.center,
                                           child: Icon(
                                             _editingMessageId != null ? Icons.check_rounded : Icons.send_rounded,
-                                            color: isDark ? const Color(0xFFD6A5F8) : const Color(0xFF7C3AED),
-                                            size: 22,
+                                            color: Colors.white,
+                                            size: 19,
                                           ),
                                         ),
                                       ),
                                     ],
                                   ),
+                                  // Drawer Lampiran Berkas / Mode File Pengganti Keyboard
+                                  if (_showAttachmentPanel)
+                                    _buildAttachmentBottomPanel(isDark, showCpFeatures, projectId),
                                 ],
                               ),
                             ),
@@ -4882,215 +5583,214 @@ class _ImagePreviewSendDialogState extends State<ImagePreviewSendDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final sizeKb = (widget.imageBytes.lengthInBytes / 1024).toStringAsFixed(1);
-    return Dialog(
-      backgroundColor: widget.isDark ? const Color(0xFF18181B) : Colors.white,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-      child: Container(
-        constraints: const BoxConstraints(maxWidth: 420),
-        padding: const EdgeInsets.all(18),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // Header with Title & HD toggle badge
-            Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Kirim Gambar',
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: widget.isDark ? Colors.white : const Color(0xFF0F172A),
-                        ),
-                      ),
-                      Text(
-                        'Ukuran file: $sizeKb KB',
-                        style: GoogleFonts.dmSans(
-                          fontSize: 12,
-                          color: widget.isDark ? Colors.white60 : Colors.black54,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                // HD Toggle Button (WhatsApp Style)
-                GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      _isHd = !_isHd;
-                    });
-                  },
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: _isHd
-                          ? const Color(0xFF7C3AED)
-                          : (widget.isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9)),
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(
-                        color: _isHd
-                            ? const Color(0xFF9333EA)
-                            : (widget.isDark ? const Color(0xFF3F3F46) : const Color(0xFFE2E8F0)),
-                        width: 1.2,
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.hd_rounded,
-                          size: 18,
-                          color: _isHd ? Colors.white : (widget.isDark ? Colors.white70 : const Color(0xFF475569)),
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          _isHd ? 'HD ON' : 'HD OFF',
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 11.5,
-                            fontWeight: FontWeight.bold,
-                            color: _isHd ? Colors.white : (widget.isDark ? Colors.white70 : const Color(0xFF475569)),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
+    final bottomInset = MediaQuery.of(context).viewInsets.bottom;
 
-            // Image Preview Container
-            ClipRRect(
-              borderRadius: BorderRadius.circular(14),
-              child: Container(
-                constraints: const BoxConstraints(maxHeight: 280),
-                color: widget.isDark ? Colors.black : const Color(0xFFF8FAFC),
+    return Scaffold(
+      backgroundColor: Colors.black,
+      resizeToAvoidBottomInset: false,
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          // 1. Full Screen Interactive Image Canvas
+          Positioned.fill(
+            child: InteractiveViewer(
+              minScale: 0.8,
+              maxScale: 4.0,
+              child: Center(
                 child: Image.memory(
                   widget.imageBytes,
                   fit: BoxFit.contain,
                 ),
               ),
             ),
-            const SizedBox(height: 8),
+          ),
 
-            // HD Status Indicator Text
-            Row(
-              children: [
-                Icon(
-                  _isHd ? Icons.check_circle_rounded : Icons.info_outline_rounded,
-                  size: 13,
-                  color: _isHd ? const Color(0xFF10B981) : const Color(0xFF7C3AED),
-                ),
-                const SizedBox(width: 6),
-                Expanded(
-                  child: Text(
-                    _isHd
-                        ? 'Kualitas HD diunggah penuh tanpa kompresi'
-                        : 'Mode Hemat: Dikompresi otomatis ke ~200 KB',
-                    style: GoogleFonts.dmSans(
-                      fontSize: 11.5,
-                      color: _isHd
-                          ? const Color(0xFF10B981)
-                          : (widget.isDark ? Colors.white60 : Colors.black54),
-                    ),
+          // 2. Top Bar: Close Button (X) on left, HD Toggle button on right
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: SafeArea(
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      Colors.black.withValues(alpha: 0.75),
+                      Colors.transparent,
+                    ],
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
                   ),
                 ),
-              ],
-            ),
-            const SizedBox(height: 12),
-
-            // Caption Text Field
-            Container(
-              decoration: BoxDecoration(
-                color: widget.isDark ? const Color(0xFF27272A) : const Color(0xFFF8FAFC),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: widget.isDark ? const Color(0xFF3F3F46) : const Color(0xFFE2E8F0),
-                ),
-              ),
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
-              child: TextField(
-                controller: _captionController,
-                style: GoogleFonts.dmSans(
-                  fontSize: 14,
-                  color: widget.isDark ? Colors.white : Colors.black87,
-                ),
-                decoration: InputDecoration(
-                  hintText: 'Tambah keterangan (opsional)...',
-                  hintStyle: GoogleFonts.dmSans(
-                    fontSize: 14,
-                    color: widget.isDark ? Colors.white38 : Colors.black38,
-                  ),
-                  border: InputBorder.none,
-                  isDense: true,
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-
-            // Actions Buttons: Batal & Kirim
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: () => Navigator.pop(context, null),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: widget.isDark ? Colors.white70 : Colors.black87,
-                      side: BorderSide(
-                        color: widget.isDark ? const Color(0xFF3F3F46) : const Color(0xFFE2E8F0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    // Tombol Batal / Close (X)
+                    GestureDetector(
+                      onTap: () => Navigator.pop(context, null),
+                      child: Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: Colors.black.withValues(alpha: 0.45),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.close_rounded,
+                          color: Colors.white,
+                          size: 24,
+                        ),
                       ),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                      padding: const EdgeInsets.symmetric(vertical: 12),
                     ),
-                    child: Text(
-                      'Batal',
-                      style: GoogleFonts.plusJakartaSans(fontSize: 13.5, fontWeight: FontWeight.w600),
+
+                    // Tombol HD
+                    GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          _isHd = !_isHd;
+                        });
+                      },
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 200),
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: _isHd
+                              ? const Color(0xFF7C3AED)
+                              : Colors.black.withValues(alpha: 0.45),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: _isHd ? const Color(0xFFA78BFA) : Colors.white30,
+                            width: 1.2,
+                          ),
+                          boxShadow: _isHd
+                              ? [
+                                  BoxShadow(
+                                    color: const Color(0xFF7C3AED).withValues(alpha: 0.5),
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 2),
+                                  )
+                                ]
+                              : null,
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              _isHd ? Icons.hd_rounded : Icons.hd_outlined,
+                              size: 18,
+                              color: Colors.white,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              'HD',
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 12.0,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+
+          // 3. Bottom Bar: Caption input text box & Send button
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: bottomInset > 0 ? bottomInset : (MediaQuery.of(context).padding.bottom + 8),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    Colors.transparent,
+                    Colors.black.withValues(alpha: 0.8),
+                  ],
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                ),
+              ),
+              child: Row(
+                children: [
+                  // Text box keterangan
+                  Expanded(
+                    child: Container(
+                      constraints: const BoxConstraints(minHeight: 46),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF1E1E22).withValues(alpha: 0.8),
+                        borderRadius: BorderRadius.circular(24),
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.25),
+                          width: 1.0,
+                        ),
+                      ),
+                      alignment: Alignment.center,
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: TextField(
+                        controller: _captionController,
+                        style: GoogleFonts.dmSans(
+                          fontSize: 15.0,
+                          color: Colors.white,
+                        ),
+                        decoration: InputDecoration(
+                          hintText: 'Tambah keterangan...',
+                          hintStyle: GoogleFonts.dmSans(
+                            fontSize: 15.0,
+                            color: Colors.white60,
+                          ),
+                          border: InputBorder.none,
+                          isDense: true,
+                          contentPadding: const EdgeInsets.symmetric(vertical: 10),
+                        ),
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: () {
+                  const SizedBox(width: 8),
+
+                  // Tombol Kirim: Lingkaran background ungu ikon kirim putih
+                  BouncyButton(
+                    scaleDown: 0.85,
+                    duration: const Duration(milliseconds: 100),
+                    onTap: () {
                       Navigator.pop(context, {
                         'isHd': _isHd,
                         'caption': _captionController.text.trim(),
                       });
                     },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF7C3AED),
-                      foregroundColor: Colors.white,
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(Icons.send_rounded, size: 16),
-                        const SizedBox(width: 6),
-                        Text(
-                          'Kirim',
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 13.5,
-                            fontWeight: FontWeight.bold,
+                    child: Container(
+                      width: 44,
+                      height: 44,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF7C3AED),
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0xFF7C3AED).withValues(alpha: 0.4),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
+                      alignment: Alignment.center,
+                      child: const Icon(
+                        Icons.send_rounded,
+                        color: Colors.white,
+                        size: 20,
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -5541,14 +6241,14 @@ class _PurpleMicroPatternPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    // 1. Solid Flat Background (Hitam pekat solid #000000)
-    final Color solidBg = isDark ? const Color(0xFF000000) : const Color(0xFFFAF9FD);
+    // 1. Solid Flat Background (20% Ungu lembut pada mode light)
+    final Color solidBg = isDark ? const Color(0xFF000000) : const Color(0xFFF3EDFD);
     canvas.drawColor(solidBg, BlendMode.src);
 
     // 2. Abstract Squiggle & Brush Paint (Ungu soft elegan)
     final strokePaint = Paint()
       ..color = (isDark ? const Color(0xFFA855F7) : const Color(0xFF7C3AED))
-          .withValues(alpha: isDark ? 0.14 : 0.10)
+          .withValues(alpha: isDark ? 0.14 : 0.20)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.3
       ..strokeCap = StrokeCap.round
