@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:hubner/core/widgets/three_dots_loader.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:hubner/core/theme/app_typography.dart';
+import 'package:flutter/services.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:hubner/core/theme/app_typography.dart';
+import 'package:hubner/core/theme/app_colors.dart';
 import '../../../projects/presentation/pages/class_page.dart';
 
 class NotificationsPage extends StatefulWidget {
@@ -13,7 +15,47 @@ class NotificationsPage extends StatefulWidget {
 }
 
 class _NotificationsPageState extends State<NotificationsPage> {
-  String _selectedFilter = 'Semua';
+  Set<String> _readItemIds = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _loadReadItems();
+  }
+
+  Future<void> _loadReadItems() async {
+    final prefs = await SharedPreferences.getInstance();
+    final list = prefs.getStringList('read_notifications_ids') ?? [];
+    if (mounted) {
+      setState(() {
+        _readItemIds = list.toSet();
+      });
+    }
+  }
+
+  Future<void> _markItemAsRead(String id) async {
+    if (id.isEmpty || _readItemIds.contains(id)) return;
+    final prefs = await SharedPreferences.getInstance();
+    _readItemIds.add(id);
+    await prefs.setStringList('read_notifications_ids', _readItemIds.toList());
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
+  Future<void> _markAllAsRead(List<Map<String, dynamic>> items) async {
+    final prefs = await SharedPreferences.getInstance();
+    for (var it in items) {
+      final id = it['id']?.toString() ?? '';
+      if (id.isNotEmpty) {
+        _readItemIds.add(id);
+      }
+    }
+    await prefs.setStringList('read_notifications_ids', _readItemIds.toList());
+    if (mounted) {
+      setState(() {});
+    }
+  }
 
   String _formatTime(dynamic createdAt) {
     if (createdAt == null) return 'Baru saja';
@@ -39,50 +81,28 @@ class _NotificationsPageState extends State<NotificationsPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.black, size: 20),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: Text(
-          'Notifikasi & Aktivitas',
-          style: AppTypography.chatHeaderTitle(
-            color: Colors.black,
-          ),
-        ),
-        centerTitle: true,
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(1),
-          child: Container(color: const Color(0xFFF1F5F9), height: 1),
-        ),
-      ),
-      body: Column(
-        children: [
-          // Filter Chips Row
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: [
-                  _buildFilterChip('Semua'),
-                  const SizedBox(width: 8),
-                  _buildFilterChip('Classroom Selesai'),
-                  const SizedBox(width: 8),
-                  _buildFilterChip('Tugas Selesai'),
-                ],
-              ),
-            ),
-          ),
-          const Divider(height: 1, color: Color(0xFFF1F5F9)),
+    final bool isDark = AppColors.isDarkMode;
+    final currentUid = FirebaseAuth.instance.currentUser?.uid ?? '';
 
-          // Notifications List from Firestore Stream (Max 20 Items)
-          Expanded(
-            child: StreamBuilder<QuerySnapshot>(
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+        systemNavigationBarColor: Colors.transparent,
+        systemNavigationBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+      ),
+      child: Scaffold(
+        backgroundColor: isDark ? const Color(0xFF000000) : Colors.white,
+        body: StreamBuilder<DocumentSnapshot>(
+          stream: currentUid.isNotEmpty
+              ? FirebaseFirestore.instance.collection('users').doc(currentUid).snapshots()
+              : const Stream.empty(),
+          builder: (context, userSnap) {
+            final userData = (userSnap.data?.data() as Map<String, dynamic>?) ?? {};
+            final String userRole = (userData['role'] ?? 'Siswa').toString();
+            final List enrolledProjectIds = List.from(userData['projectIds'] ?? []);
+
+            return StreamBuilder<QuerySnapshot>(
               stream: FirebaseFirestore.instance.collection('notifications').snapshots(),
               builder: (context, notifSnap) {
                 return StreamBuilder<QuerySnapshot>(
@@ -90,63 +110,163 @@ class _NotificationsPageState extends State<NotificationsPage> {
                   builder: (context, projSnap) {
                     if (notifSnap.connectionState == ConnectionState.waiting &&
                         projSnap.connectionState == ConnectionState.waiting) {
-                      return const SizedBox.shrink();
+                      return const Center(
+                        child: SizedBox(
+                          width: 24,
+                          height: 24,
+                          child: CircularProgressIndicator(strokeWidth: 2.0),
+                        ),
+                      );
                     }
 
                     final notifDocs = notifSnap.data?.docs ?? [];
                     final projDocs = projSnap.data?.docs ?? [];
 
-                    final List<Map<String, dynamic>> items = [];
-
-                    // 1. Add notification documents from notifications collection
-                    for (var doc in notifDocs) {
-                      final data = doc.data() as Map<String, dynamic>;
-                      items.add({
-                        'text': data['text'] ?? '',
-                        'type': data['type'] ?? 'classroom',
-                        'projectId': data['projectId'] ?? '',
-                        'createdAt': data['createdAt'],
-                      });
-                    }
-
-                    // 2. Add completed projects and completed tasks directly from projects collection
-                    for (var doc in projDocs) {
+                    // Filter only projects belonging to this user (strictly account-isolated)
+                    final userProjects = projDocs.where((doc) {
                       final pData = doc.data() as Map<String, dynamic>;
                       final pId = doc.id;
+                      final creatorId = pData['creatorId'] ?? pData['ownerUid'] ?? pData['teacherId'] ?? '';
+                      final members = List.from(pData['members'] ?? []);
+                      final studentIds = List.from(pData['studentIds'] ?? []);
+
+                      return creatorId == currentUid ||
+                          members.contains(currentUid) ||
+                          studentIds.contains(currentUid) ||
+                          enrolledProjectIds.contains(pId);
+                    }).toList();
+
+                    final userProjectMap = {for (var p in userProjects) p.id: p.data() as Map<String, dynamic>};
+                    final validProjectIds = userProjectMap.keys.toSet();
+
+                    final List<Map<String, dynamic>> items = [];
+
+                    // 1. Add direct notifications for this user or their enrolled projects
+                    for (var doc in notifDocs) {
+                      final data = doc.data() as Map<String, dynamic>;
+                      final targetUid = data['uid'] ?? data['recipientId'] ?? '';
+                      final pId = data['projectId'] ?? '';
+                      final targetRole = data['targetRole'] ?? 'all';
+
+                      final bool isMyUser = targetUid == currentUid;
+                      final bool isMyClass = pId.isNotEmpty && validProjectIds.contains(pId);
+                      final bool isRoleMatch = targetRole == 'all' || targetRole == userRole;
+
+                      if ((isMyUser || isMyClass) && isRoleMatch) {
+                        items.add({
+                          'id': doc.id,
+                          'text': data['text'] ?? '',
+                          'type': (data['type'] ?? 'classroom').toString(),
+                          'projectId': pId,
+                          'createdAt': data['createdAt'],
+                        });
+                      }
+                    }
+
+                    // 2. Synthesize role-specific notifications from enrolled classrooms (tugas, materi, quiz, classroom)
+                    for (var entry in userProjectMap.entries) {
+                      final pId = entry.key;
+                      final pData = entry.value;
                       final pName = pData['name'] ?? 'Classroom';
                       final pStatus = (pData['status'] ?? '').toString();
                       final stages = List.from(pData['stages'] ?? []);
 
                       int totalTasks = 0;
                       int doneTasks = 0;
+
                       for (var st in stages) {
-                        final tasks = List.from(st['tasks'] ?? []);
+                        // Tugas
+                        final tasks = List.from(st['tasks'] ?? st['tugas'] ?? []);
                         totalTasks += tasks.length;
                         for (var t in tasks) {
+                          final tTitle = t['title'] ?? t['name'] ?? 'Tugas';
                           final isTaskDone = t['isDone'] == true || (t['progress'] ?? 0) == 100;
-                          if (isTaskDone) {
-                            doneTasks++;
-                            final tTitle = t['title'] ?? 'Tugas';
-                            final taskExists = items.any(
-                              (it) => it['projectId'] == pId && it['text'].contains(tTitle),
-                            );
-                            if (!taskExists) {
-                              items.add({
-                                'text': 'Tugas "$tTitle" pada classroom "$pName" telah selesai.',
-                                'type': 'tugas',
-                                'projectId': pId,
-                                'createdAt': pData['updatedAt'] ?? pData['createdAt'] ?? DateTime.now(),
-                              });
+                          if (isTaskDone) doneTasks++;
+
+                          final String itemId = 'task_${pId}_$tTitle';
+                          final taskAlreadyInList = items.any((it) => it['id'] == itemId);
+
+                          if (!taskAlreadyInList) {
+                            String notifText;
+                            if (userRole == 'Guru') {
+                              notifText = 'Anda membuat tugas "$tTitle" pada $pName.';
+                            } else {
+                              if (isTaskDone) {
+                                notifText = 'Anda telah menyelesaikan tugas "$tTitle" pada $pName.';
+                              } else {
+                                notifText = 'Guru mengunggah tugas baru: "$tTitle" pada $pName.';
+                              }
                             }
+
+                            items.add({
+                              'id': itemId,
+                              'text': notifText,
+                              'type': 'tugas',
+                              'projectId': pId,
+                              'createdAt': t['createdAt'] ?? pData['updatedAt'] ?? pData['createdAt'] ?? DateTime.now(),
+                            });
+                          }
+                        }
+
+                        // Materi
+                        final materis = List.from(st['materis'] ?? st['materi'] ?? st['materials'] ?? []);
+                        for (var m in materis) {
+                          final mTitle = m['title'] ?? m['name'] ?? 'Materi Pembelajaran';
+                          final String itemId = 'materi_${pId}_$mTitle';
+                          final materiAlreadyInList = items.any((it) => it['id'] == itemId);
+
+                          if (!materiAlreadyInList) {
+                            String notifText;
+                            if (userRole == 'Guru') {
+                              notifText = 'Anda membuat materi baru: "$mTitle" pada $pName.';
+                            } else {
+                              notifText = 'Guru mengunggah materi baru: "$mTitle" pada $pName.';
+                            }
+
+                            items.add({
+                              'id': itemId,
+                              'text': notifText,
+                              'type': 'materi',
+                              'projectId': pId,
+                              'createdAt': m['createdAt'] ?? pData['updatedAt'] ?? pData['createdAt'] ?? DateTime.now(),
+                            });
+                          }
+                        }
+
+                        // Quiz
+                        final quizzes = List.from(st['quizzes'] ?? st['quiz'] ?? st['soal'] ?? []);
+                        for (var q in quizzes) {
+                          final qTitle = q['title'] ?? q['name'] ?? 'Quiz Kelas';
+                          final String itemId = 'quiz_${pId}_$qTitle';
+                          final quizAlreadyInList = items.any((it) => it['id'] == itemId);
+
+                          if (!quizAlreadyInList) {
+                            String notifText;
+                            if (userRole == 'Guru') {
+                              notifText = 'Anda membuat kuis baru: "$qTitle" pada $pName.';
+                            } else {
+                              notifText = 'Guru mengunggah kuis baru: "$qTitle" pada $pName.';
+                            }
+
+                            items.add({
+                              'id': itemId,
+                              'text': notifText,
+                              'type': 'quiz',
+                              'projectId': pId,
+                              'createdAt': q['createdAt'] ?? pData['updatedAt'] ?? pData['createdAt'] ?? DateTime.now(),
+                            });
                           }
                         }
                       }
 
+                      // Classroom Completion
                       final bool isDone = pStatus == 'Selesai' || (totalTasks > 0 && doneTasks == totalTasks);
                       if (isDone) {
-                        final alreadyExists = items.any((it) => it['projectId'] == pId && it['type'] == 'classroom');
+                        final String itemId = 'classroom_done_$pId';
+                        final alreadyExists = items.any((it) => it['id'] == itemId);
                         if (!alreadyExists) {
                           items.add({
+                            'id': itemId,
                             'text': 'Classroom "$pName" telah 100% selesai dikerjakan.',
                             'type': 'classroom',
                             'projectId': pId,
@@ -156,7 +276,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                       }
                     }
 
-                    // Sort items newest first
+                    // Sort newest first
                     items.sort((a, b) {
                       DateTime tA;
                       DateTime tB;
@@ -179,127 +299,212 @@ class _NotificationsPageState extends State<NotificationsPage> {
                       return tB.compareTo(tA);
                     });
 
-                    // Cap to 20 items max
-                    final finalItems = items.take(20).toList();
+                    // Cap to 30 items max
+                    final finalItems = items.take(30).toList();
 
-                    // Filter items according to filter chip
-                    final filteredItems = finalItems.where((item) {
-                      final type = item['type'] ?? '';
-                      if (_selectedFilter == 'Classroom Selesai') {
-                        return type == 'classroom';
-                      } else if (_selectedFilter == 'Tugas Selesai') {
-                        return type == 'tugas';
-                      }
-                      return true;
-                    }).toList();
+                    // Calculate unread count
+                    final int unreadCount = finalItems.where((it) => !_readItemIds.contains(it['id'])).length;
 
-                    if (filteredItems.isEmpty) {
-                      return Center(
-                        child: Padding(
-                          padding: const EdgeInsets.all(32.0),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const Icon(Icons.notifications_off_outlined, size: 54, color: Colors.black26),
-                              const SizedBox(height: 12),
-                              Text(
-                                'Belum Ada Notifikasi',
-                                style: AppTypography.sectionHeader(color: Colors.black54),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                'Pemberitahuan aktivitas classroom dan tugas baru akan muncul di sini.',
-                                textAlign: TextAlign.center,
-                                style: AppTypography.subtitle(color: Colors.black38),
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    }
-
-                    return ListView.separated(
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                      itemCount: filteredItems.length,
-                      separatorBuilder: (context, index) => const Divider(height: 24, color: Color(0xFFF1F5F9)),
-                      itemBuilder: (context, index) {
-                        final item = filteredItems[index];
-                        return InkWell(
-                          onTap: () {
-                            if (item['projectId'] != null && (item['projectId'] as String).isNotEmpty) {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => ClassPage(
-                                    projectId: item['projectId'],
-                                    projectTitle: 'Detail Project',
+                    return Scaffold(
+                      backgroundColor: isDark ? const Color(0xFF000000) : Colors.white,
+                      appBar: AppBar(
+                        backgroundColor: isDark ? const Color(0xFF000000) : Colors.white,
+                        elevation: 0,
+                        scrolledUnderElevation: 0,
+                        leadingWidth: 56,
+                        leading: Padding(
+                          padding: const EdgeInsets.only(left: 14.0),
+                          child: Center(
+                            child: GestureDetector(
+                              onTap: () => Navigator.pop(context),
+                              behavior: HitTestBehavior.opaque,
+                              child: Container(
+                                width: 40,
+                                height: 40,
+                                decoration: BoxDecoration(
+                                  color: isDark ? const Color(0xFF18181B) : Colors.white,
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                                    width: 1.2,
                                   ),
                                 ),
-                              );
-                            }
-                          },
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 4.0),
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Expanded(
-                                  child: Text(
-                                    item['text'],
-                                    style: GoogleFonts.dmSans(
-                                      fontSize: 15.2,
-                                      color: Colors.black87,
-                                      height: 1.4,
+                                child: Center(
+                                  child: Icon(
+                                    Icons.chevron_left_rounded,
+                                    color: isDark ? Colors.white : Colors.black87,
+                                    size: 24,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        titleSpacing: 10,
+                        title: Text(
+                          'Notifikasi & Aktivitas',
+                          style: AppTypography.chatHeaderTitle(
+                            color: isDark ? Colors.white : Colors.black,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        centerTitle: false,
+                        actions: [
+                          if (finalItems.isNotEmpty)
+                            Padding(
+                              padding: const EdgeInsets.only(right: 14.0),
+                              child: Center(
+                                child: GestureDetector(
+                                  onTap: unreadCount > 0 ? () => _markAllAsRead(finalItems) : null,
+                                  behavior: HitTestBehavior.opaque,
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+                                    decoration: BoxDecoration(
+                                      color: unreadCount > 0
+                                          ? (isDark ? const Color(0xFF27272A) : const Color(0xFF1E293B))
+                                          : (isDark ? const Color(0xFF18181B) : const Color(0xFFF1F5F9)),
+                                      borderRadius: BorderRadius.circular(20),
+                                      border: isDark
+                                          ? Border.all(color: const Color(0xFF3F3F46), width: 1.0)
+                                          : (unreadCount > 0 ? null : Border.all(color: const Color(0xFFE2E8F0), width: 1.0)),
+                                    ),
+                                    child: Text(
+                                      'Baca Semua',
+                                      style: AppTypography.buttonLabel(
+                                        color: unreadCount > 0 ? Colors.white : (isDark ? Colors.white38 : Colors.black38),
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 13.0,
+                                      ),
                                     ),
                                   ),
                                 ),
-                                const SizedBox(width: 12),
-                                Text(
-                                  _formatTime(item['createdAt']),
-                                  style: GoogleFonts.dmSans(
-                                    fontSize: 14.0,
-                                    color: Colors.black38,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ],
+                              ),
                             ),
+                        ],
+                        bottom: PreferredSize(
+                          preferredSize: const Size.fromHeight(1),
+                          child: Container(
+                            color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+                            height: 1,
                           ),
-                        );
-                      },
+                        ),
+                      ),
+                      body: finalItems.isEmpty
+                          ? Center(
+                              child: Padding(
+                                padding: const EdgeInsets.all(32.0),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.notifications_none_rounded,
+                                      size: 54,
+                                      color: isDark ? Colors.white24 : Colors.black26,
+                                    ),
+                                    const SizedBox(height: 12),
+                                    Text(
+                                      'Belum Ada Notifikasi',
+                                      style: AppTypography.sectionHeader(
+                                        color: isDark ? Colors.white60 : Colors.black54,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      'Aktivitas kelas, tugas, materi, dan kuis Anda akan tampil di sini.',
+                                      textAlign: TextAlign.center,
+                                      style: AppTypography.timestamp(
+                                        color: isDark ? Colors.white38 : Colors.black38,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            )
+                          : ListView.separated(
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                              itemCount: finalItems.length,
+                              separatorBuilder: (context, index) => Divider(
+                                height: 14,
+                                color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+                              ),
+                              itemBuilder: (context, index) {
+                                final item = finalItems[index];
+                                final String itemId = item['id'] ?? '';
+                                final bool isRead = _readItemIds.contains(itemId);
+
+                                return InkWell(
+                                  onTap: () {
+                                    _markItemAsRead(itemId);
+                                    if (item['projectId'] != null && (item['projectId'] as String).isNotEmpty) {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) => ClassPage(
+                                            projectId: item['projectId'],
+                                            projectTitle: 'Detail Classroom',
+                                          ),
+                                        ),
+                                      );
+                                    }
+                                  },
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(vertical: 6.0, horizontal: 4.0),
+                                    child: Row(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        // Notification Text (Normal weight, font size 18, no icon)
+                                        Expanded(
+                                          child: Text(
+                                            item['text'],
+                                            style: AppTypography.chatBody(
+                                              fontSize: 18.0,
+                                              color: isDark ? Colors.white : Colors.black87,
+                                              fontWeight: FontWeight.normal,
+                                              height: 1.35,
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(width: 12),
+
+                                        // Trailing Timestamp & Small Unread Indicator Dot
+                                        Column(
+                                          crossAxisAlignment: CrossAxisAlignment.end,
+                                          children: [
+                                            if (!isRead) ...[
+                                              Container(
+                                                width: 7,
+                                                height: 7,
+                                                margin: const EdgeInsets.only(bottom: 4, top: 4),
+                                                decoration: const BoxDecoration(
+                                                  shape: BoxShape.circle,
+                                                  color: Color(0xFFEF4444), // Red Indicator Dot
+                                                ),
+                                              ),
+                                            ],
+                                            Text(
+                                              _formatTime(item['createdAt']),
+                                              style: AppTypography.timestamp(
+                                                fontSize: 13,
+                                                color: isDark ? Colors.white38 : Colors.black38,
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
                     );
                   },
                 );
               },
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildFilterChip(String label) {
-    final isSelected = _selectedFilter == label;
-    return ChoiceChip(
-      label: Text(label),
-      selected: isSelected,
-      onSelected: (selected) {
-        if (selected) {
-          setState(() {
-            _selectedFilter = label;
-          });
-        }
-      },
-      selectedColor: Colors.black,
-      backgroundColor: const Color(0xFFF8FAFC),
-      labelStyle: AppTypography.buttonLabel(
-        color: isSelected ? Colors.white : Colors.black54,
-      ),
-      side: BorderSide(
-        color: isSelected ? Colors.black : const Color(0xFFE2E8F0),
-      ),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
+            );
+          },
+        ),
       ),
     );
   }

@@ -18,6 +18,7 @@ import 'package:hubner/features/projects/presentation/pages/add_class_page.dart'
 import 'package:hubner/features/projects/presentation/pages/edit_class_page.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:hubner/features/notifications/presentation/pages/notifications_page.dart';
+import 'package:hubner/features/notifications/presentation/widgets/notification_bell_icon.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:hubner/main.dart';
@@ -3852,36 +3853,12 @@ class _HomePageState extends State<HomePage> {
                                                 },
                                               ),
                                               const SizedBox(width: 10),
-                                              BouncyButton(
-                                                onTap: () {
-                                                  Navigator.push(
-                                                    context,
-                                                    MaterialPageRoute(
-                                                      builder: (_) => const NotificationsPage(),
-                                                    ),
-                                                  );
+                                              ValueListenableBuilder<String>(
+                                                valueListenable: HubnerApp.themeNotifier,
+                                                builder: (context, currentTheme, _) {
+                                                  final bool isDark = currentTheme == 'Gelap' || currentTheme == 'Hitam';
+                                                  return NotificationBellIcon(isDark: isDark, size: 42);
                                                 },
-                                                child: Container(
-                                                  width: 42,
-                                                  height: 42,
-                                                  decoration: BoxDecoration(
-                                                    color: isDark
-                                                        ? const Color(0xFF1C1C1E)
-                                                        : Colors.white,
-                                                    shape: BoxShape.circle,
-                                                    border: Border.all(
-                                                      color: isDark
-                                                          ? const Color(0xFF27272A)
-                                                          : const Color(0xFFF1F5F9),
-                                                      width: 1.2,
-                                                    ),
-                                                  ),
-                                                  child: Icon(
-                                                    Icons.notifications_none_rounded,
-                                                    color: isDark ? Colors.white : Colors.black,
-                                                    size: 20,
-                                                  ),
-                                                ),
                                               ),
                                             ],
                                           ),
@@ -4848,35 +4825,41 @@ class _HomePageState extends State<HomePage> {
 
             return Dialog(
               insetPadding: const EdgeInsets.symmetric(horizontal: 16),
-              backgroundColor: isDark ? const Color(0xFF141416) : Colors.white,
+              backgroundColor: isDark ? const Color(0xFF141416) : const Color(0xFFF1F5F9),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(28),
+                borderRadius: BorderRadius.circular(24),
               ),
               child: Container(
-                padding: const EdgeInsets.all(20),
-                constraints: const BoxConstraints(maxWidth: 380),
+                padding: const EdgeInsets.all(16),
+                constraints: const BoxConstraints(maxWidth: 390),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // Header: Title & Close Button
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          'Analytics',
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 20,
+                          'Preview Statistik',
+                          style: AppTypography.chatHeaderTitle(
+                            fontSize: 18.5,
                             fontWeight: FontWeight.bold,
                             color: isDark ? Colors.white : Colors.black,
                           ),
                         ),
                         GestureDetector(
                           onTap: () => Navigator.pop(context),
+                          behavior: HitTestBehavior.opaque,
                           child: Container(
                             padding: const EdgeInsets.all(4),
                             decoration: BoxDecoration(
-                              color: isDark ? Colors.white12 : const Color(0xFFF1F5F9),
+                              color: isDark ? Colors.white12 : Colors.white,
                               shape: BoxShape.circle,
+                              border: Border.all(
+                                color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                                width: 1.0,
+                              ),
                             ),
                             child: Icon(
                               Icons.close_rounded,
@@ -4887,8 +4870,9 @@ class _HomePageState extends State<HomePage> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 12),
 
+                    // Filter Tabs
                     Row(
                       children: [
                         _buildPillTab('Semua', activeTab == 0, isDark, () => setModalState(() => activeTab = 0)),
@@ -4898,93 +4882,105 @@ class _HomePageState extends State<HomePage> {
                         _buildPillTab('Nilai', activeTab == 2, isDark, () => setModalState(() => activeTab = 2)),
                       ],
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 12),
 
-                    Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: isDark ? const Color(0xFF26262B) : const Color(0xFFD4C5FF),
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(
-                            Icons.flash_on_rounded,
-                            color: isDark ? const Color(0xFFA78BFA) : const Color(0xFF7F52FC),
-                            size: 18,
-                          ),
+                    // Poin Keaktifan Kelas (Compact Card)
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: isDark ? const Color(0xFF18181B) : Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                          width: 1.0,
                         ),
-                        const SizedBox(width: 10),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Poin Keaktifan Kelas',
-                              style: GoogleFonts.dmSans(
-                                fontSize: 14.0,
-                                color: isDark ? Colors.white60 : Colors.black54,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                            Text(
-                              '$activityPoints Poin',
-                              style: GoogleFonts.plusJakartaSans(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: isDark ? Colors.white : Colors.black,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 24),
-
-                    SizedBox(
-                      height: 160,
+                      ),
                       child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        crossAxisAlignment: CrossAxisAlignment.end,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          _buildCustomBar(
-                            context,
-                            isDark: isDark,
-                            heightPercent: finalTugasProgress,
-                            icon: Icons.assignment_outlined,
-                            title: 'Tugas',
-                            duration: '${(finalTugasProgress * 100).toInt()}% Selesai',
-                            color: const Color(0xFF8B5CF6),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Poin Keaktifan Kelas',
+                                style: AppTypography.timestamp(
+                                  fontSize: 12.0,
+                                  color: isDark ? Colors.white60 : Colors.black54,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              Text(
+                                '$activityPoints Poin',
+                                style: AppTypography.buttonLabel(
+                                  fontSize: 15.0,
+                                  fontWeight: FontWeight.bold,
+                                  color: isDark ? Colors.white : Colors.black,
+                                ),
+                              ),
+                            ],
                           ),
-                          _buildCustomBar(
-                            context,
-                            isDark: isDark,
-                            heightPercent: finalPdfProgress,
-                            icon: Icons.menu_book_rounded,
-                            title: 'Materi',
-                            duration: '${(finalPdfProgress * 100).toInt()}% Dibaca',
-                            color: const Color(0xFFF59E0B),
-                          ),
-                          _buildCustomBar(
-                            context,
-                            isDark: isDark,
-                            heightPercent: finalQuizProgress,
-                            icon: Icons.quiz_outlined,
-                            title: 'Kuis',
-                            duration: '${(finalQuizProgress * 100).toInt()}% Selesai',
-                            color: const Color(0xFF06B6D4),
-                          ),
-                          _buildCustomBar(
-                            context,
-                            isDark: isDark,
-                            heightPercent: avgQuizScore > 0 ? (avgQuizScore / 100).clamp(0.0, 1.0) : 0.05,
-                            icon: Icons.emoji_events_outlined,
-                            title: 'Rerata Nilai',
-                            duration: avgQuizScore > 0 ? 'Skor: ${avgQuizScore.toInt()}' : 'Belum Ada',
-                            color: const Color(0xFF10B981),
+                          Container(
+                            padding: const EdgeInsets.all(6),
+                            decoration: BoxDecoration(
+                              color: isDark ? const Color(0xFF26262B) : const Color(0xFFEDE9FE),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              Icons.flash_on_rounded,
+                              color: isDark ? const Color(0xFFA78BFA) : const Color(0xFF7F52FC),
+                              size: 16,
+                            ),
                           ),
                         ],
                       ),
                     ),
+                    const SizedBox(height: 10),
+
+                    // Segmented Progress Cards (Without Icons)
+                    if (activeTab == 0 || activeTab == 2)
+                      _buildStatProgressCard(
+                        context,
+                        isDark: isDark,
+                        percent: finalTugasProgress,
+                        categoryLabel: 'Tugas',
+                        headlineText: finalTugasProgress > 0
+                            ? '${(finalTugasProgress * 100).toInt()}% Selesai'
+                            : '0% Selesai',
+                        color: const Color(0xFF2563EB), // Blue
+                      ),
+                    if (activeTab == 0 || activeTab == 1)
+                      _buildStatProgressCard(
+                        context,
+                        isDark: isDark,
+                        percent: finalPdfProgress,
+                        categoryLabel: 'Materi',
+                        headlineText: finalPdfProgress > 0
+                            ? '${(finalPdfProgress * 100).toInt()}% Dibaca'
+                            : '0% Dibaca',
+                        color: const Color(0xFFEF4444), // Red
+                      ),
+                    if (activeTab == 0 || activeTab == 2) ...[
+                      _buildStatProgressCard(
+                        context,
+                        isDark: isDark,
+                        percent: finalQuizProgress,
+                        categoryLabel: 'Kuis',
+                        headlineText: finalQuizProgress > 0
+                            ? '${(finalQuizProgress * 100).toInt()}% Selesai'
+                            : '0% Selesai',
+                        color: const Color(0xFFF59E0B), // Amber / Yellow
+                      ),
+                      _buildStatProgressCard(
+                        context,
+                        isDark: isDark,
+                        percent: avgQuizScore > 0 ? (avgQuizScore / 100).clamp(0.0, 1.0) : 0.0,
+                        categoryLabel: 'Rerata Nilai',
+                        headlineText: avgQuizScore > 0
+                            ? 'Skor: ${avgQuizScore.toInt()}'
+                            : 'Belum Ada',
+                        color: const Color(0xFF10B981), // Emerald Green
+                      ),
+                    ],
                   ],
                 ),
               ),
@@ -4998,19 +4994,26 @@ class _HomePageState extends State<HomePage> {
   Widget _buildPillTab(String text, bool isActive, bool isDark, VoidCallback onTap) {
     return GestureDetector(
       onTap: onTap,
+      behavior: HitTestBehavior.opaque,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
         decoration: BoxDecoration(
           color: isActive
               ? (isDark ? Colors.white : Colors.black)
-              : (isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9)),
-          borderRadius: BorderRadius.circular(20),
+              : (isDark ? const Color(0xFF1E1E22) : Colors.white),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: isActive
+                ? (isDark ? Colors.white : Colors.black)
+                : (isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0)),
+            width: 1.0,
+          ),
         ),
         child: Text(
           text,
-          style: GoogleFonts.plusJakartaSans(
-            fontSize: 14.0,
-            fontWeight: FontWeight.bold,
+          style: AppTypography.buttonLabel(
+            fontSize: 13.0,
+            fontWeight: FontWeight.w600,
             color: isActive
                 ? (isDark ? Colors.black : Colors.white)
                 : (isDark ? Colors.white60 : Colors.black54),
@@ -5020,82 +5023,115 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _buildCustomBar(
+  Widget _buildStatProgressCard(
     BuildContext context, {
     required bool isDark,
-    required double heightPercent,
-    required IconData icon,
-    required String title,
-    required String duration,
+    required double percent,
+    required String categoryLabel,
+    required String headlineText,
+    String? trailingSubtext,
     required Color color,
   }) {
-    return Expanded(
+    final double clampedPercent = percent.clamp(0.0, 1.0);
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 6.0),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8.5),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF18181B) : Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+          width: 1.0,
+        ),
+      ),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.end,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              child: Stack(
-                alignment: Alignment.bottomCenter,
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                categoryLabel,
+                style: AppTypography.timestamp(
+                  fontSize: 12.0,
+                  fontWeight: FontWeight.w500,
+                  color: isDark ? Colors.white54 : Colors.black45,
+                ),
+              ),
+              if (trailingSubtext != null && trailingSubtext.isNotEmpty)
+                Text(
+                  trailingSubtext,
+                  style: AppTypography.timestamp(
+                    fontSize: 11.5,
+                    color: isDark ? Colors.white38 : Colors.black38,
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: 2),
+          Text(
+            headlineText,
+            style: AppTypography.chatHeaderTitle(
+              fontSize: 16.5,
+              fontWeight: FontWeight.bold,
+              color: color,
+            ),
+          ),
+          const SizedBox(height: 7),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final double totalWidth = constraints.maxWidth;
+              return Stack(
+                alignment: Alignment.centerLeft,
                 children: [
+                  // 1. Base Track
                   Container(
-                    width: 32,
+                    height: 12,
+                    width: totalWidth,
                     decoration: BoxDecoration(
-                      color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+                      color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
                       borderRadius: BorderRadius.circular(20),
                     ),
                   ),
-                  FractionallySizedBox(
-                    heightFactor: heightPercent.clamp(0.08, 1.0),
-                    child: Container(
-                      width: 32,
+
+                  // 2. Filled Progress with rounded ends
+                  if (clampedPercent > 0)
+                    Container(
+                      height: 12,
+                      width: (totalWidth * clampedPercent).clamp(12.0, totalWidth),
                       decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [
-                            color,
-                            color.withValues(alpha: 0.85),
-                          ],
-                        ),
-                        borderRadius: BorderRadius.circular(20), // FULL ROUNDED ATAS DAN BAWAH
+                        color: color,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                    ),
+
+                  // 3. Segmented Milestone Dots
+                  Positioned.fill(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 14),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: List.generate(4, (index) {
+                          final double stepFraction = index / 3.0;
+                          final bool isPassed = clampedPercent >= stepFraction && clampedPercent > 0;
+                          return Container(
+                            width: 4,
+                            height: 4,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: isPassed
+                                  ? Colors.white.withValues(alpha: 0.95)
+                                  : (isDark ? Colors.white38 : Colors.black26),
+                            ),
+                          );
+                        }),
                       ),
                     ),
                   ),
                 ],
-              ),
-            ),
-          ),
-          const SizedBox(height: 12),
-          Container(
-            padding: const EdgeInsets.all(7),
-            decoration: BoxDecoration(
-              color: isDark ? const Color(0xFF27272A) : const Color(0xFFF8FAFC),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              icon,
-              size: 16,
-              color: isDark ? Colors.white : Colors.black87,
-            ),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            title,
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: 14.0,
-              fontWeight: FontWeight.bold,
-              color: isDark ? Colors.white : Colors.black87,
-            ),
-          ),
-          const SizedBox(height: 2),
-          Text(
-            duration,
-            style: GoogleFonts.dmSans(
-              fontSize: 14.0,
-              color: isDark ? Colors.white54 : Colors.black45,
-            ),
+              );
+            },
           ),
         ],
       ),

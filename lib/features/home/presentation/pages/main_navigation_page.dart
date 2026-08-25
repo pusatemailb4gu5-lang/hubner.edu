@@ -11,6 +11,7 @@ import 'manage_friends_page.dart';
 import 'package:hubner/features/todo/presentation/pages/todo_page.dart';
 import 'package:hubner/features/home/presentation/widgets/animated_rainbow_background.dart';
 import 'package:hubner/features/notifications/presentation/pages/notifications_page.dart';
+import 'package:hubner/features/notifications/presentation/widgets/notification_bell_icon.dart';
 
 import 'package:hubner/features/projects/presentation/pages/laporan_page.dart' hide BouncyButton;
 import 'package:hubner/features/projects/presentation/pages/monitoring_page.dart';
@@ -317,31 +318,8 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
 
                            const Spacer(),
 
-                           // Notification Icon (glassmorphic)
-                           GestureDetector(
-                             onTap: () {
-                               Navigator.push(
-                                 context,
-                                 MaterialPageRoute(
-                                   builder: (_) => const NotificationsPage(),
-                                 ),
-                               );
-                             },
-                             child: Container(
-                               width: 36,
-                               height: 36,
-                               decoration: BoxDecoration(
-                                 color: Colors.white.withValues(alpha: 0.16),
-                                 shape: BoxShape.circle,
-                                 border: Border.all(color: Colors.white.withValues(alpha: 0.15), width: 1.0),
-                               ),
-                               child: const Icon(
-                                 Icons.notifications_none_rounded,
-                                 color: Colors.white,
-                                 size: 20,
-                               ),
-                             ),
-                           ),
+                           // Notification Icon with Unread Badge
+                           NotificationBellIcon(isDark: isDark, size: 36),
                            const SizedBox(width: 16),
 
                            // User role label
