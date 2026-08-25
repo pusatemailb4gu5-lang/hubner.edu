@@ -313,7 +313,7 @@ class _DetailCpPageState extends State<DetailCpPage> {
               );
 
               return SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+                padding: AppTypography.pagePadding(top: 20, bottom: 20),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [

@@ -179,9 +179,9 @@ class _OnboardingPageState extends State<OnboardingPage> with SingleTickerProvid
                     border: Border.all(color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0), width: 1.0),
                   ),
                   padding: EdgeInsets.fromLTRB(
-                    28.0,
-                    28.0,
-                    28.0,
+                    AppTypography.screenHorizontalMargin,
+                    24.0,
+                    AppTypography.screenHorizontalMargin,
                     24.0 + safeBottomPadding,
                   ),
                   child: Column(

@@ -12,6 +12,8 @@ import 'package:hubner/features/todo/presentation/pages/todo_page.dart';
 import 'package:hubner/features/home/presentation/widgets/animated_rainbow_background.dart';
 import 'package:hubner/features/notifications/presentation/pages/notifications_page.dart';
 import 'package:hubner/features/notifications/presentation/widgets/notification_bell_icon.dart';
+import 'package:hubner/core/widgets/in_app_chat_overlay.dart';
+import 'edit_profile_page.dart';
 
 import 'package:hubner/features/projects/presentation/pages/laporan_page.dart' hide BouncyButton;
 import 'package:hubner/features/projects/presentation/pages/monitoring_page.dart';
@@ -165,50 +167,35 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
                 } else if (unreadCount > lastKnown) {
                   _lastUnreadCounts[docId] = unreadCount;
                   
-                  final channelName = data['channel'] ?? '#general';
-                  final lastMsg = data['lastMessage'] ?? '';
-                  
-                  final bool isGroupChat = channelName.startsWith('#');
-                  final displayMsg = isGroupChat ? '$channelName: $lastMsg' : lastMsg;
-                  
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        key: ValueKey(docId),
-                        content: Row(
-                          children: [
-                            const Icon(Icons.chat_bubble_rounded, color: Colors.white, size: 16),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Text(
-                                displayMsg,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: AppTypography.timestamp(),
+                  // Suppress notification if user is currently inside ChatRoomPage
+                  if (!ChatRoomPage.isCurrentlyOpen) {
+                    final channelName = data['channel'] ?? '#general';
+                    final lastMsg = data['lastMessage'] ?? '';
+                    final avatar = (data['avatar'] ?? '').toString();
+                    final bool isDark = AppColors.isDarkMode;
+
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      if (!mounted) return;
+                      InAppChatOverlay.show(
+                        context: context,
+                        title: channelName,
+                        message: lastMsg,
+                        avatar: avatar,
+                        isDark: isDark,
+                        onReply: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => ChatRoomPage(
+                                discussionId: docId,
+                                channelName: channelName,
                               ),
                             ),
-                          ],
-                        ),
-                        backgroundColor: Colors.black,
-                        duration: const Duration(seconds: 3),
-                        action: SnackBarAction(
-                          label: 'Balas',
-                          textColor: Colors.amber,
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => ChatRoomPage(
-                                  discussionId: docId,
-                                  channelName: channelName,
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                    );
-                  });
+                          );
+                        },
+                      );
+                    });
+                  }
                 } else if (unreadCount < lastKnown) {
                   _lastUnreadCounts[docId] = unreadCount;
                 }
@@ -1162,7 +1149,7 @@ class _DiscussionTabState extends State<DiscussionTab> {
                 children: [
                   // Top In-List Header
                   Padding(
-                    padding: const EdgeInsets.fromLTRB(16.0, 10.0, 16.0, 10.0),
+                    padding: AppTypography.pagePadding(top: 10.0, bottom: 10.0),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       crossAxisAlignment: CrossAxisAlignment.center,
@@ -1202,7 +1189,7 @@ class _DiscussionTabState extends State<DiscussionTab> {
 
                   // Search Bar (Rounded 28 & Styled match Home Page - scrolls away!)
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 6.0),
+                    padding: EdgeInsets.symmetric(horizontal: AppTypography.screenHorizontalMargin, vertical: 6.0),
                     child: Container(
                       height: 48,
                       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -4135,6 +4122,7 @@ class _DocumentsTabState extends State<DocumentsTab> {
   bool _isConnecting = false;
   bool _isUploading = false;
   String _searchQuery = '';
+  final TextEditingController _searchController = TextEditingController();
   bool _driveInitialized = false;
   bool _driveAuthorized = false;
   String _driveEmail = '';
@@ -4157,6 +4145,12 @@ class _DocumentsTabState extends State<DocumentsTab> {
     super.initState();
     _initGoogleSignIn();
     _ensureChatFilesFolderExists();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   Future<void> _ensureChatFilesFolderExists() async {
@@ -4743,7 +4737,7 @@ class _DocumentsTabState extends State<DocumentsTab> {
                         children: [
                           // Top Main Header (Title & Subtitle)
                           Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
+                            padding: EdgeInsets.symmetric(horizontal: AppTypography.screenHorizontalMargin, vertical: 12.0),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
@@ -4773,7 +4767,7 @@ class _DocumentsTabState extends State<DocumentsTab> {
                           // Status Bar Google Drive: Terhubung (Google Drive -> Terhubung dengan dot hijau -> Tombol Putuskan di bawahnya)
                           if (isDriveConnected)
                             Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 4.0),
+                              padding: EdgeInsets.symmetric(horizontal: AppTypography.screenHorizontalMargin, vertical: 4.0),
                               child: Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                                 decoration: BoxDecoration(
@@ -4866,13 +4860,13 @@ class _DocumentsTabState extends State<DocumentsTab> {
                             )
                           else if (!isUserLoading)
                             Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 4.0),
+                              padding: EdgeInsets.symmetric(horizontal: AppTypography.screenHorizontalMargin, vertical: 4.0),
                               child: _buildDriveNotConnectedCard(isDark),
                             ),
 
                       Container(
                         width: double.infinity,
-                        padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 8.0),
+                        padding: EdgeInsets.symmetric(horizontal: AppTypography.screenHorizontalMargin, vertical: 8.0),
                         child: SingleChildScrollView(
                           scrollDirection: Axis.horizontal,
                           child: Row(
@@ -4956,28 +4950,62 @@ class _DocumentsTabState extends State<DocumentsTab> {
 
                       // Search Input with Upload Button placed next to it
                       Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 4.0),
+                        padding: EdgeInsets.symmetric(horizontal: AppTypography.screenHorizontalMargin, vertical: 4.0),
                         child: Row(
                           children: [
                             Expanded(
-                              child: TextField(
-                                onChanged: (v) => setState(() => _searchQuery = v.toLowerCase()),
-                                style: AppTypography.timestamp(color: isDark ? Colors.white : Colors.black87),
-                                decoration: InputDecoration(
-                                  hintText: 'Cari berkas di $_currentFolderName...',
-                                  hintStyle: AppTypography.timestamp(color: isDark ? Colors.white38 : Colors.black26),
-                                  filled: true,
-                                  fillColor: isDark ? const Color(0xFF18181B) : const Color(0xFFF8FAFC),
-                                  prefixIcon: Icon(Icons.search_rounded, color: isDark ? Colors.white38 : Colors.black38, size: 18),
-                                  contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
-                                  enabledBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(24),
-                                    borderSide: BorderSide(color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9)),
+                              child: Container(
+                                height: 44,
+                                padding: const EdgeInsets.symmetric(horizontal: 16),
+                                decoration: BoxDecoration(
+                                  color: isDark ? const Color(0xFF18181B) : const Color(0xFFF1F5F9),
+                                  borderRadius: BorderRadius.circular(24),
+                                  border: Border.all(
+                                    color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                                    width: 1.0,
                                   ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(24),
-                                    borderSide: BorderSide(color: isDark ? Colors.white : Colors.black),
-                                  ),
+                                ),
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.search_rounded,
+                                      color: isDark ? Colors.white54 : Colors.black45,
+                                      size: 18,
+                                    ),
+                                    const SizedBox(width: 10),
+                                    Expanded(
+                                      child: TextField(
+                                        controller: _searchController,
+                                        onChanged: (val) {
+                                          setState(() {
+                                            _searchQuery = val.trim().toLowerCase();
+                                          });
+                                        },
+                                        style: AppTypography.searchInput(color: isDark ? Colors.white : Colors.black87),
+                                        decoration: InputDecoration(
+                                          hintText: 'Cari berkas...',
+                                          hintStyle: AppTypography.searchInput(color: isDark ? Colors.white38 : Colors.black38),
+                                          border: InputBorder.none,
+                                          isDense: true,
+                                          contentPadding: const EdgeInsets.symmetric(vertical: 10),
+                                        ),
+                                      ),
+                                    ),
+                                    if (_searchQuery.isNotEmpty)
+                                      GestureDetector(
+                                        onTap: () {
+                                          _searchController.clear();
+                                          setState(() {
+                                            _searchQuery = '';
+                                          });
+                                        },
+                                        child: Icon(
+                                          Icons.close_rounded,
+                                          color: isDark ? Colors.white54 : Colors.black45,
+                                          size: 16,
+                                        ),
+                                      ),
+                                  ],
                                 ),
                               ),
                             ),
@@ -5007,7 +5035,7 @@ class _DocumentsTabState extends State<DocumentsTab> {
 
                       // Sub-Bar: Sort text with A Arrow Up icon ("A Panah Naik") & Add Folder below textbox + View Mode Toggle
                       Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 4.0),
+                        padding: EdgeInsets.symmetric(horizontal: AppTypography.screenHorizontalMargin, vertical: 4.0),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
@@ -5119,24 +5147,21 @@ class _DocumentsTabState extends State<DocumentsTab> {
                                 return name.contains(_searchQuery);
                               }
                               // Hierarchy matching:
-                              if (_currentFolderId.isEmpty) {
-                                return parentId.isEmpty || parentId == 'root';
-                              } else {
-                                return parentId == _currentFolderId;
+                              if (_folderCrumbs.isEmpty) {
+                                return parentId.isEmpty || parentId == publicDriveFolderId;
                               }
+                              return parentId == _folderCrumbs.last.id;
                             }).toList();
 
-                            // Sorting
+                            // Sort filtered items
                             filtered.sort((a, b) {
                               final dataA = a.data() as Map<String, dynamic>;
                               final dataB = b.data() as Map<String, dynamic>;
-                              final isFolderA = dataA['isFolder'] == true || (dataA['mimeType'] ?? '').toString().contains('folder');
-                              final isFolderB = dataB['isFolder'] == true || (dataB['mimeType'] ?? '').toString().contains('folder');
-
-                              // Folders always on top
-                              if (isFolderA && !isFolderB) return -1;
-                              if (!isFolderA && isFolderB) return 1;
-
+                              final bool isFolderA = dataA['isFolder'] == true;
+                              final bool isFolderB = dataB['isFolder'] == true;
+                              if (isFolderA != isFolderB) {
+                                return isFolderA ? -1 : 1;
+                              }
                               if (_sortBy == 'name_asc') {
                                 return (dataA['name'] ?? '').toString().compareTo((dataB['name'] ?? '').toString());
                               } else if (_sortBy == 'size_desc') {
@@ -5177,7 +5202,7 @@ class _DocumentsTabState extends State<DocumentsTab> {
 
                             if (_isGridView) {
                               return GridView.builder(
-                                padding: const EdgeInsets.only(left: 24.0, right: 24.0, bottom: 120.0, top: 8),
+                                padding: EdgeInsets.only(left: AppTypography.screenHorizontalMargin, right: AppTypography.screenHorizontalMargin, bottom: 120.0, top: 8),
                                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                                   crossAxisCount: 2,
                                   crossAxisSpacing: 12,
@@ -5194,13 +5219,14 @@ class _DocumentsTabState extends State<DocumentsTab> {
                             }
 
                             return ListView.separated(
-                              padding: const EdgeInsets.only(left: 16.0, right: 16.0, bottom: 120.0, top: 4),
+                              padding: const EdgeInsets.only(left: 0, right: 0, bottom: 120.0, top: 4),
                               itemCount: filtered.length,
                               separatorBuilder: (context, index) => Divider(
                                 height: 1,
                                 thickness: 0.8,
                                 color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
-                                indent: 56,
+                                indent: 56 + AppTypography.screenHorizontalMargin,
+                                endIndent: AppTypography.screenHorizontalMargin,
                               ),
                               itemBuilder: (context, index) {
                                 final docSnap = filtered[index];
@@ -5245,7 +5271,6 @@ class _DocumentsTabState extends State<DocumentsTab> {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        borderRadius: BorderRadius.circular(12),
         onTap: () {
           if (isFolder) {
             setState(() {
@@ -5263,7 +5288,7 @@ class _DocumentsTabState extends State<DocumentsTab> {
           }
         },
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+          padding: EdgeInsets.symmetric(horizontal: AppTypography.screenHorizontalMargin, vertical: 8),
           child: Row(
             children: [
               Container(
@@ -5735,6 +5760,271 @@ class _PurplePatternPainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
+class _ProfileHeroMicroPatternPainter extends CustomPainter {
+  final String avatarPath;
+  final bool isDark;
+
+  _ProfileHeroMicroPatternPainter({required this.avatarPath, required this.isDark});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (size.width <= 0 || size.height <= 0) return;
+
+    final rand = Random(avatarPath.hashCode);
+    final int patternType = avatarPath.hashCode.abs() % 5;
+
+    // Subtle dark/light opacity for geometric shapes matching reference image
+    final geoColor = isDark
+        ? Colors.black.withValues(alpha: 0.28)
+        : Colors.black.withValues(alpha: 0.10);
+    final accentGeoColor = isDark
+        ? Colors.white.withValues(alpha: 0.16)
+        : Colors.white.withValues(alpha: 0.26);
+
+    final fillPaint = Paint()..style = PaintingStyle.fill;
+    final strokePaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.0;
+
+    switch (patternType) {
+      case 0:
+        // === Variation 0: Bauhaus Arches, Wedges & Triangles ===
+        fillPaint.color = geoColor;
+        canvas.drawArc(
+          Rect.fromCircle(center: const Offset(15, 15), radius: 38),
+          0,
+          pi / 2,
+          true,
+          fillPaint,
+        );
+
+        fillPaint.color = accentGeoColor;
+        canvas.drawRRect(
+          RRect.fromRectAndRadius(
+            Rect.fromCenter(center: Offset(size.width - 35, 32), width: 34, height: 34),
+            const Radius.circular(10),
+          ),
+          fillPaint,
+        );
+
+        fillPaint.color = geoColor;
+        canvas.drawArc(
+          Rect.fromCircle(center: Offset(30, size.height * 0.48), radius: 30),
+          pi * 0.2,
+          pi * 1.5,
+          true,
+          fillPaint,
+        );
+
+        fillPaint.color = accentGeoColor;
+        final triPath = Path()
+          ..moveTo(size.width - 15, size.height * 0.40)
+          ..lineTo(size.width - 50, size.height * 0.50)
+          ..lineTo(size.width - 15, size.height * 0.58)
+          ..close();
+        canvas.drawPath(triPath, fillPaint);
+
+        fillPaint.color = geoColor;
+        canvas.drawArc(
+          Rect.fromCircle(center: Offset(size.width - 20, size.height * 0.86), radius: 38),
+          pi,
+          pi / 2,
+          true,
+          fillPaint,
+        );
+        break;
+
+      case 1:
+        // === Variation 1: Memphis Waves, Capsules & Diamond Stars ===
+        fillPaint.color = geoColor;
+        canvas.drawRRect(
+          RRect.fromRectAndRadius(
+            Rect.fromLTWH(10, 15, 60, 24),
+            const Radius.circular(12),
+          ),
+          fillPaint,
+        );
+
+        fillPaint.color = accentGeoColor;
+        canvas.drawRRect(
+          RRect.fromRectAndRadius(
+            Rect.fromLTWH(size.width - 55, 20, 42, 42),
+            const Radius.circular(21),
+          ),
+          fillPaint,
+        );
+
+        // Diamond star on middle left
+        fillPaint.color = accentGeoColor;
+        final dX = 35.0, dY = size.height * 0.50, dS = 18.0;
+        final dPath = Path()
+          ..moveTo(dX, dY - dS)
+          ..lineTo(dX + dS, dY)
+          ..lineTo(dX, dY + dS)
+          ..lineTo(dX - dS, dY)
+          ..close();
+        canvas.drawPath(dPath, fillPaint);
+
+        // Concentric waves / arcs on right
+        strokePaint.color = geoColor;
+        strokePaint.strokeWidth = 3.5;
+        canvas.drawArc(
+          Rect.fromCircle(center: Offset(size.width - 20, size.height * 0.52), radius: 32),
+          pi * 0.7,
+          pi * 1.1,
+          false,
+          strokePaint,
+        );
+        canvas.drawArc(
+          Rect.fromCircle(center: Offset(size.width - 20, size.height * 0.52), radius: 46),
+          pi * 0.7,
+          pi * 1.1,
+          false,
+          strokePaint,
+        );
+        break;
+
+      case 2:
+        // === Variation 2: Modern Concentric Rings & Grid Arrays ===
+        strokePaint.color = accentGeoColor;
+        strokePaint.strokeWidth = 3.0;
+        canvas.drawCircle(Offset(28, 30), 22, strokePaint);
+        canvas.drawCircle(Offset(28, 30), 34, strokePaint);
+
+        fillPaint.color = geoColor;
+        canvas.drawCircle(Offset(size.width - 32, 36), 26, fillPaint);
+
+        // Diagonal pill strips on bottom
+        fillPaint.color = geoColor;
+        canvas.save();
+        canvas.translate(size.width - 45, size.height * 0.58);
+        canvas.rotate(-pi / 4);
+        canvas.drawRRect(
+          RRect.fromRectAndRadius(
+            const Rect.fromLTWH(-30, -10, 60, 20),
+            const Radius.circular(10),
+          ),
+          fillPaint,
+        );
+        canvas.restore();
+
+        fillPaint.color = accentGeoColor;
+        canvas.save();
+        canvas.translate(35, size.height * 0.56);
+        canvas.rotate(pi / 6);
+        canvas.drawRRect(
+          RRect.fromRectAndRadius(
+            const Rect.fromLTWH(-25, -8, 50, 16),
+            const Radius.circular(8),
+          ),
+          fillPaint,
+        );
+        canvas.restore();
+        break;
+
+      case 3:
+        // === Variation 3: Playful 4-Point Starbursts & Organic Crescents ===
+        fillPaint.color = accentGeoColor;
+        // Starburst top left
+        final sPath = Path()
+          ..moveTo(30, 10)
+          ..quadraticBezierTo(30, 28, 48, 28)
+          ..quadraticBezierTo(30, 28, 30, 46)
+          ..quadraticBezierTo(30, 28, 12, 28)
+          ..quadraticBezierTo(30, 28, 30, 10)
+          ..close();
+        canvas.drawPath(sPath, fillPaint);
+
+        // Crescent top right
+        fillPaint.color = geoColor;
+        final cPath = Path()
+          ..addOval(Rect.fromCircle(center: Offset(size.width - 35, 35), radius: 25));
+        final cutPath = Path()
+          ..addOval(Rect.fromCircle(center: Offset(size.width - 44, 30), radius: 22));
+        final diffPath = Path.combine(PathOperation.difference, cPath, cutPath);
+        canvas.drawPath(diffPath, fillPaint);
+
+        // Pebble blob middle right
+        fillPaint.color = accentGeoColor;
+        canvas.drawRRect(
+          RRect.fromRectAndRadius(
+            Rect.fromLTWH(size.width - 50, size.height * 0.46, 44, 32),
+            const Radius.circular(16),
+          ),
+          fillPaint,
+        );
+
+        // Double arc bottom left
+        strokePaint.color = geoColor;
+        strokePaint.strokeWidth = 3.0;
+        canvas.drawArc(
+          Rect.fromCircle(center: Offset(20, size.height * 0.65), radius: 26),
+          -pi * 0.2,
+          pi * 1.2,
+          false,
+          strokePaint,
+        );
+        break;
+
+      case 4:
+      default:
+        // === Variation 4: Dynamic Hexagons, Ribbons & Rounded Cutouts ===
+        fillPaint.color = geoColor;
+        // Hexagon top left
+        final hPath = Path();
+        final hCenter = const Offset(32, 32);
+        final hRadius = 24.0;
+        for (int i = 0; i < 6; i++) {
+          final angle = pi / 3 * i;
+          final pX = hCenter.dx + hRadius * cos(angle);
+          final pY = hCenter.dy + hRadius * sin(angle);
+          if (i == 0) {
+            hPath.moveTo(pX, pY);
+          } else {
+            hPath.lineTo(pX, pY);
+          }
+        }
+        hPath.close();
+        canvas.drawPath(hPath, fillPaint);
+
+        // Chevron arrow right
+        fillPaint.color = accentGeoColor;
+        final chPath = Path()
+          ..moveTo(size.width - 48, size.height * 0.38)
+          ..lineTo(size.width - 24, size.height * 0.46)
+          ..lineTo(size.width - 48, size.height * 0.54)
+          ..lineTo(size.width - 36, size.height * 0.46)
+          ..close();
+        canvas.drawPath(chPath, fillPaint);
+
+        // Rounded pill ribbon on bottom right
+        fillPaint.color = geoColor;
+        canvas.drawRRect(
+          RRect.fromRectAndRadius(
+            Rect.fromLTWH(size.width - 65, size.height * 0.80, 55, 20),
+            const Radius.circular(10),
+          ),
+          fillPaint,
+        );
+        break;
+    }
+
+    // Common scattered playful micro-dots
+    final dotPaint = Paint()..style = PaintingStyle.fill;
+    for (int i = 0; i < 7; i++) {
+      final x = (rand.nextDouble() * 0.86 + 0.07) * size.width;
+      final y = (rand.nextDouble() * 0.86 + 0.07) * size.height;
+      dotPaint.color = (i % 2 == 0 ? accentGeoColor : geoColor);
+      canvas.drawCircle(Offset(x, y), 2.5 + rand.nextDouble() * 2.0, dotPaint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _ProfileHeroMicroPatternPainter oldDelegate) {
+    return oldDelegate.avatarPath != avatarPath || oldDelegate.isDark != isDark;
+  }
+}
+
 // --- Dynamic Profile Page Tab ---
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -5744,240 +6034,67 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  bool _showAvatarSelector = false;
   Map<String, dynamic>? _cachedUserData;
+  bool _showAvatarOverlay = false;
 
-  void _showGenderSelector(BuildContext context, String currentUid, String currentGender) {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
-      ),
-      builder: (context) {
-        final safeBottom = MediaQuery.of(context).padding.bottom;
-        return Padding(
-          padding: EdgeInsets.only(
-            left: 24,
-            right: 24,
-            top: 24,
-            bottom: 24 + safeBottom,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(
-                child: Container(
-                  width: 48,
-                  height: 5,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFE2E8F0),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-              Text(
-                'Pilih Jenis Kelamin',
-                style: AppTypography.chatHeaderTitle(color: Colors.black, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 16),
-              ListTile(
-                leading: const Icon(Icons.male_rounded, color: Colors.blueAccent),
-                title: Text('Laki-laki', style: AppTypography.buttonLabel(fontWeight: FontWeight.w600)),
-                trailing: currentGender == 'Laki-laki' ? const Icon(Icons.check_circle, color: Colors.green) : null,
-                onTap: () async {
-                  await FirebaseFirestore.instance.collection('users').doc(currentUid).update({
-                    'gender': 'Laki-laki',
-                    'avatar': 'assets/icon_pack/avatar/avatar_2.png',
-                  });
-                  if (context.mounted) {
-                    Navigator.pop(context);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Jenis kelamin & avatar default laki-laki diperbarui!')),
-                    );
-                  }
-                },
-              ),
-              const Divider(color: Color(0xFFF1F5F9)),
-              ListTile(
-                leading: const Icon(Icons.female_rounded, color: Colors.pinkAccent),
-                title: Text('Perempuan', style: AppTypography.buttonLabel(fontWeight: FontWeight.w600)),
-                trailing: currentGender == 'Perempuan' ? const Icon(Icons.check_circle, color: Colors.green) : null,
-                onTap: () async {
-                  await FirebaseFirestore.instance.collection('users').doc(currentUid).update({
-                    'gender': 'Perempuan',
-                    'avatar': 'assets/icon_pack/avatar/avatar_1.png',
-                  });
-                  if (context.mounted) {
-                    Navigator.pop(context);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Jenis kelamin & avatar default perempuan diperbarui!')),
-                    );
-                  }
-                },
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
+  // 10 Pasangan Warna Resmi Identitas Classroom dari desain.md
+  static const List<Color> _classroomCardColors = [
+    Color(0xFFD6A5F8), // 01. Lilac Purple (Core)
+    Color(0xFF9CC8FC), // 02. Sky Blue
+    Color(0xFF7DE3D0), // 03. Emerald Mint / Tosca
+    Color(0xFFF7BD84), // 04. Amber Peach / Orange
+    Color(0xFFF794BE), // 05. Rose Magenta / Pink
+    Color(0xFFA5B4FC), // 06. Indigo Violet
+    Color(0xFFBEF264), // 07. Fresh Lime
+    Color(0xFF67E8F9), // 08. Ocean Cyan
+    Color(0xFFFDE047), // 09. Amber Gold
+    Color(0xFFCBD5E1), // 10. Steel Slate
+  ];
 
-  void _showSchoolLevelSelector(BuildContext context, String currentUid, String currentSchoolLevel) {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
-      ),
-      builder: (context) {
-        final safeBottom = MediaQuery.of(context).padding.bottom;
-        return Padding(
-          padding: EdgeInsets.only(
-            left: 24,
-            right: 24,
-            top: 24,
-            bottom: 24 + safeBottom,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(
-                child: Container(
-                  width: 48,
-                  height: 5,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFE2E8F0),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-              Text(
-                'Pilih Tingkat Sekolah',
-                style: AppTypography.chatHeaderTitle(color: Colors.black, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 16),
-              ...['SD', 'SMP', 'SMA', 'SMK'].map((level) {
-                return Column(
-                  children: [
-                    ListTile(
-                      leading: const Icon(Icons.school_rounded, color: Colors.blueAccent),
-                      title: Text(level, style: AppTypography.buttonLabel(fontWeight: FontWeight.w600)),
-                      trailing: currentSchoolLevel == level ? const Icon(Icons.check_circle, color: Colors.green) : null,
-                      onTap: () async {
-                        await FirebaseFirestore.instance.collection('users').doc(currentUid).update({
-                          'schoolLevel': level,
-                        });
-                        if (context.mounted) {
-                          Navigator.pop(context);
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Tingkat sekolah diperbarui menjadi $level!')),
-                          );
-                        }
-                      },
-                    ),
-                    const Divider(color: Color(0xFFF1F5F9), height: 1),
-                  ],
-                );
-              }),
-            ],
-          ),
-        );
-      },
-    );
-  }
+  static const List<Color> _classroomCardDarkColors = [
+    Color(0xFF6B3BA3), // 01. Deep Lilac (Core)
+    Color(0xFF2864A8), // 02. Deep Sky Blue
+    Color(0xFF147D75), // 03. Deep Teal / Tosca
+    Color(0xFFC76D10), // 04. Deep Amber / Orange
+    Color(0xFFA82658), // 05. Deep Rose Magenta (dari desain.md)
+    Color(0xFF4338CA), // 06. Deep Indigo Violet
+    Color(0xFF4D7C0F), // 07. Deep Olive Lime (dari desain.md)
+    Color(0xFF0E7490), // 08. Deep Ocean Cyan
+    Color(0xFFA16207), // 09. Deep Amber Gold
+    Color(0xFF334155), // 10. Deep Slate Steel
+  ];
 
-  void _showUpgradePlanDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (ctx) => Dialog(
-        backgroundColor: Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        child: Container(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: const BoxDecoration(
-                  color: Color(0xFFFEF08A),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(Icons.workspace_premium_rounded, color: Color(0xFFEA580C), size: 36),
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'Upgrade ke Hubner Pro',
-                style: AppTypography.chatHeaderTitle(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Dapatkan akses penuh ke semua fitur premium kolaborasi tim tanpa batas.',
-                textAlign: TextAlign.center,
-                style: AppTypography.timestamp(color: Colors.black54),
-              ),
-              const SizedBox(height: 20),
-              _buildFeatureRow('Unlimited Proyek & Tugas'),
-              _buildFeatureRow('Integrasi Google Drive Premium'),
-              _buildFeatureRow('Kapasitas Anggota Tim Tanpa Batas'),
-              _buildFeatureRow('Dukungan Prioritas 24/7'),
-              const SizedBox(height: 24),
-              SizedBox(
-                width: double.infinity,
-                height: 48,
-                child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.pop(ctx);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Terima kasih! Anda berhasil ter-upgrade ke Hubner Pro.')),
-                    );
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFFDE047),
-                    foregroundColor: const Color(0xFFEA580C),
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  ),
-                  child: Text(
-                    'Mulai Berlangganan - Rp 99.000/bln',
-                    style: AppTypography.buttonLabel(fontWeight: FontWeight.bold),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildFeatureRow(String text) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4.0),
-      child: Row(
-        children: [
-          const Icon(Icons.check_circle_rounded, color: Color(0xFF0F766E), size: 16),
-          const SizedBox(width: 8),
-          Text(text, style: AppTypography.timestamp(fontWeight: FontWeight.w500)),
-        ],
-      ),
-    );
+  Color _getHeroColor(String avatarPath, bool isDark) {
+    int idx = 0;
+    final match = RegExp(r'(\d+)').firstMatch(avatarPath);
+    if (match != null) {
+      idx = (int.tryParse(match.group(1) ?? '1') ?? 1) - 1;
+    } else {
+      idx = avatarPath.hashCode.abs();
+    }
+    final colors = isDark ? _classroomCardDarkColors : _classroomCardColors;
+    return colors[idx % colors.length];
   }
 
   void _deleteAccount(BuildContext context, String currentUid) async {
+    final bool isDark = AppColors.isDarkMode;
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: Colors.white,
-        title: Text('Hapus Akun', style: AppTypography.buttonLabel(color: Colors.redAccent, fontWeight: FontWeight.bold)),
-        content: Text('Yakin ingin menghapus akun Anda secara permanen? Semua data proyek dan tugas Anda akan dihapus selamanya.', style: AppTypography.buttonLabel()),
+        backgroundColor: isDark ? const Color(0xFF18181B) : Colors.white,
+        title: Text(
+          'Hapus Akun',
+          style: AppTypography.buttonLabel(color: Colors.redAccent, fontWeight: FontWeight.bold),
+        ),
+        content: Text(
+          'Yakin ingin menghapus akun Anda secara permanen? Semua data proyek dan tugas Anda akan dihapus selamanya.',
+          style: AppTypography.buttonLabel(color: isDark ? Colors.white70 : Colors.black87),
+        ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text('Batal', style: AppTypography.buttonLabel(color: Colors.black54))),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text('Batal', style: AppTypography.buttonLabel(color: isDark ? Colors.white60 : Colors.black54)),
+          ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
             child: Text('Hapus Permanen', style: AppTypography.buttonLabel(color: Colors.redAccent, fontWeight: FontWeight.bold)),
@@ -6009,26 +6126,87 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
-  Widget _buildSectionHeader(String title) {
+  Widget _buildSectionHeader(String title, bool isDark) {
     return Padding(
       padding: const EdgeInsets.only(top: 22, bottom: 8, left: 4),
       child: Text(
         title.toUpperCase(),
-        style: AppTypography.channelTag(color: Colors.black38, fontWeight: FontWeight.bold, letterSpacing: 0.8),
+        style: AppTypography.channelTag(
+          color: isDark ? Colors.white38 : Colors.black38,
+          fontWeight: FontWeight.bold,
+          letterSpacing: 0.8,
+        ),
       ),
     );
   }
 
-  Widget _buildSectionCard(List<Widget> children) {
+  Widget _buildSectionCard(List<Widget> children, bool isDark) {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: const Color(0xFFF8FAFC),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFFF1F5F9)),
+        color: isDark ? const Color(0xFF18181B) : Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+          width: 1.2,
+        ),
       ),
       child: Column(
         children: children,
+      ),
+    );
+  }
+
+  Widget _buildInfoTile({
+    required IconData icon,
+    required String title,
+    required String value,
+    required bool isDark,
+    Color? iconColor,
+    VoidCallback? onTap,
+  }) {
+    final effectiveIconColor = iconColor ?? (isDark ? Colors.white70 : const Color(0xFF7C3AED));
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(20),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        child: Row(
+          children: [
+            // Frameless icon placed cleanly at the left
+            Icon(icon, color: effectiveIconColor, size: 22),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: AppTypography.timestamp(
+                      color: isDark ? Colors.white54 : const Color(0xFF64748B),
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    value.isNotEmpty ? value : '-',
+                    style: AppTypography.cardTitle(
+                      color: isDark ? Colors.white : const Color(0xFF0F172A),
+                      fontWeight: FontWeight.w600,
+                      fontSize: 18,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            if (onTap != null)
+              Icon(
+                Icons.copy_rounded,
+                size: 18,
+                color: isDark ? Colors.white38 : Colors.black38,
+              ),
+          ],
+        ),
       ),
     );
   }
@@ -6038,49 +6216,52 @@ class _ProfilePageState extends State<ProfilePage> {
     required String title,
     required String trailing,
     required VoidCallback onTap,
-    Color iconColor = Colors.black54,
-    Color titleColor = Colors.black87,
+    required bool isDark,
+    Color? iconColor,
+    Color? titleColor,
   }) {
+    final effectiveIconColor = iconColor ?? (isDark ? Colors.white70 : const Color(0xFF64748B));
+    final effectiveTitleColor = titleColor ?? (isDark ? Colors.white : const Color(0xFF0F172A));
+
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(20),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         child: Row(
           children: [
-            Container(
-              padding: const EdgeInsets.all(6),
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                shape: BoxShape.circle,
+            // Frameless icon placed cleanly at the left
+            Icon(icon, color: effectiveIconColor, size: 22),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Text(
+                title,
+                maxLines: 1,
+                style: AppTypography.cardTitle(
+                  color: effectiveTitleColor,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 18,
+                ),
               ),
-              child: Icon(icon, color: iconColor, size: 18),
-            ),
-            const SizedBox(width: 12),
-            Text(
-              title,
-              maxLines: 1,
-              style: AppTypography.buttonLabel(color: titleColor, fontWeight: FontWeight.w600),
             ),
             const SizedBox(width: 8),
-            Expanded(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  if (trailing.isNotEmpty)
-                    Flexible(
-                      child: Text(
-                        trailing,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        textAlign: TextAlign.end,
-                        style: AppTypography.timestamp(color: Colors.black45),
-                      ),
-                    ),
-                  const SizedBox(width: 4),
-                  const Icon(Icons.chevron_right_rounded, color: Colors.black26, size: 18),
-                ],
+            if (trailing.isNotEmpty)
+              Flexible(
+                child: Text(
+                  trailing,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.end,
+                  style: AppTypography.timestamp(
+                    color: isDark ? Colors.white54 : const Color(0xFF64748B),
+                  ),
+                ),
               ),
+            const SizedBox(width: 4),
+            Icon(
+              Icons.chevron_right_rounded,
+              color: isDark ? Colors.white38 : const Color(0xFF94A3B8),
+              size: 20,
             ),
           ],
         ),
@@ -6090,8 +6271,9 @@ class _ProfilePageState extends State<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
+    final bool isDark = AppColors.isDarkMode;
+
     Future<void> logOut() async {
-      final bool isDark = AppColors.isDarkMode;
       final confirm = await showDialog<bool>(
         context: context,
         builder: (ctx) => AlertDialog(
@@ -6099,18 +6281,26 @@ class _ProfilePageState extends State<ProfilePage> {
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           title: Text(
             'Keluar dari Akun',
-            style: AppTypography.buttonLabel(color: isDark ? Colors.white : Colors.black87, fontWeight: FontWeight.bold),
+            style: AppTypography.buttonLabel(
+              color: isDark ? Colors.white : Colors.black87,
+              fontWeight: FontWeight.bold,
+            ),
           ),
           content: Text(
             'Apakah Anda yakin ingin keluar dari akun ini?',
-            style: AppTypography.buttonLabel(color: isDark ? Colors.white70 : Colors.black87),
+            style: AppTypography.buttonLabel(
+              color: isDark ? Colors.white70 : Colors.black87,
+            ),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx, false),
               child: Text(
                 'Batal',
-                style: AppTypography.buttonLabel(color: isDark ? Colors.white60 : Colors.black54, fontWeight: FontWeight.w600),
+                style: AppTypography.buttonLabel(
+                  color: isDark ? Colors.white60 : Colors.black54,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
             ElevatedButton(
@@ -6179,6 +6369,7 @@ class _ProfilePageState extends State<ProfilePage> {
             : fallbackUserId;
         final String roleDb = userData?['role'] ?? 'Siswa';
         final String schoolLevel = userData?['schoolLevel'] ?? '-';
+        final String grade = userData?['grade'] ?? '-';
         final bool isFemale = gender.toLowerCase() == 'perempuan';
         final String suffix = isFemale ? '6' : '1';
         String defaultAvatar = 'assets/icon_pack/avatar/sma_$suffix.png';
@@ -6205,501 +6396,663 @@ class _ProfilePageState extends State<ProfilePage> {
         final bool notifyTaskReminder = userData?['notifyTaskReminder'] ?? true;
         final bool notifyChatMention = userData?['notifyChatMention'] ?? true;
 
-        return GestureDetector(
-          onTap: () {
-            if (_showAvatarSelector) {
-              setState(() {
-                _showAvatarSelector = false;
-              });
-            }
-          },
-          child: Align(
-            alignment: Alignment.topCenter,
-            child: Container(
-              constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width > 500 ? double.infinity : 500),
-              child: SafeArea(
-                bottom: false,
-                child: Stack(
-                  children: [
-                    SingleChildScrollView(
-                      padding: EdgeInsets.only(
-                        left: 20.0,
-                        right: 20.0,
-                        top: 16.0,
-                        bottom: MediaQuery.of(context).padding.bottom + 80 + 24,
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Profil',
-                            style: AppTypography.pageTitle(color: Colors.black, fontWeight: FontWeight.w600),
-                          ),
-                          const SizedBox(height: 20),
+        final heroColor = _getHeroColor(avatarPath, isDark);
 
-                          // User Profile Card
-                          Center(
-                            child: Column(
-                              children: [
-                                GestureDetector(
-                                  behavior: HitTestBehavior.opaque,
-                                  onTap: () => setState(() => _showAvatarSelector = !_showAvatarSelector),
-                                  child: Stack(
-                                    children: [
-                                      Container(
-                                        width: 96,
-                                        height: 96,
-                                        decoration: BoxDecoration(
-                                          shape: BoxShape.circle,
-                                          border: Border.all(color: Colors.black, width: 2),
+        final heroTextColor = isDark ? Colors.white : const Color(0xFF0F172A);
+
+        return Scaffold(
+          backgroundColor: isDark ? const Color(0xFF000000) : const Color(0xFFF8FAFC),
+          body: SingleChildScrollView(
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(context).padding.bottom + 80 + 24,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // 1. Symmetrical Curved Hero Header Card
+                ClipRRect(
+                  borderRadius: const BorderRadius.vertical(
+                    bottom: Radius.circular(36),
+                  ),
+                  child: Container(
+                    width: double.infinity,
+                    color: heroColor,
+                    child: CustomPaint(
+                      painter: _ProfileHeroMicroPatternPainter(
+                        avatarPath: avatarPath,
+                        isDark: isDark,
+                      ),
+                      child: SafeArea(
+                        bottom: false,
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: AppTypography.screenHorizontalMargin,
+                            vertical: 16,
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              // Top Bar: "Profile" title on left + Circular Edit Action on right
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    'Profile',
+                                    style: AppTypography.pageTitle(
+                                      color: heroTextColor,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  InkWell(
+                                    borderRadius: BorderRadius.circular(20),
+                                    onTap: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) => EditProfilePage(
+                                            uid: currentUid,
+                                            initialData: userData,
+                                          ),
                                         ),
-                                        child: ClipOval(
-                                          child: Transform.scale(
-                                            scale: 1.25,
-                                            child: Image.asset(
-                                              avatarPath,
-                                              fit: BoxFit.cover,
-                                              errorBuilder: (ctx, err, st) => Container(
-                                                color: const Color(0xFFF1F5F9),
-                                                child: const Icon(Icons.person_rounded, size: 40, color: Colors.black38),
+                                      );
+                                    },
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                      decoration: BoxDecoration(
+                                        color: isDark
+                                            ? Colors.black.withValues(alpha: 0.35)
+                                            : Colors.white.withValues(alpha: 0.85),
+                                        borderRadius: BorderRadius.circular(20),
+                                        border: Border.all(
+                                          color: isDark
+                                              ? Colors.white.withValues(alpha: 0.25)
+                                              : Colors.black.withValues(alpha: 0.08),
+                                          width: 1.0,
+                                        ),
+                                      ),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Icon(
+                                            Icons.edit_rounded,
+                                            color: heroTextColor,
+                                            size: 14,
+                                          ),
+                                          const SizedBox(width: 5),
+                                          Text(
+                                            'Edit Profil',
+                                            style: AppTypography.timestamp(
+                                              color: heroTextColor,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 14),
+
+                              // Symmetrical Centered Avatar (Tapping toggles floating overlay)
+                              GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    _showAvatarOverlay = !_showAvatarOverlay;
+                                  });
+                                },
+                                child: Stack(
+                                  clipBehavior: Clip.none,
+                                  alignment: Alignment.bottomRight,
+                                  children: [
+                                    Container(
+                                      width: 92,
+                                      height: 92,
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+                                        border: Border.all(
+                                          color: Colors.white.withValues(alpha: 0.90),
+                                          width: 3.5,
+                                        ),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: Colors.black.withValues(alpha: 0.20),
+                                            blurRadius: 12,
+                                            offset: const Offset(0, 4),
+                                          ),
+                                        ],
+                                      ),
+                                      child: ClipOval(
+                                        child: Transform.scale(
+                                          scale: 1.45,
+                                          child: Image.asset(
+                                            avatarPath,
+                                            fit: BoxFit.cover,
+                                            errorBuilder: (ctx, err, st) => Container(
+                                              color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+                                              child: Icon(
+                                                Icons.person_rounded,
+                                                size: 48,
+                                                color: heroTextColor.withValues(alpha: 0.5),
                                               ),
                                             ),
                                           ),
                                         ),
                                       ),
-                                      Positioned(
-                                        bottom: 0,
-                                        right: 0,
-                                        child: Container(
-                                          padding: const EdgeInsets.all(5),
-                                          decoration: const BoxDecoration(
-                                            color: Colors.black,
-                                            shape: BoxShape.circle,
-                                          ),
-                                          child: const Icon(
-                                            Icons.edit_rounded,
-                                            color: Colors.white,
-                                            size: 14,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                const SizedBox(height: 16),
-                                Text(
-                                  name,
-                                  style: AppTypography.chatHeaderTitle(color: Colors.black, fontWeight: FontWeight.bold),
-                                ),
-                                Text(
-                                  'ID User: $userId',
-                                  style: AppTypography.timestamp(color: Colors.black38),
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-
-                          // Group 1: Detail Akun
-                          _buildSectionHeader('Detail Akun'),
-                          _buildSectionCard([
-                            _buildSettingTile(
-                              icon: Icons.fingerprint_rounded,
-                              iconColor: Colors.teal,
-                              title: 'ID User',
-                              trailing: userId,
-                              onTap: () {
-                                Clipboard.setData(ClipboardData(text: userId));
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text('ID User berhasil disalin ke clipboard!')),
-                                );
-                              },
-                            ),
-                            const Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 18.0),
-                              child: Divider(color: Color(0xFFF1F5F9), height: 1),
-                            ),
-                            _buildSettingTile(
-                              icon: Icons.person_outline_rounded,
-                              iconColor: Colors.blueAccent,
-                              title: 'Nama Lengkap',
-                              trailing: name,
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => ProfileSubPage(
-                                      title: 'Ubah Nama Lengkap',
-                                      child: EditNameForm(initialName: name, uid: currentUid),
                                     ),
-                                  ),
-                                );
-                              },
-                            ),
-                            const Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 18.0),
-                              child: Divider(color: Color(0xFFF1F5F9), height: 1),
-                            ),
-                            _buildSettingTile(
-                              icon: Icons.mail_outline_rounded,
-                              iconColor: Colors.purpleAccent,
-                              title: 'Email',
-                              trailing: email,
-                              onTap: () {},
-                            ),
-                            const Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 18.0),
-                              child: Divider(color: Color(0xFFF1F5F9), height: 1),
-                            ),
-                            _buildSettingTile(
-                              icon: Icons.wc_rounded,
-                              iconColor: Colors.pinkAccent,
-                              title: 'Jenis Kelamin',
-                              trailing: gender,
-                              onTap: () => _showGenderSelector(context, currentUid, gender),
-                            ),
-                            const Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 18.0),
-                              child: Divider(color: Color(0xFFF1F5F9), height: 1),
-                            ),
-                            _buildSettingTile(
-                              icon: Icons.public_rounded,
-                              iconColor: Colors.orangeAccent,
-                              title: 'Zona Waktu',
-                              trailing: timezone,
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => ProfileSubPage(
-                                      title: 'Ubah Zona Waktu',
-                                      child: EditTimezoneForm(currentTz: timezone, uid: currentUid),
-                                    ),
-                                  ),
-                                );
-                              },
-                            ),
-                            const Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 18.0),
-                              child: Divider(color: Color(0xFFF1F5F9), height: 1),
-                            ),
-                            _buildSettingTile(
-                              icon: Icons.language_rounded,
-                              iconColor: Colors.indigoAccent,
-                              title: 'Bahasa',
-                              trailing: language,
-                              onTap: () {
-                                showDialog(
-                                  context: context,
-                                  builder: (ctx) => AlertDialog(
-                                    backgroundColor: Colors.white,
-                                    title: Text('Pilih Bahasa', style: AppTypography.buttonLabel(fontWeight: FontWeight.bold)),
-                                    content: Text('Saat ini Hubner Edu hanya tersedia dalam Bahasa Indonesia.', style: AppTypography.buttonLabel()),
-                                    actions: [
-                                      TextButton(
-                                        onPressed: () => Navigator.pop(ctx),
-                                        child: Text('OK', style: AppTypography.buttonLabel(color: Colors.black, fontWeight: FontWeight.bold)),
-                                      ),
-                                    ],
-                                  ),
-                                );
-                              },
-                            ),
-                            const Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 18.0),
-                              child: Divider(color: Color(0xFFF1F5F9), height: 1),
-                            ),
-                            _buildSettingTile(
-                              icon: Icons.assignment_ind_rounded,
-                              iconColor: Colors.blueGrey,
-                              title: 'Role',
-                              trailing: roleDb,
-                              onTap: () {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text('Role tidak dapat diubah.')),
-                                );
-                              },
-                            ),
-                            const Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 18.0),
-                              child: Divider(color: Color(0xFFF1F5F9), height: 1),
-                            ),
-                            _buildSettingTile(
-                              icon: Icons.school_rounded,
-                              iconColor: Colors.teal,
-                              title: 'Tingkat Sekolah',
-                              trailing: schoolLevel,
-                              onTap: () {
-                                _showSchoolLevelSelector(context, currentUid, schoolLevel);
-                              },
-                            ),
-                          ]),
-
-                          // Group 2: Keamanan
-                          _buildSectionHeader('Keamanan'),
-                          _buildSectionCard([
-                            _buildSettingTile(
-                              icon: Icons.lock_outline_rounded,
-                              iconColor: Colors.redAccent,
-                              title: 'Ubah Password',
-                              trailing: '',
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => const ProfileSubPage(
-                                      title: 'Ubah Password',
-                                      child: ChangePasswordForm(),
-                                    ),
-                                  ),
-                                );
-                              },
-                            ),
-                            const Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 18.0),
-                              child: Divider(color: Color(0xFFF1F5F9), height: 1),
-                            ),
-                            _buildSettingTile(
-                              icon: Icons.security_rounded,
-                              iconColor: Colors.blueGrey,
-                              title: 'Otentikasi 2 Langkah',
-                              trailing: twoFactorEnabled ? 'Aktif' : 'Nonaktif',
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => ProfileSubPage(
-                                      title: 'Otentikasi 2 Langkah',
-                                      child: TwoFactorSetupForm(isEnabled: twoFactorEnabled, uid: currentUid),
-                                    ),
-                                  ),
-                                );
-                              },
-                            ),
-                            const Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 18.0),
-                              child: Divider(color: Color(0xFFF1F5F9), height: 1),
-                            ),
-                            _buildSettingTile(
-                              icon: Icons.devices_rounded,
-                              iconColor: Colors.teal,
-                              title: 'Sesi Aktif',
-                              trailing: '1 Sesi Aktif',
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => const ProfileSubPage(
-                                      title: 'Sesi Aktif',
-                                      child: ActiveSessionsForm(),
-                                    ),
-                                  ),
-                                );
-                              },
-                            ),
-                          ]),
-
-                          // Group 3: Tampilan
-                          _buildSectionHeader('Tampilan'),
-                          _buildSectionCard([
-                            _buildSettingTile(
-                              icon: Icons.palette_outlined,
-                              iconColor: Colors.amber,
-                              title: 'Tema',
-                              trailing: themeMode,
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => ProfileSubPage(
-                                      title: 'Ubah Tema',
-                                      child: ThemeSetupForm(currentTheme: themeMode, uid: currentUid),
-                                    ),
-                                  ),
-                                );
-                              },
-                            ),
-                          ]),
-
-                          // Group 4: Notifikasi
-                          _buildSectionHeader('Notifikasi'),
-                          _buildSectionCard([
-                            _buildSettingTile(
-                              icon: Icons.notifications_none_rounded,
-                              iconColor: Colors.green,
-                              title: 'Notifikasi',
-                              trailing: 'Atur Notifikasi',
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => ProfileSubPage(
-                                      title: 'Pengaturan Notifikasi',
-                                      child: NotificationSetupForm(
-                                        taskReminder: notifyTaskReminder,
-                                        chatMention: notifyChatMention,
-                                        uid: currentUid,
-                                      ),
-                                    ),
-                                  ),
-                                );
-                              },
-                            ),
-                          ]),
-
-                          // Group 5: Hapus Akun
-                          _buildSectionHeader('Hapus Akun'),
-                          _buildSectionCard([
-                            _buildSettingTile(
-                              icon: Icons.delete_forever_rounded,
-                              iconColor: Colors.red,
-                              titleColor: Colors.red,
-                              title: 'Hapus Akun',
-                              trailing: '',
-                              onTap: () => _deleteAccount(context, currentUid),
-                            ),
-                          ]),
-
-                          // Group 6: Tentang
-                          _buildSectionHeader('Tentang'),
-                          _buildSectionCard([
-                            _buildSettingTile(
-                              icon: Icons.info_outline_rounded,
-                              iconColor: Colors.blueGrey,
-                              title: 'Tentang Aplikasi',
-                              trailing: 'Hubner Edu v1.1.0 beta',
-                              onTap: () {
-                                showDialog(
-                                  context: context,
-                                  builder: (ctx) => AlertDialog(
-                                    backgroundColor: Colors.white,
-                                    title: Text('Hubner Edu', style: AppTypography.buttonLabel(fontWeight: FontWeight.bold)),
-                                    content: Text(
-                                      'Hubner Edu adalah platform manajemen kelas online dan pembelajaran interaktif secara real-time.',
-                                      style: AppTypography.buttonLabel(),
-                                    ),
-                                    actions: [
-                                      TextButton(
-                                        onPressed: () => Navigator.pop(ctx),
-                                        child: Text('Tutup', style: AppTypography.buttonLabel(color: Colors.black, fontWeight: FontWeight.bold)),
-                                      )
-                                    ],
-                                  ),
-                                );
-                              },
-                            ),
-                          ]),
-
-                          const SizedBox(height: 32),
-
-                          // Log out button
-                          SizedBox(
-                            width: double.infinity,
-                            height: 52,
-                            child: ElevatedButton.icon(
-                              onPressed: logOut,
-                              icon: const Icon(Icons.logout_rounded, size: 18),
-                              label: Text(
-                                'Keluar dari Akun',
-                                style: AppTypography.cardTitle(fontWeight: FontWeight.bold),
-                              ),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFFFEE2E2),
-                                foregroundColor: Colors.redAccent,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(16),
-                                ),
-                                elevation: 0,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 24),
-                        ],
-                      ),
-                    ),
-                    if (_showAvatarSelector)
-                      Positioned(
-                        top: 155,
-                        left: 24,
-                        right: 24,
-                        height: 72,
-                        child: GestureDetector(
-                          onTap: () {}, // prevent tap from propagation to background
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(20),
-                            child: BackdropFilter(
-                              filter: ui.ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  color: Colors.white.withValues(alpha: 0.88),
-                                  borderRadius: BorderRadius.circular(20),
-                                  border: Border.all(color: const Color(0xFFE2E8F0)),
-                                ),
-                                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                                child: ListView.builder(
-                                  scrollDirection: Axis.horizontal,
-                                  itemCount: 10,
-                                  itemBuilder: (context, idx) {
-                                    final isGuru = roleDb.toLowerCase() == 'guru';
-                                    String prefix = 'sma';
-                                    if (isGuru) {
-                                      prefix = 'guru';
-                                    } else {
-                                      final String sL = schoolLevel.toUpperCase();
-                                      if (sL == 'SD') {
-                                        prefix = 'sd';
-                                      } else if (sL == 'SMP') {
-                                        prefix = 'smp';
-                                      } else {
-                                        prefix = 'sma';
-                                      }
-                                    }
-                                    final path = 'assets/icon_pack/avatar/${prefix}_${idx + 1}.png';
-                                    final isSelected = path == avatarPath;
-                                    return GestureDetector(
-                                      onTap: () async {
-                                        await FirebaseFirestore.instance.collection('users').doc(currentUid).update({
-                                          'avatar': path,
-                                        });
-                                        setState(() {
-                                          _showAvatarSelector = false;
-                                        });
-                                        if (context.mounted) {
-                                          ScaffoldMessenger.of(context).showSnackBar(
-                                            const SnackBar(content: Text('Foto profil berhasil diperbarui!')),
-                                          );
-                                        }
-                                      },
+                                    Positioned(
+                                      bottom: 0,
+                                      right: 0,
                                       child: Container(
-                                        margin: const EdgeInsets.only(right: 12),
-                                        width: 52,
-                                        height: 52,
+                                        padding: const EdgeInsets.all(6),
                                         decoration: BoxDecoration(
+                                          color: _showAvatarOverlay ? const Color(0xFF7C3AED) : const Color(0xFFF59E0B),
                                           shape: BoxShape.circle,
                                           border: Border.all(
-                                            color: isSelected ? Colors.black : const Color(0xFFE2E8F0),
-                                            width: isSelected ? 2.5 : 1.0,
+                                            color: Colors.white,
+                                            width: 1.8,
                                           ),
                                         ),
-                                        padding: const EdgeInsets.all(2.5),
-                                        child: ClipOval(
-                                          child: Transform.scale(
-                                            scale: 1.25,
-                                            child: Image.asset(path, fit: BoxFit.cover),
-                                          ),
+                                        child: Icon(
+                                          _showAvatarOverlay ? Icons.keyboard_arrow_up_rounded : Icons.edit_rounded,
+                                          color: Colors.white,
+                                          size: 12,
                                         ),
                                       ),
-                                    );
-                                  },
+                                    ),
+                                  ],
                                 ),
                               ),
-                            ),
+                              const SizedBox(height: 12),
+
+                              // Symmetrical Centered User Name (Black / High Contrast)
+                              Text(
+                                name,
+                                textAlign: TextAlign.center,
+                                style: AppTypography.pageTitle(
+                                  color: heroTextColor,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 6),
+
+                              // Symmetrical Role Tag with Colored Block & ID User
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                                    decoration: BoxDecoration(
+                                      color: roleDb.toLowerCase() == 'guru'
+                                          ? const Color(0xFF7C3AED)
+                                          : const Color(0xFF2563EB),
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    child: Text(
+                                      roleDb,
+                                      style: AppTypography.timestamp(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                    decoration: BoxDecoration(
+                                      color: isDark
+                                          ? Colors.black.withValues(alpha: 0.35)
+                                          : Colors.white.withValues(alpha: 0.55),
+                                      borderRadius: BorderRadius.circular(10),
+                                      border: Border.all(
+                                        color: isDark
+                                            ? Colors.white.withValues(alpha: 0.15)
+                                            : Colors.black.withValues(alpha: 0.08),
+                                        width: 1.0,
+                                      ),
+                                    ),
+                                    child: InkWell(
+                                      borderRadius: BorderRadius.circular(10),
+                                      onTap: () {
+                                        Clipboard.setData(ClipboardData(text: userId));
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          const SnackBar(content: Text('ID User berhasil disalin ke clipboard!')),
+                                        );
+                                      },
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Text(
+                                            'ID: $userId',
+                                            style: AppTypography.timestamp(
+                                              color: heroTextColor,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                          const SizedBox(width: 4),
+                                          Icon(
+                                            Icons.copy_rounded,
+                                            size: 12,
+                                            color: heroTextColor,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+
+                              // Floating In-Card Avatar Slider Overlay (Bounded inside Card Bounds)
+                              if (_showAvatarOverlay) ...[
+                                const SizedBox(height: 14),
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(32),
+                                  child: BackdropFilter(
+                                    filter: ui.ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+                                    child: Container(
+                                      width: double.infinity,
+                                      height: 64,
+                                      padding: const EdgeInsets.symmetric(vertical: 6),
+                                      decoration: BoxDecoration(
+                                        color: isDark
+                                            ? Colors.black.withValues(alpha: 0.50)
+                                            : Colors.white.withValues(alpha: 0.50),
+                                        borderRadius: BorderRadius.circular(32),
+                                        border: Border.all(
+                                          color: isDark
+                                              ? Colors.white.withValues(alpha: 0.16)
+                                              : Colors.black.withValues(alpha: 0.10),
+                                          width: 1.2,
+                                        ),
+                                      ),
+                                      child: ListView.separated(
+                                        scrollDirection: Axis.horizontal,
+                                        physics: const BouncingScrollPhysics(),
+                                        padding: const EdgeInsets.symmetric(horizontal: 10),
+                                        itemCount: () {
+                                          if (roleDb.toLowerCase() == 'guru') {
+                                            return 10;
+                                          } else if (schoolLevel == 'SD') {
+                                            return 20;
+                                          } else {
+                                            return 10;
+                                          }
+                                        }(),
+                                        separatorBuilder: (_, __) => const SizedBox(width: 8),
+                                        itemBuilder: (context, idx) {
+                                          final String avPath;
+                                          if (roleDb.toLowerCase() == 'guru') {
+                                            avPath = 'assets/icon_pack/avatar/guru_${idx + 1}.png';
+                                          } else if (schoolLevel == 'SD') {
+                                            avPath = idx < 10
+                                                ? 'assets/icon_pack/avatar/sd_${idx + 1}.png'
+                                                : 'assets/icon_pack/avatar/avatar_${idx - 9}.png';
+                                          } else if (schoolLevel == 'SMP') {
+                                            avPath = 'assets/icon_pack/avatar/smp_${idx + 1}.png';
+                                          } else {
+                                            avPath = 'assets/icon_pack/avatar/sma_${idx + 1}.png';
+                                          }
+
+                                          final bool isSelected = avPath == avatarPath;
+
+                                          return GestureDetector(
+                                            onTap: () async {
+                                              if (currentUid.isNotEmpty) {
+                                                await FirebaseFirestore.instance
+                                                    .collection('users')
+                                                    .doc(currentUid)
+                                                    .update({'avatar': avPath});
+                                              }
+                                            },
+                                            child: Container(
+                                              width: 50,
+                                              height: 50,
+                                              decoration: BoxDecoration(
+                                                shape: BoxShape.circle,
+                                                border: isSelected
+                                                    ? Border.all(
+                                                        color: const Color(0xFF7C3AED),
+                                                        width: 2.5,
+                                                      )
+                                                    : Border.all(color: Colors.transparent, width: 2.0),
+                                                color: isDark ? const Color(0xFF18181B) : const Color(0xFFF1F5F9),
+                                              ),
+                                              child: ClipOval(
+                                                child: Transform.scale(
+                                                  scale: 1.45,
+                                                  child: Image.asset(
+                                                    avPath,
+                                                    fit: BoxFit.cover,
+                                                    errorBuilder: (_, __, ___) => const Icon(
+                                                      Icons.person_rounded,
+                                                      size: 24,
+                                                      color: Color(0xFF7C3AED),
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                              const SizedBox(height: 12),
+                            ],
                           ),
                         ),
                       ),
-                  ],
+                    ),
+                  ),
                 ),
-              ),
+                const SizedBox(height: 16),
+
+                // 2. Main Content Sections
+                Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: AppTypography.screenHorizontalMargin,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Section 1: Informasi Akun (Read-only Overview)
+                      _buildSectionHeader('Informasi Akun', isDark),
+                      _buildSectionCard([
+                        _buildInfoTile(
+                          icon: Icons.mail_outline_rounded,
+                          title: 'Email',
+                          value: email,
+                          iconColor: Colors.purpleAccent,
+                          isDark: isDark,
+                        ),
+                        Divider(
+                          color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+                          height: 1,
+                          indent: 52,
+                        ),
+                        _buildInfoTile(
+                          icon: Icons.wc_rounded,
+                          title: 'Jenis Kelamin',
+                          value: gender,
+                          iconColor: Colors.pinkAccent,
+                          isDark: isDark,
+                        ),
+                        Divider(
+                          color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+                          height: 1,
+                          indent: 52,
+                        ),
+                        _buildInfoTile(
+                          icon: Icons.school_rounded,
+                          title: 'Tingkat Sekolah',
+                          value: roleDb.toLowerCase() == 'siswa' && grade != '-'
+                              ? '$schoolLevel (Kelas $grade)'
+                              : schoolLevel,
+                          iconColor: Colors.teal,
+                          isDark: isDark,
+                        ),
+                        Divider(
+                          color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+                          height: 1,
+                          indent: 52,
+                        ),
+                        _buildInfoTile(
+                          icon: Icons.public_rounded,
+                          title: 'Zona Waktu',
+                          value: timezone,
+                          iconColor: Colors.orangeAccent,
+                          isDark: isDark,
+                        ),
+                        Divider(
+                          color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+                          height: 1,
+                          indent: 52,
+                        ),
+                        _buildInfoTile(
+                          icon: Icons.language_rounded,
+                          title: 'Bahasa',
+                          value: language,
+                          iconColor: Colors.indigoAccent,
+                          isDark: isDark,
+                        ),
+                      ], isDark),
+
+                      // Section 2: Keamanan
+                      _buildSectionHeader('Keamanan', isDark),
+                      _buildSectionCard([
+                        _buildSettingTile(
+                          icon: Icons.lock_outline_rounded,
+                          iconColor: Colors.redAccent,
+                          title: 'Ubah Password',
+                          trailing: 'Atur Ulang',
+                          isDark: isDark,
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const ProfileSubPage(
+                                  title: 'Ubah Password',
+                                  child: ChangePasswordForm(),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                        Divider(
+                          color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+                          height: 1,
+                          indent: 52,
+                        ),
+                        _buildSettingTile(
+                          icon: Icons.security_rounded,
+                          iconColor: Colors.blueGrey,
+                          title: 'Otentikasi 2 Langkah',
+                          trailing: twoFactorEnabled ? 'Aktif' : 'Nonaktif',
+                          isDark: isDark,
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => ProfileSubPage(
+                                  title: 'Otentikasi 2 Langkah',
+                                  child: TwoFactorSetupForm(isEnabled: twoFactorEnabled, uid: currentUid),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                        Divider(
+                          color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+                          height: 1,
+                          indent: 52,
+                        ),
+                        _buildSettingTile(
+                          icon: Icons.devices_rounded,
+                          iconColor: Colors.teal,
+                          title: 'Sesi Aktif',
+                          trailing: '1 Sesi Aktif',
+                          isDark: isDark,
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const ProfileSubPage(
+                                  title: 'Sesi Aktif',
+                                  child: ActiveSessionsForm(),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ], isDark),
+
+                      // Section 3: Tampilan & Preferensi
+                      _buildSectionHeader('Tampilan & Notifikasi', isDark),
+                      _buildSectionCard([
+                        _buildSettingTile(
+                          icon: Icons.palette_outlined,
+                          iconColor: Colors.amber,
+                          title: 'Tema Tampilan',
+                          trailing: themeMode == 'Dark' ? 'Gelap' : 'Terang',
+                          isDark: isDark,
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => ProfileSubPage(
+                                  title: 'Ubah Tema',
+                                  child: ThemeSetupForm(currentTheme: themeMode, uid: currentUid),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                        Divider(
+                          color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+                          height: 1,
+                          indent: 52,
+                        ),
+                        _buildSettingTile(
+                          icon: Icons.notifications_none_rounded,
+                          iconColor: Colors.green,
+                          title: 'Notifikasi',
+                          trailing: 'Atur Notifikasi',
+                          isDark: isDark,
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => ProfileSubPage(
+                                  title: 'Pengaturan Notifikasi',
+                                  child: NotificationSetupForm(
+                                    taskReminder: notifyTaskReminder,
+                                    chatMention: notifyChatMention,
+                                    uid: currentUid,
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ], isDark),
+
+                      // Section 4: Tentang & Bantuan
+                      _buildSectionHeader('Lainnya', isDark),
+                      _buildSectionCard([
+                        _buildSettingTile(
+                          icon: Icons.info_outline_rounded,
+                          iconColor: Colors.blueGrey,
+                          title: 'Tentang Aplikasi',
+                          trailing: 'Hubner Edu v1.1.0',
+                          isDark: isDark,
+                          onTap: () {
+                            showDialog(
+                              context: context,
+                              builder: (ctx) => AlertDialog(
+                                backgroundColor: isDark ? const Color(0xFF18181B) : Colors.white,
+                                title: Text(
+                                  'Hubner Edu',
+                                  style: AppTypography.buttonLabel(
+                                    color: isDark ? Colors.white : Colors.black87,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                content: Text(
+                                  'Hubner Edu adalah platform manajemen kelas online dan pembelajaran interaktif secara real-time.',
+                                  style: AppTypography.buttonLabel(
+                                    color: isDark ? Colors.white70 : Colors.black87,
+                                  ),
+                                ),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () => Navigator.pop(ctx),
+                                    child: Text(
+                                      'Tutup',
+                                      style: AppTypography.buttonLabel(
+                                        color: const Color(0xFF7C3AED),
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  )
+                                ],
+                              ),
+                            );
+                          },
+                        ),
+                        Divider(
+                          color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+                          height: 1,
+                          indent: 52,
+                        ),
+                        _buildSettingTile(
+                          icon: Icons.cleaning_services_rounded,
+                          iconColor: Colors.blueAccent,
+                          title: 'Hapus Cache',
+                          trailing: '14.8 MB',
+                          isDark: isDark,
+                          onTap: () {
+                            imageCache.clear();
+                            imageCache.clearLiveImages();
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Cache aplikasi (14.8 MB) berhasil dibersihkan!'),
+                                backgroundColor: Color(0xFF10B981),
+                                behavior: SnackBarBehavior.floating,
+                              ),
+                            );
+                          },
+                        ),
+                        Divider(
+                          color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+                          height: 1,
+                          indent: 52,
+                        ),
+                        _buildSettingTile(
+                          icon: Icons.delete_forever_rounded,
+                          iconColor: Colors.redAccent,
+                          titleColor: Colors.redAccent,
+                          title: 'Hapus Akun',
+                          trailing: '',
+                          isDark: isDark,
+                          onTap: () => _deleteAccount(context, currentUid),
+                        ),
+                      ], isDark),
+
+                      const SizedBox(height: 32),
+
+                      // Log out button (Solid Red, White Text, Round 32)
+                      SizedBox(
+                        width: double.infinity,
+                        height: 52,
+                        child: ElevatedButton.icon(
+                          onPressed: logOut,
+                          icon: const Icon(Icons.logout_rounded, size: 20, color: Colors.white),
+                          label: Text(
+                            'Keluar dari Akun',
+                            style: AppTypography.buttonLabel(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFFEF4444), // Solid red
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(32), // Solid round
+                            ),
+                            elevation: 0,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ),
         );

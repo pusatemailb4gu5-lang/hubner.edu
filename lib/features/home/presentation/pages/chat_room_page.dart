@@ -26,6 +26,9 @@ import 'home_page.dart' show BouncyButton;
 import 'package:hubner/features/projects/presentation/pages/detail_cp_page.dart';
 
 class ChatRoomPage extends StatefulWidget {
+  static bool isCurrentlyOpen = false;
+  static String? activeDiscussionId;
+
   final String discussionId;
   final String channelName;
   final String? projectId;
@@ -134,6 +137,8 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
   @override
   void initState() {
     super.initState();
+    ChatRoomPage.isCurrentlyOpen = true;
+    ChatRoomPage.activeDiscussionId = widget.discussionId;
     _currentDiscussionId = widget.discussionId;
     _isDraft = widget.discussionId.isEmpty;
     _initStreams();
@@ -151,10 +156,26 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
   }
 
   @override
+  void dispose() {
+    ChatRoomPage.isCurrentlyOpen = false;
+    ChatRoomPage.activeDiscussionId = null;
+    _messageController.removeListener(_onTextChanged);
+    _messageController.dispose();
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
+    _inputFocusNode.dispose();
+    _audioPlayer.dispose();
+    _mentionNotifier.dispose();
+    _showScrollToBottom.dispose();
+    super.dispose();
+  }
+
+  @override
   void didUpdateWidget(covariant ChatRoomPage oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.discussionId != oldWidget.discussionId ||
         widget.channelName != oldWidget.channelName) {
+      ChatRoomPage.activeDiscussionId = widget.discussionId;
       _currentDiscussionId = widget.discussionId;
       _isDraft = widget.discussionId.isEmpty;
       _initialScrollDone = false;
@@ -2288,17 +2309,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
 
 
 
-  @override
-  void dispose() {
-    _scrollController.removeListener(_onScroll);
-    _showScrollToBottom.dispose();
-    _inputFocusNode.dispose();
-    _audioPlayer.dispose();
-    _messageController.removeListener(_onTextChanged);
-    _messageController.dispose();
-    _scrollController.dispose();
-    super.dispose();
-  }
+
 
   Future<List<Map<String, dynamic>>> _loadProjectMembers(String projectId) async {
     try {
@@ -6405,6 +6416,7 @@ class _AnimatedPurpleMicroPatternBackgroundState extends State<AnimatedPurpleMic
 
   @override
   Widget build(BuildContext context) {
+    final screenSize = MediaQuery.sizeOf(context);
     return AnimatedBuilder(
       animation: _controller,
       builder: (context, child) {
@@ -6412,6 +6424,8 @@ class _AnimatedPurpleMicroPatternBackgroundState extends State<AnimatedPurpleMic
           painter: _PurpleMicroPatternPainter(
             animationValue: _controller.value,
             isDark: widget.isDark,
+            screenWidth: screenSize.width,
+            screenHeight: screenSize.height,
           ),
           child: widget.child,
         );
@@ -6450,10 +6464,14 @@ class _AbstractSquiggleData {
 class _PurpleMicroPatternPainter extends CustomPainter {
   final double animationValue;
   final bool isDark;
+  final double screenWidth;
+  final double screenHeight;
 
   _PurpleMicroPatternPainter({
     required this.animationValue,
     required this.isDark,
+    required this.screenWidth,
+    required this.screenHeight,
   });
 
   static const List<_AbstractSquiggleData> _squiggles = [
@@ -6501,6 +6519,10 @@ class _PurpleMicroPatternPainter extends CustomPainter {
           .withValues(alpha: isDark ? 0.18 : 0.12)
       ..style = PaintingStyle.fill;
 
+    // Use sticky screen dimensions so pattern doesn't compress/shift when keyboard appears
+    final double widthRef = screenWidth > 0 ? screenWidth : size.width;
+    final double heightRef = screenHeight > 0 ? screenHeight : size.height;
+
     for (int i = 0; i < _squiggles.length; i++) {
       final sq = _squiggles[i];
 
@@ -6511,8 +6533,8 @@ class _PurpleMicroPatternPainter extends CustomPainter {
       final double floatX = sin(progressX * 2 * pi) * (sq.driftX * 0.35);
       final double floatY = cos(progressY * 2 * pi) * (sq.driftY * 0.35);
 
-      final double cx = (sq.xFrac * size.width + floatX);
-      final double cy = (sq.yFrac * size.height + floatY);
+      final double cx = (sq.xFrac * widthRef + floatX);
+      final double cy = (sq.yFrac * heightRef + floatY);
 
       // Rotasi dan goyangan halus tak beraturan
       final double angle = sq.baseAngle + sin(animationValue * 2 * pi * (sq.rotSpeed * 0.5) + i) * 0.08;
@@ -6609,6 +6631,9 @@ class _PurpleMicroPatternPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _PurpleMicroPatternPainter oldDelegate) {
-    return oldDelegate.animationValue != animationValue || oldDelegate.isDark != isDark;
+    return oldDelegate.animationValue != animationValue ||
+        oldDelegate.isDark != isDark ||
+        oldDelegate.screenHeight != screenHeight ||
+        oldDelegate.screenWidth != screenWidth;
   }
 }

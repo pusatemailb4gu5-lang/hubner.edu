@@ -239,7 +239,7 @@ class _ManageFriendsPageState extends State<ManageFriendsPage> {
 
                 // Add Friend input field (Disamakan persis dengan Data Anggota Kelas)
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  padding: EdgeInsets.symmetric(horizontal: AppTypography.screenHorizontalMargin),
                   child: Container(
                     height: 54,
                     padding: const EdgeInsets.fromLTRB(16, 0, 6, 0),
@@ -298,7 +298,7 @@ class _ManageFriendsPageState extends State<ManageFriendsPage> {
 
                 // Friends List Header
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  padding: EdgeInsets.symmetric(horizontal: AppTypography.screenHorizontalMargin),
                   child: Text(
                     'Daftar Teman Anda',
                     style: AppTypography.cardTitle(color: isDark ? Colors.white70 : const Color(0xFF0F172A), fontWeight: FontWeight.w800),
@@ -318,13 +318,13 @@ class _ManageFriendsPageState extends State<ManageFriendsPage> {
                         return Center(
                           child: Text(
                             'Data tidak ditemukan.',
-                            style: AppTypography.timestamp(color: isDark ? Colors.white38 : Colors.black45),
+                            style: AppTypography.subtitle(color: isDark ? Colors.white38 : Colors.black45),
                           ),
                         );
                       }
 
                       final userData = snapshot.data!.data() as Map<String, dynamic>?;
-                      final List<String> friendUids = List<String>.from(userData?['friendUids'] ?? []);
+                      final List friendUids = List.from(userData?['friendUids'] ?? []);
 
                       if (friendUids.isEmpty) {
                         return Center(
@@ -348,7 +348,7 @@ class _ManageFriendsPageState extends State<ManageFriendsPage> {
                           final friendDocs = friendsSnapshot.data?.docs ?? [];
 
                           return ListView.separated(
-                            padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
+                            padding: EdgeInsets.fromLTRB(AppTypography.screenHorizontalMargin, 4, AppTypography.screenHorizontalMargin, 24),
                             itemCount: friendDocs.length,
                             separatorBuilder: (context, index) => const SizedBox(height: 10),
                             itemBuilder: (context, index) {

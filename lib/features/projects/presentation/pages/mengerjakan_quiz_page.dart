@@ -704,7 +704,7 @@ class _MengerjakanQuizPageState extends State<MengerjakanQuizPage> with TickerPr
 
           SafeArea(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              padding: EdgeInsets.symmetric(horizontal: AppTypography.screenHorizontalMargin, vertical: 12),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -1372,7 +1372,7 @@ class _MengerjakanQuizPageState extends State<MengerjakanQuizPage> with TickerPr
               children: [
                 // ─── TOP BAR: Title & Close Button ────────────────────────
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 16, 16, 8),
+                  padding: EdgeInsets.fromLTRB(AppTypography.screenHorizontalMargin, 16, AppTypography.screenHorizontalMargin, 8),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -1403,7 +1403,7 @@ class _MengerjakanQuizPageState extends State<MengerjakanQuizPage> with TickerPr
 
                 // ─── TABS FILTER: [Kuis Terakhir] [Akumulasi Kuis Kelas] ──
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
+                  padding: EdgeInsets.symmetric(horizontal: AppTypography.screenHorizontalMargin, vertical: 6),
                   child: Container(
                     padding: const EdgeInsets.all(4),
                     decoration: BoxDecoration(
@@ -1433,7 +1433,7 @@ class _MengerjakanQuizPageState extends State<MengerjakanQuizPage> with TickerPr
                               ),
                             )
                           : SingleChildScrollView(
-                              padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+                              padding: EdgeInsets.fromLTRB(AppTypography.screenHorizontalMargin, 8, AppTypography.screenHorizontalMargin, 24),
                               child: Column(
                                 children: [
                                   // Top 3 Podium (Proportional height based on score, 0 = 18px base)

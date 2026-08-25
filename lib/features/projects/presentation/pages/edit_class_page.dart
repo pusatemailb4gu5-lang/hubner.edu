@@ -1419,9 +1419,11 @@ Sertakan HANYA JSON tersebut tanpa penjelasan markdown apa pun di luar JSON.
         ScrollConfiguration(
           behavior: DesktopScrollBehavior(),
           child: SizedBox(
-            height: 60,
+            height: 56,
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
+              clipBehavior: Clip.none,
+              padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 2),
               itemCount: 10,
               itemBuilder: (context, idx) {
                 final isSelected = _selectedIconIndex == idx;
@@ -1433,7 +1435,7 @@ Sertakan HANYA JSON tersebut tanpa penjelasan markdown apa pun di luar JSON.
                   },
                   child: Container(
                     margin: const EdgeInsets.only(right: 12),
-                    padding: const EdgeInsets.all(3),
+                    padding: const EdgeInsets.all(2),
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       border: Border.all(
@@ -1470,6 +1472,8 @@ Sertakan HANYA JSON tersebut tanpa penjelasan markdown apa pun di luar JSON.
               height: 44,
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
+                clipBehavior: Clip.none,
+                padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 1),
                 itemCount: activeColors.length,
                 itemBuilder: (context, idx) {
                   final isSelected = _selectedColorIndex == idx;
@@ -1489,7 +1493,7 @@ Sertakan HANYA JSON tersebut tanpa penjelasan markdown apa pun di luar JSON.
                         shape: BoxShape.circle,
                         border: Border.all(
                           color: isSelected ? (isDark ? Colors.white : Colors.black87) : Colors.transparent,
-                          width: 2.5,
+                          width: 2.0,
                         ),
                       ),
                     ),
@@ -2198,7 +2202,7 @@ Sertakan HANYA JSON tersebut tanpa penjelasan markdown apa pun di luar JSON.
               child: Column(
                 children: [
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 8.0),
+                    padding: EdgeInsets.symmetric(horizontal: AppTypography.screenHorizontalMargin, vertical: 8.0),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -2230,7 +2234,7 @@ Sertakan HANYA JSON tersebut tanpa penjelasan markdown apa pun di luar JSON.
 
                   Expanded(
                     child: SingleChildScrollView(
-                      padding: const EdgeInsets.all(24.0),
+                      padding: AppTypography.pagePadding(top: 20.0, bottom: 20.0),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [

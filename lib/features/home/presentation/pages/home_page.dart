@@ -1820,9 +1820,7 @@ class _HomePageState extends State<HomePage> {
                       children: [
                         SingleChildScrollView(
                           controller: _homeScrollController,
-                          padding: const EdgeInsets.only(
-                            left: 14.0,
-                            right: 14.0,
+                          padding: AppTypography.pagePadding(
                             top: 12.0,
                             bottom: 125.0,
                           ),

@@ -1392,6 +1392,8 @@ class _AddClassPageState extends State<AddClassPage> {
           height: 34,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
+            clipBehavior: Clip.none,
+            padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 1),
             itemCount: activeColors.length,
             itemBuilder: (context, idx) {
               final isSelected = _selectedColorIndex == idx;
@@ -1411,7 +1413,7 @@ class _AddClassPageState extends State<AddClassPage> {
                     shape: BoxShape.circle,
                     border: Border.all(
                       color: isSelected ? (isDark ? Colors.white : Colors.black87) : Colors.transparent,
-                      width: 2.2,
+                      width: 2.0,
                     ),
                   ),
                 ),
@@ -1550,8 +1552,8 @@ class _AddClassPageState extends State<AddClassPage> {
               filter: ui.ImageFilter.blur(sigmaX: 10, sigmaY: 10),
               child: Container(
                 width: double.infinity,
-                height: 58,
-                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                height: 60,
+                padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 4),
                 decoration: BoxDecoration(
                   color: isDark
                       ? Colors.black.withValues(alpha: 0.50)
@@ -1566,7 +1568,7 @@ class _AddClassPageState extends State<AddClassPage> {
                 ),
                 child: ListView.separated(
                   scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
                   itemCount: 11, // 0 is default icon, 1-10 are project icons
                   separatorBuilder: (_, __) => const SizedBox(width: 8),
                   itemBuilder: (ctx, i) {
@@ -1588,16 +1590,16 @@ class _AddClassPageState extends State<AddClassPage> {
                         });
                       },
                       child: Container(
-                        width: 48,
-                        height: 48,
+                        width: 50,
+                        height: 50,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           border: isSelected
                               ? Border.all(
                                   color: const Color(0xFF7C3AED),
-                                  width: 2.4,
+                                  width: 2.0,
                                 )
-                              : Border.all(color: Colors.transparent, width: 2.4),
+                              : Border.all(color: Colors.transparent, width: 2.0),
                           color: isDark ? const Color(0xFF18181B) : const Color(0xFFF1F5F9),
                         ),
                         child: isDefault
@@ -1605,11 +1607,11 @@ class _AddClassPageState extends State<AddClassPage> {
                                 child: Icon(
                                   Icons.school_rounded,
                                   color: Color(0xFF7C3AED),
-                                  size: 24,
+                                  size: 26,
                                 ),
                               )
                             : Padding(
-                                padding: const EdgeInsets.all(4.0),
+                                padding: const EdgeInsets.all(2.0),
                                 child: Image.asset(
                                   'assets/icon_pack/project/project_$i.png',
                                   fit: BoxFit.contain,
@@ -2400,7 +2402,7 @@ class _AddClassPageState extends State<AddClassPage> {
               children: [
                 // Custom AppBar
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
+                  padding: EdgeInsets.symmetric(horizontal: AppTypography.screenHorizontalMargin, vertical: 10.0),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -2467,7 +2469,7 @@ class _AddClassPageState extends State<AddClassPage> {
 
                 Expanded(
                   child: SingleChildScrollView(
-                    padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 20.0),
+                    padding: AppTypography.pagePadding(top: 20.0, bottom: 20.0),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [

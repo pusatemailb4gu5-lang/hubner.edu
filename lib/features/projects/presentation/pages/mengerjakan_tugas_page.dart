@@ -332,7 +332,7 @@ class _MengerjakanTugasPageState extends State<MengerjakanTugasPage> {
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(20),
+          padding: AppTypography.pagePadding(top: 16, bottom: 24),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

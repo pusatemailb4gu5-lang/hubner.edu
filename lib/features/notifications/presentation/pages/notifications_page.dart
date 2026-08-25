@@ -271,13 +271,11 @@ class _NotificationsPageState extends State<NotificationsPage> {
                       return tB.compareTo(tA);
                     });
 
-                    // Cap to 30 items max
-                    final finalItems = items.take(30).toList();
-
                     return ValueListenableBuilder<Set<String>>(
                       valueListenable: NotificationService.readNotificationIdsNotifier,
                       builder: (context, readIds, _) {
-                        final int unreadCount = finalItems.where((it) => !readIds.contains(it['id'])).length;
+                        // Filter to show ONLY unread items so read items / activities disappear immediately!
+                        final unreadItems = items.where((it) => !readIds.contains(it['id'])).take(30).toList();
 
                         return Scaffold(
                       backgroundColor: isDark ? const Color(0xFF000000) : Colors.white,
@@ -324,28 +322,26 @@ class _NotificationsPageState extends State<NotificationsPage> {
                         ),
                         centerTitle: false,
                         actions: [
-                          if (finalItems.isNotEmpty)
+                          if (unreadItems.isNotEmpty)
                             Padding(
                               padding: const EdgeInsets.only(right: 14.0),
                               child: Center(
                                 child: GestureDetector(
-                                  onTap: unreadCount > 0 ? () => _markAllAsRead(finalItems) : null,
+                                  onTap: () => _markAllAsRead(unreadItems),
                                   behavior: HitTestBehavior.opaque,
                                   child: Container(
                                     padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
                                     decoration: BoxDecoration(
-                                      color: unreadCount > 0
-                                          ? (isDark ? const Color(0xFF27272A) : const Color(0xFF1E293B))
-                                          : (isDark ? const Color(0xFF18181B) : const Color(0xFFF1F5F9)),
+                                      color: isDark ? const Color(0xFF27272A) : const Color(0xFF1E293B),
                                       borderRadius: BorderRadius.circular(20),
                                       border: isDark
                                           ? Border.all(color: const Color(0xFF3F3F46), width: 1.0)
-                                          : (unreadCount > 0 ? null : Border.all(color: const Color(0xFFE2E8F0), width: 1.0)),
+                                          : null,
                                     ),
                                     child: Text(
                                       'Baca Semua',
                                       style: AppTypography.buttonLabel(
-                                        color: unreadCount > 0 ? Colors.white : (isDark ? Colors.white38 : Colors.black38),
+                                        color: Colors.white,
                                         fontWeight: FontWeight.bold,
                                         fontSize: 13.0,
                                       ),
@@ -363,7 +359,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                           ),
                         ),
                       ),
-                      body: finalItems.isEmpty
+                      body: unreadItems.isEmpty
                           ? Center(
                               child: Padding(
                                 padding: const EdgeInsets.all(32.0),
@@ -395,16 +391,16 @@ class _NotificationsPageState extends State<NotificationsPage> {
                               ),
                             )
                           : ListView.separated(
-                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                              itemCount: finalItems.length,
+                              padding: EdgeInsets.symmetric(horizontal: AppTypography.screenHorizontalMargin, vertical: 8),
+                              itemCount: unreadItems.length,
                               separatorBuilder: (context, index) => Divider(
                                 height: 14,
                                 color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
                               ),
                               itemBuilder: (context, index) {
-                                 final item = finalItems[index];
-                                 final String itemId = item['id'] ?? '';
-                                 final bool isRead = readIds.contains(itemId);
+                                final item = unreadItems[index];
+                                final String itemId = item['id'] ?? '';
+                                final bool isRead = readIds.contains(itemId);
 
                                  return InkWell(
                                    onTap: () {

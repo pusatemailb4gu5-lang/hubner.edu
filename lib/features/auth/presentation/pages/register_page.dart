@@ -40,6 +40,7 @@ class _RegisterPageState extends State<RegisterPage> {
   final _confirmPasswordController = TextEditingController();
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
+  String? _errorMessage;
   String _selectedGender = 'Laki-laki'; // Default gender
   String _selectedRole = 'Guru'; // Default role ('Guru' or 'Siswa')
   String _selectedSchoolLevel = 'SMA'; // Default school level for Guru ('SD', 'SMP', 'SMA', 'SMK')
@@ -71,6 +72,10 @@ class _RegisterPageState extends State<RegisterPage> {
   @override
   void initState() {
     super.initState();
+    _nameController.addListener(_clearError);
+    _emailController.addListener(_clearError);
+    _passwordController.addListener(_clearError);
+    _confirmPasswordController.addListener(_clearError);
     // Pre-fill fields if coming from Google Sign-In
     if (widget.isGoogleSignIn) {
       _emailController.text = widget.googleEmail ?? '';
@@ -83,8 +88,20 @@ class _RegisterPageState extends State<RegisterPage> {
     });
   }
 
+  void _clearError() {
+    if (_errorMessage != null) {
+      setState(() {
+        _errorMessage = null;
+      });
+    }
+  }
+
   @override
   void dispose() {
+    _nameController.removeListener(_clearError);
+    _emailController.removeListener(_clearError);
+    _passwordController.removeListener(_clearError);
+    _confirmPasswordController.removeListener(_clearError);
     _googleSignInSubscription?.cancel();
     _nameController.dispose();
     _emailController.dispose();
@@ -103,28 +120,29 @@ class _RegisterPageState extends State<RegisterPage> {
     final confirmPassword = _confirmPasswordController.text.trim();
 
     if (name.isEmpty || email.isEmpty || password.isEmpty || confirmPassword.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Semua field wajib diisi.')),
-      );
+      setState(() {
+        _errorMessage = 'Semua data formulir pendaftaran wajib diisi.';
+      });
       return;
     }
 
     if (password != confirmPassword) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Konfirmasi kata sandi tidak cocok.')),
-      );
+      setState(() {
+        _errorMessage = 'Konfirmasi kata sandi tidak cocok. Silakan periksa kembali.';
+      });
       return;
     }
 
     if (password.length < 6) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Kata sandi harus minimal 6 karakter.')),
-      );
+      setState(() {
+        _errorMessage = 'Kata sandi terlalu pendek. Gunakan minimal 6 karakter.';
+      });
       return;
     }
 
     setState(() {
       _isLoading = true;
+      _errorMessage = null;
     });
 
     try {
@@ -221,11 +239,29 @@ class _RegisterPageState extends State<RegisterPage> {
           );
         }
       }
+    } on FirebaseAuthException catch (e) {
+      String message = 'Pendaftaran belum berhasil. Silakan periksa kembali data Anda.';
+      if (e.code == 'email-already-in-use') {
+        message = 'Email ini sudah terdaftar. Silakan Masuk (Login) menggunakan akun Anda.';
+      } else if (e.code == 'invalid-email') {
+        message = 'Format email tidak valid. Pastikan penulisan email sudah benar.';
+      } else if (e.code == 'weak-password') {
+        message = 'Kata sandi terlalu lemah. Gunakan kombinasi huruf dan angka minimal 6 karakter.';
+      } else if (e.code == 'network-request-failed' || e.code == 'unavailable') {
+        message = 'Koneksi internet bermasalah. Pastikan perangkat Anda terhubung ke internet.';
+      } else if (e.message != null && e.message!.isNotEmpty) {
+        message = e.message!;
+      }
+      if (mounted) {
+        setState(() {
+          _errorMessage = message;
+        });
+      }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Terjadi kesalahan: $e'), backgroundColor: Colors.redAccent),
-        );
+        setState(() {
+          _errorMessage = 'Terjadi kesalahan: $e';
+        });
       }
     } finally {
       if (mounted) {
@@ -401,9 +437,9 @@ class _RegisterPageState extends State<RegisterPage> {
 
     Widget formContent = SingleChildScrollView(
       padding: EdgeInsets.fromLTRB(
-        isTablet ? 16.0 : 28.0,
+        isTablet ? 16.0 : AppTypography.screenHorizontalMargin,
         isTablet ? 16.0 : 20.0,
-        isTablet ? 16.0 : 28.0,
+        isTablet ? 16.0 : AppTypography.screenHorizontalMargin,
         16.0 + safeBottomPadding + viewInsetsBottom,
       ),
       child: Column(
@@ -938,7 +974,47 @@ class _RegisterPageState extends State<RegisterPage> {
               ),
             ],
           ],
-          const SizedBox(height: 20),
+
+          // Inline Error Alert Box (Di bawah textbox / card dengan bahasa ramah)
+          if (_errorMessage != null) ...[
+            const SizedBox(height: 12),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              decoration: BoxDecoration(
+                color: isDark ? const Color(0xFF451A1A) : const Color(0xFFFEF2F2),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: isDark ? const Color(0xFF7F1D1D) : const Color(0xFFFECACA),
+                  width: 1.0,
+                ),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(
+                    Icons.info_outline_rounded,
+                    color: isDark ? const Color(0xFFFCA5A5) : const Color(0xFFDC2626),
+                    size: 18,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      _errorMessage!,
+                      style: AppTypography.timestamp(
+                        color: isDark ? const Color(0xFFFCA5A5) : const Color(0xFFB91C1C),
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 14),
+          ] else ...[
+            const SizedBox(height: 20),
+          ],
+
           Container(
             width: double.infinity,
             height: 52,

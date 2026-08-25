@@ -116,7 +116,7 @@ class _NoteEditorPageState extends State<NoteEditorPage> {
               children: [
                 // AppBar
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
+                  padding: EdgeInsets.symmetric(horizontal: AppTypography.screenHorizontalMargin, vertical: 10.0),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -191,7 +191,7 @@ class _NoteEditorPageState extends State<NoteEditorPage> {
                 // Editor Body
                 Expanded(
                   child: SingleChildScrollView(
-                    padding: const EdgeInsets.all(24.0),
+                    padding: AppTypography.pagePadding(top: 20.0, bottom: 20.0),
                     child: Column(
                       children: [
                         // Title Textfield

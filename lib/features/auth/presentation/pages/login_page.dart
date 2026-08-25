@@ -24,9 +24,11 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
   bool _obscurePassword = true;
+  String? _errorMessage;
+
   StreamSubscription? _googleSignInSubscription;
   bool? _canPop;
 
@@ -46,12 +48,22 @@ class _LoginPageState extends State<LoginPage> {
     super.initState();
     _scrollController = ScrollController();
     _scrollController.addListener(_onScroll);
+    _emailController.addListener(_clearError);
+    _passwordController.addListener(_clearError);
     _initGoogleSignIn();
     _googleSignInSubscription = GoogleSignIn.instance.authenticationEvents.listen((event) {
       if (event is GoogleSignInAuthenticationEventSignIn) {
         _processGoogleSignIn(event.user);
       }
     });
+  }
+
+  void _clearError() {
+    if (_errorMessage != null) {
+      setState(() {
+        _errorMessage = null;
+      });
+    }
   }
 
   void _dismissBackToOnboarding() {
@@ -96,6 +108,8 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   void dispose() {
+    _emailController.removeListener(_clearError);
+    _passwordController.removeListener(_clearError);
     _scrollController.dispose();
     _googleSignInSubscription?.cancel();
     _emailController.dispose();
@@ -110,15 +124,28 @@ class _LoginPageState extends State<LoginPage> {
     final input = _emailController.text.trim();
     final password = _passwordController.text.trim();
 
-    if (input.isEmpty || password.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Email/ID dan Kata Sandi wajib diisi.')),
-      );
+    if (input.isEmpty && password.isEmpty) {
+      setState(() {
+        _errorMessage = 'Silakan masukkan Email atau User ID serta kata sandi Anda.';
+      });
+      return;
+    }
+    if (input.isEmpty) {
+      setState(() {
+        _errorMessage = 'Silakan masukkan Email atau User ID Anda.';
+      });
+      return;
+    }
+    if (password.isEmpty) {
+      setState(() {
+        _errorMessage = 'Silakan masukkan kata sandi Anda.';
+      });
       return;
     }
 
     setState(() {
       _isLoading = true;
+      _errorMessage = null;
     });
 
     try {
@@ -190,24 +217,30 @@ class _LoginPageState extends State<LoginPage> {
         );
       }
     } on FirebaseAuthException catch (e) {
-      String message = 'Masuk gagal: ${e.message}';
+      String message = 'Terjadi kendala saat masuk. Silakan periksa kembali data Anda.';
       if (e.code == 'user-not-found') {
-        message = 'Pengguna tidak ditemukan.';
+        message = 'Akun tidak ditemukan. Periksa kembali email atau User ID Anda.';
       } else if (e.code == 'wrong-password' || e.code == 'invalid-credential') {
-        message = 'Kata sandi salah atau kredensial tidak valid.';
+        message = 'Kata sandi tidak sesuai. Silakan coba lagi atau gunakan opsi "Lupa Kata Sandi".';
       } else if (e.code == 'invalid-email') {
-        message = 'Format email tidak valid.';
+        message = 'Format email tidak valid. Contoh: nama@gmail.com';
+      } else if (e.code == 'network-request-failed' || e.code == 'unavailable') {
+        message = 'Koneksi internet bermasalah. Pastikan perangkat Anda terhubung ke internet.';
+      } else if (e.code == 'too-many-requests') {
+        message = 'Terlalu banyak percobaan masuk yang gagal. Silakan coba beberapa saat lagi.';
+      } else if (e.message != null && e.message!.isNotEmpty) {
+        message = e.message!;
       }
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(message), backgroundColor: Colors.redAccent),
-        );
+        setState(() {
+          _errorMessage = message;
+        });
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Terjadi kesalahan: $e'), backgroundColor: Colors.redAccent),
-        );
+        setState(() {
+          _errorMessage = 'Terjadi kesalahan: $e';
+        });
       }
     } finally {
       if (mounted) {
@@ -353,9 +386,9 @@ class _LoginPageState extends State<LoginPage> {
         controller: _scrollController,
         physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
         padding: EdgeInsets.fromLTRB(
-          isTablet ? 16.0 : 20.0,
+          isTablet ? 16.0 : AppTypography.screenHorizontalMargin,
           isTablet ? 16.0 : 12.0,
-          isTablet ? 16.0 : 28.0,
+          isTablet ? 16.0 : AppTypography.screenHorizontalMargin,
           16.0 + safeBottomPadding + viewInsetsBottom,
         ),
         child: Column(
@@ -496,7 +529,46 @@ class _LoginPageState extends State<LoginPage> {
                 ),
               ),
             ),
-            const SizedBox(height: 8),
+
+            // Inline Error Alert Box (Di bawah textbox / card dengan bahasa ramah)
+            if (_errorMessage != null) ...[
+              const SizedBox(height: 4),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                decoration: BoxDecoration(
+                  color: isDark ? const Color(0xFF451A1A) : const Color(0xFFFEF2F2),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: isDark ? const Color(0xFF7F1D1D) : const Color(0xFFFECACA),
+                    width: 1.0,
+                  ),
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(
+                      Icons.info_outline_rounded,
+                      color: isDark ? const Color(0xFFFCA5A5) : const Color(0xFFDC2626),
+                      size: 18,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        _errorMessage!,
+                        style: AppTypography.timestamp(
+                          color: isDark ? const Color(0xFFFCA5A5) : const Color(0xFFB91C1C),
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 12),
+            ] else ...[
+              const SizedBox(height: 8),
+            ],
 
             // Sign In Button
             Container(

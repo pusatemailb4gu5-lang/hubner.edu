@@ -1084,7 +1084,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                         left: 0,
                         right: 0,
                         child: Padding(
-                          padding: EdgeInsets.fromLTRB(16, statusBarHeight + 16, 16, 20),
+                          padding: EdgeInsets.fromLTRB(AppTypography.screenHorizontalMargin, statusBarHeight + 16, AppTypography.screenHorizontalMargin, 20),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -1404,7 +1404,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                 // SIMPLE TOOLBAR: CHECKBOX TUGAS & QUIZ, ATUR PRESENSI & IKON UNDUH (STICKY)
                                 // ==========================================
                                 Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+                                  padding: EdgeInsets.symmetric(horizontal: AppTypography.screenHorizontalMargin, vertical: 4),
                                   child: Row(
                                     children: [
                                       // Mode Checkbox: Tugas
