@@ -207,7 +207,6 @@ class _TeacherHomePageState extends State<TeacherHomePage> {
                                     MaterialPageRoute(
                                       builder: (context) => MonitoringPage(
                                         initialProjectId: projectDocs.first.id,
-                                        projectTitle: (projectDocs.first.data() as Map)['name'] ?? 'Classroom',
                                       ),
                                     ),
                                   );
