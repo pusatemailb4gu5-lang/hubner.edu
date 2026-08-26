@@ -40,6 +40,10 @@ jobs:
             --release-version=latest \
             --allow-asset-diffs \
             --allow-native-diffs \
+            --force || \
+          shorebird release android \
+            --allow-asset-diffs \
+            --allow-native-diffs \
             --force
         env:
           SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
