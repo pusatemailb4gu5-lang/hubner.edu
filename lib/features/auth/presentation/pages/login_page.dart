@@ -591,7 +591,7 @@ class _LoginPageState extends State<LoginPage> {
                     ? const SizedBox(
                         width: 22,
                         height: 22,
-                        child: const ThreeDotsLoader(),
+                        child: ThreeDotsLoader(colors: [Colors.white]),
                       )
                     : Text(
                         'Masuk',

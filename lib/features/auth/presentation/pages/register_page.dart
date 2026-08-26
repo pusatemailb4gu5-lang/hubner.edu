@@ -1035,7 +1035,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   ? const SizedBox(
                       width: 22,
                       height: 22,
-                      child: const ThreeDotsLoader(),
+                      child: ThreeDotsLoader(colors: [Colors.white]),
                     )
                   : Text(
                       'Daftar',
