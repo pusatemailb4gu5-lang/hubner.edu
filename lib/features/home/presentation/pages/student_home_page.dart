@@ -8,6 +8,8 @@ import 'package:hubner/features/notifications/presentation/widgets/notification_
 import 'package:hubner/features/projects/presentation/pages/class_page.dart' hide ClassroomCardPatternPainter;
 import 'package:hubner/features/todo/presentation/pages/todo_page.dart';
 import 'package:hubner/features/home/presentation/widgets/home_card_painters.dart';
+import 'package:hubner/features/home/presentation/pages/edit_profile_page.dart';
+import 'package:hubner/features/home/presentation/pages/note_editor_page.dart';
 import 'package:hubner/main.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -22,6 +24,7 @@ class StudentHomePage extends StatefulWidget {
 class _StudentHomePageState extends State<StudentHomePage> {
   DateTime _selectedCalendarDay = DateTime.now();
   final ScrollController _homeScrollController = ScrollController();
+  final ValueNotifier<String> _searchQueryNotifier = ValueNotifier<String>('');
   final Set<String> _deletedProjectIds = {};
   List<DocumentSnapshot> _lastProjectDocs = [];
 
@@ -71,8 +74,25 @@ class _StudentHomePageState extends State<StudentHomePage> {
     return null;
   }
 
+  Widget _buildAvatarFallback(String name, bool isDark) {
+    final String initial = name.isNotEmpty
+        ? name.trim().substring(0, 1).toUpperCase()
+        : 'S';
+    return Center(
+      child: Text(
+        initial,
+        style: GoogleFonts.plusJakartaSans(
+          fontSize: 18.0,
+          fontWeight: FontWeight.bold,
+          color: isDark ? Colors.white : const Color(0xFF7C3AED),
+        ),
+      ),
+    );
+  }
+
   @override
   void dispose() {
+    _searchQueryNotifier.dispose();
     _homeScrollController.dispose();
     super.dispose();
   }
@@ -100,6 +120,7 @@ class _StudentHomePageState extends State<StudentHomePage> {
         final Map<String, dynamic> userData =
             userSnapshot.data?.data() as Map<String, dynamic>? ?? {};
         final String userName = userData['name'] ?? user.displayName ?? 'Siswa';
+        final String userPhoto = (userData['photoUrl'] ?? userData['profileImage'] ?? user.photoURL ?? '').toString();
         final String schoolLevel = userData['schoolLevel'] ?? 'SMK';
         final List<dynamic> projectIds = userData['projectIds'] ?? [];
 
@@ -147,40 +168,104 @@ class _StudentHomePageState extends State<StudentHomePage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Student Header Row
+                      // Full Rich Header Row (Avatar, Name/Role, Catatan, Night Mode, Notifikasi)
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Siswa · ${schoolLevel.toUpperCase()}',
-                                style: GoogleFonts.dmSans(
-                                  fontSize: 13.5,
-                                  fontWeight: FontWeight.w600,
-                                  color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                          GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const EditProfilePage(),
                                 ),
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                userName,
-                                style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 22.0,
-                                  fontWeight: FontWeight.bold,
-                                  color: isDark ? Colors.white : Colors.black,
+                              );
+                            },
+                            child: Container(
+                              width: 44,
+                              height: 44,
+                              clipBehavior: Clip.antiAlias,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                                  width: 1.5,
                                 ),
+                                color: isDark ? const Color(0xFF18181B) : const Color(0xFFF1F5F9),
                               ),
-                            ],
+                              child: userPhoto.isNotEmpty
+                                  ? Image.network(
+                                      userPhoto,
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (_, __, ___) => _buildAvatarFallback(userName, isDark),
+                                    )
+                                  : _buildAvatarFallback(userName, isDark),
+                            ),
                           ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Siswa · ${schoolLevel.toUpperCase()}',
+                                  style: GoogleFonts.dmSans(
+                                    fontSize: 12.5,
+                                    fontWeight: FontWeight.w600,
+                                    color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                                  ),
+                                ),
+                                const SizedBox(height: 1),
+                                Text(
+                                  userName,
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontSize: 18.0,
+                                    fontWeight: FontWeight.bold,
+                                    color: isDark ? Colors.white : Colors.black,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 8),
                           Row(
                             children: [
+                              // Catatan / Quick Notes Button
+                              GestureDetector(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => const NoteEditorPage(),
+                                    ),
+                                  );
+                                },
+                                child: Container(
+                                  width: 38,
+                                  height: 38,
+                                  decoration: BoxDecoration(
+                                    color: isDark ? const Color(0xFF18181B) : Colors.white,
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                      color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                                    ),
+                                  ),
+                                  child: Icon(
+                                    Icons.note_alt_outlined,
+                                    color: isDark ? const Color(0xFFA78BFA) : const Color(0xFF7C3AED),
+                                    size: 18,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 6),
+                              // Night Mode Button
                               GestureDetector(
                                 onTap: () => _toggleTheme(context, isDark),
                                 behavior: HitTestBehavior.opaque,
                                 child: Container(
-                                  width: 40,
-                                  height: 40,
+                                  width: 38,
+                                  height: 38,
                                   decoration: BoxDecoration(
                                     color: isDark ? const Color(0xFF18181B) : Colors.white,
                                     shape: BoxShape.circle,
@@ -195,11 +280,55 @@ class _StudentHomePageState extends State<StudentHomePage> {
                                   ),
                                 ),
                               ),
-                              const SizedBox(width: 8),
-                              NotificationBellIcon(isDark: isDark, size: 40),
+                              const SizedBox(width: 6),
+                              // Notification Bell Icon
+                              NotificationBellIcon(isDark: isDark, size: 38),
                             ],
                           ),
                         ],
+                      ),
+                      const SizedBox(height: 14),
+
+                      // Pencarian (Search Bar Input)
+                      Container(
+                        height: 44,
+                        padding: const EdgeInsets.symmetric(horizontal: 14),
+                        decoration: BoxDecoration(
+                          color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
+                          borderRadius: BorderRadius.circular(22),
+                          border: Border.all(
+                            color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.search_rounded,
+                              size: 20,
+                              color: isDark ? Colors.white54 : Colors.black45,
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: TextField(
+                                onChanged: (val) => _searchQueryNotifier.value = val,
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 14.0,
+                                  color: isDark ? Colors.white : Colors.black87,
+                                ),
+                                decoration: InputDecoration(
+                                  hintText: 'Cari classroom, materi, atau tugas...',
+                                  hintStyle: GoogleFonts.dmSans(
+                                    fontSize: 13.5,
+                                    color: isDark ? Colors.white38 : Colors.black38,
+                                  ),
+                                  border: InputBorder.none,
+                                  isDense: true,
+                                  contentPadding: EdgeInsets.zero,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                       const SizedBox(height: 16),
 
@@ -574,72 +703,99 @@ class _StudentHomePageState extends State<StudentHomePage> {
                               fontWeight: FontWeight.w700,
                             ),
                           ),
-                          Text(
-                            '${projectDocs.length} Kelas',
-                            style: GoogleFonts.dmSans(
-                              fontSize: 14.0,
-                              fontWeight: FontWeight.w600,
-                              color: isDark ? const Color(0xFFA78BFA) : const Color(0xFF7C3AED),
-                            ),
+                          ValueListenableBuilder<String>(
+                            valueListenable: _searchQueryNotifier,
+                            builder: (context, query, _) {
+                              final filtered = projectDocs.where((doc) {
+                                final data = doc.data() as Map<String, dynamic>;
+                                final title = (data['name'] ?? '').toString().toLowerCase();
+                                return title.contains(query.toLowerCase());
+                              }).toList();
+
+                              return Text(
+                                '${filtered.length} Kelas',
+                                style: GoogleFonts.dmSans(
+                                  fontSize: 14.0,
+                                  fontWeight: FontWeight.w600,
+                                  color: isDark ? const Color(0xFFA78BFA) : const Color(0xFF7C3AED),
+                                ),
+                              );
+                            },
                           ),
                         ],
                       ),
                       const SizedBox(height: 12),
 
                       // Classroom Rich Cards List
-                      if (projectDocs.isEmpty)
-                        Container(
-                          padding: const EdgeInsets.all(24),
-                          width: double.infinity,
-                          decoration: BoxDecoration(
-                            color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
-                            borderRadius: BorderRadius.circular(20),
-                            border: Border.all(
-                              color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
-                            ),
-                          ),
-                          child: Column(
-                            children: [
-                              Icon(
-                                Icons.class_outlined,
-                                size: 40,
-                                color: isDark ? Colors.white38 : Colors.black38,
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                'Belum bergabung dengan classroom manapun.',
-                                style: GoogleFonts.dmSans(
-                                  fontSize: 14.0,
-                                  color: isDark ? Colors.white54 : Colors.black54,
+                      ValueListenableBuilder<String>(
+                        valueListenable: _searchQueryNotifier,
+                        builder: (context, query, _) {
+                          final filteredDocs = projectDocs.where((doc) {
+                            final data = doc.data() as Map<String, dynamic>;
+                            final title = (data['name'] ?? '').toString().toLowerCase();
+                            final cat = (data['category'] ?? '').toString().toLowerCase();
+                            return title.contains(query.toLowerCase()) || cat.contains(query.toLowerCase());
+                          }).toList();
+
+                          if (filteredDocs.isEmpty) {
+                            return Container(
+                              padding: const EdgeInsets.all(24),
+                              width: double.infinity,
+                              decoration: BoxDecoration(
+                                color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(
+                                  color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
                                 ),
                               ),
-                            ],
-                          ),
-                        )
-                      else
-                        ListView.separated(
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          itemCount: projectDocs.length,
-                          separatorBuilder: (_, __) => const SizedBox(height: 12),
-                          itemBuilder: (context, index) {
-                            final doc = projectDocs[index];
-                            final data = doc.data() as Map<String, dynamic>;
-                            final String title = data['name'] ?? 'Classroom';
-                            final String category = data['category'] ?? 'Umum';
-                            final String ownerUid = (data['ownerUid'] ?? data['teacherUid'] ?? '').toString();
-
-                            return _buildStudentClassroomCard(
-                              context: context,
-                              projectId: doc.id,
-                              title: title,
-                              category: category,
-                              ownerUid: ownerUid,
-                              index: index,
-                              isDark: isDark,
+                              child: Column(
+                                children: [
+                                  Icon(
+                                    Icons.class_outlined,
+                                    size: 40,
+                                    color: isDark ? Colors.white38 : Colors.black38,
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    query.isNotEmpty
+                                        ? 'Tidak ada classroom yang cocok dengan "$query".'
+                                        : 'Belum bergabung dengan classroom manapun.',
+                                    style: GoogleFonts.dmSans(
+                                      fontSize: 14.0,
+                                      color: isDark ? Colors.white54 : Colors.black54,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ],
+                              ),
                             );
-                          },
-                        ),
+                          }
+
+                          return ListView.separated(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            itemCount: filteredDocs.length,
+                            separatorBuilder: (_, __) => const SizedBox(height: 12),
+                            itemBuilder: (context, index) {
+                              final doc = filteredDocs[index];
+                              final data = doc.data() as Map<String, dynamic>;
+                              final String title = data['name'] ?? 'Classroom';
+                              final String category = data['category'] ?? 'Umum';
+                              final String ownerUid = (data['ownerUid'] ?? data['teacherUid'] ?? '').toString();
+
+                              return _buildStudentClassroomCard(
+                                context: context,
+                                projectId: doc.id,
+                                title: title,
+                                category: category,
+                                ownerUid: ownerUid,
+                                index: index,
+                                isDark: isDark,
+                              );
+                            },
+                          );
+                        },
+                      ),
                     ],
                   ),
                 ),
