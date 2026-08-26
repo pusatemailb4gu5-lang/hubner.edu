@@ -7,7 +7,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 class TodoPage extends StatefulWidget {
   final DateTime? initialDate;
-  const TodoPage({super.key, this.initialDate});
+  final bool showBackButton;
+  const TodoPage({super.key, this.initialDate, this.showBackButton = true});
 
   @override
   State<TodoPage> createState() => _TodoPageState();
@@ -145,22 +146,25 @@ class _TodoPageState extends State<TodoPage> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      GestureDetector(
-                        onTap: () => Navigator.pop(context),
-                        child: Container(
-                          width: 44,
-                          height: 44,
-                          decoration: const BoxDecoration(
-                            color: Color(0xFFF1F5F9),
-                            shape: BoxShape.circle,
+                      if (widget.showBackButton && Navigator.canPop(context))
+                        GestureDetector(
+                          onTap: () => Navigator.pop(context),
+                          child: Container(
+                            width: 44,
+                            height: 44,
+                            decoration: const BoxDecoration(
+                              color: Color(0xFFF1F5F9),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.arrow_back_rounded,
+                              color: Colors.black,
+                              size: 18,
+                            ),
                           ),
-                          child: const Icon(
-                            Icons.arrow_back_rounded,
-                            color: Colors.black,
-                            size: 18,
-                          ),
-                        ),
-                      ),
+                        )
+                      else
+                        const SizedBox(width: 44),
                       Text(
                         'Jadwal',
                         style: AppTypography.chatHeaderTitle(color: Colors.black, fontWeight: FontWeight.w600),

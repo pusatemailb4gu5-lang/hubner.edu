@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:hubner/core/widgets/three_dots_loader.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
@@ -75,7 +76,7 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
   void _buildPages(bool isGuru) {
     _pages = [
       HomePage(onNavigateTab: _onNavigateTab),
-      isGuru ? const LaporanPage() : const TodoPage(),
+      isGuru ? const LaporanPage() : const StudentTaskAndReportTab(),
       const DiscussionTab(),
       isGuru
           ? DocumentsTab(onBackToHome: () => _onNavigateTab(0))
@@ -388,7 +389,7 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
                                         ),
                                         _buildSidebarItem(
                                           icon: Icons.assignment_outlined,
-                                          label: isGuru ? 'Laporan' : 'Tugas',
+                                          label: isGuru ? 'Laporan' : 'Tugas & Laporan',
                                           index: 1,
                                         ),
                                         _buildSidebarItem(
@@ -640,7 +641,7 @@ class _FluidIPhoneBottomNavBarState extends State<_FluidIPhoneBottomNavBar>
 
     final navItems = [
       {'icon': Icons.grid_view_rounded, 'label': 'Beranda'},
-      {'icon': Icons.assignment_outlined, 'label': isGuru ? 'Laporan' : 'Tugas'},
+      {'icon': Icons.assignment_outlined, 'label': isGuru ? 'Laporan' : 'Tugas & Laporan'},
       {'icon': Icons.chat_bubble_outline_rounded, 'label': 'Diskusi'},
       {'icon': isGuru ? Icons.article_outlined : Icons.analytics_outlined, 'label': isGuru ? 'Dokumen' : 'Monitoring'},
       {'icon': Icons.person_outline_rounded, 'label': 'Profil'},
@@ -7880,6 +7881,148 @@ class _SidebarNavigationItemState extends State<SidebarNavigationItem> {
           ),
         ),
       ),
+    );
+  }
+}
+
+class StudentTaskAndReportTab extends StatefulWidget {
+  const StudentTaskAndReportTab({super.key});
+
+  @override
+  State<StudentTaskAndReportTab> createState() => _StudentTaskAndReportTabState();
+}
+
+class _StudentTaskAndReportTabState extends State<StudentTaskAndReportTab> {
+  int _selectedSubTab = 0; // 0 = Tugas Saya, 1 = Laporan Nilai
+
+  @override
+  Widget build(BuildContext context) {
+    final bool isDark = AppColors.isDarkMode;
+
+    return Column(
+      children: [
+        // Top Segmented Control Switcher for Siswa
+        SafeArea(
+          bottom: false,
+          child: Container(
+            margin: const EdgeInsets.fromLTRB(16, 8, 16, 6),
+            padding: const EdgeInsets.all(4),
+            decoration: BoxDecoration(
+              color: isDark ? const Color(0xFF18181B) : const Color(0xFFF1F5F9),
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(
+                color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                width: 1.0,
+              ),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () => setState(() => _selectedSubTab = 0),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      padding: const EdgeInsets.symmetric(vertical: 9),
+                      decoration: BoxDecoration(
+                        color: _selectedSubTab == 0
+                            ? const Color(0xFF7C3AED)
+                            : Colors.transparent,
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: _selectedSubTab == 0
+                            ? [
+                                BoxShadow(
+                                  color: const Color(0xFF7C3AED).withValues(alpha: 0.3),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 2),
+                                )
+                              ]
+                            : [],
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.assignment_outlined,
+                            size: 16,
+                            color: _selectedSubTab == 0
+                                ? Colors.white
+                                : (isDark ? Colors.white70 : const Color(0xFF64748B)),
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            'Tugas Saya',
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 13,
+                              fontWeight: FontWeight.bold,
+                              color: _selectedSubTab == 0
+                                  ? Colors.white
+                                  : (isDark ? Colors.white70 : const Color(0xFF64748B)),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () => setState(() => _selectedSubTab = 1),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      padding: const EdgeInsets.symmetric(vertical: 9),
+                      decoration: BoxDecoration(
+                        color: _selectedSubTab == 1
+                            ? const Color(0xFF7C3AED)
+                            : Colors.transparent,
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: _selectedSubTab == 1
+                            ? [
+                                BoxShadow(
+                                  color: const Color(0xFF7C3AED).withValues(alpha: 0.3),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 2),
+                                )
+                              ]
+                            : [],
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.analytics_outlined,
+                            size: 16,
+                            color: _selectedSubTab == 1
+                                ? Colors.white
+                                : (isDark ? Colors.white70 : const Color(0xFF64748B)),
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            'Laporan Nilai',
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 13,
+                              fontWeight: FontWeight.bold,
+                              color: _selectedSubTab == 1
+                                  ? Colors.white
+                                  : (isDark ? Colors.white70 : const Color(0xFF64748B)),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+
+        // Body: Completely unmount inactive page to eliminate any calendar shadow glitch!
+        Expanded(
+          child: _selectedSubTab == 0
+              ? const TodoPage(showBackButton: false)
+              : const LaporanPage(),
+        ),
+      ],
     );
   }
 }
