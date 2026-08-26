@@ -20,6 +20,15 @@ jobs:
           distribution: 'zulu'
           java-version: '21'
 
+      - name: Set up Flutter SDK
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Install Dependencies
+        run: flutter pub get
+
       - name: Set up Shorebird
         uses: shorebirdtech/setup-shorebird@v1
         with:
@@ -30,6 +39,8 @@ jobs:
           shorebird patch android \
             --release-version=latest \
             --allow-asset-diffs \
-            --allow-native-diffs
+            --allow-native-diffs \
+            --force
         env:
           SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
+

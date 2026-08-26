@@ -10,6 +10,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'firebase_options.dart';
 import 'core/theme/app_colors.dart';
 import 'core/theme/app_theme.dart';
+import 'core/services/shorebird_service.dart';
 import 'features/splash/presentation/pages/splash_page.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'features/landing/presentation/pages/landing_page.dart';
@@ -41,6 +42,8 @@ void main() async {
         cacheSizeBytes: Settings.CACHE_SIZE_UNLIMITED,
       );
     } catch (_) {}
+    // Trigger Shorebird OTA code push update check in background
+    ShorebirdService.checkForUpdates();
   }
 
   final prefs = await SharedPreferences.getInstance();
