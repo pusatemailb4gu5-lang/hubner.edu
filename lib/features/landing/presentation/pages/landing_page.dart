@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'package:hubner/core/widgets/three_dots_loader.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hubner/features/projects/presentation/pages/class_page.dart'
@@ -2459,7 +2458,7 @@ class _LandingPageState extends State<LandingPage> {
                             ? const SizedBox(
                                 width: 14,
                                 height: 14,
-                                child: const ThreeDotsLoader(),
+                                child: CircularProgressIndicator(),
                               )
                             : Row(
                                 children: [
@@ -2495,7 +2494,7 @@ class _LandingPageState extends State<LandingPage> {
                             padding: const EdgeInsets.symmetric(vertical: 16),
                             child: Row(
                               children: [
-                                const ThreeDotsLoader(size: 6, bounceHeight: 3),
+                                CircularProgressIndicator(),
                                 const SizedBox(width: 8),
                                 Text('AI sedang merancang 3-5 materi per elemen...', style: GoogleFonts.dmSans(fontSize: 14.3, color: Colors.black54)),
                               ],

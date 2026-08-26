@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:hubner/core/widgets/three_dots_loader.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hubner/core/theme/app_typography.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -343,7 +342,7 @@ class _CompleteCompanyProfilePageState extends State<CompleteCompanyProfilePage>
                           ? const SizedBox(
                               width: 24,
                               height: 24,
-                              child: const ThreeDotsLoader(),
+                              child: CircularProgressIndicator(),
                             )
                           : Text(
                               'Simpan & Mulai',

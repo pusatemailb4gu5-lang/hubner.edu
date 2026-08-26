@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'package:hubner/core/widgets/three_dots_loader.dart';
 import 'dart:async';
 import 'dart:ui';
 import 'package:http/http.dart' as http;
@@ -2085,7 +2084,7 @@ Sertakan HANYA JSON tersebut tanpa penjelasan markdown apa pun di luar JSON.
                           ? const SizedBox(
                               width: 18,
                               height: 18,
-                              child: const ThreeDotsLoader(),
+                              child: CircularProgressIndicator(),
                             )
                           : Text(
                               'Perbarui Classroom',

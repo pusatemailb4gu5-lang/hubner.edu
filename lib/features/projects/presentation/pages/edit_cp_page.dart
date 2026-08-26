@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:hubner/core/theme/app_typography.dart';
-import 'package:hubner/core/widgets/three_dots_loader.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -145,7 +144,7 @@ class _EditCpPageState extends State<EditCpPage> {
                           width: 44,
                           height: 44,
                           child: Center(
-                            child: ThreeDotsLoader(size: 5, bounceHeight: 3),
+                            child: CircularProgressIndicator(),
                           ),
                         )
                       : GestureDetector(

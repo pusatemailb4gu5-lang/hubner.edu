@@ -3,7 +3,6 @@ import 'package:image/image.dart' as img;
 import 'dart:ui' as ui;
 import 'dart:math';
 import 'package:flutter/material.dart';
-import 'package:hubner/core/widgets/three_dots_loader.dart';
 import 'package:flutter/services.dart';
 // Animated Purple Micro Pattern Background
 import 'package:google_fonts/google_fonts.dart';
@@ -653,7 +652,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
       showDialog(
         context: context,
         barrierDismissible: false,
-        builder: (_) => const Center(child: ThreeDotsLoader()),
+        builder: (_) => const Center(child: CircularProgressIndicator()),
       );
 
       final auth = await account.authorizationClient.authorizeScopes([drive.DriveApi.driveFileScope]);
@@ -754,7 +753,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                           showDialog(
                             context: context,
                             barrierDismissible: false,
-                            builder: (_) => const Center(child: ThreeDotsLoader()),
+                            builder: (_) => const Center(child: CircularProgressIndicator()),
                           );
 
                           try {
@@ -836,7 +835,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                     showDialog(
                                       context: context,
                                       barrierDismissible: false,
-                                      builder: (_) => const Center(child: ThreeDotsLoader()),
+                                      builder: (_) => const Center(child: CircularProgressIndicator()),
                                     );
 
                                     try {
@@ -1298,7 +1297,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (_) => const Center(child: ThreeDotsLoader()),
+      builder: (_) => const Center(child: CircularProgressIndicator()),
     );
 
     List<Map<String, dynamic>> stages = [];

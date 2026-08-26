@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:hubner/core/widgets/three_dots_loader.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_svg/flutter_svg.dart';
@@ -4791,7 +4790,7 @@ class _DocumentsTabState extends State<DocumentsTab> {
                                   ),
                                 ),
                                 if (_isUploading)
-                                  const ThreeDotsLoader(size: 6, bounceHeight: 3),
+                                  CircularProgressIndicator(),
                               ],
                             ),
                           ),
@@ -5746,7 +5745,7 @@ class _DocumentsTabState extends State<DocumentsTab> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           if (_isConnecting)
-                            const ThreeDotsLoader(size: 5, bounceHeight: 2)
+                            CircularProgressIndicator()
                           else
                             const GoogleDriveLogoWidget(size: 18),
                           const SizedBox(width: 10),
@@ -7278,7 +7277,7 @@ class _EditNameFormState extends State<EditNameForm> {
               elevation: 0,
             ),
             child: _isLoading 
-                ? const ThreeDotsLoader(size: 5, bounceHeight: 2, colors: [Colors.white, Colors.white70, Colors.white60])
+                ? CircularProgressIndicator(strokeWidth: 2, valueColor: AlwaysStoppedAnimation<Color>(Colors.white))
                 : Text('Simpan Perubahan', style: AppTypography.cardTitle(color: Colors.white, fontWeight: FontWeight.bold)),
           ),
         ),
@@ -7426,7 +7425,7 @@ class _ChangePasswordFormState extends State<ChangePasswordForm> {
               elevation: 0,
             ),
             child: _isLoading 
-                ? const ThreeDotsLoader(size: 5, bounceHeight: 2, colors: [Colors.white, Colors.white70, Colors.white60])
+                ? CircularProgressIndicator(strokeWidth: 2, valueColor: AlwaysStoppedAnimation<Color>(Colors.white))
                 : Text('Ubah Kata Sandi', style: AppTypography.cardTitle(color: Colors.white, fontWeight: FontWeight.bold)),
           ),
         ),

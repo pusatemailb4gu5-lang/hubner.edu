@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:hubner/core/theme/app_colors.dart';
 import 'package:hubner/core/theme/app_typography.dart';
-import 'package:hubner/core/widgets/three_dots_loader.dart';
 
 class EditProfilePage extends StatefulWidget {
   final String uid;
@@ -352,11 +351,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                   elevation: 0,
                 ),
                 child: _isSaving
-                    ? const ThreeDotsLoader(
-                        size: 5,
-                        bounceHeight: 2,
-                        colors: [Colors.white, Colors.white70, Colors.white60],
-                      )
+                    ? CircularProgressIndicator(strokeWidth: 2, valueColor: AlwaysStoppedAnimation<Color>(Colors.white))
                     : Text(
                         'Simpan Perubahan',
                         style: AppTypography.buttonLabel(

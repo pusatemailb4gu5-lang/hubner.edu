@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'package:hubner/core/widgets/three_dots_loader.dart';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:hubner/core/theme/app_typography.dart';
@@ -1424,7 +1423,7 @@ class _MengerjakanQuizPageState extends State<MengerjakanQuizPage> with TickerPr
                 // ─── SCROLLABLE CONTENT (PODIUM + RANKINGS LIST) ──────────
                 Expanded(
                   child: _isLoadingLeaderboard
-                      ? const Center(child: ThreeDotsLoader())
+                      ? const Center(child: CircularProgressIndicator())
                       : activeList.isEmpty
                           ? Center(
                               child: Text(

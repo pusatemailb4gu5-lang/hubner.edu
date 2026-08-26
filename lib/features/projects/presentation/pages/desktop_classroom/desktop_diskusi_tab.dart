@@ -4,7 +4,6 @@ import 'package:hubner/core/theme/app_typography.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:hubner/core/widgets/three_dots_loader.dart';
 import 'package:hubner/main.dart' show HubnerApp;
 import 'package:hubner/features/home/presentation/pages/chat_room_page.dart';
 import 'package:hubner/features/home/presentation/pages/manage_friends_page.dart';
@@ -180,7 +179,7 @@ class _DesktopDiskusiTabState extends State<DesktopDiskusiTab> {
                     ),
                     const SizedBox(height: 8),
                     if (isLoadingMembers)
-                      const Center(child: Padding(padding: EdgeInsets.all(16), child: ThreeDotsLoader()))
+                      const Center(child: Padding(padding: EdgeInsets.all(16), child: CircularProgressIndicator()))
                     else
                       Container(
                         constraints: const BoxConstraints(maxHeight: 180),

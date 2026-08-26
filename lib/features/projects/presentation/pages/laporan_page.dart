@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:hubner/core/theme/app_typography.dart';
-import 'package:hubner/core/widgets/three_dots_loader.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -2142,7 +2141,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const SizedBox(
                 height: 250,
-                child: Center(child: ThreeDotsLoader()),
+                child: Center(child: CircularProgressIndicator()),
               );
             }
 

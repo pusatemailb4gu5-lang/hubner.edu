@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'package:hubner/core/widgets/three_dots_loader.dart';
 import 'dart:async';
 import 'dart:ui' as ui;
 import 'package:http/http.dart' as http;
@@ -1016,7 +1015,7 @@ class _AddClassPageState extends State<AddClassPage> {
       showDialog(
         context: context,
         barrierDismissible: false,
-        builder: (context) => const Center(child: ThreeDotsLoader()),
+        builder: (context) => const Center(child: CircularProgressIndicator()),
       );
 
       final userName = widget.registrationData!['name']!;

@@ -4,7 +4,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hubner/core/theme/app_colors.dart';
 import 'package:hubner/core/theme/app_typography.dart';
-import 'package:hubner/core/widgets/three_dots_loader.dart';
 import 'package:hubner/features/notifications/presentation/widgets/notification_bell_icon.dart';
 import 'package:hubner/features/projects/presentation/pages/class_page.dart';
 import 'package:hubner/features/projects/presentation/pages/desktop_classroom_page.dart';
@@ -62,7 +61,7 @@ class _StudentHomePageState extends State<StudentHomePage> {
     final User? user = FirebaseAuth.instance.currentUser;
     if (user == null) {
       return const Scaffold(
-        body: Center(child: ThreeDotsLoader()),
+        body: Center(child: CircularProgressIndicator()),
       );
     }
 
@@ -73,7 +72,7 @@ class _StudentHomePageState extends State<StudentHomePage> {
       builder: (context, userSnapshot) {
         if (!userSnapshot.hasData) {
           return const Scaffold(
-            body: Center(child: ThreeDotsLoader()),
+            body: Center(child: CircularProgressIndicator()),
           );
         }
 

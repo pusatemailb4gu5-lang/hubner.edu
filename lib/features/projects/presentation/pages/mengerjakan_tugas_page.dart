@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:hubner/core/theme/app_typography.dart';
-import 'package:hubner/core/widgets/three_dots_loader.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -88,7 +87,7 @@ class _MengerjakanTugasPageState extends State<MengerjakanTugasPage> {
       showDialog(
         context: context,
         barrierDismissible: false,
-        builder: (_) => const Center(child: ThreeDotsLoader()),
+        builder: (_) => const Center(child: CircularProgressIndicator()),
       );
 
       final doc = await FirebaseFirestore.instance.collection('projects').doc(widget.projectId).get();
@@ -650,7 +649,7 @@ class _MengerjakanTugasPageState extends State<MengerjakanTugasPage> {
                       ? const SizedBox(
                           width: 24,
                           height: 24,
-                          child: const ThreeDotsLoader(),
+                          child: CircularProgressIndicator(),
                         )
                       : Text(
                           _hasSubmitted ? 'Perbarui Pengiriman' : 'Kirim Tugas',

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:hubner/core/widgets/three_dots_loader.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hubner/core/theme/app_typography.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -418,7 +417,7 @@ class _JoinClassRegistrationPageState extends State<JoinClassRegistrationPage> {
                             ? const SizedBox(
                                 width: 18,
                                 height: 18,
-                                child: const ThreeDotsLoader(),
+                                child: CircularProgressIndicator(),
                               )
                             : const Icon(Icons.search_rounded, size: 18),
                         label: Text(
@@ -563,7 +562,7 @@ class _JoinClassRegistrationPageState extends State<JoinClassRegistrationPage> {
                                   ? const SizedBox(
                                       width: 18,
                                       height: 18,
-                                      child: const ThreeDotsLoader(),
+                                      child: CircularProgressIndicator(),
                                     )
                                   : const Icon(Icons.group_add_rounded, size: 18),
                               label: Text(

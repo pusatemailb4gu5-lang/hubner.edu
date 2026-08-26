@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:hubner/core/widgets/three_dots_loader.dart';
 import 'package:hubner/core/widgets/bouncy_button.dart';
 import 'student_home_page.dart';
 import 'teacher_home_page.dart';
@@ -31,7 +30,7 @@ class _HomePageState extends State<HomePage> {
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
           return const Scaffold(
-            body: Center(child: ThreeDotsLoader()),
+            body: Center(child: CircularProgressIndicator()),
           );
         }
 

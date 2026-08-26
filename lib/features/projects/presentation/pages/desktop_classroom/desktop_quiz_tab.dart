@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:hubner/core/theme/app_typography.dart';
-import 'package:hubner/core/widgets/three_dots_loader.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -134,7 +133,7 @@ class _DesktopQuizTabState extends State<DesktopQuizTab> {
           .snapshots(),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
-          return const Center(child: ThreeDotsLoader());
+          return const Center(child: CircularProgressIndicator());
         }
 
         final data = snapshot.data!.data() as Map<String, dynamic>? ?? {};

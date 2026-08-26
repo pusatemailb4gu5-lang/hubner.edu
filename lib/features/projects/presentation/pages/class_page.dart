@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:hubner/core/theme/app_typography.dart';
-import 'package:hubner/core/widgets/three_dots_loader.dart';
 import 'dart:async';
 import 'dart:ui';
 import 'package:google_fonts/google_fonts.dart';
@@ -446,7 +445,7 @@ class _ClassPageState extends State<ClassPage> {
                     ? const SizedBox(
                         width: 12,
                         height: 12,
-                        child: const ThreeDotsLoader(),
+                        child: CircularProgressIndicator(),
                       )
                     : Text(
                         'Undang',
@@ -1167,7 +1166,7 @@ class _ClassPageState extends State<ClassPage> {
       showDialog(
         context: context,
         barrierDismissible: false,
-        builder: (context) => const Center(child: ThreeDotsLoader()),
+        builder: (context) => const Center(child: CircularProgressIndicator()),
       );
       loaderShown = true;
       final userDocSnapshot = await FirebaseFirestore.instance
@@ -1240,7 +1239,7 @@ class _ClassPageState extends State<ClassPage> {
             context: context,
             barrierDismissible: false,
             builder: (context) =>
-                const Center(child: ThreeDotsLoader()),
+                const Center(child: CircularProgressIndicator()),
           );
           loaderShown = true;
           await FirebaseFirestore.instance
@@ -1291,7 +1290,7 @@ class _ClassPageState extends State<ClassPage> {
       showDialog(
         context: context,
         barrierDismissible: false,
-        builder: (context) => const Center(child: ThreeDotsLoader()),
+        builder: (context) => const Center(child: CircularProgressIndicator()),
       );
       await FirebaseFirestore.instance
           .collection('users')
@@ -7240,7 +7239,7 @@ class _AddActivityOverlayPageState extends State<AddActivityOverlayPage> {
         context: context,
         barrierDismissible: false,
         builder: (_) =>
-            const Center(child: ThreeDotsLoader()),
+            const Center(child: CircularProgressIndicator()),
       );
       final doc = await FirebaseFirestore.instance
           .collection('projects')

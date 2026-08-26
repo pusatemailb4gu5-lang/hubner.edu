@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:hubner/core/theme/app_typography.dart';
-import 'package:hubner/core/widgets/three_dots_loader.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:hubner/main.dart';
@@ -244,7 +243,7 @@ class _ManageAttendancePageState extends State<ManageAttendancePage> {
                               child: SizedBox(
                                 width: 18,
                                 height: 18,
-                                child: ThreeDotsLoader(),
+                                child: CircularProgressIndicator(),
                               ),
                             ),
                           )
@@ -320,7 +319,7 @@ class _ManageAttendancePageState extends State<ManageAttendancePage> {
                                 child: SizedBox(
                                   width: 20,
                                   height: 20,
-                                  child: ThreeDotsLoader(),
+                                  child: CircularProgressIndicator(),
                                 ),
                               ),
                             )
