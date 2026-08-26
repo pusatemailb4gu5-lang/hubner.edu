@@ -5,7 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:hubner/core/theme/app_colors.dart';
 import 'package:hubner/core/theme/app_typography.dart';
 import 'package:hubner/features/notifications/presentation/widgets/notification_bell_icon.dart';
-import 'package:hubner/features/projects/presentation/pages/class_page.dart';
+import 'package:hubner/features/projects/presentation/pages/class_page.dart' hide ClassroomCardPatternPainter;
 import 'package:hubner/features/todo/presentation/pages/todo_page.dart';
 import 'package:hubner/features/home/presentation/widgets/home_card_painters.dart';
 import 'package:hubner/main.dart';

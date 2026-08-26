@@ -6,7 +6,7 @@ import 'package:hubner/core/theme/app_colors.dart';
 import 'package:hubner/core/theme/app_typography.dart';
 import 'package:hubner/features/notifications/presentation/widgets/notification_bell_icon.dart';
 import 'package:hubner/features/projects/presentation/pages/add_class_page.dart';
-import 'package:hubner/features/projects/presentation/pages/class_page.dart';
+import 'package:hubner/features/projects/presentation/pages/class_page.dart' hide ClassroomCardPatternPainter;
 import 'package:hubner/features/projects/presentation/pages/desktop_classroom_page.dart';
 import 'package:hubner/features/projects/presentation/pages/monitoring_page.dart';
 import 'package:hubner/features/home/presentation/widgets/home_card_painters.dart';
