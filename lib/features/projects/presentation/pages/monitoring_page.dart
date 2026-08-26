@@ -36,23 +36,29 @@ class _MonitoringPageState extends State<MonitoringPage> {
   final Set<String> _expandedMateriKeys = {};
 
   final List<Color> _classroomCardColors = const [
-    Color(0xFFE0F2F1), // 1. Soft Teal (matching 0xFF009688)
-    Color(0xFFE3F2FD), // 2. Soft Blue (matching 0xFF448AFF)
-    Color(0xFFFBE8FF), // 3. Soft Magenta (matching 0xFFE040FB)
-    Color(0xFFFFF0F5), // 4. Soft Pink (matching 0xFFFF4081)
-    Color(0xFFFFF8E1), // 5. Soft Orange (matching 0xFFFFAB40)
-    Color(0xFFEEF0FC), // 6. Soft Indigo (matching 0xFF536DFE)
-    Color(0xFFECEFF1), // 7. Soft Blue Grey (matching 0xFF607D8B)
+    Color(0xFFD6A5F8), // 01. Lilac Purple (Core)
+    Color(0xFF9CC8FC), // 02. Sky Blue
+    Color(0xFF7DE3D0), // 03. Emerald Mint / Tosca
+    Color(0xFFF7BD84), // 04. Amber Peach / Orange
+    Color(0xFFF794BE), // 05. Rose Magenta / Pink
+    Color(0xFFA5B4FC), // 06. Indigo Violet
+    Color(0xFFBEF264), // 07. Fresh Lime
+    Color(0xFF67E8F9), // 08. Ocean Cyan
+    Color(0xFFFDE047), // 09. Amber Gold / Kuning
+    Color(0xFFCBD5E1), // 10. Steel Slate / Grey
   ];
 
   final List<Color> _classroomAccentColors = const [
-    Color(0xFF009688), // 1. Teal
-    Color(0xFF448AFF), // 2. Blue
-    Color(0xFFE040FB), // 3. Purple/Magenta
-    Color(0xFFFF4081), // 4. Pink/Rose
-    Color(0xFFFFAB40), // 5. Orange/Amber
-    Color(0xFF536DFE), // 6. Indigo
-    Color(0xFF607D8B), // 7. Blue Grey
+    Color(0xFF7C3AED), // 01. Ungu Hubner Core / Primary
+    Color(0xFF2864A8), // 02. Deep Sky Blue
+    Color(0xFF147D75), // 03. Deep Teal / Tosca
+    Color(0xFFC76D10), // 04. Deep Amber / Orange
+    Color(0xFFA82658), // 05. Deep Rose / Magenta
+    Color(0xFF4338CA), // 06. Deep Indigo
+    Color(0xFF4D7C0F), // 07. Deep Olive Lime
+    Color(0xFF0E7490), // 08. Deep Ocean Cyan
+    Color(0xFFA16207), // 09. Deep Amber Gold
+    Color(0xFF334155), // 10. Deep Slate Steel
   ];
 
   @override
