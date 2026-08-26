@@ -144,7 +144,10 @@ class _TeacherHomePageState extends State<TeacherHomePage> {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (_) => const EditProfilePage(),
+                                  builder: (_) => EditProfilePage(
+                                    uid: user.uid,
+                                    initialData: userData,
+                                  ),
                                 ),
                               );
                             },
@@ -205,7 +208,11 @@ class _TeacherHomePageState extends State<TeacherHomePage> {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (_) => const NoteEditorPage(),
+                                      builder: (_) => const NoteEditorPage(
+                                        noteId: null,
+                                        initialTitle: '',
+                                        initialContent: '',
+                                      ),
                                     ),
                                   );
                                 },
