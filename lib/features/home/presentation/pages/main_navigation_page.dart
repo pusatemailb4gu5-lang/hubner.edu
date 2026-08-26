@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:hubner/core/widgets/three_dots_loader.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:hubner/core/widgets/google_sign_in_button.dart';
 import 'home_page.dart';
-import 'package:hubner/core/widgets/bouncy_button.dart';
 import 'chat_room_page.dart';
 import 'manage_friends_page.dart';
 import 'package:hubner/features/todo/presentation/pages/todo_page.dart';
@@ -4790,7 +4790,7 @@ class _DocumentsTabState extends State<DocumentsTab> {
                                   ),
                                 ),
                                 if (_isUploading)
-                                  CircularProgressIndicator(),
+                                  const ThreeDotsLoader(size: 6, bounceHeight: 3),
                               ],
                             ),
                           ),
@@ -5745,7 +5745,7 @@ class _DocumentsTabState extends State<DocumentsTab> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           if (_isConnecting)
-                            CircularProgressIndicator()
+                            const ThreeDotsLoader(size: 5, bounceHeight: 2)
                           else
                             const GoogleDriveLogoWidget(size: 18),
                           const SizedBox(width: 10),
@@ -7277,7 +7277,7 @@ class _EditNameFormState extends State<EditNameForm> {
               elevation: 0,
             ),
             child: _isLoading 
-                ? CircularProgressIndicator(strokeWidth: 2, valueColor: AlwaysStoppedAnimation<Color>(Colors.white))
+                ? const ThreeDotsLoader(size: 5, bounceHeight: 2, colors: [Colors.white, Colors.white70, Colors.white60])
                 : Text('Simpan Perubahan', style: AppTypography.cardTitle(color: Colors.white, fontWeight: FontWeight.bold)),
           ),
         ),
@@ -7425,7 +7425,7 @@ class _ChangePasswordFormState extends State<ChangePasswordForm> {
               elevation: 0,
             ),
             child: _isLoading 
-                ? CircularProgressIndicator(strokeWidth: 2, valueColor: AlwaysStoppedAnimation<Color>(Colors.white))
+                ? const ThreeDotsLoader(size: 5, bounceHeight: 2, colors: [Colors.white, Colors.white70, Colors.white60])
                 : Text('Ubah Kata Sandi', style: AppTypography.cardTitle(color: Colors.white, fontWeight: FontWeight.bold)),
           ),
         ),

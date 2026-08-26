@@ -3,6 +3,7 @@ import 'package:image/image.dart' as img;
 import 'dart:ui' as ui;
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:hubner/core/widgets/three_dots_loader.dart';
 import 'package:flutter/services.dart';
 // Animated Purple Micro Pattern Background
 import 'package:google_fonts/google_fonts.dart';
@@ -21,7 +22,7 @@ import 'package:hubner/core/theme/app_colors.dart';
 import 'package:hubner/core/services/app_sound_service.dart';
 import 'package:hubner/core/theme/app_typography.dart';
 import 'package:hubner/main.dart' show HubnerApp;
-import 'package:hubner/core/widgets/bouncy_button.dart';
+import 'home_page.dart' show BouncyButton;
 import 'package:hubner/features/projects/presentation/pages/detail_cp_page.dart';
 
 class ChatRoomPage extends StatefulWidget {
@@ -652,7 +653,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
       showDialog(
         context: context,
         barrierDismissible: false,
-        builder: (_) => const Center(child: CircularProgressIndicator()),
+        builder: (_) => const Center(child: ThreeDotsLoader()),
       );
 
       final auth = await account.authorizationClient.authorizeScopes([drive.DriveApi.driveFileScope]);
@@ -753,7 +754,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                           showDialog(
                             context: context,
                             barrierDismissible: false,
-                            builder: (_) => const Center(child: CircularProgressIndicator()),
+                            builder: (_) => const Center(child: ThreeDotsLoader()),
                           );
 
                           try {
@@ -835,7 +836,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                     showDialog(
                                       context: context,
                                       barrierDismissible: false,
-                                      builder: (_) => const Center(child: CircularProgressIndicator()),
+                                      builder: (_) => const Center(child: ThreeDotsLoader()),
                                     );
 
                                     try {
@@ -1297,7 +1298,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (_) => const Center(child: CircularProgressIndicator()),
+      builder: (_) => const Center(child: ThreeDotsLoader()),
     );
 
     List<Map<String, dynamic>> stages = [];
