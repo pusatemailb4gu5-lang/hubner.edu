@@ -3070,13 +3070,18 @@ class _HomePageState extends State<HomePage> {
                                   );
                                 }
 
-                                return Column(
-                                  children: [
-                                    todayCard,
-                                    const SizedBox(height: 16),
-                                    progressCardsColumn,
-                                  ],
-                                );
+                                return Row(
+                                   crossAxisAlignment: CrossAxisAlignment.start,
+                                   children: [
+                                     Expanded(
+                                       child: todayCard,
+                                     ),
+                                     const SizedBox(width: 12),
+                                     Expanded(
+                                       child: progressCardsColumn,
+                                     ),
+                                   ],
+                                 );
                               },
                             ),
                             if (MediaQuery.of(context).size.width < 700 || MediaQuery.of(context).size.shortestSide < 700) ...[
