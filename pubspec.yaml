@@ -2,7 +2,7 @@ name: hubner
 description: Hubner - Aplikasi task, plan, note, dan anggota.
 publish_to: 'none'
 
-version: 1.1.0+1
+version: 1.1.0+2
 
 environment:
   sdk: ^3.11.4
@@ -39,6 +39,7 @@ dependencies:
   image: ^4.3.0
   image_picker: ^1.1.2
   syncfusion_flutter_pdfviewer: ^33.2.13
+  flutter_local_notifications: ^18.0.1
 
 dev_dependencies:
   flutter_test:

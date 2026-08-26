@@ -14,6 +14,7 @@ import 'package:hubner/features/notifications/presentation/pages/notifications_p
 import 'package:hubner/features/notifications/presentation/widgets/notification_bell_icon.dart';
 import 'package:hubner/core/widgets/in_app_chat_overlay.dart';
 import 'edit_profile_page.dart';
+import 'package:hubner/features/notifications/domain/notification_service.dart';
 
 import 'package:hubner/features/projects/presentation/pages/laporan_page.dart' hide BouncyButton;
 import 'package:hubner/features/projects/presentation/pages/monitoring_page.dart';
@@ -77,7 +78,7 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
       isGuru ? const LaporanPage() : const TodoPage(),
       const DiscussionTab(),
       isGuru
-          ? const DocumentsTab()
+          ? DocumentsTab(onBackToHome: () => _onNavigateTab(0))
           : MonitoringPage(
               key: ValueKey(_selectedProjectId ?? 'monitoring_default'),
               initialProjectId: _selectedProjectId,
@@ -193,6 +194,12 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
                             ),
                           );
                         },
+                      );
+
+                      // Android high-priority pop-up notification (WhatsApp style)
+                      NotificationService.showPopUpNotification(
+                        title: channelName,
+                        body: lastMsg.isNotEmpty ? lastMsg : 'Pesan baru diterima',
                       );
                     });
                   }
@@ -421,38 +428,47 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
             );
           }
 
-            return AnnotatedRegion<SystemUiOverlayStyle>(
-              value: SystemUiOverlayStyle(
-                statusBarColor: Colors.transparent,
-                statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
-                systemNavigationBarColor: Colors.transparent,
-                systemNavigationBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
-                systemNavigationBarDividerColor: Colors.transparent,
-                systemNavigationBarContrastEnforced: false,
-              ),
-              child: Scaffold(
-                backgroundColor: isDark ? Colors.black : Colors.white,
-                resizeToAvoidBottomInset: false,
-                body: Stack(
-                  children: [
-                    Positioned.fill(
-                      child: IndexedStack(index: _currentIndex, children: _pages),
-                    ),
-                    Positioned(
-                      left: 14,
-                      right: 14,
-                      bottom: MediaQuery.of(context).padding.bottom > 0
-                          ? MediaQuery.of(context).padding.bottom + 14
-                          : 26,
-                      child: _FluidIPhoneBottomNavBar(
-                        currentIndex: _currentIndex,
-                        onTabSelected: _updateIndex,
-                        isDark: isDark,
-                        isGuru: isGuru,
-                        totalUnread: totalUnread,
+            return PopScope(
+              canPop: _currentIndex == 0,
+              onPopInvokedWithResult: (didPop, result) {
+                if (didPop) return;
+                if (_currentIndex != 0) {
+                  _onNavigateTab(0);
+                }
+              },
+              child: AnnotatedRegion<SystemUiOverlayStyle>(
+                value: SystemUiOverlayStyle(
+                  statusBarColor: Colors.transparent,
+                  statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+                  systemNavigationBarColor: Colors.transparent,
+                  systemNavigationBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+                  systemNavigationBarDividerColor: Colors.transparent,
+                  systemNavigationBarContrastEnforced: false,
+                ),
+                child: Scaffold(
+                  backgroundColor: isDark ? Colors.black : Colors.white,
+                  resizeToAvoidBottomInset: false,
+                  body: Stack(
+                    children: [
+                      Positioned.fill(
+                        child: IndexedStack(index: _currentIndex, children: _pages),
                       ),
-                    ),
-                  ],
+                      Positioned(
+                        left: 14,
+                        right: 14,
+                        bottom: MediaQuery.of(context).padding.bottom > 0
+                            ? MediaQuery.of(context).padding.bottom + 14
+                            : 26,
+                        child: _FluidIPhoneBottomNavBar(
+                          currentIndex: _currentIndex,
+                          onTabSelected: _updateIndex,
+                          isDark: isDark,
+                          isGuru: isGuru,
+                          totalUnread: totalUnread,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             );
@@ -4101,10 +4117,12 @@ class _GoogleAuthClient extends http.BaseClient {
 
 class DocumentsTab extends StatefulWidget {
   final bool isDark;
+  final VoidCallback? onBackToHome;
 
   const DocumentsTab({
     super.key,
     this.isDark = false,
+    this.onBackToHome,
   });
 
   @override
@@ -4726,7 +4744,19 @@ class _DocumentsTabState extends State<DocumentsTab> {
               builder: (context, docSnap) {
                 final docs = docSnap.data?.docs ?? [];
 
-                return Align(
+                return PopScope(
+                  canPop: false,
+                  onPopInvokedWithResult: (didPop, result) {
+                    if (didPop) return;
+                    if (_folderCrumbs.isNotEmpty) {
+                      setState(() {
+                        _folderCrumbs.removeLast();
+                      });
+                    } else if (widget.onBackToHome != null) {
+                      widget.onBackToHome!();
+                    }
+                  },
+                  child: Align(
                   alignment: Alignment.topCenter,
                   child: Container(
                     constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width > 500 ? double.infinity : 500),
@@ -4871,24 +4901,26 @@ class _DocumentsTabState extends State<DocumentsTab> {
                           scrollDirection: Axis.horizontal,
                           child: Row(
                             children: [
-                              if (_folderCrumbs.isNotEmpty) ...[
-                                GestureDetector(
-                                  onTap: () {
+                              GestureDetector(
+                                onTap: () {
+                                  if (_folderCrumbs.isNotEmpty) {
                                     setState(() {
                                       _folderCrumbs.removeLast();
                                     });
-                                  },
-                                  child: Container(
-                                    padding: const EdgeInsets.all(6),
-                                    margin: const EdgeInsets.only(right: 8),
-                                    decoration: BoxDecoration(
-                                      color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: Icon(Icons.arrow_back_ios_new_rounded, size: 14, color: isDark ? Colors.white : Colors.black87),
+                                  } else {
+                                    widget.onBackToHome?.call();
+                                  }
+                                },
+                                child: Container(
+                                  padding: const EdgeInsets.all(6),
+                                  margin: const EdgeInsets.only(right: 8),
+                                  decoration: BoxDecoration(
+                                    color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                                    shape: BoxShape.circle,
                                   ),
+                                  child: Icon(Icons.arrow_back_ios_new_rounded, size: 14, color: isDark ? Colors.white : Colors.black87),
                                 ),
-                              ],
+                              ),
                               GestureDetector(
                                 onTap: () {
                                   setState(() {
@@ -5241,12 +5273,13 @@ class _DocumentsTabState extends State<DocumentsTab> {
                   ),
                 ),
               ),
-            );
-          },
-        );
-      },
-    );
-  },
+            ),
+          );
+        },
+      );
+    },
+  );
+},
 );
 }
 

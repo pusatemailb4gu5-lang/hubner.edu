@@ -1,3 +1,5 @@
+import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hubner/core/theme/app_typography.dart';
@@ -64,6 +66,10 @@ class _InAppFileViewerDialogState extends State<InAppFileViewerDialog> {
   String? _textContent;
   bool _isLoadingText = false;
 
+  Uint8List? _pdfBytes;
+  bool _isLoadingPdf = false;
+  String? _pdfError;
+
   bool get _isImage {
     final m = widget.mimeType?.toLowerCase() ?? '';
     final n = widget.fileName.toLowerCase();
@@ -75,8 +81,13 @@ class _InAppFileViewerDialogState extends State<InAppFileViewerDialog> {
         n.endsWith('.webp') ||
         n.endsWith('.gif') ||
         n.endsWith('.bmp') ||
+        n.endsWith('.heic') ||
+        n.endsWith('.svg') ||
         u.endsWith('.jpg') ||
-        u.endsWith('.png');
+        u.endsWith('.jpeg') ||
+        u.endsWith('.png') ||
+        u.endsWith('.webp') ||
+        (u.contains('firebasestorage') && !u.contains('.pdf'));
   }
 
   bool get _isAudio {
@@ -94,7 +105,8 @@ class _InAppFileViewerDialogState extends State<InAppFileViewerDialog> {
   bool get _isPdf {
     final m = widget.mimeType?.toLowerCase() ?? '';
     final n = widget.fileName.toLowerCase();
-    return m.contains('pdf') || n.endsWith('.pdf');
+    final u = widget.fileUrl.toLowerCase();
+    return m.contains('pdf') || n.endsWith('.pdf') || u.contains('.pdf');
   }
 
   @override
@@ -104,10 +116,87 @@ class _InAppFileViewerDialogState extends State<InAppFileViewerDialog> {
       _initAudio();
     } else if (_isText) {
       _loadTextContent();
+    } else if (_isPdf) {
+      _loadPdfBytes();
+    }
+  }
+
+  Future<void> _loadPdfBytes() async {
+    setState(() {
+      _isLoadingPdf = true;
+      _pdfError = null;
+    });
+
+    try {
+      final url = widget.fileUrl;
+      // 1. Local file path
+      if (!url.startsWith('http://') && !url.startsWith('https://')) {
+        final file = File(url);
+        if (await file.exists()) {
+          final bytes = await file.readAsBytes();
+          if (mounted) {
+            setState(() {
+              _pdfBytes = bytes;
+              _isLoadingPdf = false;
+            });
+            return;
+          }
+        }
+      }
+
+      // 2. Network URL: build candidates for Google Drive or direct download
+      final fileId = _extractFileId(url);
+      List<String> pdfCandidateUrls = [];
+      if (fileId.isNotEmpty) {
+        pdfCandidateUrls.add('https://drive.google.com/uc?export=download&id=$fileId');
+        pdfCandidateUrls.add('https://lh3.googleusercontent.com/d/$fileId');
+        pdfCandidateUrls.add('https://docs.google.com/uc?export=download&id=$fileId');
+      }
+      if (url.isNotEmpty && !pdfCandidateUrls.contains(url)) {
+        pdfCandidateUrls.add(_resolveDownloadUrl(url));
+        pdfCandidateUrls.add(url);
+      }
+
+      for (final candidateUrl in pdfCandidateUrls) {
+        try {
+          final response = await http.get(Uri.parse(candidateUrl)).timeout(const Duration(seconds: 14));
+          if (response.statusCode == 200 && response.bodyBytes.isNotEmpty) {
+            final bytes = response.bodyBytes;
+            // Check PDF magic header %PDF
+            if (bytes.length > 4 &&
+                bytes[0] == 0x25 &&
+                bytes[1] == 0x50 &&
+                bytes[2] == 0x44 &&
+                bytes[3] == 0x46) {
+              if (mounted) {
+                setState(() {
+                  _pdfBytes = bytes;
+                  _isLoadingPdf = false;
+                });
+                return;
+              }
+            }
+          }
+        } catch (_) {}
+      }
+
+      if (mounted) {
+        setState(() {
+          _isLoadingPdf = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoadingPdf = false;
+          _pdfError = e.toString();
+        });
+      }
     }
   }
 
   String _extractFileId(String rawUrl) {
+    if (rawUrl.isEmpty) return '';
     final regFile = RegExp(r'/file/d/([a-zA-Z0-9_-]+)');
     final regId = RegExp(r'[?&]id=([a-zA-Z0-9_-]+)');
     final regDoc = RegExp(r'/d/([a-zA-Z0-9_-]+)');
@@ -119,6 +208,7 @@ class _InAppFileViewerDialogState extends State<InAppFileViewerDialog> {
     if (matchFile != null) return matchFile.group(1)!;
     if (matchId != null) return matchId.group(1)!;
     if (matchDoc != null) return matchDoc.group(1)!;
+    if (RegExp(r'^[a-zA-Z0-9_-]{20,}$').hasMatch(rawUrl)) return rawUrl;
     return '';
   }
 
@@ -141,6 +231,22 @@ class _InAppFileViewerDialogState extends State<InAppFileViewerDialog> {
     }
 
     final url = urls[index];
+
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+      try {
+        final file = File(url);
+        if (file.existsSync()) {
+          return Image.file(
+            file,
+            fit: BoxFit.contain,
+            errorBuilder: (context, error, stackTrace) {
+              return _buildCascadingImage(urls, index + 1, isDark);
+            },
+          );
+        }
+      } catch (_) {}
+    }
+
     return Image.network(
       url,
       fit: BoxFit.contain,
@@ -498,6 +604,52 @@ class _InAppFileViewerDialogState extends State<InAppFileViewerDialog> {
     }
 
     if (_isPdf) {
+      if (_isLoadingPdf) {
+        return Container(
+          height: 480,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: isDark ? const Color(0xFF18181B) : const Color(0xFFF1F5F9),
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const CircularProgressIndicator(strokeWidth: 2.5),
+              const SizedBox(height: 16),
+              Text(
+                'Memuat pratinjau dokumen PDF...',
+                style: AppTypography.timestamp(color: isDark ? Colors.white70 : Colors.black87),
+              ),
+            ],
+          ),
+        );
+      }
+
+      if (_pdfBytes != null) {
+        return Container(
+          height: 480,
+          decoration: BoxDecoration(
+            color: isDark ? const Color(0xFF18181B) : const Color(0xFFF1F5F9),
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0)),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(18),
+            child: SfPdfViewer.memory(
+              _pdfBytes!,
+              canShowScrollHead: true,
+              canShowScrollStatus: true,
+              canShowPaginationDialog: true,
+              onDocumentLoadFailed: (PdfDocumentLoadFailedDetails details) {
+                debugPrint('PDF memory load failed: ${details.description}');
+              },
+            ),
+          ),
+        );
+      }
+
       final downloadUrl = _resolveDownloadUrl(widget.fileUrl);
       return Container(
         height: 480,
@@ -514,7 +666,7 @@ class _InAppFileViewerDialogState extends State<InAppFileViewerDialog> {
             canShowScrollStatus: true,
             canShowPaginationDialog: true,
             onDocumentLoadFailed: (PdfDocumentLoadFailedDetails details) {
-              debugPrint('PDF load failed: ${details.description}');
+              debugPrint('PDF network load failed: ${details.description}');
             },
           ),
         ),

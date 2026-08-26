@@ -5870,16 +5870,7 @@ class _ImagePreviewSendDialogState extends State<ImagePreviewSendDialog> {
             child: SafeArea(
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      (widget.isDark ? Colors.black : Colors.white).withValues(alpha: widget.isDark ? 0.75 : 0.85),
-                      Colors.transparent,
-                    ],
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                  ),
-                ),
+                color: Colors.transparent,
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -5967,16 +5958,7 @@ class _ImagePreviewSendDialogState extends State<ImagePreviewSendDialog> {
             bottom: bottomInset > 0 ? bottomInset : (MediaQuery.of(context).padding.bottom + 8),
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    Colors.transparent,
-                    (widget.isDark ? Colors.black : Colors.white).withValues(alpha: widget.isDark ? 0.8 : 0.95),
-                  ],
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                ),
-              ),
+              color: Colors.transparent,
               child: Row(
                 children: [
                   // Text box keterangan

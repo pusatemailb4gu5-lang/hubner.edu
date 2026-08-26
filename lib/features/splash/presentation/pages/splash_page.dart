@@ -69,22 +69,19 @@ class _SplashPageState extends State<SplashPage> with SingleTickerProviderStateM
     final prefs = await SharedPreferences.getInstance();
     if (!mounted) return;
 
-    final bool isPrefsLoggedIn = prefs.getBool('isLoggedIn') ?? false;
+    final bool hasSavedLogin = prefs.getBool('isLoggedIn') ?? false;
     final bool isFirebaseLoggedIn = FirebaseAuth.instance.currentUser != null;
-    final bool isLoggedIn = isPrefsLoggedIn || isFirebaseLoggedIn;
 
-    if (isFirebaseLoggedIn && !isPrefsLoggedIn) {
+    if (hasSavedLogin || isFirebaseLoggedIn) {
       await prefs.setBool('isLoggedIn', true);
-    }
-
-    if (!mounted) return;
-
-    if (isLoggedIn) {
+      if (!mounted) return;
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => MainNavigationPage()),
+        MaterialPageRoute(builder: (_) => const MainNavigationPage()),
       );
       return;
     }
+
+    if (!mounted) return;
 
     if (kIsWeb) {
       Navigator.of(context).pushReplacement(

@@ -46,9 +46,11 @@ void main() async {
   final prefs = await SharedPreferences.getInstance();
   final hasSavedLogin = prefs.getBool('isLoggedIn') ?? false;
   final hasFirebaseAuthUser = FirebaseAuth.instance.currentUser != null;
-  final isLoggedIn = hasSavedLogin || hasFirebaseAuthUser;
 
-  if (hasFirebaseAuthUser && !hasSavedLogin) {
+  // If saved locally as logged in OR firebase user exists, user is logged in locally.
+  // Do NOT wipe isLoggedIn to false at startup while Firebase Auth restores tokens in background.
+  final isLoggedIn = hasSavedLogin || hasFirebaseAuthUser;
+  if (isLoggedIn && !hasSavedLogin) {
     await prefs.setBool('isLoggedIn', true);
   }
 
