@@ -6,11 +6,10 @@ import 'package:hubner/core/theme/app_colors.dart';
 import 'package:hubner/core/theme/app_typography.dart';
 import 'package:hubner/features/notifications/presentation/widgets/notification_bell_icon.dart';
 import 'package:hubner/features/projects/presentation/pages/class_page.dart';
-import 'package:hubner/features/projects/presentation/pages/desktop_classroom_page.dart';
+import 'package:hubner/features/todo/presentation/pages/todo_page.dart';
 import 'package:hubner/features/home/presentation/widgets/home_card_painters.dart';
 import 'package:hubner/main.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'note_editor_page.dart';
 
 class StudentHomePage extends StatefulWidget {
   final Function(int index, {String? projectId})? onNavigateTab;
@@ -22,12 +21,35 @@ class StudentHomePage extends StatefulWidget {
 
 class _StudentHomePageState extends State<StudentHomePage> {
   DateTime _selectedCalendarDay = DateTime.now();
-  DateTime _currentCalendarMonth = DateTime.now();
-  int _quizCardPage = 0;
-  final ValueNotifier<String> _searchQueryNotifier = ValueNotifier<String>('');
   final ScrollController _homeScrollController = ScrollController();
   final Set<String> _deletedProjectIds = {};
   List<DocumentSnapshot> _lastProjectDocs = [];
+
+  final List<Color> _classroomCardColors = const [
+    Color(0xFFD6A5F8), // 01. Lilac Purple (Core)
+    Color(0xFF9CC8FC), // 02. Sky Blue
+    Color(0xFF7DE3D0), // 03. Emerald Mint / Tosca
+    Color(0xFFF7BD84), // 04. Amber Peach / Orange
+    Color(0xFFF794BE), // 05. Rose Magenta / Pink
+    Color(0xFFA5B4FC), // 06. Indigo Violet
+    Color(0xFFBEF264), // 07. Fresh Lime
+    Color(0xFF67E8F9), // 08. Ocean Cyan
+    Color(0xFFFDE047), // 09. Amber Gold / Kuning
+    Color(0xFFCBD5E1), // 10. Steel Slate / Grey
+  ];
+
+  final List<Color> _classroomAccentColors = const [
+    Color(0xFF7C3AED), // 01. Ungu Hubner Core / Primary
+    Color(0xFF2864A8), // 02. Deep Sky Blue
+    Color(0xFF147D75), // 03. Deep Teal / Tosca
+    Color(0xFFC76D10), // 04. Deep Amber / Orange
+    Color(0xFFA82658), // 05. Deep Rose / Magenta
+    Color(0xFF4338CA), // 06. Deep Indigo
+    Color(0xFF4D7C0F), // 07. Deep Olive Lime
+    Color(0xFF0E7490), // 08. Deep Ocean Cyan
+    Color(0xFFA16207), // 09. Deep Amber Gold
+    Color(0xFF334155), // 10. Deep Slate Steel
+  ];
 
   void _toggleTheme(BuildContext context, bool isDark) async {
     final newTheme = isDark ? 'Terang' : 'Gelap';
@@ -36,7 +58,7 @@ class _StudentHomePageState extends State<StudentHomePage> {
     await prefs.setString('app_theme', newTheme);
   }
 
-  DateTime _parseDateString(String dateStr) {
+  DateTime? _parseDateString(String dateStr) {
     try {
       final parts = dateStr.trim().split('/');
       if (parts.length == 3) {
@@ -46,12 +68,11 @@ class _StudentHomePageState extends State<StudentHomePage> {
         return DateTime(year, month, day);
       }
     } catch (_) {}
-    return DateTime.now();
+    return null;
   }
 
   @override
   void dispose() {
-    _searchQueryNotifier.dispose();
     _homeScrollController.dispose();
     super.dispose();
   }
@@ -538,6 +559,10 @@ class _StudentHomePageState extends State<StudentHomePage> {
                       ),
                       const SizedBox(height: 24),
 
+                      // Calendar Schedule Slider
+                      _buildCalendarSlider(allUserTasks),
+                      const SizedBox(height: 24),
+
                       // Classroom Title Section
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -549,11 +574,19 @@ class _StudentHomePageState extends State<StudentHomePage> {
                               fontWeight: FontWeight.w700,
                             ),
                           ),
+                          Text(
+                            '${projectDocs.length} Kelas',
+                            style: GoogleFonts.dmSans(
+                              fontSize: 14.0,
+                              fontWeight: FontWeight.w600,
+                              color: isDark ? const Color(0xFFA78BFA) : const Color(0xFF7C3AED),
+                            ),
+                          ),
                         ],
                       ),
                       const SizedBox(height: 12),
 
-                      // Classroom Grid / Cards
+                      // Classroom Rich Cards List
                       if (projectDocs.isEmpty)
                         Container(
                           padding: const EdgeInsets.all(24),
@@ -594,74 +627,16 @@ class _StudentHomePageState extends State<StudentHomePage> {
                             final data = doc.data() as Map<String, dynamic>;
                             final String title = data['name'] ?? 'Classroom';
                             final String category = data['category'] ?? 'Umum';
+                            final String ownerUid = (data['ownerUid'] ?? data['teacherUid'] ?? '').toString();
 
-                            return GestureDetector(
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => ClassPage(
-                                      projectId: doc.id,
-                                      projectTitle: title,
-                                    ),
-                                  ),
-                                );
-                              },
-                              child: Container(
-                                padding: const EdgeInsets.all(16),
-                                decoration: BoxDecoration(
-                                  color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
-                                  borderRadius: BorderRadius.circular(20),
-                                  border: Border.all(
-                                    color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
-                                  ),
-                                ),
-                                child: Row(
-                                  children: [
-                                    Container(
-                                      width: 48,
-                                      height: 48,
-                                      decoration: BoxDecoration(
-                                        color: const Color(0xFF7C3AED).withValues(alpha: 0.1),
-                                        shape: BoxShape.circle,
-                                      ),
-                                      child: const Icon(
-                                        Icons.school_rounded,
-                                        color: Color(0xFF7C3AED),
-                                        size: 24,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 14),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            title,
-                                            style: GoogleFonts.plusJakartaSans(
-                                              fontSize: 16.0,
-                                              fontWeight: FontWeight.bold,
-                                              color: isDark ? Colors.white : Colors.black87,
-                                            ),
-                                          ),
-                                          const SizedBox(height: 4),
-                                          Text(
-                                            category,
-                                            style: GoogleFonts.dmSans(
-                                              fontSize: 13.0,
-                                              color: isDark ? Colors.white54 : Colors.black54,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    Icon(
-                                      Icons.chevron_right_rounded,
-                                      color: isDark ? Colors.white38 : Colors.black38,
-                                    ),
-                                  ],
-                                ),
-                              ),
+                            return _buildStudentClassroomCard(
+                              context: context,
+                              projectId: doc.id,
+                              title: title,
+                              category: category,
+                              ownerUid: ownerUid,
+                              index: index,
+                              isDark: isDark,
                             );
                           },
                         ),
@@ -674,6 +649,378 @@ class _StudentHomePageState extends State<StudentHomePage> {
         );
       },
     );
+  }
+
+  Widget _buildStudentClassroomCard({
+    required BuildContext context,
+    required String projectId,
+    required String title,
+    required String category,
+    required String ownerUid,
+    required int index,
+    required bool isDark,
+  }) {
+    final Color cardColor = _classroomCardColors[index % _classroomCardColors.length];
+    final Color accentColor = _classroomAccentColors[index % _classroomAccentColors.length];
+
+    return FutureBuilder<DocumentSnapshot>(
+      future: ownerUid.isNotEmpty
+          ? FirebaseFirestore.instance.collection('users').doc(ownerUid).get()
+          : null,
+      builder: (context, userSnap) {
+        String teacherName = 'Pengajar';
+        String gender = '';
+        if (userSnap.hasData && userSnap.data != null && userSnap.data!.exists) {
+          final userData = userSnap.data!.data() as Map<String, dynamic>;
+          teacherName = userData['name'] ?? userData['displayName'] ?? 'Pengajar';
+          gender = userData['gender'] ?? '';
+        }
+
+        final isFemale = gender.toLowerCase().contains('perempuan') || gender.toLowerCase().startsWith('p');
+        final titlePrefix = isFemale ? 'Bu' : 'Pak';
+        final displayTeacherName = '$titlePrefix $teacherName';
+
+        return GestureDetector(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => ClassPage(
+                  projectId: projectId,
+                  projectTitle: title,
+                ),
+              ),
+            );
+          },
+          child: Container(
+            height: 155,
+            clipBehavior: Clip.antiAlias,
+            decoration: BoxDecoration(
+              color: isDark ? const Color(0xFF1C1C1E) : cardColor,
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(
+                color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                width: 1.2,
+              ),
+            ),
+            child: Stack(
+              children: [
+                Positioned.fill(
+                  child: CustomPaint(
+                    painter: ClassroomCardPatternPainter(
+                      patternIndex: index,
+                      accentColor: isDark
+                          ? Colors.white.withValues(alpha: 0.08)
+                          : accentColor.withValues(alpha: 0.15),
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      // Top Row: Category badge & Arrow Button
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: isDark
+                                  ? const Color(0xFF27272A)
+                                  : accentColor.withValues(alpha: 0.15),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Text(
+                              category.toUpperCase(),
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 11.5,
+                                fontWeight: FontWeight.bold,
+                                color: isDark ? const Color(0xFFA78BFA) : accentColor,
+                              ),
+                            ),
+                          ),
+                          Container(
+                            width: 34,
+                            height: 34,
+                            decoration: BoxDecoration(
+                              color: isDark ? const Color(0xFF27272A) : Colors.white.withValues(alpha: 0.8),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              Icons.arrow_forward_rounded,
+                              size: 16,
+                              color: isDark ? Colors.white : Colors.black87,
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      // Classroom Title
+                      Text(
+                        title,
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 18.0,
+                          fontWeight: FontWeight.bold,
+                          color: isDark ? Colors.white : Colors.black87,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+
+                      // Bottom Row: Teacher Badge
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: isDark
+                                  ? const Color(0xFF27272A)
+                                  : Colors.white.withValues(alpha: 0.85),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(
+                                  Icons.person_rounded,
+                                  size: 14,
+                                  color: Color(0xFF7C3AED),
+                                ),
+                                const SizedBox(width: 5),
+                                Text(
+                                  displayTeacherName,
+                                  style: GoogleFonts.dmSans(
+                                    fontSize: 12.5,
+                                    fontWeight: FontWeight.bold,
+                                    color: isDark ? Colors.white : Colors.black87,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildCalendarSlider(List<Map<String, dynamic>> allTasks) {
+    final bool isDark = AppColors.isDarkMode;
+    final DateTime now = DateTime.now();
+    final DateTime todayDate = DateTime(now.year, now.month, now.day);
+    final List<DateTime> calendarDays = List.generate(14, (index) {
+      return todayDate.subtract(const Duration(days: 4)).add(Duration(days: index));
+    });
+
+    final currentMonthYearStr =
+        '${_getMonthName(_selectedCalendarDay.month)} ${_selectedCalendarDay.year}';
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 2.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                currentMonthYearStr,
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 16.5,
+                  fontWeight: FontWeight.bold,
+                  color: isDark ? Colors.white : Colors.black87,
+                ),
+              ),
+              Icon(
+                Icons.calendar_month_outlined,
+                size: 18,
+                color: isDark ? Colors.white54 : Colors.black45,
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 8),
+        SizedBox(
+          height: 80,
+          child: ListView.separated(
+            key: const PageStorageKey('student_home_calendar_slider'),
+            scrollDirection: Axis.horizontal,
+            itemCount: calendarDays.length,
+            separatorBuilder: (context, index) => const SizedBox(width: 8),
+            itemBuilder: (context, index) {
+              final day = calendarDays[index];
+              final bool isSelected =
+                  _selectedCalendarDay.day == day.day &&
+                  _selectedCalendarDay.month == day.month &&
+                  _selectedCalendarDay.year == day.year;
+
+              final bool hasTasks = _hasTaskOnDay(day, allTasks);
+              final Color activeBgColor = _getDayCardBg(day.weekday);
+              final Color dayTextColor = _getDayTextColor(day.weekday);
+
+              return GestureDetector(
+                onTap: () {
+                  setState(() {
+                    _selectedCalendarDay = day;
+                  });
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => TodoPage(initialDate: day),
+                    ),
+                  );
+                },
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  width: 52,
+                  decoration: BoxDecoration(
+                    color: isSelected
+                        ? activeBgColor
+                        : (isDark ? const Color(0xFF18181B) : Colors.white),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: isSelected
+                          ? Colors.transparent
+                          : (isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0)),
+                      width: 1,
+                    ),
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: isSelected
+                              ? dayTextColor
+                              : dayTextColor.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          _getDayName(day.weekday),
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 12.0,
+                            fontWeight: FontWeight.bold,
+                            color: isSelected ? Colors.white : dayTextColor,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        day.day.toString(),
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 17.5,
+                          fontWeight: FontWeight.bold,
+                          color: isSelected
+                              ? Colors.black
+                              : (isDark ? Colors.white : Colors.black87),
+                        ),
+                      ),
+                      if (hasTasks) ...[
+                        const SizedBox(height: 4),
+                        Container(
+                          width: 5,
+                          height: 5,
+                          decoration: BoxDecoration(
+                            color: isSelected
+                                ? dayTextColor
+                                : dayTextColor.withValues(alpha: 0.5),
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                      ] else
+                        const SizedBox(height: 9),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  bool _hasTaskOnDay(DateTime day, List<Map<String, dynamic>> allTasks) {
+    for (var task in allTasks) {
+      final startStr = task['start'] as String? ?? '';
+      final endStr = task['end'] as String? ?? '';
+      if (startStr.isEmpty || endStr.isEmpty || startStr == 'DD/MM/YYYY') continue;
+
+      final startDate = _parseDateString(startStr);
+      final endDate = _parseDateString(endStr);
+      if (startDate == null || endDate == null) continue;
+
+      final targetDay = DateTime(day.year, day.month, day.day);
+      final normStart = DateTime(startDate.year, startDate.month, startDate.day);
+      final normEnd = DateTime(endDate.year, endDate.month, endDate.day);
+
+      if ((targetDay.isAfter(normStart) || targetDay.isAtSameMomentAs(normStart)) &&
+          (targetDay.isBefore(normEnd) || targetDay.isAtSameMomentAs(normEnd))) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  Color _getDayCardBg(int weekday) {
+    switch (weekday) {
+      case 1:
+        return const Color(0xFFDBEAFE);
+      case 2:
+        return const Color(0xFFD1FAE5);
+      case 3:
+        return const Color(0xFFFDE68A);
+      case 4:
+        return const Color(0xFFE9D5FF);
+      case 5:
+        return const Color(0xFFCCFBF1);
+      case 6:
+      case 7:
+      default:
+        return const Color(0xFFFECDD3);
+    }
+  }
+
+  Color _getDayTextColor(int weekday) {
+    switch (weekday) {
+      case 1:
+        return const Color(0xFF1D4ED8);
+      case 2:
+        return const Color(0xFF047857);
+      case 3:
+        return const Color(0xFFB45309);
+      case 4:
+        return const Color(0xFF6D28D9);
+      case 5:
+        return const Color(0xFF0F766E);
+      case 6:
+      case 7:
+      default:
+        return const Color(0xFFBE123C);
+    }
+  }
+
+  String _getMonthName(int month) {
+    const months = [
+      'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+      'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember',
+    ];
+    return months[month - 1];
+  }
+
+  String _getDayName(int weekday) {
+    const days = ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'];
+    return days[weekday - 1];
   }
 
   Widget _buildLeftSection({
