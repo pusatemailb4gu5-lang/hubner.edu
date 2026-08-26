@@ -22,7 +22,7 @@ import 'package:hubner/core/theme/app_colors.dart';
 import 'package:hubner/core/services/app_sound_service.dart';
 import 'package:hubner/core/theme/app_typography.dart';
 import 'package:hubner/main.dart' show HubnerApp;
-import 'home_page.dart' show BouncyButton;
+import 'package:hubner/core/widgets/bouncy_button.dart';
 import 'package:hubner/features/projects/presentation/pages/detail_cp_page.dart';
 
 class ChatRoomPage extends StatefulWidget {

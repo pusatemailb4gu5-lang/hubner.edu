@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:hubner/core/widgets/three_dots_loader.dart';
+import 'package:hubner/core/widgets/bouncy_button.dart';
 import 'student_home_page.dart';
 import 'teacher_home_page.dart';
 
 export 'student_home_page.dart';
 export 'teacher_home_page.dart';
+export 'package:hubner/core/widgets/bouncy_button.dart';
 
 class HomePage extends StatefulWidget {
   final Function(int index, {String? projectId})? onNavigateTab;
