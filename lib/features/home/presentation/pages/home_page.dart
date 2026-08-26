@@ -816,109 +816,6 @@ class _HomePageState extends State<HomePage> {
     return _cachedProjectsStream!;
   }
 
-  Widget _buildLeftCardSection({
-    required IconData icon,
-    required Color iconColor,
-    required String title,
-    required List<Widget> items,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(4),
-              decoration: BoxDecoration(
-                color: iconColor.withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(6),
-              ),
-              child: Icon(icon, size: 13, color: iconColor),
-            ),
-            const SizedBox(width: 6),
-            Expanded(
-              child: Text(
-                title,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 14.0,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.black87,
-                  height: 1.2,
-                ),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 5),
-        ...items,
-      ],
-    );
-  }
-
-  Widget _buildItemText(String text) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 4, bottom: 3),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Container(
-            width: 5,
-            height: 5,
-            decoration: const BoxDecoration(
-              color: Color(0xFF0284C7),
-              shape: BoxShape.circle,
-            ),
-          ),
-          const SizedBox(width: 6),
-          Expanded(
-            child: Text(
-              text,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 14.0,
-                fontWeight: FontWeight.w600,
-                color: Colors.black87,
-                height: 1.25,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildEmptyText(String text) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 4, top: 1, bottom: 3),
-      child: Row(
-        children: [
-          const Icon(
-            Icons.check_circle_outline_rounded,
-            size: 11,
-            color: Colors.black38,
-          ),
-          const SizedBox(width: 4),
-          Expanded(
-            child: Text(
-              text,
-              style: GoogleFonts.dmSans(
-                fontSize: 14.0,
-                fontStyle: FontStyle.italic,
-                color: Colors.black45,
-                height: 1.25,
-              ),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   final List<Color> _softCardColors = const [
     Color(0xFFF9EED2), // Soft Peach/Cream
     Color(0xFFE5ECEB), // Soft Mint/Teal
@@ -2266,26 +2163,103 @@ class _HomePageState extends State<HomePage> {
 
                                 final bool isTablet =
                                     MediaQuery.of(context).size.width > 500;
+                                final bool isDark = AppColors.isDarkMode;
+
+                                Widget buildLeftCardSection({
+                                  required IconData icon,
+                                  required Color iconColor,
+                                  required String title,
+                                  required List<Widget> items,
+                                }) {
+                                  return Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                        children: [
+                                          Icon(icon, size: 14, color: iconColor),
+                                          const SizedBox(width: 6),
+                                          Text(
+                                            title,
+                                            style: GoogleFonts.plusJakartaSans(
+                                              fontSize: 13.5,
+                                              fontWeight: FontWeight.bold,
+                                              color: isDark
+                                                  ? Colors.white
+                                                  : Colors.black87,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 4),
+                                      ...items,
+                                    ],
+                                  );
+                                }
+
+                                Widget buildEmptyText(String text) {
+                                  return Padding(
+                                    padding: const EdgeInsets.only(left: 20),
+                                    child: Text(
+                                      text,
+                                      style: GoogleFonts.dmSans(
+                                        fontSize: 13.0,
+                                        color: isDark
+                                            ? Colors.white54
+                                            : Colors.black45,
+                                        fontStyle: FontStyle.italic,
+                                      ),
+                                    ),
+                                  );
+                                }
+
+                                Widget buildItemText(String text) {
+                                  return Padding(
+                                    padding: const EdgeInsets.only(left: 20),
+                                    child: Text(
+                                      text,
+                                      style: GoogleFonts.dmSans(
+                                        fontSize: 13.5,
+                                        fontWeight: FontWeight.w600,
+                                        color: isDark
+                                            ? const Color(0xFFE2E8F0)
+                                            : const Color(0xFF1E293B),
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  );
+                                }
 
                                 Widget todayCard = Container(
                                   height: 300,
                                   clipBehavior: Clip.antiAlias,
                                   decoration: BoxDecoration(
-                                    gradient: const LinearGradient(
-                                      colors: [
-                                        Color(0xFFE0F2FE),
-                                        Color(0xFFF0F9FF),
-                                      ],
-                                      begin: Alignment.topLeft,
-                                      end: Alignment.bottomRight,
-                                    ),
+                                    color: isDark ? const Color(0xFF1C1C1E) : null,
+                                    gradient: isDark
+                                        ? null
+                                        : const LinearGradient(
+                                            colors: [
+                                              Color(0xFFE0F2FE),
+                                              Color(0xFFF0F9FF),
+                                            ],
+                                            begin: Alignment.topLeft,
+                                            end: Alignment.bottomRight,
+                                          ),
                                     borderRadius: BorderRadius.circular(24),
+                                    border: Border.all(
+                                      color: isDark
+                                          ? const Color(0xFF27272A)
+                                          : const Color(0xFFE2E8F0),
+                                      width: 1.0,
+                                    ),
                                   ),
                                   child: Stack(
                                     children: [
-                                      const Positioned.fill(
+                                      Positioned.fill(
                                         child: CustomPaint(
-                                          painter: BlueCardPatternPainter(),
+                                          painter: BlueCardPatternPainter(
+                                            isDark: isDark,
+                                          ),
                                         ),
                                       ),
                                       Padding(
@@ -2304,7 +2278,9 @@ class _HomePageState extends State<HomePage> {
                                                   style: GoogleFonts.plusJakartaSans(
                                                     fontSize: 17.6,
                                                     fontWeight: FontWeight.bold,
-                                                    color: Colors.black87,
+                                                    color: isDark
+                                                        ? Colors.white
+                                                        : Colors.black87,
                                                   ),
                                                 ),
                                                 Container(
@@ -2314,8 +2290,10 @@ class _HomePageState extends State<HomePage> {
                                                         vertical: 3,
                                                       ),
                                                   decoration: BoxDecoration(
-                                                    color: Colors.white
-                                                        .withValues(alpha: 0.8),
+                                                    color: isDark
+                                                        ? const Color(0xFF27272A)
+                                                        : Colors.white
+                                                            .withValues(alpha: 0.8),
                                                     borderRadius:
                                                         BorderRadius.circular(
                                                           10,
@@ -2327,9 +2305,11 @@ class _HomePageState extends State<HomePage> {
                                                       fontSize: 14.0,
                                                       fontWeight:
                                                           FontWeight.w600,
-                                                      color: const Color(
-                                                        0xFF0369A1,
-                                                      ),
+                                                      color: isDark
+                                                          ? const Color(0xFF60A5FA)
+                                                          : const Color(
+                                                              0xFF0369A1,
+                                                            ),
                                                     ),
                                                   ),
                                                 ),
@@ -2346,19 +2326,21 @@ class _HomePageState extends State<HomePage> {
                                                         CrossAxisAlignment
                                                             .start,
                                                     children: [
-                                                      _buildLeftCardSection(
+                                                      buildLeftCardSection(
                                                         icon: Icons
                                                             .calendar_today_rounded,
-                                                        iconColor: const Color(
-                                                          0xFF0369A1,
-                                                        ),
+                                                        iconColor: isDark
+                                                            ? const Color(0xFF60A5FA)
+                                                            : const Color(
+                                                                0xFF0369A1,
+                                                              ),
                                                         title:
                                                             'Jadwal Kelas Hari Ini',
                                                         items:
                                                             activeSchedules
                                                                 .isEmpty
                                                             ? [
-                                                                _buildEmptyText(
+                                                                buildEmptyText(
                                                                   'Bebas kelas hari ini',
                                                                 ),
                                                               ]
@@ -2373,7 +2355,7 @@ class _HomePageState extends State<HomePage> {
                                                                 projName =
                                                                     item['projectName'] ??
                                                                     'Classroom';
-                                                                return _buildItemText(
+                                                                return buildItemText(
                                                                   '$time - $projName',
                                                                 );
                                                               }).toList(),
@@ -2381,26 +2363,28 @@ class _HomePageState extends State<HomePage> {
                                                       const SizedBox(
                                                         height: 10,
                                                       ),
-                                                      _buildLeftCardSection(
+                                                      buildLeftCardSection(
                                                         icon: Icons
                                                             .assignment_outlined,
-                                                        iconColor: const Color(
-                                                          0xFF7E22CE,
-                                                        ),
+                                                        iconColor: isDark
+                                                            ? const Color(0xFFD6A5F8)
+                                                            : const Color(
+                                                                0xFF7E22CE,
+                                                              ),
                                                         title:
                                                             'Deadline Tugas Hari Ini',
                                                         items:
                                                             todayTugasDeadlines
                                                                 .isEmpty
                                                             ? [
-                                                                _buildEmptyText(
+                                                                buildEmptyText(
                                                                   'Bebas tugas hari ini',
                                                                 ),
                                                               ]
                                                             : todayTugasDeadlines
                                                                   .take(2)
                                                                   .map((t) {
-                                                                    return _buildItemText(
+                                                                    return buildItemText(
                                                                       '${t['title']} (${t['projectName']})',
                                                                     );
                                                                   })
@@ -2409,26 +2393,28 @@ class _HomePageState extends State<HomePage> {
                                                       const SizedBox(
                                                         height: 10,
                                                       ),
-                                                      _buildLeftCardSection(
+                                                      buildLeftCardSection(
                                                         icon:
                                                             Icons.quiz_outlined,
-                                                        iconColor: const Color(
-                                                          0xFFD97706,
-                                                        ),
+                                                        iconColor: isDark
+                                                            ? const Color(0xFFFCD34D)
+                                                            : const Color(
+                                                                0xFFD97706,
+                                                              ),
                                                         title:
                                                             'Jadwal Quiz Hari Ini',
                                                         items:
                                                             todayQuizDeadlines
                                                                 .isEmpty
                                                             ? [
-                                                                _buildEmptyText(
+                                                                buildEmptyText(
                                                                   'Bebas quiz hari ini',
                                                                 ),
                                                               ]
                                                             : todayQuizDeadlines
                                                                   .take(2)
                                                                   .map((q) {
-                                                                    return _buildItemText(
+                                                                    return buildItemText(
                                                                       '${q['title']} (${q['projectName']})',
                                                                     );
                                                                   })
@@ -2449,28 +2435,38 @@ class _HomePageState extends State<HomePage> {
                                 Widget progressCardsColumn = Column(
                                   children: [
                                     // Progress Tugas Card
-                                    // Tugas Card
                                     Container(
                                       height: 142,
                                       width: double.infinity,
                                       clipBehavior: Clip.antiAlias,
                                       decoration: BoxDecoration(
-                                        gradient: const LinearGradient(
-                                          colors: [
-                                            Color(0xFFF3E8FF),
-                                            Color(0xFFFAF5FF),
-                                          ],
-                                          begin: Alignment.topLeft,
-                                          end: Alignment.bottomRight,
-                                        ),
+                                        color: isDark ? const Color(0xFF1C1C1E) : null,
+                                        gradient: isDark
+                                            ? null
+                                            : const LinearGradient(
+                                                colors: [
+                                                  Color(0xFFF3E8FF),
+                                                  Color(0xFFFAF5FF),
+                                                ],
+                                                begin: Alignment.topLeft,
+                                                end: Alignment.bottomRight,
+                                              ),
                                         borderRadius: BorderRadius.circular(24),
+                                        border: Border.all(
+                                          color: isDark
+                                              ? const Color(0xFF27272A)
+                                              : const Color(0xFFE2E8F0),
+                                          width: 1.0,
+                                        ),
                                       ),
                                       child: Stack(
                                         children: [
-                                          const Positioned.fill(
+                                          Positioned.fill(
                                             child: CustomPaint(
                                               painter:
-                                                  LavenderCardPatternPainter(),
+                                                  LavenderCardPatternPainter(
+                                                isDark: isDark,
+                                              ),
                                             ),
                                           ),
                                           Padding(
@@ -2492,7 +2488,7 @@ class _HomePageState extends State<HomePage> {
                                                           ),
                                                       decoration: BoxDecoration(
                                                         color: const Color(
-                                                          0xFF7E22CE,
+                                                          0xFF7C3AED, // Ungu Hubner Core
                                                         ),
                                                         borderRadius:
                                                             BorderRadius.circular(
@@ -2514,8 +2510,9 @@ class _HomePageState extends State<HomePage> {
                                                             fontSize: 14.7,
                                                             fontWeight:
                                                                 FontWeight.bold,
-                                                            color:
-                                                                Colors.black87,
+                                                            color: isDark
+                                                                ? Colors.white
+                                                                : Colors.black87,
                                                           ),
                                                     ),
                                                   ],
@@ -2542,8 +2539,9 @@ class _HomePageState extends State<HomePage> {
                                                               fontWeight:
                                                                   FontWeight
                                                                       .w900,
-                                                              color:
-                                                                  const Color(
+                                                              color: isDark
+                                                                  ? const Color(0xFFD6A5F8)
+                                                                  : const Color(
                                                                     0xFF6B21A8,
                                                                   ),
                                                               height: 1.0,
@@ -2557,8 +2555,9 @@ class _HomePageState extends State<HomePage> {
                                                               fontWeight:
                                                                   FontWeight
                                                                       .w700,
-                                                              color:
-                                                                  const Color(
+                                                              color: isDark
+                                                                  ? const Color(0xFFA5B4FC)
+                                                                  : const Color(
                                                                     0xFF7E22CE,
                                                                   ),
                                                             ),
@@ -2587,8 +2586,9 @@ class _HomePageState extends State<HomePage> {
                                                                 fontWeight:
                                                                     FontWeight
                                                                         .w800,
-                                                                color:
-                                                                    const Color(
+                                                                color: isDark
+                                                                    ? const Color(0xFFD6A5F8)
+                                                                    : const Color(
                                                                       0xFF6B21A8,
                                                                     ),
                                                                 height: 1.0,
@@ -2605,8 +2605,9 @@ class _HomePageState extends State<HomePage> {
                                                                 fontWeight:
                                                                     FontWeight
                                                                         .w500,
-                                                                color: Colors
-                                                                    .black54,
+                                                                color: isDark
+                                                                    ? Colors.white70
+                                                                    : Colors.black54,
                                                               ),
                                                         ),
                                                       ],
@@ -2619,13 +2620,14 @@ class _HomePageState extends State<HomePage> {
                                                           ),
                                                       child: LinearProgressIndicator(
                                                         value: tugasRatio,
-                                                        backgroundColor:
-                                                            Colors.white,
+                                                        backgroundColor: isDark
+                                                            ? const Color(0xFF27272A)
+                                                            : Colors.white,
                                                         valueColor:
                                                             const AlwaysStoppedAnimation<
                                                               Color
                                                             >(
-                                                              Color(0xFF7E22CE),
+                                                              Color(0xFF7C3AED), // Ungu Hubner
                                                             ),
                                                         minHeight: 6,
                                                       ),
@@ -2656,23 +2658,34 @@ class _HomePageState extends State<HomePage> {
                                             width: double.infinity,
                                             clipBehavior: Clip.antiAlias,
                                             decoration: BoxDecoration(
-                                              gradient: const LinearGradient(
-                                                colors: [
-                                                  Color(0xFFFEF3C7),
-                                                  Color(0xFFFFFBEB),
-                                                ],
-                                                begin: Alignment.topLeft,
-                                                end: Alignment.bottomRight,
-                                              ),
+                                              color: isDark ? const Color(0xFF1C1C1E) : null,
+                                              gradient: isDark
+                                                  ? null
+                                                  : const LinearGradient(
+                                                      colors: [
+                                                        Color(0xFFFEF3C7),
+                                                        Color(0xFFFFFBEB),
+                                                      ],
+                                                      begin: Alignment.topLeft,
+                                                      end: Alignment.bottomRight,
+                                                    ),
                                               borderRadius:
                                                   BorderRadius.circular(24),
+                                              border: Border.all(
+                                                color: isDark
+                                                    ? const Color(0xFF27272A)
+                                                    : const Color(0xFFE2E8F0),
+                                                width: 1.0,
+                                              ),
                                             ),
                                             child: Stack(
                                               children: [
-                                                const Positioned.fill(
+                                                Positioned.fill(
                                                   child: CustomPaint(
                                                     painter:
-                                                        AmberCardPatternPainter(),
+                                                        AmberCardPatternPainter(
+                                                      isDark: isDark,
+                                                    ),
                                                   ),
                                                 ),
                                                 Padding(
@@ -2722,13 +2735,14 @@ class _HomePageState extends State<HomePage> {
                                                               ),
                                                               Text(
                                                                 'Quiz',
-                                                                style: GoogleFonts.dmSans(
+                                                                style: GoogleFonts.plusJakartaSans(
                                                                   fontSize: 14.7,
                                                                   fontWeight:
                                                                       FontWeight
                                                                           .bold,
-                                                                  color: Colors
-                                                                      .black87,
+                                                                  color: isDark
+                                                                      ? Colors.white
+                                                                      : Colors.black87,
                                                                 ),
                                                               ),
                                                             ],
@@ -2752,12 +2766,12 @@ class _HomePageState extends State<HomePage> {
                                                                   color:
                                                                       _quizCardPage ==
                                                                           idx
-                                                                      ? const Color(
-                                                                          0xFFB45309,
-                                                                        )
-                                                                      : const Color(
-                                                                          0xFFFCD34D,
-                                                                        ),
+                                                                      ? (isDark
+                                                                          ? const Color(0xFFFCD34D)
+                                                                          : const Color(0xFFB45309))
+                                                                      : (isDark
+                                                                          ? const Color(0xFF78350F)
+                                                                          : const Color(0xFFFCD34D)),
                                                                 ),
                                                               );
                                                             }),
@@ -2785,8 +2799,9 @@ class _HomePageState extends State<HomePage> {
                                                                 fontWeight:
                                                                     FontWeight
                                                                         .bold,
-                                                                color:
-                                                                    const Color(
+                                                                color: isDark
+                                                                    ? const Color(0xFFFDE047)
+                                                                    : const Color(
                                                                       0xFF9A3412,
                                                                     ),
                                                               ),
@@ -2816,9 +2831,11 @@ class _HomePageState extends State<HomePage> {
                                                                       fontWeight:
                                                                           FontWeight
                                                                               .w900,
-                                                                      color: const Color(
-                                                                        0xFFB45309,
-                                                                      ),
+                                                                      color: isDark
+                                                                          ? const Color(0xFFFCD34D)
+                                                                          : const Color(
+                                                                            0xFFB45309,
+                                                                          ),
                                                                       height:
                                                                           1.0,
                                                                     ),
@@ -2830,9 +2847,11 @@ class _HomePageState extends State<HomePage> {
                                                                       fontWeight:
                                                                           FontWeight
                                                                               .w700,
-                                                                      color: const Color(
-                                                                        0xFFD97706,
-                                                                      ),
+                                                                      color: isDark
+                                                                          ? const Color(0xFFFDE047)
+                                                                          : const Color(
+                                                                            0xFFD97706,
+                                                                          ),
                                                                     ),
                                                                   ),
                                                                 ],
@@ -2853,9 +2872,11 @@ class _HomePageState extends State<HomePage> {
                                                                       fontWeight:
                                                                           FontWeight
                                                                               .w900,
-                                                                      color: const Color(
-                                                                        0xFFB45309,
-                                                                      ),
+                                                                      color: isDark
+                                                                          ? const Color(0xFFFCD34D)
+                                                                          : const Color(
+                                                                            0xFFB45309,
+                                                                          ),
                                                                       height:
                                                                           1.0,
                                                                     ),
@@ -2870,9 +2891,11 @@ class _HomePageState extends State<HomePage> {
                                                                       fontWeight:
                                                                           FontWeight
                                                                               .w700,
-                                                                      color: const Color(
-                                                                        0xFFD97706,
-                                                                      ),
+                                                                      color: isDark
+                                                                          ? const Color(0xFFFDE047)
+                                                                          : const Color(
+                                                                            0xFFD97706,
+                                                                          ),
                                                                     ),
                                                                   ),
                                                                 ],
@@ -2892,9 +2915,11 @@ class _HomePageState extends State<HomePage> {
                                                                       fontWeight:
                                                                           FontWeight
                                                                               .w900,
-                                                                      color: const Color(
-                                                                        0xFFB45309,
-                                                                      ),
+                                                                      color: isDark
+                                                                          ? const Color(0xFFFCD34D)
+                                                                          : const Color(
+                                                                            0xFFB45309,
+                                                                          ),
                                                                       height:
                                                                           1.0,
                                                                     ),
@@ -2909,9 +2934,11 @@ class _HomePageState extends State<HomePage> {
                                                                       fontWeight:
                                                                           FontWeight
                                                                               .w700,
-                                                                      color: const Color(
-                                                                        0xFFD97706,
-                                                                      ),
+                                                                      color: isDark
+                                                                          ? const Color(0xFFFDE047)
+                                                                          : const Color(
+                                                                            0xFFD97706,
+                                                                          ),
                                                                     ),
                                                                   ),
                                                                 ],
@@ -2946,8 +2973,9 @@ class _HomePageState extends State<HomePage> {
                                                                     fontWeight:
                                                                         FontWeight
                                                                             .w500,
-                                                                    color: Colors
-                                                                        .black54,
+                                                                    color: isDark
+                                                                        ? Colors.white70
+                                                                        : Colors.black54,
                                                                   ),
                                                                   maxLines: 1,
                                                                   overflow:
@@ -2979,8 +3007,9 @@ class _HomePageState extends State<HomePage> {
                                                                               : averageScore /
                                                                                     100.0)
                                                                         : 0.0),
-                                                              backgroundColor:
-                                                                  Colors.white,
+                                                              backgroundColor: isDark
+                                                                  ? const Color(0xFF27272A)
+                                                                  : Colors.white,
                                                               valueColor:
                                                                   const AlwaysStoppedAnimation<
                                                                     Color
@@ -3041,15 +3070,11 @@ class _HomePageState extends State<HomePage> {
                                   );
                                 }
 
-                                return Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                return Column(
                                   children: [
-                                    Expanded(flex: 11, child: todayCard),
-                                    const SizedBox(width: 16),
-                                    Expanded(
-                                      flex: 10,
-                                      child: progressCardsColumn,
-                                    ),
+                                    todayCard,
+                                    const SizedBox(height: 16),
+                                    progressCardsColumn,
                                   ],
                                 );
                               },
@@ -6549,12 +6574,13 @@ class _QuickNotesDropdownContent extends StatelessWidget {
 }
 
 class BlueCardPatternPainter extends CustomPainter {
-  const BlueCardPatternPainter();
+  final bool isDark;
+  const BlueCardPatternPainter({this.isDark = false});
 
   @override
   void paint(Canvas canvas, Size size) {
     final paint1 = Paint()
-      ..color = const Color(0xFF0284C7).withValues(alpha: 0.07)
+      ..color = (isDark ? const Color(0xFF38BDF8) : const Color(0xFF0284C7)).withValues(alpha: isDark ? 0.05 : 0.07)
       ..style = PaintingStyle.fill;
 
     final path1 = Path();
@@ -6573,7 +6599,7 @@ class BlueCardPatternPainter extends CustomPainter {
     canvas.drawPath(path1, paint1);
 
     final paint2 = Paint()
-      ..color = Colors.white.withValues(alpha: 0.35)
+      ..color = (isDark ? Colors.white : Colors.white).withValues(alpha: isDark ? 0.04 : 0.35)
       ..style = PaintingStyle.fill;
 
     final path2 = Path();
@@ -6596,12 +6622,13 @@ class BlueCardPatternPainter extends CustomPainter {
 }
 
 class LavenderCardPatternPainter extends CustomPainter {
-  const LavenderCardPatternPainter();
+  final bool isDark;
+  const LavenderCardPatternPainter({this.isDark = false});
 
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = const Color(0xFF9333EA).withValues(alpha: 0.05)
+      ..color = (isDark ? const Color(0xFFC084FC) : const Color(0xFF9333EA)).withValues(alpha: isDark ? 0.04 : 0.05)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 12;
 
@@ -6610,7 +6637,7 @@ class LavenderCardPatternPainter extends CustomPainter {
     canvas.drawCircle(center, 44, paint);
 
     final paintFill = Paint()
-      ..color = Colors.white.withValues(alpha: 0.25)
+      ..color = Colors.white.withValues(alpha: isDark ? 0.03 : 0.25)
       ..style = PaintingStyle.fill;
     final path = Path();
     path.moveTo(size.width * 0.6, 0);
@@ -6630,12 +6657,13 @@ class LavenderCardPatternPainter extends CustomPainter {
 }
 
 class AmberCardPatternPainter extends CustomPainter {
-  const AmberCardPatternPainter();
+  final bool isDark;
+  const AmberCardPatternPainter({this.isDark = false});
 
   @override
   void paint(Canvas canvas, Size size) {
     final paint1 = Paint()
-      ..color = const Color(0xFFD97706).withValues(alpha: 0.06)
+      ..color = (isDark ? const Color(0xFFFBBF24) : const Color(0xFFD97706)).withValues(alpha: isDark ? 0.04 : 0.06)
       ..style = PaintingStyle.fill;
 
     final path1 = Path();
@@ -6652,7 +6680,7 @@ class AmberCardPatternPainter extends CustomPainter {
     canvas.drawPath(path1, paint1);
 
     final paintStroke = Paint()
-      ..color = Colors.white.withValues(alpha: 0.35)
+      ..color = Colors.white.withValues(alpha: isDark ? 0.03 : 0.35)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 10
       ..strokeCap = StrokeCap.round;
