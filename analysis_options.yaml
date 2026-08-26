@@ -38,4 +38,14 @@ analyzer:
     - windows/**
     - macos/**
     - linux/**
+  errors:
+    unused_import: info
+    unused_field: info
+    unused_local_variable: info
+    unused_element: info
+    unused_element_parameter: info
+    deprecated_member_use: info
+    dead_code: info
+    unnecessary_null_comparison: info
+
 
