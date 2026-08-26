@@ -3717,6 +3717,7 @@ class _HomePageState extends State<HomePage> {
                                           gradeLevel: projectData['gradeLevel'] ?? '-',
                                           major: projectData['major'] ?? '',
                                           ownerUid: projectData['ownerUid'] ?? '',
+                                          schedules: List.from(projectData['schedules'] ?? []),
                                         );
                                       },
                                     );
@@ -5203,6 +5204,7 @@ class _HomePageState extends State<HomePage> {
     required String gradeLevel,
     required String major,
     required String ownerUid,
+    List schedules = const [],
   }) {
     final bool isDark = AppColors.isDarkMode;
     return FutureBuilder<DocumentSnapshot>(
@@ -5245,12 +5247,18 @@ class _HomePageState extends State<HomePage> {
                 }
               },
               child: Container(
-                height: 195,
-                margin: const EdgeInsets.only(bottom: 10),
+                height: (MediaQuery.of(cardContext).size.width < 700 || MediaQuery.of(cardContext).size.shortestSide < 700) ? 168 : 195,
+                margin: EdgeInsets.zero,
                 clipBehavior: Clip.antiAlias,
                 decoration: BoxDecoration(
-                  color: accentColor,
-                  borderRadius: BorderRadius.circular(18),
+                  color: backgroundColor,
+                  borderRadius: BorderRadius.circular(22),
+                  border: isDark
+                      ? Border.all(
+                          color: Colors.white.withValues(alpha: 0.15),
+                          width: 1.0,
+                        )
+                      : null,
                 ),
                 child: Stack(
                   children: [
@@ -5263,108 +5271,112 @@ class _HomePageState extends State<HomePage> {
                           ),
                         ),
                       ),
-                        Positioned.fill(
-                          child: Padding(
-                            padding: const EdgeInsets.all(12),
-                            child: isBarcodeFlipped
-                                ? _buildInlineBarcodeView(
+                    Positioned.fill(
+                      child: Padding(
+                        padding: (MediaQuery.of(cardContext).size.width < 700 || MediaQuery.of(cardContext).size.shortestSide < 700)
+                            ? const EdgeInsets.fromLTRB(14, 12, 14, 12)
+                            : const EdgeInsets.all(16),
+                        child: isBarcodeFlipped
+                            ? _buildInlineBarcodeView(
+                                context: cardContext,
+                                projectId: projectId,
+                                title: title,
+                                accentColor: accentColor,
+                                onBack: () {
+                                  cardSetState(() {
+                                    isBarcodeFlipped = false;
+                                  });
+                                },
+                              )
+                            : isStatsFlipped
+                                ? _buildStudentStatsView(
                                     context: cardContext,
                                     projectId: projectId,
-                                    title: title,
+                                    progressValue: progressValue,
+                                    progressText: progressText,
+                                    completedTugas: completedTugas,
+                                    totalTugas: totalTugas,
+                                    completedPdf: completedPdf,
+                                    totalPdf: totalPdf,
+                                    completedQuiz: completedQuiz,
+                                    totalQuiz: totalQuiz,
                                     accentColor: accentColor,
                                     onBack: () {
                                       cardSetState(() {
-                                        isBarcodeFlipped = false;
+                                        isStatsFlipped = false;
                                       });
                                     },
                                   )
-                                : isStatsFlipped
-                                    ? _buildStudentStatsView(
-                                        context: cardContext,
-                                        projectId: projectId,
-                                        progressValue: progressValue,
-                                        progressText: progressText,
-                                        completedTugas: completedTugas,
-                                        totalTugas: totalTugas,
-                                        completedPdf: completedPdf,
-                                        totalPdf: totalPdf,
-                                        completedQuiz: completedQuiz,
-                                        totalQuiz: totalQuiz,
-                                        accentColor: accentColor,
-                                        onBack: () {
-                                          cardSetState(() {
-                                            isStatsFlipped = false;
-                                          });
-                                        },
-                                      )
-                                    : _buildStudentGeneralView(
-                                        context: cardContext,
-                                        projectId: projectId,
-                                        title: title,
-                                        iconPath: iconPath,
-                                        gradeLevel: gradeLevel,
-                                        major: major,
-                                        teacherName: teacherName,
-                                        accentColor: accentColor,
-                                        onShowStats: () {
-                                          cardSetState(() {
-                                            isStatsFlipped = true;
-                                          });
-                                        },
-                                        onShowBarcode: () {
-                                          if (MediaQuery.of(cardContext).size.width > 900) {
-                                            cardSetState(() {
-                                              isBarcodeFlipped = true;
-                                            });
-                                          } else {
-                                            _showClassBarcodeDialog(cardContext, projectId, title, accentColor);
-                                          }
-                                        },
-                                      ),
-                          ),
-                        ),
-                        if (!isStatsFlipped && !isBarcodeFlipped)
-                          Positioned(
-                            right: 18,
-                            bottom: 18,
-                            child: BouncyButton(
-                              scaleDown: 0.90,
-                              onTap: () {
-                                cardSetState(() {
-                                  isStatsFlipped = true;
-                                });
-                              },
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 10,
-                                  vertical: 4,
+                                : _buildStudentGeneralView(
+                                    context: cardContext,
+                                    projectId: projectId,
+                                    title: title,
+                                    iconPath: iconPath,
+                                    gradeLevel: gradeLevel,
+                                    major: major,
+                                    teacherName: teacherName,
+                                    accentColor: accentColor,
+                                    backgroundColor: backgroundColor,
+                                    schedules: schedules,
+                                    onShowStats: () {
+                                      cardSetState(() {
+                                        isStatsFlipped = true;
+                                      });
+                                    },
+                                    onShowBarcode: () {
+                                      if (MediaQuery.of(cardContext).size.width > 900) {
+                                        cardSetState(() {
+                                          isBarcodeFlipped = true;
+                                        });
+                                      } else {
+                                        _showClassBarcodeDialog(cardContext, projectId, title, accentColor);
+                                      }
+                                    },
+                                  ),
+                      ),
+                    ),
+                    if (!isStatsFlipped && !isBarcodeFlipped && !(MediaQuery.of(cardContext).size.width < 700 || MediaQuery.of(cardContext).size.shortestSide < 700))
+                      Positioned(
+                        right: 18,
+                        bottom: 18,
+                        child: BouncyButton(
+                          scaleDown: 0.90,
+                          onTap: () {
+                            cardSetState(() {
+                              isStatsFlipped = true;
+                            });
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: isDark ? Colors.black : const Color(0xFFFFD600),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  'Statistik',
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontSize: 14.0,
+                                    fontWeight: FontWeight.bold,
+                                    color: isDark ? Colors.white : Colors.black,
+                                  ),
                                 ),
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFFFFD600),
-                                  borderRadius: BorderRadius.circular(8),
+                                const SizedBox(width: 4),
+                                Icon(
+                                  Icons.arrow_forward_rounded,
+                                  size: 12,
+                                  color: isDark ? Colors.white : Colors.black,
                                 ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Text(
-                                      'Statistik',
-                                      style: GoogleFonts.plusJakartaSans(
-                                        fontSize: 14.0,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.black,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 4),
-                                    const Icon(
-                                      Icons.arrow_forward_rounded,
-                                      size: 12,
-                                      color: Colors.black,
-                                    ),
-                                  ],
-                                ),
-                              ),
+                              ],
                             ),
                           ),
+                        ),
+                      ),
                     ValueListenableBuilder<bool>(
                       valueListenable: _isManagingClassesNotifier,
                       builder: (context, isManaging, _) {
@@ -5379,7 +5391,7 @@ class _HomePageState extends State<HomePage> {
                                   color: isDark
                                       ? Colors.black.withValues(alpha: 0.78)
                                       : Colors.white.withValues(alpha: 0.82),
-                                  borderRadius: BorderRadius.circular(32),
+                                  borderRadius: BorderRadius.circular(22),
                                 ),
                                 child: Center(
                                   child: Row(
@@ -5435,10 +5447,183 @@ class _HomePageState extends State<HomePage> {
     required String major,
     required String teacherName,
     required Color accentColor,
+    required Color backgroundColor,
+    required List schedules,
     required VoidCallback onShowStats,
     required VoidCallback onShowBarcode,
   }) {
-    final majorText = major.isEmpty ? 'X TKJ 1' : major;
+    final majorText = major.isEmpty ? 'Umum' : major;
+    final bool isMobile = MediaQuery.of(context).size.width < 700 || MediaQuery.of(context).size.shortestSide < 700;
+    final bool isDark = AppColors.isDarkMode;
+
+    if (isMobile) {
+      return Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Positioned(
+            right: 12,
+            top: 0,
+            bottom: 0,
+            child: Center(
+              child: SizedBox(
+                height: 102,
+                width: 102,
+                child: ColorFiltered(
+                  colorFilter: isDark
+                      ? ColorFilter.mode(Colors.black.withValues(alpha: 0.12), BlendMode.darken)
+                      : const ColorFilter.mode(Colors.transparent, BlendMode.dst),
+                  child: Image.asset(
+                    iconPath,
+                    fit: BoxFit.contain,
+                    errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.zero,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                _AnimatedScheduleCapsule(
+                  schedules: schedules,
+                  accentColor: accentColor,
+                  cardColor: backgroundColor,
+                ),
+                const SizedBox(height: 4),
+                Padding(
+                  padding: const EdgeInsets.only(left: 10.0, right: 110.0),
+                  child: Builder(
+                    builder: (context) {
+                      double calculatedFontSize = 19.5;
+                      if (title.length > 55) {
+                        calculatedFontSize = 16.0;
+                      }
+                      return Text(
+                        title,
+                        maxLines: 3,
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: calculatedFontSize,
+                          fontWeight: FontWeight.w800,
+                          color: isDark ? Colors.white : Colors.black87,
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Padding(
+                  padding: const EdgeInsets.only(left: 4.0, bottom: 2.0, right: 2.0),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4.5),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(24),
+                          color: isDark
+                              ? Colors.black.withValues(alpha: 0.25)
+                              : Colors.black.withValues(alpha: 0.08),
+                          border: Border.all(
+                            color: isDark
+                                ? Colors.white.withValues(alpha: 0.2)
+                                : Colors.black.withValues(alpha: 0.18),
+                            width: 1.2,
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.flash_on_rounded,
+                              size: 13,
+                              color: isDark ? Colors.white : Colors.black87,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              majorText,
+                              style: GoogleFonts.dmSans(
+                                fontSize: 14.0,
+                                fontWeight: FontWeight.bold,
+                                color: isDark ? Colors.white : Colors.black87,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      Flexible(
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4.5),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(24),
+                            color: isDark
+                                ? Colors.black.withValues(alpha: 0.25)
+                                : Colors.black.withValues(alpha: 0.08),
+                            border: Border.all(
+                              color: isDark
+                                  ? Colors.white.withValues(alpha: 0.2)
+                                  : Colors.black.withValues(alpha: 0.18),
+                              width: 1.2,
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.person_rounded,
+                                size: 13,
+                                color: isDark ? Colors.white : Colors.black87,
+                              ),
+                              const SizedBox(width: 4),
+                              Flexible(
+                                child: Text(
+                                  teacherName,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: GoogleFonts.dmSans(
+                                    fontSize: 14.0,
+                                    fontWeight: FontWeight.bold,
+                                    color: isDark ? Colors.white : Colors.black87,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onTap: onShowStats,
+                        child: Container(
+                          width: 36,
+                          height: 36,
+                          decoration: BoxDecoration(
+                            color: isDark ? Colors.black : Colors.white,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Center(
+                            child: Icon(
+                              Icons.bar_chart_rounded,
+                              size: 20,
+                              color: isDark ? Colors.white : Colors.black87,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      );
+    }
+
     final bool isYellow = _isYellowCardColor(accentColor);
     final Color textColor = isYellow ? Colors.black : Colors.white;
     final Color subtextColor = isYellow ? Colors.black87 : Colors.white70;
@@ -5455,7 +5640,6 @@ class _HomePageState extends State<HomePage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Top Row: Class icon & name on left, QR Button on right
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -5497,7 +5681,6 @@ class _HomePageState extends State<HomePage> {
               ],
             ),
             const SizedBox(height: 8),
-            // Title (Max 3 lines, flexible font size, never truncated)
             Text(
               title,
               maxLines: 3,
@@ -5507,10 +5690,9 @@ class _HomePageState extends State<HomePage> {
             ),
           ],
         ),
-        // Translucent Metadata Box
         Container(
           width: double.infinity,
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+          padding: const EdgeInsets.only(left: 10, top: 6, bottom: 6, right: 88),
           decoration: BoxDecoration(
             color: boxBgColor,
             borderRadius: BorderRadius.circular(10),
@@ -5535,39 +5717,6 @@ class _HomePageState extends State<HomePage> {
                     ),
                   ),
                 ],
-              ),
-              const SizedBox(height: 5),
-              Align(
-                alignment: Alignment.centerRight,
-                child: GestureDetector(
-                  onTap: onShowStats,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFFFD600),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          'Statistik',
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 14.0,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black,
-                          ),
-                        ),
-                        const SizedBox(width: 4),
-                        const Icon(
-                          Icons.arrow_forward_rounded,
-                          size: 12,
-                          color: Colors.black,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
               ),
             ],
           ),
