@@ -1508,7 +1508,7 @@ class _StudentHomePageState extends State<StudentHomePage> {
         AppColors.themeMode = themeMode;
 
         return Scaffold(
-          backgroundColor: isDark ? const Color(0xFF000000) : const Color(0xFFEFF2F6),
+          backgroundColor: isDark ? const Color(0xFF000000) : Colors.white,
           body: Stack(
             children: [
               if (isDark) ...[
@@ -1567,13 +1567,13 @@ class _StudentHomePageState extends State<StudentHomePage> {
                 builder: (context, userSnapshot) {
                   if (userSnapshot.connectionState == ConnectionState.waiting && !userSnapshot.hasData) {
                     return Scaffold(
-                      backgroundColor: isDark ? Colors.black : const Color(0xFFEFF2F6),
+                      backgroundColor: isDark ? Colors.black : Colors.white,
                       body: const SizedBox.shrink(),
                     );
                   }
                   if (!userSnapshot.hasData || !userSnapshot.data!.exists) {
                     return Scaffold(
-                      backgroundColor: isDark ? Colors.black : const Color(0xFFEFF2F6),
+                      backgroundColor: isDark ? Colors.black : Colors.white,
                       body: const Center(child: Text('Data pengguna tidak ditemukan.')),
                     );
                   }
@@ -1738,8 +1738,10 @@ class _StudentHomePageState extends State<StudentHomePage> {
 
                   return SafeArea(
                     bottom: false,
-                    child: SingleChildScrollView(
-                      controller: _homeScrollController,
+                    child: Stack(
+                      children: [
+                        SingleChildScrollView(
+                          controller: _homeScrollController,
                           padding: AppTypography.pagePadding(
                             top: 12.0,
                             bottom: 125.0,
@@ -1747,20 +1749,58 @@ class _StudentHomePageState extends State<StudentHomePage> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              // Top Header: Nama & Role di Kiri, Tombol Tema & Lonceng (Ukuran 52x52 Register) di Kanan
+                              // Normal Top Header (Tampil asli di posisi awal halaman - Sama Persis dengan Mode Guru)
                               if (!isDesktop) ...[
+                                // Top Controls (Kiri: Toggle Dark / Light Mode, Kanan: Notifikasi)
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    // Pojok Kiri: Toggle Dark / Light Mode
+                                    ValueListenableBuilder<String>(
+                                      valueListenable: HubnerApp.themeNotifier,
+                                      builder: (context, currentTheme, _) {
+                                        final bool isDark = currentTheme == 'Gelap' || currentTheme == 'Hitam';
+                                        return BouncyButton(
+                                          onTap: () => _toggleThemeWithBounce(context, isDark),
+                                          child: Container(
+                                            width: 42,
+                                            height: 42,
+                                            decoration: BoxDecoration(
+                                              color: isDark
+                                                  ? const Color(0xFF18181B)
+                                                  : Colors.white,
+                                              shape: BoxShape.circle,
+                                              border: Border.all(
+                                                color: isDark
+                                                    ? const Color(0xFF27272A)
+                                                    : const Color(0xFFF1F5F9),
+                                                width: 1.2,
+                                              ),
+                                            ),
+                                            child: Icon(
+                                              isDark ? Icons.wb_sunny_rounded : Icons.nightlight_round,
+                                              color: isDark ? const Color(0xFFFBBF24) : Colors.black87,
+                                              size: 20,
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                    // Pojok Kanan: Tombol Notifikasi
+                                    ValueListenableBuilder<String>(
+                                      valueListenable: HubnerApp.themeNotifier,
+                                      builder: (context, currentTheme, _) {
+                                        final bool isDark = currentTheme == 'Gelap' || currentTheme == 'Hitam';
+                                        return NotificationBellIcon(isDark: isDark, size: 42);
+                                      },
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 16),
+                                // Profile Row (Kiri: Role & Nama, Kanan: Foto Profil Bulat 58x58)
                                 Builder(
                                   builder: (context) {
-                                    final String userGender = (userData['gender'] ?? '').toString().toLowerCase();
-                                    final bool isFemale = userGender.contains('perempuan') || userGender.contains('female') || userGender.contains('wanita');
-                                    final bool isMale = userGender.contains('laki') || userGender.contains('male') || userGender.contains('pria');
-
-                                    final Color roleColor = isFemale
-                                        ? (isDark ? const Color(0xFFF472B6) : const Color(0xFFDB2777))
-                                        : (isMale
-                                            ? (isDark ? const Color(0xFF60A5FA) : const Color(0xFF2563EB))
-                                            : (isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B)));
-
+                                    final bool isDark = AppColors.isDarkMode;
                                     final String roleSubtitle = role.toLowerCase() == 'guru'
                                         ? 'Pengajar · ${schoolLevel.isNotEmpty ? schoolLevel.toUpperCase() : 'SMA/SMK'}'
                                         : 'Siswa · ${schoolLevel.isNotEmpty ? schoolLevel.toUpperCase() : 'SMA/SMK'}';
@@ -1769,56 +1809,48 @@ class _StudentHomePageState extends State<StudentHomePage> {
                                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                       crossAxisAlignment: CrossAxisAlignment.center,
                                       children: [
-                                        // Sisi Kiri: Avatar Profil + Nama (Halo , [Nama]) di baris atas + Siswa SMK di baris bawah
                                         Expanded(
-                                          child: Row(
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
                                             children: [
-                                              // Avatar Bulat Profil
-                                              Container(
-                                                width: 52,
-                                                height: 52,
-                                                decoration: BoxDecoration(
-                                                  shape: BoxShape.circle,
-                                                  color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
+                                              Text(
+                                                roleSubtitle,
+                                                style: GoogleFonts.dmSans(
+                                                  fontSize: 13.5,
+                                                  fontWeight: FontWeight.w600,
+                                                  color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
                                                 ),
-                                                child: ClipOval(
-                                                  child: Transform.scale(
-                                                    scale: 1.45,
-                                                    child: userPhoto.isNotEmpty
-                                                        ? (userPhoto.startsWith('http')
-                                                            ? Image.network(
-                                                                userPhoto,
-                                                                fit: BoxFit.cover,
-                                                                errorBuilder: (_, __, ___) => Center(
-                                                                  child: Text(
-                                                                    userName.isNotEmpty
-                                                                        ? userName.substring(0, (userName.length >= 2 ? 2 : 1)).toUpperCase()
-                                                                        : 'P',
-                                                                    style: GoogleFonts.plusJakartaSans(
-                                                                      fontWeight: FontWeight.w800,
-                                                                      color: isDark ? Colors.white : Colors.black,
-                                                                      fontSize: 18,
-                                                                    ),
-                                                                  ),
-                                                                ),
-                                                              )
-                                                            : Image.asset(
-                                                                userPhoto,
-                                                                fit: BoxFit.cover,
-                                                                errorBuilder: (_, __, ___) => Center(
-                                                                  child: Text(
-                                                                    userName.isNotEmpty
-                                                                        ? userName.substring(0, (userName.length >= 2 ? 2 : 1)).toUpperCase()
-                                                                        : 'P',
-                                                                    style: GoogleFonts.plusJakartaSans(
-                                                                      fontWeight: FontWeight.w800,
-                                                                      color: isDark ? Colors.white : Colors.black,
-                                                                      fontSize: 18,
-                                                                    ),
-                                                                  ),
-                                                                ),
-                                                              ))
-                                                        : Center(
+                                              ),
+                                              const SizedBox(height: 3),
+                                              Text(
+                                                fullName,
+                                                style: GoogleFonts.plusJakartaSans(
+                                                  fontSize: 28.0,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: isDark ? Colors.white : Colors.black,
+                                                  height: 1.15,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        const SizedBox(width: 14),
+                                        Container(
+                                          width: 58,
+                                          height: 58,
+                                          decoration: BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
+                                          ),
+                                          child: ClipOval(
+                                            child: Transform.scale(
+                                              scale: 1.45,
+                                              child: userPhoto.isNotEmpty
+                                                  ? (userPhoto.startsWith('http')
+                                                      ? Image.network(
+                                                          userPhoto,
+                                                          fit: BoxFit.cover,
+                                                          errorBuilder: (_, __, ___) => Center(
                                                             child: Text(
                                                               userName.isNotEmpty
                                                                   ? userName.substring(0, (userName.length >= 2 ? 2 : 1)).toUpperCase()
@@ -1826,88 +1858,59 @@ class _StudentHomePageState extends State<StudentHomePage> {
                                                               style: GoogleFonts.plusJakartaSans(
                                                                 fontWeight: FontWeight.w800,
                                                                 color: isDark ? Colors.white : Colors.black,
-                                                                fontSize: 18,
+                                                                fontSize: 20,
                                                               ),
                                                             ),
                                                           ),
-                                                  ),
-                                                ),
-                                              ),
-                                              const SizedBox(width: 12),
-                                              Expanded(
-                                                child: Column(
-                                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                                  children: [
-                                                    // Baris 1: Halo , [Nama] (Font Onboarding)
-                                                    Text(
-                                                      'Halo , $fullName',
-                                                      style: GoogleFonts.plusJakartaSans(
-                                                        fontSize: 18.0,
-                                                        fontWeight: FontWeight.w900,
-                                                        color: isDark ? Colors.white : Colors.black,
-                                                        height: 1.15,
-                                                      ),
-                                                      maxLines: 1,
-                                                      overflow: TextOverflow.ellipsis,
-                                                    ),
-                                                    const SizedBox(height: 3),
-                                                    // Baris 2: Siswa · SMA/SMK (Warna Sesuai Gender)
-                                                    Text(
-                                                      roleSubtitle,
-                                                      style: GoogleFonts.dmSans(
-                                                        fontSize: 13.0,
-                                                        fontWeight: FontWeight.w700,
-                                                        color: roleColor,
-                                                      ),
-                                                      maxLines: 1,
-                                                      overflow: TextOverflow.ellipsis,
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                        const SizedBox(width: 10),
-                                        // Sisi Kanan: Tombol Mode Gelap/Terang & Lonceng Notifikasi (52x52 sesuai Register Page)
-                                        Row(
-                                          children: [
-                                            ValueListenableBuilder<String>(
-                                              valueListenable: HubnerApp.themeNotifier,
-                                              builder: (context, currentTheme, _) {
-                                                final bool currentIsDark = currentTheme == 'Gelap' || currentTheme == 'Hitam';
-                                                return BouncyButton(
-                                                  onTap: () => _toggleThemeWithBounce(context, currentIsDark),
-                                                  child: Container(
-                                                    width: 52,
-                                                    height: 52,
-                                                    decoration: BoxDecoration(
-                                                      color: currentIsDark ? const Color(0xFF18181B) : Colors.white,
-                                                      shape: BoxShape.circle,
-                                                      border: Border.all(
-                                                        color: currentIsDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
-                                                        width: 1.2,
+                                                        )
+                                                      : Image.asset(
+                                                          userPhoto,
+                                                          fit: BoxFit.cover,
+                                                          errorBuilder: (_, __, ___) => Center(
+                                                            child: Text(
+                                                              userName.isNotEmpty
+                                                                  ? userName.substring(0, (userName.length >= 2 ? 2 : 1)).toUpperCase()
+                                                                  : 'P',
+                                                              style: GoogleFonts.plusJakartaSans(
+                                                                fontWeight: FontWeight.w800,
+                                                                color: isDark ? Colors.white : Colors.black,
+                                                                fontSize: 20,
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        ))
+                                                  : Center(
+                                                      child: Text(
+                                                        userName.isNotEmpty
+                                                            ? userName.substring(0, (userName.length >= 2 ? 2 : 1)).toUpperCase()
+                                                            : 'P',
+                                                        style: GoogleFonts.plusJakartaSans(
+                                                          fontWeight: FontWeight.w800,
+                                                          color: isDark ? Colors.white : Colors.black,
+                                                          fontSize: 20,
+                                                        ),
                                                       ),
                                                     ),
-                                                    child: Icon(
-                                                      currentIsDark ? Icons.wb_sunny_rounded : Icons.nightlight_round,
-                                                      color: currentIsDark ? const Color(0xFFFBBF24) : Colors.black87,
-                                                      size: 24,
-                                                    ),
-                                                  ),
-                                                );
-                                              },
                                             ),
-                                            const SizedBox(width: 8),
-                                            NotificationBellIcon(isDark: isDark, size: 52),
-                                          ],
+                                          ),
                                         ),
                                       ],
                                     );
                                   },
                                 ),
-                                const SizedBox(height: 8),
+                                const SizedBox(height: 16),
                               ],
+                              const SizedBox(height: 4),
+                              _HomeSearchAndNotesRow(
+                                key: const ValueKey('home_search_and_notes_row'),
+                                notesKey: _notesButtonKey,
+                                onNotesTap: _showQuickNotesOverlay,
+                                onSearchChanged: (query) {
+                                  _searchQueryNotifier.value = query;
+                                },
+                                isDark: isDark,
+                              ),
+                              const SizedBox(height: 16),
                               // Student Top Section Redesign
                               StreamBuilder<Map<String, Map<String, dynamic>>>(
                                 stream: _combineStudentProgressStreams(
@@ -2023,88 +2026,89 @@ class _StudentHomePageState extends State<StudentHomePage> {
                                       ? '-'
                                       : averageScore.toStringAsFixed(1);
 
-                                   // Deadlines for selected calendar day
-                                   final targetSelectedDay = DateTime(
-                                     _selectedCalendarDay.year,
-                                     _selectedCalendarDay.month,
-                                     _selectedCalendarDay.day,
-                                   );
+                                  // Deadlines for today
+                                  final now = DateTime.now();
+                                  final today = DateTime(
+                                    now.year,
+                                    now.month,
+                                    now.day,
+                                  );
 
-                                   final List<Map<String, dynamic>>
-                                   todayTugasDeadlines = [];
-                                   final List<Map<String, dynamic>>
-                                   todayQuizDeadlines = [];
+                                  final List<Map<String, dynamic>>
+                                  todayTugasDeadlines = [];
+                                  final List<Map<String, dynamic>>
+                                  todayQuizDeadlines = [];
 
-                                   for (var projDoc in projectDocs) {
-                                     final projData =
-                                         projDoc.data() as Map<String, dynamic>;
-                                     final projName =
-                                         projData['name'] ?? 'Classroom';
-                                     final stages =
-                                         projData['stages'] as List? ?? [];
-                                     for (var stage in stages) {
-                                       final stageMap =
-                                           stage as Map<String, dynamic>;
-                                       final List rawMateris =
-                                           stageMap['materis'] as List? ?? [];
-                                       List<Map<String, dynamic>> materis = [];
-                                       if (rawMateris.isNotEmpty) {
-                                         materis = List<Map<String, dynamic>>.from(
-                                           rawMateris,
-                                         );
-                                       } else {
-                                         final List tasksList =
-                                             stageMap['tasks'] as List? ?? [];
-                                         if (tasksList.isNotEmpty) {
-                                           materis = [
-                                             {
-                                               'title': 'Materi Pembelajaran',
-                                               'tasks': tasksList,
-                                             },
-                                           ];
-                                         }
-                                       }
-                                       for (var m in materis) {
-                                         final List tasks =
-                                             m['tasks'] as List? ?? [];
-                                         for (var task in tasks) {
-                                           final taskMap =
-                                               Map<String, dynamic>.from(
-                                                 task as Map,
-                                               );
-                                           taskMap['projectName'] = projName;
-                                           final endStr =
-                                               taskMap['end'] as String? ?? '';
-                                           final type = taskMap['type'] ?? 'tugas';
+                                  for (var projDoc in projectDocs) {
+                                    final projData =
+                                        projDoc.data() as Map<String, dynamic>;
+                                    final projName =
+                                        projData['name'] ?? 'Classroom';
+                                    final stages =
+                                        projData['stages'] as List? ?? [];
+                                    for (var stage in stages) {
+                                      final stageMap =
+                                          stage as Map<String, dynamic>;
+                                      final List rawMateris =
+                                          stageMap['materis'] as List? ?? [];
+                                      List<Map<String, dynamic>> materis = [];
+                                      if (rawMateris.isNotEmpty) {
+                                        materis = List<Map<String, dynamic>>.from(
+                                          rawMateris,
+                                        );
+                                      } else {
+                                        final List tasksList =
+                                            stageMap['tasks'] as List? ?? [];
+                                        if (tasksList.isNotEmpty) {
+                                          materis = [
+                                            {
+                                              'title': 'Materi Pembelajaran',
+                                              'tasks': tasksList,
+                                            },
+                                          ];
+                                        }
+                                      }
+                                      for (var m in materis) {
+                                        final List tasks =
+                                            m['tasks'] as List? ?? [];
+                                        for (var task in tasks) {
+                                          final taskMap =
+                                              Map<String, dynamic>.from(
+                                                task as Map,
+                                              );
+                                          taskMap['projectName'] = projName;
+                                          final endStr =
+                                              taskMap['end'] as String? ?? '';
+                                          final type = taskMap['type'] ?? 'tugas';
 
-                                           if (endStr.isNotEmpty &&
-                                               endStr != 'DD/MM/YYYY') {
-                                             final endDate = _parseDateString(
-                                               endStr,
-                                             );
-                                             if (endDate != null) {
-                                               final normEnd = DateTime(
-                                                 endDate.year,
-                                                 endDate.month,
-                                                 endDate.day,
-                                               );
-                                               if (normEnd.isAtSameMomentAs(
-                                                 targetSelectedDay,
-                                               )) {
-                                                 if (type == 'tugas') {
-                                                   todayTugasDeadlines.add(
-                                                     taskMap,
-                                                   );
-                                                 } else if (type == 'quiz') {
-                                                   todayQuizDeadlines.add(taskMap);
-                                                 }
-                                               }
-                                             }
-                                           }
-                                         }
-                                       }
-                                     }
-                                   }
+                                          if (endStr.isNotEmpty &&
+                                              endStr != 'DD/MM/YYYY') {
+                                            final endDate = _parseDateString(
+                                              endStr,
+                                            );
+                                            if (endDate != null) {
+                                              final normEnd = DateTime(
+                                                endDate.year,
+                                                endDate.month,
+                                                endDate.day,
+                                              );
+                                              if (normEnd.isAtSameMomentAs(
+                                                today,
+                                              )) {
+                                                if (type == 'tugas') {
+                                                  todayTugasDeadlines.add(
+                                                    taskMap,
+                                                  );
+                                                } else if (type == 'quiz') {
+                                                  todayQuizDeadlines.add(taskMap);
+                                                }
+                                              }
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
 
                                   final bool isDark = AppColors.isDarkMode;
 
@@ -2655,7 +2659,7 @@ class _StudentHomePageState extends State<StudentHomePage> {
                                             'tag': 'Jadwal Kelas',
                                             'tagColor': isDark ? const Color(0xFF2E1065) : const Color(0xFFF3E8FF),
                                             'tagTextColor': isDark ? const Color(0xFFC4B5FD) : const Color(0xFF7C3AED),
-                                            'title': activeSchedules.isEmpty ? 'Bebas Kelas' : '${activeSchedules.length} Kelas Hari Ini',
+                                            'title': activeSchedules.isEmpty ? '"Bebas Kelas"' : '"${activeSchedules.length} Kelas Hari Ini"',
                                             'subtitle': activeSchedules.isEmpty
                                                 ? 'Tidak ada jadwal kelas untuk hari ini.'
                                                 : '${activeSchedules.first['time'] ?? ''} · ${activeSchedules.first['projectName'] ?? 'Classroom'}',
@@ -2665,7 +2669,7 @@ class _StudentHomePageState extends State<StudentHomePage> {
                                             'tag': 'Deadline Tugas',
                                             'tagColor': isDark ? const Color(0xFF451A03) : const Color(0xFFFFEDD5),
                                             'tagTextColor': isDark ? const Color(0xFFFDBA74) : const Color(0xFFC2410C),
-                                            'title': todayTugasDeadlines.isEmpty ? 'Bebas Tugas' : '${todayTugasDeadlines.length} Tugas Deadline',
+                                            'title': todayTugasDeadlines.isEmpty ? '"Bebas Tugas"' : '"${todayTugasDeadlines.length} Tugas Deadline"',
                                             'subtitle': todayTugasDeadlines.isEmpty
                                                 ? 'Semua tugas telah beres dikerjakan.'
                                                 : '${todayTugasDeadlines.first['title']} (${todayTugasDeadlines.first['projectName']})',
@@ -2675,7 +2679,7 @@ class _StudentHomePageState extends State<StudentHomePage> {
                                             'tag': 'Jadwal Kuis',
                                             'tagColor': isDark ? const Color(0xFF064E3B) : const Color(0xFFDCFCE7),
                                             'tagTextColor': isDark ? const Color(0xFF6EE7B7) : const Color(0xFF059669),
-                                            'title': todayQuizDeadlines.isEmpty ? 'Bebas Kuis' : '${todayQuizDeadlines.length} Kuis Aktif',
+                                            'title': todayQuizDeadlines.isEmpty ? '"Bebas Kuis"' : '"${todayQuizDeadlines.length} Kuis Aktif"',
                                             'subtitle': todayQuizDeadlines.isEmpty
                                                 ? 'Tidak ada kuis aktif yang harus dikerjakan.'
                                                 : '${todayQuizDeadlines.first['title']} (${todayQuizDeadlines.first['projectName']})',
@@ -2685,24 +2689,18 @@ class _StudentHomePageState extends State<StudentHomePage> {
 
                                         final currentItem = activityItems[_todayActivityIndex % activityItems.length];
 
-                                        return Container(
-                                          width: double.infinity,
-                                          padding: const EdgeInsets.fromLTRB(20, 18, 20, 18),
-                                          decoration: BoxDecoration(
-                                            color: isDark ? const Color(0xFF18181B) : Colors.white,
-                                            borderRadius: BorderRadius.circular(28),
-                                          ),
+                                        return Padding(
+                                          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
                                           child: Column(
                                             crossAxisAlignment: CrossAxisAlignment.start,
                                             children: [
-                                              // Top Row: Tag Pill on Left + Arrow Navigation Buttons on Right
                                               Row(
                                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                                 children: [
                                                   Container(
                                                     padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                                                     decoration: BoxDecoration(
-                                                      color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+                                                      color: currentItem['tagColor'] as Color,
                                                       borderRadius: BorderRadius.circular(20),
                                                     ),
                                                     child: Text(
@@ -2710,7 +2708,7 @@ class _StudentHomePageState extends State<StudentHomePage> {
                                                       style: GoogleFonts.plusJakartaSans(
                                                         fontSize: 13.5,
                                                         fontWeight: FontWeight.w800,
-                                                        color: isDark ? Colors.white : Colors.black,
+                                                        color: currentItem['tagTextColor'] as Color,
                                                       ),
                                                     ),
                                                   ),
@@ -2724,20 +2722,31 @@ class _StudentHomePageState extends State<StudentHomePage> {
                                                           });
                                                         },
                                                         child: Container(
-                                                          width: 44,
-                                                          height: 34,
+                                                          width: 36,
+                                                          height: 36,
                                                           decoration: BoxDecoration(
-                                                            color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
-                                                            borderRadius: BorderRadius.circular(10),
+                                                            color: isDark ? const Color(0xFF27272A) : Colors.white,
+                                                            shape: BoxShape.circle,
+                                                            border: Border.all(
+                                                              color: isDark ? const Color(0xFF3F3F46) : const Color(0xFFCBD5E1),
+                                                              width: 1.2,
+                                                            ),
+                                                            boxShadow: [
+                                                              BoxShadow(
+                                                                color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.06),
+                                                                blurRadius: 6,
+                                                                offset: const Offset(0, 2),
+                                                              ),
+                                                            ],
                                                           ),
                                                           child: Icon(
                                                             Icons.arrow_back_rounded,
                                                             size: 18,
-                                                            color: isDark ? Colors.white : Colors.black,
+                                                            color: isDark ? Colors.white : Colors.black87,
                                                           ),
                                                         ),
                                                       ),
-                                                      const SizedBox(width: 8),
+                                                      const SizedBox(width: 10),
                                                       GestureDetector(
                                                         onTap: () {
                                                           HapticFeedback.selectionClick();
@@ -2746,16 +2755,27 @@ class _StudentHomePageState extends State<StudentHomePage> {
                                                           });
                                                         },
                                                         child: Container(
-                                                          width: 44,
-                                                          height: 34,
+                                                          width: 36,
+                                                          height: 36,
                                                           decoration: BoxDecoration(
-                                                            color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
-                                                            borderRadius: BorderRadius.circular(10),
+                                                            color: isDark ? const Color(0xFF27272A) : Colors.white,
+                                                            shape: BoxShape.circle,
+                                                            border: Border.all(
+                                                              color: isDark ? const Color(0xFF3F3F46) : const Color(0xFFCBD5E1),
+                                                              width: 1.2,
+                                                            ),
+                                                            boxShadow: [
+                                                              BoxShadow(
+                                                                color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.06),
+                                                                blurRadius: 6,
+                                                                offset: const Offset(0, 2),
+                                                              ),
+                                                            ],
                                                           ),
                                                           child: Icon(
                                                             Icons.arrow_forward_rounded,
                                                             size: 18,
-                                                            color: isDark ? Colors.white : Colors.black,
+                                                            color: isDark ? Colors.white : Colors.black87,
                                                           ),
                                                         ),
                                                       ),
@@ -2764,8 +2784,6 @@ class _StudentHomePageState extends State<StudentHomePage> {
                                                 ],
                                               ),
                                               const SizedBox(height: 14),
-
-                                              // Main Body Row: Title + Custom Doodle for each tab
                                               Row(
                                                 crossAxisAlignment: CrossAxisAlignment.center,
                                                 children: [
@@ -2776,21 +2794,22 @@ class _StudentHomePageState extends State<StudentHomePage> {
                                                         Text(
                                                           currentItem['title'] as String,
                                                           style: AppTypography.pageTitle(
-                                                            fontSize: 22.0,
+                                                            fontSize: 24.0,
                                                             fontWeight: FontWeight.w900,
-                                                            color: isDark ? Colors.white : Colors.black,
+                                                            color: isDark ? Colors.white : const Color(0xFF0F172A),
                                                             height: 1.2,
                                                           ),
                                                           maxLines: 1,
                                                           overflow: TextOverflow.ellipsis,
                                                         ),
-                                                        const SizedBox(height: 8),
+                                                        const SizedBox(height: 6),
                                                         Text(
                                                           currentItem['subtitle'] as String,
                                                           style: AppTypography.chatBody(
-                                                            fontSize: 16.0,
-                                                            color: isDark ? Colors.white70 : Colors.black,
-                                                            height: 1.45,
+                                                            fontSize: 15.5,
+                                                            fontWeight: FontWeight.w500,
+                                                            color: isDark ? Colors.white70 : const Color(0xFF475569),
+                                                            height: 1.4,
                                                           ),
                                                           maxLines: 2,
                                                           overflow: TextOverflow.ellipsis,
@@ -2806,42 +2825,11 @@ class _StudentHomePageState extends State<StudentHomePage> {
                                           ),
                                         );
                                       },
-),
                                     );
 
                                     return Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
-                                        Padding(
-                                          padding: const EdgeInsets.only(left: 4.0, bottom: 14.0),
-                                          child: Stack(
-                                            clipBehavior: Clip.none,
-                                            children: [
-                                              // Lavender / Soft Purple Highlighter Bar covering lower 42%
-                                              Positioned(
-                                                left: -2,
-                                                right: -4,
-                                                bottom: 3,
-                                                height: 12,
-                                                child: Container(
-                                                  decoration: BoxDecoration(
-                                                    color: const Color(0xFF9399D8).withValues(alpha: isDark ? 0.45 : 0.65),
-                                                    borderRadius: BorderRadius.circular(3),
-                                                  ),
-                                                ),
-                                              ),
-                                              Text(
-                                                'Dashboard',
-                                                style: GoogleFonts.plusJakartaSans(
-                                                  fontSize: 26.0,
-                                                  fontWeight: FontWeight.w900,
-                                                  color: isDark ? Colors.white : Colors.black,
-                                                  letterSpacing: -0.5,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
                                         // 1. Horizontal Slider for Tugas & Quiz Cards
                                         StatefulBuilder(
                                           builder: (context, setStateSlider) {
@@ -2886,78 +2874,101 @@ class _StudentHomePageState extends State<StudentHomePage> {
                                           },
                                         ),
                                         const SizedBox(height: 16),
-                                        // 2. Kalender Horizontal (Diletakkan di Atas Jadwal Kelas)
-                                        if (MediaQuery.of(context).size.width < 700 || MediaQuery.of(context).size.shortestSide < 700) ...[
-                                          _buildCalendarSlider(allUserTasks, role, projectDocs),
-                                          const SizedBox(height: 18),
-                                        ],
-                                        // 3. Frameless Today Activity (Jadwal Kelas)
+                                        // 2. Frameless Today Activity
                                         todayCardsSlider,
                                       ],
                                     );
                                  },
                                ),
-                            const SizedBox(height: 22),
+                            if (MediaQuery.of(context).size.width < 700 || MediaQuery.of(context).size.shortestSide < 700) ...[
+                              const SizedBox(height: 28),
+                              _buildCalendarSlider(allUserTasks, role),
+                              const SizedBox(height: 28),
+                            ] else ...[
+                              const SizedBox(height: 28),
+                            ],
 
-                            // Master Card Container (Pencarian & Classroom Saya - Putih Bersih Tanpa Border & Tanpa Bayangan)
-                            Container(
-                              width: double.infinity,
-                              padding: const EdgeInsets.fromLTRB(16, 18, 16, 18),
-                              decoration: BoxDecoration(
-                                color: isDark ? const Color(0xFF18181B) : Colors.white,
-                                borderRadius: BorderRadius.circular(32),
+                          // Projects Section Title
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                'Classroom Saya',
+                                style: AppTypography.pageTitle(
+                                  color: AppColors.isDarkMode ? Colors.white : Colors.black,
+                                  fontWeight: FontWeight.w700,
+                                ),
                               ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                              Row(
                                 children: [
-                                  // 1. Bilah Pencarian di Dalam Card (Bersih Tanpa Tombol Catatan)
-                                  Container(
-                                    height: 48,
-                                    padding: const EdgeInsets.symmetric(horizontal: 14),
-                                    decoration: BoxDecoration(
-                                      color: isDark ? const Color(0xFF27272A) : const Color(0xFFF8FAFC),
-                                      borderRadius: BorderRadius.circular(24),
-                                      border: Border.all(
-                                        color: isDark ? const Color(0xFF3F3F46) : const Color(0xFFE2E8F0),
-                                        width: 1.0,
-                                      ),
-                                    ),
-                                    child: Row(
-                                      children: [
-                                        Icon(
-                                          Icons.search_rounded,
-                                          color: isDark ? Colors.white60 : Colors.black45,
-                                          size: 20,
-                                        ),
-                                        const SizedBox(width: 10),
-                                        Expanded(
-                                          child: TextField(
-                                            onChanged: (val) {
-                                              _searchQueryNotifier.value = val.trim().toLowerCase();
-                                            },
-                                            style: GoogleFonts.plusJakartaSans(
-                                              fontSize: 14.0,
-                                              color: isDark ? Colors.white : Colors.black87,
-                                              fontWeight: FontWeight.w600,
-                                            ),
-                                            decoration: InputDecoration(
-                                              hintText: 'Cari kelas atau materi...',
-                                              hintStyle: GoogleFonts.plusJakartaSans(
-                                                fontSize: 14.0,
-                                                color: isDark ? Colors.white38 : Colors.black38,
-                                              ),
-                                              border: InputBorder.none,
-                                              isDense: true,
-                                              contentPadding: EdgeInsets.zero,
+
+
+                                  // Tombol Kelola Kelas (Ikon Lingkaran Hitam & Centang Hijau Tanpa Background)
+                                  ValueListenableBuilder<bool>(
+                                    valueListenable: _isManagingClassesNotifier,
+                                    builder: (context, isManaging, _) {
+                                      final bool isDark = AppColors.isDarkMode;
+
+                                      if (isManaging) {
+                                        // Saat Mengelola Aktif: Tanpa Background dengan Ikon Centang Hijau & Text Hijau
+                                        return GestureDetector(
+                                          onTap: () {
+                                            _isManagingClassesNotifier.value = false;
+                                          },
+                                          behavior: HitTestBehavior.opaque,
+                                          child: Padding(
+                                            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                                            child: Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                const Icon(
+                                                  Icons.check_circle_rounded,
+                                                  color: Color(0xFF7C3AED), // Warna Ungu Hubner
+                                                  size: 18,
+                                                ),
+                                                const SizedBox(width: 5),
+                                                Text(
+                                                  'Selesai',
+                                                  style: AppTypography.buttonLabel(
+                                                    color: const Color(0xFF7C3AED),
+                                                  ),
+                                                ),
+                                              ],
                                             ),
                                           ),
+                                        );
+                                      }
+                                      return BouncyButton(
+                                        onTap: () {
+                                          _isManagingClassesNotifier.value = !isManaging;
+                                        },
+                                        child: Container(
+                                          width: 44,
+                                          height: 44,
+                                          decoration: BoxDecoration(
+                                            color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
+                                            shape: BoxShape.circle,
+                                            border: Border.all(
+                                              color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+                                              width: 1.2,
+                                            ),
+                                          ),
+                                          child: Icon(
+                                            Icons.dashboard_customize_rounded,
+                                            color: isDark ? Colors.white : Colors.black87,
+                                            size: 20,
+                                          ),
                                         ),
-                                      ],
-                                    ),
+                                      );
+                                    },
                                   ),
-                                  const SizedBox(height: 16),
+                                ],
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 14),
 
-                                  // Invitations list
+                          // Invitations list
                           StreamBuilder<QuerySnapshot>(
                             stream: FirebaseFirestore.instance
                                 .collection('projectInvitations')
@@ -3548,7 +3559,7 @@ class _StudentHomePageState extends State<StudentHomePage> {
                                         const NeverScrollableScrollPhysics(),
                                     itemCount: projectCards.length,
                                     separatorBuilder: (_, i) =>
-                                        const SizedBox(height: 12),
+                                        const SizedBox(height: 6),
                                     itemBuilder: (context, index) =>
                                         projectCards[index],
                                   );
@@ -3559,19 +3570,238 @@ class _StudentHomePageState extends State<StudentHomePage> {
                         ],
                       ),
                     ),
-                  ],
-                ),
-              ),
-            );
-          },
-        );
-      },
+                    if (!isDesktop)
+                      ValueListenableBuilder<double>(
+                        valueListenable: _headerScrollOffsetNotifier,
+                        builder: (context, scrollOffset, _) {
+                          if (scrollOffset <= 20.0) {
+                            return const SizedBox.shrink();
+                          }
+                          final bool isDark = AppColors.isDarkMode;
+                          final double t = ((scrollOffset - 20.0) / 40.0).clamp(0.0, 1.0);
+
+                          return Positioned(
+                            top: 0,
+                            left: 0,
+                            right: 0,
+                            child: Opacity(
+                              opacity: t,
+                              child: Container(
+                                padding: const EdgeInsets.fromLTRB(14, 8, 14, 36),
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    begin: Alignment.topCenter,
+                                    end: Alignment.bottomCenter,
+                                    colors: [
+                                      (isDark ? Colors.black : Colors.white).withValues(alpha: t * 0.98),
+                                      (isDark ? Colors.black : Colors.white).withValues(alpha: t * 0.95),
+                                      (isDark ? Colors.black : Colors.white).withValues(alpha: t * 0.45),
+                                      (isDark ? Colors.black : Colors.white).withValues(alpha: 0.0),
+                                    ],
+                                    stops: const [0.0, 0.48, 0.75, 1.0],
+                                  ),
+                                ),
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      crossAxisAlignment: CrossAxisAlignment.center,
+                                      children: [
+                                        // Sebelah Kiri: Avatar di sebelah kirinya Nama dan Role
+                                        Expanded(
+                                          child: Row(
+                                            children: [
+                                              if (userPhoto.isNotEmpty) ...[
+                                                Container(
+                                                  width: 36,
+                                                  height: 36,
+                                                  decoration: BoxDecoration(
+                                                    shape: BoxShape.circle,
+                                                    color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
+                                                  ),
+                                                  child: ClipOval(
+                                                    child: Transform.scale(
+                                                      scale: 1.45,
+                                                      child: ColorFiltered(
+                                                        colorFilter: isDark
+                                                            ? ColorFilter.mode(Colors.black.withValues(alpha: 0.10), BlendMode.darken)
+                                                            : const ColorFilter.mode(Colors.transparent, BlendMode.dst),
+                                                        child: userPhoto.isNotEmpty
+                                                            ? (userPhoto.startsWith('http')
+                                                                ? Image.network(
+                                                                    userPhoto,
+                                                                    fit: BoxFit.cover,
+                                                                    errorBuilder: (_, __, ___) => Center(
+                                                                      child: Text(
+                                                                        userName.isNotEmpty
+                                                                            ? userName.substring(0, (userName.length >= 2 ? 2 : 1)).toUpperCase()
+                                                                            : 'P',
+                                                                        style: GoogleFonts.plusJakartaSans(
+                                                                          fontWeight: FontWeight.w800,
+                                                                          color: isDark ? Colors.white : Colors.black,
+                                                                          fontSize: 20,
+                                                                        ),
+                                                                      ),
+                                                                    ),
+                                                                  )
+                                                                : Image.asset(
+                                                                    userPhoto,
+                                                                    fit: BoxFit.cover,
+                                                                    errorBuilder: (_, __, ___) => Center(
+                                                                      child: Text(
+                                                                        userName.isNotEmpty
+                                                                            ? userName.substring(0, (userName.length >= 2 ? 2 : 1)).toUpperCase()
+                                                                            : 'P',
+                                                                        style: GoogleFonts.plusJakartaSans(
+                                                                          fontWeight: FontWeight.w800,
+                                                                          color: isDark ? Colors.white : Colors.black,
+                                                                          fontSize: 20,
+                                                                        ),
+                                                                      ),
+                                                                    ),
+                                                                  ))
+                                                            : Center(
+                                                                child: Text(
+                                                                  userName.isNotEmpty
+                                                                      ? userName.substring(0, (userName.length >= 2 ? 2 : 1)).toUpperCase()
+                                                                      : 'P',
+                                                                  style: GoogleFonts.plusJakartaSans(
+                                                                    fontWeight: FontWeight.w800,
+                                                                    color: isDark ? Colors.white : Colors.black,
+                                                                    fontSize: 20,
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                                const SizedBox(width: 9),
+                                              ],
+                                                Expanded(
+                                                  child: Column(
+                                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                                    mainAxisSize: MainAxisSize.min,
+                                                    children: [
+                                                      Text(
+                                                        role.toLowerCase() == 'guru'
+                                                            ? 'Pengajar · ${schoolLevel.isNotEmpty ? schoolLevel.toUpperCase() : 'SMA/SMK'}'
+                                                            : 'Siswa · ${schoolLevel.isNotEmpty ? schoolLevel.toUpperCase() : 'SMA/SMK'}',
+                                                        style: GoogleFonts.dmSans(
+                                                          fontSize: 14.0,
+                                                          fontWeight: FontWeight.w500,
+                                                          color: isDark ? Colors.white60 : const Color(0xFF64748B),
+                                                        ),
+                                                        maxLines: 1,
+                                                        overflow: TextOverflow.ellipsis,
+                                                      ),
+                                                      const SizedBox(height: 1.0),
+                                                      Text(
+                                                        fullName.isNotEmpty ? fullName : userName,
+                                                        style: GoogleFonts.plusJakartaSans(
+                                                          fontSize: 16.0,
+                                                          fontWeight: FontWeight.w800,
+                                                          color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                                        ),
+                                                        maxLines: 1,
+                                                        overflow: TextOverflow.ellipsis,
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                          const SizedBox(width: 10),
+                                          Row(
+                                            children: [
+                                              ValueListenableBuilder<String>(
+                                                valueListenable: HubnerApp.themeNotifier,
+                                                builder: (context, currentTheme, _) {
+                                                  final bool currentIsDark = currentTheme == 'Gelap' || currentTheme == 'Hitam';
+                                                  return BouncyButton(
+                                                    onTap: () => _toggleThemeWithBounce(context, currentIsDark),
+                                                    child: Container(
+                                                      width: 42,
+                                                      height: 42,
+                                                      decoration: BoxDecoration(
+                                                        color: currentIsDark
+                                                            ? const Color(0xFF1C1C1E)
+                                                            : Colors.white,
+                                                        shape: BoxShape.circle,
+                                                        border: Border.all(
+                                                          color: currentIsDark
+                                                              ? const Color(0xFF27272A)
+                                                              : const Color(0xFFF1F5F9),
+                                                          width: 1.2,
+                                                        ),
+                                                      ),
+                                                      child: Icon(
+                                                        currentIsDark ? Icons.wb_sunny_rounded : Icons.nightlight_round,
+                                                        color: currentIsDark ? const Color(0xFFFBBF24) : Colors.black87,
+                                                        size: 20,
+                                                      ),
+                                                    ),
+                                                  );
+                                                },
+                                              ),
+                                              const SizedBox(width: 10),
+                                              ValueListenableBuilder<String>(
+                                                valueListenable: HubnerApp.themeNotifier,
+                                                builder: (context, currentTheme, _) {
+                                                  final bool isDark = currentTheme == 'Gelap' || currentTheme == 'Hitam';
+                                                  return NotificationBellIcon(isDark: isDark, size: 42);
+                                                },
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          if (!isDesktop)
+                            Positioned(
+                              right: 18,
+                              bottom: 96,
+                              child: BouncyButton(
+                                onTap: _showQuickNotesOverlay,
+                                child: Container(
+                                  width: 52,
+                                  height: 52,
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFF7C3AED),
+                                    shape: BoxShape.circle,
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: const Color(0xFF7C3AED).withValues(alpha: 0.4),
+                                        blurRadius: 16,
+                                        offset: const Offset(0, 6),
+                                      ),
+                                    ],
+                                  ),
+                                  child: const Center(
+                                    child: Icon(
+                                      Icons.note_alt_rounded,
+                                      color: Colors.white,
+                                      size: 25,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        ),
+      ],
     ),
-  ),
-),
-],
-),
-);
+  );
 },
 );
 }
@@ -3907,39 +4137,45 @@ class _StudentHomePageState extends State<StudentHomePage> {
       return Stack(
         clipBehavior: Clip.none,
         children: [
-          // Logo kelas di pojok kanan atas, diperkecil 30%
+          // Illustration placed on right more centered and bigger (aligned with top controls)!
           Positioned(
-            right: 10,
-            top: 8,
-            child: SizedBox(
-              height: 70,
-              width: 70,
-              child: ColorFiltered(
-                colorFilter: isDark
-                    ? ColorFilter.mode(Colors.black.withValues(alpha: 0.12), BlendMode.darken)
-                    : const ColorFilter.mode(Colors.transparent, BlendMode.dst),
-                child: Image.asset(
-                  iconPath,
-                  fit: BoxFit.contain,
-                  errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
+            right: 12,
+            top: 0,
+            bottom: 0,
+            child: Center(
+              child: SizedBox(
+                height: 102,
+                width: 102,
+                child: ColorFiltered(
+                  colorFilter: isDark
+                      ? ColorFilter.mode(Colors.black.withValues(alpha: 0.12), BlendMode.darken)
+                      : const ColorFilter.mode(Colors.transparent, BlendMode.dst),
+                  child: Image.asset(
+                    iconPath,
+                    fit: BoxFit.contain,
+                    errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
+                  ),
                 ),
               ),
             ),
           ),
+          // Main content column
           Padding(
             padding: EdgeInsets.zero,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
+                // Top Row: Animated White Time Capsule (Frameless & Taller with larger circle closer to corner)
                 _AnimatedScheduleCapsule(
                   schedules: schedules,
                   accentColor: accentColor,
                   cardColor: backgroundColor,
                 ),
                 const SizedBox(height: 4),
+                // Middle: Complete Subject Title (Flexible, full size for 1-2 lines, max 3 lines, NEVER TRUNCATED)
                 Padding(
-                  padding: const EdgeInsets.only(left: 10.0, right: 82.0),
+                  padding: const EdgeInsets.only(left: 10.0, right: 110.0),
                   child: Builder(
                     builder: (context) {
                       double calculatedFontSize = 19.5;
@@ -4846,7 +5082,13 @@ class _StudentHomePageState extends State<StudentHomePage> {
                 clipBehavior: Clip.antiAlias,
                 decoration: BoxDecoration(
                   color: backgroundColor,
-                  borderRadius: BorderRadius.circular(28),
+                  borderRadius: BorderRadius.circular(22),
+                  border: isDark
+                      ? Border.all(
+                          color: Colors.white.withValues(alpha: 0.15),
+                          width: 1.0,
+                        )
+                      : null,
                 ),
                 child: Stack(
                   children: [
@@ -5048,21 +5290,23 @@ class _StudentHomePageState extends State<StudentHomePage> {
       return Stack(
         clipBehavior: Clip.none,
         children: [
-          // Logo kelas di pojok kanan atas, diperkecil 30%
           Positioned(
-            right: 10,
-            top: 8,
-            child: SizedBox(
-              height: 70,
-              width: 70,
-              child: ColorFiltered(
-                colorFilter: isDark
-                    ? ColorFilter.mode(Colors.black.withValues(alpha: 0.12), BlendMode.darken)
-                    : const ColorFilter.mode(Colors.transparent, BlendMode.dst),
-                child: Image.asset(
-                  iconPath,
-                  fit: BoxFit.contain,
-                  errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
+            right: 12,
+            top: 0,
+            bottom: 0,
+            child: Center(
+              child: SizedBox(
+                height: 102,
+                width: 102,
+                child: ColorFiltered(
+                  colorFilter: isDark
+                      ? ColorFilter.mode(Colors.black.withValues(alpha: 0.12), BlendMode.darken)
+                      : const ColorFilter.mode(Colors.transparent, BlendMode.dst),
+                  child: Image.asset(
+                    iconPath,
+                    fit: BoxFit.contain,
+                    errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
+                  ),
                 ),
               ),
             ),
@@ -5080,7 +5324,7 @@ class _StudentHomePageState extends State<StudentHomePage> {
                 ),
                 const SizedBox(height: 4),
                 Padding(
-                  padding: const EdgeInsets.only(left: 10.0, right: 82.0),
+                  padding: const EdgeInsets.only(left: 10.0, right: 110.0),
                   child: Builder(
                     builder: (context) {
                       double calculatedFontSize = 19.5;
@@ -5311,9 +5555,11 @@ class _StudentHomePageState extends State<StudentHomePage> {
     );
   }
 
-  // Student Stats View Redesign (Matching Mockup with Custom Progress Line & Knob)
   Widget _buildStudentStatsView({
+    required BuildContext context,
+    required String projectId,
     required double progressValue,
+    required String progressText,
     required int completedTugas,
     required int totalTugas,
     required int completedPdf,
@@ -5355,22 +5601,22 @@ class _StudentHomePageState extends State<StudentHomePage> {
             Text(
               'Statistik Belajar Anda',
               style: GoogleFonts.plusJakartaSans(
-                fontSize: 14.5,
-                fontWeight: FontWeight.w800,
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
                 color: textColor,
               ),
             ),
           ],
         ),
-        const SizedBox(height: 10),
+        const SizedBox(height: 8),
 
         // Progress Card
         Container(
           width: double.infinity,
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(14),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -5382,129 +5628,46 @@ class _StudentHomePageState extends State<StudentHomePage> {
                     'Progress Belajar Mandiri',
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 14.0,
-                      fontWeight: FontWeight.w800,
-                      color: const Color(0xFF0F172A),
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
                     ),
                   ),
                   Text(
                     percentText,
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 14.0,
-                      fontWeight: FontWeight.w800,
+                      fontWeight: FontWeight.bold,
                       color: const Color(0xFFEF4444),
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 10),
-              LayoutBuilder(
-                builder: (context, constraints) {
-                  final double barWidth = constraints.maxWidth;
-                  final double clampedProgress = progressValue.clamp(0.0, 1.0);
-                  final double knobSize = 18.0;
-                  final double currentProgressWidth = barWidth * clampedProgress;
-                  final double knobLeft = (currentProgressWidth - (knobSize / 2)).clamp(0.0, barWidth - knobSize);
-
-                  return SizedBox(
-                    height: 24,
-                    child: Stack(
-                      alignment: Alignment.centerLeft,
-                      children: [
-                        // Base Background Track
-                        Container(
-                          width: barWidth,
-                          height: 7,
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFE2E8F0),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                        ),
-                        // Active Progress Line
-                        Container(
-                          width: currentProgressWidth,
-                          height: 7,
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF3B82F6),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                        ),
-                        // End Circle Knob with Percentage
-                        Positioned(
-                          left: knobLeft,
-                          child: Container(
-                            height: 18,
-                            padding: const EdgeInsets.symmetric(horizontal: 4),
-                            constraints: const BoxConstraints(minWidth: 18),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFF3B82F6),
-                              borderRadius: BorderRadius.circular(9),
-                              border: Border.all(color: Colors.white, width: 1.5),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: const Color(0xFF3B82F6).withValues(alpha: 0.35),
-                                  blurRadius: 4,
-                                  offset: const Offset(0, 1.5),
-                                ),
-                              ],
-                            ),
-                            child: Center(
-                              child: Text(
-                                percentText,
-                                style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 8.5,
-                                  fontWeight: FontWeight.w900,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                },
+              const SizedBox(height: 6),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(4),
+                child: LinearProgressIndicator(
+                  value: progressValue,
+                  minHeight: 5,
+                  backgroundColor: const Color(0xFFE2E8F0),
+                  valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFFFBBF24)),
+                ),
               ),
             ],
           ),
         ),
-        const SizedBox(height: 10),
+        const SizedBox(height: 8),
 
-        // Badges Wrap with Cute Yellow Chips
+        // Badges Wrap directly on colored background
         Wrap(
           spacing: 8,
           runSpacing: 6,
           children: [
-            _buildYellowBadge(Icons.reorder_rounded, 'Tugas: $completedTugas/$totalTugas'),
-            _buildYellowBadge(Icons.picture_as_pdf_rounded, 'PDF: $completedPdf/$totalPdf'),
+            _buildYellowBadge(Icons.edit_note_rounded, 'Tugas: $completedTugas/$totalTugas'),
+            _buildYellowBadge(Icons.picture_as_pdf_outlined, 'PDF: $completedPdf/$totalPdf'),
             _buildYellowBadge(Icons.help_outline_rounded, 'Quiz: $completedQuiz/$totalQuiz'),
           ],
         ),
       ],
-    );
-  }
-
-  Widget _buildYellowBadge(IconData icon, String text) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 6),
-      decoration: BoxDecoration(
-        color: const Color(0xFFFEF3C7),
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 14, color: const Color(0xFFB45309)),
-          const SizedBox(width: 5),
-          Text(
-            text,
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: 12.0,
-              fontWeight: FontWeight.w700,
-              color: const Color(0xFFB45309),
-            ),
-          ),
-        ],
-      ),
     );
   }
 
@@ -5886,70 +6049,58 @@ class _StudentHomePageState extends State<StudentHomePage> {
   Widget _buildCalendarSlider([
     List<Map<String, dynamic>> allTasks = const [],
     String role = 'siswa',
-    List projectDocs = const [],
   ]) {
     final bool isDark = AppColors.isDarkMode;
     final DateTime now = DateTime.now();
     final DateTime todayDate = DateTime(now.year, now.month, now.day);
-    final List<DateTime> calendarDays = List.generate(21, (index) {
+    final List<DateTime> calendarDays = List.generate(14, (index) {
       return todayDate
           .subtract(const Duration(days: 3))
           .add(Duration(days: index));
     });
 
-    final String dayName = _getFullDayName(_selectedCalendarDay.weekday);
-    final String monthName = _getShortMonthName(_selectedCalendarDay.month);
-    final String headerTitle = '$dayName, ${_selectedCalendarDay.day} $monthName';
+    final currentMonthYearStr =
+        '${_getMonthName(_selectedCalendarDay.month)} ${_selectedCalendarDay.year}';
+
+    String getSingleDayLetter(int weekday) {
+      const letters = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+      return letters[weekday - 1];
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Top Header: Tanggal di Kiri + Tombol Tambah Lembut di Kanan
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Text(
-              headerTitle,
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 18.0,
-                fontWeight: FontWeight.w800,
-                color: isDark ? Colors.white : const Color(0xFF1E293B),
-                letterSpacing: -0.2,
-              ),
-            ),
-            BouncyButton(
-              onTap: _showQuickNotesOverlay,
-              child: Container(
-                width: 32,
-                height: 32,
-                decoration: BoxDecoration(
-                  color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
-                  shape: BoxShape.circle,
-                ),
-                child: Center(
-                  child: Icon(
-                    Icons.add_rounded,
-                    size: 20,
-                    color: isDark ? Colors.white : Colors.black87,
-                  ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 2.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                currentMonthYearStr,
+                style: AppTypography.sectionHeader(
+                  fontSize: 16.5,
+                  fontWeight: FontWeight.bold,
+                  color: isDark ? Colors.white : Colors.black87,
                 ),
               ),
-            ),
-          ],
+              Icon(
+                Icons.calendar_month_outlined,
+                size: 18,
+                color: isDark ? Colors.white54 : Colors.black45,
+              ),
+            ],
+          ),
         ),
-        const SizedBox(height: 14),
-
-        // Deretan Tanggal Melingkar
+        const SizedBox(height: 10),
         SizedBox(
-          height: 48,
+          height: 68,
           child: ListView.separated(
             key: const PageStorageKey('home_calendar_slider'),
             scrollDirection: Axis.horizontal,
             clipBehavior: Clip.none,
             physics: const BouncingScrollPhysics(),
             itemCount: calendarDays.length,
-            separatorBuilder: (context, index) => const SizedBox(width: 8),
+            separatorBuilder: (context, index) => const SizedBox(width: 10),
             itemBuilder: (context, index) {
               final day = calendarDays[index];
               final bool isSelected =
@@ -5957,9 +6108,7 @@ class _StudentHomePageState extends State<StudentHomePage> {
                   _selectedCalendarDay.month == day.month &&
                   _selectedCalendarDay.year == day.year;
 
-              final bool hasJadwal = _hasScheduleOnDay(day, projectDocs);
-              final bool hasTugas = _hasTaskTypeOnDay(day, allTasks, 'tugas');
-              final bool hasQuiz = _hasTaskTypeOnDay(day, allTasks, 'quiz');
+              final bool hasTasks = _hasTaskOnDay(day, allTasks);
 
               return GestureDetector(
                 onTap: () {
@@ -5967,87 +6116,64 @@ class _StudentHomePageState extends State<StudentHomePage> {
                   setState(() {
                     _selectedCalendarDay = day;
                   });
+                  if (role.toLowerCase() != 'guru') {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => TodoPage(initialDate: day),
+                      ),
+                    );
+                  }
                 },
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
                   curve: Curves.easeOutCubic,
-                  width: 44,
-                  height: 44,
+                  width: 48,
+                  height: 68,
                   decoration: BoxDecoration(
                     color: isSelected
-                        ? (isDark ? Colors.white : Colors.black)
-                        : (isDark ? const Color(0xFF18181B) : Colors.white),
-                    shape: BoxShape.circle,
-                    border: isSelected
-                        ? null
-                        : Border.all(
-                            color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
-                            width: 1.0,
-                          ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: isDark ? 0.20 : 0.04),
-                        blurRadius: 4,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
+                        ? (isDark ? Colors.white : const Color(0xFF18181B))
+                        : (isDark ? const Color(0xFF27272A) : const Color(0xFFF1F3F5)),
+                    borderRadius: BorderRadius.circular(24),
                   ),
-                  child: Stack(
-                    alignment: Alignment.center,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Center(
-                        child: Text(
-                          day.day.toString(),
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 15.5,
-                            fontWeight: FontWeight.w700,
-                            color: isSelected
-                                ? (isDark ? Colors.black : Colors.white)
-                                : (isDark ? Colors.white : const Color(0xFF1E293B)),
-                            height: 1.0,
-                          ),
+                      Text(
+                        getSingleDayLetter(day.weekday),
+                        style: AppTypography.subtitle(
+                          fontSize: 13.0,
+                          fontWeight: FontWeight.w600,
+                          color: isSelected
+                              ? (isDark ? Colors.black87 : Colors.white)
+                              : (isDark ? Colors.white60 : const Color(0xFF64748B)),
+                          height: 1.1,
                         ),
                       ),
-                      // Multi-color Indicator Dots: Ungu (Jadwal), Orange (Tugas), Biru (Quiz) di Pojok Kiri Lingkaran
-                      if (hasJadwal || hasTugas || hasQuiz)
-                        Positioned(
-                          bottom: 4,
-                          left: 6,
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              if (hasJadwal)
-                                Container(
-                                  width: 4,
-                                  height: 4,
-                                  margin: const EdgeInsets.only(right: 2),
-                                  decoration: const BoxDecoration(
-                                    color: Color(0xFF8B5CF6), // Ungu Jadwal
-                                    shape: BoxShape.circle,
-                                  ),
-                                ),
-                              if (hasTugas)
-                                Container(
-                                  width: 4,
-                                  height: 4,
-                                  margin: const EdgeInsets.only(right: 2),
-                                  decoration: const BoxDecoration(
-                                    color: Color(0xFFF97316), // Orange Tugas
-                                    shape: BoxShape.circle,
-                                  ),
-                                ),
-                              if (hasQuiz)
-                                Container(
-                                  width: 4,
-                                  height: 4,
-                                  decoration: const BoxDecoration(
-                                    color: Color(0xFF3B82F6), // Biru Quiz
-                                    shape: BoxShape.circle,
-                                  ),
-                                ),
-                            ],
+                      const SizedBox(height: 4),
+                      Text(
+                        day.day.toString(),
+                        style: AppTypography.pageTitle(
+                          fontSize: 17.0,
+                          fontWeight: FontWeight.w800,
+                          color: isSelected
+                              ? (isDark ? Colors.black : Colors.white)
+                              : (isDark ? Colors.white : const Color(0xFF0F172A)),
+                          height: 1.1,
+                        ),
+                      ),
+                      if (hasTasks) ...[
+                        const SizedBox(height: 3),
+                        Container(
+                          width: 4,
+                          height: 4,
+                          decoration: BoxDecoration(
+                            color: isSelected
+                                ? (isDark ? Colors.black54 : Colors.white70)
+                                : const Color(0xFF7C3AED),
+                            shape: BoxShape.circle,
                           ),
                         ),
+                      ],
                     ],
                   ),
                 ),
@@ -6057,73 +6183,6 @@ class _StudentHomePageState extends State<StudentHomePage> {
         ),
       ],
     );
-  }
-
-  bool _hasScheduleOnDay(DateTime day, List projectDocs) {
-    final String dayName = _getFullDayName(day.weekday).toLowerCase();
-    for (var doc in projectDocs) {
-      if (doc is DocumentSnapshot && doc.data() != null) {
-        final data = doc.data() as Map<String, dynamic>;
-        final schedules = data['schedules'] as List? ?? [];
-        for (var s in schedules) {
-          if (s is Map) {
-            final sDay = (s['day'] ?? '').toString().toLowerCase();
-            if (sDay.contains(dayName) || dayName.contains(sDay)) {
-              return true;
-            }
-          }
-        }
-      }
-    }
-    return false;
-  }
-
-  bool _hasTaskTypeOnDay(DateTime day, List<Map<String, dynamic>> allTasks, String type) {
-    for (var task in allTasks) {
-      final taskType = task['type'] ?? 'tugas';
-      if (taskType != type) continue;
-      final endStr = task['end'] as String? ?? '';
-      if (endStr.isNotEmpty && endStr != 'DD/MM/YYYY') {
-        final endDate = _parseDateString(endStr);
-        if (endDate != null) {
-          if (endDate.year == day.year && endDate.month == day.month && endDate.day == day.day) {
-            return true;
-          }
-        }
-      }
-    }
-    return false;
-  }
-
-  String _getFullDayName(int weekday) {
-    const days = [
-      'Senin',
-      'Selasa',
-      'Rabu',
-      'Kamis',
-      'Jumat',
-      'Sabtu',
-      'Minggu',
-    ];
-    return days[(weekday - 1) % 7];
-  }
-
-  String _getShortMonthName(int month) {
-    const months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'Mei',
-      'Jun',
-      'Jul',
-      'Agu',
-      'Sep',
-      'Okt',
-      'Nov',
-      'Des',
-    ];
-    return months[(month - 1) % 12];
   }
   bool _hasTaskOnDay(DateTime day, List<Map<String, dynamic>> allTasks) {
     for (var task in allTasks) {
@@ -6178,15 +6237,94 @@ class _StudentHomePageState extends State<StudentHomePage> {
   }
 
   void _showQuickNotesOverlay() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const NoteEditorPage(
-          noteId: null,
-          initialTitle: '',
-          initialContent: '',
-        ),
-      ),
+    _openNotesDropdown(context, _notesButtonKey);
+  }
+
+  void _openNotesDropdown(BuildContext context, GlobalKey buttonKey) {
+    final RenderBox? renderBox = buttonKey.currentContext?.findRenderObject() as RenderBox?;
+    final isDark = AppColors.isDarkMode;
+
+    Offset offset = Offset.zero;
+    Size size = Size.zero;
+    if (renderBox != null) {
+      size = renderBox.size;
+      offset = renderBox.localToGlobal(Offset.zero);
+    }
+
+    final double screenWidth = MediaQuery.of(context).size.width;
+    final double top = offset.dy + size.height - 10;
+
+    showDialog(
+      context: context,
+      barrierColor: Colors.transparent,
+      builder: (dialogCtx) {
+        return StreamBuilder<QuerySnapshot>(
+          stream: FirebaseFirestore.instance
+              .collection('notes')
+              .orderBy('updatedAt', descending: true)
+              .snapshots(),
+          builder: (context, snapshot) {
+            final docs = snapshot.data?.docs ?? [];
+
+            // Tentukan lebar dinamis secara otomatis:
+            // Jika semua judul catatan pendek (<= 10 char) -> 240px
+            // Jika ada yang sedang (11-20 char) -> 275px
+            // Jika ada yang panjang (> 20 char) -> 315px (batas maksimal)
+            int maxTitleLength = 0;
+            for (var doc in docs) {
+              final data = doc.data() as Map<String, dynamic>;
+              final t = (data['title'] ?? '').toString();
+              if (t.length > maxTitleLength) {
+                maxTitleLength = t.length;
+              }
+            }
+
+            double calculatedWidth = 240.0;
+            if (maxTitleLength > 20) {
+              calculatedWidth = 315.0;
+            } else if (maxTitleLength > 10) {
+              calculatedWidth = 275.0;
+            }
+
+            final double width = math.min(calculatedWidth, screenWidth - 32.0);
+            double left = offset.dx;
+            if (left + width > screenWidth - 16.0) {
+              left = screenWidth - width - 16.0;
+            }
+            if (left < 16.0) {
+              left = 16.0;
+            }
+
+            return Stack(
+              children: [
+                Positioned(
+                  top: top,
+                  left: left,
+                  width: width,
+                  child: Material(
+                    color: Colors.transparent,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: isDark ? const Color(0xFF18181B) : Colors.white,
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                          width: 1.2,
+                        ),
+                      ),
+                      child: _QuickNotesDropdownContent(
+                        isDark: isDark,
+                        docs: docs,
+                        isLoading: snapshot.connectionState == ConnectionState.waiting && !snapshot.hasData,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
+        );
+      },
     );
   }
 }
@@ -7395,10 +7533,8 @@ class _QuizSparklinePainter extends CustomPainter {
   bool shouldRepaint(covariant _QuizSparklinePainter oldDelegate) => true;
 }
 
-/// 1. Doodle Illustration for Jadwal Kelas (Classroom / School Blackboard & Book)
 class _ClassScheduleDoodle extends StatelessWidget {
   final double size;
-
   const _ClassScheduleDoodle({super.key, this.size = 68});
 
   @override
@@ -7422,57 +7558,60 @@ class _ClassSchedulePainter extends CustomPainter {
     final Paint outline = Paint()
       ..color = const Color(0xFF1E293B)
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 2.0
+      ..strokeWidth = 2.2
       ..strokeCap = StrokeCap.round
       ..strokeJoin = StrokeJoin.round;
 
-    // Blackboard / Calendar Base
-    final RRect boardRRect = RRect.fromRectAndRadius(
-      Rect.fromLTWH(w * 0.12, h * 0.15, w * 0.76, h * 0.65),
-      const Radius.circular(10),
-    );
-    final Paint boardFill = Paint()
-      ..color = const Color(0xFFDDD6FE) // Pastel Lavender/Indigo
-      ..style = PaintingStyle.fill;
-    canvas.drawRRect(boardRRect, boardFill);
-    canvas.drawRRect(boardRRect, outline);
+    final Paint bookBg = Paint()..color = const Color(0xFFBAE6FD)..style = PaintingStyle.fill;
+    final Paint bookmark = Paint()..color = const Color(0xFFF472B6)..style = PaintingStyle.fill;
+    final Paint pencil = Paint()..color = const Color(0xFFFDE047)..style = PaintingStyle.fill;
 
-    // Top Binder Rings
-    final Paint ringPaint = Paint()..color = const Color(0xFF1E293B)..style = PaintingStyle.fill;
-    canvas.drawCircle(Offset(w * 0.30, h * 0.15), 3.0, ringPaint);
-    canvas.drawCircle(Offset(w * 0.50, h * 0.15), 3.0, ringPaint);
-    canvas.drawCircle(Offset(w * 0.70, h * 0.15), 3.0, ringPaint);
-
-    // Clock Circle in top-right
-    final Paint clockFill = Paint()..color = const Color(0xFFFEF08A)..style = PaintingStyle.fill;
-    canvas.drawCircle(Offset(w * 0.62, h * 0.42), 12, clockFill);
-    canvas.drawCircle(Offset(w * 0.62, h * 0.42), 12, outline);
-    // Clock hands
-    canvas.drawLine(Offset(w * 0.62, h * 0.42), Offset(w * 0.62, h * 0.35), outline);
-    canvas.drawLine(Offset(w * 0.62, h * 0.42), Offset(w * 0.68, h * 0.42), outline);
-
-    // Book at bottom-left
-    final Path bookPath = Path()
-      ..moveTo(w * 0.22, h * 0.45)
-      ..lineTo(w * 0.42, h * 0.45)
-      ..lineTo(w * 0.42, h * 0.68)
-      ..lineTo(w * 0.22, h * 0.68)
+    final Path leftPage = Path()
+      ..moveTo(w * 0.50, h * 0.78)
+      ..cubicTo(w * 0.35, h * 0.72, w * 0.20, h * 0.76, w * 0.12, h * 0.70)
+      ..lineTo(w * 0.12, h * 0.28)
+      ..cubicTo(w * 0.22, h * 0.34, w * 0.36, h * 0.30, w * 0.50, h * 0.36)
       ..close();
-    final Paint bookFill = Paint()..color = const Color(0xFFBAE6FD)..style = PaintingStyle.fill;
-    canvas.drawPath(bookPath, bookFill);
-    canvas.drawPath(bookPath, outline);
-    // Book spine/pages line
-    canvas.drawLine(Offset(w * 0.32, h * 0.45), Offset(w * 0.32, h * 0.68), outline);
+    canvas.drawPath(leftPage, bookBg);
+    canvas.drawPath(leftPage, outline);
+
+    final Path rightPage = Path()
+      ..moveTo(w * 0.50, h * 0.78)
+      ..cubicTo(w * 0.65, h * 0.72, w * 0.80, h * 0.76, w * 0.88, h * 0.70)
+      ..lineTo(w * 0.88, h * 0.28)
+      ..cubicTo(w * 0.78, h * 0.34, w * 0.64, h * 0.30, w * 0.50, h * 0.36)
+      ..close();
+    canvas.drawPath(rightPage, bookBg);
+    canvas.drawPath(rightPage, outline);
+
+    canvas.drawLine(Offset(w * 0.50, h * 0.36), Offset(w * 0.50, h * 0.78), outline);
+
+    final Path ribbon = Path()
+      ..moveTo(w * 0.46, h * 0.36)
+      ..lineTo(w * 0.46, h * 0.55)
+      ..lineTo(w * 0.50, h * 0.50)
+      ..lineTo(w * 0.54, h * 0.55)
+      ..lineTo(w * 0.54, h * 0.36)
+      ..close();
+    canvas.drawPath(ribbon, bookmark);
+    canvas.drawPath(ribbon, outline);
+
+    final Path pencilPath = Path()
+      ..moveTo(w * 0.70, h * 0.18)
+      ..lineTo(w * 0.82, h * 0.08)
+      ..lineTo(w * 0.88, h * 0.14)
+      ..lineTo(w * 0.76, h * 0.24)
+      ..close();
+    canvas.drawPath(pencilPath, pencil);
+    canvas.drawPath(pencilPath, outline);
   }
 
   @override
   bool shouldRepaint(covariant _ClassSchedulePainter oldDelegate) => false;
 }
 
-/// 2. Doodle Illustration for Deadline Tugas (Clipboard Checklist & Pencil)
 class _TaskDeadlineDoodle extends StatelessWidget {
   final double size;
-
   const _TaskDeadlineDoodle({super.key, this.size = 68});
 
   @override
@@ -7496,68 +7635,47 @@ class _TaskDeadlinePainter extends CustomPainter {
     final Paint outline = Paint()
       ..color = const Color(0xFF1E293B)
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 2.0
+      ..strokeWidth = 2.2
       ..strokeCap = StrokeCap.round
       ..strokeJoin = StrokeJoin.round;
 
-    // Clipboard Board
+    final Paint boardBg = Paint()..color = const Color(0xFFFED7AA)..style = PaintingStyle.fill;
+    final Paint paperBg = Paint()..color = Colors.white..style = PaintingStyle.fill;
+    final Paint clipBg = Paint()..color = const Color(0xFF94A3B8)..style = PaintingStyle.fill;
+    final Paint checkBg = Paint()..color = const Color(0xFF4ADE80)..style = PaintingStyle.fill;
+
     final RRect board = RRect.fromRectAndRadius(
-      Rect.fromLTWH(w * 0.18, h * 0.14, w * 0.60, h * 0.72),
-      const Radius.circular(8),
+      Rect.fromLTWH(w * 0.15, h * 0.16, w * 0.70, h * 0.76),
+      const Radius.circular(12),
     );
-    final Paint boardFill = Paint()..color = const Color(0xFFFED7AA)..style = PaintingStyle.fill; // Warm Peach
-    canvas.drawRRect(board, boardFill);
+    canvas.drawRRect(board, boardBg);
     canvas.drawRRect(board, outline);
 
-    // Metal Clip at Top
-    final RRect clip = RRect.fromRectAndRadius(
-      Rect.fromLTWH(w * 0.34, h * 0.08, w * 0.28, h * 0.12),
-      const Radius.circular(4),
-    );
-    final Paint clipFill = Paint()..color = const Color(0xFFCBD5E1)..style = PaintingStyle.fill;
-    canvas.drawRRect(clip, clipFill);
-    canvas.drawRRect(clip, outline);
-
-    // Checklist Paper inside
     final RRect paper = RRect.fromRectAndRadius(
-      Rect.fromLTWH(w * 0.24, h * 0.24, w * 0.48, h * 0.54),
-      const Radius.circular(4),
+      Rect.fromLTWH(w * 0.23, h * 0.24, w * 0.54, h * 0.62),
+      const Radius.circular(6),
     );
-    final Paint paperFill = Paint()..color = Colors.white..style = PaintingStyle.fill;
-    canvas.drawRRect(paper, paperFill);
+    canvas.drawRRect(paper, paperBg);
     canvas.drawRRect(paper, outline);
 
-    // Green Checkmark 1
-    final Paint checkPaint = Paint()
-      ..color = const Color(0xFF10B981) // Emerald
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 2.2
-      ..strokeCap = StrokeCap.round;
-    final Path check1 = Path()
-      ..moveTo(w * 0.30, h * 0.36)
-      ..lineTo(w * 0.34, h * 0.40)
-      ..lineTo(w * 0.42, h * 0.32);
-    canvas.drawPath(check1, checkPaint);
-    canvas.drawLine(Offset(w * 0.46, h * 0.36), Offset(w * 0.64, h * 0.36), outline);
+    final RRect clamp = RRect.fromRectAndRadius(
+      Rect.fromLTWH(w * 0.36, h * 0.10, w * 0.28, h * 0.12),
+      const Radius.circular(5),
+    );
+    canvas.drawRRect(clamp, clipBg);
+    canvas.drawRRect(clamp, outline);
 
-    // Checkmark 2
-    final Path check2 = Path()
-      ..moveTo(w * 0.30, h * 0.52)
-      ..lineTo(w * 0.34, h * 0.56)
-      ..lineTo(w * 0.42, h * 0.48);
-    canvas.drawPath(check2, checkPaint);
-    canvas.drawLine(Offset(w * 0.46, h * 0.52), Offset(w * 0.64, h * 0.52), outline);
+    canvas.drawLine(Offset(w * 0.32, h * 0.40), Offset(w * 0.68, h * 0.40), outline);
+    canvas.drawLine(Offset(w * 0.32, h * 0.54), Offset(w * 0.68, h * 0.54), outline);
+    canvas.drawLine(Offset(w * 0.32, h * 0.68), Offset(w * 0.56, h * 0.68), outline);
 
-    // Pencil on right
-    final Path pencil = Path()
-      ..moveTo(w * 0.68, h * 0.40)
-      ..lineTo(w * 0.82, h * 0.24)
-      ..lineTo(w * 0.88, h * 0.30)
-      ..lineTo(w * 0.74, h * 0.46)
-      ..close();
-    final Paint pencilFill = Paint()..color = const Color(0xFFFBBF24)..style = PaintingStyle.fill;
-    canvas.drawPath(pencil, pencilFill);
-    canvas.drawPath(pencil, outline);
+    canvas.drawCircle(Offset(w * 0.75, h * 0.74), 10, checkBg);
+    canvas.drawCircle(Offset(w * 0.75, h * 0.74), 10, outline);
+    final Path checkPath = Path()
+      ..moveTo(w * 0.70, h * 0.74)
+      ..lineTo(w * 0.74, h * 0.78)
+      ..lineTo(w * 0.81, h * 0.69);
+    canvas.drawPath(checkPath, outline);
   }
 
   @override
@@ -7932,6 +8050,3 @@ class _TaskFacetPatternPainter extends CustomPainter {
   bool shouldRepaint(covariant _TaskFacetPatternPainter oldDelegate) =>
       oldDelegate.isDark != isDark;
 }
-
-
-
