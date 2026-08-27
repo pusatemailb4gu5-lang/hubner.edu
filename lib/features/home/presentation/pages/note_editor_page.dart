@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../../core/theme/app_colors.dart';
 import 'package:hubner/core/theme/app_typography.dart';
+import 'notes_list_page.dart';
 
 class NoteEditorPage extends StatefulWidget {
   final String? noteId;
@@ -120,7 +121,7 @@ class _NoteEditorPageState extends State<NoteEditorPage> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      // Tombol Back (<): Dark sama seperti lonceng, Light putih border halus
+                      // Tombol Back (<)
                       BouncyButton(
                         onTap: () => Navigator.pop(context),
                         child: Container(
@@ -143,43 +144,78 @@ class _NoteEditorPageState extends State<NoteEditorPage> {
                       ),
                       Text(
                         widget.noteId == null ? 'Catatan Baru' : 'Edit Catatan',
-                        style: AppTypography.chatHeaderTitle(
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 17,
+                          fontWeight: FontWeight.w800,
                           color: isDark ? Colors.white : Colors.black,
                         ),
                       ),
-                      // Tombol Centang (✓): Dark sama seperti lonceng, Light warna hitam text/icon putih
-                      _isSaving
-                          ? SizedBox(
+                      // Sisi Kanan: Tombol Menu Daftar Catatan & Tombol Simpan
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          BouncyButton(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const NotesListPage(),
+                                ),
+                              );
+                            },
+                            child: Container(
                               width: 42,
                               height: 42,
-                              child: Center(
-                                child: SizedBox(
-                                  width: 20,
-                                  height: 20,
-                                  child: CircularProgressIndicator(),
+                              decoration: BoxDecoration(
+                                color: isDark ? const Color(0xFF18181B) : Colors.white,
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                                  width: 1.2,
                                 ),
                               ),
-                            )
-                          : BouncyButton(
-                              onTap: _saveNote,
-                              child: Container(
-                                width: 42,
-                                height: 42,
-                                decoration: BoxDecoration(
-                                  color: isDark ? const Color(0xFF18181B) : Colors.black,
-                                  shape: BoxShape.circle,
-                                  border: Border.all(
-                                    color: isDark ? const Color(0xFF27272A) : Colors.black,
-                                    width: 1.2,
-                                  ),
-                                ),
-                                child: const Icon(
-                                  Icons.check_rounded,
-                                  color: Colors.white,
-                                  size: 20,
-                                ),
+                              child: Icon(
+                                Icons.format_list_bulleted_rounded,
+                                color: isDark ? Colors.white : Colors.black87,
+                                size: 20,
                               ),
                             ),
+                          ),
+                          const SizedBox(width: 8),
+                          _isSaving
+                              ? const SizedBox(
+                                  width: 42,
+                                  height: 42,
+                                  child: Center(
+                                    child: SizedBox(
+                                      width: 20,
+                                      height: 20,
+                                      child: CircularProgressIndicator(strokeWidth: 2.2),
+                                    ),
+                                  ),
+                                )
+                              : BouncyButton(
+                                  onTap: _saveNote,
+                                  child: Container(
+                                    width: 42,
+                                    height: 42,
+                                    decoration: BoxDecoration(
+                                      color: isDark ? const Color(0xFF18181B) : Colors.black,
+                                      shape: BoxShape.circle,
+                                      border: Border.all(
+                                        color: isDark ? const Color(0xFF27272A) : Colors.black,
+                                        width: 1.2,
+                                      ),
+                                    ),
+                                    child: const Icon(
+                                      Icons.check_rounded,
+                                      color: Colors.white,
+                                      size: 20,
+                                    ),
+                                  ),
+                                ),
+                        ],
+                      ),
                     ],
                   ),
                 ),

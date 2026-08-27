@@ -38,6 +38,10 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  final PageController _taskQuizPageController = PageController();
+  int _taskQuizPageIndex = 0;
+  int _tugasCardMode = 0;
+  int _quizCardMode = 0;
   DateTime _selectedCalendarDay = DateTime.now();
   DateTime _currentCalendarMonth = DateTime.now();
   int _quizCardPage = 0;
@@ -1746,8 +1750,8 @@ class _HomePageState extends State<HomePage> {
                                           return BouncyButton(
                                             onTap: () => _toggleThemeWithBounce(context, isDark),
                                             child: Container(
-                                              width: 42,
-                                              height: 42,
+                                              width: 52,
+                                              height: 52,
                                               decoration: BoxDecoration(
                                                 color: isDark
                                                     ? const Color(0xFF18181B)
@@ -1756,14 +1760,14 @@ class _HomePageState extends State<HomePage> {
                                                 border: Border.all(
                                                   color: isDark
                                                       ? const Color(0xFF27272A)
-                                                      : const Color(0xFFF1F5F9),
+                                                      : const Color(0xFFE2E8F0),
                                                   width: 1.2,
                                                 ),
                                               ),
                                               child: Icon(
                                                 isDark ? Icons.wb_sunny_rounded : Icons.nightlight_round,
                                                 color: isDark ? const Color(0xFFFBBF24) : Colors.black87,
-                                                size: 20,
+                                                size: 24,
                                               ),
                                             ),
                                           );
@@ -1918,8 +1922,7 @@ class _HomePageState extends State<HomePage> {
                                               return BouncyButton(
                                                 onTap: () => _toggleThemeWithBounce(context, currentIsDark),
                                                 child: Container(
-                                                  width: 42,
-                                                  height: 42,
+                                                  height: 52,
                                                   decoration: BoxDecoration(
                                                     color: currentIsDark
                                                         ? const Color(0xFF1C1C1E)
@@ -1946,7 +1949,7 @@ class _HomePageState extends State<HomePage> {
                                              valueListenable: HubnerApp.themeNotifier,
                                              builder: (context, currentTheme, _) {
                                                final bool isDark = currentTheme == 'Gelap' || currentTheme == 'Hitam';
-                                               return NotificationBellIcon(isDark: isDark, size: 42);
+                                               return NotificationBellIcon(isDark: isDark, size: 52);
                                              },
                                            ),
                                         ],
@@ -3960,7 +3963,7 @@ class _HomePageState extends State<HomePage> {
                                                 valueListenable: HubnerApp.themeNotifier,
                                                 builder: (context, currentTheme, _) {
                                                   final bool isDark = currentTheme == 'Gelap' || currentTheme == 'Hitam';
-                                                  return NotificationBellIcon(isDark: isDark, size: 42);
+                                                  return NotificationBellIcon(isDark: isDark, size: 52);
                                                 },
                                               ),
                                             ],
@@ -7607,4 +7610,470 @@ class _HomeSearchAndNotesRowState extends State<_HomeSearchAndNotesRow> {
             ),
     );
   }
+}
+
+
+// ==========================================
+// SCANDINAVIAN / MINIMAL DOODLES & PAINTERS
+// ==========================================
+
+class _StressStyleBarChartPainter extends CustomPainter {
+  final List<int> values;
+  final bool isDark;
+  final Color barColor;
+  final Color lineColor;
+
+  const _StressStyleBarChartPainter({
+    required this.values,
+    required this.isDark,
+    required this.barColor,
+    required this.lineColor,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (values.isEmpty) return;
+
+    final int count = values.length;
+    final double barWidth = 14.0;
+    final double spacing = (size.width - (count * barWidth)) / (count > 1 ? (count - 1) : 1);
+
+    final List<Offset> peakPoints = [];
+
+    for (int i = 0; i < count; i++) {
+      final double valRatio = (values[i] / 100.0).clamp(0.15, 0.95);
+      final double barHeight = size.height * valRatio;
+      final double left = i * (barWidth + spacing);
+      final double top = size.height - barHeight;
+
+      final RRect capsule = RRect.fromRectAndRadius(
+        Rect.fromLTWH(left, top, barWidth, barHeight),
+        Radius.circular(barWidth / 2),
+      );
+
+      final Paint barPaint = Paint()
+        ..color = barColor.withValues(alpha: isDark ? 0.40 : 0.30)
+        ..style = PaintingStyle.fill;
+      canvas.drawRRect(capsule, barPaint);
+
+      peakPoints.add(Offset(left + (barWidth / 2), top));
+    }
+
+    if (peakPoints.length > 1) {
+      final Path splinePath = Path()..moveTo(peakPoints.first.dx, peakPoints.first.dy);
+      for (int i = 0; i < peakPoints.length - 1; i++) {
+        final p0 = peakPoints[i];
+        final p1 = peakPoints[i + 1];
+        final midX = (p0.dx + p1.dx) / 2;
+        splinePath.cubicTo(midX, p0.dy, midX, p1.dy, p1.dx, p1.dy);
+      }
+
+      final Paint linePaint = Paint()
+        ..color = lineColor
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 2.4
+        ..strokeCap = StrokeCap.round;
+      canvas.drawPath(splinePath, linePaint);
+
+      final Paint peakDotPaint = Paint()
+        ..color = lineColor
+        ..style = PaintingStyle.fill;
+      final Paint peakDotStroke = Paint()
+        ..color = isDark ? const Color(0xFF18181B) : Colors.white
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 2.0;
+
+      for (var pt in peakPoints) {
+        canvas.drawCircle(pt, 4.0, peakDotPaint);
+        canvas.drawCircle(pt, 4.0, peakDotStroke);
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _StressStyleBarChartPainter oldDelegate) => true;
+}
+
+class _CuteMascotFace extends StatelessWidget {
+  final double size;
+  final Color bgColor;
+  final bool isSmiling;
+  final bool isHappyDoodle;
+
+  const _CuteMascotFace({
+    super.key,
+    this.size = 28,
+    required this.bgColor,
+    this.isSmiling = true,
+    this.isHappyDoodle = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: size,
+      height: size,
+      child: CustomPaint(
+        painter: _CuteMascotPainter(
+          bgColor: bgColor,
+          isSmiling: isSmiling,
+          isHappyDoodle: isHappyDoodle,
+        ),
+      ),
+    );
+  }
+}
+
+class _CuteMascotPainter extends CustomPainter {
+  final Color bgColor;
+  final bool isSmiling;
+  final bool isHappyDoodle;
+
+  const _CuteMascotPainter({
+    required this.bgColor,
+    required this.isSmiling,
+    required this.isHappyDoodle,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final double w = size.width;
+    final double h = size.height;
+
+    final Paint outline = Paint()
+      ..color = const Color(0xFF1E293B)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = isHappyDoodle ? 2.5 : 1.8
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round;
+
+    final Paint fill = Paint()..color = bgColor..style = PaintingStyle.fill;
+    final Paint blush = Paint()..color = const Color(0xFFFCA5A5)..style = PaintingStyle.fill;
+
+    if (isHappyDoodle) {
+      final Path leftEar = Path()
+        ..moveTo(w * 0.22, h * 0.28)
+        ..quadraticBezierTo(w * 0.12, h * 0.08, w * 0.32, h * 0.16)
+        ..close();
+      final Path rightEar = Path()
+        ..moveTo(w * 0.78, h * 0.28)
+        ..quadraticBezierTo(w * 0.88, h * 0.08, w * 0.68, h * 0.16)
+        ..close();
+
+      canvas.drawPath(leftEar, fill);
+      canvas.drawPath(leftEar, outline);
+      canvas.drawPath(rightEar, fill);
+      canvas.drawPath(rightEar, outline);
+
+      final RRect head = RRect.fromRectAndRadius(
+        Rect.fromLTWH(w * 0.10, h * 0.16, w * 0.80, h * 0.76),
+        Radius.circular(w * 0.38),
+      );
+      canvas.drawRRect(head, fill);
+      canvas.drawRRect(head, outline);
+
+      final Path leftEye = Path()
+        ..moveTo(w * 0.30, h * 0.48)
+        ..quadraticBezierTo(w * 0.37, h * 0.41, w * 0.44, h * 0.48);
+      final Path rightEye = Path()
+        ..moveTo(w * 0.56, h * 0.48)
+        ..quadraticBezierTo(w * 0.63, h * 0.41, w * 0.70, h * 0.48);
+      canvas.drawPath(leftEye, outline);
+      canvas.drawPath(rightEye, outline);
+
+      final Path smile = Path()
+        ..moveTo(w * 0.42, h * 0.60)
+        ..quadraticBezierTo(w * 0.50, h * 0.74, w * 0.58, h * 0.60);
+      canvas.drawPath(smile, outline);
+
+      canvas.drawCircle(Offset(w * 0.25, h * 0.56), 4.5, blush);
+      canvas.drawCircle(Offset(w * 0.75, h * 0.56), 4.5, blush);
+    } else {
+      final Offset center = Offset(w / 2, h / 2);
+      canvas.drawCircle(center, w / 2 - 1.5, fill);
+      canvas.drawCircle(center, w / 2 - 1.5, outline);
+
+      final Paint dotEye = Paint()..color = const Color(0xFF1E293B)..style = PaintingStyle.fill;
+      canvas.drawCircle(Offset(w * 0.36, h * 0.42), 1.8, dotEye);
+      canvas.drawCircle(Offset(w * 0.64, h * 0.42), 1.8, dotEye);
+
+      final Path smile = Path()
+        ..moveTo(w * 0.38, h * 0.62)
+        ..quadraticBezierTo(w * 0.50, h * 0.74, w * 0.62, h * 0.62);
+      canvas.drawPath(smile, outline);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _CuteMascotPainter oldDelegate) => false;
+}
+
+class _SoftConcentricRipplesPainter extends CustomPainter {
+  final bool isDark;
+
+  const _SoftConcentricRipplesPainter({required this.isDark});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final double cx = size.width - 44;
+    final double cy = size.height * 0.50;
+    final Offset center = Offset(cx, cy);
+
+    final Color basePatternColor = isDark ? Colors.black : Colors.white;
+
+    final Paint p1 = Paint()
+      ..color = basePatternColor.withValues(alpha: isDark ? 0.08 : 0.18)
+      ..style = PaintingStyle.fill;
+    canvas.drawCircle(center, 92, p1);
+
+    final Paint p2 = Paint()
+      ..color = basePatternColor.withValues(alpha: isDark ? 0.14 : 0.28)
+      ..style = PaintingStyle.fill;
+    canvas.drawCircle(center, 64, p2);
+
+    final Paint p3 = Paint()
+      ..color = basePatternColor.withValues(alpha: isDark ? 0.20 : 0.38)
+      ..style = PaintingStyle.fill;
+    canvas.drawCircle(center, 40, p3);
+
+    final Path wavePath = Path()
+      ..moveTo(0, size.height - 24)
+      ..quadraticBezierTo(size.width * 0.18, size.height - 35, size.width * 0.36, size.height)
+      ..lineTo(0, size.height)
+      ..close();
+    final Paint pWave = Paint()
+      ..color = basePatternColor.withValues(alpha: isDark ? 0.06 : 0.12)
+      ..style = PaintingStyle.fill;
+    canvas.drawPath(wavePath, pWave);
+  }
+
+  @override
+  bool shouldRepaint(covariant _SoftConcentricRipplesPainter oldDelegate) =>
+      oldDelegate.isDark != isDark;
+}
+
+class _LotusBowlDoodle extends StatelessWidget {
+  final double size;
+  const _LotusBowlDoodle({super.key, this.size = 68});
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: size,
+      height: size,
+      child: CustomPaint(
+        painter: _LotusBowlPainter(),
+      ),
+    );
+  }
+}
+
+class _LotusBowlPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final double w = size.width;
+    final double h = size.height;
+
+    final Paint outline = Paint()
+      ..color = const Color(0xFF1E293B)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.2
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round;
+
+    final Paint bowlBg = Paint()..color = const Color(0xFFFED7AA)..style = PaintingStyle.fill;
+    final Paint waterBg = Paint()..color = const Color(0xFFBAE6FD)..style = PaintingStyle.fill;
+    final Paint petalCenter = Paint()..color = const Color(0xFFF472B6)..style = PaintingStyle.fill;
+
+    final Path centerPetal = Path()
+      ..moveTo(w * 0.50, h * 0.18)
+      ..quadraticBezierTo(w * 0.44, h * 0.36, w * 0.50, h * 0.54)
+      ..quadraticBezierTo(w * 0.56, h * 0.36, w * 0.50, h * 0.18)
+      ..close();
+    canvas.drawPath(centerPetal, petalCenter);
+    canvas.drawPath(centerPetal, outline);
+
+    final Path leftPetal = Path()
+      ..moveTo(w * 0.34, h * 0.32)
+      ..quadraticBezierTo(w * 0.38, h * 0.46, w * 0.48, h * 0.54)
+      ..quadraticBezierTo(w * 0.40, h * 0.44, w * 0.34, h * 0.32)
+      ..close();
+    canvas.drawPath(leftPetal, outline);
+
+    final Path rightPetal = Path()
+      ..moveTo(w * 0.66, h * 0.32)
+      ..quadraticBezierTo(w * 0.62, h * 0.46, w * 0.52, h * 0.54)
+      ..quadraticBezierTo(w * 0.60, h * 0.44, w * 0.66, h * 0.32)
+      ..close();
+    canvas.drawPath(rightPetal, outline);
+
+    final Path bowl = Path()
+      ..moveTo(w * 0.14, h * 0.54)
+      ..quadraticBezierTo(w * 0.18, h * 0.90, w * 0.50, h * 0.90)
+      ..quadraticBezierTo(w * 0.82, h * 0.90, w * 0.86, h * 0.54)
+      ..close();
+    canvas.drawPath(bowl, bowlBg);
+    canvas.drawPath(bowl, outline);
+
+    final Path water = Path()
+      ..moveTo(w * 0.14, h * 0.54)
+      ..quadraticBezierTo(w * 0.50, h * 0.62, w * 0.86, h * 0.54)
+      ..lineTo(w * 0.86, h * 0.54)
+      ..quadraticBezierTo(w * 0.50, h * 0.50, w * 0.14, h * 0.54)
+      ..close();
+    canvas.drawPath(water, waterBg);
+    canvas.drawPath(water, outline);
+  }
+
+  @override
+  bool shouldRepaint(covariant _LotusBowlPainter oldDelegate) => false;
+}
+
+class _ClassScheduleDoodle extends StatelessWidget {
+  final double size;
+  const _ClassScheduleDoodle({super.key, this.size = 68});
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: size,
+      height: size,
+      child: CustomPaint(
+        painter: _ClassSchedulePainter(),
+      ),
+    );
+  }
+}
+
+class _ClassSchedulePainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final double w = size.width;
+    final double h = size.height;
+
+    final Paint outline = Paint()
+      ..color = const Color(0xFF1E293B)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.2
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round;
+
+    final Paint bookBg = Paint()..color = const Color(0xFFBAE6FD)..style = PaintingStyle.fill;
+    final Paint bookmark = Paint()..color = const Color(0xFFF472B6)..style = PaintingStyle.fill;
+    final Paint pencil = Paint()..color = const Color(0xFFFDE047)..style = PaintingStyle.fill;
+
+    final Path leftPage = Path()
+      ..moveTo(w * 0.50, h * 0.78)
+      ..cubicTo(w * 0.35, h * 0.72, w * 0.20, h * 0.76, w * 0.12, h * 0.70)
+      ..lineTo(w * 0.12, h * 0.28)
+      ..cubicTo(w * 0.22, h * 0.34, w * 0.36, h * 0.30, w * 0.50, h * 0.36)
+      ..close();
+    canvas.drawPath(leftPage, bookBg);
+    canvas.drawPath(leftPage, outline);
+
+    final Path rightPage = Path()
+      ..moveTo(w * 0.50, h * 0.78)
+      ..cubicTo(w * 0.65, h * 0.72, w * 0.80, h * 0.76, w * 0.88, h * 0.70)
+      ..lineTo(w * 0.88, h * 0.28)
+      ..cubicTo(w * 0.78, h * 0.34, w * 0.64, h * 0.30, w * 0.50, h * 0.36)
+      ..close();
+    canvas.drawPath(rightPage, bookBg);
+    canvas.drawPath(rightPage, outline);
+
+    canvas.drawLine(Offset(w * 0.50, h * 0.36), Offset(w * 0.50, h * 0.78), outline);
+
+    final Path ribbon = Path()
+      ..moveTo(w * 0.46, h * 0.36)
+      ..lineTo(w * 0.46, h * 0.55)
+      ..lineTo(w * 0.50, h * 0.50)
+      ..lineTo(w * 0.54, h * 0.55)
+      ..lineTo(w * 0.54, h * 0.36)
+      ..close();
+    canvas.drawPath(ribbon, bookmark);
+    canvas.drawPath(ribbon, outline);
+
+    final Path pencilPath = Path()
+      ..moveTo(w * 0.70, h * 0.18)
+      ..lineTo(w * 0.82, h * 0.08)
+      ..lineTo(w * 0.88, h * 0.14)
+      ..lineTo(w * 0.76, h * 0.24)
+      ..close();
+    canvas.drawPath(pencilPath, pencil);
+    canvas.drawPath(pencilPath, outline);
+  }
+
+  @override
+  bool shouldRepaint(covariant _ClassSchedulePainter oldDelegate) => false;
+}
+
+class _TaskDeadlineDoodle extends StatelessWidget {
+  final double size;
+  const _TaskDeadlineDoodle({super.key, this.size = 68});
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: size,
+      height: size,
+      child: CustomPaint(
+        painter: _TaskDeadlinePainter(),
+      ),
+    );
+  }
+}
+
+class _TaskDeadlinePainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final double w = size.width;
+    final double h = size.height;
+
+    final Paint outline = Paint()
+      ..color = const Color(0xFF1E293B)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.2
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round;
+
+    final Paint boardBg = Paint()..color = const Color(0xFFFED7AA)..style = PaintingStyle.fill;
+    final Paint paperBg = Paint()..color = Colors.white..style = PaintingStyle.fill;
+    final Paint clipBg = Paint()..color = const Color(0xFF94A3B8)..style = PaintingStyle.fill;
+    final Paint checkBg = Paint()..color = const Color(0xFF4ADE80)..style = PaintingStyle.fill;
+
+    final RRect board = RRect.fromRectAndRadius(
+      Rect.fromLTWH(w * 0.15, h * 0.16, w * 0.70, h * 0.76),
+      const Radius.circular(12),
+    );
+    canvas.drawRRect(board, boardBg);
+    canvas.drawRRect(board, outline);
+
+    final RRect paper = RRect.fromRectAndRadius(
+      Rect.fromLTWH(w * 0.23, h * 0.24, w * 0.54, h * 0.62),
+      const Radius.circular(6),
+    );
+    canvas.drawRRect(paper, paperBg);
+    canvas.drawRRect(paper, outline);
+
+    final RRect clamp = RRect.fromRectAndRadius(
+      Rect.fromLTWH(w * 0.36, h * 0.10, w * 0.28, h * 0.12),
+      const Radius.circular(5),
+    );
+    canvas.drawRRect(clamp, clipBg);
+    canvas.drawRRect(clamp, outline);
+
+    canvas.drawLine(Offset(w * 0.32, h * 0.40), Offset(w * 0.68, h * 0.40), outline);
+    canvas.drawLine(Offset(w * 0.32, h * 0.54), Offset(w * 0.68, h * 0.54), outline);
+    canvas.drawLine(Offset(w * 0.32, h * 0.68), Offset(w * 0.56, h * 0.68), outline);
+
+    canvas.drawCircle(Offset(w * 0.75, h * 0.74), 10, checkBg);
+    canvas.drawCircle(Offset(w * 0.75, h * 0.74), 10, outline);
+    final Path checkPath = Path()
+      ..moveTo(w * 0.70, h * 0.74)
+      ..lineTo(w * 0.74, h * 0.78)
+      ..lineTo(w * 0.81, h * 0.69);
+    canvas.drawPath(checkPath, outline);
+  }
+
+  @override
+  bool shouldRepaint(covariant _TaskDeadlinePainter oldDelegate) => false;
 }

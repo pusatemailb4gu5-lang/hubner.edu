@@ -415,7 +415,7 @@ class _RegisterPageState extends State<RegisterPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 1. Top Bar: Back Button (Left) & Google Sign In Pill (Right) - Standard Header Size (40px)
+          // 1. Top Bar: Back Button (Left) & Google Sign In Pill (Right) - Height 52px matching Daftar button
           Padding(
             padding: const EdgeInsets.only(bottom: 14.0),
             child: Row(
@@ -426,8 +426,8 @@ class _RegisterPageState extends State<RegisterPage> {
                     onTap: () => Navigator.of(context).pop(),
                     behavior: HitTestBehavior.opaque,
                     child: Container(
-                      width: 40,
-                      height: 40,
+                      width: 52,
+                      height: 52,
                       decoration: BoxDecoration(
                         color: isDark ? const Color(0xFF18181B) : Colors.white,
                         shape: BoxShape.circle,
@@ -440,24 +440,24 @@ class _RegisterPageState extends State<RegisterPage> {
                         child: Icon(
                           Icons.chevron_left_rounded,
                           color: isDark ? Colors.white : Colors.black87,
-                          size: 24,
+                          size: 26,
                         ),
                       ),
                     ),
                   )
                 else
-                  const SizedBox(width: 40),
+                  const SizedBox(width: 52),
 
-                // Top-Right Google "Masuk" Button - Standard Header Size (40px)
+                // Top-Right Google "Masuk" Button - Height 52px matching Daftar button
                 GestureDetector(
                   onTap: _isLoading ? null : _handleGoogleRegister,
                   behavior: HitTestBehavior.opaque,
                   child: Container(
-                    height: 40,
-                    padding: const EdgeInsets.symmetric(horizontal: 14),
+                    height: 52,
+                    padding: const EdgeInsets.symmetric(horizontal: 18),
                     decoration: BoxDecoration(
                       color: isDark ? const Color(0xFF18181B) : Colors.white,
-                      borderRadius: BorderRadius.circular(20),
+                      borderRadius: BorderRadius.circular(32),
                       border: Border.all(
                         color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
                         width: 1.2,
@@ -466,14 +466,14 @@ class _RegisterPageState extends State<RegisterPage> {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const GoogleLogoWidget(size: 18),
-                        const SizedBox(width: 8),
+                        const GoogleLogoWidget(size: 20),
+                        const SizedBox(width: 10),
                         Text(
                           'Masuk',
                           style: AppTypography.buttonLabel(
                             color: isDark ? Colors.white : Colors.black87,
                             fontWeight: FontWeight.w600,
-                            fontSize: 13,
+                            fontSize: 14,
                           ),
                         ),
                       ],
@@ -531,8 +531,9 @@ class _RegisterPageState extends State<RegisterPage> {
                 // Full Name Field (No label above)
                 TextField(
                   controller: _nameController,
+                  cursorColor: isDark ? Colors.white : Colors.black,
                   keyboardType: TextInputType.name,
-                  style: AppTypography.timestamp(color: isDark ? Colors.white : Colors.black87),
+                  style: AppTypography.timestamp(color: isDark ? Colors.white : Colors.black),
                   decoration: InputDecoration(
                     hintText: 'Masukkan nama lengkap Anda',
                     hintStyle: AppTypography.subtitle(color: isDark ? Colors.white38 : Colors.black26),
@@ -582,8 +583,9 @@ class _RegisterPageState extends State<RegisterPage> {
                   controller: _emailController,
                   readOnly: widget.isGoogleSignIn,
                   enabled: !widget.isGoogleSignIn,
+                  cursorColor: isDark ? Colors.white : Colors.black,
                   keyboardType: TextInputType.emailAddress,
-                  style: AppTypography.timestamp(color: widget.isGoogleSignIn ? (isDark ? Colors.white38 : Colors.black38) : (isDark ? Colors.white : Colors.black87)),
+                  style: AppTypography.timestamp(color: widget.isGoogleSignIn ? (isDark ? Colors.white38 : Colors.black38) : (isDark ? Colors.white : Colors.black)),
                   decoration: InputDecoration(
                     hintText: 'Masukkan email Anda',
                     hintStyle: AppTypography.subtitle(color: isDark ? Colors.white38 : Colors.black26),
@@ -624,7 +626,8 @@ class _RegisterPageState extends State<RegisterPage> {
                 TextField(
                   controller: _passwordController,
                   obscureText: _obscurePassword,
-                  style: AppTypography.timestamp(color: isDark ? Colors.white : Colors.black87),
+                  cursorColor: isDark ? Colors.white : Colors.black,
+                  style: AppTypography.timestamp(color: isDark ? Colors.white : Colors.black),
                   decoration: InputDecoration(
                     hintText: 'Buat kata sandi',
                     hintStyle: AppTypography.subtitle(color: isDark ? Colors.white38 : Colors.black26),
@@ -664,7 +667,8 @@ class _RegisterPageState extends State<RegisterPage> {
                 TextField(
                   controller: _confirmPasswordController,
                   obscureText: _obscureConfirmPassword,
-                  style: AppTypography.timestamp(color: isDark ? Colors.white : Colors.black87),
+                  cursorColor: isDark ? Colors.white : Colors.black,
+                  style: AppTypography.timestamp(color: isDark ? Colors.white : Colors.black),
                   decoration: InputDecoration(
                     hintText: 'Konfirmasi kata sandi Anda',
                     hintStyle: AppTypography.subtitle(color: isDark ? Colors.white38 : Colors.black26),
@@ -715,12 +719,12 @@ class _RegisterPageState extends State<RegisterPage> {
                     height: 48,
                     decoration: BoxDecoration(
                       color: _selectedGender == 'Laki-laki'
-                          ? (isDark ? Colors.white : const Color(0xFF18181B))
+                          ? const Color(0xFF0EA5E9) // Solid Biru Muda
                           : (isDark ? const Color(0xFF18181B) : Colors.white),
                       borderRadius: BorderRadius.circular(32),
                       border: Border.all(
                         color: _selectedGender == 'Laki-laki'
-                            ? (isDark ? Colors.white : const Color(0xFF18181B))
+                            ? const Color(0xFF0EA5E9)
                             : (isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0)),
                         width: 1.2,
                       ),
@@ -730,13 +734,13 @@ class _RegisterPageState extends State<RegisterPage> {
                       children: [
                         Icon(
                           Icons.male_rounded,
-                          color: _selectedGender == 'Laki-laki' ? (isDark ? Colors.black : Colors.white) : (isDark ? Colors.white54 : Colors.black38),
+                          color: _selectedGender == 'Laki-laki' ? Colors.white : (isDark ? Colors.white54 : Colors.black38),
                           size: 18,
                         ),
                         const SizedBox(width: 6),
                         Text(
                           'Laki-laki',
-                          style: AppTypography.buttonLabel(color: _selectedGender == 'Laki-laki' ? (isDark ? Colors.black : Colors.white) : (isDark ? Colors.white70 : Colors.black38), fontWeight: FontWeight.w600),
+                          style: AppTypography.buttonLabel(color: _selectedGender == 'Laki-laki' ? Colors.white : (isDark ? Colors.white70 : Colors.black38), fontWeight: FontWeight.w600),
                         ),
                       ],
                     ),
@@ -751,12 +755,12 @@ class _RegisterPageState extends State<RegisterPage> {
                     height: 48,
                     decoration: BoxDecoration(
                       color: _selectedGender == 'Perempuan'
-                          ? (isDark ? Colors.white : const Color(0xFF18181B))
+                          ? const Color(0xFFF43F5E) // Solid Pink
                           : (isDark ? const Color(0xFF18181B) : Colors.white),
                       borderRadius: BorderRadius.circular(32),
                       border: Border.all(
                         color: _selectedGender == 'Perempuan'
-                            ? (isDark ? Colors.white : const Color(0xFF18181B))
+                            ? const Color(0xFFF43F5E)
                             : (isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0)),
                         width: 1.2,
                       ),
@@ -766,13 +770,13 @@ class _RegisterPageState extends State<RegisterPage> {
                       children: [
                         Icon(
                           Icons.female_rounded,
-                          color: _selectedGender == 'Perempuan' ? (isDark ? Colors.black : Colors.white) : (isDark ? Colors.white54 : Colors.black38),
+                          color: _selectedGender == 'Perempuan' ? Colors.white : (isDark ? Colors.white54 : Colors.black38),
                           size: 18,
                         ),
                         const SizedBox(width: 6),
                         Text(
                           'Perempuan',
-                          style: AppTypography.buttonLabel(color: _selectedGender == 'Perempuan' ? (isDark ? Colors.black : Colors.white) : (isDark ? Colors.white70 : Colors.black38), fontWeight: FontWeight.w600),
+                          style: AppTypography.buttonLabel(color: _selectedGender == 'Perempuan' ? Colors.white : (isDark ? Colors.white70 : Colors.black38), fontWeight: FontWeight.w600),
                         ),
                       ],
                     ),
@@ -896,7 +900,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     } else if (value == 'SMP') {
                       iconColor = const Color(0xFF2563EB); // SMP: Biru
                     } else {
-                      iconColor = const Color(0xFF8B5CF6); // SMA/SMK: Ungu
+                      iconColor = const Color(0xFF64748B); // SMA/SMK: Abu-abu
                     }
                     return DropdownMenuItem<String>(
                       value: value,
@@ -957,7 +961,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     } else if (classNum <= 9) {
                       iconColor = const Color(0xFF2563EB); // Kelas 7-9 SMP: Biru
                     } else {
-                      iconColor = const Color(0xFF8B5CF6); // Kelas 10-12 SMA/SMK: Ungu
+                      iconColor = const Color(0xFF64748B); // Kelas 10-12 SMA/SMK: Abu-abu
                     }
                     return DropdownMenuItem<String>(
                       value: value,
@@ -1014,7 +1018,7 @@ class _RegisterPageState extends State<RegisterPage> {
                         value: value,
                         child: Row(
                           children: [
-                            const Icon(Icons.domain_rounded, size: 18, color: Color(0xFF8B5CF6)), // SMA/SMK: Ungu
+                            const Icon(Icons.domain_rounded, size: 18, color: Color(0xFF64748B)), // SMA/SMK: Abu-abu
                             const SizedBox(width: 10),
                             Text(
                               value,

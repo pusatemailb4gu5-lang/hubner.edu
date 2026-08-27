@@ -353,7 +353,7 @@ class _LoginPageState extends State<LoginPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 1. Top Bar: Back Button (Left) & Google Sign In Pill (Right) - Standard Header Size (40px)
+            // 1. Top Bar: Back Button (Left) & Google Sign In Pill (Right) - Height 52px matching Masuk button
             Padding(
               padding: const EdgeInsets.only(bottom: 14.0),
               child: Row(
@@ -364,8 +364,8 @@ class _LoginPageState extends State<LoginPage> {
                       onTap: () => Navigator.of(context).pop(),
                       behavior: HitTestBehavior.opaque,
                       child: Container(
-                        width: 40,
-                        height: 40,
+                        width: 52,
+                        height: 52,
                         decoration: BoxDecoration(
                           color: isDark ? const Color(0xFF18181B) : Colors.white,
                           shape: BoxShape.circle,
@@ -378,24 +378,24 @@ class _LoginPageState extends State<LoginPage> {
                           child: Icon(
                             Icons.chevron_left_rounded,
                             color: isDark ? Colors.white : Colors.black87,
-                            size: 24,
+                            size: 26,
                           ),
                         ),
                       ),
                     )
                   else
-                    const SizedBox(width: 40),
+                    const SizedBox(width: 52),
 
-                  // Top-Right Google "Masuk" Button - Standard Header Size (40px)
+                  // Top-Right Google "Masuk" Button - Height 52px matching Masuk button
                   GestureDetector(
                     onTap: _isGoogleLoading ? null : _handleGoogleLogin,
                     behavior: HitTestBehavior.opaque,
                     child: Container(
-                      height: 40,
-                      padding: const EdgeInsets.symmetric(horizontal: 14),
+                      height: 52,
+                      padding: const EdgeInsets.symmetric(horizontal: 18),
                       decoration: BoxDecoration(
                         color: isDark ? const Color(0xFF18181B) : Colors.white,
-                        borderRadius: BorderRadius.circular(20),
+                        borderRadius: BorderRadius.circular(32),
                         border: Border.all(
                           color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
                           width: 1.2,
@@ -404,14 +404,14 @@ class _LoginPageState extends State<LoginPage> {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const GoogleLogoWidget(size: 18),
-                          const SizedBox(width: 8),
+                          const GoogleLogoWidget(size: 20),
+                          const SizedBox(width: 10),
                           Text(
                             'Masuk',
                             style: AppTypography.buttonLabel(
                               color: isDark ? Colors.white : Colors.black87,
                               fontWeight: FontWeight.w600,
-                              fontSize: 13,
+                              fontSize: 14,
                             ),
                           ),
                         ],
@@ -469,7 +469,8 @@ class _LoginPageState extends State<LoginPage> {
                   // Email Input Field (No label above)
                   TextField(
                     controller: _emailController,
-                    style: AppTypography.timestamp(color: isDark ? Colors.white : Colors.black87),
+                    cursorColor: isDark ? Colors.white : Colors.black,
+                    style: AppTypography.timestamp(color: isDark ? Colors.white : Colors.black),
                     decoration: InputDecoration(
                       hintText: 'Masukkan email atau ID User Anda...',
                       hintStyle: AppTypography.subtitle(color: isDark ? Colors.white38 : Colors.black26),
@@ -499,7 +500,8 @@ class _LoginPageState extends State<LoginPage> {
                   TextField(
                     controller: _passwordController,
                     obscureText: _obscurePassword,
-                    style: AppTypography.timestamp(color: isDark ? Colors.white : Colors.black87),
+                    cursorColor: isDark ? Colors.white : Colors.black,
+                    style: AppTypography.timestamp(color: isDark ? Colors.white : Colors.black),
                     decoration: InputDecoration(
                       hintText: 'Masukkan kata sandi Anda',
                       hintStyle: AppTypography.subtitle(color: isDark ? Colors.white38 : Colors.black26),
@@ -641,13 +643,17 @@ class _LoginPageState extends State<LoginPage> {
                         GestureDetector(
                           onTap: () {
                             Navigator.of(context).push(
-                              MaterialPageRoute(builder: (_) => const RegisterPage()),
+                              PageRouteBuilder(
+                                pageBuilder: (context, animation, secondaryAnimation) => const RegisterPage(),
+                                transitionDuration: Duration.zero,
+                                reverseTransitionDuration: Duration.zero,
+                              ),
                             );
                           },
                           child: Text(
                             'Daftar Sekarang',
                             style: AppTypography.chatBody(
-                              color: isDark ? const Color(0xFFA78BFA) : const Color(0xFF0F172A),
+                              color: isDark ? Colors.white : const Color(0xFF0F172A),
                               fontWeight: FontWeight.bold,
                             ),
                           ),

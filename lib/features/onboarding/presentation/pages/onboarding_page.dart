@@ -46,7 +46,11 @@ class _OnboardingPageState extends State<OnboardingPage> with SingleTickerProvid
 
     if (mounted) {
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => const LoginPage()),
+        PageRouteBuilder(
+          pageBuilder: (context, animation, secondaryAnimation) => const LoginPage(),
+          transitionDuration: Duration.zero,
+          reverseTransitionDuration: Duration.zero,
+        ),
       );
     }
   }
@@ -78,40 +82,20 @@ class _OnboardingPageState extends State<OnboardingPage> with SingleTickerProvid
         systemNavigationBarContrastEnforced: false,
       ),
       child: Scaffold(
-        backgroundColor: isDark ? const Color(0xFF000000) : Colors.white,
-        body: Stack(
-          children: [
-            // 1. Organic Fluid Blob Pattern Background (Variant 1: Onboarding)
-            Positioned.fill(
-              child: OrganicBlobBackground(
-                isDark: isDark,
-                variant: 1,
-              ),
-            ),
-
-            if (isDark) ...[
-              // Top-Left ambient glow
-              Positioned(
-                top: -30,
-                left: -40,
-                child: Container(
-                  width: 300,
-                  height: 300,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: RadialGradient(
-                      colors: [
-                        const Color(0xFF38104A).withValues(alpha: 0.25),
-                        Colors.transparent,
-                      ],
-                      stops: const [0.0, 0.7],
-                    ),
-                  ),
+        backgroundColor: Colors.transparent,
+        body: SizedBox.expand(
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              // 1. Organic Fluid Blob Pattern Background (Variant 1: Onboarding)
+              Positioned.fill(
+                child: OrganicBlobBackground(
+                  isDark: isDark,
+                  variant: 1,
                 ),
               ),
-            ],
 
-            // 2. Full-Width Illustration resting right on top of Bottom Card
+              // 2. Full-Width Illustration resting right on top of Bottom Card
             Column(
               children: [
                 SizedBox(height: statusBarHeight + 12.0),
@@ -227,6 +211,7 @@ class _OnboardingPageState extends State<OnboardingPage> with SingleTickerProvid
           ],
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 }

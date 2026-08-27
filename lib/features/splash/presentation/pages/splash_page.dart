@@ -116,38 +116,18 @@ class _SplashPageState extends State<SplashPage> with SingleTickerProviderStateM
         systemNavigationBarContrastEnforced: false,
       ),
       child: Scaffold(
-        backgroundColor: isDark ? const Color(0xFF000000) : Colors.white,
-        body: Stack(
-          children: [
-            // 1. Organic Fluid Blob Pattern Background (Variant 0: Splash)
-            Positioned.fill(
-              child: OrganicBlobBackground(
-                isDark: isDark,
-                variant: 0,
-              ),
-            ),
-
-            if (isDark) ...[
-              // Ambient soft plum glow
-              Positioned(
-                top: -40,
-                left: -40,
-                child: Container(
-                  width: 340,
-                  height: 340,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: RadialGradient(
-                      colors: [
-                        const Color(0xFF2E1038).withValues(alpha: 0.22),
-                        Colors.transparent,
-                      ],
-                      stops: const [0.0, 0.7],
-                    ),
-                  ),
+        backgroundColor: Colors.transparent,
+        body: SizedBox.expand(
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              // 1. Organic Fluid Blob Pattern Background (Variant 0: Splash)
+              Positioned.fill(
+                child: OrganicBlobBackground(
+                  isDark: isDark,
+                  variant: 0,
                 ),
               ),
-            ],
 
             // Center App Logo Illustration
             Center(
@@ -223,6 +203,7 @@ class _SplashPageState extends State<SplashPage> with SingleTickerProviderStateM
           ],
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 }

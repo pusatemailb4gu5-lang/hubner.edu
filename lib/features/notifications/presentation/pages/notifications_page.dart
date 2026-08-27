@@ -283,7 +283,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                         backgroundColor: isDark ? const Color(0xFF000000) : Colors.white,
                         elevation: 0,
                         scrolledUnderElevation: 0,
-                        leadingWidth: 56,
+                        leadingWidth: 70,
                         leading: Padding(
                           padding: const EdgeInsets.only(left: 14.0),
                           child: Center(
@@ -291,8 +291,8 @@ class _NotificationsPageState extends State<NotificationsPage> {
                               onTap: () => Navigator.pop(context),
                               behavior: HitTestBehavior.opaque,
                               child: Container(
-                                width: 40,
-                                height: 40,
+                                width: 52,
+                                height: 52,
                                 decoration: BoxDecoration(
                                   color: isDark ? const Color(0xFF18181B) : Colors.white,
                                   shape: BoxShape.circle,
@@ -305,7 +305,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                                   child: Icon(
                                     Icons.chevron_left_rounded,
                                     color: isDark ? Colors.white : Colors.black87,
-                                    size: 24,
+                                    size: 26,
                                   ),
                                 ),
                               ),

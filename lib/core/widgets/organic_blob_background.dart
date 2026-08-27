@@ -45,8 +45,9 @@ class _OrganicBlobPainter extends CustomPainter {
         end: Alignment.bottomCenter,
         colors: isDark
             ? [
-                const Color(0xFF161F33),
-                const Color(0xFF0F1524),
+                const Color(0xFF1E293B),
+                const Color(0xFF0F172A),
+                const Color(0xFF090D16),
               ]
             : [
                 const Color(0xFFA5C9FF),
@@ -59,13 +60,13 @@ class _OrganicBlobPainter extends CustomPainter {
 
     // 2. Translucent Organic Blob Paints
     final Color c1 = isDark
-        ? const Color(0xFF2B3D66).withValues(alpha: 0.45)
+        ? const Color(0xFF334155).withValues(alpha: 0.50)
         : const Color(0xFF6B9FF2).withValues(alpha: 0.40);
     final Color c2 = isDark
-        ? const Color(0xFF1E2C4A).withValues(alpha: 0.40)
+        ? const Color(0xFF1E293B).withValues(alpha: 0.60)
         : const Color(0xFF5D94EE).withValues(alpha: 0.35);
     final Color c3 = isDark
-        ? const Color(0xFF354B7C).withValues(alpha: 0.35)
+        ? const Color(0xFF475569).withValues(alpha: 0.40)
         : const Color(0xFF88B6FF).withValues(alpha: 0.45);
 
     final Paint paint1 = Paint()..color = c1;

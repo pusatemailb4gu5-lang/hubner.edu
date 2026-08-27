@@ -11,7 +11,7 @@ class NotificationBellIcon extends StatefulWidget {
   const NotificationBellIcon({
     super.key,
     required this.isDark,
-    this.size = 42.0,
+    this.size = 52.0,
   });
 
   @override
@@ -154,7 +154,7 @@ class _NotificationBellIconState extends State<NotificationBellIcon> {
           color: widget.isDark ? const Color(0xFF18181B) : Colors.white,
           shape: BoxShape.circle,
           border: Border.all(
-            color: widget.isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+            color: widget.isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
             width: 1.2,
           ),
         ),
@@ -164,8 +164,8 @@ class _NotificationBellIconState extends State<NotificationBellIcon> {
           children: [
             Icon(
               Icons.notifications_none_rounded,
-              color: widget.isDark ? Colors.white : Colors.black,
-              size: 20,
+              color: widget.isDark ? Colors.white : Colors.black87,
+              size: 24,
             ),
             if (unreadCount > 0)
               Positioned(
