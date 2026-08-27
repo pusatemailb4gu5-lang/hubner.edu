@@ -1654,19 +1654,39 @@ Sertakan HANYA JSON tersebut tanpa penjelasan markdown apa pun di luar JSON.
             style: AppTypography.timestamp(color: Colors.black45, height: 1.4),
           ),
           const SizedBox(height: 12),
-          SizedBox(
-            height: 40,
-            child: OutlinedButton.icon(
+          Container(
+            height: 44,
+            width: double.infinity,
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [
+                  Color(0xFFF472B6), // Pink
+                  Color(0xFF38BDF8), // Light Blue
+                ],
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
+              ),
+              borderRadius: BorderRadius.circular(22),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFFF472B6).withValues(alpha: 0.35),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: ElevatedButton.icon(
               onPressed: _runAIGeneration,
-              icon: const GeminiIcon(size: 12),
+              icon: const GeminiIcon(size: 16),
               label: Text(
                 'Buat Materi dengan AI',
-                style: AppTypography.buttonLabel(color: Colors.black87, fontWeight: FontWeight.w600),
+                style: AppTypography.buttonLabel(color: Colors.white, fontWeight: FontWeight.bold),
               ),
-              style: OutlinedButton.styleFrom(
-                side: const BorderSide(color: Colors.black87, width: 1.2),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.transparent,
+                shadowColor: Colors.transparent,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(22),
                 ),
                 padding: EdgeInsets.zero,
               ),

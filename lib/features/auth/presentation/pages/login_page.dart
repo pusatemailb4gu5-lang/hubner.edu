@@ -1,5 +1,4 @@
 import 'dart:math';
-import 'package:hubner/core/widgets/three_dots_loader.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -14,6 +13,7 @@ import 'package:hubner/features/home/presentation/widgets/animated_rainbow_backg
 import 'package:hubner/core/theme/app_colors.dart';
 import 'package:hubner/core/services/login_history_service.dart';
 import 'package:hubner/features/onboarding/presentation/pages/onboarding_page.dart';
+import 'package:hubner/core/widgets/organic_blob_background.dart';
 
 
 class LoginPage extends StatefulWidget {
@@ -35,9 +35,7 @@ class _LoginPageState extends State<LoginPage> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (_canPop == null) {
-      _canPop = Navigator.of(context).canPop();
-    }
+    _canPop ??= Navigator.of(context).canPop();
   }
 
   late final ScrollController _scrollController;
@@ -73,18 +71,7 @@ class _LoginPageState extends State<LoginPage> {
       Navigator.of(context).pop();
     } else {
       Navigator.of(context).pushReplacement(
-        PageRouteBuilder(
-          opaque: false,
-          pageBuilder: (_, __, ___) => const OnboardingPage(),
-          transitionsBuilder: (_, animation, __, child) {
-            const begin = Offset(0.0, -1.0);
-            const end = Offset.zero;
-            const curve = Curves.easeInOutCubic;
-            var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
-            return SlideTransition(position: animation.drive(tween), child: child);
-          },
-          transitionDuration: const Duration(milliseconds: 500),
-        ),
+        MaterialPageRoute(builder: (_) => const OnboardingPage()),
       );
     }
   }
@@ -338,34 +325,6 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
-  Widget _buildCircularBackButton(BuildContext context) {
-    if (!(_canPop ?? false)) return const SizedBox(height: 16);
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 24.0),
-      child: Row(
-        children: [
-          GestureDetector(
-            onTap: () => Navigator.of(context).pop(),
-            child: Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                shape: BoxShape.circle,
-                border: Border.all(color: const Color(0xFFE2E8F0)),
-              ),
-              child: const Icon(
-                Icons.chevron_left_rounded,
-                color: Colors.black87,
-                size: 24,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final safeBottomPadding = MediaQuery.of(context).padding.bottom;
@@ -386,279 +345,323 @@ class _LoginPageState extends State<LoginPage> {
         controller: _scrollController,
         physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
         padding: EdgeInsets.fromLTRB(
-          isTablet ? 16.0 : AppTypography.screenHorizontalMargin,
+          isTablet ? 16.0 : 16.0,
           isTablet ? 16.0 : 12.0,
-          isTablet ? 16.0 : AppTypography.screenHorizontalMargin,
-          16.0 + safeBottomPadding + viewInsetsBottom,
+          isTablet ? 16.0 : 16.0,
+          24.0 + safeBottomPadding + viewInsetsBottom,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (!isTablet) ...[
-              Center(
-                child: GestureDetector(
-                  onTap: _dismissBackToOnboarding,
-                  behavior: HitTestBehavior.opaque,
-                  child: Container(
-                    width: 44,
-                    height: 5,
-                    margin: const EdgeInsets.only(top: 4, bottom: 18),
-                    decoration: BoxDecoration(
-                      color: isDark ? const Color(0xFF3F3F46) : const Color(0xFFD4D4D8),
-                      borderRadius: BorderRadius.circular(3),
+            // 1. Top Bar: Back Button (Left) & Google Sign In Pill (Right) - Standard Header Size (40px)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 14.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  if (_canPop ?? false)
+                    GestureDetector(
+                      onTap: () => Navigator.of(context).pop(),
+                      behavior: HitTestBehavior.opaque,
+                      child: Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: isDark ? const Color(0xFF18181B) : Colors.white,
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                            width: 1.2,
+                          ),
+                        ),
+                        child: Center(
+                          child: Icon(
+                            Icons.chevron_left_rounded,
+                            color: isDark ? Colors.white : Colors.black87,
+                            size: 24,
+                          ),
+                        ),
+                      ),
+                    )
+                  else
+                    const SizedBox(width: 40),
+
+                  // Top-Right Google "Masuk" Button - Standard Header Size (40px)
+                  GestureDetector(
+                    onTap: _isGoogleLoading ? null : _handleGoogleLogin,
+                    behavior: HitTestBehavior.opaque,
+                    child: Container(
+                      height: 40,
+                      padding: const EdgeInsets.symmetric(horizontal: 14),
+                      decoration: BoxDecoration(
+                        color: isDark ? const Color(0xFF18181B) : Colors.white,
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                          width: 1.2,
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const GoogleLogoWidget(size: 18),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Masuk',
+                            style: AppTypography.buttonLabel(
+                              color: isDark ? Colors.white : Colors.black87,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
+                ],
               ),
-            ] else ...[
-              const SizedBox(height: 24),
-            ],
+            ),
 
-            // Welcome Titles (Judul 20, Deskripsi 18)
-            Text(
-              isTablet ? 'Selamat datang kembali!' : 'Masuk',
-              style: AppTypography.pageTitle(
-                fontSize: 20,
-                color: isDark ? Colors.white : Colors.black,
-                fontWeight: FontWeight.bold,
+            // 2. CARD 1: Title, Subtitle, Form Inputs & Submit Button
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.fromLTRB(20, 22, 20, 18),
+              decoration: BoxDecoration(
+                color: isDark ? const Color(0xFF18181B) : Colors.white,
+                borderRadius: BorderRadius.circular(32),
+                border: Border.all(
+                  color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                  width: 1.2,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.07),
+                    blurRadius: 20,
+                    offset: const Offset(0, 6),
+                  ),
+                ],
               ),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              isTablet
-                  ? 'Masuk untuk mengelola tugas Anda dengan mudah.'
-                  : 'Dengan masuk, Anda menyetujui Ketentuan Layanan kami.',
-              style: AppTypography.chatBody(
-                fontSize: 18,
-                color: isDark ? Colors.white60 : Colors.black54,
-                height: 1.4,
-              ),
-            ),
-            const SizedBox(height: 24),
-
-            // Email Input Field (Styled like Home search box with focused border)
-            Text(
-              'Email / ID User',
-              style: AppTypography.timestamp(color: isDark ? Colors.white70 : Colors.black54, fontWeight: FontWeight.w500),
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              controller: _emailController,
-              style: AppTypography.timestamp(color: isDark ? Colors.white : Colors.black87),
-              decoration: InputDecoration(
-                hintText: 'Masukkan email atau ID User Anda...',
-                hintStyle: AppTypography.subtitle(color: isDark ? Colors.white38 : Colors.black26),
-                filled: true,
-                fillColor: isDark ? const Color(0xFF18181B) : Colors.white,
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(32),
-                  borderSide: BorderSide(
-                    color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
-                    width: 1.2,
-                  ),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(32),
-                  borderSide: BorderSide(
-                    color: isDark ? Colors.white : Colors.black,
-                    width: 1.2,
-                  ),
-                ),
-                prefixIcon: Icon(Icons.person_outline_rounded, color: isDark ? Colors.white38 : Colors.black38, size: 20),
-              ),
-            ),
-            const SizedBox(height: 16),
-
-            // Password Input Field (Styled like Home search box with clean eye icon)
-            Text(
-              'Kata Sandi',
-              style: AppTypography.timestamp(color: isDark ? Colors.white70 : Colors.black54, fontWeight: FontWeight.w500),
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              controller: _passwordController,
-              obscureText: _obscurePassword,
-              style: AppTypography.timestamp(color: isDark ? Colors.white : Colors.black87),
-              decoration: InputDecoration(
-                hintText: 'Masukkan kata sandi Anda',
-                hintStyle: AppTypography.subtitle(color: isDark ? Colors.white38 : Colors.black26),
-                filled: true,
-                fillColor: isDark ? const Color(0xFF18181B) : Colors.white,
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(32),
-                  borderSide: BorderSide(
-                    color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
-                    width: 1.2,
-                  ),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(32),
-                  borderSide: BorderSide(
-                    color: isDark ? Colors.white : Colors.black,
-                    width: 1.2,
-                  ),
-                ),
-                prefixIcon: Icon(Icons.lock_outline_rounded, color: isDark ? Colors.white38 : Colors.black38, size: 20),
-                suffixIcon: GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  onTap: () {
-                    setState(() => _obscurePassword = !_obscurePassword);
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.only(right: 16.0),
-                    child: Icon(
-                      _obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
-                      color: isDark ? Colors.white38 : Colors.black38,
-                      size: 20,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Title Inside Card (Matching Onboarding Screen)
+                  Text(
+                    isTablet ? 'Selamat datang kembali!' : 'Masuk',
+                    style: AppTypography.pageTitle(
+                      fontWeight: FontWeight.w900,
+                      height: 1.2,
+                      color: isDark ? Colors.white : Colors.black,
                     ),
                   ),
-                ),
-              ),
-            ),
-
-            // Forgot Password link
-            Align(
-              alignment: Alignment.centerRight,
-              child: TextButton(
-                onPressed: () {},
-                child: Text(
-                  'Lupa Kata Sandi?',
-                  style: AppTypography.timestamp(color: isDark ? const Color(0xFFA78BFA) : const Color(0xFF6D28D9), fontWeight: FontWeight.w500),
-                ),
-              ),
-            ),
-
-            // Inline Error Alert Box (Di bawah textbox / card dengan bahasa ramah)
-            if (_errorMessage != null) ...[
-              const SizedBox(height: 4),
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                decoration: BoxDecoration(
-                  color: isDark ? const Color(0xFF451A1A) : const Color(0xFFFEF2F2),
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: isDark ? const Color(0xFF7F1D1D) : const Color(0xFFFECACA),
-                    width: 1.0,
-                  ),
-                ),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Icon(
-                      Icons.info_outline_rounded,
-                      color: isDark ? const Color(0xFFFCA5A5) : const Color(0xFFDC2626),
-                      size: 18,
+                  const SizedBox(height: 12),
+                  // Subtitle / Terms Inside Card (Matching Onboarding Screen)
+                  Text(
+                    isTablet
+                        ? 'Masuk untuk mengelola tugas Anda dengan mudah.'
+                        : 'Dengan masuk, Anda menyetujui Ketentuan Layanan kami.',
+                    style: AppTypography.chatBody(
+                      color: isDark ? Colors.white70 : Colors.black87,
+                      height: 1.45,
                     ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        _errorMessage!,
-                        style: AppTypography.timestamp(
-                          color: isDark ? const Color(0xFFFCA5A5) : const Color(0xFFB91C1C),
-                          fontWeight: FontWeight.w500,
+                  ),
+                  const SizedBox(height: 18),
+
+                  // Email Input Field (No label above)
+                  TextField(
+                    controller: _emailController,
+                    style: AppTypography.timestamp(color: isDark ? Colors.white : Colors.black87),
+                    decoration: InputDecoration(
+                      hintText: 'Masukkan email atau ID User Anda...',
+                      hintStyle: AppTypography.subtitle(color: isDark ? Colors.white38 : Colors.black26),
+                      filled: true,
+                      fillColor: isDark ? const Color(0xFF27272A) : const Color(0xFFF8FAFC),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(32),
+                        borderSide: BorderSide(
+                          color: isDark ? const Color(0xFF3F3F46) : const Color(0xFFE2E8F0),
+                          width: 1.2,
+                        ),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(32),
+                        borderSide: BorderSide(
+                          color: isDark ? Colors.white : Colors.black,
+                          width: 1.2,
+                        ),
+                      ),
+                      prefixIcon: Icon(Icons.person_outline_rounded, color: isDark ? Colors.white38 : Colors.black38, size: 20),
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+
+                  // Password Input Field (No label above)
+                  TextField(
+                    controller: _passwordController,
+                    obscureText: _obscurePassword,
+                    style: AppTypography.timestamp(color: isDark ? Colors.white : Colors.black87),
+                    decoration: InputDecoration(
+                      hintText: 'Masukkan kata sandi Anda',
+                      hintStyle: AppTypography.subtitle(color: isDark ? Colors.white38 : Colors.black26),
+                      filled: true,
+                      fillColor: isDark ? const Color(0xFF27272A) : const Color(0xFFF8FAFC),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(32),
+                        borderSide: BorderSide(
+                          color: isDark ? const Color(0xFF3F3F46) : const Color(0xFFE2E8F0),
+                          width: 1.2,
+                        ),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(32),
+                        borderSide: BorderSide(
+                          color: isDark ? Colors.white : Colors.black,
+                          width: 1.2,
+                        ),
+                      ),
+                      prefixIcon: Icon(Icons.lock_outline_rounded, color: isDark ? Colors.white38 : Colors.black38, size: 20),
+                      suffixIcon: GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onTap: () {
+                          setState(() => _obscurePassword = !_obscurePassword);
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.only(right: 16.0),
+                          child: Icon(
+                            _obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                            color: isDark ? Colors.white38 : Colors.black38,
+                            size: 20,
+                          ),
                         ),
                       ),
                     ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 12),
-            ] else ...[
-              const SizedBox(height: 8),
-            ],
+                  ),
 
-            // Sign In Button
-            Container(
-              width: double.infinity,
-              height: 52,
-              decoration: BoxDecoration(
-                color: const Color(0xFF7F52FC), // Solid brand violet
-                borderRadius: BorderRadius.circular(32),
-              ),
-              child: ElevatedButton(
-                onPressed: _isLoading ? null : _handleLogin,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.transparent,
-                  shadowColor: Colors.transparent,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(32),
-                  ),
-                ),
-                child: _isLoading
-                    ? const SizedBox(
-                        width: 22,
-                        height: 22,
-                        child: const ThreeDotsLoader(),
-                      )
-                    : Text(
-                        'Masuk',
-                        style: AppTypography.buttonLabel(color: Colors.white, fontWeight: FontWeight.w600),
+                  // Forgot Password link
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton(
+                      onPressed: () {},
+                      child: Text(
+                        'Lupa Kata Sandi?',
+                        style: AppTypography.timestamp(color: isDark ? Colors.white70 : Colors.black87, fontWeight: FontWeight.w600),
                       ),
-              ),
-            ),
-            const SizedBox(height: 14),
-            // Divider
-            Row(
-              children: [
-                Expanded(child: Divider(color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9), thickness: 1.5)),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                  child: Text(
-                    'Atau lanjutkan dengan',
-                    style: AppTypography.timestamp(color: isDark ? Colors.white38 : Colors.black38),
+                    ),
                   ),
-                ),
-                Expanded(child: Divider(color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9), thickness: 1.5)),
-              ],
-            ),
-            const SizedBox(height: 14),
-            SizedBox(
-              width: double.infinity,
-              height: 52,
-              child: OutlinedButton.icon(
-                onPressed: _isGoogleLoading ? null : _handleGoogleLogin,
-                icon: const GoogleLogoWidget(size: 20),
-                label: Text(
-                  'Masuk dengan Google',
-                  style: AppTypography.buttonLabel(color: isDark ? Colors.white : Colors.black87, fontWeight: FontWeight.w600),
-                ),
-                style: OutlinedButton.styleFrom(
-                  backgroundColor: isDark ? const Color(0xFF18181B) : Colors.white,
-                  side: BorderSide(color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0), width: 1.2),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(32),
+
+                  // Error Message
+                  if (_errorMessage != null) ...[
+                    const SizedBox(height: 4),
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                      decoration: BoxDecoration(
+                        color: isDark ? const Color(0xFF451A1A) : const Color(0xFFFEF2F2),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: isDark ? const Color(0xFF7F1D1D) : const Color(0xFFFECACA),
+                          width: 1.0,
+                        ),
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Icon(
+                            Icons.info_outline_rounded,
+                            color: isDark ? const Color(0xFFFCA5A5) : const Color(0xFFDC2626),
+                            size: 18,
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              _errorMessage!,
+                              style: AppTypography.timestamp(
+                                color: isDark ? const Color(0xFFFCA5A5) : const Color(0xFFB91C1C),
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                  ] else ...[
+                    const SizedBox(height: 8),
+                  ],
+
+                  // Sign In Button (Black Button)
+                  Container(
+                    width: double.infinity,
+                    height: 52,
+                    decoration: BoxDecoration(
+                      color: isDark ? Colors.white : const Color(0xFF18181B), // Solid black button
+                      borderRadius: BorderRadius.circular(32),
+                    ),
+                    child: ElevatedButton(
+                      onPressed: _isLoading ? null : _handleLogin,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.transparent,
+                        shadowColor: Colors.transparent,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(32),
+                        ),
+                      ),
+                      child: _isLoading
+                          ? SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2.2,
+                                valueColor: AlwaysStoppedAnimation<Color>(isDark ? Colors.black : Colors.white),
+                              ),
+                            )
+                          : Text(
+                              'Masuk',
+                              style: AppTypography.buttonLabel(
+                                color: isDark ? Colors.black : Colors.white,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                    ),
                   ),
-                ),
+                  const SizedBox(height: 16),
+
+                  // Link Belum punya akun? Daftar Sekarang (Inside Card 1, Onboarding Typography)
+                  Center(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'Belum punya akun? ',
+                          style: AppTypography.chatBody(
+                            color: isDark ? Colors.white70 : const Color(0xFF334155),
+                          ),
+                        ),
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(builder: (_) => const RegisterPage()),
+                            );
+                          },
+                          child: Text(
+                            'Daftar Sekarang',
+                            style: AppTypography.chatBody(
+                              color: isDark ? const Color(0xFFA78BFA) : const Color(0xFF0F172A),
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ),
-          const SizedBox(height: 20),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                'Belum punya akun? ',
-                style: AppTypography.timestamp(color: isDark ? Colors.white60 : Colors.black54),
-              ),
-              GestureDetector(
-                onTap: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(builder: (_) => const RegisterPage()),
-                  );
-                },
-                child: Text(
-                  'Daftar Sekarang',
-                  style: AppTypography.buttonLabel(color: isDark ? const Color(0xFFA78BFA) : const Color(0xFF6D28D9), fontWeight: FontWeight.bold),
-                ),
-              ),
-            ],
-          ),
-        ],
+          ],
+        ),
       ),
-    ),
-  );
+    );
 
     Widget onboardingPanel = Container(
       padding: const EdgeInsets.all(40),
@@ -750,25 +753,26 @@ class _LoginPageState extends State<LoginPage> {
         ),
       );
     } else {
-      final route = ModalRoute.of(context);
-      final animation = route?.animation;
-
       screenBody = Scaffold(
-        backgroundColor: isDark ? const Color(0xFF000000) : Colors.white,
-        body: animation != null
-            ? AnimatedBuilder(
-                animation: animation,
-                builder: (context, child) {
-                  return Transform.translate(
-                    offset: Offset(0, 50 * (1 - animation.value)),
-                    child: Opacity(
-                      opacity: animation.value.clamp(0.0, 1.0),
-                      child: SafeArea(child: formContent),
-                    ),
-                  );
-                },
-              )
-            : SafeArea(child: formContent),
+        backgroundColor: Colors.transparent,
+        body: SizedBox.expand(
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              // 1. Organic Fluid Blob Background Pattern across 100% of the screen
+              Positioned.fill(
+                child: OrganicBlobBackground(
+                  isDark: isDark,
+                ),
+              ),
+
+              // 2. Form Content (Header outside, Card 1, Divider outside, Card 2)
+              SafeArea(
+                child: formContent,
+              ),
+            ],
+          ),
+        ),
       );
     }
 

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hubner/core/widgets/bouncy_button.dart';
 import 'package:hubner/core/theme/app_typography.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -2645,106 +2646,6 @@ class _BouncyMenuSliderCardState extends State<_BouncyMenuSliderCard> with Singl
 }
 
 
-
-// BouncyButton Component (Liquid Spring Water Bounce with Squash, identical to Home)
-class BouncyButton extends StatefulWidget {
-  final Widget child;
-  final VoidCallback? onTap;
-  final double scaleDown;
-  final Duration duration;
-  final bool enableSquash;
-
-  const BouncyButton({
-    super.key,
-    required this.child,
-    this.onTap,
-    this.scaleDown = 0.88,
-    this.duration = const Duration(milliseconds: 130),
-    this.enableSquash = true,
-  });
-
-  @override
-  State<BouncyButton> createState() => _BouncyButtonState();
-}
-
-class _BouncyButtonState extends State<BouncyButton> with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _scaleAnimation;
-  late Animation<double> _squashX;
-  late Animation<double> _squashY;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: widget.duration,
-      reverseDuration: widget.enableSquash
-          ? const Duration(milliseconds: 380)
-          : const Duration(milliseconds: 100),
-    );
-    _scaleAnimation = Tween<double>(begin: 1.0, end: widget.scaleDown).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: Curves.easeInOutSine,
-        reverseCurve: widget.enableSquash ? Curves.elasticOut : Curves.easeOutCubic,
-      ),
-    );
-    _squashX = Tween<double>(begin: 1.0, end: widget.enableSquash ? 1.05 : 1.0).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: Curves.easeInOutSine,
-        reverseCurve: widget.enableSquash ? Curves.elasticOut : Curves.easeOutCubic,
-      ),
-    );
-    _squashY = Tween<double>(begin: 1.0, end: widget.enableSquash ? 0.92 : 1.0).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: Curves.easeInOutSine,
-        reverseCurve: widget.enableSquash ? Curves.elasticOut : Curves.easeOutCubic,
-      ),
-    );
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTapDown: (_) {
-        HapticFeedback.selectionClick();
-        _controller.forward();
-      },
-      onTapUp: (_) async {
-        _controller.reverse();
-        widget.onTap?.call();
-      },
-      onTapCancel: () => _controller.reverse(),
-      child: AnimatedBuilder(
-        animation: _controller,
-        builder: (context, child) {
-          return Transform.scale(
-            scale: _scaleAnimation.value,
-            alignment: Alignment.center,
-            child: widget.enableSquash
-                ? Transform(
-                    alignment: Alignment.center,
-                    transform: Matrix4.diagonal3Values(_squashX.value, _squashY.value, 1.0),
-                    child: child,
-                  )
-                : child,
-          );
-        },
-        child: widget.child,
-      ),
-    );
-  }
-}
 
 class StudentAvatarWidget extends StatefulWidget {
   final String uid;

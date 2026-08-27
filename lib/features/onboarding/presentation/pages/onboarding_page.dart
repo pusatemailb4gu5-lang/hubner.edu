@@ -5,7 +5,7 @@ import 'package:hubner/features/auth/presentation/pages/login_page.dart';
 import 'package:hubner/main.dart';
 import 'package:hubner/core/theme/app_typography.dart';
 import 'package:hubner/core/theme/app_colors.dart';
-import 'package:hubner/core/widgets/classroom_card_pattern_painter.dart';
+import 'package:hubner/core/widgets/organic_blob_background.dart';
 
 class OnboardingPage extends StatefulWidget {
   const OnboardingPage({super.key});
@@ -45,25 +45,8 @@ class _OnboardingPageState extends State<OnboardingPage> with SingleTickerProvid
     await prefs.setBool('seenOnboarding', true);
 
     if (mounted) {
-      Navigator.of(context).push(
-        PageRouteBuilder(
-          opaque: false,
-          pageBuilder: (context, animation, secondaryAnimation) => const LoginPage(),
-          transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            const begin = Offset(0.0, 1.0);
-            const end = Offset.zero;
-            const curve = Curves.easeInOutCubic;
-
-            var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
-            var offsetAnimation = animation.drive(tween);
-
-            return SlideTransition(
-              position: offsetAnimation,
-              child: child,
-            );
-          },
-          transitionDuration: const Duration(milliseconds: 750),
-        ),
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (context) => const LoginPage()),
       );
     }
   }
@@ -98,19 +81,11 @@ class _OnboardingPageState extends State<OnboardingPage> with SingleTickerProvid
         backgroundColor: isDark ? const Color(0xFF000000) : Colors.white,
         body: Stack(
           children: [
-            // 1. Full Screen Pattern Background
+            // 1. Organic Fluid Blob Pattern Background (Variant 1: Onboarding)
             Positioned.fill(
-              child: Container(
-                decoration: BoxDecoration(
-                  color: isDark ? const Color(0xFF130E20) : const Color(0xFF7F52FC),
-                ),
-                child: CustomPaint(
-                  painter: ClassroomCardPatternPainter(
-                    patternIndex: 0,
-                    accentColor: const Color(0xFF7F52FC),
-                    isDark: isDark,
-                  ),
-                ),
+              child: OrganicBlobBackground(
+                isDark: isDark,
+                variant: 1,
               ),
             ),
 
@@ -168,21 +143,35 @@ class _OnboardingPageState extends State<OnboardingPage> with SingleTickerProvid
                 ),
                 const SizedBox(height: 10),
 
-                // 3. Bottom Text Card Container
+                // 3. Bottom Floating Squircle Card Container
                 Container(
                   width: double.infinity,
+                  margin: EdgeInsets.fromLTRB(
+                    12.0,
+                    0.0,
+                    12.0,
+                    (safeBottomPadding > 0 ? safeBottomPadding : 12.0) + 6.0,
+                  ),
                   decoration: BoxDecoration(
                     color: isDark ? const Color(0xFF18181B) : Colors.white,
-                    borderRadius: const BorderRadius.vertical(
-                      top: Radius.circular(32),
+                    borderRadius: BorderRadius.circular(38),
+                    border: Border.all(
+                      color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                      width: 1.2,
                     ),
-                    border: Border.all(color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0), width: 1.0),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.08),
+                        blurRadius: 20,
+                        offset: const Offset(0, 6),
+                      ),
+                    ],
                   ),
-                  padding: EdgeInsets.fromLTRB(
-                    AppTypography.screenHorizontalMargin,
+                  padding: const EdgeInsets.fromLTRB(
+                    22.0,
                     24.0,
-                    AppTypography.screenHorizontalMargin,
-                    24.0 + safeBottomPadding,
+                    22.0,
+                    12.0,
                   ),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
@@ -196,20 +185,20 @@ class _OnboardingPageState extends State<OnboardingPage> with SingleTickerProvid
                           color: isDark ? Colors.white : Colors.black,
                         ),
                       ),
-                      const SizedBox(height: 14),
+                      const SizedBox(height: 12),
                       Text(
                         'Kelola kelas, tugas sekolah, dan kolaborasi belajar secara praktis dan menyenangkan.',
                         style: AppTypography.chatBody(
                           color: isDark ? Colors.white70 : Colors.black87,
-                          height: 1.5,
+                          height: 1.45,
                         ),
                       ),
-                      const SizedBox(height: 28),
+                      const SizedBox(height: 24),
                       Container(
                         width: double.infinity,
                         height: 52,
                         decoration: BoxDecoration(
-                          color: const Color(0xFF7F52FC), // Solid brand violet
+                          color: isDark ? Colors.white : const Color(0xFF18181B), // Solid black button
                           borderRadius: BorderRadius.circular(32),
                         ),
                         child: ElevatedButton(
@@ -224,8 +213,8 @@ class _OnboardingPageState extends State<OnboardingPage> with SingleTickerProvid
                           child: Text(
                             'Masuk',
                             style: AppTypography.buttonLabel(
-                              fontWeight: FontWeight.w600,
-                              color: Colors.white,
+                              fontWeight: FontWeight.w700,
+                              color: isDark ? Colors.black : Colors.white,
                             ),
                           ),
                         ),

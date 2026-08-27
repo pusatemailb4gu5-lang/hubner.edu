@@ -6,10 +6,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:hubner/features/onboarding/presentation/pages/onboarding_page.dart';
 import 'package:hubner/features/home/presentation/pages/main_navigation_page.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
-import 'package:hubner/features/landing/presentation/pages/landing_page.dart' hide ClassroomCardPatternPainter;
+import 'package:hubner/features/landing/presentation/pages/landing_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:hubner/core/theme/app_colors.dart';
-import 'package:hubner/core/widgets/classroom_card_pattern_painter.dart';
+import 'package:hubner/core/widgets/organic_blob_background.dart';
 
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
@@ -116,117 +116,111 @@ class _SplashPageState extends State<SplashPage> with SingleTickerProviderStateM
         systemNavigationBarContrastEnforced: false,
       ),
       child: Scaffold(
-        backgroundColor: isDark ? const Color(0xFF000000) : const Color(0xFF7F52FC),
-        body: Container(
-          color: isDark ? const Color(0xFF000000) : const Color(0xFF7F52FC),
-          child: Stack(
-            children: [
-              // 1. Geometric Classroom Card Wave & Ribbon Pattern Background
-              Positioned.fill(
-                child: CustomPaint(
-                  painter: ClassroomCardPatternPainter(
-                    patternIndex: 0,
-                    accentColor: const Color(0xFF7F52FC),
-                    isDark: isDark,
-                  ),
-                ),
+        backgroundColor: isDark ? const Color(0xFF000000) : Colors.white,
+        body: Stack(
+          children: [
+            // 1. Organic Fluid Blob Pattern Background (Variant 0: Splash)
+            Positioned.fill(
+              child: OrganicBlobBackground(
+                isDark: isDark,
+                variant: 0,
               ),
+            ),
 
-              if (isDark) ...[
-                // Ambient soft plum glow
-                Positioned(
-                  top: -40,
-                  left: -40,
-                  child: Container(
-                    width: 340,
-                    height: 340,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      gradient: RadialGradient(
-                        colors: [
-                          const Color(0xFF2E1038).withValues(alpha: 0.22),
-                          Colors.transparent,
-                        ],
-                        stops: const [0.0, 0.7],
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-
-              // Center App Logo Illustration (Enlarged, floating cleanly without background container)
-              Center(
-                child: FadeTransition(
-                  opacity: _logoOpacity,
-                  child: SizedBox(
-                    width: (widthToUse * 0.48).clamp(160.0, 240.0),
-                    height: (widthToUse * 0.48).clamp(160.0, 240.0),
-                    child: Image.asset(
-                      isDark ? 'assets/iconapp/icon-dark.png' : 'assets/iconapp/icon.png',
-                      fit: BoxFit.contain,
-                      errorBuilder: (context, error, stackTrace) {
-                        return Image.asset(
-                          'assets/iconapp/icon.png',
-                          fit: BoxFit.contain,
-                          errorBuilder: (context, error, stackTrace) {
-                            return Icon(
-                              Icons.school_rounded,
-                              size: 130,
-                              color: isDark ? const Color(0xFFA78BFA) : Colors.white,
-                            );
-                          },
-                        );
-                      },
-                    ),
-                  ),
-                ),
-              ),
-
-              // Brand name at bottom
-              Align(
-                alignment: const Alignment(0, 0.8),
-                child: FadeTransition(
-                  opacity: _subOpacity,
-                  child: SlideTransition(
-                    position: _subSlide,
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Text(
-                          'Hubner',
-                          style: AppTypography.pageTitle(
-                            fontWeight: FontWeight.normal,
-                            letterSpacing: -1.0,
-                            color: Colors.white,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: isDark ? const Color(0xFF7F52FC) : Colors.white,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Text(
-                            'edu',
-                            style: AppTypography.buttonLabel(
-                              color: isDark ? Colors.white : const Color(0xFF7C3AED),
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
+            if (isDark) ...[
+              // Ambient soft plum glow
+              Positioned(
+                top: -40,
+                left: -40,
+                child: Container(
+                  width: 340,
+                  height: 340,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: RadialGradient(
+                      colors: [
+                        const Color(0xFF2E1038).withValues(alpha: 0.22),
+                        Colors.transparent,
                       ],
+                      stops: const [0.0, 0.7],
                     ),
                   ),
                 ),
               ),
             ],
-          ),
+
+            // Center App Logo Illustration
+            Center(
+              child: FadeTransition(
+                opacity: _logoOpacity,
+                child: SizedBox(
+                  width: (widthToUse * 0.48).clamp(160.0, 240.0),
+                  height: (widthToUse * 0.48).clamp(160.0, 240.0),
+                  child: Image.asset(
+                    isDark ? 'assets/iconapp/icon-dark.png' : 'assets/iconapp/icon.png',
+                    fit: BoxFit.contain,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Image.asset(
+                        'assets/iconapp/icon.png',
+                        fit: BoxFit.contain,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Icon(
+                            Icons.school_rounded,
+                            size: 130,
+                            color: isDark ? const Color(0xFFA78BFA) : Colors.white,
+                          );
+                        },
+                      );
+                    },
+                  ),
+                ),
+              ),
+            ),
+
+            // Brand name at bottom
+            Align(
+              alignment: const Alignment(0, 0.82),
+              child: FadeTransition(
+                opacity: _subOpacity,
+                child: SlideTransition(
+                  position: _subSlide,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text(
+                        'Hubner',
+                        style: AppTypography.pageTitle(
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: -0.5,
+                          color: isDark ? Colors.white : const Color(0xFF18181B),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: isDark ? const Color(0xFF7F52FC) : const Color(0xFF18181B),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          'edu',
+                          style: AppTypography.buttonLabel(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );

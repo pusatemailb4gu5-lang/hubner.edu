@@ -2,7 +2,7 @@ name: hubner
 description: Hubner - Aplikasi task, plan, note, dan anggota.
 publish_to: 'none'
 
-version: 1.1.0+2
+version: 1.1.0+3
 
 environment:
   sdk: ^3.11.4
@@ -54,14 +54,15 @@ flutter_launcher_icons:
   ios: true
   image_path: "assets/iconapp/iconapp.png"
   min_sdk_android: 21
-  adaptive_icon_background: "#7F52FC"
-  adaptive_icon_foreground: "assets/iconapp/iconapp.png"
+  adaptive_icon_background: "#5E17EB"
+  adaptive_icon_foreground: "assets/iconapp/adaptive_foreground.png"
   remove_alpha_ios: true
 
 flutter:
   uses-material-design: true
   assets:
     - assets/images/
+    - assets/images/landing/
     - assets/icon_pack/avatar/
     - assets/icon_pack/project/
     - assets/icon_pack/chat/

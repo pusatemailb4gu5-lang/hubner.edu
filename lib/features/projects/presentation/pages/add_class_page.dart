@@ -1799,9 +1799,28 @@ class _AddClassPageState extends State<AddClassPage> {
             style: AppTypography.timestamp(color: isDark ? Colors.white60 : Colors.black45, height: 1.4),
           ),
           const SizedBox(height: 14),
-          SizedBox(
-            height: 46,
-            child: OutlinedButton.icon(
+          Container(
+            height: 48,
+            width: double.infinity,
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [
+                  Color(0xFFF472B6), // Pink
+                  Color(0xFF38BDF8), // Light Blue
+                ],
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
+              ),
+              borderRadius: BorderRadius.circular(24),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFFF472B6).withValues(alpha: 0.35),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: ElevatedButton.icon(
               onPressed: () {
                 final cp = _cpController.text.trim();
                 if (cp.isEmpty) {
@@ -1815,20 +1834,17 @@ class _AddClassPageState extends State<AddClassPage> {
                 }
                 _runAiGeneration(cp);
               },
-              icon: const GeminiIcon(size: 15),
+              icon: const GeminiIcon(size: 16),
               label: Text(
                 'Buat Materi dengan AI',
-                style: AppTypography.buttonLabel(color: isDark ? Colors.white : Colors.black87, fontWeight: FontWeight.bold),
+                style: AppTypography.buttonLabel(color: Colors.white, fontWeight: FontWeight.bold),
               ),
-              style: OutlinedButton.styleFrom(
-                side: BorderSide(
-                  color: isDark ? const Color(0xFF3F3F46) : const Color(0xFFCBD5E1),
-                  width: 1.2,
-                ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.transparent,
+                shadowColor: Colors.transparent,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(24),
                 ),
-                backgroundColor: isDark ? const Color(0xFF27272A).withValues(alpha: 0.6) : Colors.white,
                 padding: EdgeInsets.zero,
               ),
             ),

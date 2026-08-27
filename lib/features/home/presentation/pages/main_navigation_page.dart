@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:hubner/core/widgets/three_dots_loader.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:hubner/core/widgets/google_sign_in_button.dart';
+import 'package:hubner/core/widgets/bouncy_button.dart';
 import 'home_page.dart';
+import 'student_home_page.dart';
 import 'chat_room_page.dart';
 import 'manage_friends_page.dart';
 import 'package:hubner/features/todo/presentation/pages/todo_page.dart';
@@ -17,7 +18,7 @@ import 'package:hubner/core/widgets/in_app_chat_overlay.dart';
 import 'edit_profile_page.dart';
 import 'package:hubner/features/notifications/domain/notification_service.dart';
 
-import 'package:hubner/features/projects/presentation/pages/laporan_page.dart' hide BouncyButton;
+import 'package:hubner/features/projects/presentation/pages/laporan_page.dart';
 import 'package:hubner/features/projects/presentation/pages/monitoring_page.dart';
 import 'package:hubner/features/splash/presentation/pages/splash_page.dart';
 import 'package:hubner/features/auth/presentation/pages/login_page.dart';
@@ -75,7 +76,9 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
 
   void _buildPages(bool isGuru) {
     _pages = [
-      HomePage(onNavigateTab: _onNavigateTab),
+      isGuru
+          ? HomePage(onNavigateTab: _onNavigateTab)
+          : StudentHomePage(onNavigateTab: _onNavigateTab),
       isGuru ? const LaporanPage() : const StudentTaskAndReportTab(),
       const DiscussionTab(),
       isGuru
@@ -4790,7 +4793,11 @@ class _DocumentsTabState extends State<DocumentsTab> {
                                   ),
                                 ),
                                 if (_isUploading)
-                                  const ThreeDotsLoader(size: 6, bounceHeight: 3),
+                                  const SizedBox(
+                                    width: 18,
+                                    height: 18,
+                                    child: CircularProgressIndicator(strokeWidth: 2, valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF7F52FC))),
+                                  ),
                               ],
                             ),
                           ),
@@ -5745,7 +5752,11 @@ class _DocumentsTabState extends State<DocumentsTab> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           if (_isConnecting)
-                            const ThreeDotsLoader(size: 5, bounceHeight: 2)
+                            const SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(strokeWidth: 2, valueColor: AlwaysStoppedAnimation<Color>(Colors.white)),
+                            )
                           else
                             const GoogleDriveLogoWidget(size: 18),
                           const SizedBox(width: 10),
@@ -7277,7 +7288,11 @@ class _EditNameFormState extends State<EditNameForm> {
               elevation: 0,
             ),
             child: _isLoading 
-                ? const ThreeDotsLoader(size: 5, bounceHeight: 2, colors: [Colors.white, Colors.white70, Colors.white60])
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2.2, valueColor: AlwaysStoppedAnimation<Color>(Colors.white)),
+                  )
                 : Text('Simpan Perubahan', style: AppTypography.cardTitle(color: Colors.white, fontWeight: FontWeight.bold)),
           ),
         ),
@@ -7425,7 +7440,11 @@ class _ChangePasswordFormState extends State<ChangePasswordForm> {
               elevation: 0,
             ),
             child: _isLoading 
-                ? const ThreeDotsLoader(size: 5, bounceHeight: 2, colors: [Colors.white, Colors.white70, Colors.white60])
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2.2, valueColor: AlwaysStoppedAnimation<Color>(Colors.white)),
+                  )
                 : Text('Ubah Kata Sandi', style: AppTypography.cardTitle(color: Colors.white, fontWeight: FontWeight.bold)),
           ),
         ),

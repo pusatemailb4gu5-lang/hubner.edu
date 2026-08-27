@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:hubner/core/widgets/three_dots_loader.dart';
 import 'package:flutter/services.dart';
+import 'package:hubner/core/widgets/bouncy_button.dart';
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 import 'dart:ui';
@@ -953,7 +953,11 @@ class _HomePageState extends State<HomePage> {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => const Center(child: ThreeDotsLoader()),
+      builder: (context) => const Center(
+        child: CircularProgressIndicator(
+          valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF7F52FC)),
+        ),
+      ),
     );
 
     try {
@@ -1253,7 +1257,10 @@ class _HomePageState extends State<HomePage> {
                               ? const SizedBox(
                                   width: 20,
                                   height: 20,
-                                  child: const ThreeDotsLoader(),
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2.2,
+                                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                  ),
                                 )
                               : Text(
                                   'Periksa Kelas',
@@ -6221,149 +6228,107 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _buildCalendarSlider(
-    List<Map<String, dynamic>> allTasks,
-    String role,
-  ) {
+  Widget _buildCalendarSlider([
+    List<Map<String, dynamic>> allTasks = const [],
+    String role = 'guru',
+  ]) {
     final bool isDark = AppColors.isDarkMode;
     final DateTime now = DateTime.now();
     final DateTime todayDate = DateTime(now.year, now.month, now.day);
+
     final List<DateTime> calendarDays = List.generate(14, (index) {
       return todayDate
-          .subtract(const Duration(days: 4))
+          .subtract(const Duration(days: 3))
           .add(Duration(days: index));
     });
 
-    final currentMonthYearStr =
-        '${_getMonthName(_selectedCalendarDay.month)} ${_selectedCalendarDay.year}';
+    String getSingleDayLetter(int weekday) {
+      const letters = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+      return letters[weekday - 1];
+    }
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 2.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                currentMonthYearStr,
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 16.5,
-                  fontWeight: FontWeight.bold,
-                  color: isDark ? Colors.white : Colors.black87,
-                ),
+    return SizedBox(
+      height: 68,
+      child: ListView.separated(
+        key: const PageStorageKey('home_calendar_slider'),
+        scrollDirection: Axis.horizontal,
+        clipBehavior: Clip.none,
+        physics: const BouncingScrollPhysics(),
+        itemCount: calendarDays.length,
+        separatorBuilder: (context, index) => const SizedBox(width: 10),
+        itemBuilder: (context, index) {
+          final day = calendarDays[index];
+          final bool isSelected =
+              _selectedCalendarDay.day == day.day &&
+              _selectedCalendarDay.month == day.month &&
+              _selectedCalendarDay.year == day.year;
+
+          return GestureDetector(
+            onTap: () {
+              HapticFeedback.selectionClick();
+              setState(() {
+                _selectedCalendarDay = day;
+              });
+              if (role.toLowerCase() != 'guru') {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => TodoPage(initialDate: day),
+                  ),
+                );
+              }
+            },
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 220),
+              curve: Curves.easeOutCubic,
+              width: 48,
+              height: 68,
+              decoration: BoxDecoration(
+                color: isSelected
+                    ? (isDark ? Colors.white : const Color(0xFF18181B))
+                    : (isDark ? const Color(0xFF27272A) : const Color(0xFFF1F3F5)),
+                borderRadius: BorderRadius.circular(26),
+                boxShadow: isSelected
+                    ? [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.22),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        ),
+                      ]
+                    : null,
               ),
-              Icon(
-                Icons.calendar_month_outlined,
-                size: 18,
-                color: isDark ? Colors.white54 : Colors.black45,
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 8),
-        SizedBox(
-          height: 80,
-          child: ListView.separated(
-            key: const PageStorageKey('home_calendar_slider'),
-            scrollDirection: Axis.horizontal,
-            itemCount: calendarDays.length,
-            separatorBuilder: (context, index) => const SizedBox(width: 8),
-            itemBuilder: (context, index) {
-              final day = calendarDays[index];
-              final bool isSelected =
-                  _selectedCalendarDay.day == day.day &&
-                  _selectedCalendarDay.month == day.month &&
-                  _selectedCalendarDay.year == day.year;
-
-              final bool hasTasks = _hasTaskOnDay(day, allTasks);
-              final Color activeBgColor = _getDayCardBg(day.weekday);
-              final Color dayTextColor = _getDayTextColor(day.weekday);
-
-              return GestureDetector(
-                onTap: () {
-                  setState(() {
-                    _selectedCalendarDay = day;
-                  });
-                  if (role.toLowerCase() != 'guru') {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (_) => TodoPage(initialDate: day),
-                      ),
-                    );
-                  }
-                },
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  width: 52,
-                  decoration: BoxDecoration(
-                    color: isSelected
-                        ? activeBgColor
-                        : (isDark ? const Color(0xFF18181B) : const Color(0xFFF8FAFC)),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    getSingleDayLetter(day.weekday),
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 13.0,
+                      fontWeight: FontWeight.w600,
                       color: isSelected
-                          ? Colors.transparent
-                          : (isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0)),
-                      width: 1,
+                          ? (isDark ? Colors.black87 : Colors.white)
+                          : (isDark ? Colors.white60 : const Color(0xFF64748B)),
+                      height: 1.1,
                     ),
                   ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 7,
-                          vertical: 2,
-                        ),
-                        decoration: BoxDecoration(
-                          color: isSelected
-                              ? dayTextColor
-                              : dayTextColor.withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Text(
-                          _getDayName(day.weekday),
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 12.0,
-                            fontWeight: FontWeight.bold,
-                            color: isSelected ? Colors.white : dayTextColor,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        day.day.toString(),
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 17.5,
-                          fontWeight: FontWeight.bold,
-                          color: isSelected
-                              ? Colors.black
-                              : (isDark ? Colors.white : Colors.black87),
-                        ),
-                      ),
-                      if (hasTasks) ...[
-                        const SizedBox(height: 4),
-                        Container(
-                          width: 5,
-                          height: 5,
-                          decoration: BoxDecoration(
-                            color: isSelected
-                                ? dayTextColor
-                                : dayTextColor.withValues(alpha: 0.5),
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                      ] else
-                        const SizedBox(height: 9),
-                    ],
+                  const SizedBox(height: 4),
+                  Text(
+                    day.day.toString(),
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 17.0,
+                      fontWeight: FontWeight.w800,
+                      color: isSelected
+                          ? (isDark ? Colors.black : Colors.white)
+                          : (isDark ? Colors.white : const Color(0xFF0F172A)),
+                      height: 1.1,
+                    ),
                   ),
-                ),
-              );
-            },
-          ),
-        ),
-      ],
+                ],
+              ),
+            ),
+          );
+        },
+      ),
     );
   }
 
@@ -6590,7 +6555,14 @@ class _QuickNotesDropdownContent extends StatelessWidget {
             const Padding(
               padding: EdgeInsets.symmetric(vertical: 20.0),
               child: Center(
-                child: ThreeDotsLoader(size: 6, bounceHeight: 3),
+                child: SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2.2,
+                    valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF7F52FC)),
+                  ),
+                ),
               ),
             )
           else if (docs.isEmpty)
@@ -7636,106 +7608,3 @@ class _HomeSearchAndNotesRowState extends State<_HomeSearchAndNotesRow> {
     );
   }
 }
-
-class BouncyButton extends StatefulWidget {
-  final Widget child;
-  final VoidCallback? onTap;
-  final double scaleDown;
-  final Duration duration;
-  final bool enableSquash;
-
-  const BouncyButton({
-    super.key,
-    required this.child,
-    this.onTap,
-    this.scaleDown = 0.88,
-    this.duration = const Duration(milliseconds: 130),
-    this.enableSquash = true,
-  });
-
-  @override
-  State<BouncyButton> createState() => _BouncyButtonState();
-}
-
-class _BouncyButtonState extends State<BouncyButton> with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _scaleAnimation;
-  late Animation<double> _squashX;
-  late Animation<double> _squashY;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: widget.duration,
-      reverseDuration: widget.enableSquash
-          ? const Duration(milliseconds: 380)
-          : const Duration(milliseconds: 100),
-    );
-    _scaleAnimation = Tween<double>(begin: 1.0, end: widget.scaleDown).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: Curves.easeInOutSine,
-        reverseCurve: widget.enableSquash ? Curves.elasticOut : Curves.easeOutCubic,
-      ),
-    );
-    _squashX = Tween<double>(begin: 1.0, end: widget.enableSquash ? 1.05 : 1.0).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: Curves.easeInOutSine,
-        reverseCurve: widget.enableSquash ? Curves.elasticOut : Curves.easeOutCubic,
-      ),
-    );
-    _squashY = Tween<double>(begin: 1.0, end: widget.enableSquash ? 0.92 : 1.0).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: Curves.easeInOutSine,
-        reverseCurve: widget.enableSquash ? Curves.elasticOut : Curves.easeOutCubic,
-      ),
-    );
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTapDown: (_) {
-        HapticFeedback.selectionClick();
-        _controller.forward();
-      },
-      onTapUp: (_) async {
-        _controller.reverse();
-        widget.onTap?.call();
-      },
-      onTapCancel: () => _controller.reverse(),
-      child: AnimatedBuilder(
-        animation: _controller,
-        builder: (context, child) {
-          return Transform.scale(
-            scale: _scaleAnimation.value,
-            alignment: Alignment.center,
-            child: widget.enableSquash
-                ? Transform(
-                    alignment: Alignment.center,
-                    transform: Matrix4.diagonal3Values(_squashX.value, _squashY.value, 1.0),
-                    child: child,
-                  )
-                : child,
-          );
-        },
-        child: widget.child,
-      ),
-    );
-  }
-}
-
-
-
-
