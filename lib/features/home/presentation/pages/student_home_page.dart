@@ -3644,12 +3644,13 @@ class _StudentHomePageState extends State<StudentHomePage> {
                                     },
                                   ),
                                 ],
-                              ),
+                              ],
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
-                      if (!isDesktop)
+                    ),
+                    if (!isDesktop)
                         ValueListenableBuilder<double>(
                         valueListenable: _headerScrollOffsetNotifier,
                         builder: (context, scrollOffset, _) {
