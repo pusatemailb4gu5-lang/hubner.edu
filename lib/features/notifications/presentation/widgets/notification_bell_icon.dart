@@ -7,11 +7,13 @@ import '../pages/notifications_page.dart';
 class NotificationBellIcon extends StatefulWidget {
   final bool isDark;
   final double size;
+  final bool showFrame;
 
   const NotificationBellIcon({
     super.key,
     required this.isDark,
     this.size = 52.0,
+    this.showFrame = true,
   });
 
   @override
@@ -150,14 +152,16 @@ class _NotificationBellIconState extends State<NotificationBellIcon> {
       child: Container(
         width: widget.size,
         height: widget.size,
-        decoration: BoxDecoration(
-          color: widget.isDark ? const Color(0xFF18181B) : Colors.white,
-          shape: BoxShape.circle,
-          border: Border.all(
-            color: widget.isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
-            width: 1.2,
-          ),
-        ),
+        decoration: widget.showFrame
+            ? BoxDecoration(
+                color: widget.isDark ? const Color(0xFF18181B) : Colors.white,
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: widget.isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                  width: 1.2,
+                ),
+              )
+            : null,
         child: Stack(
           alignment: Alignment.center,
           clipBehavior: Clip.none,
@@ -165,7 +169,7 @@ class _NotificationBellIconState extends State<NotificationBellIcon> {
             Icon(
               Icons.notifications_none_rounded,
               color: widget.isDark ? Colors.white : Colors.black87,
-              size: 24,
+              size: widget.showFrame ? 24 : 26,
             ),
             if (unreadCount > 0)
               Positioned(
