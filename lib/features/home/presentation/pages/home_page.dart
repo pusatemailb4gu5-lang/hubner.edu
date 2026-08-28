@@ -1778,7 +1778,7 @@ class _HomePageState extends State<HomePage> {
                                          valueListenable: HubnerApp.themeNotifier,
                                          builder: (context, currentTheme, _) {
                                            final bool isDark = currentTheme == 'Gelap' || currentTheme == 'Hitam';
-                                           return NotificationBellIcon(isDark: isDark, size: 42);
+                                           return NotificationBellIcon(isDark: isDark, size: 52);
                                          },
                                        ),
                                     ],
