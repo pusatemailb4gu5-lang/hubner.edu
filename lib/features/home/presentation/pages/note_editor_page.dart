@@ -168,24 +168,24 @@ class _NoteEditorPageState extends State<NoteEditorPage> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      // Tombol Back (<)
+                      // Tombol Back (<) - 52x52px Standar Login
                       BouncyButton(
                         onTap: () => Navigator.pop(context),
                         child: Container(
-                          width: 42,
-                          height: 42,
+                          width: 52,
+                          height: 52,
                           decoration: BoxDecoration(
                             color: isDark ? const Color(0xFF18181B) : Colors.white,
                             shape: BoxShape.circle,
                             border: Border.all(
-                              color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+                              color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
                               width: 1.2,
                             ),
                           ),
                           child: Icon(
                             Icons.arrow_back_rounded,
                             color: isDark ? Colors.white : Colors.black87,
-                            size: 20,
+                            size: 24,
                           ),
                         ),
                       ),
@@ -198,46 +198,46 @@ class _NoteEditorPageState extends State<NoteEditorPage> {
                       Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          // Tombol 3 Garis Horisontal (Daftar List Catatan)
+                          // Tombol 3 Garis Horisontal (Daftar List Catatan) - 52x52px
                           BouncyButton(
                             onTap: _showNotesListSheet,
                             child: Container(
-                              width: 42,
-                              height: 42,
+                              width: 52,
+                              height: 52,
                               decoration: BoxDecoration(
                                 color: isDark ? const Color(0xFF18181B) : Colors.white,
                                 shape: BoxShape.circle,
                                 border: Border.all(
-                                  color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+                                  color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
                                   width: 1.2,
                                 ),
                               ),
                               child: Icon(
                                 Icons.menu_rounded,
                                 color: isDark ? Colors.white : Colors.black87,
-                                size: 20,
+                                size: 24,
                               ),
                             ),
                           ),
                           const SizedBox(width: 8),
-                          // Tombol Centang (✓) Simpan
+                          // Tombol Centang (✓) Simpan - 52x52px
                           _isSaving
                               ? const SizedBox(
-                                  width: 42,
-                                  height: 42,
+                                  width: 52,
+                                  height: 52,
                                   child: Center(
                                     child: SizedBox(
-                                      width: 20,
-                                      height: 20,
-                                      child: CircularProgressIndicator(strokeWidth: 2),
+                                      width: 24,
+                                      height: 24,
+                                      child: CircularProgressIndicator(strokeWidth: 2.2),
                                     ),
                                   ),
                                 )
                               : BouncyButton(
                                   onTap: _saveNote,
                                   child: Container(
-                                    width: 42,
-                                    height: 42,
+                                    width: 52,
+                                    height: 52,
                                     decoration: BoxDecoration(
                                       color: isDark ? const Color(0xFF18181B) : Colors.black,
                                       shape: BoxShape.circle,
@@ -249,7 +249,7 @@ class _NoteEditorPageState extends State<NoteEditorPage> {
                                     child: const Icon(
                                       Icons.check_rounded,
                                       color: Colors.white,
-                                      size: 20,
+                                      size: 24,
                                     ),
                                   ),
                                 ),

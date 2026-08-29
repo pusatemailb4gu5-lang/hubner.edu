@@ -11,11 +11,15 @@ import 'package:hubner/features/projects/presentation/pages/class_page.dart';
 import 'package:hubner/features/projects/presentation/pages/desktop_classroom_page.dart';
 import 'package:hubner/features/projects/presentation/pages/detail_cp_page.dart';
 import 'package:hubner/features/projects/presentation/pages/monitoring_page.dart';
+import 'package:hubner/features/projects/presentation/pages/baca_materi_page.dart';
+import 'package:hubner/features/projects/presentation/pages/mengerjakan_tugas_page.dart';
+import 'package:hubner/features/projects/presentation/pages/mengerjakan_quiz_page.dart';
 import 'package:hubner/features/todo/presentation/pages/todo_page.dart';
 import 'note_editor_page.dart';
 import 'package:hubner/features/projects/presentation/pages/add_class_page.dart';
 import 'package:hubner/features/projects/presentation/pages/edit_class_page.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:hubner/features/notifications/presentation/pages/notifications_page.dart';
 import 'package:hubner/features/notifications/presentation/widgets/notification_bell_icon.dart';
 import 'package:qr_flutter/qr_flutter.dart';
@@ -835,6 +839,27 @@ class _StudentHomePageState extends State<StudentHomePage> {
     return _cachedProjectsStream!;
   }
 
+  static String _formatTeacherTitle(String rawName, String? gender) {
+    if (rawName.trim().isEmpty) return '';
+    final trimmed = rawName.trim();
+    final lower = trimmed.toLowerCase();
+    if (lower.startsWith('pak ') ||
+        lower.startsWith('bu ') ||
+        lower.startsWith('bapak ') ||
+        lower.startsWith('ibu ') ||
+        lower.startsWith('mr. ') ||
+        lower.startsWith('mrs. ') ||
+        lower.startsWith('ms. ')) {
+      return trimmed;
+    }
+    final lowerGender = (gender ?? '').toLowerCase();
+    final isFemale = lowerGender.contains('perempuan') ||
+        lowerGender.contains('wanita') ||
+        lowerGender.contains('female') ||
+        lowerGender.startsWith('p');
+    return isFemale ? 'Bu $trimmed' : 'Pak $trimmed';
+  }
+
   final List<Color> _softCardColors = const [
     Color(0xFFF9EED2), // Soft Peach/Cream
     Color(0xFFE5ECEB), // Soft Mint/Teal
@@ -1080,6 +1105,18 @@ class _StudentHomePageState extends State<StudentHomePage> {
           ),
         );
       }
+    }
+  }
+
+  Future<void> _openScannerForJoin(BuildContext context) async {
+    final String? scannedCode = await Navigator.push<String>(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const ClassroomQrScannerPage(),
+      ),
+    );
+    if (scannedCode != null && scannedCode.trim().isNotEmpty && mounted) {
+      _processJoinProject(scannedCode.trim(), '');
     }
   }
 
@@ -1736,175 +1773,173 @@ class _StudentHomePageState extends State<StudentHomePage> {
                           '')
                       .toString()
                       .trim();
+                  final bool isFemale = gender.toLowerCase().contains('perempuan') || gender.toLowerCase().startsWith('p');
+                  final Color genderRoleColor = isFemale ? const Color(0xFFF43F5E) : const Color(0xFF0EA5E9);
 
-                  return SafeArea(
-                    bottom: false,
-                    child: SingleChildScrollView(
-                      controller: _homeScrollController,
-                          padding: AppTypography.pagePadding(
-                            top: 12.0,
-                            bottom: 125.0,
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              // Normal Top Header (Tampil asli di posisi awal halaman - Sama Persis dengan Mode Guru)
-                              if (!isDesktop) ...[
-                                 // Top Controls (Kanan: Toggle Dark / Light Mode & Notifikasi Bersebelahan - Tanpa Frame)
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.end,
-                                    children: [
-                                      // Toggle Dark / Light Mode (Tanpa Frame)
-                                      ValueListenableBuilder<String>(
-                                        valueListenable: HubnerApp.themeNotifier,
-                                        builder: (context, currentTheme, _) {
-                                          final bool isDark = currentTheme == 'Gelap' || currentTheme == 'Hitam';
-                                          return BouncyButton(
-                                            onTap: () => _toggleThemeWithBounce(context, isDark),
-                                            child: Padding(
-                                              padding: const EdgeInsets.all(6.0),
-                                              child: Icon(
-                                                isDark ? Icons.wb_sunny_rounded : Icons.nightlight_round,
-                                                color: isDark ? const Color(0xFFFBBF24) : Colors.black87,
-                                                size: 26,
+                  final String capitalizedName = fullName.trim().isEmpty
+                      ? 'User'
+                      : fullName.trim().split(RegExp(r'\s+')).map((w) => w.isNotEmpty ? (w[0].toUpperCase() + (w.length > 1 ? w.substring(1).toLowerCase() : '')) : '').join(' ');
+
+                  final String roleSubtitle = role.toLowerCase() == 'guru'
+                      ? 'Pengajar · ${schoolLevel.isNotEmpty ? schoolLevel.toUpperCase() : 'SMA/SMK'}'
+                      : 'Siswa · ${schoolLevel.isNotEmpty ? schoolLevel.toUpperCase() : 'SMA/SMK'}';
+                  final bool isDark = AppColors.isDarkMode;
+
+                  return Stack(
+                    children: [
+                      // 1. Scrollable Page Content
+                      SingleChildScrollView(
+                        controller: _homeScrollController,
+                        padding: EdgeInsets.fromLTRB(
+                          AppTypography.screenHorizontalMargin,
+                          MediaQuery.of(context).padding.top + (isDesktop ? 12.0 : 16.0),
+                          AppTypography.screenHorizontalMargin,
+                          125.0,
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [                            // 1. Baris Tombol Kontrol di Pojok Kanan (Dark Mode di samping Lonceng)
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                // Dark / Light Mode Toggle (Tanpa background & frame)
+                                ValueListenableBuilder<String>(
+                                  valueListenable: HubnerApp.themeNotifier,
+                                  builder: (context, currentTheme, _) {
+                                    final bool isDarkTheme = currentTheme == 'Gelap' || currentTheme == 'Hitam';
+                                    return BouncyButton(
+                                      onTap: () => _toggleThemeWithBounce(context, isDarkTheme),
+                                      child: Padding(
+                                        padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 2.0),
+                                        child: Icon(
+                                          isDarkTheme ? Icons.wb_sunny_rounded : Icons.nightlight_round,
+                                          color: isDarkTheme ? const Color(0xFFFBBF24) : Colors.black87,
+                                          size: 26,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
+                                const SizedBox(width: 8),
+
+                                // Notification Bell (Tanpa background & frame)
+                                ValueListenableBuilder<String>(
+                                  valueListenable: HubnerApp.themeNotifier,
+                                  builder: (context, currentTheme, _) {
+                                    final bool isDarkTheme = currentTheme == 'Gelap' || currentTheme == 'Hitam';
+                                    return NotificationBellIcon(
+                                      isDark: isDarkTheme,
+                                      size: 40,
+                                      showFrame: false,
+                                    );
+                                  },
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+
+                            // 2. Baris DIBAWAHNYA: Avatar, Hai [Name], & Role Subtitle (Ukuran Lebih Besar)
+                            Row(
+                              children: [
+                                // Profile Avatar (Ukuran lebih besar sebelum di-scroll: 56x56)
+                                Container(
+                                  width: 56,
+                                  height: 56,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
+                                  ),
+                                  child: ClipOval(
+                                    child: Transform.scale(
+                                      scale: 1.45,
+                                      child: userPhoto.isNotEmpty
+                                          ? (userPhoto.startsWith('http')
+                                              ? Image.network(
+                                                  userPhoto,
+                                                  fit: BoxFit.cover,
+                                                  errorBuilder: (_, __, ___) => Center(
+                                                    child: Text(
+                                                      userName.isNotEmpty
+                                                          ? userName.substring(0, (userName.length >= 2 ? 2 : 1)).toUpperCase()
+                                                          : 'P',
+                                                      style: GoogleFonts.plusJakartaSans(
+                                                        fontWeight: FontWeight.w800,
+                                                        color: isDark ? Colors.white : Colors.black,
+                                                        fontSize: 22,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                )
+                                              : Image.asset(
+                                                  userPhoto,
+                                                  fit: BoxFit.cover,
+                                                  errorBuilder: (_, __, ___) => Center(
+                                                    child: Text(
+                                                      userName.isNotEmpty
+                                                          ? userName.substring(0, (userName.length >= 2 ? 2 : 1)).toUpperCase()
+                                                          : 'P',
+                                                      style: GoogleFonts.plusJakartaSans(
+                                                        fontWeight: FontWeight.w800,
+                                                        color: isDark ? Colors.white : Colors.black,
+                                                        fontSize: 22,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ))
+                                          : Center(
+                                              child: Text(
+                                                userName.isNotEmpty
+                                                    ? userName.substring(0, (userName.length >= 2 ? 2 : 1)).toUpperCase()
+                                                    : 'P',
+                                                style: GoogleFonts.plusJakartaSans(
+                                                  fontWeight: FontWeight.w800,
+                                                  color: isDark ? Colors.white : Colors.black,
+                                                  fontSize: 22,
+                                                ),
                                               ),
                                             ),
-                                          );
-                                        },
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 14),
+
+                                // Nama & Role (Hai [Nama] diatas, Role Subtitle dibawah)
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Text(
+                                        'Hai, $capitalizedName',
+                                        style: GoogleFonts.plusJakartaSans(
+                                          fontSize: 22.0,
+                                          fontWeight: FontWeight.bold,
+                                          color: isDark ? Colors.white : Colors.black,
+                                          height: 1.15,
+                                        ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
                                       ),
-                                      const SizedBox(width: 4),
-                                      // Tombol Notifikasi (Tanpa Frame)
-                                      ValueListenableBuilder<String>(
-                                        valueListenable: HubnerApp.themeNotifier,
-                                        builder: (context, currentTheme, _) {
-                                          final bool isDark = currentTheme == 'Gelap' || currentTheme == 'Hitam';
-                                          return NotificationBellIcon(
-                                            isDark: isDark,
-                                            size: 40,
-                                            showFrame: false,
-                                          );
-                                        },
+                                      const SizedBox(height: 3),
+                                      Text(
+                                        roleSubtitle,
+                                        style: GoogleFonts.dmSans(
+                                          fontSize: 13.5,
+                                          fontWeight: FontWeight.w600,
+                                          color: genderRoleColor,
+                                        ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
                                       ),
                                     ],
                                   ),
-                                 const SizedBox(height: 12),
-                                 // Profile Row (Kiri: Foto Profil 58x58, Kanan: Hai, [Nama] di atas & Role di bawah dengan warna gender)
-                                 Builder(
-                                   builder: (context) {
-                                     final bool isDark = AppColors.isDarkMode;
-                                     final bool isFemale = gender.toLowerCase().contains('perempuan') || gender.toLowerCase().startsWith('p');
-                                     final Color genderRoleColor = isFemale ? const Color(0xFFF43F5E) : const Color(0xFF0EA5E9);
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 16),
 
-                                     final String capitalizedName = fullName.trim().isEmpty
-                                         ? 'User'
-                                         : fullName.trim().split(RegExp(r'\s+')).map((w) => w.isNotEmpty ? (w[0].toUpperCase() + (w.length > 1 ? w.substring(1).toLowerCase() : '')) : '').join(' ');
-
-                                     final String roleSubtitle = role.toLowerCase() == 'guru'
-                                         ? 'Pengajar · ${schoolLevel.isNotEmpty ? schoolLevel.toUpperCase() : 'SMA/SMK'}'
-                                         : 'Siswa · ${schoolLevel.isNotEmpty ? schoolLevel.toUpperCase() : 'SMA/SMK'}';
-
-                                     return Row(
-                                       crossAxisAlignment: CrossAxisAlignment.center,
-                                       children: [
-                                         Container(
-                                           width: 58,
-                                           height: 58,
-                                           decoration: BoxDecoration(
-                                             shape: BoxShape.circle,
-                                             color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
-                                           ),
-                                           child: ClipOval(
-                                             child: Transform.scale(
-                                               scale: 1.45,
-                                               child: userPhoto.isNotEmpty
-                                                   ? (userPhoto.startsWith('http')
-                                                       ? Image.network(
-                                                           userPhoto,
-                                                           fit: BoxFit.cover,
-                                                           errorBuilder: (_, __, ___) => Center(
-                                                             child: Text(
-                                                               userName.isNotEmpty
-                                                                   ? userName.substring(0, (userName.length >= 2 ? 2 : 1)).toUpperCase()
-                                                                   : 'P',
-                                                               style: GoogleFonts.plusJakartaSans(
-                                                                 fontWeight: FontWeight.w800,
-                                                                 color: isDark ? Colors.white : Colors.black,
-                                                                 fontSize: 20,
-                                                               ),
-                                                             ),
-                                                           ),
-                                                         )
-                                                       : Image.asset(
-                                                           userPhoto,
-                                                           fit: BoxFit.cover,
-                                                           errorBuilder: (_, __, ___) => Center(
-                                                             child: Text(
-                                                               userName.isNotEmpty
-                                                                   ? userName.substring(0, (userName.length >= 2 ? 2 : 1)).toUpperCase()
-                                                                   : 'P',
-                                                               style: GoogleFonts.plusJakartaSans(
-                                                                 fontWeight: FontWeight.w800,
-                                                                 color: isDark ? Colors.white : Colors.black,
-                                                                 fontSize: 20,
-                                                               ),
-                                                             ),
-                                                           ),
-                                                         ))
-                                                   : Center(
-                                                       child: Text(
-                                                         userName.isNotEmpty
-                                                             ? userName.substring(0, (userName.length >= 2 ? 2 : 1)).toUpperCase()
-                                                             : 'P',
-                                                         style: GoogleFonts.plusJakartaSans(
-                                                           fontWeight: FontWeight.w800,
-                                                           color: isDark ? Colors.white : Colors.black,
-                                                           fontSize: 20,
-                                                         ),
-                                                       ),
-                                                     ),
-                                             ),
-                                           ),
-                                         ),
-                                         const SizedBox(width: 14),
-                                         Expanded(
-                                           child: Column(
-                                             crossAxisAlignment: CrossAxisAlignment.start,
-                                             mainAxisAlignment: MainAxisAlignment.center,
-                                             children: [
-                                               Text(
-                                                 'Hai, $capitalizedName',
-                                                 style: GoogleFonts.plusJakartaSans(
-                                                   fontSize: 24.0,
-                                                   fontWeight: FontWeight.w900,
-                                                   color: isDark ? Colors.white : Colors.black,
-                                                   height: 1.15,
-                                                 ),
-                                                 maxLines: 1,
-                                                 overflow: TextOverflow.ellipsis,
-                                               ),
-                                               const SizedBox(height: 3),
-                                               Text(
-                                                 roleSubtitle,
-                                                 style: GoogleFonts.dmSans(
-                                                   fontSize: 13.5,
-                                                   fontWeight: FontWeight.w700,
-                                                   color: genderRoleColor,
-                                                 ),
-                                                 maxLines: 1,
-                                                 overflow: TextOverflow.ellipsis,
-                                               ),
-                                             ],
-                                           ),
-                                         ),
-                                       ],
-                                     );
-                                   },
-                                 ),
-                                 const SizedBox(height: 16),
-                               ],
-                               const SizedBox(height: 12),
-                               // Student Top Section Redesign
-                              StreamBuilder<Map<String, Map<String, dynamic>>>(
+                            // Student Top Section Redesign
+                            StreamBuilder<Map<String, Map<String, dynamic>>>(
                                 stream: _combineStudentProgressStreams(
                                   projectDocs.map((d) => d.id).toList(),
                                   currentUserId,
@@ -3093,7 +3128,7 @@ class _StudentHomePageState extends State<StudentHomePage> {
                                                        isGrid
                                                            ? Icons.view_agenda_rounded
                                                            : Icons.grid_view_rounded,
-                                                       key: ValueKey<bool>(isGrid),
+                                                      key: ValueKey<bool>(isGrid),
                                                        color: isDark ? Colors.white : Colors.black87,
                                                        size: 20,
                                                      ),
@@ -3103,6 +3138,13 @@ class _StudentHomePageState extends State<StudentHomePage> {
                                             },
                                           ),
                                         ],
+                                      ),
+                                      const SizedBox(height: 12),
+                                      // Underline Join Classroom input + Scanner Button
+                                      _ClassroomJoinInputBar(
+                                        isDark: isDark,
+                                        onJoin: (id) => _processJoinProject(id, ''),
+                                        onScan: () => _openScannerForJoin(context),
                                       ),
 
                                       // Invitations list if any
@@ -3219,291 +3261,548 @@ class _StudentHomePageState extends State<StudentHomePage> {
                                             final bool isDark = AppColors.isDarkMode;
                                             final q = searchQuery.toLowerCase().trim();
 
-                                            // SEARCH FOR ELEMEN CP & MATERI JIKA SEARCH AKTIF (SAFE PARSING)
-                                            if (q.isNotEmpty) {
-                                              final List<Map<String, dynamic>> matchedElements = [];
+                                             // SEARCH FOR ELEMEN CP, TUGAS, MATERI & QUIZ DENGAN TARGET NAVIGASI SPESIFIK
+                                             if (q.isNotEmpty) {
+                                               final List<Map<String, dynamic>> matchedItems = [];
 
-                                              for (int pIdx = 0; pIdx < projectDocs.length; pIdx++) {
-                                                try {
-                                                  final projDoc = projectDocs[pIdx];
-                                                  final pData = projDoc.data() as Map<String, dynamic>? ?? {};
-                                                  final projId = projDoc.id;
-                                                  final projTitle = (pData['name'] ?? 'Classroom').toString();
-                                                  final gradeLevel = (pData['gradeLevel'] ?? '').toString();
-                                                  final major = (pData['major'] ?? '').toString();
-                                                  final stages = pData['stages'] as List? ?? [];
-                                                  final dynamic rawColorIdx = pData['colorIndex'];
-                                                  int patternIndex = 0;
-                                                  if (rawColorIdx is int) {
-                                                    patternIndex = rawColorIdx;
-                                                  } else if (rawColorIdx is String) {
-                                                    patternIndex = int.tryParse(rawColorIdx) ?? 0;
-                                                  } else {
-                                                    patternIndex = pIdx;
-                                                  }
+                                               for (int pIdx = 0; pIdx < projectDocs.length; pIdx++) {
+                                                 try {
+                                                   final projDoc = projectDocs[pIdx];
+                                                   final pData = projDoc.data() as Map<String, dynamic>? ?? {};
+                                                   final projId = projDoc.id;
+                                                   final projTitle = (pData['name'] ?? 'Classroom').toString();
+                                                   final gradeLevel = (pData['gradeLevel'] ?? '').toString();
+                                                   final major = (pData['major'] ?? '').toString();
+                                                   final stages = pData['stages'] as List? ?? [];
+                                                   final dynamic rawColorIdx = pData['colorIndex'];
+                                                   int patternIndex = 0;
+                                                   if (rawColorIdx is int) {
+                                                     patternIndex = rawColorIdx;
+                                                   } else if (rawColorIdx is String) {
+                                                     patternIndex = int.tryParse(rawColorIdx) ?? 0;
+                                                   } else {
+                                                     patternIndex = pIdx;
+                                                   }
 
-                                                  final Color cardColor = isDark
-                                                      ? _classroomCardDarkColors[patternIndex % _classroomCardDarkColors.length]
-                                                      : _classroomCardColors[patternIndex % _classroomCardColors.length];
-                                                  final Color accentColor = _classroomAccentColors[patternIndex % _classroomAccentColors.length];
-                                                  final bool isOwner = (pData['ownerUid']?.toString() ?? '') == (FirebaseAuth.instance.currentUser?.uid ?? '');
+                                                   final Color cardColor = isDark
+                                                       ? _classroomCardDarkColors[patternIndex % _classroomCardDarkColors.length]
+                                                       : _classroomCardColors[patternIndex % _classroomCardColors.length];
+                                                   final Color accentColor = _classroomAccentColors[patternIndex % _classroomAccentColors.length];
+                                                   final bool isOwner = (pData['ownerUid']?.toString() ?? '') == (FirebaseAuth.instance.currentUser?.uid ?? '');
 
-                                                  for (int sIdx = 0; sIdx < stages.length; sIdx++) {
-                                                    try {
-                                                      final stage = stages[sIdx];
-                                                      if (stage is! Map) continue;
+                                                   for (int sIdx = 0; sIdx < stages.length; sIdx++) {
+                                                     try {
+                                                       final stage = stages[sIdx];
+                                                       if (stage is! Map) continue;
+                                                       if (stage['isArchived'] == true) continue;
 
-                                                      final stageTitle = (stage['title'] ?? stage['name'] ?? 'Elemen ${sIdx + 1}').toString();
-                                                      final stageDesc = (stage['description'] ?? stage['desc'] ?? '').toString();
-                                                      final materis = stage['materis'] as List? ?? [];
-                                                      final stageTasks = stage['tasks'] as List? ?? [];
+                                                       final stageTitle = (stage['title'] ?? stage['name'] ?? 'Elemen ${sIdx + 1}').toString();
+                                                       final stageDesc = (stage['description'] ?? stage['desc'] ?? '').toString();
+                                                       final materis = stage['materis'] as List? ?? [];
+                                                       final stageTasks = stage['tasks'] as List? ?? [];
 
-                                                      bool isMatch = stageTitle.toLowerCase().contains(q) || stageDesc.toLowerCase().contains(q);
-                                                      String? matchedMateriName;
+                                                       // 1. Check CP / Elemen Stage Match
+                                                       if (stageTitle.toLowerCase().contains(q) || stageDesc.toLowerCase().contains(q)) {
+                                                         matchedItems.add({
+                                                           'itemType': 'cp',
+                                                           'projectId': projId,
+                                                           'projectTitle': projTitle,
+                                                           'gradeLevel': gradeLevel,
+                                                           'major': major,
+                                                           'stageIdx': sIdx,
+                                                           'title': stageTitle,
+                                                           'subtitle': '$projTitle · $gradeLevel $major',
+                                                           'badgeText': 'Capaian Pembelajaran',
+                                                           'actionLabel': role.toLowerCase() == 'guru' ? 'Buka CP' : 'Buka',
+                                                           'cardColor': cardColor,
+                                                           'accentColor': accentColor,
+                                                           'isOwner': isOwner,
+                                                         });
+                                                       }
 
-                                                      for (var m in materis) {
-                                                        if (m is Map) {
-                                                          final mTitle = (m['title'] ?? '').toString();
-                                                          if (mTitle.toLowerCase().contains(q)) {
-                                                            isMatch = true;
-                                                            matchedMateriName = mTitle;
-                                                            break;
-                                                          }
-                                                        }
-                                                      }
+                                                       // 2. Check Materis & Nested Tasks
+                                                       for (int mIdx = 0; mIdx < materis.length; mIdx++) {
+                                                         final m = materis[mIdx];
+                                                         if (m is! Map) continue;
+                                                         if (m['isArchived'] == true) continue;
+                                                         final mTitle = (m['title'] ?? 'Materi').toString();
+                                                         final mDoc = (m['doc'] ?? '').toString();
+                                                         final mMaterisTasks = m['tasks'] as List? ?? [];
 
-                                                      if (!isMatch) {
-                                                        for (var t in stageTasks) {
-                                                          if (t is Map) {
-                                                            final tTitle = (t['title'] ?? '').toString();
-                                                            if (tTitle.toLowerCase().contains(q)) {
-                                                              isMatch = true;
-                                                              matchedMateriName = tTitle;
-                                                              break;
-                                                            }
-                                                          }
-                                                        }
-                                                      }
+                                                         if (mTitle.toLowerCase().contains(q)) {
+                                                           matchedItems.add({
+                                                             'itemType': 'materi',
+                                                             'projectId': projId,
+                                                             'projectTitle': projTitle,
+                                                             'gradeLevel': gradeLevel,
+                                                             'major': major,
+                                                             'stageIdx': sIdx,
+                                                             'materiIdx': mIdx,
+                                                             'title': mTitle,
+                                                             'subtitle': '$projTitle · $stageTitle',
+                                                             'badgeText': 'Materi Pembelajaran',
+                                                             'actionLabel': 'Lihat Materi',
+                                                             'cardColor': cardColor,
+                                                             'accentColor': accentColor,
+                                                             'isOwner': isOwner,
+                                                             'docName': mDoc,
+                                                             'taskKey': '${sIdx}_${mIdx}_0',
+                                                           });
+                                                         }
 
-                                                      if (isMatch) {
-                                                        matchedElements.add({
-                                                          'projectId': projId,
-                                                          'projectTitle': projTitle,
-                                                          'gradeLevel': gradeLevel,
-                                                          'major': major,
-                                                          'stageIdx': sIdx,
-                                                          'stageTitle': stageTitle,
-                                                          'stageDesc': stageDesc,
-                                                          'materiCount': materis.length,
-                                                          'taskCount': stageTasks.length,
-                                                          'cardColor': cardColor,
-                                                          'accentColor': accentColor,
-                                                          'isOwner': isOwner,
-                                                          'matchedMateri': matchedMateriName,
-                                                        });
-                                                      }
-                                                    } catch (_) {}
-                                                  }
-                                                } catch (_) {}
-                                              }
+                                                         for (int tIdx = 0; tIdx < mMaterisTasks.length; tIdx++) {
+                                                           final t = mMaterisTasks[tIdx];
+                                                           if (t is! Map) continue;
+                                                           final tTitle = (t['title'] ?? t['name'] ?? 'Tugas').toString();
+                                                           final tType = (t['type'] ?? 'tugas').toString().toLowerCase();
 
-                                              if (matchedElements.isEmpty) {
-                                                return Container(
-                                                  width: double.infinity,
-                                                  padding: const EdgeInsets.symmetric(vertical: 36, horizontal: 20),
-                                                  decoration: BoxDecoration(
-                                                    color: isDark ? const Color(0xFF27272A) : const Color(0xFFF8FAFC),
-                                                    borderRadius: BorderRadius.circular(22),
-                                                    border: Border.all(
-                                                      color: isDark ? const Color(0xFF3F3F46) : const Color(0xFFE2E8F0),
-                                                    ),
-                                                  ),
-                                                  child: Column(
-                                                    mainAxisAlignment: MainAxisAlignment.center,
-                                                    children: [
-                                                      Icon(
-                                                        Icons.search_off_rounded,
-                                                        size: 44,
-                                                        color: isDark ? Colors.white38 : Colors.black26,
-                                                      ),
-                                                      const SizedBox(height: 12),
-                                                      Text(
-                                                        'Elemen Tidak Ditemukan',
-                                                        style: GoogleFonts.plusJakartaSans(
-                                                          fontSize: 15.5,
-                                                          fontWeight: FontWeight.bold,
-                                                          color: isDark ? Colors.white : Colors.black87,
-                                                        ),
-                                                      ),
-                                                      const SizedBox(height: 6),
-                                                      Text(
-                                                        'Tidak ada elemen atau materi yang cocok dengan "$searchQuery"',
-                                                        textAlign: TextAlign.center,
-                                                        style: GoogleFonts.dmSans(
-                                                          fontSize: 14.0,
-                                                          color: isDark ? Colors.white54 : Colors.black45,
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                );
-                                              }
+                                                           if (tTitle.toLowerCase().contains(q)) {
+                                                             if (tType == 'quiz') {
+                                                               matchedItems.add({
+                                                                 'itemType': 'quiz',
+                                                                 'projectId': projId,
+                                                                 'projectTitle': projTitle,
+                                                                 'gradeLevel': gradeLevel,
+                                                                 'major': major,
+                                                                 'stageIdx': sIdx,
+                                                                 'materiIdx': mIdx,
+                                                                 'taskIdx': tIdx,
+                                                                 'title': tTitle,
+                                                                 'subtitle': '$projTitle · $stageTitle · Quiz',
+                                                                 'badgeText': 'Kuis / Evaluasi',
+                                                                 'actionLabel': 'Kerjakan Quiz',
+                                                                 'cardColor': cardColor,
+                                                                 'accentColor': accentColor,
+                                                                 'isOwner': isOwner,
+                                                                 'taskData': t,
+                                                                 'taskKey': '${sIdx}_${mIdx}_$tIdx',
+                                                               });
+                                                             } else if (tType == 'pdf' || tType == 'materi') {
+                                                               matchedItems.add({
+                                                                 'itemType': 'materi',
+                                                                 'projectId': projId,
+                                                                 'projectTitle': projTitle,
+                                                                 'gradeLevel': gradeLevel,
+                                                                 'major': major,
+                                                                 'stageIdx': sIdx,
+                                                                 'materiIdx': mIdx,
+                                                                 'taskIdx': tIdx,
+                                                                 'title': tTitle,
+                                                                 'subtitle': '$projTitle · $stageTitle · Materi',
+                                                                 'badgeText': 'Materi / Dokumen',
+                                                                 'actionLabel': 'Lihat Materi',
+                                                                 'cardColor': cardColor,
+                                                                 'accentColor': accentColor,
+                                                                 'isOwner': isOwner,
+                                                                 'docName': (t['doc'] ?? mDoc).toString(),
+                                                                 'taskData': t,
+                                                                 'taskKey': '${sIdx}_${mIdx}_$tIdx',
+                                                               });
+                                                             } else {
+                                                               matchedItems.add({
+                                                                 'itemType': 'tugas',
+                                                                 'projectId': projId,
+                                                                 'projectTitle': projTitle,
+                                                                 'gradeLevel': gradeLevel,
+                                                                 'major': major,
+                                                                 'stageIdx': sIdx,
+                                                                 'materiIdx': mIdx,
+                                                                 'taskIdx': tIdx,
+                                                                 'title': tTitle,
+                                                                 'subtitle': '$projTitle · $stageTitle · Tugas',
+                                                                 'badgeText': 'Tugas Kelas',
+                                                                 'actionLabel': 'Kerjakan Tugas',
+                                                                 'cardColor': cardColor,
+                                                                 'accentColor': accentColor,
+                                                                 'isOwner': isOwner,
+                                                                 'taskData': t,
+                                                                 'taskKey': '${sIdx}_${mIdx}_$tIdx',
+                                                               });
+                                                             }
+                                                           }
+                                                         }
+                                                       }
 
-                                              return Column(
-                                                crossAxisAlignment: CrossAxisAlignment.start,
-                                                children: [
-                                                  Padding(
-                                                    padding: const EdgeInsets.only(left: 4, bottom: 10),
-                                                    child: Text(
-                                                      'Daftar Elemen Ditemukan (${matchedElements.length})',
-                                                      style: GoogleFonts.plusJakartaSans(
-                                                        fontSize: 14.0,
-                                                        fontWeight: FontWeight.w700,
-                                                        color: isDark ? Colors.white70 : const Color(0xFF475569),
-                                                      ),
-                                                    ),
-                                                  ),
-                                                  ListView.separated(
-                                                    shrinkWrap: true,
-                                                    physics: const NeverScrollableScrollPhysics(),
-                                                    itemCount: matchedElements.length,
-                                                    separatorBuilder: (_, __) => Divider(
-                                                      height: 20,
-                                                      thickness: 1,
-                                                      color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
-                                                    ),
-                                                    itemBuilder: (context, index) {
-                                                      final elem = matchedElements[index];
-                                                      final String stageTitle = elem['stageTitle']?.toString() ?? 'Elemen';
-                                                      final String projTitle = elem['projectTitle']?.toString() ?? 'Classroom';
-                                                      final String gradeLevel = elem['gradeLevel']?.toString() ?? '';
-                                                      final String major = elem['major']?.toString() ?? '';
-                                                      final Color cardColor = elem['cardColor'] as Color? ?? Colors.white;
-                                                      final Color accentColor = elem['accentColor'] as Color? ?? const Color(0xFF7F52FC);
-                                                      final String? matchedMateri = elem['matchedMateri']?.toString();
+                                                       // 3. Check Direct Stage Tasks
+                                                       for (int tIdx = 0; tIdx < stageTasks.length; tIdx++) {
+                                                         final t = stageTasks[tIdx];
+                                                         if (t is! Map) continue;
+                                                         final tTitle = (t['title'] ?? t['name'] ?? 'Tugas').toString();
+                                                         final tType = (t['type'] ?? 'tugas').toString().toLowerCase();
 
-                                                      return InkWell(
-                                                        borderRadius: BorderRadius.circular(12),
-                                                        onTap: () {
-                                                          Navigator.of(context).push(
-                                                            MaterialPageRoute(
-                                                              builder: (_) => DetailCpPage(
-                                                                projectId: elem['projectId'],
-                                                                projectTitle: projTitle,
-                                                                stageIdx: elem['stageIdx'],
-                                                                isOwner: elem['isOwner'],
-                                                                accentColor: accentColor,
-                                                                cardColor: cardColor,
-                                                              ),
-                                                            ),
-                                                          );
-                                                        },
-                                                        child: Padding(
-                                                          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
-                                                          child: Row(
-                                                            children: [
-                                                              Expanded(
-                                                                child: Column(
-                                                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                                                  children: [
-                                                                    Text(
-                                                                      stageTitle,
-                                                                      style: GoogleFonts.plusJakartaSans(
-                                                                        fontSize: 16.5,
-                                                                        fontWeight: FontWeight.w800,
-                                                                        color: isDark ? Colors.white : const Color(0xFF0F172A),
-                                                                      ),
-                                                                      maxLines: 1,
-                                                                      overflow: TextOverflow.ellipsis,
-                                                                    ),
-                                                                    const SizedBox(height: 3),
-                                                                    Text(
-                                                                      '$projTitle · $gradeLevel $major',
-                                                                      style: GoogleFonts.dmSans(
-                                                                        fontSize: 13.5,
-                                                                        fontWeight: FontWeight.w500,
-                                                                        color: isDark ? Colors.white60 : const Color(0xFF64748B),
-                                                                      ),
-                                                                      maxLines: 1,
-                                                                      overflow: TextOverflow.ellipsis,
-                                                                    ),
-                                                                    if (matchedMateri != null) ...[
-                                                                      const SizedBox(height: 5),
-                                                                      Container(
-                                                                        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2.5),
-                                                                        decoration: BoxDecoration(
-                                                                          color: isDark ? const Color(0xFF3F2D1D) : const Color(0xFFFEF3C7),
-                                                                          borderRadius: BorderRadius.circular(6),
-                                                                        ),
-                                                                        child: Text(
-                                                                          'Materi: $matchedMateri',
-                                                                          style: GoogleFonts.dmSans(
-                                                                            fontSize: 13.0,
-                                                                            fontWeight: FontWeight.bold,
-                                                                            color: isDark ? const Color(0xFFFCD34D) : const Color(0xFFB45309),
-                                                                          ),
-                                                                          maxLines: 1,
-                                                                          overflow: TextOverflow.ellipsis,
-                                                                        ),
-                                                                      ),
-                                                                    ],
-                                                                  ],
-                                                                ),
-                                                              ),
-                                                              const SizedBox(width: 10),
-                                                              BouncyButton(
-                                                                scaleDown: 0.90,
-                                                                onTap: () {
-                                                                  Navigator.of(context).push(
-                                                                    MaterialPageRoute(
-                                                                      builder: (_) => DetailCpPage(
-                                                                        projectId: elem['projectId'],
-                                                                        projectTitle: projTitle,
-                                                                        stageIdx: elem['stageIdx'],
-                                                                        isOwner: elem['isOwner'],
-                                                                        accentColor: accentColor,
-                                                                        cardColor: cardColor,
-                                                                      ),
-                                                                    ),
-                                                                  );
-                                                                },
-                                                                child: Container(
-                                                                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7.5),
-                                                                  decoration: BoxDecoration(
-                                                                    color: isDark ? Colors.white : Colors.black,
-                                                                    borderRadius: BorderRadius.circular(24),
-                                                                  ),
-                                                                  child: Row(
-                                                                    mainAxisSize: MainAxisSize.min,
-                                                                    children: [
-                                                                      Text(
-                                                                        'Buka CP',
-                                                                        style: GoogleFonts.plusJakartaSans(
-                                                                          fontSize: 13.5,
-                                                                          fontWeight: FontWeight.bold,
-                                                                          color: isDark ? Colors.black : Colors.white,
-                                                                        ),
-                                                                      ),
-                                                                      const SizedBox(width: 4),
-                                                                      Icon(
-                                                                        Icons.arrow_forward_ios_rounded,
-                                                                        size: 10,
-                                                                        color: isDark ? Colors.black : Colors.white,
-                                                                      ),
-                                                                    ],
-                                                                  ),
-                                                                ),
-                                                              ),
-                                                            ],
-                                                          ),
-                                                        ),
-                                                      );
-                                                    },
-                                                  ),
-                                                ],
-                                              );
-                                            }
+                                                         if (tTitle.toLowerCase().contains(q)) {
+                                                           if (tType == 'quiz') {
+                                                             matchedItems.add({
+                                                               'itemType': 'quiz',
+                                                               'projectId': projId,
+                                                               'projectTitle': projTitle,
+                                                               'gradeLevel': gradeLevel,
+                                                               'major': major,
+                                                               'stageIdx': sIdx,
+                                                               'title': tTitle,
+                                                               'subtitle': '$projTitle · $stageTitle · Quiz',
+                                                               'badgeText': 'Kuis / Evaluasi',
+                                                               'actionLabel': 'Kerjakan Quiz',
+                                                               'cardColor': cardColor,
+                                                               'accentColor': accentColor,
+                                                               'isOwner': isOwner,
+                                                               'taskData': t,
+                                                               'taskKey': '${sIdx}_0_$tIdx',
+                                                             });
+                                                           } else if (tType == 'pdf' || tType == 'materi') {
+                                                             matchedItems.add({
+                                                               'itemType': 'materi',
+                                                               'projectId': projId,
+                                                               'projectTitle': projTitle,
+                                                               'gradeLevel': gradeLevel,
+                                                               'major': major,
+                                                               'stageIdx': sIdx,
+                                                               'title': tTitle,
+                                                               'subtitle': '$projTitle · $stageTitle · Materi',
+                                                               'badgeText': 'Materi / Dokumen',
+                                                               'actionLabel': 'Lihat Materi',
+                                                               'cardColor': cardColor,
+                                                               'accentColor': accentColor,
+                                                               'isOwner': isOwner,
+                                                               'docName': (t['doc'] ?? '').toString(),
+                                                               'taskData': t,
+                                                               'taskKey': '${sIdx}_0_$tIdx',
+                                                             });
+                                                           } else {
+                                                             matchedItems.add({
+                                                               'itemType': 'tugas',
+                                                               'projectId': projId,
+                                                               'projectTitle': projTitle,
+                                                               'gradeLevel': gradeLevel,
+                                                               'major': major,
+                                                               'stageIdx': sIdx,
+                                                               'title': tTitle,
+                                                               'subtitle': '$projTitle · $stageTitle · Tugas',
+                                                               'badgeText': 'Tugas Kelas',
+                                                               'actionLabel': 'Kerjakan Tugas',
+                                                               'cardColor': cardColor,
+                                                               'accentColor': accentColor,
+                                                               'isOwner': isOwner,
+                                                               'taskData': t,
+                                                               'taskKey': '${sIdx}_0_$tIdx',
+                                                             });
+                                                           }
+                                                         }
+                                                       }
+                                                     } catch (_) {}
+                                                   }
+                                                 } catch (_) {}
+                                               }
 
+                                               if (matchedItems.isEmpty) {
+                                                 return Container(
+                                                   width: double.infinity,
+                                                   padding: const EdgeInsets.symmetric(vertical: 36, horizontal: 20),
+                                                   decoration: BoxDecoration(
+                                                     color: isDark ? const Color(0xFF27272A) : const Color(0xFFF8FAFC),
+                                                     borderRadius: BorderRadius.circular(22),
+                                                     border: Border.all(
+                                                       color: isDark ? const Color(0xFF3F3F46) : const Color(0xFFE2E8F0),
+                                                     ),
+                                                   ),
+                                                   child: Column(
+                                                     mainAxisAlignment: MainAxisAlignment.center,
+                                                     children: [
+                                                       Icon(
+                                                         Icons.search_off_rounded,
+                                                         size: 44,
+                                                         color: isDark ? Colors.white38 : Colors.black26,
+                                                       ),
+                                                       const SizedBox(height: 12),
+                                                       Text(
+                                                         'Hasil Tidak Ditemukan',
+                                                         style: GoogleFonts.plusJakartaSans(
+                                                           fontSize: 15.5,
+                                                           fontWeight: FontWeight.bold,
+                                                           color: isDark ? Colors.white : Colors.black87,
+                                                         ),
+                                                       ),
+                                                       const SizedBox(height: 6),
+                                                       Text(
+                                                         'Tidak ada kelas, materi, tugas, atau kuis yang cocok dengan "$searchQuery"',
+                                                         textAlign: TextAlign.center,
+                                                         style: GoogleFonts.dmSans(
+                                                           fontSize: 14.0,
+                                                           color: isDark ? Colors.white54 : Colors.black45,
+                                                         ),
+                                                       ),
+                                                     ],
+                                                   ),
+                                                 );
+                                               }
+
+                                               return Column(
+                                                 crossAxisAlignment: CrossAxisAlignment.start,
+                                                 children: [
+                                                   Padding(
+                                                     padding: const EdgeInsets.only(left: 4, bottom: 10),
+                                                     child: Text(
+                                                       'Daftar Ditemukan (${matchedItems.length})',
+                                                       style: GoogleFonts.plusJakartaSans(
+                                                         fontSize: 14.0,
+                                                         fontWeight: FontWeight.w700,
+                                                         color: isDark ? Colors.white70 : const Color(0xFF475569),
+                                                       ),
+                                                     ),
+                                                   ),
+                                                   ListView.separated(
+                                                     shrinkWrap: true,
+                                                     physics: const NeverScrollableScrollPhysics(),
+                                                     itemCount: matchedItems.length,
+                                                     separatorBuilder: (_, __) => Divider(
+                                                       height: 20,
+                                                       thickness: 1,
+                                                       color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+                                                     ),
+                                                     itemBuilder: (context, index) {
+                                                       final item = matchedItems[index];
+                                                       final String itemType = item['itemType']?.toString() ?? 'cp';
+                                                       final String itemTitle = item['title']?.toString() ?? 'Item';
+                                                       final String subtitle = item['subtitle']?.toString() ?? '';
+                                                       final String badgeText = item['badgeText']?.toString() ?? '';
+                                                       final String actionLabel = item['actionLabel']?.toString() ?? 'Buka';
+                                                       final String projId = item['projectId']?.toString() ?? '';
+                                                       final String projTitle = item['projectTitle']?.toString() ?? 'Classroom';
+                                                       final Color cardColor = item['cardColor'] as Color? ?? Colors.white;
+                                                       final Color accentColor = item['accentColor'] as Color? ?? const Color(0xFF7F52FC);
+
+                                                       void performAction() {
+                                                         final bool isGuru = role.toLowerCase() == 'guru';
+                                                         if (isGuru) {
+                                                           if (MediaQuery.of(context).size.width > 800) {
+                                                             Navigator.of(context).push(
+                                                               MaterialPageRoute(
+                                                                 builder: (_) => DesktopClassroomPage(
+                                                                   projectId: projId,
+                                                                   projectTitle: projTitle,
+                                                                 ),
+                                                               ),
+                                                             );
+                                                           } else {
+                                                             Navigator.of(context).push(
+                                                               MaterialPageRoute(
+                                                                 builder: (_) => DetailCpPage(
+                                                                   projectId: projId,
+                                                                   projectTitle: projTitle,
+                                                                   stageIdx: item['stageIdx'] ?? 0,
+                                                                   isOwner: item['isOwner'] ?? false,
+                                                                   accentColor: accentColor,
+                                                                   cardColor: cardColor,
+                                                                 ),
+                                                               ),
+                                                             );
+                                                           }
+                                                           return;
+                                                         }
+
+                                                         // Navigation for Student:
+                                                         final currentUid = FirebaseAuth.instance.currentUser?.uid ?? '';
+                                                         final taskData = item['taskData'] as Map? ?? {};
+                                                         final String taskKey = item['taskKey']?.toString() ?? '0_0_0';
+
+                                                         if (itemType == 'cp') {
+                                                           if (widget.onNavigateTab != null) {
+                                                             widget.onNavigateTab!(3, projectId: projId);
+                                                           } else {
+                                                             Navigator.of(context).push(
+                                                               MaterialPageRoute(
+                                                                 builder: (_) => MonitoringPage(initialProjectId: projId),
+                                                               ),
+                                                             );
+                                                           }
+                                                         } else if (itemType == 'tugas') {
+                                                           Navigator.of(context).push(
+                                                             MaterialPageRoute(
+                                                               builder: (_) => MengerjakanTugasPage(
+                                                                 title: itemTitle,
+                                                                 projectId: projId,
+                                                                 studentUid: currentUid,
+                                                                 taskKey: taskKey,
+                                                                 onCompleted: () {},
+                                                                 assignmentType: taskData['assignmentType']?.toString() ?? 'individu',
+                                                                 studentsMasterList: const [],
+                                                                 taskText: taskData['tugasText']?.toString() ?? '',
+                                                                 docName: taskData['doc']?.toString() ?? '',
+                                                               ),
+                                                             ),
+                                                           );
+                                                         } else if (itemType == 'quiz') {
+                                                           Navigator.of(context).push(
+                                                             MaterialPageRoute(
+                                                               builder: (_) => MengerjakanQuizPage(
+                                                                 title: itemTitle,
+                                                                 durationStr: taskData['quizDuration']?.toString() ?? '15',
+                                                                 startTime: taskData['quizStartTime']?.toString() ?? '',
+                                                                 projectId: projId,
+                                                                 studentUid: currentUid,
+                                                                 taskKey: taskKey,
+                                                                 onCompleted: () {},
+                                                               ),
+                                                             ),
+                                                           );
+                                                         } else if (itemType == 'materi') {
+                                                           Navigator.of(context).push(
+                                                             MaterialPageRoute(
+                                                               builder: (_) => BacaMateriPage(
+                                                                 title: itemTitle,
+                                                                 docName: item['docName']?.toString() ?? '',
+                                                                 onCompleted: () {},
+                                                               ),
+                                                             ),
+                                                           );
+                                                         }
+                                                       }
+
+                                                       IconData getBadgeIcon() {
+                                                         switch (itemType) {
+                                                           case 'quiz':
+                                                             return Icons.quiz_rounded;
+                                                           case 'materi':
+                                                             return Icons.menu_book_rounded;
+                                                           case 'tugas':
+                                                             return Icons.assignment_rounded;
+                                                           default:
+                                                             return Icons.layers_rounded;
+                                                         }
+                                                       }
+
+                                                       Color getBadgeColor() {
+                                                         switch (itemType) {
+                                                           case 'quiz':
+                                                             return isDark ? const Color(0xFF3F1D2E) : const Color(0xFFFCE7F3);
+                                                           case 'materi':
+                                                             return isDark ? const Color(0xFF1D2E3F) : const Color(0xFFE0F2FE);
+                                                           case 'tugas':
+                                                             return isDark ? const Color(0xFF1D3F2B) : const Color(0xFFDCFCE7);
+                                                           default:
+                                                             return isDark ? const Color(0xFF372744) : const Color(0xFFF3E8FF);
+                                                         }
+                                                       }
+
+                                                       Color getBadgeTextColor() {
+                                                         switch (itemType) {
+                                                           case 'quiz':
+                                                             return isDark ? const Color(0xFFF472B6) : const Color(0xFFDB2777);
+                                                           case 'materi':
+                                                             return isDark ? const Color(0xFF38BDF8) : const Color(0xFF0284C7);
+                                                           case 'tugas':
+                                                             return isDark ? const Color(0xFF4ADE80) : const Color(0xFF16A34A);
+                                                           default:
+                                                             return isDark ? const Color(0xFFC084FC) : const Color(0xFF9333EA);
+                                                         }
+                                                       }
+
+                                                       return InkWell(
+                                                         borderRadius: BorderRadius.circular(12),
+                                                         onTap: performAction,
+                                                         child: Padding(
+                                                           padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
+                                                           child: Row(
+                                                             children: [
+                                                               Expanded(
+                                                                 child: Column(
+                                                                   crossAxisAlignment: CrossAxisAlignment.start,
+                                                                   children: [
+                                                                     Row(
+                                                                       children: [
+                                                                         Container(
+                                                                           padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2.5),
+                                                                           decoration: BoxDecoration(
+                                                                             color: getBadgeColor(),
+                                                                             borderRadius: BorderRadius.circular(6),
+                                                                           ),
+                                                                           child: Row(
+                                                                             mainAxisSize: MainAxisSize.min,
+                                                                             children: [
+                                                                               Icon(
+                                                                                 getBadgeIcon(),
+                                                                                 size: 11,
+                                                                                 color: getBadgeTextColor(),
+                                                                               ),
+                                                                               const SizedBox(width: 4),
+                                                                               Text(
+                                                                                 badgeText,
+                                                                                 style: GoogleFonts.dmSans(
+                                                                                   fontSize: 11.5,
+                                                                                   fontWeight: FontWeight.bold,
+                                                                                   color: getBadgeTextColor(),
+                                                                                 ),
+                                                                               ),
+                                                                             ],
+                                                                           ),
+                                                                         ),
+                                                                       ],
+                                                                     ),
+                                                                     const SizedBox(height: 4),
+                                                                     Text(
+                                                                       itemTitle,
+                                                                       style: GoogleFonts.plusJakartaSans(
+                                                                         fontSize: 16.0,
+                                                                         fontWeight: FontWeight.w800,
+                                                                         color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                                                       ),
+                                                                       maxLines: 1,
+                                                                       overflow: TextOverflow.ellipsis,
+                                                                     ),
+                                                                     const SizedBox(height: 2),
+                                                                     Text(
+                                                                       subtitle,
+                                                                       style: GoogleFonts.dmSans(
+                                                                         fontSize: 13.0,
+                                                                         fontWeight: FontWeight.w500,
+                                                                         color: isDark ? Colors.white60 : const Color(0xFF64748B),
+                                                                       ),
+                                                                       maxLines: 1,
+                                                                       overflow: TextOverflow.ellipsis,
+                                                                     ),
+                                                                   ],
+                                                                 ),
+                                                               ),
+                                                               const SizedBox(width: 10),
+                                                               BouncyButton(
+                                                                 scaleDown: 0.90,
+                                                                 onTap: performAction,
+                                                                 child: Container(
+                                                                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7.5),
+                                                                   decoration: BoxDecoration(
+                                                                     color: isDark ? Colors.white : Colors.black,
+                                                                     borderRadius: BorderRadius.circular(24),
+                                                                   ),
+                                                                   child: Row(
+                                                                     mainAxisSize: MainAxisSize.min,
+                                                                     children: [
+                                                                       Text(
+                                                                         actionLabel,
+                                                                         style: GoogleFonts.plusJakartaSans(
+                                                                           fontSize: 13.0,
+                                                                           fontWeight: FontWeight.bold,
+                                                                           color: isDark ? Colors.black : Colors.white,
+                                                                         ),
+                                                                       ),
+                                                                       const SizedBox(width: 4),
+                                                                       Icon(
+                                                                         Icons.arrow_forward_ios_rounded,
+                                                                         size: 10,
+                                                                         color: isDark ? Colors.black : Colors.white,
+                                                                       ),
+                                                                     ],
+                                                                   ),
+                                                                 ),
+                                                               ),
+                                                             ],
+                                                           ),
+                                                         ),
+                                                       );
+                                                     },
+                                                   ),
+                                                 ],
+                                               );
+                                             }
                                             final activeProjectDocs = projectDocs.where((doc) {
                                               final pData = doc.data() as Map<String, dynamic>? ?? {};
                                               final pId = (pData['projectId'] ?? doc.id).toString();
@@ -3711,17 +4010,42 @@ class _StudentHomePageState extends State<StudentHomePage> {
                                                   );
                                                 } else {
                                                   if (isGrid) {
-                                                    return GridView.builder(
-                                                      shrinkWrap: true,
-                                                      physics: const NeverScrollableScrollPhysics(),
-                                                      itemCount: projectCards.length,
-                                                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                                                        crossAxisCount: 2,
-                                                        crossAxisSpacing: 8,
-                                                        mainAxisSpacing: 8,
-                                                        childAspectRatio: 1.05,
-                                                      ),
-                                                      itemBuilder: (context, index) => projectCards[index],
+                                                    final leftCards = <Widget>[];
+                                                    final rightCards = <Widget>[];
+                                                    for (int i = 0; i < projectCards.length; i++) {
+                                                      if (i.isEven) {
+                                                        leftCards.add(projectCards[i]);
+                                                      } else {
+                                                        rightCards.add(projectCards[i]);
+                                                      }
+                                                    }
+                                                    return Row(
+                                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                                      children: [
+                                                        Expanded(
+                                                          child: Column(
+                                                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                                                            children: [
+                                                              for (int i = 0; i < leftCards.length; i++) ...[
+                                                                if (i > 0) const SizedBox(height: 8),
+                                                                leftCards[i],
+                                                              ],
+                                                            ],
+                                                          ),
+                                                        ),
+                                                        const SizedBox(width: 8),
+                                                        Expanded(
+                                                          child: Column(
+                                                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                                                            children: [
+                                                              for (int i = 0; i < rightCards.length; i++) ...[
+                                                                if (i > 0) const SizedBox(height: 8),
+                                                                rightCards[i],
+                                                              ],
+                                                            ],
+                                                          ),
+                                                        ),
+                                                      ],
                                                     );
                                                   } else {
                                                     return ListView.separated(
@@ -3741,16 +4065,199 @@ class _StudentHomePageState extends State<StudentHomePage> {
                                           },
                                         ),
                                       ],
+                                    ),
                                   ),
+                                ],
+                              ),
+                            ),
+
+            // 2. Sticky Glassmorphic Header Bar (Transparan Glassmorphic Blur 20px - Muncul saat di-scroll)
+            if (!isDesktop)
+              Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                child: ValueListenableBuilder<double>(
+                  valueListenable: _headerScrollOffsetNotifier,
+                  builder: (context, scrollOffset, _) {
+                    if (scrollOffset <= 20.0) {
+                      return const SizedBox.shrink();
+                    }
+                    final double scrollProgress = ((scrollOffset - 20.0) / 30.0).clamp(0.0, 1.0);
+                    final double blurSigma = 20.0 * scrollProgress;
+                    return Opacity(
+                      opacity: scrollProgress,
+                      child: ClipRect(
+                        child: BackdropFilter(
+                          filter: ui.ImageFilter.blur(
+                            sigmaX: blurSigma > 0.1 ? blurSigma : 0.001,
+                            sigmaY: blurSigma > 0.1 ? blurSigma : 0.001,
+                          ),
+                          child: Container(
+                            width: double.infinity,
+                            padding: EdgeInsets.fromLTRB(
+                              AppTypography.screenHorizontalMargin,
+                              MediaQuery.of(context).padding.top + 8.0,
+                              AppTypography.screenHorizontalMargin,
+                              10.0,
+                            ),
+                            decoration: BoxDecoration(
+                              color: isDark
+                                  ? const Color(0xFF000000).withValues(alpha: 0.60 * scrollProgress)
+                                  : Colors.white.withValues(alpha: 0.65 * scrollProgress),
+                              border: Border(
+                                bottom: BorderSide(
+                                  color: (isDark
+                                          ? const Color(0xFF27272A)
+                                          : const Color(0xFFF1F5F9))
+                                      .withValues(alpha: 0.9 * scrollProgress),
+                                  width: 1.0,
+                                ),
+                              ),
+                            ),
+                            child: Row(
+                              children: [
+                                // Profile Avatar
+                                Container(
+                                  width: 38,
+                                  height: 38,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
+                                  ),
+                                  child: ClipOval(
+                                    child: Transform.scale(
+                                      scale: 1.45,
+                                      child: userPhoto.isNotEmpty
+                                          ? (userPhoto.startsWith('http')
+                                              ? Image.network(
+                                                  userPhoto,
+                                                  fit: BoxFit.cover,
+                                                  errorBuilder: (_, __, ___) => Center(
+                                                    child: Text(
+                                                      userName.isNotEmpty
+                                                          ? userName.substring(0, (userName.length >= 2 ? 2 : 1)).toUpperCase()
+                                                          : 'P',
+                                                      style: GoogleFonts.plusJakartaSans(
+                                                        fontWeight: FontWeight.w800,
+                                                        color: isDark ? Colors.white : Colors.black,
+                                                        fontSize: 15,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                )
+                                              : Image.asset(
+                                                  userPhoto,
+                                                  fit: BoxFit.cover,
+                                                  errorBuilder: (_, __, ___) => Center(
+                                                    child: Text(
+                                                      userName.isNotEmpty
+                                                          ? userName.substring(0, (userName.length >= 2 ? 2 : 1)).toUpperCase()
+                                                          : 'P',
+                                                      style: GoogleFonts.plusJakartaSans(
+                                                        fontWeight: FontWeight.w800,
+                                                        color: isDark ? Colors.white : Colors.black,
+                                                        fontSize: 15,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ))
+                                          : Center(
+                                              child: Text(
+                                                userName.isNotEmpty
+                                                    ? userName.substring(0, (userName.length >= 2 ? 2 : 1)).toUpperCase()
+                                                    : 'P',
+                                                style: GoogleFonts.plusJakartaSans(
+                                                  fontWeight: FontWeight.w800,
+                                                  color: isDark ? Colors.white : Colors.black,
+                                                  fontSize: 15,
+                                                ),
+                                              ),
+                                            ),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 10),
+
+                                // Name & Role
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Text(
+                                        'Hai, $capitalizedName',
+                                        style: GoogleFonts.plusJakartaSans(
+                                          fontSize: 16.0,
+                                          fontWeight: FontWeight.bold,
+                                          color: isDark ? Colors.white : Colors.black,
+                                          height: 1.15,
+                                        ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                      const SizedBox(height: 1),
+                                      Text(
+                                        roleSubtitle,
+                                        style: GoogleFonts.dmSans(
+                                          fontSize: 11.5,
+                                          fontWeight: FontWeight.w600,
+                                          color: genderRoleColor,
+                                        ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+
+                                // Dark / Light Mode Toggle
+                                ValueListenableBuilder<String>(
+                                  valueListenable: HubnerApp.themeNotifier,
+                                  builder: (context, currentTheme, _) {
+                                    final bool isDarkTheme = currentTheme == 'Gelap' || currentTheme == 'Hitam';
+                                    return BouncyButton(
+                                      onTap: () => _toggleThemeWithBounce(context, isDarkTheme),
+                                      child: Padding(
+                                        padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 2.0),
+                                        child: Icon(
+                                          isDarkTheme ? Icons.wb_sunny_rounded : Icons.nightlight_round,
+                                          color: isDarkTheme ? const Color(0xFFFBBF24) : Colors.black87,
+                                          size: 22,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
+                                const SizedBox(width: 4),
+
+                                // Notification Bell
+                                ValueListenableBuilder<String>(
+                                  valueListenable: HubnerApp.themeNotifier,
+                                  builder: (context, currentTheme, _) {
+                                    final bool isDarkTheme = currentTheme == 'Gelap' || currentTheme == 'Hitam';
+                                    return NotificationBellIcon(
+                                      isDark: isDarkTheme,
+                                      size: 34,
+                                      showFrame: false,
+                                    );
+                                  },
                                 ),
                               ],
                             ),
                           ),
-                        );
-                      },
+                        ),
+                      ),
                     );
                   },
                 ),
+              ),
+          ],
+        );
+      },
+    );
+  },
+),
               ),
             ),
           ],
@@ -3786,7 +4293,10 @@ class _StudentHomePageState extends State<StudentHomePage> {
       builder: (context, userSnap) {
         String teacherName = 'Pak Dimas Supriadi, M.Pd';
         if (userSnap.hasData && userSnap.data != null && userSnap.data!.exists) {
-          teacherName = (userSnap.data!.data() as Map<String, dynamic>)['name'] ?? 'Pak Dimas Supriadi, M.Pd';
+          final uData = userSnap.data!.data() as Map<String, dynamic>;
+          final rawName = uData['name'] as String? ?? 'Dimas Supriadi, M.Pd';
+          final gender = uData['gender'] as String? ?? uData['jenisKelamin'] as String?;
+          teacherName = _formatTeacherTitle(rawName, gender);
         }
 
         return StreamBuilder<QuerySnapshot>(
@@ -3880,8 +4390,11 @@ class _StudentHomePageState extends State<StudentHomePage> {
                     },
                     child: Container(
                       height: isCompact2Column
-                          ? 156
+                          ? null
                           : ((MediaQuery.of(cardContext).size.width < 700 || MediaQuery.of(cardContext).size.shortestSide < 700) ? 168 : 195),
+                      constraints: isCompact2Column
+                          ? const BoxConstraints(minHeight: 100)
+                          : null,
                       margin: EdgeInsets.zero,
                       clipBehavior: Clip.antiAlias,
                       decoration: BoxDecoration(
@@ -3905,14 +4418,13 @@ class _StudentHomePageState extends State<StudentHomePage> {
                                 ),
                               ),
                             ),
-                          Positioned.fill(
-                            child: Padding(
-                              padding: isCompact2Column
-                                  ? const EdgeInsets.all(10)
-                                  : ((MediaQuery.of(cardContext).size.width < 700 || MediaQuery.of(cardContext).size.shortestSide < 700)
-                                      ? const EdgeInsets.fromLTRB(14, 12, 14, 12)
-                                      : const EdgeInsets.all(16)),
-                              child: _buildTeacherGeneralView(
+                          Padding(
+                            padding: isCompact2Column
+                                ? const EdgeInsets.all(10)
+                                : ((MediaQuery.of(cardContext).size.width < 700 || MediaQuery.of(cardContext).size.shortestSide < 700)
+                                    ? const EdgeInsets.fromLTRB(14, 12, 14, 12)
+                                    : const EdgeInsets.all(16)),
+                            child: _buildTeacherGeneralView(
                                 context: cardContext,
                                 projectId: projectId,
                                 title: title,
@@ -3924,9 +4436,10 @@ class _StudentHomePageState extends State<StudentHomePage> {
                                 accentColor: accentColor,
                                 backgroundColor: backgroundColor,
                                 schedules: schedules,
+                                ownerUid: ownerUid,
                                 isCompact2Column: isCompact2Column,
                                 onShowStats: () {
-                                  _showAnalyticsDialog(context, projectId, title, stages, membersSnap);
+                                  _showAnalyticsDialog(cardContext, projectId, title, stages, membersSnap);
                                 },
                                 onShowBarcode: () {
                                   if (MediaQuery.of(cardContext).size.width > 900) {
@@ -3934,12 +4447,11 @@ class _StudentHomePageState extends State<StudentHomePage> {
                                       isBarcodeFlipped = true;
                                     });
                                   } else {
-                                    _showClassBarcodeDialog(context, projectId, title, accentColor);
+                                    _showClassBarcodeDialog(cardContext, projectId, title, accentColor);
                                   }
                                 },
                               ),
                             ),
-                          ),
                         if (!isStatsFlipped && !isBarcodeFlipped && !(MediaQuery.of(cardContext).size.width < 700 || MediaQuery.of(cardContext).size.shortestSide < 700))
                           Positioned(
                             right: 18,
@@ -3955,8 +4467,12 @@ class _StudentHomePageState extends State<StudentHomePage> {
                                   vertical: 4,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: isDark ? Colors.black : const Color(0xFFFFD600),
+                                  color: Colors.white,
                                   borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(
+                                    color: Colors.black.withValues(alpha: 0.12),
+                                    width: 1.0,
+                                  ),
                                 ),
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
@@ -3966,14 +4482,14 @@ class _StudentHomePageState extends State<StudentHomePage> {
                                       style: GoogleFonts.plusJakartaSans(
                                         fontSize: 14.0,
                                         fontWeight: FontWeight.bold,
-                                        color: isDark ? Colors.white : Colors.black,
+                                        color: Colors.black,
                                       ),
                                     ),
                                     const SizedBox(width: 4),
-                                    Icon(
+                                    const Icon(
                                       Icons.arrow_forward_rounded,
                                       size: 12,
-                                      color: isDark ? Colors.white : Colors.black,
+                                      color: Colors.black,
                                     ),
                                   ],
                                 ),
@@ -4018,7 +4534,7 @@ class _StudentHomePageState extends State<StudentHomePage> {
                                           ),
                                           const SizedBox(width: 14),
                                           ManagementActionButton(
-                                            icon: Icons.file_download_outlined,
+                                            icon: Icons.upload_file_rounded,
                                             baseColor: const Color(0xFF10B981),
                                             onTap: () async {
                                               final snap = await FirebaseFirestore.instance.collection('projects').doc(projectId).get();
@@ -4086,6 +4602,7 @@ class _StudentHomePageState extends State<StudentHomePage> {
     required List schedules,
     required VoidCallback onShowStats,
     required VoidCallback onShowBarcode,
+    String ownerUid = '',
     bool isCompact2Column = false,
   }) {
     final majorText = major.isEmpty ? 'Umum' : major;
@@ -4093,110 +4610,241 @@ class _StudentHomePageState extends State<StudentHomePage> {
     final bool isDark = AppColors.isDarkMode;
 
     if (isMobile) {
-      return Stack(
-        clipBehavior: Clip.none,
-        children: [
-          // Illustration placed on right more centered and bigger (only in normal 1-col list mode)!
-          if (!isCompact2Column)
-            Positioned(
-              right: 6,
-              top: 0,
-              bottom: 0,
-              child: Center(
-                child: SizedBox(
-                  height: 76,
-                  width: 76,
-                  child: ColorFiltered(
-                    colorFilter: isDark
-                        ? ColorFilter.mode(Colors.black.withValues(alpha: 0.12), BlendMode.darken)
-                        : const ColorFilter.mode(Colors.transparent, BlendMode.dst),
-                    child: Image.asset(
-                      iconPath,
-                      fit: BoxFit.contain,
-                      errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
-                    ),
-                  ),
-                ),
+      if (isCompact2Column) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _AnimatedScheduleCapsule(
+              schedules: schedules,
+              accentColor: accentColor,
+              cardColor: backgroundColor,
+              isCompact: true,
+            ),
+            const SizedBox(height: 6),
+            Text(
+              title,
+              maxLines: 3,
+              overflow: TextOverflow.ellipsis,
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 14.5,
+                fontWeight: FontWeight.w800,
+                color: isDark ? Colors.white : Colors.black87,
               ),
             ),
-          // Main content column
-          Padding(
-            padding: EdgeInsets.zero,
+            if (totalStudents > 0) ...[
+              const SizedBox(height: 3),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3.5),
+                decoration: BoxDecoration(
+                  color: isDark ? Colors.white.withValues(alpha: 0.15) : Colors.white.withValues(alpha: 0.55),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: isDark ? Colors.white.withValues(alpha: 0.10) : Colors.white.withValues(alpha: 0.65),
+                    width: 1.0,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.03),
+                      blurRadius: 4,
+                      offset: const Offset(0, 1),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.people_alt_rounded,
+                      size: 12,
+                      color: Color(0xFF10B981),
+                    ),
+                    const SizedBox(width: 4),
+                    Flexible(
+                      child: Text(
+                        'Total $totalStudents Siswa',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.dmSans(
+                          fontSize: 11.0,
+                          fontWeight: FontWeight.w600,
+                          color: isDark ? Colors.white : Colors.black87,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+            const SizedBox(height: 6),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3.5),
+              decoration: BoxDecoration(
+                color: isDark ? Colors.white.withValues(alpha: 0.15) : Colors.white.withValues(alpha: 0.55),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: isDark ? Colors.white.withValues(alpha: 0.10) : Colors.white.withValues(alpha: 0.65),
+                  width: 1.0,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.03),
+                    blurRadius: 4,
+                    offset: const Offset(0, 1),
+                  ),
+                ],
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(
+                    Icons.flash_on_rounded,
+                    size: 13,
+                    color: Color(0xFFF59E0B),
+                  ),
+                  const SizedBox(width: 3),
+                  Flexible(
+                    child: Text(
+                      majorText,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.dmSans(
+                        fontSize: 11.5,
+                        fontWeight: FontWeight.bold,
+                        color: isDark ? Colors.white : Colors.black87,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        );
+      }
+
+      double calculatedFontSize = 19.5;
+      if (title.length > 55) {
+        calculatedFontSize = 16.0;
+      }
+
+      return Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Left Content Area
+          Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                // Top Row: Animated White Time Capsule (Frameless & Taller with larger circle closer to corner)
                 _AnimatedScheduleCapsule(
                   schedules: schedules,
                   accentColor: accentColor,
                   cardColor: backgroundColor,
                 ),
                 const SizedBox(height: 4),
-                // Middle: Complete Subject Title (Flexible, full size for 1-2 lines, max 3 lines, NEVER TRUNCATED)
                 Padding(
-                  padding: EdgeInsets.only(
-                    left: isCompact2Column ? 2.0 : 10.0,
-                    right: isCompact2Column ? 2.0 : 84.0,
+                  padding: const EdgeInsets.only(left: 2.0, right: 4.0),
+                  child: Text(
+                    title,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: calculatedFontSize,
+                      fontWeight: FontWeight.w800,
+                      color: isDark ? Colors.white : Colors.black87,
+                    ),
                   ),
-                  child: Builder(
-                    builder: (context) {
-                      double calculatedFontSize = isCompact2Column ? 14.5 : 19.5;
-                      if (!isCompact2Column && title.length > 55) {
-                        calculatedFontSize = 16.0;
-                      }
-                      return Text(
-                        title,
-                        maxLines: isCompact2Column ? 2 : 3,
-                        overflow: TextOverflow.ellipsis,
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: calculatedFontSize,
-                          fontWeight: FontWeight.w800,
-                          color: isDark ? Colors.white : Colors.black87,
-                        ),
-                      );
-                    },
+                ),
+                const SizedBox(height: 2),
+                Padding(
+                  padding: const EdgeInsets.only(left: 2.0),
+                  child: _MembersAvatarStackReadOnly(
+                    projectId: projectId,
+                    ownerUid: ownerUid,
+                    avatarSize: 34.0,
+                    overlap: 12.0,
                   ),
                 ),
                 const SizedBox(height: 4),
-                // Bottom Row: [ Kelas Tag ] [ Siswa Tag / Stats Button ]
                 Padding(
-                  padding: const EdgeInsets.only(left: 2.0, bottom: 2.0, right: 2.0),
+                  padding: const EdgeInsets.only(left: 2.0, bottom: 2.0),
                   child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      // Kelas / Jurusan Tag
-                      Expanded(
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4.5),
+                        decoration: BoxDecoration(
+                          color: isDark ? Colors.white.withValues(alpha: 0.15) : Colors.white.withValues(alpha: 0.55),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: isDark ? Colors.white.withValues(alpha: 0.10) : Colors.white.withValues(alpha: 0.65),
+                            width: 1.0,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.03),
+                              blurRadius: 4,
+                              offset: const Offset(0, 1),
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(
+                              Icons.flash_on_rounded,
+                              size: 13,
+                              color: Color(0xFFF59E0B),
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              majorText,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: GoogleFonts.dmSans(
+                                fontSize: 12.5,
+                                fontWeight: FontWeight.bold,
+                                color: isDark ? Colors.white : Colors.black87,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      Flexible(
                         child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4.0),
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4.5),
                           decoration: BoxDecoration(
+                            color: isDark ? Colors.white.withValues(alpha: 0.15) : Colors.white.withValues(alpha: 0.55),
                             borderRadius: BorderRadius.circular(20),
-                            color: isDark
-                                ? Colors.black.withValues(alpha: 0.25)
-                                : Colors.black.withValues(alpha: 0.08),
                             border: Border.all(
-                              color: isDark
-                                  ? Colors.white.withValues(alpha: 0.2)
-                                  : Colors.black.withValues(alpha: 0.18),
+                              color: isDark ? Colors.white.withValues(alpha: 0.10) : Colors.white.withValues(alpha: 0.65),
                               width: 1.0,
                             ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.03),
+                                blurRadius: 4,
+                                offset: const Offset(0, 1),
+                              ),
+                            ],
                           ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(
-                                Icons.flash_on_rounded,
-                                size: 11,
-                                color: isDark ? Colors.white : Colors.black87,
+                              const Icon(
+                                Icons.people_alt_rounded,
+                                size: 13,
+                                color: Color(0xFF10B981),
                               ),
-                              const SizedBox(width: 3),
+                              const SizedBox(width: 4),
                               Flexible(
                                 child: Text(
-                                  majorText,
+                                  '$totalStudents Siswa',
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                   style: GoogleFonts.dmSans(
-                                    fontSize: 12.0,
+                                    fontSize: 12.5,
                                     fontWeight: FontWeight.bold,
                                     color: isDark ? Colors.white : Colors.black87,
                                   ),
@@ -4206,68 +4854,56 @@ class _StudentHomePageState extends State<StudentHomePage> {
                           ),
                         ),
                       ),
-                      if (!isCompact2Column) ...[
-                        const SizedBox(width: 6),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4.5),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(24),
-                            color: isDark
-                                ? Colors.black.withValues(alpha: 0.25)
-                                : Colors.black.withValues(alpha: 0.08),
-                            border: Border.all(
-                              color: isDark
-                                  ? Colors.white.withValues(alpha: 0.2)
-                                  : Colors.black.withValues(alpha: 0.18),
-                              width: 1.2,
-                            ),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                Icons.group_outlined,
-                                size: 13,
-                                color: isDark ? Colors.white : Colors.black87,
-                              ),
-                              const SizedBox(width: 4),
-                              Text(
-                                '$totalStudents Siswa',
-                                style: GoogleFonts.dmSans(
-                                  fontSize: 14.0,
-                                  fontWeight: FontWeight.bold,
-                                  color: isDark ? Colors.white : Colors.black87,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                      const SizedBox(width: 4),
-                      GestureDetector(
-                        behavior: HitTestBehavior.opaque,
-                        onTap: onShowStats,
-                        child: Container(
-                          width: isCompact2Column ? 28 : 36,
-                          height: isCompact2Column ? 28 : 36,
-                          decoration: BoxDecoration(
-                            color: isDark ? Colors.black : Colors.white,
-                            shape: BoxShape.circle,
-                          ),
-                          child: Center(
-                            child: Icon(
-                              Icons.bar_chart_rounded,
-                              size: isCompact2Column ? 16 : 20,
-                              color: isDark ? Colors.white : Colors.black87,
-                            ),
-                          ),
-                        ),
-                      ),
                     ],
                   ),
                 ),
               ],
             ),
+          ),
+          const SizedBox(width: 10),
+          // Right Side: 2x Bigger Class Icon (68x68) + Vertically Aligned Stats Button
+          Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              SizedBox(
+                height: 68,
+                width: 68,
+                child: ColorFiltered(
+                  colorFilter: isDark
+                      ? ColorFilter.mode(Colors.black.withValues(alpha: 0.12), BlendMode.darken)
+                      : const ColorFilter.mode(Colors.transparent, BlendMode.dst),
+                  child: Image.asset(
+                    iconPath,
+                    fit: BoxFit.contain,
+                    errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
+                  ),
+                ),
+              ),
+              GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: onShowStats,
+                child: Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: Colors.black.withValues(alpha: 0.15),
+                      width: 1.0,
+                    ),
+                  ),
+                  child: const Center(
+                    child: Icon(
+                      Icons.bar_chart_rounded,
+                      size: 18,
+                      color: Colors.black,
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       );
@@ -4581,23 +5217,32 @@ class _StudentHomePageState extends State<StudentHomePage> {
   }
 
   Widget _buildYellowBadge(IconData icon, String text) {
+    final bool isDark = AppColors.isDarkMode;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: const Color(0xFFFEF3C7),
-        borderRadius: BorderRadius.circular(10),
+        color: isDark
+            ? Colors.black.withValues(alpha: 0.25)
+            : Colors.black.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: isDark
+              ? Colors.white.withValues(alpha: 0.2)
+              : Colors.black.withValues(alpha: 0.18),
+          width: 1.0,
+        ),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 12, color: const Color(0xFFD97706)),
+          Icon(icon, size: 12, color: isDark ? Colors.white : Colors.black87),
           const SizedBox(width: 4),
           Text(
             text,
             style: GoogleFonts.plusJakartaSans(
-              fontSize: 14.0,
+              fontSize: 12.5,
               fontWeight: FontWeight.bold,
-              color: const Color(0xFFD97706),
+              color: isDark ? Colors.white : Colors.black87,
             ),
           ),
         ],
@@ -5013,7 +5658,10 @@ class _StudentHomePageState extends State<StudentHomePage> {
       builder: (context, userSnap) {
         String teacherName = 'Pak Dimas Supriadi, M.Pd';
         if (userSnap.hasData && userSnap.data != null && userSnap.data!.exists) {
-          teacherName = (userSnap.data!.data() as Map<String, dynamic>)['name'] ?? 'Pak Dimas Supriadi, M.Pd';
+          final uData = userSnap.data!.data() as Map<String, dynamic>;
+          final rawName = uData['name'] as String? ?? 'Dimas Supriadi, M.Pd';
+          final gender = uData['gender'] as String? ?? uData['jenisKelamin'] as String?;
+          teacherName = _formatTeacherTitle(rawName, gender);
         }
 
         bool isStatsFlipped = false;
@@ -5049,8 +5697,11 @@ class _StudentHomePageState extends State<StudentHomePage> {
               },
               child: Container(
                 height: isCompact2Column
-                    ? 156
+                    ? null
                     : ((MediaQuery.of(cardContext).size.width < 700 || MediaQuery.of(cardContext).size.shortestSide < 700) ? 168 : 195),
+                constraints: isCompact2Column
+                    ? const BoxConstraints(minHeight: 100)
+                    : null,
                 margin: EdgeInsets.zero,
                 clipBehavior: Clip.antiAlias,
                 decoration: BoxDecoration(
@@ -5074,14 +5725,13 @@ class _StudentHomePageState extends State<StudentHomePage> {
                           ),
                         ),
                       ),
-                    Positioned.fill(
-                      child: Padding(
-                        padding: isCompact2Column
-                            ? const EdgeInsets.all(10)
-                            : ((MediaQuery.of(cardContext).size.width < 700 || MediaQuery.of(cardContext).size.shortestSide < 700)
-                                ? const EdgeInsets.fromLTRB(14, 12, 14, 12)
-                                : const EdgeInsets.all(16)),
-                        child: isBarcodeFlipped
+                    Padding(
+                      padding: isCompact2Column
+                          ? const EdgeInsets.all(10)
+                          : ((MediaQuery.of(cardContext).size.width < 700 || MediaQuery.of(cardContext).size.shortestSide < 700)
+                              ? const EdgeInsets.fromLTRB(14, 12, 14, 12)
+                              : const EdgeInsets.all(16)),
+                      child: isBarcodeFlipped
                             ? _buildInlineBarcodeView(
                                 context: cardContext,
                                 projectId: projectId,
@@ -5123,7 +5773,9 @@ class _StudentHomePageState extends State<StudentHomePage> {
                                     accentColor: accentColor,
                                     backgroundColor: backgroundColor,
                                     schedules: schedules,
+                                    ownerUid: ownerUid,
                                     isCompact2Column: isCompact2Column,
+                                    progressValue: progressValue,
                                     onShowStats: () {
                                       cardSetState(() {
                                         isStatsFlipped = true;
@@ -5139,7 +5791,6 @@ class _StudentHomePageState extends State<StudentHomePage> {
                                       }
                                     },
                                   ),
-                      ),
                     ),
                     if (!isStatsFlipped && !isBarcodeFlipped && !(MediaQuery.of(cardContext).size.width < 700 || MediaQuery.of(cardContext).size.shortestSide < 700))
                       Positioned(
@@ -5158,8 +5809,12 @@ class _StudentHomePageState extends State<StudentHomePage> {
                               vertical: 4,
                             ),
                             decoration: BoxDecoration(
-                              color: isDark ? Colors.black : const Color(0xFFFFD600),
+                              color: Colors.white,
                               borderRadius: BorderRadius.circular(8),
+                              border: Border.all(
+                                color: Colors.black.withValues(alpha: 0.12),
+                                width: 1.0,
+                              ),
                             ),
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
@@ -5169,14 +5824,14 @@ class _StudentHomePageState extends State<StudentHomePage> {
                                   style: GoogleFonts.plusJakartaSans(
                                     fontSize: 14.0,
                                     fontWeight: FontWeight.bold,
-                                    color: isDark ? Colors.white : Colors.black,
+                                    color: Colors.black,
                                   ),
                                 ),
                                 const SizedBox(width: 4),
-                                Icon(
+                                const Icon(
                                   Icons.arrow_forward_rounded,
                                   size: 12,
-                                  color: isDark ? Colors.white : Colors.black,
+                                  color: Colors.black,
                                 ),
                               ],
                             ),
@@ -5257,40 +5912,180 @@ class _StudentHomePageState extends State<StudentHomePage> {
     required List schedules,
     required VoidCallback onShowStats,
     required VoidCallback onShowBarcode,
+    String ownerUid = '',
     bool isCompact2Column = false,
+    double progressValue = 0.0,
   }) {
     final majorText = major.isEmpty ? 'Umum' : major;
     final bool isMobile = MediaQuery.of(context).size.width < 700 || MediaQuery.of(context).size.shortestSide < 700;
     final bool isDark = AppColors.isDarkMode;
 
     if (isMobile) {
-      return Stack(
-        clipBehavior: Clip.none,
-        children: [
-          if (!isCompact2Column)
-            Positioned(
-              right: 6,
-              top: 0,
-              bottom: 0,
-              child: Center(
-                child: SizedBox(
-                  height: 76,
-                  width: 76,
-                  child: ColorFiltered(
-                    colorFilter: isDark
-                        ? ColorFilter.mode(Colors.black.withValues(alpha: 0.12), BlendMode.darken)
-                        : const ColorFilter.mode(Colors.transparent, BlendMode.dst),
-                    child: Image.asset(
-                      iconPath,
-                      fit: BoxFit.contain,
-                      errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
+      if (isCompact2Column) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _AnimatedScheduleCapsule(
+              schedules: schedules,
+              accentColor: accentColor,
+              cardColor: backgroundColor,
+              isCompact: true,
+            ),
+            const SizedBox(height: 6),
+            Text(
+              title,
+              maxLines: 3,
+              overflow: TextOverflow.ellipsis,
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 14.5,
+                fontWeight: FontWeight.w800,
+                color: isDark ? Colors.white : Colors.black87,
+              ),
+            ),
+            if (teacherName.isNotEmpty) ...[
+              const SizedBox(height: 3),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3.5),
+                decoration: BoxDecoration(
+                  color: isDark ? Colors.white.withValues(alpha: 0.15) : Colors.white.withValues(alpha: 0.55),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: isDark ? Colors.white.withValues(alpha: 0.10) : Colors.white.withValues(alpha: 0.65),
+                    width: 1.0,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.03),
+                      blurRadius: 4,
+                      offset: const Offset(0, 1),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.person_rounded,
+                      size: 12,
+                      color: Color(0xFF3B82F6),
+                    ),
+                    const SizedBox(width: 4),
+                    Flexible(
+                      child: Text(
+                        teacherName,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.dmSans(
+                          fontSize: 11.0,
+                          fontWeight: FontWeight.w600,
+                          color: isDark ? Colors.white : Colors.black87,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+            const SizedBox(height: 6),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Flexible(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3.5),
+                    decoration: BoxDecoration(
+                      color: isDark ? Colors.white.withValues(alpha: 0.15) : Colors.white.withValues(alpha: 0.55),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: isDark ? Colors.white.withValues(alpha: 0.10) : Colors.white.withValues(alpha: 0.65),
+                        width: 1.0,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.03),
+                          blurRadius: 4,
+                          offset: const Offset(0, 1),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(
+                          Icons.flash_on_rounded,
+                          size: 13,
+                          color: Color(0xFFF59E0B),
+                        ),
+                        const SizedBox(width: 3),
+                        Flexible(
+                          child: Text(
+                            majorText,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: GoogleFonts.dmSans(
+                              fontSize: 11.5,
+                              fontWeight: FontWeight.bold,
+                              color: isDark ? Colors.white : Colors.black87,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
-              ),
+                const SizedBox(width: 6),
+                // Circular progress indicator without card, percentage in center
+                SizedBox(
+                  width: 26,
+                  height: 26,
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      CircularProgressIndicator(
+                        value: progressValue.clamp(0.0, 1.0),
+                        strokeWidth: 2.6,
+                        backgroundColor: isDark
+                            ? Colors.white.withValues(alpha: 0.15)
+                            : Colors.black.withValues(alpha: 0.10),
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          progressValue >= 1.0
+                              ? const Color(0xFF10B981)
+                              : (progressValue >= 0.5
+                                  ? const Color(0xFF3B82F6)
+                                  : (progressValue > 0.0
+                                      ? const Color(0xFFF59E0B)
+                                      : (isDark ? Colors.white60 : Colors.black54))),
+                        ),
+                      ),
+                      Text(
+                        '${(progressValue * 100).toInt()}%',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 8.5,
+                          fontWeight: FontWeight.w800,
+                          color: isDark ? Colors.white : Colors.black87,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
-          Padding(
-            padding: EdgeInsets.zero,
+          ],
+        );
+      }
+
+      double calculatedFontSize = 19.5;
+      if (title.length > 55) {
+        calculatedFontSize = 16.0;
+      }
+
+      return Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Left Content Area
+          Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -5302,143 +6097,161 @@ class _StudentHomePageState extends State<StudentHomePage> {
                 ),
                 const SizedBox(height: 4),
                 Padding(
-                  padding: EdgeInsets.only(
-                    left: isCompact2Column ? 2.0 : 10.0,
-                    right: isCompact2Column ? 2.0 : 84.0,
+                  padding: const EdgeInsets.only(left: 2.0, right: 4.0),
+                  child: Text(
+                    title,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: calculatedFontSize,
+                      fontWeight: FontWeight.w800,
+                      color: isDark ? Colors.white : Colors.black87,
+                    ),
                   ),
-                  child: Builder(
-                    builder: (context) {
-                      double calculatedFontSize = isCompact2Column ? 14.5 : 19.5;
-                      if (!isCompact2Column && title.length > 55) {
-                        calculatedFontSize = 16.0;
-                      }
-                      return Text(
-                        title,
-                        maxLines: isCompact2Column ? 2 : 3,
-                        overflow: TextOverflow.ellipsis,
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: calculatedFontSize,
-                          fontWeight: FontWeight.w800,
-                          color: isDark ? Colors.white : Colors.black87,
-                        ),
-                      );
-                    },
+                ),
+                const SizedBox(height: 2),
+                Padding(
+                  padding: const EdgeInsets.only(left: 2.0),
+                  child: _MembersAvatarStackReadOnly(
+                    projectId: projectId,
+                    ownerUid: ownerUid,
+                    avatarSize: 34.0,
+                    overlap: 12.0,
                   ),
                 ),
                 const SizedBox(height: 4),
                 Padding(
-                  padding: const EdgeInsets.only(left: 2.0, bottom: 2.0, right: 2.0),
+                  padding: const EdgeInsets.only(left: 2.0, bottom: 2.0),
                   child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      Expanded(
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4.0),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4.5),
+                        decoration: BoxDecoration(
+                          color: isDark ? Colors.white.withValues(alpha: 0.15) : Colors.white.withValues(alpha: 0.55),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: isDark ? Colors.white.withValues(alpha: 0.10) : Colors.white.withValues(alpha: 0.65),
+                            width: 1.0,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.03),
+                              blurRadius: 4,
+                              offset: const Offset(0, 1),
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(
+                              Icons.flash_on_rounded,
+                              size: 13,
+                              color: Color(0xFFF59E0B),
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              majorText,
+                              style: GoogleFonts.dmSans(
+                                fontSize: 12.5,
+                                fontWeight: FontWeight.bold,
+                                color: isDark ? Colors.white : Colors.black87,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      if (teacherName.isNotEmpty) ...[
+                        const SizedBox(width: 6),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4.5),
                           decoration: BoxDecoration(
+                            color: isDark ? Colors.white.withValues(alpha: 0.15) : Colors.white.withValues(alpha: 0.55),
                             borderRadius: BorderRadius.circular(20),
-                            color: isDark
-                                ? Colors.black.withValues(alpha: 0.25)
-                                : Colors.black.withValues(alpha: 0.08),
                             border: Border.all(
-                              color: isDark
-                                  ? Colors.white.withValues(alpha: 0.2)
-                                  : Colors.black.withValues(alpha: 0.18),
+                              color: isDark ? Colors.white.withValues(alpha: 0.10) : Colors.white.withValues(alpha: 0.65),
                               width: 1.0,
                             ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.03),
+                                blurRadius: 4,
+                                offset: const Offset(0, 1),
+                              ),
+                            ],
                           ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(
-                                Icons.flash_on_rounded,
-                                size: 11,
-                                color: isDark ? Colors.white : Colors.black87,
+                              const Icon(
+                                Icons.person_rounded,
+                                size: 13,
+                                color: Color(0xFF3B82F6),
                               ),
-                              const SizedBox(width: 3),
-                              Flexible(
-                                child: Text(
-                                  majorText,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: GoogleFonts.dmSans(
-                                    fontSize: 12.0,
-                                    fontWeight: FontWeight.bold,
-                                    color: isDark ? Colors.white : Colors.black87,
-                                  ),
+                              const SizedBox(width: 4),
+                              Text(
+                                teacherName,
+                                style: GoogleFonts.dmSans(
+                                  fontSize: 12.5,
+                                  fontWeight: FontWeight.w600,
+                                  color: isDark ? Colors.white : Colors.black87,
                                 ),
                               ),
                             ],
                           ),
                         ),
-                      ),
-                      if (!isCompact2Column) ...[
-                        const SizedBox(width: 6),
-                        Flexible(
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4.5),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(24),
-                              color: isDark
-                                  ? Colors.black.withValues(alpha: 0.25)
-                                  : Colors.black.withValues(alpha: 0.08),
-                              border: Border.all(
-                                color: isDark
-                                    ? Colors.white.withValues(alpha: 0.2)
-                                    : Colors.black.withValues(alpha: 0.18),
-                                width: 1.2,
-                              ),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  Icons.person_rounded,
-                                  size: 13,
-                                  color: isDark ? Colors.white : Colors.black87,
-                                ),
-                                const SizedBox(width: 4),
-                                Flexible(
-                                  child: Text(
-                                    teacherName,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: GoogleFonts.dmSans(
-                                      fontSize: 14.0,
-                                      fontWeight: FontWeight.bold,
-                                      color: isDark ? Colors.white : Colors.black87,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
                       ],
-                      const SizedBox(width: 4),
-                      GestureDetector(
-                        behavior: HitTestBehavior.opaque,
-                        onTap: onShowStats,
-                        child: Container(
-                          width: isCompact2Column ? 28 : 36,
-                          height: isCompact2Column ? 28 : 36,
-                          decoration: BoxDecoration(
-                            color: isDark ? Colors.black : Colors.white,
-                            shape: BoxShape.circle,
-                          ),
-                          child: Center(
-                            child: Icon(
-                              Icons.bar_chart_rounded,
-                              size: isCompact2Column ? 16 : 20,
-                              color: isDark ? Colors.white : Colors.black87,
-                            ),
-                          ),
-                        ),
-                      ),
                     ],
                   ),
                 ),
               ],
             ),
+          ),
+          const SizedBox(width: 10),
+          // Right Side: 2x Bigger Class Icon (68x68) + Vertically Aligned Stats Button
+          Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              SizedBox(
+                height: 68,
+                width: 68,
+                child: ColorFiltered(
+                  colorFilter: isDark
+                      ? ColorFilter.mode(Colors.black.withValues(alpha: 0.12), BlendMode.darken)
+                      : const ColorFilter.mode(Colors.transparent, BlendMode.dst),
+                  child: Image.asset(
+                    iconPath,
+                    fit: BoxFit.contain,
+                    errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
+                  ),
+                ),
+              ),
+              GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: onShowStats,
+                child: Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: Colors.black.withValues(alpha: 0.15),
+                      width: 1.0,
+                    ),
+                  ),
+                  child: const Center(
+                    child: Icon(
+                      Icons.bar_chart_rounded,
+                      size: 18,
+                      color: Colors.black,
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       );
@@ -5559,6 +6372,7 @@ class _StudentHomePageState extends State<StudentHomePage> {
     required VoidCallback onBack,
     Color accentColor = Colors.transparent,
   }) {
+    final bool isDark = AppColors.isDarkMode;
     final bool isYellow = _isYellowCardColor(accentColor);
     final Color textColor = isYellow ? Colors.black : Colors.white;
     final Color backBtnBg = isYellow ? Colors.black.withValues(alpha: 0.12) : Colors.white.withValues(alpha: 0.2);
@@ -5582,7 +6396,7 @@ class _StudentHomePageState extends State<StudentHomePage> {
                 ),
                 child: Icon(
                   Icons.arrow_back_rounded,
-                  color: textColor,
+                  color: isDark ? Colors.white : Colors.black87,
                   size: 14,
                 ),
               ),
@@ -5593,67 +6407,129 @@ class _StudentHomePageState extends State<StudentHomePage> {
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 14,
                 fontWeight: FontWeight.bold,
-                color: textColor,
+                color: isDark ? Colors.white : Colors.black,
               ),
             ),
           ],
         ),
         const SizedBox(height: 8),
 
-        // Progress Card
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(14),
-          ),
+        // Progress Section (fully rounded slider track with sliding egg pill)
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 2),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Progress Belajar Mandiri',
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 14.0,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black87,
-                    ),
-                  ),
-                  Text(
-                    percentText,
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 14.0,
-                      fontWeight: FontWeight.bold,
-                      color: const Color(0xFFEF4444),
-                    ),
-                  ),
-                ],
+              Text(
+                'Progress Belajar Mandiri',
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 13.5,
+                  fontWeight: FontWeight.bold,
+                  color: isDark ? Colors.white : Colors.black87,
+                ),
               ),
               const SizedBox(height: 6),
-              ClipRRect(
-                borderRadius: BorderRadius.circular(4),
-                child: LinearProgressIndicator(
-                  value: progressValue,
-                  minHeight: 5,
-                  backgroundColor: const Color(0xFFE2E8F0),
-                  valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFFFBBF24)),
-                ),
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  final double totalWidth = constraints.maxWidth;
+                  final double pillWidth = 46.0;
+                  final double maxSlide = (totalWidth - pillWidth).clamp(0.0, totalWidth);
+                  final double slidePosition = maxSlide * progressValue.clamp(0.0, 1.0);
+                  final Color activeColor = progressValue >= 1.0
+                      ? const Color(0xFF10B981)
+                      : (progressValue >= 0.5
+                          ? const Color(0xFF3B82F6)
+                          : (progressValue > 0.0 ? const Color(0xFFF59E0B) : (isDark ? Colors.white54 : Colors.black45)));
+
+                  return SizedBox(
+                    height: 26,
+                    child: Stack(
+                      alignment: Alignment.centerLeft,
+                      children: [
+                        // Background Track (Full Rounded)
+                        Container(
+                          height: 8,
+                          width: totalWidth,
+                          decoration: BoxDecoration(
+                            color: isDark
+                                ? Colors.white.withValues(alpha: 0.15)
+                                : Colors.black.withValues(alpha: 0.08),
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                        ),
+                        // Filled Progress Track (Full Rounded)
+                        if (progressValue > 0)
+                          Container(
+                            height: 8,
+                            width: (slidePosition + pillWidth / 2).clamp(8.0, totalWidth),
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: progressValue >= 1.0
+                                    ? [const Color(0xFF10B981), const Color(0xFF34D399)]
+                                    : (progressValue >= 0.5
+                                        ? [const Color(0xFF3B82F6), const Color(0xFF60A5FA)]
+                                        : [const Color(0xFFF59E0B), const Color(0xFFFBBF24)]),
+                              ),
+                              borderRadius: BorderRadius.circular(30),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: activeColor.withValues(alpha: 0.35),
+                                  blurRadius: 4,
+                                  offset: const Offset(0, 1),
+                                ),
+                              ],
+                            ),
+                          ),
+                        // Floating Egg/Pill Capsule following progress (Full Stadium Rounded)
+                        Positioned(
+                          left: slidePosition,
+                          child: Container(
+                            width: pillWidth,
+                            height: 22,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(30),
+                              border: Border.all(
+                                color: Colors.black.withValues(alpha: 0.12),
+                                width: 1.0,
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.10),
+                                  blurRadius: 4,
+                                  offset: const Offset(0, 1.5),
+                                ),
+                              ],
+                            ),
+                            child: Center(
+                              child: Text(
+                                percentText,
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 11.5,
+                                  fontWeight: FontWeight.w800,
+                                  color: Colors.black,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
               ),
             ],
           ),
         ),
         const SizedBox(height: 8),
 
-        // Badges Wrap directly on colored background
+        // Badges Wrap directly on colored background (all fully rounded)
         Wrap(
           spacing: 8,
           runSpacing: 6,
           children: [
-            _buildYellowBadge(Icons.edit_note_rounded, 'Tugas: $completedTugas/$totalTugas'),
-            _buildYellowBadge(Icons.picture_as_pdf_outlined, 'PDF: $completedPdf/$totalPdf'),
+            _buildYellowBadge(Icons.assignment_outlined, 'Tugas: $completedTugas/$totalTugas'),
+            _buildYellowBadge(Icons.description_outlined, 'Materi: $completedPdf/$totalPdf'),
             _buildYellowBadge(Icons.help_outline_rounded, 'Quiz: $completedQuiz/$totalQuiz'),
           ],
         ),
@@ -6786,15 +7662,194 @@ class _ManagementActionButtonState extends State<ManagementActionButton> {
   }
 }
 
+class _MembersAvatarStackReadOnly extends StatelessWidget {
+  final String projectId;
+  final String ownerUid;
+  final double avatarSize;
+  final double overlap;
+
+  const _MembersAvatarStackReadOnly({
+    super.key,
+    required this.projectId,
+    required this.ownerUid,
+    this.avatarSize = 26.0,
+    this.overlap = 9.0,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final bool isDark = AppColors.isDarkMode;
+
+    return StreamBuilder<QuerySnapshot>(
+      stream: FirebaseFirestore.instance
+          .collection('users')
+          .where('projectIds', arrayContains: projectId)
+          .snapshots(),
+      builder: (context, snapshot) {
+        final allDocs = snapshot.data?.docs ?? [];
+        final studentDocs = allDocs.where((d) {
+          final data = d.data() as Map<String, dynamic>? ?? {};
+          final role = (data['role'] ?? '').toString().toLowerCase();
+          if (d.id == ownerUid) return false;
+          if (role == 'guru' ||
+              role == 'teacher' ||
+              role == 'pengajar' ||
+              role == 'admin') {
+            return false;
+          }
+          return true;
+        }).toList();
+
+        if (studentDocs.isEmpty) {
+          return const SizedBox.shrink();
+        }
+
+        final int totalCount = studentDocs.length;
+        final int displayCount = totalCount > 4 ? 3 : totalCount;
+        final bool hasMore = totalCount > 4;
+        final int extraCount = totalCount - 3;
+        final int totalSlots = hasMore ? 4 : displayCount;
+        final double totalWidth = totalSlots * (avatarSize - overlap) + overlap + 4.0;
+
+        return IgnorePointer(
+          child: SizedBox(
+            height: avatarSize,
+            width: totalWidth,
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                for (int i = 0; i < displayCount; i++)
+                  Positioned(
+                    left: i * (avatarSize - overlap),
+                    child: Container(
+                      width: avatarSize,
+                      height: avatarSize,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
+                      ),
+                      child: ClipOval(
+                        child: Transform.scale(
+                          scale: 1.45,
+                          child: _buildAvatar(
+                            studentDocs[i].data() as Map<String, dynamic>? ?? {},
+                            i,
+                            size: avatarSize,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                if (hasMore)
+                  Positioned(
+                    left: displayCount * (avatarSize - overlap),
+                    child: Container(
+                      width: avatarSize,
+                      height: avatarSize,
+                      decoration: BoxDecoration(
+                        color: isDark ? const Color(0xFF18181B) : const Color(0xFF1E293B),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Center(
+                        child: Text(
+                          '+$extraCount',
+                          style: GoogleFonts.plusJakartaSans(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w900,
+                            fontSize: avatarSize * 0.38,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildAvatar(Map<String, dynamic> userData, int index, {required double size}) {
+    final photo = (userData['profileImageUrl'] ??
+            userData['photoUrl'] ??
+            userData['avatarUrl'] ??
+            userData['avatar'] ??
+            '')
+        .toString()
+        .trim();
+    final name = (userData['name'] ?? 'U').toString().trim();
+
+    if (photo.isNotEmpty) {
+      if (photo.startsWith('http')) {
+        return Image.network(
+          photo,
+          width: size,
+          height: size,
+          fit: BoxFit.cover,
+          errorBuilder: (_, __, ___) => _buildFallback(name, index, size: size),
+        );
+      } else {
+        String assetPath = photo;
+        if (!assetPath.startsWith('assets/')) {
+          if (assetPath.startsWith('avatar/') || assetPath.startsWith('chat/')) {
+            assetPath = 'assets/icon_pack/$assetPath';
+          } else {
+            assetPath = 'assets/icon_pack/avatar/$assetPath';
+          }
+        }
+        return Image.asset(
+          assetPath,
+          width: size,
+          height: size,
+          fit: BoxFit.cover,
+          errorBuilder: (_, __, ___) => _buildFallback(name, index, size: size),
+        );
+      }
+    }
+    return _buildFallback(name, index, size: size);
+  }
+
+  Widget _buildFallback(String name, int index, {required double size}) {
+    final initial = name.isNotEmpty ? name[0].toUpperCase() : 'U';
+    const colors = [
+      Color(0xFFFEF08A),
+      Color(0xFFBBF7D0),
+      Color(0xFFFBCFE8),
+      Color(0xFFBAE6FD),
+      Color(0xFFDDD6FE),
+    ];
+    final Color bgColor = colors[index % colors.length];
+
+    return Container(
+      width: size,
+      height: size,
+      color: bgColor,
+      child: Center(
+        child: Text(
+          initial,
+          style: GoogleFonts.plusJakartaSans(
+            fontSize: size * 0.42,
+            color: const Color(0xFF1E293B),
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _AnimatedScheduleCapsule extends StatefulWidget {
   final List schedules;
   final Color accentColor;
   final Color cardColor;
+  final bool isCompact;
   const _AnimatedScheduleCapsule({
     super.key,
     required this.schedules,
     this.accentColor = const Color(0xFF7F52FC),
     this.cardColor = Colors.white,
+    this.isCompact = false,
   });
 
   @override
@@ -6828,10 +7883,13 @@ class _AnimatedScheduleCapsuleState extends State<_AnimatedScheduleCapsule> {
   @override
   Widget build(BuildContext context) {
     final bool isDark = AppColors.isDarkMode;
+    final bool isCompact = widget.isCompact;
 
     if (widget.schedules.isEmpty) {
       return Container(
-        padding: const EdgeInsets.only(left: 4, right: 14, top: 4, bottom: 4),
+        padding: isCompact
+            ? const EdgeInsets.only(left: 3, right: 8, top: 3, bottom: 3)
+            : const EdgeInsets.only(left: 4, right: 14, top: 4, bottom: 4),
         decoration: BoxDecoration(
           color: isDark ? Colors.black : Colors.white,
           borderRadius: BorderRadius.circular(28),
@@ -6841,8 +7899,8 @@ class _AnimatedScheduleCapsuleState extends State<_AnimatedScheduleCapsule> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Container(
-              width: 28,
-              height: 28,
+              width: isCompact ? 20 : 28,
+              height: isCompact ? 20 : 28,
               decoration: BoxDecoration(
                 color: isDark
                     ? const Color(0xFF18181B)
@@ -6852,16 +7910,26 @@ class _AnimatedScheduleCapsuleState extends State<_AnimatedScheduleCapsule> {
               child: Center(
                 child: Icon(
                   Icons.warning_amber_rounded,
-                  size: 16,
+                  size: isCompact ? 12 : 16,
                   color: isDark ? Colors.white : Colors.black87,
                 ),
               ),
             ),
-            const SizedBox(width: 8),
-            Text(
-              'Jadwal belum diatur',
-              style: AppTypography.timestamp(
-                color: isDark ? Colors.white : Colors.black87,
+            SizedBox(width: isCompact ? 5 : 8),
+            Flexible(
+              child: Text(
+                'Jadwal belum diatur',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: isCompact
+                    ? GoogleFonts.plusJakartaSans(
+                        fontSize: 10.5,
+                        fontWeight: FontWeight.w600,
+                        color: isDark ? Colors.white : Colors.black87,
+                      )
+                    : AppTypography.timestamp(
+                        color: isDark ? Colors.white : Colors.black87,
+                      ),
               ),
             ),
           ],
@@ -6889,7 +7957,9 @@ class _AnimatedScheduleCapsuleState extends State<_AnimatedScheduleCapsule> {
       },
       child: Container(
         key: ValueKey<int>(_currentIndex),
-        padding: const EdgeInsets.only(left: 4, right: 14, top: 4, bottom: 4),
+        padding: isCompact
+            ? const EdgeInsets.only(left: 3, right: 8, top: 3, bottom: 3)
+            : const EdgeInsets.only(left: 4, right: 14, top: 4, bottom: 4),
         decoration: BoxDecoration(
           color: isDark ? Colors.black : Colors.white,
           borderRadius: BorderRadius.circular(28),
@@ -6899,8 +7969,8 @@ class _AnimatedScheduleCapsuleState extends State<_AnimatedScheduleCapsule> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Container(
-              width: 28,
-              height: 28,
+              width: isCompact ? 20 : 28,
+              height: isCompact ? 20 : 28,
               decoration: BoxDecoration(
                 color: isDark
                     ? const Color(0xFF18181B)
@@ -6910,16 +7980,26 @@ class _AnimatedScheduleCapsuleState extends State<_AnimatedScheduleCapsule> {
               child: Center(
                 child: Icon(
                   Icons.check_rounded,
-                  size: 16,
+                  size: isCompact ? 12 : 16,
                   color: isDark ? Colors.white : Colors.black87,
                 ),
               ),
             ),
-            const SizedBox(width: 8),
-            Text(
-              '$dayStr, $timeStr',
-              style: AppTypography.timestamp(
-                color: isDark ? Colors.white : Colors.black87,
+            SizedBox(width: isCompact ? 5 : 8),
+            Flexible(
+              child: Text(
+                '$dayStr, $timeStr',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: isCompact
+                    ? GoogleFonts.plusJakartaSans(
+                        fontSize: 10.5,
+                        fontWeight: FontWeight.w600,
+                        color: isDark ? Colors.white : Colors.black87,
+                      )
+                    : AppTypography.timestamp(
+                        color: isDark ? Colors.white : Colors.black87,
+                      ),
               ),
             ),
           ],
@@ -6992,25 +8072,41 @@ class _ClassroomSearchBarState extends State<_ClassroomSearchBar> {
           ),
           const SizedBox(width: 10),
           Expanded(
-            child: TextField(
-              controller: _controller,
-              keyboardType: TextInputType.text,
-              textInputAction: TextInputAction.search,
-              onChanged: (val) {
-                setState(() {});
-                _onChanged(val);
-              },
-              style: AppTypography.subtitle(
-                color: isDark ? Colors.white : Colors.black87,
-              ),
-              decoration: InputDecoration(
-                hintText: 'Cari kelas atau materi...',
-                hintStyle: AppTypography.subtitle(
-                  color: isDark ? Colors.white38 : const Color(0xFF94A3B8),
+            child: Theme(
+              data: Theme.of(context).copyWith(
+                textSelectionTheme: TextSelectionThemeData(
+                  selectionColor: isDark
+                      ? Colors.white.withValues(alpha: 0.25)
+                      : Colors.black.withValues(alpha: 0.15),
+                  selectionHandleColor: isDark ? Colors.white : Colors.black87,
+                  cursorColor: isDark ? Colors.white : Colors.black,
                 ),
-                border: InputBorder.none,
-                isDense: true,
-                contentPadding: EdgeInsets.zero,
+              ),
+              child: TextField(
+                controller: _controller,
+                keyboardType: TextInputType.text,
+                textInputAction: TextInputAction.search,
+                cursorColor: isDark ? Colors.white : Colors.black,
+                onChanged: (val) {
+                  setState(() {});
+                  _onChanged(val);
+                },
+                style: GoogleFonts.plusJakartaSans(
+                  color: isDark ? Colors.white : Colors.black,
+                  fontSize: 14.5,
+                  fontWeight: FontWeight.w600,
+                ),
+                decoration: InputDecoration(
+                  hintText: 'Cari kelas atau materi...',
+                  hintStyle: GoogleFonts.plusJakartaSans(
+                    color: isDark ? Colors.white38 : const Color(0xFF94A3B8),
+                    fontSize: 14.5,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  border: InputBorder.none,
+                  isDense: true,
+                  contentPadding: EdgeInsets.zero,
+                ),
               ),
             ),
           ),
@@ -7035,6 +8131,511 @@ class _ClassroomSearchBarState extends State<_ClassroomSearchBar> {
       ),
     );
   }
+}
+
+class _ClassroomJoinInputBar extends StatefulWidget {
+  final bool isDark;
+  final ValueChanged<String> onJoin;
+  final VoidCallback onScan;
+
+  const _ClassroomJoinInputBar({
+    super.key,
+    required this.isDark,
+    required this.onJoin,
+    required this.onScan,
+  });
+
+  @override
+  State<_ClassroomJoinInputBar> createState() => _ClassroomJoinInputBarState();
+}
+
+class _ClassroomJoinInputBarState extends State<_ClassroomJoinInputBar> {
+  final TextEditingController _controller = TextEditingController();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _submit() {
+    final text = _controller.text.trim();
+    if (text.isNotEmpty) {
+      widget.onJoin(text);
+      _controller.clear();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 4.0, left: 4.0, right: 4.0, bottom: 2.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Expanded(
+            child: Theme(
+              data: Theme.of(context).copyWith(
+                textSelectionTheme: TextSelectionThemeData(
+                  selectionColor: widget.isDark
+                      ? Colors.white.withValues(alpha: 0.25)
+                      : Colors.black.withValues(alpha: 0.15),
+                  selectionHandleColor: widget.isDark ? Colors.white : Colors.black87,
+                  cursorColor: widget.isDark ? Colors.white : Colors.black,
+                ),
+              ),
+              child: TextField(
+                controller: _controller,
+                textInputAction: TextInputAction.go,
+                onSubmitted: (_) => _submit(),
+                cursorColor: widget.isDark ? Colors.white : Colors.black,
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 13.5,
+                  fontWeight: FontWeight.w600,
+                  color: widget.isDark ? Colors.white : Colors.black87,
+                ),
+                decoration: InputDecoration(
+                  isDense: true,
+                  contentPadding: const EdgeInsets.only(bottom: 6, left: 2, right: 4),
+                  hintText: 'Masukkan ID classroom...',
+                  hintStyle: GoogleFonts.plusJakartaSans(
+                    fontSize: 13.0,
+                    fontWeight: FontWeight.normal,
+                    color: widget.isDark ? Colors.white38 : Colors.black38,
+                  ),
+                  enabledBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(
+                      color: widget.isDark ? Colors.white24 : Colors.black26,
+                      width: 1.2,
+                    ),
+                  ),
+                  focusedBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(
+                      color: widget.isDark ? Colors.white : Colors.black,
+                      width: 2.0,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 10),
+          BouncyButton(
+            scaleDown: 0.94,
+            onTap: _submit,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+              decoration: BoxDecoration(
+                color: widget.isDark ? Colors.white : Colors.black,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Text(
+                'Gabung Kelas',
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 12.0,
+                  fontWeight: FontWeight.w700,
+                  color: widget.isDark ? Colors.black : Colors.white,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          BouncyButton(
+            scaleDown: 0.90,
+            onTap: widget.onScan,
+            child: Padding(
+              padding: const EdgeInsets.all(4.0),
+              child: Icon(
+                Icons.qr_code_scanner_rounded,
+                size: 24,
+                color: widget.isDark ? Colors.white : Colors.black87,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class ClassroomQrScannerPage extends StatefulWidget {
+  const ClassroomQrScannerPage({super.key});
+
+  @override
+  State<ClassroomQrScannerPage> createState() => _ClassroomQrScannerPageState();
+}
+
+class _ClassroomQrScannerPageState extends State<ClassroomQrScannerPage>
+    with SingleTickerProviderStateMixin {
+  final MobileScannerController _scannerController = MobileScannerController(
+    detectionSpeed: DetectionSpeed.noDuplicates,
+  );
+  late AnimationController _animController;
+  late Animation<double> _animValue;
+  bool _isTorchOn = false;
+  bool _isProcessing = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _animController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 2000),
+    )..repeat(reverse: true);
+    _animValue = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _animController, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _animController.dispose();
+    _scannerController.dispose();
+    super.dispose();
+  }
+
+  void _onDetect(BarcodeCapture capture) {
+    if (_isProcessing) return;
+    for (final barcode in capture.barcodes) {
+      final code = barcode.rawValue;
+      if (code != null && code.trim().isNotEmpty) {
+        _isProcessing = true;
+        HapticFeedback.mediumImpact();
+        Navigator.pop(context, code.trim());
+        break;
+      }
+    }
+  }
+
+  Future<void> _pickImageFromGallery() async {
+    try {
+      final picker = ImagePicker();
+      final image = await picker.pickImage(source: ImageSource.gallery);
+      if (image != null) {
+        final barcodes = await _scannerController.analyzeImage(image.path);
+        if (barcodes != null && barcodes.barcodes.isNotEmpty) {
+          final code = barcodes.barcodes.first.rawValue;
+          if (code != null && code.trim().isNotEmpty && mounted) {
+            _isProcessing = true;
+            HapticFeedback.mediumImpact();
+            Navigator.pop(context, code.trim());
+            return;
+          }
+        }
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Tidak ditemukan kode QR pada gambar yang dipilih.'),
+              backgroundColor: Colors.redAccent,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Gagal memproses gambar: $e'),
+            backgroundColor: Colors.redAccent,
+          ),
+        );
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final scanAreaSize = size.width * 0.72;
+
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: Stack(
+        children: [
+          // Fullscreen Mobile Scanner Camera Feed
+          Positioned.fill(
+            child: MobileScanner(
+              controller: _scannerController,
+              onDetect: _onDetect,
+            ),
+          ),
+
+          // Dark Tint Overlay with Cutout in Center
+          Positioned.fill(
+            child: CustomPaint(
+              painter: _ScannerCutoutPainter(
+                cutoutSize: scanAreaSize,
+              ),
+            ),
+          ),
+
+          // Clearly Defined White Box Viewfinder in Center
+          Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: scanAreaSize,
+                  height: scanAreaSize,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(24),
+                    border: Border.all(
+                      color: Colors.white,
+                      width: 3.0,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.4),
+                        blurRadius: 16,
+                        spreadRadius: 2,
+                      ),
+                    ],
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(21),
+                    child: Stack(
+                      children: [
+                        // Animated Scanning Line
+                        AnimatedBuilder(
+                          animation: _animValue,
+                          builder: (context, _) {
+                            return Positioned(
+                              top: _animValue.value * (scanAreaSize - 4),
+                              left: 0,
+                              right: 0,
+                              child: Container(
+                                height: 4,
+                                decoration: BoxDecoration(
+                                  gradient: const LinearGradient(
+                                    colors: [
+                                      Colors.transparent,
+                                      Color(0xFF38BDF8),
+                                      Color(0xFFBAE6FD),
+                                      Color(0xFF38BDF8),
+                                      Colors.transparent,
+                                    ],
+                                  ),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: const Color(0xFF38BDF8).withValues(alpha: 0.95),
+                                      blurRadius: 12,
+                                      spreadRadius: 2,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 18),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withValues(alpha: 0.65),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    'Posisikan QR code kelas di dalam kotak',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // Top Header (Back Button + Title)
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                child: Row(
+                  children: [
+                    IconButton(
+                      onPressed: () => Navigator.pop(context),
+                      icon: const Icon(
+                        Icons.arrow_back_rounded,
+                        color: Colors.white,
+                        size: 26,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Scan Kode Classroom',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+
+          // Bottom Action Buttons + Footer
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        // Upload / Gallery Button
+                        GestureDetector(
+                          onTap: _pickImageFromGallery,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Container(
+                                width: 56,
+                                height: 56,
+                                decoration: const BoxDecoration(
+                                  color: Colors.white,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(
+                                  Icons.image_outlined,
+                                  color: Colors.black87,
+                                  size: 26,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                'Upload',
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        // Flash / Torch Toggle Button
+                        GestureDetector(
+                          onTap: () async {
+                            await _scannerController.toggleTorch();
+                            setState(() {
+                              _isTorchOn = !_isTorchOn;
+                            });
+                          },
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Container(
+                                width: 56,
+                                height: 56,
+                                decoration: BoxDecoration(
+                                  color: _isTorchOn ? const Color(0xFF38BDF8) : Colors.white,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Icon(
+                                  _isTorchOn ? Icons.flash_on_rounded : Icons.flash_off_rounded,
+                                  color: Colors.black87,
+                                  size: 26,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                _isTorchOn ? 'Matikan Flash' : 'Nyalakan Flash',
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 28),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'Powered By ',
+                          style: GoogleFonts.dmSans(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.white60,
+                          ),
+                        ),
+                        Text(
+                          'Hubner Edu',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w800,
+                            color: Colors.white,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ScannerCutoutPainter extends CustomPainter {
+  final double cutoutSize;
+
+  _ScannerCutoutPainter({required this.cutoutSize});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final backgroundPath = Path()
+      ..addRect(Rect.fromLTWH(0, 0, size.width, size.height));
+
+    final cutoutRect = RRect.fromRectAndRadius(
+      Rect.fromCenter(
+        center: Offset(size.width / 2, size.height / 2 - 24),
+        width: cutoutSize,
+        height: cutoutSize,
+      ),
+      const Radius.circular(24),
+    );
+
+    final cutoutPath = Path()..addRRect(cutoutRect);
+
+    final overlayPath = Path.combine(
+      PathOperation.difference,
+      backgroundPath,
+      cutoutPath,
+    );
+
+    final paint = Paint()..color = Colors.black.withValues(alpha: 0.55);
+    canvas.drawPath(overlayPath, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant _ScannerCutoutPainter oldDelegate) =>
+      oldDelegate.cutoutSize != cutoutSize;
 }
 
 

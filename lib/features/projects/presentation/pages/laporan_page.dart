@@ -2536,7 +2536,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
 }
 
 // Bouncy Menu Slider Card (Visual match persis ke slider menu di screenshot)
-class _BouncyMenuSliderCard extends StatefulWidget {
+class _BouncyMenuSliderCard extends StatelessWidget {
   final IconData icon;
   final Color cardBg;
   final String title;
@@ -2554,91 +2554,54 @@ class _BouncyMenuSliderCard extends StatefulWidget {
   });
 
   @override
-  State<_BouncyMenuSliderCard> createState() => _BouncyMenuSliderCardState();
-}
-
-class _BouncyMenuSliderCardState extends State<_BouncyMenuSliderCard> with SingleTickerProviderStateMixin {
-  late AnimationController _anim;
-  late Animation<double> _scale;
-
-  @override
-  void initState() {
-    super.initState();
-    _anim = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 120),
-    );
-    _scale = Tween<double>(begin: 1.0, end: 0.94).animate(
-      CurvedAnimation(parent: _anim, curve: Curves.easeInOut),
-    );
-  }
-
-  @override
-  void dispose() {
-    _anim.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTapDown: (_) => _anim.forward(),
-      onTapUp: (_) {
-        _anim.reverse();
-        widget.onTap();
-      },
-      onTapCancel: () => _anim.reverse(),
-      child: AnimatedBuilder(
-        animation: _scale,
-        builder: (context, child) => Transform.scale(
-          scale: _scale.value,
-          child: child,
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        decoration: BoxDecoration(
+          color: cardBg,
+          borderRadius: BorderRadius.circular(24),
         ),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-          decoration: BoxDecoration(
-            color: widget.cardBg,
-            borderRadius: BorderRadius.circular(24),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 36,
-                height: 36,
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  widget.icon,
-                  color: Colors.black87,
-                  size: 19,
-                ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 36,
+              height: 36,
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
               ),
-              const SizedBox(width: 9),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    widget.title,
-                    style: AppTypography.buttonLabel(color: const Color(0xFF7C3AED), fontWeight: FontWeight.bold, height: 1.15),
-                  ),
-                  const SizedBox(height: 1.5),
-                  ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 130),
-                    child: Text(
-                      widget.subtitle,
-                      style: AppTypography.timestamp(color: Colors.black54, fontWeight: FontWeight.w600),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ],
+              child: Icon(
+                icon,
+                color: Colors.black87,
+                size: 19,
               ),
-            ],
-          ),
+            ),
+            const SizedBox(width: 9),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  title,
+                  style: AppTypography.buttonLabel(color: const Color(0xFF7C3AED), fontWeight: FontWeight.bold, height: 1.15),
+                ),
+                const SizedBox(height: 1.5),
+                ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 130),
+                  child: Text(
+                    subtitle,
+                    style: AppTypography.timestamp(color: Colors.black54, fontWeight: FontWeight.w600),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );

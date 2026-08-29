@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hubner/core/theme/app_typography.dart';
+import 'package:hubner/core/theme/app_colors.dart';
+import 'package:hubner/core/widgets/bouncy_button.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -27,8 +29,8 @@ class MengerjakanTugasPage extends StatefulWidget {
     required this.studentUid,
     required this.taskKey,
     required this.onCompleted,
-    required this.assignmentType,
-    required this.studentsMasterList,
+    this.assignmentType = 'mandiri',
+    this.studentsMasterList = const [],
     this.taskText,
     this.docName,
   });
@@ -50,6 +52,13 @@ class _MengerjakanTugasPageState extends State<MengerjakanTugasPage> {
   void initState() {
     super.initState();
     _fetchExistingSubmission();
+  }
+
+  @override
+  void dispose() {
+    _noteController.dispose();
+    _linkController.dispose();
+    super.dispose();
   }
 
   Future<void> _fetchExistingSubmission() async {
@@ -134,7 +143,7 @@ class _MengerjakanTugasPageState extends State<MengerjakanTugasPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Berkas berhasil diunggah ke Google Drive Guru!'),
-            backgroundColor: Color(0xFF10B981),
+            backgroundColor: Color(0xFF16A34A),
           ),
         );
       }
@@ -245,7 +254,6 @@ class _MengerjakanTugasPageState extends State<MengerjakanTugasPage> {
         'submittedAt': FieldValue.serverTimestamp(),
       }, SetOptions(merge: true));
 
-      // Also write/update studentProgress for all group members so it works with LaporanPage
       final List<String> allGroupUids = [widget.studentUid];
       if (widget.assignmentType == 'kelompok' && _selectedMembers.isNotEmpty) {
         for (var memberName in _selectedMembers) {
@@ -285,7 +293,7 @@ class _MengerjakanTugasPageState extends State<MengerjakanTugasPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Tugas berhasil dikirim!'),
-            backgroundColor: Color(0xFF10B981),
+            backgroundColor: Color(0xFF16A34A),
           ),
         );
         Navigator.pop(context);
@@ -305,359 +313,406 @@ class _MengerjakanTugasPageState extends State<MengerjakanTugasPage> {
 
   @override
   Widget build(BuildContext context) {
+    final bool isDark = AppColors.isDarkMode;
     final bool isKelompok = widget.assignmentType == 'kelompok';
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: GestureDetector(
-          onTap: () => Navigator.pop(context),
-          child: Container(
-            margin: const EdgeInsets.all(8),
-            decoration: const BoxDecoration(
-              color: Color(0xFFF1F5F9),
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(Icons.arrow_back_rounded, color: Colors.black, size: 18),
+      backgroundColor: isDark ? const Color(0xFF09090B) : const Color(0xFFF8FAFC),
+      body: Align(
+        alignment: Alignment.topCenter,
+        child: Container(
+          constraints: BoxConstraints(
+            maxWidth: MediaQuery.of(context).size.width > 500 ? double.infinity : 500,
           ),
-        ),
-        title: Text(
-          'Mengerjakan Tugas',
-          style: AppTypography.chatHeaderTitle(color: Colors.black87, fontWeight: FontWeight.bold),
-        ),
-        centerTitle: true,
-      ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: AppTypography.pagePadding(top: 16, bottom: 24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Header Task Information Card
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(18),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: const Color(0xFF2563EB).withValues(alpha: 0.2)),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFEFF6FF),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                isKelompok ? Icons.group_outlined : Icons.assignment_outlined,
-                                size: 14,
-                                color: const Color(0xFF2563EB),
-                              ),
-                              const SizedBox(width: 6),
-                              Text(
-                                isKelompok ? 'Tugas Kelompok' : 'Tugas Mandiri',
-                                style: AppTypography.buttonLabel(color: const Color(0xFF2563EB), fontWeight: FontWeight.bold),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const Spacer(),
-                        if (_hasSubmitted)
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFD1FAE5),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Text(
-                              'Sudah Terkumpul',
-                              style: AppTypography.buttonLabel(color: const Color(0xFF059669), fontWeight: FontWeight.bold),
-                            ),
-                          ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      widget.title,
-                      style: AppTypography.chatHeaderTitle(color: Colors.black87, fontWeight: FontWeight.bold),
-                    ),
-                    if (widget.taskText != null && widget.taskText!.isNotEmpty) ...[
-                      const SizedBox(height: 8),
-                      Text(
-                        widget.taskText!,
-                        style: AppTypography.timestamp(color: Colors.black54, height: 1.5),
-                      ),
-                    ],
-                    if (widget.docName != null && widget.docName!.isNotEmpty) ...[
-                      const SizedBox(height: 12),
-                      GestureDetector(
-                        onTap: () async {
-                          final uri = Uri.tryParse(widget.docName!);
-                          if (uri != null && (widget.docName!.startsWith('http://') || widget.docName!.startsWith('https://'))) {
-                            if (await canLaunchUrl(uri)) {
-                              await launchUrl(uri, mode: LaunchMode.inAppWebView);
-                            } else {
-                              if (mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text('Tidak dapat membuka tautan berkas.')),
-                                );
-                              }
-                            }
-                          }
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFEFF6FF),
-                            borderRadius: BorderRadius.circular(10),
-                            border: Border.all(color: const Color(0xFFBFDBFE)),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Icon(Icons.attach_file_rounded, size: 14, color: Color(0xFF2563EB)),
-                              const SizedBox(width: 6),
-                              Text(
-                                widget.docName!.startsWith('http')
-                                    ? '📄 Buka Lampiran Berkas (Google Drive)'
-                                    : widget.docName!,
-                                style: AppTypography.buttonLabel(color: const Color(0xFF1E40AF), fontWeight: FontWeight.bold),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-              const SizedBox(height: 20),
-
-              // Group Members Card if Kelompok
-              if (isKelompok) ...[
-                Text(
-                  'Anggota Kelompok',
-                  style: AppTypography.buttonLabel(color: Colors.black87, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 8),
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(18),
-                    border: Border.all(color: const Color(0xFFE2E8F0)),
+          child: SafeArea(
+            child: Column(
+              children: [
+                // Top AppBar with 52x52px Circular Buttons (Matching Login Google Button standard)
+                Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: AppTypography.screenHorizontalMargin,
+                    vertical: 10.0,
                   ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        'Pilih anggota kelompok yang mengerjakan tugas ini:',
-                        style: AppTypography.timestamp(color: Colors.black54),
-                      ),
-                      const SizedBox(height: 10),
-                      Wrap(
-                        spacing: 8,
-                        runSpacing: 8,
-                        children: widget.studentsMasterList.map((s) {
-                          final name = (s['name'] ?? 'Siswa').toString();
-                          final isSelected = _selectedMembers.contains(name);
-                          return FilterChip(
-                            selected: isSelected,
-                            label: Text(name),
-                            labelStyle: AppTypography.buttonLabel(color: isSelected ? Colors.white : Colors.black87, fontWeight: isSelected ? FontWeight.bold : FontWeight.normal),
-                            selectedColor: const Color(0xFF2563EB),
-                            backgroundColor: const Color(0xFFF1F5F9),
-                            onSelected: (selected) {
-                              setState(() {
-                                if (selected) {
-                                  _selectedMembers.add(name);
-                                } else {
-                                  _selectedMembers.remove(name);
-                                }
-                              });
-                            },
-                          );
-                        }).toList(),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 20),
-              ],
-
-              // Answer Input Card
-              Text(
-                'Jawaban & Catatan Siswa',
-                style: AppTypography.buttonLabel(color: Colors.black87, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 8),
-              Container(
-                padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(18),
-                  border: Border.all(color: const Color(0xFFE2E8F0)),
-                ),
-                child: TextField(
-                  controller: _noteController,
-                  maxLines: 5,
-                  style: AppTypography.subtitle(),
-                  decoration: InputDecoration(
-                    hintText: 'Tulis uraian jawaban atau rangkuman tugas di sini...',
-                    hintStyle: AppTypography.timestamp(color: Colors.black38),
-                    border: InputBorder.none,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-
-              // File Link & PDF Upload Card
-              Text(
-                'Upload Berkas PDF / Link Berkas Tugas',
-                style: AppTypography.buttonLabel(color: Colors.black87, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 8),
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(18),
-                  border: Border.all(color: const Color(0xFFE2E8F0)),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    SizedBox(
-                      width: double.infinity,
-                      height: 48,
-                      child: ElevatedButton.icon(
-                        onPressed: _isSubmitting ? null : _uploadFileDirectly,
-                        icon: const Icon(Icons.picture_as_pdf_rounded, size: 20, color: Colors.white),
-                        label: Text(
-                          '📄 Unggah Berkas PDF / Dokumen',
-                          style: AppTypography.buttonLabel(fontWeight: FontWeight.bold),
-                        ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFDC2626), // Red for PDF
-                          foregroundColor: Colors.white,
-                          elevation: 1,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14),
+                      // Back Button (<) - 52x52px
+                      BouncyButton(
+                        onTap: () => Navigator.pop(context),
+                        child: Container(
+                          width: 52,
+                          height: 52,
+                          decoration: BoxDecoration(
+                            color: isDark ? const Color(0xFF18181B) : Colors.white,
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                              width: 1.2,
+                            ),
+                          ),
+                          child: Icon(
+                            Icons.arrow_back_rounded,
+                            color: isDark ? Colors.white : Colors.black87,
+                            size: 24,
                           ),
                         ),
                       ),
-                    ),
-                    const SizedBox(height: 14),
-                    Text(
-                      'Atau tempelkan tautan berkas (Google Drive / GitHub / URL):',
-                      style: AppTypography.timestamp(color: Colors.black54),
-                    ),
-                    const SizedBox(height: 6),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF8FAFC),
-                        borderRadius: BorderRadius.circular(14),
-                        border: Border.all(color: const Color(0xFFE2E8F0)),
-                      ),
-                      child: TextField(
-                        controller: _linkController,
-                        style: AppTypography.subtitle(),
-                        decoration: InputDecoration(
-                          icon: const Icon(Icons.link_rounded, color: Color(0xFF2563EB), size: 18),
-                          hintText: 'https://drive.google.com/...',
-                          hintStyle: AppTypography.timestamp(color: Colors.black38),
-                          border: InputBorder.none,
+                      Text(
+                        'Mengerjakan Tugas',
+                        style: AppTypography.chatHeaderTitle(
+                          color: isDark ? Colors.white : Colors.black,
                         ),
-                        onChanged: (val) => setState(() {}),
                       ),
-                    ),
-
-                    if (_linkController.text.isNotEmpty) ...[
-                      const SizedBox(height: 12),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFEFF6FF),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: const Color(0xFFBFDBFE)),
-                        ),
-                        child: Row(
-                          children: [
-                            const Icon(Icons.picture_as_pdf_rounded, color: Color(0xFFDC2626), size: 22),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'Berkas Terlampir:',
-                                    style: AppTypography.buttonLabel(color: const Color(0xFF1E40AF), fontWeight: FontWeight.bold),
+                      // Submit Action Button (✓) - 52x52px
+                      _isSubmitting
+                          ? const SizedBox(
+                              width: 52,
+                              height: 52,
+                              child: Center(
+                                child: SizedBox(
+                                  width: 24,
+                                  height: 24,
+                                  child: CircularProgressIndicator(strokeWidth: 2.2),
+                                ),
+                              ),
+                            )
+                          : BouncyButton(
+                              onTap: _submitTugas,
+                              child: Container(
+                                width: 52,
+                                height: 52,
+                                decoration: BoxDecoration(
+                                  color: _hasSubmitted
+                                      ? const Color(0xFF16A34A)
+                                      : (isDark ? const Color(0xFF18181B) : Colors.black),
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: _hasSubmitted
+                                        ? const Color(0xFF16A34A)
+                                        : (isDark ? const Color(0xFF27272A) : Colors.black),
+                                    width: 1.2,
                                   ),
+                                ),
+                                child: const Icon(
+                                  Icons.check_rounded,
+                                  color: Colors.white,
+                                  size: 24,
+                                ),
+                              ),
+                            ),
+                    ],
+                  ),
+                ),
+                Divider(
+                  color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+                  height: 1,
+                ),
+
+                // Main Scrollable Body (Typography matching NoteEditorPage)
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: AppTypography.pagePadding(top: 20.0, bottom: 32.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Tag Badge & Status
+                        Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: isDark
+                                    ? const Color(0xFFD97706).withValues(alpha: 0.25)
+                                    : const Color(0xFFFEF3C7),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    isKelompok ? Icons.group_outlined : Icons.assignment_outlined,
+                                    size: 14,
+                                    color: isDark ? const Color(0xFFFDE68A) : const Color(0xFFD97706),
+                                  ),
+                                  const SizedBox(width: 6),
                                   Text(
-                                    _linkController.text,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: AppTypography.timestamp(color: const Color(0xFF2563EB)),
+                                    isKelompok ? 'Tugas Kelompok' : 'Tugas Mandiri',
+                                    style: GoogleFonts.plusJakartaSans(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w700,
+                                      color: isDark ? const Color(0xFFFDE68A) : const Color(0xFFD97706),
+                                    ),
                                   ),
                                 ],
                               ),
                             ),
-                            IconButton(
-                              icon: const Icon(Icons.open_in_new_rounded, size: 18, color: Color(0xFF2563EB)),
-                              onPressed: () async {
-                                final uri = Uri.tryParse(_linkController.text);
-                                if (uri != null && await canLaunchUrl(uri)) {
-                                  await launchUrl(uri, mode: LaunchMode.externalApplication);
-                                }
-                              },
-                            ),
+                            const Spacer(),
+                            if (_hasSubmitted)
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                decoration: BoxDecoration(
+                                  color: isDark
+                                      ? const Color(0xFF16A34A).withValues(alpha: 0.25)
+                                      : const Color(0xFFDCFCE7),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Text(
+                                  'Sudah Terkumpul ✓',
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w700,
+                                    color: isDark ? const Color(0xFF4ADE80) : const Color(0xFF16A34A),
+                                  ),
+                                ),
+                              ),
                           ],
                         ),
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-              const SizedBox(height: 28),
+                        const SizedBox(height: 14),
 
-              // Submit Button
-              SizedBox(
-                width: double.infinity,
-                height: 52,
-                child: ElevatedButton(
-                  onPressed: _isSubmitting ? null : _submitTugas,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF2563EB),
-                    foregroundColor: Colors.white,
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
+                        // Assignment Title (Matching NoteEditorPage sizePageTitle: 28px bold)
+                        Text(
+                          widget.title,
+                          style: AppTypography.pageTitle(
+                            color: isDark ? Colors.white : const Color(0xFF0F172A),
+                          ),
+                        ),
+                        if (widget.taskText != null && widget.taskText!.isNotEmpty) ...[
+                          const SizedBox(height: 10),
+                          Text(
+                            widget.taskText!,
+                            style: AppTypography.chatBody(
+                              color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF475569),
+                              height: 1.6,
+                            ),
+                          ),
+                        ],
+                        if (widget.docName != null && widget.docName!.isNotEmpty) ...[
+                          const SizedBox(height: 14),
+                          GestureDetector(
+                            onTap: () async {
+                              final uri = Uri.tryParse(widget.docName!);
+                              if (uri != null && (widget.docName!.startsWith('http://') || widget.docName!.startsWith('https://'))) {
+                                if (await canLaunchUrl(uri)) {
+                                  await launchUrl(uri, mode: LaunchMode.inAppWebView);
+                                } else {
+                                  if (mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(content: Text('Tidak dapat membuka tautan berkas.')),
+                                    );
+                                  }
+                                }
+                              }
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                              decoration: BoxDecoration(
+                                color: isDark ? const Color(0xFF18181B) : Colors.white,
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(
+                                  color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                                  width: 1.2,
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.attach_file_rounded,
+                                    size: 16,
+                                    color: isDark ? const Color(0xFF38BDF8) : const Color(0xFF0284C7),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Flexible(
+                                    child: Text(
+                                      widget.docName!.startsWith('http')
+                                          ? 'Buka Lampiran Berkas Tugas'
+                                          : widget.docName!,
+                                      style: AppTypography.buttonLabel(
+                                        color: isDark ? const Color(0xFF38BDF8) : const Color(0xFF0284C7),
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                        const SizedBox(height: 24),
+
+                        // Section 1: Catatan / Teks Jawaban Siswa
+                        Text(
+                          'Catatan Jawaban Siswa',
+                          style: AppTypography.cardTitle(
+                            color: isDark ? Colors.white : const Color(0xFF0F172A),
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                          decoration: BoxDecoration(
+                            color: isDark ? const Color(0xFF18181B) : Colors.white,
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                              color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                              width: 1.2,
+                            ),
+                          ),
+                          child: TextField(
+                            controller: _noteController,
+                            maxLines: 6,
+                            cursorColor: isDark ? Colors.white : Colors.black,
+                            style: AppTypography.chatBody(
+                              color: isDark ? Colors.white : Colors.black87,
+                              height: 1.5,
+                            ),
+                            decoration: InputDecoration(
+                              hintText: 'Tulis ringkasan hasil kerja, jawaban pertanyaan, atau catatan tugas Anda di sini...',
+                              hintStyle: AppTypography.chatBody(
+                                color: isDark ? Colors.white30 : Colors.black26,
+                                height: 1.5,
+                              ),
+                              border: InputBorder.none,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+
+                        // Section 2: Unggah Berkas Jawaban ke Google Drive
+                        Text(
+                          'Lampiran Berkas Hasil Tugas',
+                          style: AppTypography.cardTitle(
+                            color: isDark ? Colors.white : const Color(0xFF0F172A),
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Container(
+                          padding: const EdgeInsets.all(18),
+                          decoration: BoxDecoration(
+                            color: isDark ? const Color(0xFF18181B) : Colors.white,
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                              color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                              width: 1.2,
+                            ),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              SizedBox(
+                                width: double.infinity,
+                                height: 52,
+                                child: OutlinedButton.icon(
+                                  onPressed: _uploadFileDirectly,
+                                  icon: const Icon(Icons.cloud_upload_outlined, size: 20),
+                                  label: Text(
+                                    'Pilih Berkas & Unggah ke Drive',
+                                    style: AppTypography.buttonLabel(
+                                      fontWeight: FontWeight.bold,
+                                      color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                    ),
+                                  ),
+                                  style: OutlinedButton.styleFrom(
+                                    foregroundColor: isDark ? Colors.white : const Color(0xFF0F172A),
+                                    side: BorderSide(
+                                      color: isDark ? const Color(0xFF3F3F46) : const Color(0xFFCBD5E1),
+                                      width: 1.2,
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(32),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 14),
+                              TextField(
+                                controller: _linkController,
+                                cursorColor: isDark ? Colors.white : Colors.black,
+                                style: AppTypography.messageInput(
+                                  color: isDark ? Colors.white : Colors.black87,
+                                ),
+                                decoration: InputDecoration(
+                                  labelText: 'Tautan Berkas Drive / Dokumen',
+                                  labelStyle: AppTypography.timestamp(
+                                    color: isDark ? Colors.white60 : Colors.black54,
+                                  ),
+                                  hintText: 'https://drive.google.com/...',
+                                  hintStyle: AppTypography.timestamp(
+                                    color: isDark ? Colors.white30 : Colors.black26,
+                                  ),
+                                  prefixIcon: Icon(
+                                    Icons.link_rounded,
+                                    color: isDark ? Colors.white60 : Colors.black54,
+                                    size: 20,
+                                  ),
+                                  filled: true,
+                                  fillColor: isDark ? const Color(0xFF101012) : const Color(0xFFF8FAFC),
+                                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(16),
+                                    borderSide: BorderSide(
+                                      color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                                      width: 1.2,
+                                    ),
+                                  ),
+                                  enabledBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(16),
+                                    borderSide: BorderSide(
+                                      color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                                      width: 1.2,
+                                    ),
+                                  ),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(16),
+                                    borderSide: BorderSide(
+                                      color: isDark ? Colors.white : Colors.black,
+                                      width: 1.5,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 32),
+
+                        // Bottom Submit Button (Height 52px, Radius 32)
+                        SizedBox(
+                          width: double.infinity,
+                          height: 52,
+                          child: ElevatedButton(
+                            onPressed: _isSubmitting ? null : _submitTugas,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: isDark ? const Color(0xFF18181B) : Colors.black,
+                              foregroundColor: Colors.white,
+                              elevation: 0,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(32),
+                                side: BorderSide(
+                                  color: isDark ? const Color(0xFF27272A) : Colors.black,
+                                  width: 1.2,
+                                ),
+                              ),
+                            ),
+                            child: Text(
+                              _hasSubmitted ? 'Perbarui Jawaban Tugas' : 'Kirim Jawaban Tugas',
+                              style: AppTypography.buttonLabel(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  child: _isSubmitting
-                      ? const SizedBox(
-                          width: 24,
-                          height: 24,
-                          child: CircularProgressIndicator(),
-                        )
-                      : Text(
-                          _hasSubmitted ? 'Perbarui Pengiriman' : 'Kirim Tugas',
-                          style: AppTypography.cardTitle(fontWeight: FontWeight.bold),
-                        ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

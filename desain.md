@@ -317,6 +317,16 @@ Seluruh tombol aksi bulat, tombol kirim, drawer lampiran media, dan container ik
   5. List Item Dokumen & File Manager Cards
 - **Tampilan Bersih & Rapat**: Seluruh komponen tampil *flat modern*, ringan, cepat dirender, dan tidak memiliki efek blur bayangan yang memberatkan performa rendering GPU Android.
 
+### C. Standar Ukuran Tombol Header & Aksi (52.0 x 52.0 px Standar Login Google)
+- **Tombol Kembali / Back Button (`<`)**: Menggunakan dimensi baku **`52.0 x 52.0 px`** (`BoxShape.circle`, border `1.2px`, icon size `24px`) yang seragam dengan tombol Login Google.
+- **Tombol Centang / Simpan / Aksi Header (`✓`)**: Menggunakan dimensi baku **`52.0 x 52.0 px`** (`BoxShape.circle`, border `1.2px`, icon size `24px`).
+- **Penerapan Terstandar**:
+  - Halaman Login & Registrasi (`login_page.dart`)
+  - Halaman Buat/Edit Catatan (`note_editor_page.dart`)
+  - Halaman Membaca Materi (`baca_materi_page.dart`)
+  - Halaman Mengerjakan Tugas (`mengerjakan_tugas_page.dart`)
+
 ---
 
 *Spesifikasi desain ini adalah acuan baku pembangunan visual seluruh fitur di Hubner Edu.*
+

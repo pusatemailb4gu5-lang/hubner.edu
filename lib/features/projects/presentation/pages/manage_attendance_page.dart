@@ -368,7 +368,7 @@ class _ManageAttendancePageState extends State<ManageAttendancePage> {
   }
 }
 
-class _BouncyIconButton extends StatefulWidget {
+class _BouncyIconButton extends StatelessWidget {
   final Widget child;
   final VoidCallback onTap;
 
@@ -378,48 +378,11 @@ class _BouncyIconButton extends StatefulWidget {
   });
 
   @override
-  State<_BouncyIconButton> createState() => _BouncyIconButtonState();
-}
-
-class _BouncyIconButtonState extends State<_BouncyIconButton> with SingleTickerProviderStateMixin {
-  late AnimationController _anim;
-  late Animation<double> _scale;
-
-  @override
-  void initState() {
-    super.initState();
-    _anim = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 120),
-    );
-    _scale = Tween<double>(begin: 1.0, end: 0.90).animate(
-      CurvedAnimation(parent: _anim, curve: Curves.easeInOut),
-    );
-  }
-
-  @override
-  void dispose() {
-    _anim.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTapDown: (_) => _anim.forward(),
-      onTapUp: (_) {
-        _anim.reverse();
-        widget.onTap();
-      },
-      onTapCancel: () => _anim.reverse(),
-      child: AnimatedBuilder(
-        animation: _scale,
-        builder: (context, child) => Transform.scale(
-          scale: _scale.value,
-          child: child,
-        ),
-        child: widget.child,
-      ),
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: child,
     );
   }
 }

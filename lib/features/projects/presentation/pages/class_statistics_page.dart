@@ -583,7 +583,7 @@ class _ClassStatisticsPageState extends State<ClassStatisticsPage>
   }
 }
 
-class _BouncyCard extends StatefulWidget {
+class _BouncyCard extends StatelessWidget {
   final Color cardBg;
   final int patternIndex;
   final Color accentColor;
@@ -605,225 +605,112 @@ class _BouncyCard extends StatefulWidget {
   });
 
   @override
-  State<_BouncyCard> createState() => _BouncyCardState();
-}
-
-class _BouncyCardState extends State<_BouncyCard> with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _scaleAnimation;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 140),
-      lowerBound: 0.0,
-      upperBound: 0.06,
-    );
-    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.94).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-    );
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTapDown: (_) => _controller.forward(),
-      onTapUp: (_) => _controller.reverse(),
-      onTapCancel: () => _controller.reverse(),
-      onTap: widget.onArrowTap,
-      child: AnimatedBuilder(
-        animation: _scaleAnimation,
-        builder: (context, child) => Transform.scale(
-          scale: _scaleAnimation.value,
-          child: child,
+      onTap: onArrowTap,
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        height: 155,
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: cardBg,
+          borderRadius: BorderRadius.circular(32),
         ),
-        child: Container(
-          height: 155,
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: widget.cardBg,
-            borderRadius: BorderRadius.circular(32),
-          ),
-          child: Stack(
-            children: [
-              Positioned.fill(
-                child: CustomPaint(
-                  painter: ClassroomCardPatternPainter(
-                    patternIndex: widget.patternIndex,
-                    accentColor: widget.accentColor,
-                  ),
+        child: Stack(
+          children: [
+            Positioned.fill(
+              child: CustomPaint(
+                painter: ClassroomCardPatternPainter(
+                  patternIndex: patternIndex,
+                  accentColor: accentColor,
                 ),
               ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  // Top Row: Icon Circle + Title
-                  Row(
-                    children: [
-                      Container(
-                        width: 38,
-                        height: 38,
-                        decoration: const BoxDecoration(
-                          color: Colors.white,
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(widget.icon, color: const Color(0xFF0F172A), size: 20),
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                // Top Row: Icon Circle + Title
+                Row(
+                  children: [
+                    Container(
+                      width: 38,
+                      height: 38,
+                      decoration: const BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
                       ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          widget.title,
-                          style: AppTypography.buttonLabel(color: const Color(0xFF0F172A), fontWeight: FontWeight.w800),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+                      child: Icon(icon, color: const Color(0xFF0F172A), size: 20),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        title,
+                        style: AppTypography.buttonLabel(color: const Color(0xFF0F172A), fontWeight: FontWeight.w800),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+                // Bottom Row: Big Value + Arrow Button
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      value,
+                      style: AppTypography.pageTitle(color: const Color(0xFF0F172A), fontWeight: FontWeight.w900, letterSpacing: -1.0),
+                    ),
+                    Container(
+                      width: 40,
+                      height: 40,
+                      decoration: const BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Center(
+                        child: Icon(
+                          Icons.north_east_rounded,
+                          color: Color(0xFF0F172A),
+                          size: 22,
                         ),
                       ),
-                    ],
-                  ),
-                  // Bottom Row: Big Value + Arrow Button
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Text(
-                        widget.value,
-                        style: AppTypography.pageTitle(color: const Color(0xFF0F172A), fontWeight: FontWeight.w900, letterSpacing: -1.0),
-                      ),
-                      Container(
-                        width: 40,
-                        height: 40,
-                        decoration: const BoxDecoration(
-                          color: Colors.white,
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Center(
-                          child: Icon(
-                            Icons.north_east_rounded,
-                            color: Color(0xFF0F172A),
-                            size: 22,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ],
-          ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );
   }
 }
 
-class _BouncyContainer extends StatefulWidget {
+class _BouncyContainer extends StatelessWidget {
   final Widget child;
 
   const _BouncyContainer({required this.child});
 
   @override
-  State<_BouncyContainer> createState() => _BouncyContainerState();
-}
-
-class _BouncyContainerState extends State<_BouncyContainer> with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _scaleAnimation;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 130),
-      lowerBound: 0.0,
-      upperBound: 0.03,
-    );
-    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.97).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-    );
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTapDown: (_) => _controller.forward(),
-      onTapUp: (_) => _controller.reverse(),
-      onTapCancel: () => _controller.reverse(),
-      onTap: () {},
-      child: AnimatedBuilder(
-        animation: _scaleAnimation,
-        builder: (context, child) => Transform.scale(
-          scale: _scaleAnimation.value,
-          child: child,
-        ),
-        child: widget.child,
-      ),
-    );
+    return child;
   }
 }
 
-class _BouncyButton extends StatefulWidget {
+class _BouncyButton extends StatelessWidget {
   final Widget child;
   final VoidCallback onTap;
 
   const _BouncyButton({required this.child, required this.onTap});
 
   @override
-  State<_BouncyButton> createState() => _BouncyButtonState();
-}
-
-class _BouncyButtonState extends State<_BouncyButton> with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _scaleAnimation;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 120),
-    );
-    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.88).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-    );
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTapDown: (_) => _controller.forward(),
-      onTapUp: (_) => _controller.reverse(),
-      onTapCancel: () => _controller.reverse(),
-      onTap: widget.onTap,
-      child: AnimatedBuilder(
-        animation: _scaleAnimation,
-        builder: (context, child) => Transform.scale(
-          scale: _scaleAnimation.value,
-          child: child,
-        ),
-        child: widget.child,
-      ),
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: child,
     );
   }
 }

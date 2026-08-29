@@ -8906,7 +8906,7 @@ class ClassroomCardPatternPainter extends CustomPainter {
       oldDelegate.patternIndex != patternIndex || oldDelegate.accentColor != accentColor;
 }
 
-class _BouncyMenuSliderCard extends StatefulWidget {
+class _BouncyMenuSliderCard extends StatelessWidget {
   final IconData icon;
   final Color cardBg;
   final String title;
@@ -8922,104 +8922,58 @@ class _BouncyMenuSliderCard extends StatefulWidget {
   });
 
   @override
-  State<_BouncyMenuSliderCard> createState() => _BouncyMenuSliderCardState();
-}
-
-class _BouncyMenuSliderCardState extends State<_BouncyMenuSliderCard>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _scaleAnimation;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 100),
-      reverseDuration: const Duration(milliseconds: 250),
-    );
-    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.91).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: Curves.easeOutCubic,
-        reverseCurve: Curves.elasticOut,
-      ),
-    );
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final Color actualCardBg = widget.isDark
-        ? (widget.cardBg == const Color(0xFFD6A5F8)
+    final Color actualCardBg = isDark
+        ? (cardBg == const Color(0xFFD6A5F8)
             ? const Color(0xFF6B3BA3)
-            : widget.cardBg == const Color(0xFF9CC8FC)
+            : cardBg == const Color(0xFF9CC8FC)
                 ? const Color(0xFF2864A8)
-                : widget.cardBg == const Color(0xFF7DE3D0)
+                : cardBg == const Color(0xFF7DE3D0)
                     ? const Color(0xFF147D75)
-                    : widget.cardBg == const Color(0xFFF7BD84)
+                    : cardBg == const Color(0xFFF7BD84)
                         ? const Color(0xFFC76D10)
-                        : widget.cardBg == const Color(0xFFF794BE)
+                        : cardBg == const Color(0xFFF794BE)
                             ? const Color(0xFFA82658)
                             : const Color(0xFF27272A))
-        : widget.cardBg;
+        : cardBg;
 
-    return AnimatedBuilder(
-      animation: _scaleAnimation,
-      builder: (context, child) => Transform.scale(
-        scale: _scaleAnimation.value,
-        child: child,
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: widget.onTap,
-          onHighlightChanged: (highlighted) {
-            if (highlighted) {
-              _controller.forward();
-            } else {
-              _controller.reverse();
-            }
-          },
-          borderRadius: BorderRadius.circular(32),
-          child: Container(
-            height: 54,
-            padding: const EdgeInsets.fromLTRB(6, 6, 16, 6),
-            decoration: BoxDecoration(
-              color: actualCardBg,
-              borderRadius: BorderRadius.circular(32),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 42,
-                  height: 42,
-                  decoration: BoxDecoration(
-                    color: widget.isDark ? Colors.black.withValues(alpha: 0.25) : Colors.white,
-                    shape: BoxShape.circle,
-                  ),
-                  child: Center(
-                    child: Icon(
-                      widget.icon,
-                      size: 22,
-                      color: widget.isDark ? Colors.white : Colors.black,
-                    ),
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(32),
+        child: Container(
+          height: 54,
+          padding: const EdgeInsets.fromLTRB(6, 6, 16, 6),
+          decoration: BoxDecoration(
+            color: actualCardBg,
+            borderRadius: BorderRadius.circular(32),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 42,
+                height: 42,
+                decoration: BoxDecoration(
+                  color: isDark ? Colors.black.withValues(alpha: 0.25) : Colors.white,
+                  shape: BoxShape.circle,
+                ),
+                child: Center(
+                  child: Icon(
+                    icon,
+                    size: 22,
+                    color: isDark ? Colors.white : Colors.black,
                   ),
                 ),
-                const SizedBox(width: 10),
-                Text(
-                  widget.title,
-                  maxLines: 2,
-                  style: AppTypography.buttonLabel(color: widget.isDark ? Colors.white : Colors.black, fontWeight: FontWeight.w800, height: 1.15),
-                ),
-              ],
-            ),
+              ),
+              const SizedBox(width: 10),
+              Text(
+                title,
+                maxLines: 2,
+                style: AppTypography.buttonLabel(color: isDark ? Colors.white : Colors.black, fontWeight: FontWeight.w800, height: 1.15),
+              ),
+            ],
           ),
         ),
       ),
