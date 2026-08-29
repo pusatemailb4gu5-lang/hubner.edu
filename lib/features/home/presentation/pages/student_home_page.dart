@@ -2416,6 +2416,7 @@ class _StudentHomePageState extends State<StudentHomePage> {
                                                );
                                              }),
                                            ),
+                                           const SizedBox(width: 14),
                                          ],
                                        );
                                      }
@@ -2803,6 +2804,7 @@ class _StudentHomePageState extends State<StudentHomePage> {
                                                );
                                              }),
                                            ),
+                                           const SizedBox(width: 14),
                                          ],
                                        );
                                      }
@@ -3027,703 +3029,722 @@ class _StudentHomePageState extends State<StudentHomePage> {
                                  },
                                ),
                                const SizedBox(height: 24),
-                                // Top Row: Search Bar + Manage Classes Button
-                                Row(
-                                  children: [
-                                    Expanded(
-                                      child: _ClassroomSearchBar(
-                                        isDark: isDark,
-                                        onSearchChanged: (query) {
-                                          _searchQueryNotifier.value = query;
-                                        },
+                                // Frameless White Card Container (Login Page Model) wrapping Search Bar & Classroom Cards
+                                Container(
+                                  width: double.infinity,
+                                  padding: const EdgeInsets.all(16),
+                                  decoration: BoxDecoration(
+                                    color: isDark ? const Color(0xFF18181B) : Colors.white,
+                                    borderRadius: BorderRadius.circular(28),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.05),
+                                        blurRadius: 20,
+                                        spreadRadius: 0,
+                                        offset: const Offset(0, 4),
                                       ),
-                                    ),
-                                    const SizedBox(width: 8),
-                                    ValueListenableBuilder<bool>(
-                                      valueListenable: _isClassroomGridNotifier,
-                                      builder: (context, isGrid, _) {
-                                        return BouncyButton(
-                                          onTap: () {
-                                            HapticFeedback.selectionClick();
-                                            _isClassroomGridNotifier.value = !isGrid;
-                                          },
-                                          child: Container(
-                                            width: 44,
-                                            height: 44,
-                                            decoration: BoxDecoration(
-                                              color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
-                                              shape: BoxShape.circle,
-                                              border: Border.all(
-                                                color: isDark ? const Color(0xFF3F3F46) : const Color(0xFFE2E8F0),
-                                                width: 1.0,
-                                              ),
-                                            ),
-                                            child: Icon(
-                                              Icons.dashboard_customize_rounded,
-                                              color: isDark ? Colors.white : Colors.black87,
-                                              size: 20,
+                                    ],
+                                  ),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      // Top Row: Search Bar + Manage Classes Button
+                                      Row(
+                                        children: [
+                                          Expanded(
+                                            child: _ClassroomSearchBar(
+                                              isDark: isDark,
+                                              onSearchChanged: (query) {
+                                                _searchQueryNotifier.value = query;
+                                              },
                                             ),
                                           ),
-                                        );
-                                      },
-                                    ),
-                                  ],
-                                ),
-
-                                // Invitations list if any
-                                StreamBuilder<QuerySnapshot>(
-                                  stream: FirebaseFirestore.instance
-                                      .collection('projectInvitations')
-                                      .where(
-                                        'invitedUid',
-                                        isEqualTo:
-                                            FirebaseAuth.instance.currentUser?.uid,
-                                      )
-                                      .where('status', isEqualTo: 'pending')
-                                      .snapshots(),
-                                  builder: (context, invSnap) {
-                                    if (!invSnap.hasData ||
-                                        invSnap.data!.docs.isEmpty) {
-                                      return const SizedBox.shrink();
-                                    }
-                                    return Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        const SizedBox(height: 12),
-                                        Text(
-                                          'Undangan Kelas',
-                                          style: GoogleFonts.plusJakartaSans(
-                                            fontSize: 14.5,
-                                            fontWeight: FontWeight.bold,
-                                            color: isDark ? Colors.white : Colors.black87,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 8),
-                                        ListView.builder(
-                                          shrinkWrap: true,
-                                          physics: const NeverScrollableScrollPhysics(),
-                                          itemCount: invSnap.data!.docs.length,
-                                          itemBuilder: (ctx, idx) {
-                                            final invDoc = invSnap.data!.docs[idx];
-                                            final invData =
-                                                invDoc.data() as Map<String, dynamic>;
-                                            final invId = invDoc.id;
-                                            final projName =
-                                                invData['projectName'] ?? 'Kelas';
-                                            final projId =
-                                                invData['projectId'] ?? '';
-                                            final invIconPath =
-                                                invData['iconPath'] ??
-                                                'assets/icon_pack/project/project_1.png';
-
-                                            return Container(
-                                              margin: const EdgeInsets.only(bottom: 8),
-                                              padding: const EdgeInsets.symmetric(
-                                                horizontal: 14,
-                                                vertical: 10,
-                                              ),
-                                              decoration: BoxDecoration(
-                                                color: isDark ? const Color(0xFF27272A) : const Color(0xFFF8FAFC),
-                                                borderRadius: BorderRadius.circular(16),
-                                                border: Border.all(
-                                                  color: isDark ? const Color(0xFF3F3F46) : const Color(0xFFE2E8F0),
-                                                ),
-                                              ),
-                                              child: Row(
-                                                children: [
-                                                  ClipRRect(
-                                                    borderRadius: BorderRadius.circular(8),
-                                                    child: Image.asset(
-                                                      invIconPath,
-                                                      width: 34,
-                                                      height: 34,
-                                                      fit: BoxFit.cover,
+                                          const SizedBox(width: 8),
+                                          ValueListenableBuilder<bool>(
+                                            valueListenable: _isClassroomGridNotifier,
+                                            builder: (context, isGrid, _) {
+                                              return BouncyButton(
+                                                onTap: () {
+                                                  HapticFeedback.selectionClick();
+                                                  _isClassroomGridNotifier.value = !isGrid;
+                                                },
+                                                child: Container(
+                                                  width: 44,
+                                                  height: 44,
+                                                  decoration: BoxDecoration(
+                                                    color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+                                                    shape: BoxShape.circle,
+                                                    border: Border.all(
+                                                      color: isDark ? const Color(0xFF3F3F46) : const Color(0xFFE2E8F0),
+                                                      width: 1.0,
                                                     ),
                                                   ),
-                                                  const SizedBox(width: 10),
-                                                  Expanded(
-                                                    child: Text(
-                                                      projName,
-                                                      style: GoogleFonts.plusJakartaSans(
-                                                        fontWeight: FontWeight.bold,
-                                                        fontSize: 14,
-                                                        color: isDark ? Colors.white : Colors.black87,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            );
-                                          },
-                                        ),
-                                      ],
-                                    );
-                                  },
-                                ),
-
-                                const SizedBox(height: 12),
-
-                                if (projectIds.isEmpty && role.toLowerCase() != 'guru')
-                                  Container(
-                                    width: double.infinity,
-                                    padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
-                                    alignment: Alignment.center,
-                                    child: Text(
-                                      'Belum ada kelas. Silakan gabung atau buat kelas baru.',
-                                      textAlign: TextAlign.center,
-                                      style: GoogleFonts.dmSans(
-                                        fontSize: 14.5,
-                                        color: isDark ? Colors.white54 : Colors.black45,
-                                      ),
-                                    ),
-                                  )
-                                else ...[
-                                  ValueListenableBuilder<String>(
-                                    valueListenable: _searchQueryNotifier,
-                                    builder: (context, searchQuery, _) {
-                                      final bool isDark = AppColors.isDarkMode;
-                                      final q = searchQuery.toLowerCase().trim();
-
-                                      // SEARCH FOR ELEMEN CP & MATERI JIKA SEARCH AKTIF (SAFE PARSING)
-                                      if (q.isNotEmpty) {
-                                        final List<Map<String, dynamic>> matchedElements = [];
-
-                                        for (int pIdx = 0; pIdx < projectDocs.length; pIdx++) {
-                                          try {
-                                            final projDoc = projectDocs[pIdx];
-                                            final pData = projDoc.data() as Map<String, dynamic>? ?? {};
-                                            final projId = projDoc.id;
-                                            final projTitle = (pData['name'] ?? 'Classroom').toString();
-                                            final gradeLevel = (pData['gradeLevel'] ?? '').toString();
-                                            final major = (pData['major'] ?? '').toString();
-                                            final stages = pData['stages'] as List? ?? [];
-                                            final dynamic rawColorIdx = pData['colorIndex'];
-                                            int patternIndex = 0;
-                                            if (rawColorIdx is int) {
-                                              patternIndex = rawColorIdx;
-                                            } else if (rawColorIdx is String) {
-                                              patternIndex = int.tryParse(rawColorIdx) ?? 0;
-                                            } else {
-                                              patternIndex = pIdx;
-                                            }
-
-                                            final Color cardColor = isDark
-                                                ? _classroomCardDarkColors[patternIndex % _classroomCardDarkColors.length]
-                                                : _classroomCardColors[patternIndex % _classroomCardColors.length];
-                                            final Color accentColor = _classroomAccentColors[patternIndex % _classroomAccentColors.length];
-                                            final bool isOwner = (pData['ownerUid']?.toString() ?? '') == (FirebaseAuth.instance.currentUser?.uid ?? '');
-
-                                            for (int sIdx = 0; sIdx < stages.length; sIdx++) {
-                                              try {
-                                                final stage = stages[sIdx];
-                                                if (stage is! Map) continue;
-
-                                                final stageTitle = (stage['title'] ?? stage['name'] ?? 'Elemen ${sIdx + 1}').toString();
-                                                final stageDesc = (stage['description'] ?? stage['desc'] ?? '').toString();
-                                                final materis = stage['materis'] as List? ?? [];
-                                                final stageTasks = stage['tasks'] as List? ?? [];
-
-                                                bool isMatch = stageTitle.toLowerCase().contains(q) || stageDesc.toLowerCase().contains(q);
-                                                String? matchedMateriName;
-
-                                                for (var m in materis) {
-                                                  if (m is Map) {
-                                                    final mTitle = (m['title'] ?? '').toString();
-                                                    if (mTitle.toLowerCase().contains(q)) {
-                                                      isMatch = true;
-                                                      matchedMateriName = mTitle;
-                                                      break;
-                                                    }
-                                                  }
-                                                }
-
-                                                if (!isMatch) {
-                                                  for (var t in stageTasks) {
-                                                    if (t is Map) {
-                                                      final tTitle = (t['title'] ?? '').toString();
-                                                      if (tTitle.toLowerCase().contains(q)) {
-                                                        isMatch = true;
-                                                        matchedMateriName = tTitle;
-                                                        break;
-                                                      }
-                                                    }
-                                                  }
-                                                }
-
-                                                if (isMatch) {
-                                                  matchedElements.add({
-                                                    'projectId': projId,
-                                                    'projectTitle': projTitle,
-                                                    'gradeLevel': gradeLevel,
-                                                    'major': major,
-                                                    'stageIdx': sIdx,
-                                                    'stageTitle': stageTitle,
-                                                    'stageDesc': stageDesc,
-                                                    'materiCount': materis.length,
-                                                    'taskCount': stageTasks.length,
-                                                    'cardColor': cardColor,
-                                                    'accentColor': accentColor,
-                                                    'isOwner': isOwner,
-                                                    'matchedMateri': matchedMateriName,
-                                                  });
-                                                }
-                                              } catch (_) {}
-                                            }
-                                          } catch (_) {}
-                                        }
-
-                                        if (matchedElements.isEmpty) {
-                                          return Container(
-                                            width: double.infinity,
-                                            padding: const EdgeInsets.symmetric(vertical: 36, horizontal: 20),
-                                            decoration: BoxDecoration(
-                                              color: isDark ? const Color(0xFF27272A) : const Color(0xFFF8FAFC),
-                                              borderRadius: BorderRadius.circular(22),
-                                              border: Border.all(
-                                                color: isDark ? const Color(0xFF3F3F46) : const Color(0xFFE2E8F0),
-                                              ),
-                                            ),
-                                            child: Column(
-                                              mainAxisAlignment: MainAxisAlignment.center,
-                                              children: [
-                                                Icon(
-                                                  Icons.search_off_rounded,
-                                                  size: 44,
-                                                  color: isDark ? Colors.white38 : Colors.black26,
-                                                ),
-                                                const SizedBox(height: 12),
-                                                Text(
-                                                  'Elemen Tidak Ditemukan',
-                                                  style: GoogleFonts.plusJakartaSans(
-                                                    fontSize: 15.5,
-                                                    fontWeight: FontWeight.bold,
+                                                  child: Icon(
+                                                    Icons.dashboard_customize_rounded,
                                                     color: isDark ? Colors.white : Colors.black87,
+                                                    size: 20,
                                                   ),
                                                 ),
-                                                const SizedBox(height: 6),
-                                                Text(
-                                                  'Tidak ada elemen atau materi yang cocok dengan "$searchQuery"',
-                                                  textAlign: TextAlign.center,
-                                                  style: GoogleFonts.dmSans(
-                                                    fontSize: 14.0,
-                                                    color: isDark ? Colors.white54 : Colors.black45,
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          );
-                                        }
+                                              );
+                                            },
+                                          ),
+                                        ],
+                                      ),
 
-                                        return Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            Padding(
-                                              padding: const EdgeInsets.only(left: 4, bottom: 10),
-                                              child: Text(
-                                                'Daftar Elemen Ditemukan (${matchedElements.length})',
+                                      // Invitations list if any
+                                      StreamBuilder<QuerySnapshot>(
+                                        stream: FirebaseFirestore.instance
+                                            .collection('projectInvitations')
+                                            .where(
+                                              'invitedUid',
+                                              isEqualTo:
+                                                  FirebaseAuth.instance.currentUser?.uid,
+                                            )
+                                            .where('status', isEqualTo: 'pending')
+                                            .snapshots(),
+                                        builder: (context, invSnap) {
+                                          if (!invSnap.hasData ||
+                                              invSnap.data!.docs.isEmpty) {
+                                            return const SizedBox.shrink();
+                                          }
+                                          return Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              const SizedBox(height: 12),
+                                              Text(
+                                                'Undangan Kelas',
                                                 style: GoogleFonts.plusJakartaSans(
-                                                  fontSize: 14.0,
-                                                  fontWeight: FontWeight.w700,
-                                                  color: isDark ? Colors.white70 : const Color(0xFF475569),
+                                                  fontSize: 14.5,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: isDark ? Colors.white : Colors.black87,
                                                 ),
                                               ),
-                                            ),
-                                            ListView.separated(
-                                              shrinkWrap: true,
-                                              physics: const NeverScrollableScrollPhysics(),
-                                              itemCount: matchedElements.length,
-                                              separatorBuilder: (_, __) => Divider(
-                                                height: 20,
-                                                thickness: 1,
-                                                color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
-                                              ),
-                                              itemBuilder: (context, index) {
-                                                final elem = matchedElements[index];
-                                                final String stageTitle = elem['stageTitle']?.toString() ?? 'Elemen';
-                                                final String projTitle = elem['projectTitle']?.toString() ?? 'Classroom';
-                                                final String gradeLevel = elem['gradeLevel']?.toString() ?? '';
-                                                final String major = elem['major']?.toString() ?? '';
-                                                final Color cardColor = elem['cardColor'] as Color? ?? Colors.white;
-                                                final Color accentColor = elem['accentColor'] as Color? ?? const Color(0xFF7F52FC);
-                                                final String? matchedMateri = elem['matchedMateri']?.toString();
+                                              const SizedBox(height: 8),
+                                              ListView.builder(
+                                                shrinkWrap: true,
+                                                physics: const NeverScrollableScrollPhysics(),
+                                                itemCount: invSnap.data!.docs.length,
+                                                itemBuilder: (ctx, idx) {
+                                                  final invDoc = invSnap.data!.docs[idx];
+                                                  final invData =
+                                                      invDoc.data() as Map<String, dynamic>;
+                                                  final invId = invDoc.id;
+                                                  final projName =
+                                                      invData['projectName'] ?? 'Kelas';
+                                                  final projId =
+                                                      invData['projectId'] ?? '';
+                                                  final invIconPath =
+                                                      invData['iconPath'] ??
+                                                      'assets/icon_pack/project/project_1.png';
 
-                                                return InkWell(
-                                                  borderRadius: BorderRadius.circular(12),
-                                                  onTap: () {
-                                                    Navigator.of(context).push(
-                                                      MaterialPageRoute(
-                                                        builder: (_) => DetailCpPage(
-                                                          projectId: elem['projectId'],
-                                                          projectTitle: projTitle,
-                                                          stageIdx: elem['stageIdx'],
-                                                          isOwner: elem['isOwner'],
-                                                          accentColor: accentColor,
-                                                          cardColor: cardColor,
-                                                        ),
+                                                  return Container(
+                                                    margin: const EdgeInsets.only(bottom: 8),
+                                                    padding: const EdgeInsets.symmetric(
+                                                      horizontal: 14,
+                                                      vertical: 10,
+                                                    ),
+                                                    decoration: BoxDecoration(
+                                                      color: isDark ? const Color(0xFF27272A) : const Color(0xFFF8FAFC),
+                                                      borderRadius: BorderRadius.circular(16),
+                                                      border: Border.all(
+                                                        color: isDark ? const Color(0xFF3F3F46) : const Color(0xFFE2E8F0),
                                                       ),
-                                                    );
-                                                  },
-                                                  child: Padding(
-                                                    padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
+                                                    ),
                                                     child: Row(
                                                       children: [
-                                                        Expanded(
-                                                          child: Column(
-                                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                                            children: [
-                                                              Text(
-                                                                stageTitle,
-                                                                style: GoogleFonts.plusJakartaSans(
-                                                                  fontSize: 16.5,
-                                                                  fontWeight: FontWeight.w800,
-                                                                  color: isDark ? Colors.white : const Color(0xFF0F172A),
-                                                                ),
-                                                                maxLines: 1,
-                                                                overflow: TextOverflow.ellipsis,
-                                                              ),
-                                                              const SizedBox(height: 3),
-                                                              Text(
-                                                                '$projTitle · $gradeLevel $major',
-                                                                style: GoogleFonts.dmSans(
-                                                                  fontSize: 13.5,
-                                                                  fontWeight: FontWeight.w500,
-                                                                  color: isDark ? Colors.white60 : const Color(0xFF64748B),
-                                                                ),
-                                                                maxLines: 1,
-                                                                overflow: TextOverflow.ellipsis,
-                                                              ),
-                                                              if (matchedMateri != null) ...[
-                                                                const SizedBox(height: 5),
-                                                                Container(
-                                                                  padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2.5),
-                                                                  decoration: BoxDecoration(
-                                                                    color: isDark ? const Color(0xFF3F2D1D) : const Color(0xFFFEF3C7),
-                                                                    borderRadius: BorderRadius.circular(6),
-                                                                  ),
-                                                                  child: Text(
-                                                                    'Materi: $matchedMateri',
-                                                                    style: GoogleFonts.dmSans(
-                                                                      fontSize: 13.0,
-                                                                      fontWeight: FontWeight.bold,
-                                                                      color: isDark ? const Color(0xFFFCD34D) : const Color(0xFFB45309),
-                                                                    ),
-                                                                    maxLines: 1,
-                                                                    overflow: TextOverflow.ellipsis,
-                                                                  ),
-                                                                ),
-                                                              ],
-                                                            ],
+                                                        ClipRRect(
+                                                          borderRadius: BorderRadius.circular(8),
+                                                          child: Image.asset(
+                                                            invIconPath,
+                                                            width: 34,
+                                                            height: 34,
+                                                            fit: BoxFit.cover,
                                                           ),
                                                         ),
                                                         const SizedBox(width: 10),
-                                                        BouncyButton(
-                                                          scaleDown: 0.90,
-                                                          onTap: () {
-                                                            Navigator.of(context).push(
-                                                              MaterialPageRoute(
-                                                                builder: (_) => DetailCpPage(
-                                                                  projectId: elem['projectId'],
-                                                                  projectTitle: projTitle,
-                                                                  stageIdx: elem['stageIdx'],
-                                                                  isOwner: elem['isOwner'],
-                                                                  accentColor: accentColor,
-                                                                  cardColor: cardColor,
-                                                                ),
-                                                              ),
-                                                            );
-                                                          },
-                                                          child: Container(
-                                                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7.5),
-                                                            decoration: BoxDecoration(
-                                                              color: isDark ? Colors.white : Colors.black,
-                                                              borderRadius: BorderRadius.circular(24),
-                                                            ),
-                                                            child: Row(
-                                                              mainAxisSize: MainAxisSize.min,
-                                                              children: [
-                                                                Text(
-                                                                  'Buka CP',
-                                                                  style: GoogleFonts.plusJakartaSans(
-                                                                    fontSize: 13.5,
-                                                                    fontWeight: FontWeight.bold,
-                                                                    color: isDark ? Colors.black : Colors.white,
-                                                                  ),
-                                                                ),
-                                                                const SizedBox(width: 4),
-                                                                Icon(
-                                                                  Icons.arrow_forward_ios_rounded,
-                                                                  size: 10,
-                                                                  color: isDark ? Colors.black : Colors.white,
-                                                                ),
-                                                              ],
+                                                        Expanded(
+                                                          child: Text(
+                                                            projName,
+                                                            style: GoogleFonts.plusJakartaSans(
+                                                              fontWeight: FontWeight.bold,
+                                                              fontSize: 14,
+                                                              color: isDark ? Colors.white : Colors.black87,
                                                             ),
                                                           ),
                                                         ),
                                                       ],
                                                     ),
-                                                  ),
-                                                );
-                                              },
+                                                  );
+                                                },
+                                              ),
+                                            ],
+                                          );
+                                        },
+                                      ),
+
+                                      const SizedBox(height: 14),
+
+                                      if (projectIds.isEmpty && role.toLowerCase() != 'guru')
+                                        Container(
+                                          width: double.infinity,
+                                          padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+                                          alignment: Alignment.center,
+                                          child: Text(
+                                            'Belum ada kelas. Silakan gabung atau buat kelas baru.',
+                                            textAlign: TextAlign.center,
+                                            style: GoogleFonts.dmSans(
+                                              fontSize: 14.5,
+                                              color: isDark ? Colors.white54 : Colors.black45,
                                             ),
-                                          ],
-                                        );
-                                      }
+                                          ),
+                                        )
+                                      else
+                                        ValueListenableBuilder<String>(
+                                          valueListenable: _searchQueryNotifier,
+                                          builder: (context, searchQuery, _) {
+                                            final bool isDark = AppColors.isDarkMode;
+                                            final q = searchQuery.toLowerCase().trim();
 
-                                      final activeProjectDocs = projectDocs.where((doc) {
-                                        final pData = doc.data() as Map<String, dynamic>? ?? {};
-                                        final pId = (pData['projectId'] ?? doc.id).toString();
-                                        return !_deletedProjectIds.contains(doc.id) && !_deletedProjectIds.contains(pId);
-                                      }).toList();
+                                            // SEARCH FOR ELEMEN CP & MATERI JIKA SEARCH AKTIF (SAFE PARSING)
+                                            if (q.isNotEmpty) {
+                                              final List<Map<String, dynamic>> matchedElements = [];
 
-                                      return ValueListenableBuilder<bool>(
-                                        valueListenable: _isClassroomGridNotifier,
-                                        builder: (context, isGrid, _) {
-                                          final List<Widget> projectCards = List.generate(
-                                            activeProjectDocs.length,
-                                            (index) {
-                                              final projectData = activeProjectDocs[index].data()
-                                                  as Map<String, dynamic>;
-                                              final projId = (projectData['projectId'] != null && projectData['projectId'].toString().isNotEmpty)
-                                                  ? projectData['projectId'].toString()
-                                                  : activeProjectDocs[index].id;
-                                              final projTitle =
-                                                  projectData['name'] ?? 'Project';
-                                              final stages =
-                                                  projectData['stages'] as List? ?? [];
+                                              for (int pIdx = 0; pIdx < projectDocs.length; pIdx++) {
+                                                try {
+                                                  final projDoc = projectDocs[pIdx];
+                                                  final pData = projDoc.data() as Map<String, dynamic>? ?? {};
+                                                  final projId = projDoc.id;
+                                                  final projTitle = (pData['name'] ?? 'Classroom').toString();
+                                                  final gradeLevel = (pData['gradeLevel'] ?? '').toString();
+                                                  final major = (pData['major'] ?? '').toString();
+                                                  final stages = pData['stages'] as List? ?? [];
+                                                  final dynamic rawColorIdx = pData['colorIndex'];
+                                                  int patternIndex = 0;
+                                                  if (rawColorIdx is int) {
+                                                    patternIndex = rawColorIdx;
+                                                  } else if (rawColorIdx is String) {
+                                                    patternIndex = int.tryParse(rawColorIdx) ?? 0;
+                                                  } else {
+                                                    patternIndex = pIdx;
+                                                  }
 
-                                              final dynamic rawColorIdx = projectData['colorIndex'];
-                                              int patternIndex = 0;
-                                              if (rawColorIdx is int) {
-                                                patternIndex = rawColorIdx;
-                                              } else if (rawColorIdx is String) {
-                                                patternIndex = int.tryParse(rawColorIdx) ?? 0;
-                                              } else if (rawColorIdx is num) {
-                                                patternIndex = rawColorIdx.toInt();
-                                              } else {
-                                                patternIndex = index;
-                                              }
-                                              final cardColor = isDark
-                                                  ? _classroomCardDarkColors[patternIndex %
-                                                      _classroomCardDarkColors.length]
-                                                  : _classroomCardColors[patternIndex %
-                                                      _classroomCardColors.length];
-                                              final accentColor =
-                                                  _classroomAccentColors[patternIndex %
-                                                      _classroomAccentColors.length];
+                                                  final Color cardColor = isDark
+                                                      ? _classroomCardDarkColors[patternIndex % _classroomCardDarkColors.length]
+                                                      : _classroomCardColors[patternIndex % _classroomCardColors.length];
+                                                  final Color accentColor = _classroomAccentColors[patternIndex % _classroomAccentColors.length];
+                                                  final bool isOwner = (pData['ownerUid']?.toString() ?? '') == (FirebaseAuth.instance.currentUser?.uid ?? '');
 
-                                              final iconFileName =
-                                                  projectData['icon'] as String? ??
-                                                  'project_1.png';
-                                              final iconPath =
-                                                  'assets/icon_pack/project/$iconFileName';
+                                                  for (int sIdx = 0; sIdx < stages.length; sIdx++) {
+                                                    try {
+                                                      final stage = stages[sIdx];
+                                                      if (stage is! Map) continue;
 
-                                              if (role.toLowerCase() == 'guru') {
-                                                return _buildTeacherProjectCard(
-                                                  context: context,
-                                                  projectId: projId,
-                                                  title: projTitle,
-                                                  backgroundColor: cardColor,
-                                                  accentColor: accentColor,
-                                                  patternIndex: patternIndex,
-                                                  iconPath: iconPath,
-                                                  stages: stages,
-                                                  schedules: List.from(
-                                                    projectData['schedules'] ?? [],
-                                                  ),
-                                                  gradeLevel: projectData['gradeLevel'] ?? '-',
-                                                  major: projectData['major'] ?? '',
-                                                  ownerUid: projectData['ownerUid'] ?? '',
-                                                  studentsMasterList: projectData['studentsMasterList'] as List? ?? [],
-                                                  membersList: projectData['members'] as List? ?? [],
-                                                  isCompact2Column: isGrid,
-                                                );
-                                              }
+                                                      final stageTitle = (stage['title'] ?? stage['name'] ?? 'Elemen ${sIdx + 1}').toString();
+                                                      final stageDesc = (stage['description'] ?? stage['desc'] ?? '').toString();
+                                                      final materis = stage['materis'] as List? ?? [];
+                                                      final stageTasks = stage['tasks'] as List? ?? [];
 
-                                              final currentUid =
-                                                  FirebaseAuth.instance.currentUser?.uid ??
-                                                  '';
-                                              return StreamBuilder<DocumentSnapshot>(
-                                                stream: FirebaseFirestore.instance
-                                                    .collection('projects')
-                                                    .doc(projId)
-                                                    .collection('userProgress')
-                                                    .doc(currentUid)
-                                                    .snapshots(),
-                                                builder: (context, snapshot) {
-                                                  int completedTugas = 0;
-                                                  int totalTugas = 0;
-                                                  int completedPdf = 0;
-                                                  int totalPdf = 0;
-                                                  int completedQuiz = 0;
-                                                  int totalQuiz = 0;
-                                                  final List<int> quizScores = [];
+                                                      bool isMatch = stageTitle.toLowerCase().contains(q) || stageDesc.toLowerCase().contains(q);
+                                                      String? matchedMateriName;
 
-                                                  if (snapshot.hasData &&
-                                                      snapshot.data!.exists) {
-                                                    final progressData =
-                                                        snapshot.data!.data()
-                                                            as Map<String, dynamic>;
-                                                    final completedTasks =
-                                                        (progressData['completedTasks']
-                                                                as List?) ??
-                                                        [];
-
-                                                    for (var stage in stages) {
-                                                      final materis =
-                                                          stage['materis'] as List? ?? [];
                                                       for (var m in materis) {
-                                                        final tasks =
-                                                            m['tasks'] as List? ?? [];
-                                                        for (var t in tasks) {
-                                                          final taskId =
-                                                              t['id'] as String? ?? '';
-                                                          final type =
-                                                              t['type'] as String? ??
-                                                              'tugas';
-                                                          final isCompleted =
-                                                              completedTasks.contains(taskId);
+                                                        if (m is Map) {
+                                                          final mTitle = (m['title'] ?? '').toString();
+                                                          if (mTitle.toLowerCase().contains(q)) {
+                                                            isMatch = true;
+                                                            matchedMateriName = mTitle;
+                                                            break;
+                                                          }
+                                                        }
+                                                      }
 
-                                                          if (type == 'tugas') {
-                                                            totalTugas++;
-                                                            if (isCompleted) completedTugas++;
-                                                          } else if (type == 'pdf') {
-                                                            totalPdf++;
-                                                            if (isCompleted) completedPdf++;
-                                                          } else if (type == 'quiz') {
-                                                            totalQuiz++;
-                                                            if (isCompleted) {
-                                                              completedQuiz++;
-                                                              final scoreVal =
-                                                                  progressData['quizScore_'];
-                                                              if (scoreVal != null) {
-                                                                final int score =
-                                                                    (scoreVal as num).toInt();
-                                                                quizScores.add(score);
-                                                              }
+                                                      if (!isMatch) {
+                                                        for (var t in stageTasks) {
+                                                          if (t is Map) {
+                                                            final tTitle = (t['title'] ?? '').toString();
+                                                            if (tTitle.toLowerCase().contains(q)) {
+                                                              isMatch = true;
+                                                              matchedMateriName = tTitle;
+                                                              break;
                                                             }
                                                           }
                                                         }
                                                       }
-                                                    }
+
+                                                      if (isMatch) {
+                                                        matchedElements.add({
+                                                          'projectId': projId,
+                                                          'projectTitle': projTitle,
+                                                          'gradeLevel': gradeLevel,
+                                                          'major': major,
+                                                          'stageIdx': sIdx,
+                                                          'stageTitle': stageTitle,
+                                                          'stageDesc': stageDesc,
+                                                          'materiCount': materis.length,
+                                                          'taskCount': stageTasks.length,
+                                                          'cardColor': cardColor,
+                                                          'accentColor': accentColor,
+                                                          'isOwner': isOwner,
+                                                          'matchedMateri': matchedMateriName,
+                                                        });
+                                                      }
+                                                    } catch (_) {}
                                                   }
+                                                } catch (_) {}
+                                              }
 
-                                                  final int totalAll =
-                                                      totalTugas + totalPdf + totalQuiz;
-                                                  final int completedAll =
-                                                      completedTugas +
-                                                      completedPdf +
-                                                      completedQuiz;
-                                                  final double progressValue = totalAll > 0
-                                                      ? completedAll / totalAll
-                                                      : 0.0;
-                                                  final String progressText = '$completedAll/$totalAll';
-
-                                                  return _buildProjectCard(
-                                                    context: context,
-                                                    projectId: projId,
-                                                    title: projTitle,
-                                                    backgroundColor: cardColor,
-                                                    accentColor: accentColor,
-                                                    patternIndex: patternIndex,
-                                                    iconPath: iconPath,
-                                                    progressColor: accentColor,
-                                                    progressValue: progressValue,
-                                                    progressText: progressText,
-                                                    completedTugas: completedTugas,
-                                                    totalTugas: totalTugas,
-                                                    completedPdf: completedPdf,
-                                                    totalPdf: totalPdf,
-                                                    completedQuiz: completedQuiz,
-                                                    totalQuiz: totalQuiz,
-                                                    gradeLevel: projectData['gradeLevel'] ?? '-',
-                                                    major: projectData['major'] ?? '',
-                                                    ownerUid: projectData['ownerUid'] ?? '',
-                                                    schedules: List.from(projectData['schedules'] ?? []),
-                                                    isCompact2Column: isGrid,
-                                                  );
-                                                },
-                                              );
-                                            },
-                                          );
-
-                                          if (role.toLowerCase() == 'guru') {
-                                            projectCards.add(const AddClassroomPlaceholderCard());
-                                          }
-
-                                          if (MediaQuery.of(context).size.width >= 700 && MediaQuery.of(context).size.shortestSide >= 700) {
-                                            final double screenW = MediaQuery.of(context).size.width;
-                                            final int cols = screenW > 1350
-                                                ? 4
-                                                : (screenW > 980 ? 3 : 2);
-                                            final double ratio = screenW > 1350
-                                                ? 1.44
-                                                : (screenW > 980 ? 1.40 : 1.44);
-
-                                            return GridView.builder(
-                                              shrinkWrap: true,
-                                              physics:
-                                                  const NeverScrollableScrollPhysics(),
-                                              itemCount: projectCards.length,
-                                              gridDelegate:
-                                                  SliverGridDelegateWithFixedCrossAxisCount(
-                                                    crossAxisCount: cols,
-                                                    crossAxisSpacing: 10,
-                                                    mainAxisSpacing: 10,
-                                                    childAspectRatio: ratio,
+                                              if (matchedElements.isEmpty) {
+                                                return Container(
+                                                  width: double.infinity,
+                                                  padding: const EdgeInsets.symmetric(vertical: 36, horizontal: 20),
+                                                  decoration: BoxDecoration(
+                                                    color: isDark ? const Color(0xFF27272A) : const Color(0xFFF8FAFC),
+                                                    borderRadius: BorderRadius.circular(22),
+                                                    border: Border.all(
+                                                      color: isDark ? const Color(0xFF3F3F46) : const Color(0xFFE2E8F0),
+                                                    ),
                                                   ),
-                                              itemBuilder: (context, index) =>
-                                                  projectCards[index],
-                                            );
-                                          } else {
-                                            if (isGrid) {
-                                              return GridView.builder(
-                                                shrinkWrap: true,
-                                                physics: const NeverScrollableScrollPhysics(),
-                                                itemCount: projectCards.length,
-                                                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                                                  crossAxisCount: 2,
-                                                  crossAxisSpacing: 8,
-                                                  mainAxisSpacing: 8,
-                                                  childAspectRatio: 1.05,
-                                                ),
-                                                itemBuilder: (context, index) => projectCards[index],
-                                              );
-                                            } else {
-                                              return ListView.separated(
-                                                shrinkWrap: true,
-                                                physics:
-                                                    const NeverScrollableScrollPhysics(),
-                                                itemCount: projectCards.length,
-                                                separatorBuilder: (_, i) =>
-                                                    const SizedBox(height: 8),
-                                                itemBuilder: (context, index) =>
-                                                    projectCards[index],
+                                                  child: Column(
+                                                    mainAxisAlignment: MainAxisAlignment.center,
+                                                    children: [
+                                                      Icon(
+                                                        Icons.search_off_rounded,
+                                                        size: 44,
+                                                        color: isDark ? Colors.white38 : Colors.black26,
+                                                      ),
+                                                      const SizedBox(height: 12),
+                                                      Text(
+                                                        'Elemen Tidak Ditemukan',
+                                                        style: GoogleFonts.plusJakartaSans(
+                                                          fontSize: 15.5,
+                                                          fontWeight: FontWeight.bold,
+                                                          color: isDark ? Colors.white : Colors.black87,
+                                                        ),
+                                                      ),
+                                                      const SizedBox(height: 6),
+                                                      Text(
+                                                        'Tidak ada elemen atau materi yang cocok dengan "$searchQuery"',
+                                                        textAlign: TextAlign.center,
+                                                        style: GoogleFonts.dmSans(
+                                                          fontSize: 14.0,
+                                                          color: isDark ? Colors.white54 : Colors.black45,
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                );
+                                              }
+
+                                              return Column(
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                children: [
+                                                  Padding(
+                                                    padding: const EdgeInsets.only(left: 4, bottom: 10),
+                                                    child: Text(
+                                                      'Daftar Elemen Ditemukan (${matchedElements.length})',
+                                                      style: GoogleFonts.plusJakartaSans(
+                                                        fontSize: 14.0,
+                                                        fontWeight: FontWeight.w700,
+                                                        color: isDark ? Colors.white70 : const Color(0xFF475569),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  ListView.separated(
+                                                    shrinkWrap: true,
+                                                    physics: const NeverScrollableScrollPhysics(),
+                                                    itemCount: matchedElements.length,
+                                                    separatorBuilder: (_, __) => Divider(
+                                                      height: 20,
+                                                      thickness: 1,
+                                                      color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+                                                    ),
+                                                    itemBuilder: (context, index) {
+                                                      final elem = matchedElements[index];
+                                                      final String stageTitle = elem['stageTitle']?.toString() ?? 'Elemen';
+                                                      final String projTitle = elem['projectTitle']?.toString() ?? 'Classroom';
+                                                      final String gradeLevel = elem['gradeLevel']?.toString() ?? '';
+                                                      final String major = elem['major']?.toString() ?? '';
+                                                      final Color cardColor = elem['cardColor'] as Color? ?? Colors.white;
+                                                      final Color accentColor = elem['accentColor'] as Color? ?? const Color(0xFF7F52FC);
+                                                      final String? matchedMateri = elem['matchedMateri']?.toString();
+
+                                                      return InkWell(
+                                                        borderRadius: BorderRadius.circular(12),
+                                                        onTap: () {
+                                                          Navigator.of(context).push(
+                                                            MaterialPageRoute(
+                                                              builder: (_) => DetailCpPage(
+                                                                projectId: elem['projectId'],
+                                                                projectTitle: projTitle,
+                                                                stageIdx: elem['stageIdx'],
+                                                                isOwner: elem['isOwner'],
+                                                                accentColor: accentColor,
+                                                                cardColor: cardColor,
+                                                              ),
+                                                            ),
+                                                          );
+                                                        },
+                                                        child: Padding(
+                                                          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
+                                                          child: Row(
+                                                            children: [
+                                                              Expanded(
+                                                                child: Column(
+                                                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                                                  children: [
+                                                                    Text(
+                                                                      stageTitle,
+                                                                      style: GoogleFonts.plusJakartaSans(
+                                                                        fontSize: 16.5,
+                                                                        fontWeight: FontWeight.w800,
+                                                                        color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                                                      ),
+                                                                      maxLines: 1,
+                                                                      overflow: TextOverflow.ellipsis,
+                                                                    ),
+                                                                    const SizedBox(height: 3),
+                                                                    Text(
+                                                                      '$projTitle · $gradeLevel $major',
+                                                                      style: GoogleFonts.dmSans(
+                                                                        fontSize: 13.5,
+                                                                        fontWeight: FontWeight.w500,
+                                                                        color: isDark ? Colors.white60 : const Color(0xFF64748B),
+                                                                      ),
+                                                                      maxLines: 1,
+                                                                      overflow: TextOverflow.ellipsis,
+                                                                    ),
+                                                                    if (matchedMateri != null) ...[
+                                                                      const SizedBox(height: 5),
+                                                                      Container(
+                                                                        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2.5),
+                                                                        decoration: BoxDecoration(
+                                                                          color: isDark ? const Color(0xFF3F2D1D) : const Color(0xFFFEF3C7),
+                                                                          borderRadius: BorderRadius.circular(6),
+                                                                        ),
+                                                                        child: Text(
+                                                                          'Materi: $matchedMateri',
+                                                                          style: GoogleFonts.dmSans(
+                                                                            fontSize: 13.0,
+                                                                            fontWeight: FontWeight.bold,
+                                                                            color: isDark ? const Color(0xFFFCD34D) : const Color(0xFFB45309),
+                                                                          ),
+                                                                          maxLines: 1,
+                                                                          overflow: TextOverflow.ellipsis,
+                                                                        ),
+                                                                      ),
+                                                                    ],
+                                                                  ],
+                                                                ),
+                                                              ),
+                                                              const SizedBox(width: 10),
+                                                              BouncyButton(
+                                                                scaleDown: 0.90,
+                                                                onTap: () {
+                                                                  Navigator.of(context).push(
+                                                                    MaterialPageRoute(
+                                                                      builder: (_) => DetailCpPage(
+                                                                        projectId: elem['projectId'],
+                                                                        projectTitle: projTitle,
+                                                                        stageIdx: elem['stageIdx'],
+                                                                        isOwner: elem['isOwner'],
+                                                                        accentColor: accentColor,
+                                                                        cardColor: cardColor,
+                                                                      ),
+                                                                    ),
+                                                                  );
+                                                                },
+                                                                child: Container(
+                                                                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7.5),
+                                                                  decoration: BoxDecoration(
+                                                                    color: isDark ? Colors.white : Colors.black,
+                                                                    borderRadius: BorderRadius.circular(24),
+                                                                  ),
+                                                                  child: Row(
+                                                                    mainAxisSize: MainAxisSize.min,
+                                                                    children: [
+                                                                      Text(
+                                                                        'Buka CP',
+                                                                        style: GoogleFonts.plusJakartaSans(
+                                                                          fontSize: 13.5,
+                                                                          fontWeight: FontWeight.bold,
+                                                                          color: isDark ? Colors.black : Colors.white,
+                                                                        ),
+                                                                      ),
+                                                                      const SizedBox(width: 4),
+                                                                      Icon(
+                                                                        Icons.arrow_forward_ios_rounded,
+                                                                        size: 10,
+                                                                        color: isDark ? Colors.black : Colors.white,
+                                                                      ),
+                                                                    ],
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                            ],
+                                                          ),
+                                                        ),
+                                                      );
+                                                    },
+                                                  ),
+                                                ],
                                               );
                                             }
-                                          }
-                                        },
-                                      );
-                                    },
+
+                                            final activeProjectDocs = projectDocs.where((doc) {
+                                              final pData = doc.data() as Map<String, dynamic>? ?? {};
+                                              final pId = (pData['projectId'] ?? doc.id).toString();
+                                              return !_deletedProjectIds.contains(doc.id) && !_deletedProjectIds.contains(pId);
+                                            }).toList();
+
+                                            return ValueListenableBuilder<bool>(
+                                              valueListenable: _isClassroomGridNotifier,
+                                              builder: (context, isGrid, _) {
+                                                final List<Widget> projectCards = List.generate(
+                                                  activeProjectDocs.length,
+                                                  (index) {
+                                                    final projectData = activeProjectDocs[index].data()
+                                                        as Map<String, dynamic>;
+                                                    final projId = (projectData['projectId'] != null && projectData['projectId'].toString().isNotEmpty)
+                                                        ? projectData['projectId'].toString()
+                                                        : activeProjectDocs[index].id;
+                                                    final projTitle =
+                                                        projectData['name'] ?? 'Project';
+                                                    final stages =
+                                                        projectData['stages'] as List? ?? [];
+
+                                                    final dynamic rawColorIdx = projectData['colorIndex'];
+                                                    int patternIndex = 0;
+                                                    if (rawColorIdx is int) {
+                                                      patternIndex = rawColorIdx;
+                                                    } else if (rawColorIdx is String) {
+                                                      patternIndex = int.tryParse(rawColorIdx) ?? 0;
+                                                    } else if (rawColorIdx is num) {
+                                                      patternIndex = rawColorIdx.toInt();
+                                                    } else {
+                                                      patternIndex = index;
+                                                    }
+                                                    final cardColor = isDark
+                                                        ? _classroomCardDarkColors[patternIndex %
+                                                            _classroomCardDarkColors.length]
+                                                        : _classroomCardColors[patternIndex %
+                                                            _classroomCardColors.length];
+                                                    final accentColor =
+                                                        _classroomAccentColors[patternIndex %
+                                                            _classroomAccentColors.length];
+
+                                                    final iconFileName =
+                                                        projectData['icon'] as String? ??
+                                                        'project_1.png';
+                                                    final iconPath =
+                                                        'assets/icon_pack/project/$iconFileName';
+
+                                                    if (role.toLowerCase() == 'guru') {
+                                                      return _buildTeacherProjectCard(
+                                                        context: context,
+                                                        projectId: projId,
+                                                        title: projTitle,
+                                                        backgroundColor: cardColor,
+                                                        accentColor: accentColor,
+                                                        patternIndex: patternIndex,
+                                                        iconPath: iconPath,
+                                                        stages: stages,
+                                                        schedules: List.from(
+                                                          projectData['schedules'] ?? [],
+                                                        ),
+                                                        gradeLevel: projectData['gradeLevel'] ?? '-',
+                                                        major: projectData['major'] ?? '',
+                                                        ownerUid: projectData['ownerUid'] ?? '',
+                                                        studentsMasterList: projectData['studentsMasterList'] as List? ?? [],
+                                                        membersList: projectData['members'] as List? ?? [],
+                                                        isCompact2Column: isGrid,
+                                                      );
+                                                    }
+
+                                                    final currentUid =
+                                                        FirebaseAuth.instance.currentUser?.uid ??
+                                                        '';
+                                                    return StreamBuilder<DocumentSnapshot>(
+                                                      stream: FirebaseFirestore.instance
+                                                          .collection('projects')
+                                                          .doc(projId)
+                                                          .collection('userProgress')
+                                                          .doc(currentUid)
+                                                          .snapshots(),
+                                                      builder: (context, snapshot) {
+                                                        int completedTugas = 0;
+                                                        int totalTugas = 0;
+                                                        int completedPdf = 0;
+                                                        int totalPdf = 0;
+                                                        int completedQuiz = 0;
+                                                        int totalQuiz = 0;
+                                                        final List<int> quizScores = [];
+
+                                                        if (snapshot.hasData &&
+                                                            snapshot.data!.exists) {
+                                                          final progressData =
+                                                              snapshot.data!.data()
+                                                                  as Map<String, dynamic>;
+                                                          final completedTasks =
+                                                              (progressData['completedTasks']
+                                                                      as List?) ??
+                                                              [];
+
+                                                          for (var stage in stages) {
+                                                            final materis =
+                                                                stage['materis'] as List? ?? [];
+                                                            for (var m in materis) {
+                                                              final tasks =
+                                                                  m['tasks'] as List? ?? [];
+                                                              for (var t in tasks) {
+                                                                final taskId =
+                                                                    t['id'] as String? ?? '';
+                                                                final type =
+                                                                    t['type'] as String? ??
+                                                                    'tugas';
+                                                                final isCompleted =
+                                                                    completedTasks.contains(taskId);
+
+                                                                if (type == 'tugas') {
+                                                                  totalTugas++;
+                                                                  if (isCompleted) completedTugas++;
+                                                                } else if (type == 'pdf') {
+                                                                  totalPdf++;
+                                                                  if (isCompleted) completedPdf++;
+                                                                } else if (type == 'quiz') {
+                                                                  totalQuiz++;
+                                                                  if (isCompleted) {
+                                                                    completedQuiz++;
+                                                                    final scoreVal =
+                                                                        progressData['quizScore_'];
+                                                                    if (scoreVal != null) {
+                                                                      final int score =
+                                                                          (scoreVal as num).toInt();
+                                                                      quizScores.add(score);
+                                                                    }
+                                                                  }
+                                                                }
+                                                              }
+                                                            }
+                                                          }
+                                                        }
+
+                                                        final int totalAll =
+                                                            totalTugas + totalPdf + totalQuiz;
+                                                        final int completedAll =
+                                                            completedTugas +
+                                                            completedPdf +
+                                                            completedQuiz;
+                                                        final double progressValue = totalAll > 0
+                                                            ? completedAll / totalAll
+                                                            : 0.0;
+                                                        final String progressText = '$completedAll/$totalAll';
+
+                                                        return _buildProjectCard(
+                                                          context: context,
+                                                          projectId: projId,
+                                                          title: projTitle,
+                                                          backgroundColor: cardColor,
+                                                          accentColor: accentColor,
+                                                          patternIndex: patternIndex,
+                                                          iconPath: iconPath,
+                                                          progressColor: accentColor,
+                                                          progressValue: progressValue,
+                                                          progressText: progressText,
+                                                          completedTugas: completedTugas,
+                                                          totalTugas: totalTugas,
+                                                          completedPdf: completedPdf,
+                                                          totalPdf: totalPdf,
+                                                          completedQuiz: completedQuiz,
+                                                          totalQuiz: totalQuiz,
+                                                          gradeLevel: projectData['gradeLevel'] ?? '-',
+                                                          major: projectData['major'] ?? '',
+                                                          ownerUid: projectData['ownerUid'] ?? '',
+                                                          schedules: List.from(projectData['schedules'] ?? []),
+                                                          isCompact2Column: isGrid,
+                                                        );
+                                                      },
+                                                    );
+                                                  },
+                                                );
+
+                                                if (role.toLowerCase() == 'guru') {
+                                                  projectCards.add(const AddClassroomPlaceholderCard());
+                                                }
+
+                                                if (MediaQuery.of(context).size.width >= 700 && MediaQuery.of(context).size.shortestSide >= 700) {
+                                                  final double screenW = MediaQuery.of(context).size.width;
+                                                  final int cols = screenW > 1350
+                                                      ? 4
+                                                      : (screenW > 980 ? 3 : 2);
+                                                  final double ratio = screenW > 1350
+                                                      ? 1.44
+                                                      : (screenW > 980 ? 1.40 : 1.44);
+
+                                                  return GridView.builder(
+                                                    shrinkWrap: true,
+                                                    physics:
+                                                        const NeverScrollableScrollPhysics(),
+                                                    itemCount: projectCards.length,
+                                                    gridDelegate:
+                                                        SliverGridDelegateWithFixedCrossAxisCount(
+                                                          crossAxisCount: cols,
+                                                          crossAxisSpacing: 10,
+                                                          mainAxisSpacing: 10,
+                                                          childAspectRatio: ratio,
+                                                        ),
+                                                    itemBuilder: (context, index) =>
+                                                        projectCards[index],
+                                                  );
+                                                } else {
+                                                  if (isGrid) {
+                                                    return GridView.builder(
+                                                      shrinkWrap: true,
+                                                      physics: const NeverScrollableScrollPhysics(),
+                                                      itemCount: projectCards.length,
+                                                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                                                        crossAxisCount: 2,
+                                                        crossAxisSpacing: 8,
+                                                        mainAxisSpacing: 8,
+                                                        childAspectRatio: 1.05,
+                                                      ),
+                                                      itemBuilder: (context, index) => projectCards[index],
+                                                    );
+                                                  } else {
+                                                    return ListView.separated(
+                                                      shrinkWrap: true,
+                                                      physics:
+                                                          const NeverScrollableScrollPhysics(),
+                                                      itemCount: projectCards.length,
+                                                      separatorBuilder: (_, i) =>
+                                                          const SizedBox(height: 8),
+                                                      itemBuilder: (context, index) =>
+                                                          projectCards[index],
+                                                    );
+                                                  }
+                                                }
+                                              },
+                                            );
+                                          },
+                                        );
+                                      },
+                                    ],
                                   ),
-                                ],
+                                ),
                               ],
                             ),
                           ),
-                        ],
-                      ),
-                    ),
-                  );
-                },
-              );
-            },
-          ),
+                        );
+                      },
+                    );
+                  },
+                ),
+              ),
+            ),
+          ],
         ),
-      ),
-    ],
-  ),
-);
-},
-);
+      );
+    },
+  );
 }
 
   Widget _buildTeacherProjectCard({
@@ -4034,8 +4055,6 @@ class _StudentHomePageState extends State<StudentHomePage> {
       return Icons.palette_rounded;
     } else if (lowerTitle.contains('fisika') || lowerTitle.contains('sains') || lowerTitle.contains('science')) {
       return Icons.science_rounded;
-    } else if (lowerTitle.contains('matematika') || lowerTitle.contains('geometri') || lowerTitle.contains('hitung')) {
-      return Icons.calculate_rounded;
     }
     return Icons.school_rounded;
   }
@@ -4054,6 +4073,7 @@ class _StudentHomePageState extends State<StudentHomePage> {
     required List schedules,
     required VoidCallback onShowStats,
     required VoidCallback onShowBarcode,
+    bool isCompact2Column = false,
   }) {
     final majorText = major.isEmpty ? 'Umum' : major;
     final bool isMobile = MediaQuery.of(context).size.width < 700 || MediaQuery.of(context).size.shortestSide < 700;
@@ -4063,28 +4083,29 @@ class _StudentHomePageState extends State<StudentHomePage> {
       return Stack(
         clipBehavior: Clip.none,
         children: [
-          // Illustration placed on right more centered and bigger (aligned with top controls)!
-          Positioned(
-            right: 6,
-            top: 0,
-            bottom: 0,
-            child: Center(
-              child: SizedBox(
-                height: 76,
-                width: 76,
-                child: ColorFiltered(
-                  colorFilter: isDark
-                      ? ColorFilter.mode(Colors.black.withValues(alpha: 0.12), BlendMode.darken)
-                      : const ColorFilter.mode(Colors.transparent, BlendMode.dst),
-                  child: Image.asset(
-                    iconPath,
-                    fit: BoxFit.contain,
-                    errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
+          // Illustration placed on right more centered and bigger (only in normal 1-col list mode)!
+          if (!isCompact2Column)
+            Positioned(
+              right: 6,
+              top: 0,
+              bottom: 0,
+              child: Center(
+                child: SizedBox(
+                  height: 76,
+                  width: 76,
+                  child: ColorFiltered(
+                    colorFilter: isDark
+                        ? ColorFilter.mode(Colors.black.withValues(alpha: 0.12), BlendMode.darken)
+                        : const ColorFilter.mode(Colors.transparent, BlendMode.dst),
+                    child: Image.asset(
+                      iconPath,
+                      fit: BoxFit.contain,
+                      errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
           // Main content column
           Padding(
             padding: EdgeInsets.zero,
@@ -4101,16 +4122,20 @@ class _StudentHomePageState extends State<StudentHomePage> {
                 const SizedBox(height: 4),
                 // Middle: Complete Subject Title (Flexible, full size for 1-2 lines, max 3 lines, NEVER TRUNCATED)
                 Padding(
-                  padding: const EdgeInsets.only(left: 10.0, right: 84.0),
+                  padding: EdgeInsets.only(
+                    left: isCompact2Column ? 2.0 : 10.0,
+                    right: isCompact2Column ? 2.0 : 84.0,
+                  ),
                   child: Builder(
                     builder: (context) {
-                      double calculatedFontSize = 19.5;
-                      if (title.length > 55) {
+                      double calculatedFontSize = isCompact2Column ? 14.5 : 19.5;
+                      if (!isCompact2Column && title.length > 55) {
                         calculatedFontSize = 16.0;
                       }
                       return Text(
                         title,
-                        maxLines: 3,
+                        maxLines: isCompact2Column ? 2 : 3,
+                        overflow: TextOverflow.ellipsis,
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: calculatedFontSize,
                           fontWeight: FontWeight.w800,
@@ -4121,109 +4146,115 @@ class _StudentHomePageState extends State<StudentHomePage> {
                   ),
                 ),
                 const SizedBox(height: 4),
-                // Bottom Row: [ Kelas Tag ] [ Siswa Tag ] [ Spacer ] [ Circular Graphic Statistik Button ] on right
+                // Bottom Row: [ Kelas Tag ] [ Siswa Tag / Stats Button ]
                 Padding(
-                  padding: const EdgeInsets.only(left: 4.0, bottom: 2.0, right: 2.0),
+                  padding: const EdgeInsets.only(left: 2.0, bottom: 2.0, right: 2.0),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                    // Kelas / Jurusan Tag (Full rounded pill)
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4.5),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(24),
-                        color: isDark
-                            ? Colors.black.withValues(alpha: 0.25)
-                            : Colors.black.withValues(alpha: 0.08),
-                        border: Border.all(
-                          color: isDark
-                              ? Colors.white.withValues(alpha: 0.2)
-                              : Colors.black.withValues(alpha: 0.18),
-                          width: 1.2,
+                      // Kelas / Jurusan Tag
+                      Expanded(
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4.0),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(20),
+                            color: isDark
+                                ? Colors.black.withValues(alpha: 0.25)
+                                : Colors.black.withValues(alpha: 0.08),
+                            border: Border.all(
+                              color: isDark
+                                  ? Colors.white.withValues(alpha: 0.2)
+                                  : Colors.black.withValues(alpha: 0.18),
+                              width: 1.0,
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.flash_on_rounded,
+                                size: 11,
+                                color: isDark ? Colors.white : Colors.black87,
+                              ),
+                              const SizedBox(width: 3),
+                              Flexible(
+                                child: Text(
+                                  majorText,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: GoogleFonts.dmSans(
+                                    fontSize: 12.0,
+                                    fontWeight: FontWeight.bold,
+                                    color: isDark ? Colors.white : Colors.black87,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            Icons.flash_on_rounded,
-                            size: 13,
-                            color: isDark ? Colors.white : Colors.black87,
+                      if (!isCompact2Column) ...[
+                        const SizedBox(width: 6),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4.5),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(24),
+                            color: isDark
+                                ? Colors.black.withValues(alpha: 0.25)
+                                : Colors.black.withValues(alpha: 0.08),
+                            border: Border.all(
+                              color: isDark
+                                  ? Colors.white.withValues(alpha: 0.2)
+                                  : Colors.black.withValues(alpha: 0.18),
+                              width: 1.2,
+                            ),
                           ),
-                          const SizedBox(width: 4),
-                          Text(
-                            majorText,
-                            style: GoogleFonts.dmSans(
-                              fontSize: 14.0,
-                              fontWeight: FontWeight.bold,
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.group_outlined,
+                                size: 13,
+                                color: isDark ? Colors.white : Colors.black87,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                '$totalStudents Siswa',
+                                style: GoogleFonts.dmSans(
+                                  fontSize: 14.0,
+                                  fontWeight: FontWeight.bold,
+                                  color: isDark ? Colors.white : Colors.black87,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                      const SizedBox(width: 4),
+                      GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onTap: onShowStats,
+                        child: Container(
+                          width: isCompact2Column ? 28 : 36,
+                          height: isCompact2Column ? 28 : 36,
+                          decoration: BoxDecoration(
+                            color: isDark ? Colors.black : Colors.white,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Center(
+                            child: Icon(
+                              Icons.bar_chart_rounded,
+                              size: isCompact2Column ? 16 : 20,
                               color: isDark ? Colors.white : Colors.black87,
                             ),
                           ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 6),
-                    // Total Siswa Tag (Full rounded pill)
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4.5),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(24),
-                        color: isDark
-                            ? Colors.black.withValues(alpha: 0.25)
-                            : Colors.black.withValues(alpha: 0.08),
-                        border: Border.all(
-                          color: isDark
-                              ? Colors.white.withValues(alpha: 0.2)
-                              : Colors.black.withValues(alpha: 0.18),
-                          width: 1.2,
                         ),
                       ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            Icons.group_outlined,
-                            size: 13,
-                            color: isDark ? Colors.white : Colors.black87,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            '$totalStudents Siswa',
-                            style: GoogleFonts.dmSans(
-                              fontSize: 14.0,
-                              fontWeight: FontWeight.bold,
-                              color: isDark ? Colors.white : Colors.black87,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const Spacer(),
-                    // Statistik button at bottom right: Circle button with graphic chart icon!
-                    GestureDetector(
-                      behavior: HitTestBehavior.opaque,
-                      onTap: onShowStats,
-                      child: Container(
-                        width: 36,
-                        height: 36,
-                        decoration: BoxDecoration(
-                          color: isDark ? Colors.black : Colors.white,
-                          shape: BoxShape.circle,
-                        ),
-                        child: Center(
-                          child: Icon(
-                            Icons.bar_chart_rounded,
-                            size: 20,
-                            color: isDark ? Colors.white : Colors.black87,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            ],
-          ),
+              ],
+            ),
           ),
         ],
       );
@@ -4961,6 +4992,7 @@ class _StudentHomePageState extends State<StudentHomePage> {
     required String major,
     required String ownerUid,
     List schedules = const [],
+    bool isCompact2Column = false,
   }) {
     final bool isDark = AppColors.isDarkMode;
     return FutureBuilder<DocumentSnapshot>(
@@ -5003,7 +5035,9 @@ class _StudentHomePageState extends State<StudentHomePage> {
                 }
               },
               child: Container(
-                height: (MediaQuery.of(cardContext).size.width < 700 || MediaQuery.of(cardContext).size.shortestSide < 700) ? 168 : 195,
+                height: isCompact2Column
+                    ? 156
+                    : ((MediaQuery.of(cardContext).size.width < 700 || MediaQuery.of(cardContext).size.shortestSide < 700) ? 168 : 195),
                 margin: EdgeInsets.zero,
                 clipBehavior: Clip.antiAlias,
                 decoration: BoxDecoration(
@@ -5029,9 +5063,11 @@ class _StudentHomePageState extends State<StudentHomePage> {
                       ),
                     Positioned.fill(
                       child: Padding(
-                        padding: (MediaQuery.of(cardContext).size.width < 700 || MediaQuery.of(cardContext).size.shortestSide < 700)
-                            ? const EdgeInsets.fromLTRB(14, 12, 14, 12)
-                            : const EdgeInsets.all(16),
+                        padding: isCompact2Column
+                            ? const EdgeInsets.all(10)
+                            : ((MediaQuery.of(cardContext).size.width < 700 || MediaQuery.of(cardContext).size.shortestSide < 700)
+                                ? const EdgeInsets.fromLTRB(14, 12, 14, 12)
+                                : const EdgeInsets.all(16)),
                         child: isBarcodeFlipped
                             ? _buildInlineBarcodeView(
                                 context: cardContext,
@@ -5074,6 +5110,7 @@ class _StudentHomePageState extends State<StudentHomePage> {
                                     accentColor: accentColor,
                                     backgroundColor: backgroundColor,
                                     schedules: schedules,
+                                    isCompact2Column: isCompact2Column,
                                     onShowStats: () {
                                       cardSetState(() {
                                         isStatsFlipped = true;
@@ -5207,6 +5244,7 @@ class _StudentHomePageState extends State<StudentHomePage> {
     required List schedules,
     required VoidCallback onShowStats,
     required VoidCallback onShowBarcode,
+    bool isCompact2Column = false,
   }) {
     final majorText = major.isEmpty ? 'Umum' : major;
     final bool isMobile = MediaQuery.of(context).size.width < 700 || MediaQuery.of(context).size.shortestSide < 700;
@@ -5216,27 +5254,28 @@ class _StudentHomePageState extends State<StudentHomePage> {
       return Stack(
         clipBehavior: Clip.none,
         children: [
-          Positioned(
-            right: 6,
-            top: 0,
-            bottom: 0,
-            child: Center(
-              child: SizedBox(
-                height: 76,
-                width: 76,
-                child: ColorFiltered(
-                  colorFilter: isDark
-                      ? ColorFilter.mode(Colors.black.withValues(alpha: 0.12), BlendMode.darken)
-                      : const ColorFilter.mode(Colors.transparent, BlendMode.dst),
-                  child: Image.asset(
-                    iconPath,
-                    fit: BoxFit.contain,
-                    errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
+          if (!isCompact2Column)
+            Positioned(
+              right: 6,
+              top: 0,
+              bottom: 0,
+              child: Center(
+                child: SizedBox(
+                  height: 76,
+                  width: 76,
+                  child: ColorFiltered(
+                    colorFilter: isDark
+                        ? ColorFilter.mode(Colors.black.withValues(alpha: 0.12), BlendMode.darken)
+                        : const ColorFilter.mode(Colors.transparent, BlendMode.dst),
+                    child: Image.asset(
+                      iconPath,
+                      fit: BoxFit.contain,
+                      errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
           Padding(
             padding: EdgeInsets.zero,
             child: Column(
@@ -5250,16 +5289,20 @@ class _StudentHomePageState extends State<StudentHomePage> {
                 ),
                 const SizedBox(height: 4),
                 Padding(
-                  padding: const EdgeInsets.only(left: 10.0, right: 84.0),
+                  padding: EdgeInsets.only(
+                    left: isCompact2Column ? 2.0 : 10.0,
+                    right: isCompact2Column ? 2.0 : 84.0,
+                  ),
                   child: Builder(
                     builder: (context) {
-                      double calculatedFontSize = 19.5;
-                      if (title.length > 55) {
+                      double calculatedFontSize = isCompact2Column ? 14.5 : 19.5;
+                      if (!isCompact2Column && title.length > 55) {
                         calculatedFontSize = 16.0;
                       }
                       return Text(
                         title,
-                        maxLines: 3,
+                        maxLines: isCompact2Column ? 2 : 3,
+                        overflow: TextOverflow.ellipsis,
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: calculatedFontSize,
                           fontWeight: FontWeight.w800,
@@ -5271,50 +5314,15 @@ class _StudentHomePageState extends State<StudentHomePage> {
                 ),
                 const SizedBox(height: 4),
                 Padding(
-                  padding: const EdgeInsets.only(left: 4.0, bottom: 2.0, right: 2.0),
+                  padding: const EdgeInsets.only(left: 2.0, bottom: 2.0, right: 2.0),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4.5),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(24),
-                          color: isDark
-                              ? Colors.black.withValues(alpha: 0.25)
-                              : Colors.black.withValues(alpha: 0.08),
-                          border: Border.all(
-                            color: isDark
-                                ? Colors.white.withValues(alpha: 0.2)
-                                : Colors.black.withValues(alpha: 0.18),
-                            width: 1.2,
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.flash_on_rounded,
-                              size: 13,
-                              color: isDark ? Colors.white : Colors.black87,
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              majorText,
-                              style: GoogleFonts.dmSans(
-                                fontSize: 14.0,
-                                fontWeight: FontWeight.bold,
-                                color: isDark ? Colors.white : Colors.black87,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 6),
-                      Flexible(
+                      Expanded(
                         child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4.5),
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4.0),
                           decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(24),
+                            borderRadius: BorderRadius.circular(20),
                             color: isDark
                                 ? Colors.black.withValues(alpha: 0.25)
                                 : Colors.black.withValues(alpha: 0.08),
@@ -5322,25 +5330,25 @@ class _StudentHomePageState extends State<StudentHomePage> {
                               color: isDark
                                   ? Colors.white.withValues(alpha: 0.2)
                                   : Colors.black.withValues(alpha: 0.18),
-                              width: 1.2,
+                              width: 1.0,
                             ),
                           ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Icon(
-                                Icons.person_rounded,
-                                size: 13,
+                                Icons.flash_on_rounded,
+                                size: 11,
                                 color: isDark ? Colors.white : Colors.black87,
                               ),
-                              const SizedBox(width: 4),
+                              const SizedBox(width: 3),
                               Flexible(
                                 child: Text(
-                                  teacherName,
+                                  majorText,
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                   style: GoogleFonts.dmSans(
-                                    fontSize: 14.0,
+                                    fontSize: 12.0,
                                     fontWeight: FontWeight.bold,
                                     color: isDark ? Colors.white : Colors.black87,
                                   ),
@@ -5350,13 +5358,56 @@ class _StudentHomePageState extends State<StudentHomePage> {
                           ),
                         ),
                       ),
-                      const SizedBox(width: 6),
+                      if (!isCompact2Column) ...[
+                        const SizedBox(width: 6),
+                        Flexible(
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4.5),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(24),
+                              color: isDark
+                                  ? Colors.black.withValues(alpha: 0.25)
+                                  : Colors.black.withValues(alpha: 0.08),
+                              border: Border.all(
+                                color: isDark
+                                    ? Colors.white.withValues(alpha: 0.2)
+                                    : Colors.black.withValues(alpha: 0.18),
+                                width: 1.2,
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.person_rounded,
+                                  size: 13,
+                                  color: isDark ? Colors.white : Colors.black87,
+                                ),
+                                const SizedBox(width: 4),
+                                Flexible(
+                                  child: Text(
+                                    teacherName,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: GoogleFonts.dmSans(
+                                      fontSize: 14.0,
+                                      fontWeight: FontWeight.bold,
+                                      color: isDark ? Colors.white : Colors.black87,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                      const SizedBox(width: 4),
                       GestureDetector(
                         behavior: HitTestBehavior.opaque,
                         onTap: onShowStats,
                         child: Container(
-                          width: 36,
-                          height: 36,
+                          width: isCompact2Column ? 28 : 36,
+                          height: isCompact2Column ? 28 : 36,
                           decoration: BoxDecoration(
                             color: isDark ? Colors.black : Colors.white,
                             shape: BoxShape.circle,
@@ -5364,7 +5415,7 @@ class _StudentHomePageState extends State<StudentHomePage> {
                           child: Center(
                             child: Icon(
                               Icons.bar_chart_rounded,
-                              size: 20,
+                              size: isCompact2Column ? 16 : 20,
                               color: isDark ? Colors.white : Colors.black87,
                             ),
                           ),

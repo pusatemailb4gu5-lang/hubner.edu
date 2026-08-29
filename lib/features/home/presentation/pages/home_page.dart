@@ -4324,13 +4324,13 @@ class _HomePageState extends State<HomePage> {
         children: [
           // Illustration placed on right more centered and bigger (aligned with top controls)!
           Positioned(
-            right: 6,
+            right: 12,
             top: 0,
             bottom: 0,
             child: Center(
               child: SizedBox(
-                height: 76,
-                width: 76,
+                height: 102,
+                width: 102,
                 child: ColorFiltered(
                   colorFilter: isDark
                       ? ColorFilter.mode(Colors.black.withValues(alpha: 0.12), BlendMode.darken)
@@ -4360,7 +4360,7 @@ class _HomePageState extends State<HomePage> {
                 const SizedBox(height: 4),
                 // Middle: Complete Subject Title (Flexible, full size for 1-2 lines, max 3 lines, NEVER TRUNCATED)
                 Padding(
-                  padding: const EdgeInsets.only(left: 10.0, right: 84.0),
+                  padding: const EdgeInsets.only(left: 10.0, right: 110.0),
                   child: Builder(
                     builder: (context) {
                       double calculatedFontSize = 19.5;
@@ -5476,13 +5476,13 @@ class _HomePageState extends State<HomePage> {
         clipBehavior: Clip.none,
         children: [
           Positioned(
-            right: 6,
+            right: 12,
             top: 0,
             bottom: 0,
             child: Center(
               child: SizedBox(
-                height: 76,
-                width: 76,
+                height: 102,
+                width: 102,
                 child: ColorFiltered(
                   colorFilter: isDark
                       ? ColorFilter.mode(Colors.black.withValues(alpha: 0.12), BlendMode.darken)
@@ -5509,7 +5509,7 @@ class _HomePageState extends State<HomePage> {
                 ),
                 const SizedBox(height: 4),
                 Padding(
-                  padding: const EdgeInsets.only(left: 10.0, right: 84.0),
+                  padding: const EdgeInsets.only(left: 10.0, right: 110.0),
                   child: Builder(
                     builder: (context) {
                       double calculatedFontSize = 19.5;
