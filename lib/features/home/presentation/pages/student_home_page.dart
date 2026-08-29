@@ -3036,6 +3036,12 @@ class _StudentHomePageState extends State<StudentHomePage> {
                                   decoration: BoxDecoration(
                                     color: isDark ? const Color(0xFF18181B) : Colors.white,
                                     borderRadius: BorderRadius.circular(28),
+                                    border: Border.all(
+                                      color: isDark
+                                          ? Colors.white.withValues(alpha: 0.15)
+                                          : const Color(0xFFE2E8F0),
+                                      width: 1.0,
+                                    ),
                                     boxShadow: [
                                       BoxShadow(
                                         color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.05),
@@ -3079,11 +3085,19 @@ class _StudentHomePageState extends State<StudentHomePage> {
                                                       width: 1.0,
                                                     ),
                                                   ),
-                                                  child: Icon(
-                                                    Icons.dashboard_customize_rounded,
-                                                    color: isDark ? Colors.white : Colors.black87,
-                                                    size: 20,
-                                                  ),
+                                                   child: AnimatedSwitcher(
+                                                     duration: const Duration(milliseconds: 200),
+                                                     transitionBuilder: (child, animation) =>
+                                                         ScaleTransition(scale: animation, child: child),
+                                                     child: Icon(
+                                                       isGrid
+                                                           ? Icons.view_agenda_rounded
+                                                           : Icons.grid_view_rounded,
+                                                       key: ValueKey<bool>(isGrid),
+                                                       color: isDark ? Colors.white : Colors.black87,
+                                                       size: 20,
+                                                     ),
+                                                   ),
                                                 ),
                                               );
                                             },
@@ -3725,9 +3739,8 @@ class _StudentHomePageState extends State<StudentHomePage> {
                                               },
                                             );
                                           },
-                                        );
-                                      },
-                                    ],
+                                        ),
+                                      ],
                                   ),
                                 ),
                               ],
