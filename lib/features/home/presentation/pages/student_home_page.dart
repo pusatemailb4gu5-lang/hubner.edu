@@ -55,6 +55,7 @@ class _StudentHomePageState extends State<StudentHomePage> {
   List<String>? _cachedProjectIds;
   List<DocumentSnapshot> _lastProjectDocs = [];
   final ValueNotifier<bool> _isManagingClassesNotifier = ValueNotifier<bool>(false);
+  final ValueNotifier<bool> _isClassroomGridNotifier = ValueNotifier<bool>(false);
   final ValueNotifier<String> _searchQueryNotifier = ValueNotifier<String>('');
   final GlobalKey _notesButtonKey = GlobalKey();
   final ScrollController _homeScrollController = ScrollController();
@@ -1787,10 +1788,17 @@ class _StudentHomePageState extends State<StudentHomePage> {
                                     ],
                                   ),
                                  const SizedBox(height: 12),
-                                 // Profile Row (Kiri: Foto Profil 58x58, Kanan: Hai, [Nama] di atas & Role di bawah)
+                                 // Profile Row (Kiri: Foto Profil 58x58, Kanan: Hai, [Nama] di atas & Role di bawah dengan warna gender)
                                  Builder(
                                    builder: (context) {
                                      final bool isDark = AppColors.isDarkMode;
+                                     final bool isFemale = gender.toLowerCase().contains('perempuan') || gender.toLowerCase().startsWith('p');
+                                     final Color genderRoleColor = isFemale ? const Color(0xFFF43F5E) : const Color(0xFF0EA5E9);
+
+                                     final String capitalizedName = fullName.trim().isEmpty
+                                         ? 'User'
+                                         : fullName.trim().split(RegExp(r'\s+')).map((w) => w.isNotEmpty ? (w[0].toUpperCase() + (w.length > 1 ? w.substring(1).toLowerCase() : '')) : '').join(' ');
+
                                      final String roleSubtitle = role.toLowerCase() == 'guru'
                                          ? 'Pengajar · ${schoolLevel.isNotEmpty ? schoolLevel.toUpperCase() : 'SMA/SMK'}'
                                          : 'Siswa · ${schoolLevel.isNotEmpty ? schoolLevel.toUpperCase() : 'SMA/SMK'}';
@@ -1864,7 +1872,7 @@ class _StudentHomePageState extends State<StudentHomePage> {
                                              mainAxisAlignment: MainAxisAlignment.center,
                                              children: [
                                                Text(
-                                                 'Hai, $fullName',
+                                                 'Hai, $capitalizedName',
                                                  style: GoogleFonts.plusJakartaSans(
                                                    fontSize: 24.0,
                                                    fontWeight: FontWeight.w900,
@@ -1879,8 +1887,8 @@ class _StudentHomePageState extends State<StudentHomePage> {
                                                  roleSubtitle,
                                                  style: GoogleFonts.dmSans(
                                                    fontSize: 13.5,
-                                                   fontWeight: FontWeight.w600,
-                                                   color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                                                   fontWeight: FontWeight.w700,
+                                                   color: genderRoleColor,
                                                  ),
                                                  maxLines: 1,
                                                  overflow: TextOverflow.ellipsis,
@@ -2120,594 +2128,684 @@ class _StudentHomePageState extends State<StudentHomePage> {
 
                                     // Quiz Card (Auto Slider 3 Mode: 0 = Progress X/Y + Donut %, 1 = Sparkline 3 Nilai Terakhir, 2 = Nilai Quiz Terakhir)
                                     Widget buildTugasPillCard() {
-                                      final Color bgLight = const Color(0xFFFED7AA);
-                                      final Color bgDark = const Color(0xFFC76D10);
-                                      final Color titleColor = isDark ? Colors.white : const Color(0xFF1E293B);
-                                      final Color subtitleColor = isDark ? Colors.white.withValues(alpha: 0.90) : const Color(0xFF334155);
-                                      final Color dotActive = isDark ? Colors.white : const Color(0xFF18181B);
-                                      final Color dotInactive = isDark ? Colors.white38 : const Color(0xFF18181B).withValues(alpha: 0.35);
+                                       final Color bgLight = const Color(0xFFFED7AA);
+                                       final Color bgDark = const Color(0xFFC76D10);
+                                       final Color titleColor = isDark ? Colors.white : const Color(0xFF1E293B);
+                                       final Color subtitleColor = isDark ? Colors.white.withValues(alpha: 0.90) : const Color(0xFF334155);
+                                       final Color dotActive = isDark ? Colors.white : const Color(0xFF18181B);
+                                       final Color dotInactive = isDark ? Colors.white38 : const Color(0xFF18181B).withValues(alpha: 0.35);
 
-                                      final taskChartValues = totalTugas > 0
-                                          ? List.generate(7, (i) => ((completedTugas / totalTugas) * 80 + (i * 3)).clamp(20, 100).toInt())
-                                          : [30, 45, 60, 50, 75, 85, 90];
+                                       final taskChartValues = totalTugas > 0
+                                           ? List.generate(7, (i) => ((completedTugas / totalTugas) * 80 + (i * 3)).clamp(20, 100).toInt())
+                                           : [30, 45, 60, 50, 75, 85, 90];
 
-                                      return Row(
-                                        children: [
-                                          Expanded(
-                                            child: GestureDetector(
-                                              onVerticalDragEnd: (details) {
-                                                final vel = details.primaryVelocity ?? 0;
-                                                if (vel < -100) {
-                                                  if (_tugasCardMode != 1) {
-                                                    HapticFeedback.selectionClick();
-                                                    setState(() => _tugasCardMode = 1);
-                                                  }
-                                                } else if (vel > 100) {
-                                                  if (_tugasCardMode != 0) {
-                                                    HapticFeedback.selectionClick();
-                                                    setState(() => _tugasCardMode = 0);
-                                                  }
-                                                }
-                                              },
-                                              onTap: () {
-                                                HapticFeedback.selectionClick();
-                                                setState(() {
-                                                  _tugasCardMode = (_tugasCardMode + 1) % 2;
-                                                });
-                                              },
-                                              child: Container(
-                                                clipBehavior: Clip.antiAlias,
-                                                decoration: BoxDecoration(
-                                                  color: isDark ? bgDark : bgLight,
-                                                  borderRadius: BorderRadius.circular(30),
-                                                  border: isDark
-                                                      ? Border.all(
-                                                          color: Colors.white.withValues(alpha: 0.15),
-                                                          width: 1.0,
-                                                        )
-                                                      : null,
-                                                ),
-                                                child: Stack(
-                                                  children: [
-                                                    Positioned.fill(
-                                                      child: CustomPaint(
-                                                        painter: _TaskFacetPatternPainter(isDark: isDark),
-                                                      ),
-                                                    ),
-                                                    Padding(
-                                                      padding: const EdgeInsets.fromLTRB(18, 14, 18, 12),
-                                                      child: AnimatedSwitcher(
-                                                        duration: const Duration(milliseconds: 220),
-                                                        switchInCurve: Curves.easeOut,
-                                                        switchOutCurve: Curves.easeIn,
-                                                        child: KeyedSubtree(
-                                                          key: ValueKey<int>(_tugasCardMode),
-                                                          child: _tugasCardMode == 0
-                                                              ? Row(
-                                                                  key: const ValueKey('tugas_mode_0'),
-                                                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                                                  children: [
-                                                                    Expanded(
-                                                                      child: Column(
-                                                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                                                        mainAxisAlignment: MainAxisAlignment.center,
-                                                                        children: [
-                                                                          Row(
-                                                                            children: [
-                                                                              Icon(
-                                                                                Icons.assignment_turned_in_rounded,
-                                                                                size: 14,
-                                                                                color: isDark ? Colors.white70 : const Color(0xFFC2410C),
-                                                                              ),
-                                                                              const SizedBox(width: 4),
-                                                                              Text(
-                                                                                'TARGET TUGAS',
-                                                                                style: GoogleFonts.plusJakartaSans(
-                                                                                  fontSize: 11.5,
-                                                                                  fontWeight: FontWeight.w800,
-                                                                                  letterSpacing: 0.5,
-                                                                                  color: isDark ? Colors.white70 : const Color(0xFFC2410C),
-                                                                                ),
-                                                                              ),
-                                                                            ],
-                                                                          ),
-                                                                          const SizedBox(height: 3),
-                                                                          Text(
-                                                                            totalTugas > 0 ? '$completedTugas/$totalTugas Selesai' : '0 Tugas',
-                                                                            style: GoogleFonts.plusJakartaSans(
-                                                                              fontSize: 24.0,
-                                                                              fontWeight: FontWeight.w900,
-                                                                              color: titleColor,
-                                                                              height: 1.15,
-                                                                            ),
-                                                                          ),
-                                                                          const SizedBox(height: 3),
-                                                                          Text(
-                                                                            totalTugas > completedTugas
-                                                                                ? '${totalTugas - completedTugas} tugas belum diselesaikan.'
-                                                                                : 'Semua target tugas telah tercapai!',
-                                                                            style: GoogleFonts.plusJakartaSans(
-                                                                              fontSize: 12.0,
-                                                                              fontWeight: FontWeight.w600,
-                                                                              color: subtitleColor,
-                                                                            ),
-                                                                            maxLines: 1,
-                                                                            overflow: TextOverflow.ellipsis,
-                                                                          ),
-                                                                        ],
-                                                                      ),
-                                                                    ),
-                                                                    const SizedBox(width: 10),
-                                                                    Container(
-                                                                      width: 58,
-                                                                      height: 58,
-                                                                      decoration: BoxDecoration(
-                                                                        shape: BoxShape.circle,
-                                                                        color: isDark ? Colors.white12 : Colors.white.withValues(alpha: 0.90),
-                                                                      ),
-                                                                      child: Stack(
-                                                                        alignment: Alignment.center,
-                                                                        children: [
-                                                                          SizedBox(
-                                                                            width: 48,
-                                                                            height: 48,
-                                                                            child: CircularProgressIndicator(
-                                                                              value: tugasRatio,
-                                                                              strokeWidth: 4.5,
-                                                                              backgroundColor: isDark ? Colors.white24 : const Color(0xFFFFEDD5),
-                                                                              valueColor: AlwaysStoppedAnimation<Color>(
-                                                                                isDark ? Colors.white : const Color(0xFFEA580C),
-                                                                              ),
-                                                                            ),
-                                                                          ),
-                                                                          Text(
-                                                                            '${(tugasRatio * 100).toInt()}%',
-                                                                            style: GoogleFonts.plusJakartaSans(
-                                                                              fontSize: 12.5,
-                                                                              fontWeight: FontWeight.w900,
-                                                                              color: titleColor,
-                                                                            ),
-                                                                          ),
-                                                                        ],
-                                                                      ),
-                                                                    ),
-                                                                  ],
-                                                                )
-                                                              : Row(
-                                                                  key: const ValueKey('tugas_mode_1'),
-                                                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                                                  children: [
-                                                                    Expanded(
-                                                                      flex: 5,
-                                                                      child: Column(
-                                                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                                                        mainAxisAlignment: MainAxisAlignment.center,
-                                                                        children: [
-                                                                          Row(
-                                                                            children: [
-                                                                              Icon(
-                                                                                Icons.bar_chart_rounded,
-                                                                                size: 14,
-                                                                                color: isDark ? Colors.white70 : const Color(0xFFC2410C),
-                                                                              ),
-                                                                              const SizedBox(width: 4),
-                                                                              Text(
-                                                                                'STATISTIK TUGAS',
-                                                                                style: GoogleFonts.plusJakartaSans(
-                                                                                  fontSize: 11.5,
-                                                                                  fontWeight: FontWeight.w800,
-                                                                                  letterSpacing: 0.5,
-                                                                                  color: isDark ? Colors.white70 : const Color(0xFFC2410C),
-                                                                                ),
-                                                                              ),
-                                                                            ],
-                                                                          ),
-                                                                          const SizedBox(height: 3),
-                                                                          Text(
-                                                                            '${(tugasRatio * 100).toInt()}% Tuntas',
-                                                                            style: GoogleFonts.plusJakartaSans(
-                                                                              fontSize: 24.0,
-                                                                              fontWeight: FontWeight.w900,
-                                                                              color: titleColor,
-                                                                              height: 1.15,
-                                                                            ),
-                                                                          ),
-                                                                          const SizedBox(height: 3),
-                                                                          Text(
-                                                                            '$completedTugas dari $totalTugas tugas selesai',
-                                                                            style: GoogleFonts.plusJakartaSans(
-                                                                              fontSize: 12.0,
-                                                                              fontWeight: FontWeight.w600,
-                                                                              color: subtitleColor,
-                                                                            ),
-                                                                            maxLines: 1,
-                                                                            overflow: TextOverflow.ellipsis,
-                                                                          ),
-                                                                        ],
-                                                                      ),
-                                                                    ),
-                                                                    const SizedBox(width: 8),
-                                                                    Expanded(
-                                                                      flex: 5,
-                                                                      child: SizedBox(
-                                                                        height: 72,
-                                                                        child: CustomPaint(
-                                                                          size: Size.infinite,
-                                                                          painter: _StressStyleBarChartPainter(
-                                                                            values: taskChartValues,
-                                                                            isDark: isDark,
-                                                                            barColor: isDark ? Colors.white : const Color(0xFF9A3412),
-                                                                            lineColor: isDark ? Colors.white : const Color(0xFF431407),
-                                                                          ),
-                                                                        ),
-                                                                      ),
-                                                                    ),
-                                                                  ],
-                                                                ),
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                          const SizedBox(width: 10),
-                                          Column(
-                                            mainAxisAlignment: MainAxisAlignment.center,
-                                            children: List.generate(2, (index) {
-                                              final bool isActive = index == _tugasCardMode;
-                                              return AnimatedContainer(
-                                                duration: const Duration(milliseconds: 220),
-                                                margin: const EdgeInsets.symmetric(vertical: 4),
-                                                width: 8,
-                                                height: 8,
-                                                decoration: BoxDecoration(
-                                                  shape: BoxShape.circle,
-                                                  color: isActive ? dotActive : Colors.transparent,
-                                                  border: isActive
-                                                      ? null
-                                                      : Border.all(color: dotInactive, width: 1.8),
-                                                ),
-                                              );
-                                            }),
-                                          ),
-                                        ],
-                                      );
-                                    }
+                                       return Row(
+                                         children: [
+                                           Expanded(
+                                             child: GestureDetector(
+                                               onVerticalDragEnd: (details) {
+                                                 final vel = details.primaryVelocity ?? 0;
+                                                 if (vel < -100) {
+                                                   if (_tugasCardMode != 1) {
+                                                     HapticFeedback.selectionClick();
+                                                     setState(() => _tugasCardMode = 1);
+                                                   }
+                                                 } else if (vel > 100) {
+                                                   if (_tugasCardMode != 0) {
+                                                     HapticFeedback.selectionClick();
+                                                     setState(() => _tugasCardMode = 0);
+                                                   }
+                                                 }
+                                               },
+                                               onTap: () {
+                                                 HapticFeedback.selectionClick();
+                                                 setState(() {
+                                                   _tugasCardMode = (_tugasCardMode + 1) % 2;
+                                                 });
+                                               },
+                                               child: Container(
+                                                 clipBehavior: Clip.antiAlias,
+                                                 decoration: BoxDecoration(
+                                                   color: isDark ? bgDark : bgLight,
+                                                   borderRadius: BorderRadius.circular(32),
+                                                   border: isDark
+                                                       ? Border.all(
+                                                           color: Colors.white.withValues(alpha: 0.15),
+                                                           width: 1.0,
+                                                         )
+                                                       : null,
+                                                 ),
+                                                 child: Stack(
+                                                   children: [
+                                                     Positioned.fill(
+                                                       child: CustomPaint(
+                                                         painter: _TaskFacetPatternPainter(isDark: isDark),
+                                                       ),
+                                                     ),
+                                                     Padding(
+                                                       padding: const EdgeInsets.fromLTRB(22, 16, 16, 16),
+                                                       child: AnimatedSwitcher(
+                                                         duration: const Duration(milliseconds: 220),
+                                                         switchInCurve: Curves.easeOut,
+                                                         switchOutCurve: Curves.easeIn,
+                                                         child: KeyedSubtree(
+                                                           key: ValueKey<int>(_tugasCardMode),
+                                                           child: _tugasCardMode == 0
+                                                               ? Row(
+                                                                   key: const ValueKey('tugas_mode_0'),
+                                                                   crossAxisAlignment: CrossAxisAlignment.center,
+                                                                   children: [
+                                                                     Expanded(
+                                                                       child: Column(
+                                                                         crossAxisAlignment: CrossAxisAlignment.start,
+                                                                         mainAxisAlignment: MainAxisAlignment.center,
+                                                                         children: [
+                                                                           Row(
+                                                                             children: [
+                                                                               Icon(
+                                                                                 Icons.assignment_turned_in_rounded,
+                                                                                 size: 15,
+                                                                                 color: isDark ? Colors.white70 : const Color(0xFFC2410C),
+                                                                               ),
+                                                                               const SizedBox(width: 5),
+                                                                               Text(
+                                                                                 'TARGET TUGAS',
+                                                                                 style: GoogleFonts.plusJakartaSans(
+                                                                                   fontSize: 12.5,
+                                                                                   fontWeight: FontWeight.w800,
+                                                                                   letterSpacing: 0.6,
+                                                                                   color: isDark ? Colors.white70 : const Color(0xFFC2410C),
+                                                                                 ),
+                                                                               ),
+                                                                             ],
+                                                                           ),
+                                                                           const SizedBox(height: 12),
+                                                                           Text.rich(
+                                                                             TextSpan(
+                                                                               children: [
+                                                                                 TextSpan(
+                                                                                   text: totalTugas > 0 ? '$completedTugas' : '0',
+                                                                                   style: GoogleFonts.plusJakartaSans(
+                                                                                     fontSize: 38.0,
+                                                                                     fontWeight: FontWeight.w900,
+                                                                                     color: titleColor,
+                                                                                     height: 1.0,
+                                                                                   ),
+                                                                                 ),
+                                                                                 TextSpan(
+                                                                                   text: totalTugas > 0 ? '/$totalTugas Selesai' : ' Tugas Selesai',
+                                                                                   style: GoogleFonts.plusJakartaSans(
+                                                                                     fontSize: 22.0,
+                                                                                     fontWeight: FontWeight.w800,
+                                                                                     color: titleColor,
+                                                                                     height: 1.0,
+                                                                                   ),
+                                                                                 ),
+                                                                               ],
+                                                                             ),
+                                                                             maxLines: 1,
+                                                                             overflow: TextOverflow.ellipsis,
+                                                                           ),
+                                                                           const SizedBox(height: 11),
+                                                                           Text(
+                                                                             totalTugas > completedTugas
+                                                                                 ? '${totalTugas - completedTugas} tugas belum diselesaikan.'
+                                                                                 : 'Semua target tugas telah tercapai!',
+                                                                             style: GoogleFonts.dmSans(
+                                                                               fontSize: 13.5,
+                                                                               fontWeight: FontWeight.w600,
+                                                                               color: subtitleColor,
+                                                                               height: 1.15,
+                                                                             ),
+                                                                             maxLines: 1,
+                                                                             overflow: TextOverflow.ellipsis,
+                                                                           ),
+                                                                         ],
+                                                                       ),
+                                                                     ),
+                                                                     const SizedBox(width: 10),
+                                                                     Container(
+                                                                       width: 66,
+                                                                       height: 66,
+                                                                       decoration: BoxDecoration(
+                                                                         shape: BoxShape.circle,
+                                                                         color: isDark ? Colors.white12 : Colors.white.withValues(alpha: 0.92),
+                                                                       ),
+                                                                       child: Stack(
+                                                                         alignment: Alignment.center,
+                                                                         children: [
+                                                                           SizedBox(
+                                                                             width: 54,
+                                                                             height: 54,
+                                                                             child: CircularProgressIndicator(
+                                                                               value: tugasRatio,
+                                                                               strokeWidth: 5.0,
+                                                                               backgroundColor: isDark ? Colors.white24 : const Color(0xFFFFEDD5),
+                                                                               valueColor: AlwaysStoppedAnimation<Color>(
+                                                                                 isDark ? Colors.white : const Color(0xFFEA580C),
+                                                                               ),
+                                                                             ),
+                                                                           ),
+                                                                           Text(
+                                                                             '${(tugasRatio * 100).toInt()}%',
+                                                                             style: GoogleFonts.plusJakartaSans(
+                                                                               fontSize: 14.0,
+                                                                               fontWeight: FontWeight.w900,
+                                                                               color: titleColor,
+                                                                             ),
+                                                                           ),
+                                                                         ],
+                                                                       ),
+                                                                     ),
+                                                                   ],
+                                                                 )
+                                                               : Row(
+                                                                   key: const ValueKey('tugas_mode_1'),
+                                                                   crossAxisAlignment: CrossAxisAlignment.center,
+                                                                   children: [
+                                                                     Expanded(
+                                                                       flex: 5,
+                                                                       child: Column(
+                                                                         crossAxisAlignment: CrossAxisAlignment.start,
+                                                                         mainAxisAlignment: MainAxisAlignment.center,
+                                                                         children: [
+                                                                           Row(
+                                                                             children: [
+                                                                               Icon(
+                                                                                 Icons.bar_chart_rounded,
+                                                                                 size: 15,
+                                                                                 color: isDark ? Colors.white70 : const Color(0xFFC2410C),
+                                                                               ),
+                                                                               const SizedBox(width: 5),
+                                                                               Text(
+                                                                                 'STATISTIK TUGAS',
+                                                                                 style: GoogleFonts.plusJakartaSans(
+                                                                                   fontSize: 12.5,
+                                                                                   fontWeight: FontWeight.w800,
+                                                                                   letterSpacing: 0.6,
+                                                                                   color: isDark ? Colors.white70 : const Color(0xFFC2410C),
+                                                                                 ),
+                                                                               ),
+                                                                             ],
+                                                                           ),
+                                                                           const SizedBox(height: 12),
+                                                                           Text.rich(
+                                                                             TextSpan(
+                                                                               children: [
+                                                                                 TextSpan(
+                                                                                   text: '${(tugasRatio * 100).toInt()}',
+                                                                                   style: GoogleFonts.plusJakartaSans(
+                                                                                     fontSize: 38.0,
+                                                                                     fontWeight: FontWeight.w900,
+                                                                                     color: titleColor,
+                                                                                     height: 1.0,
+                                                                                   ),
+                                                                                 ),
+                                                                                 TextSpan(
+                                                                                   text: '% Tuntas',
+                                                                                   style: GoogleFonts.plusJakartaSans(
+                                                                                     fontSize: 22.0,
+                                                                                     fontWeight: FontWeight.w800,
+                                                                                     color: titleColor,
+                                                                                     height: 1.0,
+                                                                                   ),
+                                                                                 ),
+                                                                               ],
+                                                                             ),
+                                                                             maxLines: 1,
+                                                                             overflow: TextOverflow.ellipsis,
+                                                                           ),
+                                                                           const SizedBox(height: 11),
+                                                                           Text(
+                                                                             '$completedTugas dari $totalTugas tugas selesai',
+                                                                             style: GoogleFonts.dmSans(
+                                                                               fontSize: 13.5,
+                                                                               fontWeight: FontWeight.w600,
+                                                                               color: subtitleColor,
+                                                                               height: 1.15,
+                                                                             ),
+                                                                             maxLines: 1,
+                                                                             overflow: TextOverflow.ellipsis,
+                                                                           ),
+                                                                         ],
+                                                                       ),
+                                                                     ),
+                                                                     const SizedBox(width: 8),
+                                                                     Expanded(
+                                                                       flex: 5,
+                                                                       child: SizedBox(
+                                                                         height: 78,
+                                                                         child: CustomPaint(
+                                                                           size: Size.infinite,
+                                                                           painter: _StressStyleBarChartPainter(
+                                                                             values: taskChartValues,
+                                                                             isDark: isDark,
+                                                                             barColor: isDark ? Colors.white : const Color(0xFF9A3412),
+                                                                             lineColor: isDark ? Colors.white : const Color(0xFF431407),
+                                                                           ),
+                                                                         ),
+                                                                       ),
+                                                                     ),
+                                                                   ],
+                                                                 ),
+                                                         ),
+                                                       ),
+                                                     ),
+                                                   ],
+                                                 ),
+                                               ),
+                                             ),
+                                           ),
+                                           const SizedBox(width: 10),
+                                           Column(
+                                             mainAxisAlignment: MainAxisAlignment.center,
+                                             children: List.generate(2, (index) {
+                                               final bool isActive = index == _tugasCardMode;
+                                               return AnimatedContainer(
+                                                 duration: const Duration(milliseconds: 220),
+                                                 margin: const EdgeInsets.symmetric(vertical: 4),
+                                                 width: 8,
+                                                 height: 8,
+                                                 decoration: BoxDecoration(
+                                                   shape: BoxShape.circle,
+                                                   color: isActive ? dotActive : Colors.transparent,
+                                                   border: isActive
+                                                       ? null
+                                                       : Border.all(color: dotInactive, width: 1.8),
+                                                 ),
+                                               );
+                                             }),
+                                           ),
+                                         ],
+                                       );
+                                     }
 
-                                    Widget buildQuizPillCard() {
-                                      final Color bgLight = const Color(0xFFBAE6FD);
-                                      final Color bgDark = const Color(0xFF6B3BA3);
-                                      final Color titleColor = isDark ? Colors.white : const Color(0xFF0F172A);
-                                      final Color subtitleColor = isDark ? Colors.white.withValues(alpha: 0.90) : const Color(0xFF334155);
-                                      final Color dotActive = isDark ? Colors.white : const Color(0xFF18181B);
-                                      final Color dotInactive = isDark ? Colors.white38 : const Color(0xFF18181B).withValues(alpha: 0.35);
+                                     Widget buildQuizPillCard() {
+                                       final Color bgLight = const Color(0xFFBAE6FD);
+                                       final Color bgDark = const Color(0xFF6B3BA3);
+                                       final Color titleColor = isDark ? Colors.white : const Color(0xFF0F172A);
+                                       final Color subtitleColor = isDark ? Colors.white.withValues(alpha: 0.90) : const Color(0xFF334155);
+                                       final Color dotActive = isDark ? Colors.white : const Color(0xFF18181B);
+                                       final Color dotInactive = isDark ? Colors.white38 : const Color(0xFF18181B).withValues(alpha: 0.35);
 
-                                      final last5Scores = quizScores.isNotEmpty
-                                          ? (quizScores.length >= 5
-                                              ? quizScores.sublist(quizScores.length - 5)
-                                              : quizScores)
-                                          : [65, 80, 85, 75, 95];
+                                       final last5Scores = quizScores.isNotEmpty
+                                           ? (quizScores.length >= 5
+                                               ? quizScores.sublist(quizScores.length - 5)
+                                               : quizScores)
+                                           : [65, 80, 85, 75, 95];
 
-                                      return Row(
-                                        children: [
-                                          Expanded(
-                                            child: GestureDetector(
-                                              onVerticalDragEnd: (details) {
-                                                final vel = details.primaryVelocity ?? 0;
-                                                if (vel < -100) {
-                                                  HapticFeedback.selectionClick();
-                                                  setState(() => _quizCardMode = (_quizCardMode + 1) % 3);
-                                                } else if (vel > 100) {
-                                                  HapticFeedback.selectionClick();
-                                                  setState(() => _quizCardMode = (_quizCardMode - 1 + 3) % 3);
-                                                }
-                                              },
-                                              onTap: () {
-                                                HapticFeedback.selectionClick();
-                                                setState(() {
-                                                  _quizCardMode = (_quizCardMode + 1) % 3;
-                                                });
-                                              },
-                                              child: Container(
-                                                clipBehavior: Clip.antiAlias,
-                                                decoration: BoxDecoration(
-                                                  color: isDark ? bgDark : bgLight,
-                                                  borderRadius: BorderRadius.circular(30),
-                                                  border: isDark
-                                                      ? Border.all(
-                                                          color: Colors.white.withValues(alpha: 0.15),
-                                                          width: 1.0,
-                                                        )
-                                                      : null,
-                                                ),
-                                                child: Stack(
-                                                  children: [
-                                                    Positioned.fill(
-                                                      child: CustomPaint(
-                                                        painter: _QuizFacetPatternPainter(isDark: isDark),
-                                                      ),
-                                                    ),
-                                                    Padding(
-                                                      padding: const EdgeInsets.fromLTRB(18, 14, 18, 12),
-                                                      child: AnimatedSwitcher(
-                                                        duration: const Duration(milliseconds: 220),
-                                                        switchInCurve: Curves.easeOut,
-                                                        switchOutCurve: Curves.easeIn,
-                                                        child: KeyedSubtree(
-                                                          key: ValueKey<int>(_quizCardMode),
-                                                          child: _quizCardMode == 0
-                                                              ? Row(
-                                                                  key: const ValueKey('quiz_mode_0'),
-                                                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                                                  children: [
-                                                                    Expanded(
-                                                                      child: Column(
-                                                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                                                        mainAxisAlignment: MainAxisAlignment.center,
-                                                                        children: [
-                                                                          Row(
-                                                                            children: [
-                                                                              Icon(
-                                                                                Icons.quiz_rounded,
-                                                                                size: 14,
-                                                                                color: isDark ? Colors.white70 : const Color(0xFF0369A1),
-                                                                              ),
-                                                                              const SizedBox(width: 4),
-                                                                              Text(
-                                                                                'RINGKASAN KUIS',
-                                                                                style: GoogleFonts.plusJakartaSans(
-                                                                                  fontSize: 11.5,
-                                                                                  fontWeight: FontWeight.w800,
-                                                                                  letterSpacing: 0.5,
-                                                                                  color: isDark ? Colors.white70 : const Color(0xFF0369A1),
-                                                                                ),
-                                                                              ),
-                                                                            ],
-                                                                          ),
-                                                                          const SizedBox(height: 3),
-                                                                          Text(
-                                                                            totalQuiz > 0 ? '$completedQuiz/$totalQuiz Selesai' : '0 Kuis',
-                                                                            style: GoogleFonts.plusJakartaSans(
-                                                                              fontSize: 24.0,
-                                                                              fontWeight: FontWeight.w900,
-                                                                              color: titleColor,
-                                                                              height: 1.15,
-                                                                            ),
-                                                                          ),
-                                                                          const SizedBox(height: 3),
-                                                                          Text(
-                                                                            totalQuiz > 0
-                                                                                ? (completedQuiz == totalQuiz
-                                                                                    ? 'Semua evaluasi telah tuntas!'
-                                                                                    : '$completedQuiz dari $totalQuiz kuis diselesaikan.')
-                                                                                : 'Belum ada kuis aktif saat ini.',
-                                                                            style: GoogleFonts.plusJakartaSans(
-                                                                              fontSize: 12.0,
-                                                                              fontWeight: FontWeight.w600,
-                                                                              color: subtitleColor,
-                                                                            ),
-                                                                            maxLines: 1,
-                                                                            overflow: TextOverflow.ellipsis,
-                                                                          ),
-                                                                        ],
-                                                                      ),
-                                                                    ),
-                                                                    const SizedBox(width: 10),
-                                                                    Container(
-                                                                      width: 58,
-                                                                      height: 58,
-                                                                      decoration: BoxDecoration(
-                                                                        shape: BoxShape.circle,
-                                                                        color: isDark ? Colors.white12 : Colors.white.withValues(alpha: 0.90),
-                                                                      ),
-                                                                      child: Stack(
-                                                                        alignment: Alignment.center,
-                                                                        children: [
-                                                                          SizedBox(
-                                                                            width: 48,
-                                                                            height: 48,
-                                                                            child: CircularProgressIndicator(
-                                                                              value: totalQuiz > 0 ? completedQuiz / totalQuiz : 0.0,
-                                                                              strokeWidth: 4.5,
-                                                                              backgroundColor: isDark ? Colors.white24 : const Color(0xFFE0F2FE),
-                                                                              valueColor: AlwaysStoppedAnimation<Color>(
-                                                                                isDark ? Colors.white : const Color(0xFF0284C7),
-                                                                              ),
-                                                                            ),
-                                                                          ),
-                                                                          Icon(
-                                                                            Icons.emoji_events_rounded,
-                                                                            size: 22,
-                                                                            color: isDark ? const Color(0xFFFBBF24) : const Color(0xFF0284C7),
-                                                                          ),
-                                                                        ],
-                                                                      ),
-                                                                    ),
-                                                                  ],
-                                                                )
-                                                              : (_quizCardMode == 1
-                                                                  ? Row(
-                                                                      key: const ValueKey('quiz_mode_1'),
-                                                                      crossAxisAlignment: CrossAxisAlignment.center,
-                                                                      children: [
-                                                                        Expanded(
-                                                                          flex: 5,
-                                                                          child: Column(
-                                                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                                                            mainAxisAlignment: MainAxisAlignment.center,
-                                                                            children: [
-                                                                              Row(
-                                                                                children: [
-                                                                                  Icon(
-                                                                                    Icons.trending_up_rounded,
-                                                                                    size: 14,
-                                                                                    color: isDark ? Colors.white70 : const Color(0xFF0369A1),
-                                                                                  ),
-                                                                                  const SizedBox(width: 4),
-                                                                                  Text(
-                                                                                    'TREN PERFORMA',
-                                                                                    style: GoogleFonts.plusJakartaSans(
-                                                                                      fontSize: 11.5,
-                                                                                      fontWeight: FontWeight.w800,
-                                                                                      letterSpacing: 0.5,
-                                                                                      color: isDark ? Colors.white70 : const Color(0xFF0369A1),
-                                                                                    ),
-                                                                                  ),
-                                                                                ],
-                                                                              ),
-                                                                              const SizedBox(height: 3),
-                                                                              Text(
-                                                                                '$avgScoreText Poin',
-                                                                                style: GoogleFonts.plusJakartaSans(
-                                                                                  fontSize: 24.0,
-                                                                                  fontWeight: FontWeight.w900,
-                                                                                  color: titleColor,
-                                                                                  height: 1.15,
-                                                                                ),
-                                                                              ),
-                                                                              const SizedBox(height: 3),
-                                                                              Text(
-                                                                                'Rata-rata 5 kuis terakhir',
-                                                                                style: GoogleFonts.plusJakartaSans(
-                                                                                  fontSize: 12.0,
-                                                                                  fontWeight: FontWeight.w600,
-                                                                                  color: subtitleColor,
-                                                                                ),
-                                                                                maxLines: 1,
-                                                                                overflow: TextOverflow.ellipsis,
-                                                                              ),
-                                                                            ],
-                                                                          ),
-                                                                        ),
-                                                                        const SizedBox(width: 8),
-                                                                        Expanded(
-                                                                          flex: 5,
-                                                                          child: SizedBox(
-                                                                            height: 72,
-                                                                            child: CustomPaint(
-                                                                              size: Size.infinite,
-                                                                              painter: _StressStyleBarChartPainter(
-                                                                                values: last5Scores,
-                                                                                isDark: isDark,
-                                                                                barColor: isDark ? Colors.white : const Color(0xFF3B82F6),
-                                                                                lineColor: isDark ? Colors.white : const Color(0xFF1D4ED8),
-                                                                              ),
-                                                                            ),
-                                                                          ),
-                                                                        ),
-                                                                      ],
-                                                                    )
-                                                                  : Row(
-                                                                      key: const ValueKey('quiz_mode_2'),
-                                                                      crossAxisAlignment: CrossAxisAlignment.center,
-                                                                      children: [
-                                                                        Expanded(
-                                                                          child: Column(
-                                                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                                                            mainAxisAlignment: MainAxisAlignment.center,
-                                                                            children: [
-                                                                              Row(
-                                                                                children: [
-                                                                                  Icon(
-                                                                                    Icons.workspace_premium_rounded,
-                                                                                    size: 14,
-                                                                                    color: isDark ? Colors.white70 : const Color(0xFF0369A1),
-                                                                                  ),
-                                                                                  const SizedBox(width: 4),
-                                                                                  Text(
-                                                                                    'SKOR TERAKHIR',
-                                                                                    style: GoogleFonts.plusJakartaSans(
-                                                                                      fontSize: 11.5,
-                                                                                      fontWeight: FontWeight.w800,
-                                                                                      letterSpacing: 0.5,
-                                                                                      color: isDark ? Colors.white70 : const Color(0xFF0369A1),
-                                                                                    ),
-                                                                                  ),
-                                                                                ],
-                                                                              ),
-                                                                              const SizedBox(height: 3),
-                                                                              Text(
-                                                                                scoreText == '-' ? '0 Poin' : '$scoreText Poin',
-                                                                                style: GoogleFonts.plusJakartaSans(
-                                                                                  fontSize: 24.0,
-                                                                                  fontWeight: FontWeight.w900,
-                                                                                  color: titleColor,
-                                                                                  height: 1.15,
-                                                                                ),
-                                                                              ),
-                                                                              const SizedBox(height: 3),
-                                                                              Text(
-                                                                                quizScores.isNotEmpty
-                                                                                    ? (quizScores.last >= 80
-                                                                                        ? 'Pencapaian sangat luar biasa!'
-                                                                                        : 'Performa stabil, tingkatkan terus!')
-                                                                                    : 'Selesaikan kuis pertamamu!',
-                                                                                style: GoogleFonts.plusJakartaSans(
-                                                                                  fontSize: 12.0,
-                                                                                  fontWeight: FontWeight.w600,
-                                                                                  color: subtitleColor,
-                                                                                ),
-                                                                                maxLines: 1,
-                                                                                overflow: TextOverflow.ellipsis,
-                                                                              ),
-                                                                            ],
-                                                                          ),
-                                                                        ),
-                                                                        const SizedBox(width: 10),
-                                                                        Container(
-                                                                          width: 56,
-                                                                          height: 56,
-                                                                          decoration: BoxDecoration(
-                                                                            shape: BoxShape.circle,
-                                                                            color: isDark ? Colors.white12 : Colors.white.withValues(alpha: 0.90),
-                                                                            border: Border.all(
-                                                                              color: isDark ? Colors.white24 : const Color(0xFFBAE6FD),
-                                                                              width: 1.5,
-                                                                            ),
-                                                                          ),
-                                                                          child: Center(
-                                                                            child: Icon(
-                                                                              Icons.military_tech_rounded,
-                                                                              size: 32,
-                                                                              color: isDark ? const Color(0xFFFBBF24) : const Color(0xFF0284C7),
-                                                                            ),
-                                                                          ),
-                                                                        ),
-                                                                      ],
-                                                                    )),
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                          const SizedBox(width: 10),
-                                          Column(
-                                            mainAxisAlignment: MainAxisAlignment.center,
-                                            children: List.generate(3, (index) {
-                                              final bool isActive = index == _quizCardMode;
-                                              return AnimatedContainer(
-                                                duration: const Duration(milliseconds: 220),
-                                                margin: const EdgeInsets.symmetric(vertical: 4),
-                                                width: 8,
-                                                height: 8,
-                                                decoration: BoxDecoration(
-                                                  shape: BoxShape.circle,
-                                                  color: isActive ? dotActive : Colors.transparent,
-                                                  border: isActive
-                                                      ? null
-                                                      : Border.all(color: dotInactive, width: 1.8),
-                                                ),
-                                              );
-                                            }),
-                                          ),
-                                        ],
-                                      );
-                                    }
+                                       return Row(
+                                         children: [
+                                           Expanded(
+                                             child: GestureDetector(
+                                               onVerticalDragEnd: (details) {
+                                                 final vel = details.primaryVelocity ?? 0;
+                                                 if (vel < -100) {
+                                                   HapticFeedback.selectionClick();
+                                                   setState(() => _quizCardMode = (_quizCardMode + 1) % 3);
+                                                 } else if (vel > 100) {
+                                                   HapticFeedback.selectionClick();
+                                                   setState(() => _quizCardMode = (_quizCardMode - 1 + 3) % 3);
+                                                 }
+                                               },
+                                               onTap: () {
+                                                 HapticFeedback.selectionClick();
+                                                 setState(() {
+                                                   _quizCardMode = (_quizCardMode + 1) % 3;
+                                                 });
+                                               },
+                                               child: Container(
+                                                 clipBehavior: Clip.antiAlias,
+                                                 decoration: BoxDecoration(
+                                                   color: isDark ? bgDark : bgLight,
+                                                   borderRadius: BorderRadius.circular(32),
+                                                   border: isDark
+                                                       ? Border.all(
+                                                           color: Colors.white.withValues(alpha: 0.15),
+                                                           width: 1.0,
+                                                         )
+                                                       : null,
+                                                 ),
+                                                 child: Stack(
+                                                   children: [
+                                                     Positioned.fill(
+                                                       child: CustomPaint(
+                                                         painter: _QuizFacetPatternPainter(isDark: isDark),
+                                                       ),
+                                                     ),
+                                                     Padding(
+                                                       padding: const EdgeInsets.fromLTRB(22, 16, 16, 16),
+                                                       child: AnimatedSwitcher(
+                                                         duration: const Duration(milliseconds: 220),
+                                                         switchInCurve: Curves.easeOut,
+                                                         switchOutCurve: Curves.easeIn,
+                                                         child: KeyedSubtree(
+                                                           key: ValueKey<int>(_quizCardMode),
+                                                           child: _quizCardMode == 0
+                                                               ? Row(
+                                                                   key: const ValueKey('quiz_mode_0'),
+                                                                   crossAxisAlignment: CrossAxisAlignment.center,
+                                                                   children: [
+                                                                     Expanded(
+                                                                       child: Column(
+                                                                         crossAxisAlignment: CrossAxisAlignment.start,
+                                                                         mainAxisAlignment: MainAxisAlignment.center,
+                                                                         children: [
+                                                                           Row(
+                                                                             children: [
+                                                                               Icon(
+                                                                                 Icons.quiz_rounded,
+                                                                                 size: 15,
+                                                                                 color: isDark ? Colors.white70 : const Color(0xFF0369A1),
+                                                                               ),
+                                                                               const SizedBox(width: 5),
+                                                                               Text(
+                                                                                 'RINGKASAN KUIS',
+                                                                                 style: GoogleFonts.plusJakartaSans(
+                                                                                   fontSize: 12.5,
+                                                                                   fontWeight: FontWeight.w800,
+                                                                                   letterSpacing: 0.6,
+                                                                                   color: isDark ? Colors.white70 : const Color(0xFF0369A1),
+                                                                                 ),
+                                                                               ),
+                                                                             ],
+                                                                           ),
+                                                                           const SizedBox(height: 12),
+                                                                           Text.rich(
+                                                                             TextSpan(
+                                                                               children: [
+                                                                                 TextSpan(
+                                                                                   text: totalQuiz > 0 ? '$completedQuiz' : '0',
+                                                                                   style: GoogleFonts.plusJakartaSans(
+                                                                                     fontSize: 38.0,
+                                                                                     fontWeight: FontWeight.w900,
+                                                                                     color: titleColor,
+                                                                                     height: 1.0,
+                                                                                   ),
+                                                                                 ),
+                                                                                 TextSpan(
+                                                                                   text: totalQuiz > 0 ? '/$totalQuiz Selesai' : ' Kuis Selesai',
+                                                                                   style: GoogleFonts.plusJakartaSans(
+                                                                                     fontSize: 22.0,
+                                                                                     fontWeight: FontWeight.w800,
+                                                                                     color: titleColor,
+                                                                                     height: 1.0,
+                                                                                   ),
+                                                                                 ),
+                                                                               ],
+                                                                             ),
+                                                                             maxLines: 1,
+                                                                             overflow: TextOverflow.ellipsis,
+                                                                           ),
+                                                                           const SizedBox(height: 11),
+                                                                           Text(
+                                                                             totalQuiz > 0
+                                                                                 ? (completedQuiz == totalQuiz
+                                                                                     ? 'Semua evaluasi telah tuntas!'
+                                                                                     : '$completedQuiz dari $totalQuiz kuis diselesaikan.')
+                                                                                 : 'Belum ada kuis aktif saat ini.',
+                                                                             style: GoogleFonts.dmSans(
+                                                                               fontSize: 13.5,
+                                                                               fontWeight: FontWeight.w600,
+                                                                               color: subtitleColor,
+                                                                               height: 1.15,
+                                                                             ),
+                                                                             maxLines: 1,
+                                                                             overflow: TextOverflow.ellipsis,
+                                                                           ),
+                                                                         ],
+                                                                       ),
+                                                                     ),
+                                                                     const SizedBox(width: 10),
+                                                                     Container(
+                                                                       width: 66,
+                                                                       height: 66,
+                                                                       decoration: BoxDecoration(
+                                                                         shape: BoxShape.circle,
+                                                                         color: isDark ? Colors.white12 : Colors.white.withValues(alpha: 0.92),
+                                                                       ),
+                                                                       child: Stack(
+                                                                         alignment: Alignment.center,
+                                                                         children: [
+                                                                           SizedBox(
+                                                                             width: 54,
+                                                                             height: 54,
+                                                                             child: CircularProgressIndicator(
+                                                                               value: totalQuiz > 0 ? completedQuiz / totalQuiz : 0.0,
+                                                                               strokeWidth: 5.0,
+                                                                               backgroundColor: isDark ? Colors.white24 : const Color(0xFFE0F2FE),
+                                                                               valueColor: AlwaysStoppedAnimation<Color>(
+                                                                                 isDark ? Colors.white : const Color(0xFF0284C7),
+                                                                               ),
+                                                                             ),
+                                                                           ),
+                                                                           Icon(
+                                                                             Icons.emoji_events_rounded,
+                                                                             size: 26,
+                                                                             color: isDark ? const Color(0xFFFBBF24) : const Color(0xFF0284C7),
+                                                                           ),
+                                                                         ],
+                                                                       ),
+                                                                     ),
+                                                                   ],
+                                                                 )
+                                                               : (_quizCardMode == 1
+                                                                   ? Row(
+                                                                       key: const ValueKey('quiz_mode_1'),
+                                                                       crossAxisAlignment: CrossAxisAlignment.center,
+                                                                       children: [
+                                                                         Expanded(
+                                                                           flex: 5,
+                                                                           child: Column(
+                                                                             crossAxisAlignment: CrossAxisAlignment.start,
+                                                                             mainAxisAlignment: MainAxisAlignment.center,
+                                                                             children: [
+                                                                               Row(
+                                                                                 children: [
+                                                                                   Icon(
+                                                                                     Icons.trending_up_rounded,
+                                                                                     size: 15,
+                                                                                     color: isDark ? Colors.white70 : const Color(0xFF0369A1),
+                                                                                   ),
+                                                                                   const SizedBox(width: 5),
+                                                                                   Text(
+                                                                                     'TREN PERFORMA',
+                                                                                     style: GoogleFonts.plusJakartaSans(
+                                                                                       fontSize: 12.5,
+                                                                                       fontWeight: FontWeight.w800,
+                                                                                       letterSpacing: 0.6,
+                                                                                       color: isDark ? Colors.white70 : const Color(0xFF0369A1),
+                                                                                     ),
+                                                                                   ),
+                                                                                 ],
+                                                                               ),
+                                                                               const SizedBox(height: 12),
+                                                                               Text.rich(
+                                                                                 TextSpan(
+                                                                                   children: [
+                                                                                     TextSpan(
+                                                                                       text: avgScoreText,
+                                                                                       style: GoogleFonts.plusJakartaSans(
+                                                                                         fontSize: 38.0,
+                                                                                         fontWeight: FontWeight.w900,
+                                                                                         color: titleColor,
+                                                                                         height: 1.0,
+                                                                                       ),
+                                                                                     ),
+                                                                                     TextSpan(
+                                                                                       text: ' Poin',
+                                                                                       style: GoogleFonts.plusJakartaSans(
+                                                                                         fontSize: 22.0,
+                                                                                         fontWeight: FontWeight.w800,
+                                                                                         color: titleColor,
+                                                                                         height: 1.0,
+                                                                                       ),
+                                                                                     ),
+                                                                                   ],
+                                                                                 ),
+                                                                                 maxLines: 1,
+                                                                                 overflow: TextOverflow.ellipsis,
+                                                                               ),
+                                                                               const SizedBox(height: 11),
+                                                                               Text(
+                                                                                 'Rata-rata 5 kuis terakhir',
+                                                                                 style: GoogleFonts.dmSans(
+                                                                                   fontSize: 13.5,
+                                                                                   fontWeight: FontWeight.w600,
+                                                                                   color: subtitleColor,
+                                                                                   height: 1.15,
+                                                                                 ),
+                                                                                 maxLines: 1,
+                                                                                 overflow: TextOverflow.ellipsis,
+                                                                               ),
+                                                                             ],
+                                                                           ),
+                                                                         ),
+                                                                         const SizedBox(width: 8),
+                                                                         Expanded(
+                                                                           flex: 5,
+                                                                           child: SizedBox(
+                                                                             height: 78,
+                                                                             child: CustomPaint(
+                                                                               size: Size.infinite,
+                                                                               painter: _StressStyleBarChartPainter(
+                                                                                 values: last5Scores,
+                                                                                 isDark: isDark,
+                                                                                 barColor: isDark ? Colors.white : const Color(0xFF3B82F6),
+                                                                                 lineColor: isDark ? Colors.white : const Color(0xFF1D4ED8),
+                                                                               ),
+                                                                             ),
+                                                                           ),
+                                                                         ),
+                                                                       ],
+                                                                     )
+                                                                   : Row(
+                                                                       key: const ValueKey('quiz_mode_2'),
+                                                                       crossAxisAlignment: CrossAxisAlignment.center,
+                                                                       children: [
+                                                                         Expanded(
+                                                                           child: Column(
+                                                                             crossAxisAlignment: CrossAxisAlignment.start,
+                                                                             mainAxisAlignment: MainAxisAlignment.center,
+                                                                             children: [
+                                                                               Row(
+                                                                                 children: [
+                                                                                   Icon(
+                                                                                     Icons.workspace_premium_rounded,
+                                                                                     size: 15,
+                                                                                     color: isDark ? Colors.white70 : const Color(0xFF0369A1),
+                                                                                   ),
+                                                                                   const SizedBox(width: 5),
+                                                                                   Text(
+                                                                                     'SKOR TERAKHIR',
+                                                                                     style: GoogleFonts.plusJakartaSans(
+                                                                                       fontSize: 12.5,
+                                                                                       fontWeight: FontWeight.w800,
+                                                                                       letterSpacing: 0.6,
+                                                                                       color: isDark ? Colors.white70 : const Color(0xFF0369A1),
+                                                                                     ),
+                                                                                   ),
+                                                                                 ],
+                                                                               ),
+                                                                               const SizedBox(height: 12),
+                                                                               Text.rich(
+                                                                                 TextSpan(
+                                                                                   children: [
+                                                                                     TextSpan(
+                                                                                       text: scoreText == '-' ? '0' : scoreText,
+                                                                                       style: GoogleFonts.plusJakartaSans(
+                                                                                         fontSize: 38.0,
+                                                                                         fontWeight: FontWeight.w900,
+                                                                                         color: titleColor,
+                                                                                         height: 1.0,
+                                                                                       ),
+                                                                                     ),
+                                                                                     TextSpan(
+                                                                                       text: ' Poin',
+                                                                                       style: GoogleFonts.plusJakartaSans(
+                                                                                         fontSize: 22.0,
+                                                                                         fontWeight: FontWeight.w800,
+                                                                                         color: titleColor,
+                                                                                         height: 1.0,
+                                                                                       ),
+                                                                                     ),
+                                                                                   ],
+                                                                                 ),
+                                                                                 maxLines: 1,
+                                                                                 overflow: TextOverflow.ellipsis,
+                                                                               ),
+                                                                               const SizedBox(height: 11),
+                                                                               Text(
+                                                                                 quizScores.isNotEmpty
+                                                                                     ? (quizScores.last >= 80
+                                                                                         ? 'Pencapaian sangat luar biasa!'
+                                                                                         : 'Performa stabil, tingkatkan terus!')
+                                                                                     : 'Selesaikan kuis pertamamu!',
+                                                                                 style: GoogleFonts.dmSans(
+                                                                                   fontSize: 13.5,
+                                                                                   fontWeight: FontWeight.w600,
+                                                                                   color: subtitleColor,
+                                                                                   height: 1.15,
+                                                                                 ),
+                                                                                 maxLines: 1,
+                                                                                 overflow: TextOverflow.ellipsis,
+                                                                               ),
+                                                                             ],
+                                                                           ),
+                                                                         ),
+                                                                         const SizedBox(width: 10),
+                                                                         Container(
+                                                                           width: 66,
+                                                                           height: 66,
+                                                                           decoration: BoxDecoration(
+                                                                             shape: BoxShape.circle,
+                                                                             color: isDark ? Colors.white12 : Colors.white.withValues(alpha: 0.92),
+                                                                             border: Border.all(
+                                                                               color: isDark ? Colors.white24 : const Color(0xFFBAE6FD),
+                                                                               width: 1.5,
+                                                                             ),
+                                                                           ),
+                                                                           child: Center(
+                                                                             child: Icon(
+                                                                               Icons.military_tech_rounded,
+                                                                               size: 36,
+                                                                               color: isDark ? const Color(0xFFFBBF24) : const Color(0xFF0284C7),
+                                                                             ),
+                                                                           ),
+                                                                         ),
+                                                                       ],
+                                                                     )),
+                                                         ),
+                                                       ),
+                                                     ),
+                                                   ],
+                                                 ),
+                                               ),
+                                             ),
+                                           ),
+                                           const SizedBox(width: 10),
+                                           Column(
+                                             mainAxisAlignment: MainAxisAlignment.center,
+                                             children: List.generate(3, (index) {
+                                               final bool isActive = index == _quizCardMode;
+                                               return AnimatedContainer(
+                                                 duration: const Duration(milliseconds: 220),
+                                                 margin: const EdgeInsets.symmetric(vertical: 4),
+                                                 width: 8,
+                                                 height: 8,
+                                                 decoration: BoxDecoration(
+                                                   shape: BoxShape.circle,
+                                                   color: isActive ? dotActive : Colors.transparent,
+                                                   border: isActive
+                                                       ? null
+                                                       : Border.all(color: dotInactive, width: 1.8),
+                                                 ),
+                                               );
+                                             }),
+                                           ),
+                                         ],
+                                       );
+                                     }
 
                                     int _todayActivityIndex = 0;
 
@@ -2880,8 +2978,9 @@ class _StudentHomePageState extends State<StudentHomePage> {
                                             return Column(
                                               children: [
                                                 SizedBox(
-                                                  height: 146,
+                                                  height: 158,
                                                   child: PageView(
+                                                    clipBehavior: Clip.none,
                                                     controller: _taskQuizPageController,
                                                     onPageChanged: (idx) {
                                                       setStateSlider(() {
@@ -2928,28 +3027,7 @@ class _StudentHomePageState extends State<StudentHomePage> {
                                  },
                                ),
                                const SizedBox(height: 24),
-                          Container(
-                            width: double.infinity,
-                            decoration: BoxDecoration(
-                              color: isDark ? const Color(0xFF18181B) : Colors.white,
-                              borderRadius: BorderRadius.circular(36),
-                              border: Border.all(
-                                color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
-                                width: 1.2,
-                              ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.08),
-                                  blurRadius: 20,
-                                  offset: const Offset(0, 6),
-                                ),
-                              ],
-                            ),
-                            padding: const EdgeInsets.all(14),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                // Top Row inside Card: Search Bar + Manage Classes Button
+                                // Top Row: Search Bar + Manage Classes Button
                                 Row(
                                   children: [
                                     Expanded(
@@ -2962,49 +3040,12 @@ class _StudentHomePageState extends State<StudentHomePage> {
                                     ),
                                     const SizedBox(width: 8),
                                     ValueListenableBuilder<bool>(
-                                      valueListenable: _isManagingClassesNotifier,
-                                      builder: (context, isManaging, _) {
-                                        if (isManaging) {
-                                          return GestureDetector(
-                                            onTap: () {
-                                              _isManagingClassesNotifier.value = false;
-                                            },
-                                            behavior: HitTestBehavior.opaque,
-                                            child: Container(
-                                              height: 44,
-                                              padding: const EdgeInsets.symmetric(horizontal: 14),
-                                              decoration: BoxDecoration(
-                                                color: isDark ? const Color(0xFF2E1065) : const Color(0xFFF3E8FF),
-                                                borderRadius: BorderRadius.circular(22),
-                                                border: Border.all(
-                                                  color: const Color(0xFF7C3AED),
-                                                  width: 1.0,
-                                                ),
-                                              ),
-                                              child: Row(
-                                                mainAxisSize: MainAxisSize.min,
-                                                children: [
-                                                  const Icon(
-                                                    Icons.check_circle_rounded,
-                                                    color: Color(0xFF7C3AED),
-                                                    size: 18,
-                                                  ),
-                                                  const SizedBox(width: 5),
-                                                  Text(
-                                                    'Selesai',
-                                                    style: AppTypography.buttonLabel(
-                                                      color: const Color(0xFF7C3AED),
-                                                      fontWeight: FontWeight.bold,
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          );
-                                        }
+                                      valueListenable: _isClassroomGridNotifier,
+                                      builder: (context, isGrid, _) {
                                         return BouncyButton(
                                           onTap: () {
-                                            _isManagingClassesNotifier.value = !isManaging;
+                                            HapticFeedback.selectionClick();
+                                            _isClassroomGridNotifier.value = !isGrid;
                                           },
                                           child: Container(
                                             width: 44,
@@ -3434,212 +3475,234 @@ class _StudentHomePageState extends State<StudentHomePage> {
                                         return !_deletedProjectIds.contains(doc.id) && !_deletedProjectIds.contains(pId);
                                       }).toList();
 
-                                      final List<Widget> projectCards = List.generate(
-                                        activeProjectDocs.length,
-                                        (index) {
-                                          final projectData = activeProjectDocs[index].data()
-                                              as Map<String, dynamic>;
-                                          final projId = (projectData['projectId'] != null && projectData['projectId'].toString().isNotEmpty)
-                                              ? projectData['projectId'].toString()
-                                              : activeProjectDocs[index].id;
-                                          final projTitle =
-                                              projectData['name'] ?? 'Project';
-                                          final stages =
-                                              projectData['stages'] as List? ?? [];
+                                      return ValueListenableBuilder<bool>(
+                                        valueListenable: _isClassroomGridNotifier,
+                                        builder: (context, isGrid, _) {
+                                          final List<Widget> projectCards = List.generate(
+                                            activeProjectDocs.length,
+                                            (index) {
+                                              final projectData = activeProjectDocs[index].data()
+                                                  as Map<String, dynamic>;
+                                              final projId = (projectData['projectId'] != null && projectData['projectId'].toString().isNotEmpty)
+                                                  ? projectData['projectId'].toString()
+                                                  : activeProjectDocs[index].id;
+                                              final projTitle =
+                                                  projectData['name'] ?? 'Project';
+                                              final stages =
+                                                  projectData['stages'] as List? ?? [];
 
-                                          final dynamic rawColorIdx = projectData['colorIndex'];
-                                          int patternIndex = 0;
-                                          if (rawColorIdx is int) {
-                                            patternIndex = rawColorIdx;
-                                          } else if (rawColorIdx is String) {
-                                            patternIndex = int.tryParse(rawColorIdx) ?? 0;
-                                          } else if (rawColorIdx is num) {
-                                            patternIndex = rawColorIdx.toInt();
-                                          } else {
-                                            patternIndex = index;
-                                          }
-                                          final cardColor = isDark
-                                              ? _classroomCardDarkColors[patternIndex %
-                                                  _classroomCardDarkColors.length]
-                                              : _classroomCardColors[patternIndex %
-                                                  _classroomCardColors.length];
-                                          final accentColor =
-                                              _classroomAccentColors[patternIndex %
-                                                  _classroomAccentColors.length];
+                                              final dynamic rawColorIdx = projectData['colorIndex'];
+                                              int patternIndex = 0;
+                                              if (rawColorIdx is int) {
+                                                patternIndex = rawColorIdx;
+                                              } else if (rawColorIdx is String) {
+                                                patternIndex = int.tryParse(rawColorIdx) ?? 0;
+                                              } else if (rawColorIdx is num) {
+                                                patternIndex = rawColorIdx.toInt();
+                                              } else {
+                                                patternIndex = index;
+                                              }
+                                              final cardColor = isDark
+                                                  ? _classroomCardDarkColors[patternIndex %
+                                                      _classroomCardDarkColors.length]
+                                                  : _classroomCardColors[patternIndex %
+                                                      _classroomCardColors.length];
+                                              final accentColor =
+                                                  _classroomAccentColors[patternIndex %
+                                                      _classroomAccentColors.length];
 
-                                          final iconFileName =
-                                              projectData['icon'] as String? ??
-                                              'project_1.png';
-                                          final iconPath =
-                                              'assets/icon_pack/project/$iconFileName';
+                                              final iconFileName =
+                                                  projectData['icon'] as String? ??
+                                                  'project_1.png';
+                                              final iconPath =
+                                                  'assets/icon_pack/project/$iconFileName';
 
-                                          if (role.toLowerCase() == 'guru') {
-                                            return _buildTeacherProjectCard(
-                                              context: context,
-                                              projectId: projId,
-                                              title: projTitle,
-                                              backgroundColor: cardColor,
-                                              accentColor: accentColor,
-                                              patternIndex: patternIndex,
-                                              iconPath: iconPath,
-                                              stages: stages,
-                                              schedules: List.from(
-                                                projectData['schedules'] ?? [],
-                                              ),
-                                              gradeLevel: projectData['gradeLevel'] ?? '-',
-                                              major: projectData['major'] ?? '',
-                                              ownerUid: projectData['ownerUid'] ?? '',
-                                              studentsMasterList: projectData['studentsMasterList'] as List? ?? [],
-                                              membersList: projectData['members'] as List? ?? [],
-                                            );
-                                          }
+                                              if (role.toLowerCase() == 'guru') {
+                                                return _buildTeacherProjectCard(
+                                                  context: context,
+                                                  projectId: projId,
+                                                  title: projTitle,
+                                                  backgroundColor: cardColor,
+                                                  accentColor: accentColor,
+                                                  patternIndex: patternIndex,
+                                                  iconPath: iconPath,
+                                                  stages: stages,
+                                                  schedules: List.from(
+                                                    projectData['schedules'] ?? [],
+                                                  ),
+                                                  gradeLevel: projectData['gradeLevel'] ?? '-',
+                                                  major: projectData['major'] ?? '',
+                                                  ownerUid: projectData['ownerUid'] ?? '',
+                                                  studentsMasterList: projectData['studentsMasterList'] as List? ?? [],
+                                                  membersList: projectData['members'] as List? ?? [],
+                                                  isCompact2Column: isGrid,
+                                                );
+                                              }
 
-                                          final currentUid =
-                                              FirebaseAuth.instance.currentUser?.uid ??
-                                              '';
-                                          return StreamBuilder<DocumentSnapshot>(
-                                            stream: FirebaseFirestore.instance
-                                                .collection('projects')
-                                                .doc(projId)
-                                                .collection('userProgress')
-                                                .doc(currentUid)
-                                                .snapshots(),
-                                            builder: (context, snapshot) {
-                                              int completedTugas = 0;
-                                              int totalTugas = 0;
-                                              int completedPdf = 0;
-                                              int totalPdf = 0;
-                                              int completedQuiz = 0;
-                                              int totalQuiz = 0;
-                                              final List<int> quizScores = [];
+                                              final currentUid =
+                                                  FirebaseAuth.instance.currentUser?.uid ??
+                                                  '';
+                                              return StreamBuilder<DocumentSnapshot>(
+                                                stream: FirebaseFirestore.instance
+                                                    .collection('projects')
+                                                    .doc(projId)
+                                                    .collection('userProgress')
+                                                    .doc(currentUid)
+                                                    .snapshots(),
+                                                builder: (context, snapshot) {
+                                                  int completedTugas = 0;
+                                                  int totalTugas = 0;
+                                                  int completedPdf = 0;
+                                                  int totalPdf = 0;
+                                                  int completedQuiz = 0;
+                                                  int totalQuiz = 0;
+                                                  final List<int> quizScores = [];
 
-                                              if (snapshot.hasData &&
-                                                  snapshot.data!.exists) {
-                                                final progressData =
-                                                    snapshot.data!.data()
-                                                        as Map<String, dynamic>;
-                                                final completedTasks =
-                                                    (progressData['completedTasks']
-                                                            as List?) ??
-                                                    [];
+                                                  if (snapshot.hasData &&
+                                                      snapshot.data!.exists) {
+                                                    final progressData =
+                                                        snapshot.data!.data()
+                                                            as Map<String, dynamic>;
+                                                    final completedTasks =
+                                                        (progressData['completedTasks']
+                                                                as List?) ??
+                                                        [];
 
-                                                for (var stage in stages) {
-                                                  final materis =
-                                                      stage['materis'] as List? ?? [];
-                                                  for (var m in materis) {
-                                                    final tasks =
-                                                        m['tasks'] as List? ?? [];
-                                                    for (var t in tasks) {
-                                                      final taskId =
-                                                          t['id'] as String? ?? '';
-                                                      final type =
-                                                          t['type'] as String? ??
-                                                          'tugas';
-                                                      final isCompleted =
-                                                          completedTasks.contains(taskId);
+                                                    for (var stage in stages) {
+                                                      final materis =
+                                                          stage['materis'] as List? ?? [];
+                                                      for (var m in materis) {
+                                                        final tasks =
+                                                            m['tasks'] as List? ?? [];
+                                                        for (var t in tasks) {
+                                                          final taskId =
+                                                              t['id'] as String? ?? '';
+                                                          final type =
+                                                              t['type'] as String? ??
+                                                              'tugas';
+                                                          final isCompleted =
+                                                              completedTasks.contains(taskId);
 
-                                                      if (type == 'tugas') {
-                                                        totalTugas++;
-                                                        if (isCompleted) completedTugas++;
-                                                      } else if (type == 'pdf') {
-                                                        totalPdf++;
-                                                        if (isCompleted) completedPdf++;
-                                                      } else if (type == 'quiz') {
-                                                        totalQuiz++;
-                                                        if (isCompleted) {
-                                                          completedQuiz++;
-                                                          final scoreVal =
-                                                              progressData['quizScore_'];
-                                                          if (scoreVal != null) {
-                                                            final int score =
-                                                                (scoreVal as num).toInt();
-                                                            quizScores.add(score);
+                                                          if (type == 'tugas') {
+                                                            totalTugas++;
+                                                            if (isCompleted) completedTugas++;
+                                                          } else if (type == 'pdf') {
+                                                            totalPdf++;
+                                                            if (isCompleted) completedPdf++;
+                                                          } else if (type == 'quiz') {
+                                                            totalQuiz++;
+                                                            if (isCompleted) {
+                                                              completedQuiz++;
+                                                              final scoreVal =
+                                                                  progressData['quizScore_'];
+                                                              if (scoreVal != null) {
+                                                                final int score =
+                                                                    (scoreVal as num).toInt();
+                                                                quizScores.add(score);
+                                                              }
+                                                            }
                                                           }
                                                         }
                                                       }
                                                     }
                                                   }
-                                                }
-                                              }
 
-                                              final int totalAll =
-                                                  totalTugas + totalPdf + totalQuiz;
-                                              final int completedAll =
-                                                  completedTugas +
-                                                  completedPdf +
-                                                  completedQuiz;
-                                              final double progressValue = totalAll > 0
-                                                  ? completedAll / totalAll
-                                                  : 0.0;
-                                              final String progressText = '$completedAll/$totalAll';
+                                                  final int totalAll =
+                                                      totalTugas + totalPdf + totalQuiz;
+                                                  final int completedAll =
+                                                      completedTugas +
+                                                      completedPdf +
+                                                      completedQuiz;
+                                                  final double progressValue = totalAll > 0
+                                                      ? completedAll / totalAll
+                                                      : 0.0;
+                                                  final String progressText = '$completedAll/$totalAll';
 
-                                              return _buildProjectCard(
-                                                context: context,
-                                                projectId: projId,
-                                                title: projTitle,
-                                                backgroundColor: cardColor,
-                                                accentColor: accentColor,
-                                                patternIndex: patternIndex,
-                                                iconPath: iconPath,
-                                                progressColor: accentColor,
-                                                progressValue: progressValue,
-                                                progressText: progressText,
-                                                completedTugas: completedTugas,
-                                                totalTugas: totalTugas,
-                                                completedPdf: completedPdf,
-                                                totalPdf: totalPdf,
-                                                completedQuiz: completedQuiz,
-                                                totalQuiz: totalQuiz,
-                                                gradeLevel: projectData['gradeLevel'] ?? '-',
-                                                major: projectData['major'] ?? '',
-                                                ownerUid: projectData['ownerUid'] ?? '',
-                                                schedules: List.from(projectData['schedules'] ?? []),
+                                                  return _buildProjectCard(
+                                                    context: context,
+                                                    projectId: projId,
+                                                    title: projTitle,
+                                                    backgroundColor: cardColor,
+                                                    accentColor: accentColor,
+                                                    patternIndex: patternIndex,
+                                                    iconPath: iconPath,
+                                                    progressColor: accentColor,
+                                                    progressValue: progressValue,
+                                                    progressText: progressText,
+                                                    completedTugas: completedTugas,
+                                                    totalTugas: totalTugas,
+                                                    completedPdf: completedPdf,
+                                                    totalPdf: totalPdf,
+                                                    completedQuiz: completedQuiz,
+                                                    totalQuiz: totalQuiz,
+                                                    gradeLevel: projectData['gradeLevel'] ?? '-',
+                                                    major: projectData['major'] ?? '',
+                                                    ownerUid: projectData['ownerUid'] ?? '',
+                                                    schedules: List.from(projectData['schedules'] ?? []),
+                                                    isCompact2Column: isGrid,
+                                                  );
+                                                },
                                               );
                                             },
                                           );
+
+                                          if (role.toLowerCase() == 'guru') {
+                                            projectCards.add(const AddClassroomPlaceholderCard());
+                                          }
+
+                                          if (MediaQuery.of(context).size.width >= 700 && MediaQuery.of(context).size.shortestSide >= 700) {
+                                            final double screenW = MediaQuery.of(context).size.width;
+                                            final int cols = screenW > 1350
+                                                ? 4
+                                                : (screenW > 980 ? 3 : 2);
+                                            final double ratio = screenW > 1350
+                                                ? 1.44
+                                                : (screenW > 980 ? 1.40 : 1.44);
+
+                                            return GridView.builder(
+                                              shrinkWrap: true,
+                                              physics:
+                                                  const NeverScrollableScrollPhysics(),
+                                              itemCount: projectCards.length,
+                                              gridDelegate:
+                                                  SliverGridDelegateWithFixedCrossAxisCount(
+                                                    crossAxisCount: cols,
+                                                    crossAxisSpacing: 10,
+                                                    mainAxisSpacing: 10,
+                                                    childAspectRatio: ratio,
+                                                  ),
+                                              itemBuilder: (context, index) =>
+                                                  projectCards[index],
+                                            );
+                                          } else {
+                                            if (isGrid) {
+                                              return GridView.builder(
+                                                shrinkWrap: true,
+                                                physics: const NeverScrollableScrollPhysics(),
+                                                itemCount: projectCards.length,
+                                                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                                                  crossAxisCount: 2,
+                                                  crossAxisSpacing: 8,
+                                                  mainAxisSpacing: 8,
+                                                  childAspectRatio: 1.05,
+                                                ),
+                                                itemBuilder: (context, index) => projectCards[index],
+                                              );
+                                            } else {
+                                              return ListView.separated(
+                                                shrinkWrap: true,
+                                                physics:
+                                                    const NeverScrollableScrollPhysics(),
+                                                itemCount: projectCards.length,
+                                                separatorBuilder: (_, i) =>
+                                                    const SizedBox(height: 8),
+                                                itemBuilder: (context, index) =>
+                                                    projectCards[index],
+                                              );
+                                            }
+                                          }
                                         },
                                       );
-
-                                      if (role.toLowerCase() == 'guru') {
-                                        projectCards.add(const AddClassroomPlaceholderCard());
-                                      }
-
-                                      if (MediaQuery.of(context).size.width >= 700 && MediaQuery.of(context).size.shortestSide >= 700) {
-                                        final double screenW = MediaQuery.of(context).size.width;
-                                        final int cols = screenW > 1350
-                                            ? 4
-                                            : (screenW > 980 ? 3 : 2);
-                                        final double ratio = screenW > 1350
-                                            ? 1.44
-                                            : (screenW > 980 ? 1.40 : 1.44);
-
-                                        return GridView.builder(
-                                          shrinkWrap: true,
-                                          physics:
-                                              const NeverScrollableScrollPhysics(),
-                                          itemCount: projectCards.length,
-                                          gridDelegate:
-                                              SliverGridDelegateWithFixedCrossAxisCount(
-                                                crossAxisCount: cols,
-                                                crossAxisSpacing: 10,
-                                                mainAxisSpacing: 10,
-                                                childAspectRatio: ratio,
-                                              ),
-                                          itemBuilder: (context, index) =>
-                                              projectCards[index],
-                                        );
-                                      } else {
-                                        return ListView.separated(
-                                          shrinkWrap: true,
-                                          physics:
-                                              const NeverScrollableScrollPhysics(),
-                                          itemCount: projectCards.length,
-                                          separatorBuilder: (_, i) =>
-                                              const SizedBox(height: 8),
-                                          itemBuilder: (context, index) =>
-                                              projectCards[index],
-                                        );
-                                      }
                                     },
                                   ),
                                 ],
@@ -3678,6 +3741,7 @@ class _StudentHomePageState extends State<StudentHomePage> {
     required String ownerUid,
     List studentsMasterList = const [],
     List membersList = const [],
+    bool isCompact2Column = false,
   }) {
     final latestMaterial = _getLatestMaterialTitle(stages);
     final scheduleText = _getScheduleSummary(schedules);
@@ -3781,7 +3845,9 @@ class _StudentHomePageState extends State<StudentHomePage> {
                       }
                     },
                     child: Container(
-                      height: (MediaQuery.of(cardContext).size.width < 700 || MediaQuery.of(cardContext).size.shortestSide < 700) ? 168 : 195,
+                      height: isCompact2Column
+                          ? 156
+                          : ((MediaQuery.of(cardContext).size.width < 700 || MediaQuery.of(cardContext).size.shortestSide < 700) ? 168 : 195),
                       margin: EdgeInsets.zero,
                       clipBehavior: Clip.antiAlias,
                       decoration: BoxDecoration(
@@ -3807,9 +3873,11 @@ class _StudentHomePageState extends State<StudentHomePage> {
                             ),
                           Positioned.fill(
                             child: Padding(
-                              padding: (MediaQuery.of(cardContext).size.width < 700 || MediaQuery.of(cardContext).size.shortestSide < 700)
-                                  ? const EdgeInsets.fromLTRB(14, 12, 14, 12)
-                                  : const EdgeInsets.all(16),
+                              padding: isCompact2Column
+                                  ? const EdgeInsets.all(10)
+                                  : ((MediaQuery.of(cardContext).size.width < 700 || MediaQuery.of(cardContext).size.shortestSide < 700)
+                                      ? const EdgeInsets.fromLTRB(14, 12, 14, 12)
+                                      : const EdgeInsets.all(16)),
                               child: _buildTeacherGeneralView(
                                 context: cardContext,
                                 projectId: projectId,
@@ -3822,6 +3890,7 @@ class _StudentHomePageState extends State<StudentHomePage> {
                                 accentColor: accentColor,
                                 backgroundColor: backgroundColor,
                                 schedules: schedules,
+                                isCompact2Column: isCompact2Column,
                                 onShowStats: () {
                                   _showAnalyticsDialog(context, projectId, title, stages, membersSnap);
                                 },
@@ -3996,13 +4065,13 @@ class _StudentHomePageState extends State<StudentHomePage> {
         children: [
           // Illustration placed on right more centered and bigger (aligned with top controls)!
           Positioned(
-            right: 12,
+            right: 6,
             top: 0,
             bottom: 0,
             child: Center(
               child: SizedBox(
-                height: 102,
-                width: 102,
+                height: 76,
+                width: 76,
                 child: ColorFiltered(
                   colorFilter: isDark
                       ? ColorFilter.mode(Colors.black.withValues(alpha: 0.12), BlendMode.darken)
@@ -4032,7 +4101,7 @@ class _StudentHomePageState extends State<StudentHomePage> {
                 const SizedBox(height: 4),
                 // Middle: Complete Subject Title (Flexible, full size for 1-2 lines, max 3 lines, NEVER TRUNCATED)
                 Padding(
-                  padding: const EdgeInsets.only(left: 10.0, right: 110.0),
+                  padding: const EdgeInsets.only(left: 10.0, right: 84.0),
                   child: Builder(
                     builder: (context) {
                       double calculatedFontSize = 19.5;
@@ -5148,13 +5217,13 @@ class _StudentHomePageState extends State<StudentHomePage> {
         clipBehavior: Clip.none,
         children: [
           Positioned(
-            right: 12,
+            right: 6,
             top: 0,
             bottom: 0,
             child: Center(
               child: SizedBox(
-                height: 102,
-                width: 102,
+                height: 76,
+                width: 76,
                 child: ColorFiltered(
                   colorFilter: isDark
                       ? ColorFilter.mode(Colors.black.withValues(alpha: 0.12), BlendMode.darken)
@@ -5181,7 +5250,7 @@ class _StudentHomePageState extends State<StudentHomePage> {
                 ),
                 const SizedBox(height: 4),
                 Padding(
-                  padding: const EdgeInsets.only(left: 10.0, right: 110.0),
+                  padding: const EdgeInsets.only(left: 10.0, right: 84.0),
                   child: Builder(
                     builder: (context) {
                       double calculatedFontSize = 19.5;
