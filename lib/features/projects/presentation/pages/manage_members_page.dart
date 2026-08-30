@@ -11,6 +11,7 @@ class ManageMembersPage extends StatefulWidget {
   final String ownerUid;
   final bool isEmbedded;
   final VoidCallback? onCloseInline;
+  final bool showInviteSection;
 
   const ManageMembersPage({
     super.key,
@@ -19,6 +20,7 @@ class ManageMembersPage extends StatefulWidget {
     required this.ownerUid,
     this.isEmbedded = false,
     this.onCloseInline,
+    this.showInviteSection = true,
   });
 
   @override
@@ -355,27 +357,51 @@ class _ManageMembersPageState extends State<ManageMembersPage> {
             userData['photoUrl'] ??
             userData['avatarUrl'] ??
             userData['avatar'] ??
+            userData['photo'] ??
+            userData['userAvatar'] ??
+            userData['teacherPhoto'] ??
             '')
         .toString()
         .trim();
     final name = (userData['name'] ?? 'U').toString().trim();
 
-    if (photo.isNotEmpty) {
-      if (photo.startsWith('http')) {
-        return Image.network(
-          photo,
-          fit: BoxFit.cover,
-          errorBuilder: (_, __, ___) => _buildFallbackAvatar(name, index),
-        );
+    if (photo.isEmpty) {
+      final role = (userData['role'] ?? '').toString().toLowerCase();
+      final bool isGuru = role == 'guru' || role == 'teacher' || role == 'pengajar' || role == 'admin';
+      if (isGuru) {
+        return Image.asset('assets/icon_pack/avatar/avatar_2.png', fit: BoxFit.cover);
+      }
+      return _buildFallbackAvatar(name, index);
+    }
+
+    if (photo.startsWith('http://') || photo.startsWith('https://')) {
+      return Image.network(
+        photo,
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) => _buildFallbackAvatar(name, index),
+      );
+    }
+
+    String assetPath = photo;
+    if (!assetPath.startsWith('assets/')) {
+      if (assetPath.startsWith('icon_pack/')) {
+        assetPath = 'assets/$assetPath';
       } else {
-        return Image.asset(
-          photo,
-          fit: BoxFit.cover,
-          errorBuilder: (_, __, ___) => _buildFallbackAvatar(name, index),
-        );
+        assetPath = 'assets/icon_pack/avatar/$assetPath';
       }
     }
-    return _buildFallbackAvatar(name, index);
+    if (!assetPath.toLowerCase().endsWith('.png') &&
+        !assetPath.toLowerCase().endsWith('.jpg') &&
+        !assetPath.toLowerCase().endsWith('.jpeg') &&
+        !assetPath.toLowerCase().endsWith('.webp')) {
+      assetPath = '$assetPath.png';
+    }
+
+    return Image.asset(
+      assetPath,
+      fit: BoxFit.cover,
+      errorBuilder: (_, __, ___) => _buildFallbackAvatar(name, index),
+    );
   }
 
   Widget _buildFallbackAvatar(String name, int index) {
@@ -490,8 +516,8 @@ class _ManageMembersPageState extends State<ManageMembersPage> {
 
             const SizedBox(height: 16),
 
-            // Invite Member Section (Only project owner can invite)
-            if (currentUid == widget.ownerUid)
+            // Invite Member Section (Only project owner can invite, if showInviteSection is true)
+            if (widget.showInviteSection && currentUid == widget.ownerUid) ...[
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
                 child: Container(
@@ -547,8 +573,8 @@ class _ManageMembersPageState extends State<ManageMembersPage> {
                   ),
                 ),
               ),
-
-            const SizedBox(height: 16),
+              const SizedBox(height: 16),
+            ],
 
             // Pending Join Requests & Pending Invitations (Owner View)
             if (currentUid == widget.ownerUid) ...[

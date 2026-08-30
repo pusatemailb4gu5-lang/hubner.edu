@@ -8,7 +8,10 @@ import 'package:hubner/features/projects/presentation/pages/class_page.dart';
 import 'mengerjakan_tugas_page.dart';
 import 'mengerjakan_quiz_page.dart';
 import 'baca_materi_page.dart';
-import 'package:hubner/features/home/presentation/widgets/animated_rainbow_background.dart';
+import 'dart:math' as math;
+import 'dart:ui' as ui;
+import 'package:hubner/core/widgets/bouncy_button.dart';
+import 'manage_members_page.dart';
 import 'package:hubner/core/theme/app_colors.dart';
 
 class MonitoringPage extends StatefulWidget {
@@ -35,31 +38,269 @@ class _MonitoringPageState extends State<MonitoringPage> {
   final Set<String> _expandedMateriKeys = {};
 
   final List<Color> _classroomCardColors = const [
-    Color(0xFFE0F2F1), // 1. Soft Teal (matching 0xFF009688)
-    Color(0xFFE3F2FD), // 2. Soft Blue (matching 0xFF448AFF)
-    Color(0xFFFBE8FF), // 3. Soft Magenta (matching 0xFFE040FB)
-    Color(0xFFFFF0F5), // 4. Soft Pink (matching 0xFFFF4081)
-    Color(0xFFFFF8E1), // 5. Soft Orange (matching 0xFFFFAB40)
-    Color(0xFFEEF0FC), // 6. Soft Indigo (matching 0xFF536DFE)
-    Color(0xFFECEFF1), // 7. Soft Blue Grey (matching 0xFF607D8B)
+    Color(0xFFD6A5F8), // 01. Lilac Purple (Core)
+    Color(0xFF9CC8FC), // 02. Sky Blue
+    Color(0xFF7DE3D0), // 03. Emerald Mint / Tosca
+    Color(0xFFF7BD84), // 04. Amber Peach / Orange
+    Color(0xFFF794BE), // 05. Rose Magenta / Pink
+    Color(0xFFA5B4FC), // 06. Indigo Violet
+    Color(0xFFBEF264), // 07. Fresh Lime
+    Color(0xFF67E8F9), // 08. Ocean Cyan
+    Color(0xFFFDE047), // 09. Amber Gold
+    Color(0xFFCBD5E1), // 10. Steel Slate
+  ];
+
+  final List<Color> _classroomCardDarkColors = const [
+    Color(0xFF6B3BA3), // 01. Deep Lilac (Core)
+    Color(0xFF2864A8), // 02. Deep Sky Blue
+    Color(0xFF147D75), // 03. Deep Teal / Tosca
+    Color(0xFFC76D10), // 04. Deep Amber / Orange
+    Color(0xFFA82658), // 05. Deep Rose / Magenta
+    Color(0xFF4338CA), // 06. Deep Indigo
+    Color(0xFF4D7C0F), // 07. Deep Olive Lime
+    Color(0xFF0E7490), // 08. Deep Ocean Cyan
+    Color(0xFFA16207), // 09. Deep Amber Gold
+    Color(0xFF334155), // 10. Deep Slate Steel
   ];
 
   final List<Color> _classroomAccentColors = const [
-    Color(0xFF009688), // 1. Teal
-    Color(0xFF448AFF), // 2. Blue
-    Color(0xFFE040FB), // 3. Purple/Magenta
-    Color(0xFFFF4081), // 4. Pink/Rose
-    Color(0xFFFFAB40), // 5. Orange/Amber
-    Color(0xFF536DFE), // 6. Indigo
-    Color(0xFF607D8B), // 7. Blue Grey
+    Color(0xFF7C3AED), // 01. Purple (Core)
+    Color(0xFF2563EB), // 02. Blue
+    Color(0xFF059669), // 03. Teal
+    Color(0xFFD97706), // 04. Amber / Orange
+    Color(0xFFDB2777), // 05. Pink / Rose
+    Color(0xFF4F46E5), // 06. Indigo
+    Color(0xFF65A30D), // 07. Lime
+    Color(0xFF0891B2), // 08. Cyan
+    Color(0xFFCA8A04), // 09. Gold
+    Color(0xFF475569), // 10. Slate
   ];
+
+  Widget _buildSafeAvatar(String? avatar) {
+    final String raw = (avatar ?? '').trim();
+    if (raw.isEmpty) {
+      return Image.asset('assets/icon_pack/avatar/avatar_2.png', fit: BoxFit.cover);
+    }
+    if (raw.startsWith('http://') || raw.startsWith('https://')) {
+      return Image.network(
+        raw,
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) => Image.asset('assets/icon_pack/avatar/avatar_2.png', fit: BoxFit.cover),
+      );
+    }
+    String assetPath = raw;
+    if (!assetPath.startsWith('assets/')) {
+      if (assetPath.startsWith('icon_pack/')) {
+        assetPath = 'assets/$assetPath';
+      } else {
+        assetPath = 'assets/icon_pack/avatar/$assetPath';
+      }
+    }
+    if (!assetPath.toLowerCase().endsWith('.png') &&
+        !assetPath.toLowerCase().endsWith('.jpg') &&
+        !assetPath.toLowerCase().endsWith('.jpeg') &&
+        !assetPath.toLowerCase().endsWith('.webp')) {
+      assetPath = '$assetPath.png';
+    }
+    return Image.asset(
+      assetPath,
+      fit: BoxFit.cover,
+      errorBuilder: (_, __, ___) => Image.asset('assets/icon_pack/avatar/avatar_2.png', fit: BoxFit.cover),
+    );
+  }
+
+  final GlobalKey _classDropdownKey = GlobalKey();
+  final GlobalKey _stickyClassDropdownKey = GlobalKey();
+  final ScrollController _scrollController = ScrollController();
+  final ValueNotifier<double> _scrollOffsetNotifier = ValueNotifier<double>(0.0);
+
+  Widget _buildClassIcon(Map<String, dynamic> data, {double size = 26}) {
+    final rawIcon = (data['icon'] ?? '').toString();
+    String iconPath = 'assets/icon_pack/project/project_1.png';
+    if (rawIcon.isNotEmpty) {
+      if (rawIcon.startsWith('assets/')) {
+        iconPath = rawIcon;
+      } else {
+        iconPath = 'assets/icon_pack/project/$rawIcon';
+      }
+    }
+    return Image.asset(
+      iconPath,
+      width: size,
+      height: size,
+      fit: BoxFit.contain,
+      errorBuilder: (context, error, stackTrace) => Icon(
+        Icons.school_rounded,
+        color: const Color(0xFF7F52FC),
+        size: size,
+      ),
+    );
+  }
+
+  void _openClassDropdownMenu(
+    BuildContext context,
+    GlobalKey buttonKey,
+    List<Map<String, dynamic>> projects,
+  ) {
+    final RenderBox? renderBox =
+        buttonKey.currentContext?.findRenderObject() as RenderBox?;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    Offset offset = Offset.zero;
+    Size size = Size.zero;
+    if (renderBox != null) {
+      size = renderBox.size;
+      offset = renderBox.localToGlobal(Offset.zero);
+    }
+
+    final double screenWidth = MediaQuery.of(context).size.width;
+    final double width = math.min(260.0, screenWidth - 32.0);
+    final double top = offset.dy + size.height + 6;
+    double left = offset.dx + size.width - width;
+    if (left + width > screenWidth - 16.0) {
+      left = screenWidth - width - 16.0;
+    }
+    if (left < 16.0) {
+      left = 16.0;
+    }
+
+    showDialog(
+      context: context,
+      barrierColor: Colors.transparent,
+      builder: (dialogCtx) {
+        return Stack(
+          children: [
+            Positioned(
+              top: top,
+              left: left,
+              width: width,
+              child: Material(
+                color: Colors.transparent,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: isDark ? const Color(0xFF18181B) : Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: isDark
+                          ? const Color(0xFF27272A)
+                          : const Color(0xFFE2E8F0),
+                      width: 1.2,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.12),
+                        blurRadius: 16,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(20),
+                    child: ListView.separated(
+                      shrinkWrap: true,
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 6,
+                        horizontal: 6,
+                      ),
+                      itemCount: projects.length,
+                      separatorBuilder: (_, _) => Divider(
+                        height: 1,
+                        color: isDark
+                            ? const Color(0xFF27272A)
+                            : const Color(0xFFF1F5F9),
+                      ),
+                      itemBuilder: (context, index) {
+                        final p = projects[index];
+                        final String pId = p['id']?.toString() ?? '';
+                        final String pName =
+                            p['name']?.toString() ?? 'Classroom';
+                        final bool isSelected = pId == _selectedProjectId;
+
+                        return InkWell(
+                          borderRadius: BorderRadius.circular(12),
+                          onTap: () {
+                            Navigator.pop(dialogCtx);
+                            if (pId != _selectedProjectId) {
+                              setState(() {
+                                _selectedProjectId = pId;
+                                _selectedProjectData = p;
+                              });
+                              _fetchTeacherInfo(
+                                p['ownerUid'] ?? p['teacherUid'],
+                              );
+                            }
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 8,
+                            ),
+                            child: Row(
+                              children: [
+                                _buildClassIcon(p, size: 28),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: Text(
+                                    pName,
+                                    style: GoogleFonts.plusJakartaSans(
+                                      fontSize: 14.0,
+                                      fontWeight: isSelected
+                                          ? FontWeight.bold
+                                          : FontWeight.w600,
+                                      color: isSelected
+                                          ? (isDark
+                                              ? const Color(0xFF60A5FA)
+                                              : const Color(0xFF2563EB))
+                                          : (isDark
+                                              ? Colors.white
+                                              : const Color(0xFF0F172A)),
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                if (isSelected) ...[
+                                  const SizedBox(width: 6),
+                                  Icon(
+                                    Icons.check_rounded,
+                                    color: isDark
+                                        ? const Color(0xFF60A5FA)
+                                        : const Color(0xFF2563EB),
+                                    size: 18,
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   @override
   void initState() {
     super.initState();
     _selectedProjectId = widget.initialProjectId;
+    _scrollController.addListener(() {
+      _scrollOffsetNotifier.value = _scrollController.offset;
+    });
     _checkUserRole();
     _loadUserProjects();
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    _scrollOffsetNotifier.dispose();
+    super.dispose();
   }
 
   Future<void> _checkUserRole() async {
@@ -710,30 +951,15 @@ class _MonitoringPageState extends State<MonitoringPage> {
                           padding: const EdgeInsets.symmetric(vertical: 8.0),
                           child: Row(
                             children: [
-                              Container(
-                                width: 36,
-                                height: 36,
-                                clipBehavior: Clip.antiAlias,
-                                decoration: const BoxDecoration(
-                                  color: Color(0xFFD97706),
-                                  shape: BoxShape.circle,
+                              SizedBox(
+                                width: 38,
+                                height: 38,
+                                child: ClipOval(
+                                  child: Transform.scale(
+                                    scale: 1.45,
+                                    child: _buildSafeAvatar(_teacherPhoto),
+                                  ),
                                 ),
-                                child: _teacherPhoto.isNotEmpty
-                                    ? Image.network(
-                                        _teacherPhoto,
-                                        fit: BoxFit.cover,
-                                        errorBuilder: (ctx, err, st) =>
-                                            const Icon(
-                                              Icons.person_rounded,
-                                              color: Colors.white,
-                                              size: 20,
-                                            ),
-                                      )
-                                    : const Icon(
-                                        Icons.person_rounded,
-                                        color: Colors.white,
-                                        size: 20,
-                                      ),
                               ),
                               const SizedBox(width: 12),
                               Expanded(
@@ -1433,16 +1659,18 @@ class _MonitoringPageState extends State<MonitoringPage> {
 
   @override
   Widget build(BuildContext context) {
+    final bool isDark = AppColors.isDarkMode;
+
     if (_isLoadingProjects) {
-      return const Scaffold(
-        backgroundColor: Colors.transparent,
-        body: SizedBox.shrink(),
+      return Scaffold(
+        backgroundColor: isDark ? Colors.black : Colors.white,
+        body: const SizedBox.shrink(),
       );
     }
 
     if (_userProjects.isEmpty) {
       return Scaffold(
-        backgroundColor: Colors.transparent,
+        backgroundColor: isDark ? Colors.black : Colors.white,
         body: SafeArea(
           child: Center(
             child: Column(
@@ -1450,25 +1678,30 @@ class _MonitoringPageState extends State<MonitoringPage> {
               children: [
                 Container(
                   padding: const EdgeInsets.all(18),
-                  decoration: const BoxDecoration(
-                    color: Color(0xFFF1F5F9),
+                  decoration: BoxDecoration(
+                    color: isDark ? const Color(0xFF18181B) : const Color(0xFFF1F5F9),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.analytics_outlined,
                     size: 48,
-                    color: Colors.black38,
+                    color: isDark ? Colors.white38 : Colors.black38,
                   ),
                 ),
                 const SizedBox(height: 16),
                 Text(
                   'Belum Ada Kelas',
-                  style: AppTypography.chatHeaderTitle(color: Colors.black87, fontWeight: FontWeight.bold),
+                  style: AppTypography.chatHeaderTitle(
+                    color: isDark ? Colors.white : Colors.black87,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   'Silakan bergabung ke kelas untuk melihat monitoring.',
-                  style: AppTypography.timestamp(color: Colors.black45),
+                  style: AppTypography.timestamp(
+                    color: isDark ? Colors.white60 : Colors.black45,
+                  ),
                   textAlign: TextAlign.center,
                 ),
               ],
@@ -1478,13 +1711,22 @@ class _MonitoringPageState extends State<MonitoringPage> {
       );
     }
 
-    // Determine card theme index (matching Home Page classroom card loop)
-    final int selectedIndex = _userProjects.indexWhere(
-      (p) => p['id'] == _selectedProjectId,
-    );
-    final int themeIdx = (_selectedProjectData?['colorIndex'] as int?) ??
-        (selectedIndex >= 0 ? selectedIndex % _classroomCardColors.length : 0);
-    final Color cardColor = _classroomCardColors[themeIdx];
+    // Determine card theme index (matching Detail Classroom & Home Page logic)
+    final dynamic rawColorIdx = _selectedProjectData?['colorIndex'];
+    int resolvedIdx = 0;
+    if (rawColorIdx is int) {
+      resolvedIdx = rawColorIdx;
+    } else if (rawColorIdx is String) {
+      resolvedIdx = int.tryParse(rawColorIdx) ?? 0;
+    } else if (rawColorIdx is num) {
+      resolvedIdx = rawColorIdx.toInt();
+    } else {
+      final int foundIdx = _userProjects.indexWhere((p) => p['id'] == _selectedProjectId);
+      if (foundIdx >= 0) resolvedIdx = foundIdx;
+    }
+    final int themeIdx = resolvedIdx % _classroomCardColors.length;
+    final List<Color> activeCardColors = isDark ? _classroomCardDarkColors : _classroomCardColors;
+    final Color cardColor = activeCardColors[themeIdx];
     final Color accentColor = _classroomAccentColors[themeIdx];
 
     final String projectTitle = _selectedProjectData?['name'] ?? 'Classroom';
@@ -1497,130 +1739,116 @@ class _MonitoringPageState extends State<MonitoringPage> {
         ? _teacherPhoto
         : (_selectedProjectData?['teacherPhoto'] ??
               _selectedProjectData?['ownerPhoto'] ??
+              _selectedProjectData?['ownerAvatar'] ??
               '');
 
     return Scaffold(
-      backgroundColor: Colors.transparent,
-      body: AnimatedRainbowBackground(
-        child: SafeArea(
-          top: false,
-          bottom: false,
-          child: SingleChildScrollView(
-            physics: const BouncingScrollPhysics(),
-            child: Align(
-              alignment: Alignment.topCenter,
-              child: Container(
-                constraints: BoxConstraints(
-                  maxWidth: MediaQuery.of(context).size.width > 500
-                      ? double.infinity
-                      : 500,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // 1. PAGE TITLE & SUBTITLE
-                    SafeArea(
-                      bottom: false,
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(20, 16, 20, 10),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'Monitoring Classroom',
-                                    style: AppTypography.pageTitle(color: Colors.black87, fontWeight: FontWeight.bold),
+      backgroundColor: isDark ? Colors.black : Colors.white,
+      body: Stack(
+        children: [
+          SafeArea(
+            top: false,
+            bottom: false,
+            child: SingleChildScrollView(
+              controller: _scrollController,
+              physics: const BouncingScrollPhysics(),
+              child: Align(
+            alignment: Alignment.topCenter,
+            child: Container(
+              constraints: BoxConstraints(
+                maxWidth: MediaQuery.of(context).size.width > 500
+                    ? double.infinity
+                    : 500,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // 1. PAGE TITLE & SUBTITLE + GANTI BUTTON AT TOP RIGHT
+                  SafeArea(
+                    bottom: false,
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 16, 20, 10),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Monitoring Classroom',
+                                  style: AppTypography.pageTitle(
+                                    color: isDark ? Colors.white : Colors.black87,
+                                    fontWeight: FontWeight.bold,
                                   ),
-                                  Text(
-                                    'Cek checklist materi, kuis, dan tugas Anda di sini.',
-                                    style: AppTypography.timestamp(color: Colors.black45),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  'Cek checklist materi, kuis, dan tugas Anda di sini.',
+                                  style: AppTypography.timestamp(
+                                    color: isDark ? Colors.white60 : Colors.black45,
                                   ),
-                                ],
-                              ),
+                                ),
+                              ],
                             ),
-                            // Hide dropdown entirely if only 1 project
-                            if (_userProjects.length > 1)
-                              Container(
+                          ),
+                          if (_userProjects.length > 1) ...[
+                            const SizedBox(width: 12),
+                            BouncyButton(
+                              key: _classDropdownKey,
+                              scaleDown: 0.92,
+                              onTap: () => _openClassDropdownMenu(
+                                context,
+                                _classDropdownKey,
+                                _userProjects,
+                              ),
+                              child: Container(
+                                height: 38,
                                 padding: const EdgeInsets.symmetric(
-                                  horizontal: 10,
-                                  vertical: 4,
+                                  horizontal: 14,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFFF1F5F9),
-                                  borderRadius: BorderRadius.circular(12),
-                                  border: null,
-                                ),
-                                child: DropdownButtonHideUnderline(
-                                  child: DropdownButton<String>(
-                                    value: _selectedProjectId,
-                                    isDense: true,
-                                    menuWidth: 320,
-                                    itemHeight: 56,
-                                    dropdownColor: Colors.white,
-                                    borderRadius: BorderRadius.circular(12),
-                                    icon: const Icon(
-                                      Icons.keyboard_arrow_down_rounded,
-                                      color: Colors.black87,
-                                      size: 18,
-                                    ),
-                                    selectedItemBuilder:
-                                        (BuildContext context) {
-                                          return _userProjects.map((p) {
-                                            return Align(
-                                              alignment: Alignment.centerLeft,
-                                              child: Text(
-                                                'Ganti',
-                                                style: AppTypography.buttonLabel(color: Colors.black87, fontWeight: FontWeight.bold),
-                                              ),
-                                            );
-                                          }).toList();
-                                        },
-                                    hint: Text(
-                                      'Pilih Classroom',
-                                      style: AppTypography.timestamp(color: Colors.black54),
-                                    ),
-                                    onChanged: (newVal) {
-                                      if (newVal != null &&
-                                          newVal != _selectedProjectId) {
-                                        final proj = _userProjects.firstWhere(
-                                          (p) => p['id'] == newVal,
-                                          orElse: () => {},
-                                        );
-                                        setState(() {
-                                          _selectedProjectId = newVal;
-                                          _selectedProjectData = proj;
-                                        });
-                                        _fetchTeacherInfo(
-                                          proj['ownerUid'] ??
-                                              proj['teacherUid'],
-                                        );
-                                      }
-                                    },
-                                    items: _userProjects.map((p) {
-                                      final String pId =
-                                          p['id']?.toString() ?? '';
-                                      final String pName =
-                                          p['name']?.toString() ?? 'Classroom';
-                                      return DropdownMenuItem<String>(
-                                        value: pId,
-                                        child: Text(
-                                          pName,
-                                          style: AppTypography.timestamp(color: Colors.black87, fontWeight: FontWeight.w500),
-                                          maxLines: 2,
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      );
-                                    }).toList(),
+                                  color: isDark
+                                      ? const Color(0xFF1C1C1E)
+                                      : Colors.white,
+                                  borderRadius: BorderRadius.circular(20),
+                                  border: Border.all(
+                                    color: isDark
+                                        ? const Color(0xFF27272A)
+                                        : const Color(0xFFE2E8F0),
+                                    width: 1.0,
                                   ),
                                 ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      'Ganti',
+                                      style: GoogleFonts.plusJakartaSans(
+                                        fontSize: 13.5,
+                                        fontWeight: FontWeight.bold,
+                                        color: isDark
+                                            ? Colors.white
+                                            : Colors.black87,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Icon(
+                                      Icons.keyboard_arrow_down_rounded,
+                                      color: isDark
+                                          ? Colors.white70
+                                          : Colors.black54,
+                                      size: 18,
+                                    ),
+                                  ],
+                                ),
                               ),
+                            ),
                           ],
-                        ),
+                        ],
                       ),
                     ),
+                  ),
 
                     // 2. STREAM LISTENER FOR REAL-TIME PROJECT STAGES & STUDENT PROGRESS DATA
                     StreamBuilder<DocumentSnapshot>(
@@ -1975,8 +2203,19 @@ class _MonitoringPageState extends State<MonitoringPage> {
                                                                 ],
                                                                 GestureDetector(
                                                                   onTap: () {
-                                                                    _showClassMembersSheet(
-                                                                      context,
+                                                                    if (_selectedProjectId == null) return;
+                                                                    Navigator.of(context).push(
+                                                                      MaterialPageRoute(
+                                                                        builder: (_) => ManageMembersPage(
+                                                                          projectId: _selectedProjectId!,
+                                                                          projectName: _selectedProjectData?['name'] ?? 'Kelas',
+                                                                          ownerUid: (_selectedProjectData?['ownerUid'] ??
+                                                                                  _selectedProjectData?['teacherUid'] ??
+                                                                                  '')
+                                                                              .toString(),
+                                                                          showInviteSection: false,
+                                                                        ),
+                                                                      ),
                                                                     );
                                                                   },
                                                                   child: Container(
@@ -2003,13 +2242,13 @@ class _MonitoringPageState extends State<MonitoringPage> {
                                                                           MainAxisSize
                                                                               .min,
                                                                       children: [
-                                                                        Icon(
+                                                                        const Icon(
                                                                           Icons
                                                                               .groups_rounded,
                                                                           size:
                                                                               14,
                                                                           color:
-                                                                              accentColor,
+                                                                              Colors.black87,
                                                                         ),
                                                                         const SizedBox(
                                                                           width:
@@ -2017,19 +2256,19 @@ class _MonitoringPageState extends State<MonitoringPage> {
                                                                         ),
                                                                         Text(
                                                                           'Lihat Kelas',
-                                                                          style: AppTypography.buttonLabel(color: accentColor, fontWeight: FontWeight.bold),
+                                                                          style: AppTypography.buttonLabel(color: Colors.black87, fontWeight: FontWeight.bold),
                                                                         ),
                                                                         const SizedBox(
                                                                           width:
                                                                               2,
                                                                         ),
-                                                                        Icon(
+                                                                        const Icon(
                                                                           Icons
                                                                               .chevron_right_rounded,
                                                                           size:
                                                                               13,
                                                                           color:
-                                                                              accentColor,
+                                                                              Colors.black87,
                                                                         ),
                                                                       ],
                                                                     ),
@@ -2057,7 +2296,7 @@ class _MonitoringPageState extends State<MonitoringPage> {
                                                 ),
                                                 const SizedBox(height: 14),
 
-                                                // Teacher Info Row (Large Avatar with ClipAntiAlias to fix white square corners, Format Title Bp./Bu Full Name)
+                                                // Teacher Info Row (Zoomed Avatar & Logo Framing, Format Title Bp./Bu Full Name)
                                                 Builder(
                                                   builder: (context) {
                                                     final formattedName =
@@ -2067,52 +2306,18 @@ class _MonitoringPageState extends State<MonitoringPage> {
                                                         );
                                                     return Row(
                                                       children: [
-                                                        Container(
-                                                          width: 42,
-                                                          height: 42,
-                                                          clipBehavior:
-                                                              Clip.antiAlias,
-                                                          decoration:
-                                                              BoxDecoration(
-                                                                color: accentColor
-                                                                    .withValues(
-                                                                      alpha:
-                                                                          0.18,
-                                                                    ),
-                                                                shape: BoxShape
-                                                                    .circle,
-                                                              ),
-                                                          child:
-                                                              displayTeacherPhoto
-                                                                  .isNotEmpty
-                                                              ? Image.network(
-                                                                  displayTeacherPhoto,
-                                                                  fit: BoxFit
-                                                                      .cover,
-                                                                  errorBuilder:
-                                                                      (
-                                                                        ctx,
-                                                                        err,
-                                                                        st,
-                                                                      ) => Icon(
-                                                                        Icons
-                                                                            .person_rounded,
-                                                                        size:
-                                                                            22,
-                                                                        color:
-                                                                            accentColor,
-                                                                      ),
-                                                                )
-                                                              : Icon(
-                                                                  Icons
-                                                                      .person_rounded,
-                                                                  size: 22,
-                                                                  color:
-                                                                      accentColor,
-                                                                ),
+                                                        SizedBox(
+                                                          width: 44,
+                                                          height: 44,
+                                                          child: ClipOval(
+                                                            child: Transform.scale(
+                                                              scale: 1.45,
+                                                              child: _buildSafeAvatar(displayTeacherPhoto),
+                                                            ),
+                                                          ),
                                                         ),
                                                         const SizedBox(
-                                                          width: 10,
+                                                          width: 12,
                                                         ),
                                                         Column(
                                                           crossAxisAlignment:
@@ -2121,12 +2326,17 @@ class _MonitoringPageState extends State<MonitoringPage> {
                                                           children: [
                                                             Text(
                                                               formattedName,
-                                                              style: AppTypography.replySubtitle(color: Colors.black87, fontWeight: FontWeight.normal),
+                                                              style: AppTypography.replySubtitle(
+                                                                color: isDark ? Colors.white : Colors.black87,
+                                                                fontWeight: FontWeight.bold,
+                                                              ),
                                                             ),
                                                             Text(
                                                               'Pengajar Kelas',
                                                               style:
-                                                                  AppTypography.timestamp(color: Colors.black54),
+                                                                  AppTypography.timestamp(
+                                                                    color: isDark ? Colors.white60 : Colors.black54,
+                                                                  ),
                                                             ),
                                                           ],
                                                         ),
@@ -2150,7 +2360,7 @@ class _MonitoringPageState extends State<MonitoringPage> {
                                                     Text(
                                                       '$completedItems/$totalItems Selesai',
                                                       style:
-                                                          AppTypography.buttonLabel(color: accentColor, fontWeight: FontWeight.bold),
+                                                          AppTypography.buttonLabel(color: Colors.black87, fontWeight: FontWeight.bold),
                                                     ),
                                                   ],
                                                 ),
@@ -2173,10 +2383,11 @@ class _MonitoringPageState extends State<MonitoringPage> {
                                                 ),
                                                 const SizedBox(height: 14),
 
-                                                // CTA Buttons Row (Lihat CP & Lihat Jadwal)
+                                                // CTA Buttons Row (Capaian & Jadwal Pembelajaran)
                                                 Row(
                                                   children: [
                                                     Expanded(
+                                                      flex: 3,
                                                       child: GestureDetector(
                                                         onTap: () => _showCpDialog(
                                                           context,
@@ -2187,12 +2398,12 @@ class _MonitoringPageState extends State<MonitoringPage> {
                                                           padding:
                                                               const EdgeInsets.symmetric(
                                                                 vertical: 8,
-                                                                horizontal: 10,
+                                                                horizontal: 8,
                                                               ),
                                                           decoration: BoxDecoration(
                                                             color: Colors.white
                                                                 .withValues(
-                                                                  alpha: 0.85,
+                                                                  alpha: 0.90,
                                                                 ),
                                                             borderRadius:
                                                                 BorderRadius.circular(
@@ -2205,27 +2416,32 @@ class _MonitoringPageState extends State<MonitoringPage> {
                                                                 MainAxisAlignment
                                                                     .center,
                                                             children: [
-                                                              Icon(
+                                                              const Icon(
                                                                 Icons
                                                                     .verified_outlined,
                                                                 size: 14,
                                                                 color:
-                                                                    accentColor,
+                                                                    Colors.black87,
                                                               ),
                                                               const SizedBox(
-                                                                width: 6,
+                                                                width: 4,
                                                               ),
-                                                              Text(
-                                                                'Lihat Elemen',
-                                                                style: AppTypography.timestamp(color: Colors.black54, fontWeight: FontWeight.w500),
+                                                              Flexible(
+                                                                child: Text(
+                                                                  'Capaian',
+                                                                  style: AppTypography.timestamp(color: Colors.black87, fontWeight: FontWeight.bold),
+                                                                  maxLines: 1,
+                                                                  overflow: TextOverflow.ellipsis,
+                                                                ),
                                                               ),
                                                             ],
                                                           ),
                                                         ),
                                                       ),
                                                     ),
-                                                    const SizedBox(width: 10),
+                                                    const SizedBox(width: 8),
                                                     Expanded(
+                                                      flex: 5,
                                                       child: GestureDetector(
                                                         onTap: () =>
                                                             _showJadwalDialog(
@@ -2237,12 +2453,12 @@ class _MonitoringPageState extends State<MonitoringPage> {
                                                           padding:
                                                               const EdgeInsets.symmetric(
                                                                 vertical: 8,
-                                                                horizontal: 10,
+                                                                horizontal: 8,
                                                               ),
                                                           decoration: BoxDecoration(
                                                             color: Colors.white
                                                                 .withValues(
-                                                                  alpha: 0.85,
+                                                                  alpha: 0.90,
                                                                 ),
                                                             borderRadius:
                                                                 BorderRadius.circular(
@@ -2255,19 +2471,23 @@ class _MonitoringPageState extends State<MonitoringPage> {
                                                                 MainAxisAlignment
                                                                     .center,
                                                             children: [
-                                                              Icon(
+                                                              const Icon(
                                                                 Icons
                                                                     .schedule_rounded,
                                                                 size: 14,
                                                                 color:
-                                                                    accentColor,
+                                                                    Colors.black87,
                                                               ),
                                                               const SizedBox(
-                                                                width: 6,
+                                                                width: 4,
                                                               ),
-                                                              Text(
-                                                                'Lihat Jadwal',
-                                                                style: AppTypography.timestamp(color: Colors.black54, fontWeight: FontWeight.w500),
+                                                              Flexible(
+                                                                child: Text(
+                                                                  'Jadwal Pembelajaran',
+                                                                  style: AppTypography.timestamp(color: Colors.black87, fontWeight: FontWeight.bold),
+                                                                  maxLines: 1,
+                                                                  overflow: TextOverflow.ellipsis,
+                                                                ),
                                                               ),
                                                             ],
                                                           ),
@@ -2280,7 +2500,6 @@ class _MonitoringPageState extends State<MonitoringPage> {
                                             ),
                                           ),
 
-                                          // Search Box with Border matching card accent and rounded top & bottom
                                           Container(
                                             margin: const EdgeInsets.fromLTRB(
                                               16,
@@ -2297,6 +2516,7 @@ class _MonitoringPageState extends State<MonitoringPage> {
                                               border: null,
                                             ),
                                             child: TextField(
+                                              cursorColor: isDark ? Colors.white : Colors.black,
                                               onChanged: (val) {
                                                 setState(() {
                                                   _searchQuery = val
@@ -2308,10 +2528,10 @@ class _MonitoringPageState extends State<MonitoringPage> {
                                                 hintText:
                                                     'Cari materi atau tugas...',
                                                 hintStyle: AppTypography.timestamp(color: Colors.black45),
-                                                prefixIcon: Icon(
+                                                prefixIcon: const Icon(
                                                   Icons.search_rounded,
                                                   size: 18,
-                                                  color: accentColor,
+                                                  color: Colors.black87,
                                                 ),
                                                 filled: true,
                                                 fillColor: Colors.transparent,
@@ -2349,7 +2569,9 @@ class _MonitoringPageState extends State<MonitoringPage> {
                                             child: _buildMetricCard(
                                               cardIndex: 0,
                                               icon: Icons.menu_book_rounded,
-                                              bgColor: const Color(0xFFEFF6FF),
+                                              bgColor: isDark
+                                                  ? const Color(0xFF2864A8)
+                                                  : const Color(0xFF9CC8FC),
                                               value: totalTugas > 0
                                                   ? '$completedTugas/$totalTugas'
                                                   : '0/0',
@@ -2361,7 +2583,9 @@ class _MonitoringPageState extends State<MonitoringPage> {
                                             child: _buildMetricCard(
                                               cardIndex: 1,
                                               icon: Icons.quiz_outlined,
-                                              bgColor: const Color(0xFFF3E8FF),
+                                              bgColor: isDark
+                                                  ? const Color(0xFF6B3BA3)
+                                                  : const Color(0xFFD6A5F8),
                                               value: totalQuiz > 0
                                                   ? '$completedQuiz/$totalQuiz'
                                                   : '0/0',
@@ -2373,7 +2597,9 @@ class _MonitoringPageState extends State<MonitoringPage> {
                                             child: _buildMetricCard(
                                               cardIndex: 2,
                                               icon: Icons.star_outline_rounded,
-                                              bgColor: const Color(0xFFFEF3C7),
+                                              bgColor: isDark
+                                                  ? const Color(0xFFC76D10)
+                                                  : const Color(0xFFF7BD84),
                                               value: accumulatedScore > 0
                                                   ? accumulatedScore
                                                         .toStringAsFixed(1)
@@ -2423,6 +2649,126 @@ class _MonitoringPageState extends State<MonitoringPage> {
             ),
           ),
         ),
+          // Sticky Blurred Header when scrolled (Only shows mapel name & Ganti button)
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: SafeArea(
+              bottom: false,
+              child: ValueListenableBuilder<double>(
+                valueListenable: _scrollOffsetNotifier,
+                builder: (context, scrollOffset, _) {
+                  if (scrollOffset <= 20.0) {
+                    return const SizedBox.shrink();
+                  }
+                  final double scrollProgress =
+                      ((scrollOffset - 20.0) / 30.0).clamp(0.0, 1.0);
+                  final double blurSigma = 20.0 * scrollProgress;
+
+                  return Opacity(
+                    opacity: scrollProgress,
+                    child: ClipRect(
+                      child: BackdropFilter(
+                        filter: ui.ImageFilter.blur(
+                          sigmaX: blurSigma > 0.1 ? blurSigma : 0.001,
+                          sigmaY: blurSigma > 0.1 ? blurSigma : 0.001,
+                        ),
+                        child: Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
+                          decoration: BoxDecoration(
+                            color: isDark
+                                ? const Color(0xFF000000).withValues(alpha: 0.70 * scrollProgress)
+                                : Colors.white.withValues(alpha: 0.80 * scrollProgress),
+                            border: Border(
+                              bottom: BorderSide(
+                                color: (isDark
+                                        ? const Color(0xFF27272A)
+                                        : const Color(0xFFE2E8F0))
+                                    .withValues(alpha: 0.85 * scrollProgress),
+                                width: 1.0,
+                              ),
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  projectTitle,
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontSize: 16.0,
+                                    fontWeight: FontWeight.bold,
+                                    color: isDark ? Colors.white : Colors.black87,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              if (_userProjects.length > 1) ...[
+                                const SizedBox(width: 10),
+                                BouncyButton(
+                                  key: _stickyClassDropdownKey,
+                                  scaleDown: 0.92,
+                                  onTap: () => _openClassDropdownMenu(
+                                    context,
+                                    _stickyClassDropdownKey,
+                                    _userProjects,
+                                  ),
+                                  child: Container(
+                                    height: 38,
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 14,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: isDark
+                                          ? const Color(0xFF1C1C1E)
+                                          : Colors.white,
+                                      borderRadius: BorderRadius.circular(20),
+                                      border: Border.all(
+                                        color: isDark
+                                            ? const Color(0xFF27272A)
+                                            : const Color(0xFFE2E8F0),
+                                        width: 1.0,
+                                      ),
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text(
+                                          'Ganti',
+                                          style: GoogleFonts.plusJakartaSans(
+                                            fontSize: 13.5,
+                                            fontWeight: FontWeight.bold,
+                                            color: isDark
+                                                ? Colors.white
+                                                : Colors.black87,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 4),
+                                        Icon(
+                                          Icons.keyboard_arrow_down_rounded,
+                                          color: isDark
+                                              ? Colors.white70
+                                              : Colors.black54,
+                                          size: 18,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -2492,8 +2838,11 @@ class _MonitoringPageState extends State<MonitoringPage> {
     final bool isLockedForStudent = !_isGuru && status == 'akan_datang';
 
     // Color theme matching element index number
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
     final int colorIdx = stageIdx % _classroomCardColors.length;
-    final Color elementBgColor = _classroomCardColors[colorIdx];
+    final List<Color> activeCardColors =
+        isDark ? _classroomCardDarkColors : _classroomCardColors;
+    final Color elementBgColor = activeCardColors[colorIdx];
     final Color elementAccentColor = _classroomAccentColors[colorIdx];
 
     final List rawMateris = stage['materis'] as List? ?? [];
@@ -2550,7 +2899,7 @@ class _MonitoringPageState extends State<MonitoringPage> {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: elementBgColor.withValues(alpha: 0.55),
+        color: elementBgColor,
         borderRadius: BorderRadius.circular(24),
         border: null,
       ),
@@ -2826,19 +3175,7 @@ class _MonitoringPageState extends State<MonitoringPage> {
                                 ),
                                 const SizedBox(width: 8),
 
-                                // RIGHT SIDE ROSETTE / STAR VERIFIED CHECK BADGE (Image format!)
-                                Icon(
-                                  isMateriCompleted
-                                      ? Icons.verified_rounded
-                                      : Icons.verified_outlined,
-                                  color: isMateriCompleted
-                                      ? const Color(0xFF10B981)
-                                      : Colors.black26,
-                                  size: 24,
-                                ),
-
                                 if (tasks.isNotEmpty) ...[
-                                  const SizedBox(width: 6),
                                   Icon(
                                     isMateriExpanded
                                         ? Icons.keyboard_arrow_up_rounded
@@ -2846,7 +3183,20 @@ class _MonitoringPageState extends State<MonitoringPage> {
                                     size: 20,
                                     color: Colors.black38,
                                   ),
+                                  const SizedBox(width: 8),
                                 ],
+
+                                // RIGHT SIDE CHECKLIST BADGE (Lingkaran hijau / abu dengan centang)
+                                Icon(
+                                  Icons.check_circle_rounded,
+                                  color: isMateriCompleted
+                                      ? const Color(0xFF10B981)
+                                      : (Theme.of(context).brightness ==
+                                              Brightness.dark
+                                          ? const Color(0xFF3F3F46)
+                                          : const Color(0xFFCBD5E1)),
+                                  size: 22,
+                                ),
                               ],
                             ),
                           ),

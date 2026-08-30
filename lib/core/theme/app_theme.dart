@@ -114,6 +114,11 @@ class AppTheme {
           ),
         ),
       ),
+      textSelectionTheme: TextSelectionThemeData(
+        cursorColor: AppColors.isDarkMode ? Colors.white : Colors.black,
+        selectionColor: AppColors.isDarkMode ? Colors.white24 : const Color(0xFFE2E8F0),
+        selectionHandleColor: AppColors.isDarkMode ? Colors.white : Colors.black,
+      ),
       splashFactory: InkSparkle.splashFactory,
     );
   }

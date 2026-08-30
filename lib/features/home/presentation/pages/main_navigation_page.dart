@@ -637,17 +637,93 @@ class _FluidIPhoneBottomNavBarState extends State<_FluidIPhoneBottomNavBar>
     }
   }
 
+  Widget _buildNavSvg({
+    required int index,
+    required bool isActive,
+    required bool isDark,
+    required bool isGuru,
+  }) {
+    final mainColor = isActive
+        ? (isDark ? '#FFFFFF' : '#0F172A')
+        : (isDark ? '#71717A' : '#94A3B8');
+
+    String svgStr;
+    switch (index) {
+      case 0: // Beranda (Grid Dashboard - 80% Black/White, 20% Violet Accent)
+        final accentColor = isActive ? '#7C3AED' : (isDark ? '#71717A' : '#94A3B8');
+        svgStr = '''<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="3.5" y="3.5" width="7" height="7" rx="2.5" fill="$mainColor"/>
+          <rect x="13.5" y="3.5" width="7" height="7" rx="2.5" fill="$accentColor"/>
+          <rect x="3.5" y="13.5" width="7" height="7" rx="2.5" fill="$mainColor"/>
+          <rect x="13.5" y="13.5" width="7" height="7" rx="2.5" fill="$mainColor"/>
+        </svg>''';
+        break;
+
+      case 1: // Tugas / Laporan (Note & Pen - 80% Black/White, 20% Amber/Orange Accent)
+        final accentColor = isActive ? '#F59E0B' : (isDark ? '#71717A' : '#94A3B8');
+        svgStr = '''<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M7 3H5a2 2 0 00-2 2v14a2 2 0 002 2h10a2 2 0 002-2v-3" stroke="$mainColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M7 8h4M7 12h3M7 16h6" stroke="$mainColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M19.1 2.9a2.12 2.12 0 013 3L13.5 14.5l-4.5 1 1-4.5L19.1 2.9z" fill="$accentColor" stroke="$mainColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>''';
+        break;
+
+      case 2: // Diskusi (Chat Bubble - 80% Black/White, 20% Purple Accent Dots)
+        final accentColor = isActive ? '#8B5CF6' : (isDark ? '#71717A' : '#94A3B8');
+        svgStr = '''<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 21a9.004 9.004 0 006.364-2.636A9 9 0 0021 12c0-4.97-4.03-9-9-9s-9 4.03-9 9c0 2.12.74 4.07 1.97 5.61L4 21l4.5-1.2A8.96 8.96 0 0012 21z" stroke="$mainColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="8" cy="12" r="1.6" fill="$accentColor"/>
+          <circle cx="12" cy="12" r="1.6" fill="$accentColor"/>
+          <circle cx="16" cy="12" r="1.6" fill="$accentColor"/>
+        </svg>''';
+        break;
+
+      case 3: // Monitoring / Dokumen (Analytics / Document - 80% Black/White, 20% Sky Blue Accent)
+        final accentColor = isActive ? '#0284C7' : (isDark ? '#71717A' : '#94A3B8');
+        if (isGuru) {
+          svgStr = '''<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6z" stroke="$mainColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M14 2v6h6" stroke="$mainColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="$accentColor"/>
+            <path d="M8 13h8M8 17h5" stroke="$mainColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>''';
+        } else {
+          svgStr = '''<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M3 21h18" stroke="$mainColor" stroke-width="2" stroke-linecap="round"/>
+            <rect x="5" y="12" width="3.5" height="6" rx="1.5" fill="$mainColor"/>
+            <rect x="10.25" y="8" width="3.5" height="10" rx="1.5" fill="$mainColor"/>
+            <rect x="15.5" y="4" width="3.5" height="14" rx="1.5" fill="$accentColor"/>
+          </svg>''';
+        }
+        break;
+
+      case 4: // Profil (User Profile - 80% Black/White, 20% Emerald Green Accent)
+      default:
+        final accentColor = isActive ? '#10B981' : (isDark ? '#71717A' : '#94A3B8');
+        svgStr = '''<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 11a4 4 0 100-8 4 4 0 000 8zM5 20.5a7 7 0 0114 0" stroke="$mainColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="18" cy="5.5" r="2.2" fill="$accentColor"/>
+        </svg>''';
+        break;
+    }
+
+    return SvgPicture.string(
+      svgStr,
+      width: 21,
+      height: 21,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final bool isDark = widget.isDark;
     final bool isGuru = widget.isGuru;
 
     final navItems = [
-      {'icon': Icons.grid_view_rounded, 'label': 'Beranda'},
-      {'icon': Icons.assignment_outlined, 'label': isGuru ? 'Laporan' : 'Tugas'},
-      {'icon': Icons.chat_bubble_outline_rounded, 'label': 'Diskusi'},
-      {'icon': isGuru ? Icons.article_outlined : Icons.analytics_outlined, 'label': isGuru ? 'Dokumen' : 'Monitoring'},
-      {'icon': Icons.person_outline_rounded, 'label': 'Profil'},
+      {'label': 'Beranda'},
+      {'label': isGuru ? 'Laporan' : 'Tugas'},
+      {'label': 'Diskusi'},
+      {'label': isGuru ? 'Dokumen' : 'Monitoring'},
+      {'label': 'Profil'},
     ];
 
     return LayoutBuilder(
@@ -736,11 +812,10 @@ class _FluidIPhoneBottomNavBarState extends State<_FluidIPhoneBottomNavBar>
                   ),
                 ),
 
-                // 2. Interactive Navigation Items (Text di bawah ikon)
+                // 2. Interactive Navigation Items (SVG + Text di bawah ikon)
                 Row(
                   children: List.generate(5, (index) {
                     final item = navItems[index];
-                    final IconData icon = item['icon'] as IconData;
                     final String label = item['label'] as String;
                     final int unread = (index == 2) ? widget.totalUnread : 0;
 
@@ -764,12 +839,11 @@ class _FluidIPhoneBottomNavBarState extends State<_FluidIPhoneBottomNavBar>
                                 children: [
                                   Transform.scale(
                                     scale: 1.0 + (activeFactor * 0.08),
-                                    child: Icon(
-                                      icon,
-                                      color: isDark
-                                          ? Color.lerp(Colors.white38, Colors.white, activeFactor)
-                                          : Color.lerp(const Color(0xFF64748B), const Color(0xFF0F172A), activeFactor),
-                                      size: 20,
+                                    child: _buildNavSvg(
+                                      index: index,
+                                      isActive: isClosest,
+                                      isDark: isDark,
+                                      isGuru: isGuru,
                                     ),
                                   ),
                                   if (unread > 0)
@@ -810,8 +884,8 @@ class _FluidIPhoneBottomNavBarState extends State<_FluidIPhoneBottomNavBar>
                                 label,
                                 style: AppTypography.microBadge(
                                   color: isDark
-                                      ? Color.lerp(Colors.white38, Colors.white, activeFactor)
-                                      : Color.lerp(const Color(0xFF64748B), const Color(0xFF0F172A), activeFactor),
+                                      ? (isClosest ? Colors.white : const Color(0xFF71717A))
+                                      : (isClosest ? const Color(0xFF0F172A) : const Color(0xFF94A3B8)),
                                   fontWeight: isClosest ? FontWeight.w800 : FontWeight.w500,
                                   letterSpacing: -0.2,
                                 ),
@@ -1070,6 +1144,108 @@ class _DiscussionTabState extends State<DiscussionTab> {
     );
   }
 
+  Widget _buildSearchBar(bool isDark, {bool isSticky = false, double height = 52.0}) {
+    final double iconSize = height < 48 ? 18.0 : 22.0;
+    final double fontSize = height < 48 ? 14.5 : 16.5;
+    final double verticalPadding = height < 48 ? 8.0 : 12.0;
+    final double borderRadius = height < 48 ? 22.0 : 28.0;
+
+    return Container(
+      height: height,
+      padding: const EdgeInsets.symmetric(horizontal: 14),
+      decoration: BoxDecoration(
+        color: isDark
+            ? (isSticky ? const Color(0xFF18181B).withValues(alpha: 0.65) : const Color(0xFF18181B))
+            : (isSticky ? Colors.white.withValues(alpha: 0.70) : Colors.white),
+        borderRadius: BorderRadius.circular(borderRadius),
+        border: Border.all(
+          color: isDark
+              ? const Color(0xFF27272A).withValues(alpha: isSticky ? 0.6 : 1.0)
+              : const Color(0xFFE2E8F0).withValues(alpha: isSticky ? 0.8 : 1.0),
+          width: 1.2,
+        ),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            Icons.search_rounded,
+            color: isDark ? Colors.white60 : Colors.black45,
+            size: iconSize,
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Theme(
+              data: Theme.of(context).copyWith(
+                textSelectionTheme: TextSelectionThemeData(
+                  cursorColor: isDark ? Colors.white : Colors.black,
+                  selectionColor: isDark ? Colors.white24 : Colors.black12,
+                  selectionHandleColor: isDark ? Colors.white : Colors.black,
+                ),
+              ),
+              child: TextField(
+                controller: _searchController,
+                cursorColor: isDark ? Colors.white : Colors.black,
+                cursorWidth: 2.0,
+                onChanged: (val) {
+                  setState(() {
+                    _searchQuery = val;
+                  });
+                },
+                style: AppTypography.searchInput(
+                  color: isDark ? Colors.white : Colors.black87,
+                  fontSize: fontSize,
+                ),
+                decoration: InputDecoration(
+                  hintText: 'Cari thread diskusi...',
+                  hintStyle: AppTypography.searchInput(
+                    color: isDark ? Colors.white38 : Colors.black38,
+                    fontSize: fontSize,
+                  ),
+                  border: InputBorder.none,
+                  isDense: true,
+                  contentPadding: EdgeInsets.symmetric(vertical: verticalPadding),
+                ),
+              ),
+            ),
+          ),
+          if (_searchQuery.isNotEmpty)
+            GestureDetector(
+              onTap: () {
+                _searchController.clear();
+                setState(() {
+                  _searchQuery = '';
+                });
+              },
+              child: Icon(
+                Icons.close_rounded,
+                color: isDark ? Colors.white60 : Colors.black45,
+                size: 18,
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildManageFriendsButton(bool isDark, {double iconSize = 24.0}) {
+    return BouncyButton(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const ManageFriendsPage()),
+        );
+      },
+      child: Padding(
+        padding: const EdgeInsets.all(6.0),
+        child: Icon(
+          Icons.people_outline_rounded,
+          color: isDark ? Colors.white : Colors.black87,
+          size: iconSize,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<String>(
@@ -1162,108 +1338,42 @@ class _DiscussionTabState extends State<DiscussionTab> {
           controller: _discussionScrollController,
           physics: const ClampingScrollPhysics(),
           slivers: [
-            // Top Scrollable Header & Search Bar (Scrolls away seamlessly!)
+            // Top Scrollable Header (Saat Diam: Row Diskusi + Ikon Teman 52x52, Dibawahnya Search Bar Full Width)
             SliverToBoxAdapter(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Top In-List Header
+                  // Top In-List Header (Diskusi Title & Circular 52x52 Manage Friends Button seukuran note)
                   Padding(
-                    padding: AppTypography.pagePadding(top: 10.0, bottom: 10.0),
+                    padding: EdgeInsets.fromLTRB(
+                      AppTypography.screenHorizontalMargin,
+                      MediaQuery.of(context).padding.top + 10.0,
+                      AppTypography.screenHorizontalMargin,
+                      6.0,
+                    ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Text(
                           'Diskusi',
-                          style: AppTypography.pageTitle(color: isDark ? Colors.white : Colors.black, fontWeight: FontWeight.w600),
-                        ),
-                        BouncyButton(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (_) => const ManageFriendsPage()),
-                            );
-                          },
-                          child: Container(
-                            width: 42,
-                            height: 42,
-                            decoration: BoxDecoration(
-                              color: isDark ? const Color(0xFF18181B) : Colors.white,
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
-                                width: 1.2,
-                              ),
-                            ),
-                            child: Icon(
-                              Icons.people_outline_rounded,
-                              color: isDark ? Colors.white : Colors.black87,
-                              size: 20,
-                            ),
+                          style: AppTypography.pageTitle(
+                            color: isDark ? Colors.white : Colors.black,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
+                        _buildManageFriendsButton(isDark, iconSize: 24.0),
                       ],
                     ),
                   ),
 
-                  // Search Bar (Rounded 28 & Styled match Home Page - scrolls away!)
+                  // Search Bar Full Width (52px height)
                   Padding(
-                    padding: EdgeInsets.symmetric(horizontal: AppTypography.screenHorizontalMargin, vertical: 6.0),
-                    child: Container(
-                      height: 48,
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      decoration: BoxDecoration(
-                        color: isDark ? const Color(0xFF18181B) : Colors.white,
-                        borderRadius: BorderRadius.circular(28),
-                        border: Border.all(
-                          color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
-                          width: 1.2,
-                        ),
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.search_rounded,
-                            color: isDark ? Colors.white60 : Colors.black45,
-                            size: 20,
-                          ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: TextField(
-                              controller: _searchController,
-                              onChanged: (val) {
-                                setState(() {
-                                  _searchQuery = val;
-                                });
-                              },
-                              style: AppTypography.searchInput(color: isDark ? Colors.white : Colors.black87),
-                              decoration: InputDecoration(
-                                hintText: 'Cari thread diskusi...',
-                                hintStyle: AppTypography.searchInput(color: isDark ? Colors.white38 : Colors.black38),
-                                border: InputBorder.none,
-                                isDense: true,
-                                contentPadding: const EdgeInsets.symmetric(vertical: 10),
-                              ),
-                            ),
-                          ),
-                          if (_searchQuery.isNotEmpty)
-                            GestureDetector(
-                              onTap: () {
-                                _searchController.clear();
-                                setState(() {
-                                  _searchQuery = '';
-                                });
-                              },
-                              child: Icon(
-                                Icons.close_rounded,
-                                color: isDark ? Colors.white60 : Colors.black45,
-                                size: 18,
-                              ),
-                            ),
-                        ],
-                      ),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: AppTypography.screenHorizontalMargin,
+                      vertical: 6.0,
                     ),
+                    child: _buildSearchBar(isDark),
                   ),
                   const SizedBox(height: 8),
                 ],
@@ -1571,6 +1681,62 @@ class _DiscussionTabState extends State<DiscussionTab> {
                   bottom: false,
                   child: listContent,
                 ),
+                ValueListenableBuilder<double>(
+                  valueListenable: _headerScrollOffsetNotifier,
+                  builder: (context, scrollOffset, _) {
+                    if (scrollOffset <= 20.0) {
+                      return const SizedBox.shrink();
+                    }
+                    final double scrollProgress = ((scrollOffset - 20.0) / 30.0).clamp(0.0, 1.0);
+                    final double blurSigma = 20.0 * scrollProgress;
+                    final double currentBarHeight = ui.lerpDouble(52.0, 42.0, scrollProgress)!;
+                    final double currentIconSize = ui.lerpDouble(24.0, 20.0, scrollProgress)!;
+
+                    return Positioned(
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      child: Opacity(
+                        opacity: scrollProgress,
+                        child: ClipRect(
+                          child: BackdropFilter(
+                            filter: ui.ImageFilter.blur(
+                              sigmaX: blurSigma > 0.1 ? blurSigma : 0.001,
+                              sigmaY: blurSigma > 0.1 ? blurSigma : 0.001,
+                            ),
+                            child: Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.fromLTRB(16, 12, 16, 10),
+                              decoration: BoxDecoration(
+                                color: isDark
+                                    ? const Color(0xFF000000).withValues(alpha: 0.50 * scrollProgress)
+                                    : Colors.white.withValues(alpha: 0.55 * scrollProgress),
+                                border: Border(
+                                  bottom: BorderSide(
+                                    color: (isDark
+                                            ? const Color(0xFF27272A)
+                                            : const Color(0xFFE2E8F0))
+                                        .withValues(alpha: 0.85 * scrollProgress),
+                                    width: 1.0,
+                                  ),
+                                ),
+                              ),
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: _buildSearchBar(isDark, isSticky: true, height: currentBarHeight),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  _buildManageFriendsButton(isDark, iconSize: currentIconSize),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
                 Positioned(
                   bottom: safeBottomPadding + 20,
                   right: 16,
@@ -1637,81 +1803,64 @@ class _DiscussionTabState extends State<DiscussionTab> {
           ),
           child: Stack(
             children: [
-              SafeArea(
-                bottom: false,
-                child: listContent,
-              ),
+              listContent,
 
-              // Sticky Header with blur/gradient when scrolling down (Like Home Page)
+              // Sticky Header (Like Todo Page: Glassmorphic blur, Search & Friends, Title Disappears!)
               ValueListenableBuilder<double>(
                 valueListenable: _headerScrollOffsetNotifier,
                 builder: (context, scrollOffset, _) {
                   if (scrollOffset <= 20.0) {
                     return const SizedBox.shrink();
                   }
-                  final double t = ((scrollOffset - 20.0) / 40.0).clamp(0.0, 1.0);
+                  final double scrollProgress = ((scrollOffset - 20.0) / 30.0).clamp(0.0, 1.0);
+                  final double blurSigma = 20.0 * scrollProgress;
+                  final double currentBarHeight = ui.lerpDouble(52.0, 42.0, scrollProgress)!;
+                  final double currentIconSize = ui.lerpDouble(24.0, 20.0, scrollProgress)!;
 
                   return Positioned(
                     top: 0,
                     left: 0,
                     right: 0,
                     child: Opacity(
-                      opacity: t,
-                      child: Container(
-                        padding: EdgeInsets.fromLTRB(
-                          16,
-                          MediaQuery.of(context).padding.top + 6,
-                          16,
-                          16,
-                        ),
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            colors: [
-                              (isDark ? Colors.black : Colors.white).withValues(alpha: t * 0.98),
-                              (isDark ? Colors.black : Colors.white).withValues(alpha: t * 0.95),
-                              (isDark ? Colors.black : Colors.white).withValues(alpha: t * 0.45),
-                              (isDark ? Colors.black : Colors.white).withValues(alpha: 0.0),
-                            ],
-                            stops: const [0.0, 0.48, 0.75, 1.0],
+                      opacity: scrollProgress,
+                      child: ClipRect(
+                        child: BackdropFilter(
+                          filter: ui.ImageFilter.blur(
+                            sigmaX: blurSigma > 0.1 ? blurSigma : 0.001,
+                            sigmaY: blurSigma > 0.1 ? blurSigma : 0.001,
                           ),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            const SizedBox(width: 42),
-                            Text(
-                              'Diskusi',
-                              style: AppTypography.cardTitle(color: isDark ? Colors.white : const Color(0xFF0F172A), fontWeight: FontWeight.w800),
+                          child: Container(
+                            width: double.infinity,
+                            padding: EdgeInsets.fromLTRB(
+                              AppTypography.screenHorizontalMargin,
+                              MediaQuery.of(context).padding.top + 8.0,
+                              AppTypography.screenHorizontalMargin,
+                              ui.lerpDouble(10.0, 6.0, scrollProgress)!,
                             ),
-                            BouncyButton(
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(builder: (_) => const ManageFriendsPage()),
-                                );
-                              },
-                              child: Container(
-                                width: 42,
-                                height: 42,
-                                decoration: BoxDecoration(
-                                  color: isDark ? const Color(0xFF18181B) : Colors.white,
-                                  shape: BoxShape.circle,
-                                  border: Border.all(
-                                    color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
-                                    width: 1.2,
-                                  ),
-                                ),
-                                child: Icon(
-                                  Icons.people_outline_rounded,
-                                  color: isDark ? Colors.white : Colors.black87,
-                                  size: 20,
+                            decoration: BoxDecoration(
+                              color: isDark
+                                  ? const Color(0xFF000000).withValues(alpha: 0.50 * scrollProgress)
+                                  : Colors.white.withValues(alpha: 0.55 * scrollProgress),
+                              border: Border(
+                                bottom: BorderSide(
+                                  color: (isDark
+                                          ? const Color(0xFF27272A)
+                                          : const Color(0xFFE2E8F0))
+                                      .withValues(alpha: 0.85 * scrollProgress),
+                                  width: 1.0,
                                 ),
                               ),
                             ),
-                          ],
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: _buildSearchBar(isDark, isSticky: true, height: currentBarHeight),
+                                ),
+                                const SizedBox(width: 8),
+                                _buildManageFriendsButton(isDark, iconSize: currentIconSize),
+                              ],
+                            ),
+                          ),
                         ),
                       ),
                     ),
@@ -6105,10 +6254,26 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
   Map<String, dynamic>? _cachedUserData;
   bool _showAvatarOverlay = false;
   late AnimationController _animController;
+  ScrollController? _scrollController;
+  final ValueNotifier<double> _scrollOffsetNotifier = ValueNotifier<double>(0.0);
+
+  ScrollController get scrollController {
+    if (_scrollController == null) {
+      _scrollController = ScrollController()
+        ..addListener(() {
+          _scrollOffsetNotifier.value = _scrollController?.offset ?? 0.0;
+        });
+    }
+    return _scrollController!;
+  }
 
   @override
   void initState() {
     super.initState();
+    _scrollController = ScrollController()
+      ..addListener(() {
+        _scrollOffsetNotifier.value = _scrollController?.offset ?? 0.0;
+      });
     _animController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 8),
@@ -6117,6 +6282,8 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
 
   @override
   void dispose() {
+    _scrollController?.dispose();
+    _scrollOffsetNotifier.dispose();
     _animController.dispose();
     super.dispose();
   }
@@ -6212,13 +6379,13 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
 
   Widget _buildSectionHeader(String title, bool isDark) {
     return Padding(
-      padding: const EdgeInsets.only(top: 22, bottom: 8, left: 4),
+      padding: const EdgeInsets.only(top: 18, bottom: 8, left: 4),
       child: Text(
-        title.toUpperCase(),
-        style: AppTypography.channelTag(
-          color: isDark ? Colors.white38 : Colors.black38,
-          fontWeight: FontWeight.bold,
-          letterSpacing: 0.8,
+        title,
+        style: GoogleFonts.plusJakartaSans(
+          fontSize: 16,
+          fontWeight: FontWeight.w800,
+          color: isDark ? Colors.white : Colors.black87,
         ),
       ),
     );
@@ -6229,7 +6396,7 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
       width: double.infinity,
       decoration: BoxDecoration(
         color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(20),
         border: Border.all(
           color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
           width: 1.0,
@@ -6241,24 +6408,133 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
     );
   }
 
+  Widget _buildDualToneSvgIcon(String iconType, String accentHex, bool isDark, {double size = 20}) {
+    final String mainColor = isDark ? '#FFFFFF' : '#18181B';
+    String svgStr;
+
+    switch (iconType) {
+      case 'email':
+        svgStr = '''<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="3" y="5" width="18" height="14" rx="3" stroke="$mainColor" stroke-width="2"/>
+          <path d="M3 7l9 6 9-6" stroke="$mainColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="12" cy="12" r="2.2" fill="$accentHex"/>
+        </svg>''';
+        break;
+
+      case 'gender':
+        svgStr = '''<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="12" cy="8" r="4.5" stroke="$mainColor" stroke-width="2"/>
+          <path d="M4 20c0-4.418 3.582-8 8-8s8 3.582 8 8" stroke="$mainColor" stroke-width="2" stroke-linecap="round"/>
+          <circle cx="12" cy="8" r="2.2" fill="$accentHex"/>
+        </svg>''';
+        break;
+
+      case 'school':
+        svgStr = '''<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 3L2 8l10 5 10-5-10-5z" stroke="$mainColor" stroke-width="2" stroke-linejoin="round"/>
+          <path d="M6 10.6v5.4c0 3.3 2.7 6 6 6s6-2.7 6-6v-5.4" stroke="$mainColor" stroke-width="2" stroke-linecap="round"/>
+          <path d="M22 8v7" stroke="$accentHex" stroke-width="2" stroke-linecap="round"/>
+          <circle cx="22" cy="15.5" r="1.5" fill="$accentHex"/>
+        </svg>''';
+        break;
+
+      case 'timezone':
+        svgStr = '''<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="12" cy="12" r="9" stroke="$mainColor" stroke-width="2"/>
+          <path d="M12 7v5l3.5 2" stroke="$accentHex" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="12" cy="12" r="1.5" fill="$accentHex"/>
+        </svg>''';
+        break;
+
+      case 'language':
+        svgStr = '''<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="12" cy="12" r="9" stroke="$mainColor" stroke-width="2"/>
+          <path d="M3.6 9h16.8M3.6 15h16.8" stroke="$mainColor" stroke-width="1.8" stroke-linecap="round"/>
+          <path d="M12 3a14 14 0 010 18M12 3a14 14 0 000 18" stroke="$accentHex" stroke-width="2" stroke-linecap="round"/>
+        </svg>''';
+        break;
+
+      case 'password':
+        svgStr = '''<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="4" y="10" width="16" height="11" rx="3" stroke="$mainColor" stroke-width="2"/>
+          <path d="M8 10V7a4 4 0 118 0v3" stroke="$mainColor" stroke-width="2" stroke-linecap="round"/>
+          <circle cx="12" cy="15.5" r="1.8" fill="$accentHex"/>
+          <path d="M12 17.3v1.7" stroke="$accentHex" stroke-width="2" stroke-linecap="round"/>
+        </svg>''';
+        break;
+
+      case 'security':
+        svgStr = '''<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 3L4 6.5v6c0 5 3.4 9.6 8 10.5 4.6-.9 8-5.5 8-10.5v-6L12 3z" stroke="$mainColor" stroke-width="2" stroke-linejoin="round"/>
+          <path d="M9 12l2 2 4-4" stroke="$accentHex" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>''';
+        break;
+
+      case 'theme':
+        svgStr = '''<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 3a9 9 0 100 18 3.5 3.5 0 003.5-3.5c0-.9-.4-1.7-.4-2.5 0-1.7 1.3-3 3-3h1.9A9 9 0 0012 3z" stroke="$mainColor" stroke-width="2"/>
+          <circle cx="7.5" cy="10.5" r="1.6" fill="$accentHex"/>
+          <circle cx="12" cy="7.5" r="1.6" fill="$accentHex"/>
+          <circle cx="16.5" cy="10.5" r="1.6" fill="$accentHex"/>
+        </svg>''';
+        break;
+
+      case 'notification':
+        svgStr = '''<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9" stroke="$mainColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M13.73 21a2 2 0 01-3.46 0" stroke="$mainColor" stroke-width="2" stroke-linecap="round"/>
+          <circle cx="18" cy="5" r="2.5" fill="$accentHex"/>
+        </svg>''';
+        break;
+
+      case 'about':
+        svgStr = '''<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="12" cy="12" r="9" stroke="$mainColor" stroke-width="2"/>
+          <circle cx="12" cy="8" r="1.6" fill="$accentHex"/>
+          <path d="M12 11.5v5" stroke="$accentHex" stroke-width="2" stroke-linecap="round"/>
+        </svg>''';
+        break;
+
+      case 'cache':
+        svgStr = '''<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M19 11l-8-8-8 8M4 11v9a2 2 0 002 2h12a2 2 0 002-2v-9" stroke="$mainColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M15 5l2-2 2 2-2 2-2-2zM9 13l1.5-1.5 1.5 1.5-1.5 1.5L9 13z" fill="$accentHex"/>
+        </svg>''';
+        break;
+
+      case 'delete_account':
+      default:
+        svgStr = '''<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2" stroke="$mainColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M10 11v6M14 11v6" stroke="$accentHex" stroke-width="2" stroke-linecap="round"/>
+        </svg>''';
+        break;
+    }
+
+    return SvgPicture.string(
+      svgStr,
+      width: size,
+      height: size,
+    );
+  }
+
   Widget _buildInfoTile({
-    required IconData icon,
+    required String iconType,
+    required String accentHex,
     required String title,
     required String value,
     required bool isDark,
-    Color? iconColor,
     VoidCallback? onTap,
   }) {
-    final effectiveIconColor = iconColor ?? (isDark ? Colors.white70 : const Color(0xFF7C3AED));
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(20),
+      borderRadius: BorderRadius.circular(16),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         child: Row(
           children: [
-            // Frameless icon placed cleanly at the left
-            Icon(icon, color: effectiveIconColor, size: 22),
+            // Dual-tone 60% Black/White + 40% Accent Color SVG Icon
+            _buildDualToneSvgIcon(iconType, accentHex, isDark, size: 20),
             const SizedBox(width: 14),
             Expanded(
               child: Column(
@@ -6277,7 +6553,7 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
                     style: AppTypography.cardTitle(
                       color: isDark ? Colors.white : const Color(0xFF0F172A),
                       fontWeight: FontWeight.w600,
-                      fontSize: 18,
+                      fontSize: 14.5,
                     ),
                   ),
                 ],
@@ -6286,7 +6562,7 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
             if (onTap != null)
               Icon(
                 Icons.copy_rounded,
-                size: 18,
+                size: 16,
                 color: isDark ? Colors.white38 : Colors.black38,
               ),
           ],
@@ -6296,26 +6572,25 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
   }
 
   Widget _buildSettingTile({
-    required IconData icon,
+    required String iconType,
+    required String accentHex,
     required String title,
     required String trailing,
     required VoidCallback onTap,
     required bool isDark,
-    Color? iconColor,
     Color? titleColor,
   }) {
-    final effectiveIconColor = iconColor ?? (isDark ? Colors.white70 : const Color(0xFF64748B));
     final effectiveTitleColor = titleColor ?? (isDark ? Colors.white : const Color(0xFF0F172A));
 
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(20),
+      borderRadius: BorderRadius.circular(16),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
         child: Row(
           children: [
-            // Frameless icon placed cleanly at the left
-            Icon(icon, color: effectiveIconColor, size: 22),
+            // Dual-tone 60% Black/White + 40% Accent Color SVG Icon
+            _buildDualToneSvgIcon(iconType, accentHex, isDark, size: 20),
             const SizedBox(width: 14),
             Text(
               title,
@@ -6323,7 +6598,7 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
               style: AppTypography.cardTitle(
                 color: effectiveTitleColor,
                 fontWeight: FontWeight.w600,
-                fontSize: 18,
+                fontSize: 14.5,
               ),
             ),
             const Spacer(),
@@ -6343,7 +6618,7 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
             Icon(
               Icons.chevron_right_rounded,
               color: isDark ? Colors.white38 : const Color(0xFF94A3B8),
-              size: 20,
+              size: 18,
             ),
           ],
         ),
@@ -6482,648 +6757,755 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
             final bool notifyChatMention = userData?['notifyChatMention'] ?? true;
 
             final heroColor = _getHeroColor(avatarPath, isDark);
-
             final heroTextColor = isDark ? Colors.white : const Color(0xFF0F172A);
+
+            final int cacheBytes = PaintingBinding.instance.imageCache.currentSizeBytes;
+            final double cacheMb = cacheBytes / (1024 * 1024);
+            final String cacheDisplay = cacheMb >= 1.0
+                ? '${cacheMb.toStringAsFixed(1)} MB'
+                : (cacheBytes > 0 ? '${(cacheBytes / 1024).toStringAsFixed(0)} KB' : '0 KB');
 
             return Scaffold(
               backgroundColor: isDark ? const Color(0xFF000000) : const Color(0xFFF8FAFC),
-              body: SingleChildScrollView(
-                padding: EdgeInsets.only(
-                  bottom: MediaQuery.of(context).padding.bottom + 80 + 24,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // 1. Symmetrical Curved Hero Header Card
-                    ClipRRect(
-                      borderRadius: const BorderRadius.vertical(
-                        bottom: Radius.circular(36),
+              body: Stack(
+                children: [
+                  // Main Scrollable Content
+                  SafeArea(
+                    bottom: false,
+                    child: SingleChildScrollView(
+                      controller: scrollController,
+                      padding: EdgeInsets.only(
+                        left: AppTypography.screenHorizontalMargin,
+                        right: AppTypography.screenHorizontalMargin,
+                        top: 14,
+                        bottom: MediaQuery.of(context).padding.bottom + 80 + 24,
                       ),
-                      child: Container(
-                        width: double.infinity,
-                        color: heroColor,
-                        child: AnimatedBuilder(
-                          animation: _animController,
-                          builder: (context, _) => CustomPaint(
-                            painter: _ProfileHeroMicroPatternPainter(
-                              avatarPath: avatarPath,
-                              isDark: isDark,
-                              progress: _animController.value,
-                            ),
-                            child: SafeArea(
-                              bottom: false,
-                              child: Padding(
-                                padding: EdgeInsets.symmetric(
-                                  horizontal: AppTypography.screenHorizontalMargin,
-                                  vertical: 16,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Unscrolled top row: "Profil" Title on the left, Red Logout Button on the right
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Text(
+                                'Profil',
+                                style: AppTypography.pageTitle(
+                                  color: isDark ? Colors.white : Colors.black,
+                                  fontWeight: FontWeight.w600,
                                 ),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: [
-                                    // Top Bar: Edit Action on top right (styled exactly like Mode Edit button)
-                                    Align(
-                                      alignment: Alignment.topRight,
-                                      child: InkWell(
-                                        borderRadius: BorderRadius.circular(20),
-                                        onTap: () {
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (_) => EditProfilePage(
-                                                uid: currentUid,
-                                                initialData: userData,
+                              ),
+                              BouncyButton(
+                                onTap: logOut,
+                                child: const Padding(
+                                  padding: EdgeInsets.all(6.0),
+                                  child: Icon(
+                                    Icons.logout_rounded,
+                                    color: Color(0xFFEF4444),
+                                    size: 26,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+
+                          // Rectangular Hero Profile Card (With Hero Color & Micro Pattern)
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(24),
+                            child: Container(
+                              width: double.infinity,
+                              color: heroColor,
+                              child: AnimatedBuilder(
+                                animation: _animController,
+                                builder: (context, _) => CustomPaint(
+                                  painter: _ProfileHeroMicroPatternPainter(
+                                    avatarPath: avatarPath,
+                                    isDark: isDark,
+                                    progress: _animController.value,
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(18),
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        // Top Action inside Card: "Edit Profil" Button on top-right (With Background Capsule)
+                                        Align(
+                                          alignment: Alignment.topRight,
+                                          child: BouncyButton(
+                                            onTap: () {
+                                              Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder: (_) => EditProfilePage(
+                                                    uid: currentUid,
+                                                    initialData: userData,
+                                                  ),
+                                                ),
+                                              );
+                                            },
+                                            child: Container(
+                                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                              decoration: BoxDecoration(
+                                                color: isDark ? const Color(0xFF27272A) : const Color(0xFF1E293B),
+                                                borderRadius: BorderRadius.circular(20),
+                                                border: isDark
+                                                    ? Border.all(color: const Color(0xFF3F3F46), width: 1.0)
+                                                    : null,
+                                              ),
+                                              child: Row(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  const Icon(Icons.edit_rounded, size: 12, color: Colors.white),
+                                                  const SizedBox(width: 5),
+                                                  Text(
+                                                    'Edit Profil',
+                                                    style: AppTypography.buttonLabel(
+                                                      color: Colors.white,
+                                                      fontWeight: FontWeight.bold,
+                                                      fontSize: 12.0,
+                                                    ),
+                                                  ),
+                                                ],
                                               ),
                                             ),
-                                          );
-                                        },
-                                        child: Container(
-                                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
-                                          decoration: BoxDecoration(
-                                            color: isDark ? const Color(0xFF27272A) : const Color(0xFF1E293B),
-                                            borderRadius: BorderRadius.circular(20),
-                                            border: isDark
-                                                ? Border.all(color: const Color(0xFF3F3F46), width: 1.0)
-                                                : null,
-                                          ),
-                                          child: Text(
-                                            'Edit Profil',
-                                            style: AppTypography.buttonLabel(
-                                              color: Colors.white,
-                                              fontWeight: FontWeight.bold,
-                                            ),
                                           ),
                                         ),
-                                      ),
-                                    ),
-                                    const SizedBox(height: 14),
+                                        const SizedBox(height: 8),
 
-                              // Symmetrical Centered Avatar (Tapping toggles floating overlay)
-                              GestureDetector(
-                                onTap: () {
-                                  setState(() {
-                                    _showAvatarOverlay = !_showAvatarOverlay;
-                                  });
-                                },
-                                child: Stack(
-                                  clipBehavior: Clip.none,
-                                  alignment: Alignment.bottomRight,
-                                  children: [
-                                    Container(
-                                      width: 92,
-                                      height: 92,
-                                      decoration: BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
-                                        border: Border.all(
-                                          color: Colors.white.withValues(alpha: 0.90),
-                                          width: 3.5,
+                                        // Content Row: Left Avatar (aligned to edge) + Right Info
+                                        Row(
+                                          crossAxisAlignment: CrossAxisAlignment.center,
+                                          children: [
+                                            // Left Avatar (Lurus rata kiri dengan ikon kartu di bawah, ukuran +20% & tanpa border)
+                                            GestureDetector(
+                                              onTap: () {
+                                                setState(() {
+                                                  _showAvatarOverlay = !_showAvatarOverlay;
+                                                });
+                                              },
+                                              child: Stack(
+                                                clipBehavior: Clip.none,
+                                                alignment: Alignment.bottomRight,
+                                                children: [
+                                                  Container(
+                                                    width: 86,
+                                                    height: 86,
+                                                    decoration: BoxDecoration(
+                                                      shape: BoxShape.circle,
+                                                      color: isDark
+                                                          ? const Color(0xFF27272A)
+                                                          : const Color(0xFFF1F5F9),
+                                                      boxShadow: [
+                                                        BoxShadow(
+                                                          color: Colors.black.withValues(alpha: 0.15),
+                                                          blurRadius: 10,
+                                                          offset: const Offset(0, 4),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                    child: ClipOval(
+                                                      child: Transform.scale(
+                                                        scale: 1.45,
+                                                        child: Image.asset(
+                                                          avatarPath,
+                                                          fit: BoxFit.cover,
+                                                          errorBuilder: (ctx, err, st) => Container(
+                                                            color: isDark
+                                                                ? const Color(0xFF27272A)
+                                                                : const Color(0xFFF1F5F9),
+                                                            child: Icon(
+                                                              Icons.person_rounded,
+                                                              size: 48,
+                                                              color: heroTextColor.withValues(alpha: 0.5),
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  Positioned(
+                                                    bottom: 0,
+                                                    right: 0,
+                                                    child: Container(
+                                                      padding: const EdgeInsets.all(5),
+                                                      decoration: BoxDecoration(
+                                                        color: _showAvatarOverlay
+                                                            ? const Color(0xFF7C3AED)
+                                                            : const Color(0xFFF59E0B),
+                                                        shape: BoxShape.circle,
+                                                        border: Border.all(
+                                                          color: Colors.white,
+                                                          width: 1.5,
+                                                        ),
+                                                      ),
+                                                      child: Icon(
+                                                        _showAvatarOverlay
+                                                            ? Icons.keyboard_arrow_up_rounded
+                                                            : Icons.edit_rounded,
+                                                        color: Colors.white,
+                                                        size: 12,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                            const SizedBox(width: 16),
+                                            // Right: Name, Role, ID
+                                            Expanded(
+                                              child: Column(
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                mainAxisAlignment: MainAxisAlignment.center,
+                                                children: [
+                                                  Text(
+                                                    name,
+                                                    style: AppTypography.pageTitle(
+                                                      color: heroTextColor,
+                                                      fontWeight: FontWeight.bold,
+                                                      fontSize: 22.0,
+                                                    ),
+                                                    maxLines: 1,
+                                                    overflow: TextOverflow.ellipsis,
+                                                  ),
+                                                  const SizedBox(height: 8),
+                                                  Wrap(
+                                                    spacing: 6,
+                                                    runSpacing: 5,
+                                                    crossAxisAlignment: WrapCrossAlignment.center,
+                                                    children: [
+                                                      Container(
+                                                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                                        decoration: BoxDecoration(
+                                                          color: roleDb.toLowerCase() == 'guru'
+                                                              ? const Color(0xFF7C3AED)
+                                                              : const Color(0xFF2563EB),
+                                                          borderRadius: BorderRadius.circular(20),
+                                                        ),
+                                                        child: Text(
+                                                          roleDb,
+                                                          style: AppTypography.timestamp(
+                                                            color: Colors.white,
+                                                            fontWeight: FontWeight.bold,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                      InkWell(
+                                                        borderRadius: BorderRadius.circular(20),
+                                                        onTap: () {
+                                                          Clipboard.setData(ClipboardData(text: userId));
+                                                          ScaffoldMessenger.of(context).showSnackBar(
+                                                            const SnackBar(
+                                                              content: Text('ID User berhasil disalin ke clipboard!'),
+                                                              duration: Duration(seconds: 1),
+                                                            ),
+                                                          );
+                                                        },
+                                                        child: Container(
+                                                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                                          decoration: BoxDecoration(
+                                                            color: isDark
+                                                                ? Colors.black.withValues(alpha: 0.35)
+                                                                : Colors.white.withValues(alpha: 0.55),
+                                                            borderRadius: BorderRadius.circular(20),
+                                                            border: Border.all(
+                                                              color: isDark
+                                                                  ? Colors.white.withValues(alpha: 0.15)
+                                                                  : Colors.black.withValues(alpha: 0.08),
+                                                              width: 1.0,
+                                                            ),
+                                                          ),
+                                                          child: Row(
+                                                            mainAxisSize: MainAxisSize.min,
+                                                            children: [
+                                                              Text(
+                                                                'ID: $userId',
+                                                                style: AppTypography.timestamp(
+                                                                  color: heroTextColor,
+                                                                  fontWeight: FontWeight.w600,
+                                                                ),
+                                                              ),
+                                                              const SizedBox(width: 4),
+                                                              Icon(
+                                                                Icons.copy_rounded,
+                                                                size: 11,
+                                                                color: heroTextColor,
+                                                              ),
+                                                            ],
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ],
                                         ),
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: Colors.black.withValues(alpha: 0.20),
-                                            blurRadius: 12,
-                                            offset: const Offset(0, 4),
+
+                                        // Floating In-Card Avatar Slider Overlay (if toggled)
+                                        if (_showAvatarOverlay) ...[
+                                          const SizedBox(height: 14),
+                                          ClipRRect(
+                                            borderRadius: BorderRadius.circular(20),
+                                            child: Container(
+                                              width: double.infinity,
+                                              height: 58,
+                                              padding: const EdgeInsets.symmetric(vertical: 5),
+                                              decoration: BoxDecoration(
+                                                color: isDark
+                                                    ? Colors.black.withValues(alpha: 0.50)
+                                                    : Colors.white.withValues(alpha: 0.50),
+                                                borderRadius: BorderRadius.circular(20),
+                                                border: Border.all(
+                                                  color: isDark
+                                                      ? Colors.white.withValues(alpha: 0.16)
+                                                      : Colors.black.withValues(alpha: 0.10),
+                                                  width: 1.0,
+                                                ),
+                                              ),
+                                              child: ListView.separated(
+                                                scrollDirection: Axis.horizontal,
+                                                physics: const BouncingScrollPhysics(),
+                                                padding: const EdgeInsets.symmetric(horizontal: 8),
+                                                itemCount: () {
+                                                  if (roleDb.toLowerCase() == 'guru') {
+                                                    return 10;
+                                                  } else if (schoolLevel == 'SD') {
+                                                    return 20;
+                                                  } else {
+                                                    return 10;
+                                                  }
+                                                }(),
+                                                separatorBuilder: (_, __) => const SizedBox(width: 8),
+                                                itemBuilder: (context, idx) {
+                                                  final String avPath;
+                                                  if (roleDb.toLowerCase() == 'guru') {
+                                                    avPath = 'assets/icon_pack/avatar/guru_${idx + 1}.png';
+                                                  } else if (schoolLevel == 'SD') {
+                                                    avPath = idx < 10
+                                                        ? 'assets/icon_pack/avatar/sd_${idx + 1}.png'
+                                                        : 'assets/icon_pack/avatar/avatar_${idx - 9}.png';
+                                                  } else if (schoolLevel == 'SMP') {
+                                                    avPath = 'assets/icon_pack/avatar/smp_${idx + 1}.png';
+                                                  } else {
+                                                    avPath = 'assets/icon_pack/avatar/sma_${idx + 1}.png';
+                                                  }
+
+                                                  final bool isSelected = avPath == avatarPath;
+
+                                                  return GestureDetector(
+                                                    onTap: () async {
+                                                      if (currentUid.isNotEmpty) {
+                                                        await FirebaseFirestore.instance
+                                                            .collection('users')
+                                                            .doc(currentUid)
+                                                            .update({'avatar': avPath});
+                                                      }
+                                                    },
+                                                    child: Container(
+                                                      width: 44,
+                                                      height: 44,
+                                                      decoration: BoxDecoration(
+                                                        shape: BoxShape.circle,
+                                                        border: isSelected
+                                                            ? Border.all(
+                                                                color: const Color(0xFF7C3AED),
+                                                                width: 2.5,
+                                                              )
+                                                            : Border.all(
+                                                                color: Colors.transparent,
+                                                                width: 1.5,
+                                                            ),
+                                                        color: isDark ? const Color(0xFF18181B) : const Color(0xFFF1F5F9),
+                                                      ),
+                                                      child: ClipOval(
+                                                        child: Transform.scale(
+                                                          scale: 1.45,
+                                                          child: Image.asset(
+                                                            avPath,
+                                                            fit: BoxFit.cover,
+                                                            errorBuilder: (_, __, ___) => const Icon(
+                                                              Icons.person_rounded,
+                                                              size: 22,
+                                                              color: Color(0xFF7C3AED),
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  );
+                                                },
+                                              ),
+                                            ),
                                           ),
                                         ],
-                                      ),
-                                      child: ClipOval(
-                                        child: Transform.scale(
-                                          scale: 1.45,
-                                          child: Image.asset(
-                                            avatarPath,
-                                            fit: BoxFit.cover,
-                                            errorBuilder: (ctx, err, st) => Container(
-                                              color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
-                                              child: Icon(
-                                                Icons.person_rounded,
-                                                size: 48,
-                                                color: heroTextColor.withValues(alpha: 0.5),
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      ),
+                                      ],
                                     ),
-                                    Positioned(
-                                      bottom: 0,
-                                      right: 0,
-                                      child: Container(
-                                        padding: const EdgeInsets.all(6),
-                                        decoration: BoxDecoration(
-                                          color: _showAvatarOverlay ? const Color(0xFF7C3AED) : const Color(0xFFF59E0B),
-                                          shape: BoxShape.circle,
-                                          border: Border.all(
-                                            color: Colors.white,
-                                            width: 1.8,
-                                          ),
-                                        ),
-                                        child: Icon(
-                                          _showAvatarOverlay ? Icons.keyboard_arrow_up_rounded : Icons.edit_rounded,
-                                          color: Colors.white,
-                                          size: 12,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
+                                  ),
                                 ),
                               ),
-                              const SizedBox(height: 12),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
 
-                              // Symmetrical Centered User Name (Black / High Contrast)
-                              Text(
-                                name,
-                                textAlign: TextAlign.center,
-                                style: AppTypography.pageTitle(
-                                  color: heroTextColor,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              const SizedBox(height: 6),
+                          // Section 1: Informasi Akun (Read-only Overview)
+                          _buildSectionHeader('Informasi Akun', isDark),
+                          _buildSectionCard([
+                            _buildInfoTile(
+                              iconType: 'email',
+                              accentHex: '#8B5CF6',
+                              title: 'Email',
+                              value: email,
+                              isDark: isDark,
+                            ),
+                            Divider(
+                              color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+                              height: 1,
+                              indent: 52,
+                            ),
+                            _buildInfoTile(
+                              iconType: 'gender',
+                              accentHex: '#EC4899',
+                              title: 'Jenis Kelamin',
+                              value: gender,
+                              isDark: isDark,
+                            ),
+                            Divider(
+                              color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+                              height: 1,
+                              indent: 52,
+                            ),
+                            _buildInfoTile(
+                              iconType: 'school',
+                              accentHex: '#14B8A6',
+                              title: 'Tingkat Sekolah',
+                              value: roleDb.toLowerCase() == 'siswa' && grade != '-'
+                                  ? '$schoolLevel (Kelas $grade)'
+                                  : schoolLevel,
+                              isDark: isDark,
+                            ),
+                            Divider(
+                              color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+                              height: 1,
+                              indent: 52,
+                            ),
+                            _buildInfoTile(
+                              iconType: 'timezone',
+                              accentHex: '#F59E0B',
+                              title: 'Zona Waktu',
+                              value: timezone,
+                              isDark: isDark,
+                            ),
+                            Divider(
+                              color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+                              height: 1,
+                              indent: 52,
+                            ),
+                            _buildInfoTile(
+                              iconType: 'language',
+                              accentHex: '#3B82F6',
+                              title: 'Bahasa',
+                              value: language,
+                              isDark: isDark,
+                            ),
+                          ], isDark),
 
-                              // Symmetrical Role Tag with Colored Block & ID User
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
-                                    decoration: BoxDecoration(
-                                      color: roleDb.toLowerCase() == 'guru'
-                                          ? const Color(0xFF7C3AED)
-                                          : const Color(0xFF2563EB),
-                                      borderRadius: BorderRadius.circular(10),
+                          // Section 2: Keamanan
+                          _buildSectionHeader('Keamanan', isDark),
+                          _buildSectionCard([
+                            _buildSettingTile(
+                              iconType: 'password',
+                              accentHex: '#EF4444',
+                              title: 'Ubah Password',
+                              trailing: 'Atur Ulang',
+                              isDark: isDark,
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => const ProfileSubPage(
+                                      title: 'Ubah Password',
+                                      child: ChangePasswordForm(),
                                     ),
-                                    child: Text(
-                                      roleDb,
-                                      style: AppTypography.timestamp(
-                                        color: Colors.white,
+                                  ),
+                                );
+                              },
+                            ),
+                            Divider(
+                              color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+                              height: 1,
+                              indent: 52,
+                            ),
+                            _buildSettingTile(
+                              iconType: 'security',
+                              accentHex: '#3B82F6',
+                              title: 'Otentikasi 2 Langkah',
+                              trailing: twoFactorEnabled ? 'Aktif' : 'Nonaktif',
+                              isDark: isDark,
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => ProfileSubPage(
+                                      title: 'Otentikasi 2 Langkah',
+                                      child: TwoFactorSetupForm(isEnabled: twoFactorEnabled, uid: currentUid),
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ], isDark),
+
+                          // Section 3: Tampilan & Notifikasi
+                          _buildSectionHeader('Tampilan & Notifikasi', isDark),
+                          _buildSectionCard([
+                            _buildSettingTile(
+                              iconType: 'theme',
+                              accentHex: '#F59E0B',
+                              title: 'Tema Tampilan',
+                              trailing: themeMode == 'Dark' ? 'Gelap' : 'Terang',
+                              isDark: isDark,
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => ProfileSubPage(
+                                      title: 'Ubah Tema',
+                                      child: ThemeSetupForm(currentTheme: themeMode, uid: currentUid),
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                            Divider(
+                              color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+                              height: 1,
+                              indent: 52,
+                            ),
+                            _buildSettingTile(
+                              iconType: 'notification',
+                              accentHex: '#10B981',
+                              title: 'Notifikasi',
+                              trailing: 'Atur Notifikasi',
+                              isDark: isDark,
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => ProfileSubPage(
+                                      title: 'Pengaturan Notifikasi',
+                                      child: NotificationSetupForm(
+                                        taskReminder: notifyTaskReminder,
+                                        chatMention: notifyChatMention,
+                                        uid: currentUid,
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ], isDark),
+
+                          // Section 4: Lainnya
+                          _buildSectionHeader('Lainnya', isDark),
+                          _buildSectionCard([
+                            _buildSettingTile(
+                              iconType: 'about',
+                              accentHex: '#06B6D4',
+                              title: 'Tentang Aplikasi',
+                              trailing: 'Hubner Edu v1.1.0',
+                              isDark: isDark,
+                              onTap: () {
+                                showDialog(
+                                  context: context,
+                                  builder: (ctx) => AlertDialog(
+                                    backgroundColor: isDark ? const Color(0xFF1C1C1E) : Colors.white,
+                                    title: Text(
+                                      'Tentang Hubner Edu',
+                                      style: AppTypography.buttonLabel(
+                                        color: isDark ? Colors.white : Colors.black87,
                                         fontWeight: FontWeight.bold,
                                       ),
                                     ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                                    decoration: BoxDecoration(
-                                      color: isDark
-                                          ? Colors.black.withValues(alpha: 0.35)
-                                          : Colors.white.withValues(alpha: 0.55),
-                                      borderRadius: BorderRadius.circular(10),
-                                      border: Border.all(
-                                        color: isDark
-                                            ? Colors.white.withValues(alpha: 0.15)
-                                            : Colors.black.withValues(alpha: 0.08),
-                                        width: 1.0,
+                                    content: Text(
+                                      'Hubner Edu adalah platform manajemen kelas online dan pembelajaran interaktif secara real-time.',
+                                      style: AppTypography.buttonLabel(
+                                        color: isDark ? Colors.white70 : Colors.black87,
                                       ),
                                     ),
-                                    child: InkWell(
-                                      borderRadius: BorderRadius.circular(10),
-                                      onTap: () {
-                                        Clipboard.setData(ClipboardData(text: userId));
-                                        ScaffoldMessenger.of(context).showSnackBar(
-                                          const SnackBar(content: Text('ID User berhasil disalin ke clipboard!')),
-                                        );
-                                      },
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Text(
-                                            'ID: $userId',
-                                            style: AppTypography.timestamp(
-                                              color: heroTextColor,
-                                              fontWeight: FontWeight.w600,
-                                            ),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () => Navigator.pop(ctx),
+                                        child: Text(
+                                          'Tutup',
+                                          style: AppTypography.buttonLabel(
+                                            color: isDark ? Colors.white : Colors.black87,
+                                            fontWeight: FontWeight.bold,
                                           ),
-                                          const SizedBox(width: 4),
-                                          Icon(
-                                            Icons.copy_rounded,
-                                            size: 12,
-                                            color: heroTextColor,
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-
-                              // Floating In-Card Avatar Slider Overlay (Bounded inside Card Bounds)
-                              if (_showAvatarOverlay) ...[
-                                const SizedBox(height: 14),
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(32),
-                                  child: BackdropFilter(
-                                    filter: ui.ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-                                    child: Container(
-                                      width: double.infinity,
-                                      height: 64,
-                                      padding: const EdgeInsets.symmetric(vertical: 6),
-                                      decoration: BoxDecoration(
-                                        color: isDark
-                                            ? Colors.black.withValues(alpha: 0.50)
-                                            : Colors.white.withValues(alpha: 0.50),
-                                        borderRadius: BorderRadius.circular(32),
-                                        border: Border.all(
-                                          color: isDark
-                                              ? Colors.white.withValues(alpha: 0.16)
-                                              : Colors.black.withValues(alpha: 0.10),
-                                          width: 1.2,
                                         ),
-                                      ),
-                                      child: ListView.separated(
-                                        scrollDirection: Axis.horizontal,
-                                        physics: const BouncingScrollPhysics(),
-                                        padding: const EdgeInsets.symmetric(horizontal: 10),
-                                        itemCount: () {
-                                          if (roleDb.toLowerCase() == 'guru') {
-                                            return 10;
-                                          } else if (schoolLevel == 'SD') {
-                                            return 20;
-                                          } else {
-                                            return 10;
-                                          }
-                                        }(),
-                                        separatorBuilder: (_, __) => const SizedBox(width: 8),
-                                        itemBuilder: (context, idx) {
-                                          final String avPath;
-                                          if (roleDb.toLowerCase() == 'guru') {
-                                            avPath = 'assets/icon_pack/avatar/guru_${idx + 1}.png';
-                                          } else if (schoolLevel == 'SD') {
-                                            avPath = idx < 10
-                                                ? 'assets/icon_pack/avatar/sd_${idx + 1}.png'
-                                                : 'assets/icon_pack/avatar/avatar_${idx - 9}.png';
-                                          } else if (schoolLevel == 'SMP') {
-                                            avPath = 'assets/icon_pack/avatar/smp_${idx + 1}.png';
-                                          } else {
-                                            avPath = 'assets/icon_pack/avatar/sma_${idx + 1}.png';
-                                          }
-
-                                          final bool isSelected = avPath == avatarPath;
-
-                                          return GestureDetector(
-                                            onTap: () async {
-                                              if (currentUid.isNotEmpty) {
-                                                await FirebaseFirestore.instance
-                                                    .collection('users')
-                                                    .doc(currentUid)
-                                                    .update({'avatar': avPath});
-                                              }
-                                            },
-                                            child: Container(
-                                              width: 50,
-                                              height: 50,
-                                              decoration: BoxDecoration(
-                                                shape: BoxShape.circle,
-                                                border: isSelected
-                                                    ? Border.all(
-                                                        color: const Color(0xFF7C3AED),
-                                                        width: 2.5,
-                                                      )
-                                                    : Border.all(color: Colors.transparent, width: 2.0),
-                                                color: isDark ? const Color(0xFF18181B) : const Color(0xFFF1F5F9),
-                                              ),
-                                              child: ClipOval(
-                                                child: Transform.scale(
-                                                  scale: 1.45,
-                                                  child: Image.asset(
-                                                    avPath,
-                                                    fit: BoxFit.cover,
-                                                    errorBuilder: (_, __, ___) => const Icon(
-                                                      Icons.person_rounded,
-                                                      size: 24,
-                                                      color: Color(0xFF7C3AED),
-                                                    ),
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                          );
-                                        },
-                                      ),
-                                    ),
+                                      )
+                                    ],
                                   ),
-                                ),
-                              ],
-                              const SizedBox(height: 12),
-                            ],
-                          ),
-                        ),
+                                );
+                              },
+                            ),
+                            Divider(
+                              color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+                              height: 1,
+                              indent: 52,
+                            ),
+                            _buildSettingTile(
+                              iconType: 'cache',
+                              accentHex: '#3B82F6',
+                              title: 'Hapus Cache',
+                              trailing: cacheDisplay,
+                              isDark: isDark,
+                              onTap: () {
+                                final int freedBytes = PaintingBinding.instance.imageCache.currentSizeBytes;
+                                final int count = PaintingBinding.instance.imageCache.currentSize;
+                                PaintingBinding.instance.imageCache.clear();
+                                PaintingBinding.instance.imageCache.clearLiveImages();
+                                setState(() {});
+                                final String freedStr = freedBytes >= 1024 * 1024
+                                    ? '${(freedBytes / (1024 * 1024)).toStringAsFixed(1)} MB'
+                                    : '${(freedBytes / 1024).toStringAsFixed(0)} KB';
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(freedBytes > 0
+                                        ? 'Cache gambar dan memori ($freedStr, $count objek) berhasil dibersihkan!'
+                                        : 'Cache memori sudah dalam kondisi bersih (0 KB).'),
+                                    backgroundColor: const Color(0xFF10B981),
+                                    behavior: SnackBarBehavior.floating,
+                                  ),
+                                );
+                              },
+                            ),
+                            Divider(
+                              color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+                              height: 1,
+                              indent: 52,
+                            ),
+                            _buildSettingTile(
+                              iconType: 'delete_account',
+                              accentHex: '#EF4444',
+                              titleColor: Colors.redAccent,
+                              title: 'Hapus Akun',
+                              trailing: '',
+                              isDark: isDark,
+                              onTap: () => _deleteAccount(context, currentUid),
+                            ),
+                          ], isDark),
+
+                          const SizedBox(height: 24),
+                        ],
                       ),
                     ),
                   ),
-                ),
-              ),
-              const SizedBox(height: 16),
 
-                // 2. Main Content Sections
-                Padding(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: AppTypography.screenHorizontalMargin,
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Section 1: Informasi Akun (Read-only Overview)
-                      _buildSectionHeader('Informasi Akun', isDark),
-                      _buildSectionCard([
-                        _buildInfoTile(
-                          icon: Icons.mail_outline_rounded,
-                          title: 'Email',
-                          value: email,
-                          iconColor: Colors.purpleAccent,
-                          isDark: isDark,
-                        ),
-                        Divider(
-                          color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
-                          height: 1,
-                          indent: 52,
-                        ),
-                        _buildInfoTile(
-                          icon: Icons.wc_rounded,
-                          title: 'Jenis Kelamin',
-                          value: gender,
-                          iconColor: Colors.pinkAccent,
-                          isDark: isDark,
-                        ),
-                        Divider(
-                          color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
-                          height: 1,
-                          indent: 52,
-                        ),
-                        _buildInfoTile(
-                          icon: Icons.school_rounded,
-                          title: 'Tingkat Sekolah',
-                          value: roleDb.toLowerCase() == 'siswa' && grade != '-'
-                              ? '$schoolLevel (Kelas $grade)'
-                              : schoolLevel,
-                          iconColor: Colors.teal,
-                          isDark: isDark,
-                        ),
-                        Divider(
-                          color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
-                          height: 1,
-                          indent: 52,
-                        ),
-                        _buildInfoTile(
-                          icon: Icons.public_rounded,
-                          title: 'Zona Waktu',
-                          value: timezone,
-                          iconColor: Colors.orangeAccent,
-                          isDark: isDark,
-                        ),
-                        Divider(
-                          color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
-                          height: 1,
-                          indent: 52,
-                        ),
-                        _buildInfoTile(
-                          icon: Icons.language_rounded,
-                          title: 'Bahasa',
-                          value: language,
-                          iconColor: Colors.indigoAccent,
-                          isDark: isDark,
-                        ),
-                      ], isDark),
+                  // Sticky Top Header Bar (Hanya muncul saat di-scroll melewati Edit Profil di kartu)
+                  Positioned(
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    child: ValueListenableBuilder<double>(
+                      valueListenable: _scrollOffsetNotifier,
+                      builder: (context, scrollOffset, _) {
+                        if (scrollOffset <= 80.0) {
+                          return const SizedBox.shrink();
+                        }
+                        final double progress = ((scrollOffset - 80.0) / 35.0).clamp(0.0, 1.0);
+                        final double blurSigma = 16.0 * progress;
 
-                      // Section 2: Keamanan
-                      _buildSectionHeader('Keamanan', isDark),
-                      _buildSectionCard([
-                        _buildSettingTile(
-                          icon: Icons.lock_outline_rounded,
-                          iconColor: Colors.redAccent,
-                          title: 'Ubah Password',
-                          trailing: 'Atur Ulang',
-                          isDark: isDark,
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => const ProfileSubPage(
-                                  title: 'Ubah Password',
-                                  child: ChangePasswordForm(),
-                                ),
+                        return Opacity(
+                          opacity: progress,
+                          child: ClipRect(
+                            child: BackdropFilter(
+                              filter: ui.ImageFilter.blur(
+                                sigmaX: blurSigma > 0.1 ? blurSigma : 0.001,
+                                sigmaY: blurSigma > 0.1 ? blurSigma : 0.001,
                               ),
-                            );
-                          },
-                        ),
-                        Divider(
-                          color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
-                          height: 1,
-                          indent: 52,
-                        ),
-                        _buildSettingTile(
-                          icon: Icons.security_rounded,
-                          iconColor: Colors.blueGrey,
-                          title: 'Otentikasi 2 Langkah',
-                          trailing: twoFactorEnabled ? 'Aktif' : 'Nonaktif',
-                          isDark: isDark,
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => ProfileSubPage(
-                                  title: 'Otentikasi 2 Langkah',
-                                  child: TwoFactorSetupForm(isEnabled: twoFactorEnabled, uid: currentUid),
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                        Divider(
-                          color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
-                          height: 1,
-                          indent: 52,
-                        ),
-                        _buildSettingTile(
-                          icon: Icons.devices_rounded,
-                          iconColor: Colors.teal,
-                          title: 'Sesi Aktif',
-                          trailing: '1 Sesi Aktif',
-                          isDark: isDark,
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => const ProfileSubPage(
-                                  title: 'Sesi Aktif',
-                                  child: ActiveSessionsForm(),
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                      ], isDark),
-
-                      // Section 3: Tampilan & Preferensi
-                      _buildSectionHeader('Tampilan & Notifikasi', isDark),
-                      _buildSectionCard([
-                        _buildSettingTile(
-                          icon: Icons.palette_outlined,
-                          iconColor: Colors.amber,
-                          title: 'Tema Tampilan',
-                          trailing: themeMode == 'Dark' ? 'Gelap' : 'Terang',
-                          isDark: isDark,
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => ProfileSubPage(
-                                  title: 'Ubah Tema',
-                                  child: ThemeSetupForm(currentTheme: themeMode, uid: currentUid),
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                        Divider(
-                          color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
-                          height: 1,
-                          indent: 52,
-                        ),
-                        _buildSettingTile(
-                          icon: Icons.notifications_none_rounded,
-                          iconColor: Colors.green,
-                          title: 'Notifikasi',
-                          trailing: 'Atur Notifikasi',
-                          isDark: isDark,
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => ProfileSubPage(
-                                  title: 'Pengaturan Notifikasi',
-                                  child: NotificationSetupForm(
-                                    taskReminder: notifyTaskReminder,
-                                    chatMention: notifyChatMention,
-                                    uid: currentUid,
-                                  ),
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                      ], isDark),
-
-                      // Section 4: Tentang & Bantuan
-                      _buildSectionHeader('Lainnya', isDark),
-                      _buildSectionCard([
-                        _buildSettingTile(
-                          icon: Icons.info_outline_rounded,
-                          iconColor: Colors.blueGrey,
-                          title: 'Tentang Aplikasi',
-                          trailing: 'Hubner Edu v1.1.0',
-                          isDark: isDark,
-                          onTap: () {
-                            showDialog(
-                              context: context,
-                              builder: (ctx) => AlertDialog(
-                                backgroundColor: isDark ? const Color(0xFF18181B) : Colors.white,
-                                title: Text(
-                                  'Hubner Edu',
-                                  style: AppTypography.buttonLabel(
-                                    color: isDark ? Colors.white : Colors.black87,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                content: Text(
-                                  'Hubner Edu adalah platform manajemen kelas online dan pembelajaran interaktif secara real-time.',
-                                  style: AppTypography.buttonLabel(
-                                    color: isDark ? Colors.white70 : Colors.black87,
-                                  ),
-                                ),
-                                actions: [
-                                  TextButton(
-                                    onPressed: () => Navigator.pop(ctx),
-                                    child: Text(
-                                      'Tutup',
-                                      style: AppTypography.buttonLabel(
-                                        color: const Color(0xFF7C3AED),
-                                        fontWeight: FontWeight.bold,
-                                      ),
+                              child: Container(
+                                color: (isDark ? const Color(0xFF000000) : const Color(0xFFF8FAFC))
+                                    .withValues(alpha: 0.75 * progress),
+                                child: SafeArea(
+                                  bottom: false,
+                                  child: Padding(
+                                    padding: EdgeInsets.symmetric(
+                                      horizontal: AppTypography.screenHorizontalMargin,
+                                      vertical: 8.0,
                                     ),
-                                  )
-                                ],
-                              ),
-                            );
-                          },
-                        ),
-                        Divider(
-                          color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
-                          height: 1,
-                          indent: 52,
-                        ),
-                        _buildSettingTile(
-                          icon: Icons.cleaning_services_rounded,
-                          iconColor: Colors.blueAccent,
-                          title: 'Hapus Cache',
-                          trailing: '14.8 MB',
-                          isDark: isDark,
-                          onTap: () {
-                            imageCache.clear();
-                            imageCache.clearLiveImages();
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Cache aplikasi (14.8 MB) berhasil dibersihkan!'),
-                                backgroundColor: Color(0xFF10B981),
-                                behavior: SnackBarBehavior.floating,
-                              ),
-                            );
-                          },
-                        ),
-                        Divider(
-                          color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
-                          height: 1,
-                          indent: 52,
-                        ),
-                        _buildSettingTile(
-                          icon: Icons.delete_forever_rounded,
-                          iconColor: Colors.redAccent,
-                          titleColor: Colors.redAccent,
-                          title: 'Hapus Akun',
-                          trailing: '',
-                          isDark: isDark,
-                          onTap: () => _deleteAccount(context, currentUid),
-                        ),
-                      ], isDark),
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      crossAxisAlignment: CrossAxisAlignment.center,
+                                      children: [
+                                        // Kiri: Edit Profil Button (Tanpa Background / Frameless di Sticky Header)
+                                        BouncyButton(
+                                          onTap: () {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (_) => EditProfilePage(
+                                                  uid: currentUid,
+                                                  initialData: userData,
+                                                ),
+                                              ),
+                                            );
+                                          },
+                                          child: Padding(
+                                            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                                            child: Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                Icon(
+                                                  Icons.edit_rounded,
+                                                  size: 16,
+                                                  color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                                ),
+                                                const SizedBox(width: 6),
+                                                Text(
+                                                  'Edit Profil',
+                                                  style: AppTypography.buttonLabel(
+                                                    color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: 14.0,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
 
-                      const SizedBox(height: 32),
-
-                      // Log out button (Solid Red, White Text, Round 32)
-                      SizedBox(
-                        width: double.infinity,
-                        height: 52,
-                        child: ElevatedButton.icon(
-                          onPressed: logOut,
-                          icon: const Icon(Icons.logout_rounded, size: 20, color: Colors.white),
-                          label: Text(
-                            'Keluar dari Akun',
-                            style: AppTypography.buttonLabel(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
+                                        // Kanan: Red Logout Button (Tanpa Background & Border)
+                                        BouncyButton(
+                                          onTap: logOut,
+                                          child: const Padding(
+                                            padding: EdgeInsets.all(6.0),
+                                            child: Icon(
+                                              Icons.logout_rounded,
+                                              color: Color(0xFFEF4444),
+                                              size: 26,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
                             ),
                           ),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFFEF4444), // Solid red
-                            foregroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(32), // Solid round
-                            ),
-                            elevation: 0,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                    ],
+                        );
+                      },
+                    ),
                   ),
-                ),
-              ],
-            ),
-          ),
+                ],
+              ),
+            );
+          },
         );
       },
     );
-  },
-);
   }
 }
 
@@ -7282,7 +7664,7 @@ class _EditNameFormState extends State<EditNameForm> {
               }
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF7F52FC),
+              backgroundColor: isDark ? const Color(0xFF27272A) : const Color(0xFF18181B),
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(32)),
               elevation: 0,
@@ -7331,7 +7713,7 @@ class EditTimezoneForm extends StatelessWidget {
               fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
             ),
           ),
-          trailing: isSelected ? const Icon(Icons.check_circle_rounded, color: Color(0xFF7F52FC)) : null,
+          trailing: isSelected ? Icon(Icons.check_circle_rounded, color: isDark ? Colors.white : const Color(0xFF18181B)) : null,
           onTap: () async {
             await FirebaseFirestore.instance.collection('users').doc(uid).update({'timezone': tz});
             if (context.mounted) {
@@ -7434,7 +7816,7 @@ class _ChangePasswordFormState extends State<ChangePasswordForm> {
               }
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF7F52FC),
+              backgroundColor: isDark ? const Color(0xFF27272A) : const Color(0xFF18181B),
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(32)),
               elevation: 0,
@@ -7486,7 +7868,7 @@ class TwoFactorSetupForm extends StatelessWidget {
             ),
             Switch.adaptive(
               value: isEnabled,
-              activeTrackColor: const Color(0xFF7F52FC),
+              activeTrackColor: isDark ? Colors.white : const Color(0xFF18181B),
               onChanged: (val) async {
                 await FirebaseFirestore.instance.collection('users').doc(uid).update({'twoFactorEnabled': val});
                 if (context.mounted) {
@@ -7616,7 +7998,7 @@ class ThemeSetupForm extends StatelessWidget {
                 ),
               ),
               trailing: isSelected
-                  ? Icon(Icons.check_circle_rounded, color: isDark ? Colors.white : const Color(0xFF7F52FC))
+                  ? Icon(Icons.check_circle_rounded, color: isDark ? Colors.white : const Color(0xFF18181B))
                   : null,
               onTap: () async {
                 String newTheme;
@@ -7675,7 +8057,7 @@ class _NotificationSetupFormState extends State<NotificationSetupForm> {
       children: [
         SwitchListTile.adaptive(
           contentPadding: EdgeInsets.zero,
-          activeTrackColor: const Color(0xFF7F52FC),
+          activeTrackColor: isDark ? Colors.white : const Color(0xFF18181B),
           title: Text(
             'Task Reminder',
             style: AppTypography.cardTitle(
@@ -7698,7 +8080,7 @@ class _NotificationSetupFormState extends State<NotificationSetupForm> {
         Divider(color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9)),
         SwitchListTile.adaptive(
           contentPadding: EdgeInsets.zero,
-          activeTrackColor: const Color(0xFF7F52FC),
+          activeTrackColor: isDark ? Colors.white : const Color(0xFF18181B),
           title: Text(
             'Chat Mention',
             style: AppTypography.cardTitle(

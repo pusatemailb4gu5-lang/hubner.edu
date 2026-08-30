@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 import 'dart:ui';
@@ -2170,9 +2171,9 @@ class _StudentHomePageState extends State<StudentHomePage> {
                                        final Color dotActive = isDark ? Colors.white : const Color(0xFF18181B);
                                        final Color dotInactive = isDark ? Colors.white38 : const Color(0xFF18181B).withValues(alpha: 0.35);
 
-                                       final taskChartValues = totalTugas > 0
+                                       final taskChartValues = (totalTugas > 0 && completedTugas > 0)
                                            ? List.generate(7, (i) => ((completedTugas / totalTugas) * 80 + (i * 3)).clamp(20, 100).toInt())
-                                           : [30, 45, 60, 50, 75, 85, 90];
+                                           : <int>[];
 
                                        return Row(
                                          children: [
@@ -2405,22 +2406,24 @@ class _StudentHomePageState extends State<StudentHomePage> {
                                                                          ],
                                                                        ),
                                                                      ),
-                                                                     const SizedBox(width: 8),
-                                                                     Expanded(
-                                                                       flex: 5,
-                                                                       child: SizedBox(
-                                                                         height: 78,
-                                                                         child: CustomPaint(
-                                                                           size: Size.infinite,
-                                                                           painter: _StressStyleBarChartPainter(
-                                                                             values: taskChartValues,
-                                                                             isDark: isDark,
-                                                                             barColor: isDark ? Colors.white : const Color(0xFF9A3412),
-                                                                             lineColor: isDark ? Colors.white : const Color(0xFF431407),
+                                                                     if (taskChartValues.isNotEmpty) ...[
+                                                                       const SizedBox(width: 8),
+                                                                       Expanded(
+                                                                         flex: 5,
+                                                                         child: SizedBox(
+                                                                           height: 78,
+                                                                           child: CustomPaint(
+                                                                             size: Size.infinite,
+                                                                             painter: _StressStyleBarChartPainter(
+                                                                               values: taskChartValues,
+                                                                               isDark: isDark,
+                                                                               barColor: isDark ? Colors.white : const Color(0xFF9A3412),
+                                                                               lineColor: isDark ? Colors.white : const Color(0xFF431407),
+                                                                             ),
                                                                            ),
                                                                          ),
                                                                        ),
-                                                                     ),
+                                                                     ],
                                                                    ],
                                                                  ),
                                                          ),
@@ -2468,7 +2471,7 @@ class _StudentHomePageState extends State<StudentHomePage> {
                                            ? (quizScores.length >= 5
                                                ? quizScores.sublist(quizScores.length - 5)
                                                : quizScores)
-                                           : [65, 80, 85, 75, 95];
+                                           : <int>[];
 
                                        return Row(
                                          children: [
@@ -2615,11 +2618,7 @@ class _StudentHomePageState extends State<StudentHomePage> {
                                                                                ),
                                                                              ),
                                                                            ),
-                                                                           Icon(
-                                                                             Icons.emoji_events_rounded,
-                                                                             size: 26,
-                                                                             color: isDark ? const Color(0xFFFBBF24) : const Color(0xFF0284C7),
-                                                                           ),
+                                                                           const _TrophySvgIcon(size: 28),
                                                                          ],
                                                                        ),
                                                                      ),
@@ -2660,7 +2659,7 @@ class _StudentHomePageState extends State<StudentHomePage> {
                                                                                  TextSpan(
                                                                                    children: [
                                                                                      TextSpan(
-                                                                                       text: avgScoreText,
+                                                                                       text: avgScoreText == '-' ? '0' : avgScoreText,
                                                                                        style: GoogleFonts.plusJakartaSans(
                                                                                          fontSize: 38.0,
                                                                                          fontWeight: FontWeight.w900,
@@ -2684,7 +2683,11 @@ class _StudentHomePageState extends State<StudentHomePage> {
                                                                                ),
                                                                                const SizedBox(height: 11),
                                                                                Text(
-                                                                                 'Rata-rata 5 kuis terakhir',
+                                                                                 quizScores.isNotEmpty
+                                                                                     ? (last5Scores.length == 1
+                                                                                         ? '1 kuis diselesaikan'
+                                                                                         : 'Rata-rata ${last5Scores.length} kuis terakhir')
+                                                                                     : 'Belum ada quiz yang dikerjakan',
                                                                                  style: GoogleFonts.dmSans(
                                                                                    fontSize: 13.5,
                                                                                    fontWeight: FontWeight.w600,
@@ -2697,22 +2700,24 @@ class _StudentHomePageState extends State<StudentHomePage> {
                                                                              ],
                                                                            ),
                                                                          ),
-                                                                         const SizedBox(width: 8),
-                                                                         Expanded(
-                                                                           flex: 5,
-                                                                           child: SizedBox(
-                                                                             height: 78,
-                                                                             child: CustomPaint(
-                                                                               size: Size.infinite,
-                                                                               painter: _StressStyleBarChartPainter(
-                                                                                 values: last5Scores,
-                                                                                 isDark: isDark,
-                                                                                 barColor: isDark ? Colors.white : const Color(0xFF3B82F6),
-                                                                                 lineColor: isDark ? Colors.white : const Color(0xFF1D4ED8),
+                                                                         if (last5Scores.isNotEmpty) ...[
+                                                                           const SizedBox(width: 8),
+                                                                           Expanded(
+                                                                             flex: 5,
+                                                                             child: SizedBox(
+                                                                               height: 78,
+                                                                               child: CustomPaint(
+                                                                                 size: Size.infinite,
+                                                                                 painter: _StressStyleBarChartPainter(
+                                                                                   values: last5Scores,
+                                                                                   isDark: isDark,
+                                                                                   barColor: isDark ? Colors.white : const Color(0xFF3B82F6),
+                                                                                   lineColor: isDark ? Colors.white : const Color(0xFF1D4ED8),
+                                                                                 ),
                                                                                ),
                                                                              ),
                                                                            ),
-                                                                         ),
+                                                                         ],
                                                                        ],
                                                                      )
                                                                    : Row(
@@ -2801,12 +2806,8 @@ class _StudentHomePageState extends State<StudentHomePage> {
                                                                                width: 1.5,
                                                                              ),
                                                                            ),
-                                                                           child: Center(
-                                                                             child: Icon(
-                                                                               Icons.military_tech_rounded,
-                                                                               size: 36,
-                                                                               color: isDark ? const Color(0xFFFBBF24) : const Color(0xFF0284C7),
-                                                                             ),
+                                                                           child: const Center(
+                                                                             child: _TrophySvgIcon(size: 40),
                                                                            ),
                                                                          ),
                                                                        ],
@@ -2860,7 +2861,7 @@ class _StudentHomePageState extends State<StudentHomePage> {
                                             'subtitle': todayQuizDeadlines.isEmpty
                                                 ? 'Tidak ada kuis aktif untuk tanggal ini.'
                                                 : '${todayQuizDeadlines.first['title']} (${todayQuizDeadlines.first['projectName']})',
-                                            'doodle': const _LotusBowlDoodle(size: 68),
+                                            'doodle': _QuizPuzzleDoodle(width: 96, height: 60, isDark: isDark),
                                           },
                                           {
                                             'tag': 'Deadline Tugas',
@@ -2870,7 +2871,7 @@ class _StudentHomePageState extends State<StudentHomePage> {
                                             'subtitle': todayTugasDeadlines.isEmpty
                                                 ? 'Tidak ada tugas deadline untuk tanggal ini.'
                                                 : '${todayTugasDeadlines.first['title']} (${todayTugasDeadlines.first['projectName']})',
-                                            'doodle': const _TaskDeadlineDoodle(size: 68),
+                                            'doodle': _TaskDeadlineDoodle(width: 96, height: 60, isDark: isDark),
                                           },
                                           {
                                             'tag': 'Jadwal Kelas',
@@ -2880,7 +2881,7 @@ class _StudentHomePageState extends State<StudentHomePage> {
                                             'subtitle': activeSchedules.isEmpty
                                                 ? 'Tidak ada jadwal kelas untuk tanggal ini.'
                                                 : '${activeSchedules.first['time'] ?? ''} · ${activeSchedules.first['projectName'] ?? 'Classroom'}',
-                                            'doodle': const _ClassScheduleDoodle(size: 68),
+                                            'doodle': _ClassScheduleDoodle(width: 96, height: 60, isDark: isDark),
                                           },
                                         ];
 
@@ -8710,9 +8711,10 @@ class _QuizSparklinePainter extends CustomPainter {
   bool shouldRepaint(covariant _QuizSparklinePainter oldDelegate) => true;
 }
 
-class _ClassScheduleDoodle extends StatelessWidget {
+/// 0. Trophy SVG Icon for Student Banner (2-Tone Model: Golden Yellow & Warm Brown/Bronze)
+class _TrophySvgIcon extends StatelessWidget {
   final double size;
-  const _ClassScheduleDoodle({super.key, this.size = 68});
+  const _TrophySvgIcon({super.key, this.size = 36});
 
   @override
   Widget build(BuildContext context) {
@@ -8720,226 +8722,316 @@ class _ClassScheduleDoodle extends StatelessWidget {
       width: size,
       height: size,
       child: CustomPaint(
-        painter: _ClassSchedulePainter(),
+        painter: _TrophySvgPainter(),
       ),
     );
   }
 }
 
-class _ClassSchedulePainter extends CustomPainter {
+class _TrophySvgPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final double w = size.width;
     final double h = size.height;
 
-    final Paint outline = Paint()
-      ..color = const Color(0xFF1E293B)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 2.2
-      ..strokeCap = StrokeCap.round
-      ..strokeJoin = StrokeJoin.round;
+    // 2-Tone Color Palette: Golden Yellow & Warm Brown/Bronze
+    final Paint goldBright = Paint()..color = const Color(0xFFFBBF24)..style = PaintingStyle.fill;
+    final Paint goldLight = Paint()..color = const Color(0xFFFEF08A)..style = PaintingStyle.fill;
+    final Paint bronzeDark = Paint()..color = const Color(0xFF92400E)..style = PaintingStyle.fill;
+    final Paint bronzeShade = Paint()..color = const Color(0xFFB45309)..style = PaintingStyle.fill;
 
-    final Paint bookBg = Paint()..color = const Color(0xFFBAE6FD)..style = PaintingStyle.fill;
-    final Paint bookmark = Paint()..color = const Color(0xFFF472B6)..style = PaintingStyle.fill;
-    final Paint pencil = Paint()..color = const Color(0xFFFDE047)..style = PaintingStyle.fill;
-
-    final Path leftPage = Path()
-      ..moveTo(w * 0.50, h * 0.78)
-      ..cubicTo(w * 0.35, h * 0.72, w * 0.20, h * 0.76, w * 0.12, h * 0.70)
-      ..lineTo(w * 0.12, h * 0.28)
-      ..cubicTo(w * 0.22, h * 0.34, w * 0.36, h * 0.30, w * 0.50, h * 0.36)
+    // 1. Trophy Ear Handles (Outer Brown/Bronze with Inner Gold)
+    // Left Handle
+    final Path leftHandle = Path()
+      ..moveTo(w * 0.28, h * 0.22)
+      ..cubicTo(w * 0.04, h * 0.22, w * 0.04, h * 0.52, w * 0.32, h * 0.50)
+      ..lineTo(w * 0.32, h * 0.42)
+      ..cubicTo(w * 0.14, h * 0.44, w * 0.14, h * 0.28, w * 0.28, h * 0.28)
       ..close();
-    canvas.drawPath(leftPage, bookBg);
-    canvas.drawPath(leftPage, outline);
+    canvas.drawPath(leftHandle, bronzeShade);
 
-    final Path rightPage = Path()
-      ..moveTo(w * 0.50, h * 0.78)
-      ..cubicTo(w * 0.65, h * 0.72, w * 0.80, h * 0.76, w * 0.88, h * 0.70)
-      ..lineTo(w * 0.88, h * 0.28)
-      ..cubicTo(w * 0.78, h * 0.34, w * 0.64, h * 0.30, w * 0.50, h * 0.36)
+    // Right Handle
+    final Path rightHandle = Path()
+      ..moveTo(w * 0.72, h * 0.22)
+      ..cubicTo(w * 0.96, h * 0.22, w * 0.96, h * 0.52, w * 0.68, h * 0.50)
+      ..lineTo(w * 0.68, h * 0.42)
+      ..cubicTo(w * 0.86, h * 0.44, w * 0.86, h * 0.28, w * 0.72, h * 0.28)
       ..close();
-    canvas.drawPath(rightPage, bookBg);
-    canvas.drawPath(rightPage, outline);
+    canvas.drawPath(rightHandle, bronzeDark);
 
-    canvas.drawLine(Offset(w * 0.50, h * 0.36), Offset(w * 0.50, h * 0.78), outline);
-
-    final Path ribbon = Path()
-      ..moveTo(w * 0.46, h * 0.36)
-      ..lineTo(w * 0.46, h * 0.55)
-      ..lineTo(w * 0.50, h * 0.50)
-      ..lineTo(w * 0.54, h * 0.55)
-      ..lineTo(w * 0.54, h * 0.36)
-      ..close();
-    canvas.drawPath(ribbon, bookmark);
-    canvas.drawPath(ribbon, outline);
-
-    final Path pencilPath = Path()
-      ..moveTo(w * 0.70, h * 0.18)
-      ..lineTo(w * 0.82, h * 0.08)
-      ..lineTo(w * 0.88, h * 0.14)
-      ..lineTo(w * 0.76, h * 0.24)
-      ..close();
-    canvas.drawPath(pencilPath, pencil);
-    canvas.drawPath(pencilPath, outline);
-  }
-
-  @override
-  bool shouldRepaint(covariant _ClassSchedulePainter oldDelegate) => false;
-}
-
-class _TaskDeadlineDoodle extends StatelessWidget {
-  final double size;
-  const _TaskDeadlineDoodle({super.key, this.size = 68});
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: size,
-      height: size,
-      child: CustomPaint(
-        painter: _TaskDeadlinePainter(),
-      ),
+    // 2. Base Pedestal (Brownish Base)
+    // Bottom Block
+    final RRect bottomBlock = RRect.fromRectAndRadius(
+      Rect.fromLTWH(w * 0.24, h * 0.82, w * 0.52, h * 0.14),
+      Radius.circular(w * 0.04),
     );
-  }
-}
+    canvas.drawRRect(bottomBlock, bronzeDark);
 
-class _TaskDeadlinePainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final double w = size.width;
-    final double h = size.height;
-
-    final Paint outline = Paint()
-      ..color = const Color(0xFF1E293B)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 2.2
-      ..strokeCap = StrokeCap.round
-      ..strokeJoin = StrokeJoin.round;
-
-    final Paint boardBg = Paint()..color = const Color(0xFFFED7AA)..style = PaintingStyle.fill;
-    final Paint paperBg = Paint()..color = Colors.white..style = PaintingStyle.fill;
-    final Paint clipBg = Paint()..color = const Color(0xFF94A3B8)..style = PaintingStyle.fill;
-    final Paint checkBg = Paint()..color = const Color(0xFF4ADE80)..style = PaintingStyle.fill;
-
-    final RRect board = RRect.fromRectAndRadius(
-      Rect.fromLTWH(w * 0.15, h * 0.16, w * 0.70, h * 0.76),
-      const Radius.circular(12),
+    // Pedestal Plate (Gold Accent on Base)
+    final RRect basePlate = RRect.fromRectAndRadius(
+      Rect.fromLTWH(w * 0.32, h * 0.74, w * 0.36, h * 0.08),
+      Radius.circular(w * 0.02),
     );
-    canvas.drawRRect(board, boardBg);
-    canvas.drawRRect(board, outline);
+    canvas.drawRRect(basePlate, bronzeShade);
 
-    final RRect paper = RRect.fromRectAndRadius(
-      Rect.fromLTWH(w * 0.23, h * 0.24, w * 0.54, h * 0.62),
-      const Radius.circular(6),
+    // Stem / Pillar
+    final RRect stem = RRect.fromRectAndRadius(
+      Rect.fromLTWH(w * 0.43, h * 0.58, w * 0.14, h * 0.18),
+      Radius.circular(w * 0.03),
     );
-    canvas.drawRRect(paper, paperBg);
-    canvas.drawRRect(paper, outline);
+    canvas.drawRRect(stem, bronzeShade);
 
-    final RRect clamp = RRect.fromRectAndRadius(
-      Rect.fromLTWH(w * 0.36, h * 0.10, w * 0.28, h * 0.12),
-      const Radius.circular(5),
+    // Stem Ring (Golden Yellow)
+    final RRect stemRing = RRect.fromRectAndRadius(
+      Rect.fromLTWH(w * 0.38, h * 0.65, w * 0.24, h * 0.05),
+      Radius.circular(w * 0.02),
     );
-    canvas.drawRRect(clamp, clipBg);
-    canvas.drawRRect(clamp, outline);
+    canvas.drawRRect(stemRing, goldBright);
 
-    canvas.drawLine(Offset(w * 0.32, h * 0.40), Offset(w * 0.68, h * 0.40), outline);
-    canvas.drawLine(Offset(w * 0.32, h * 0.54), Offset(w * 0.68, h * 0.54), outline);
-    canvas.drawLine(Offset(w * 0.32, h * 0.68), Offset(w * 0.56, h * 0.68), outline);
-
-    canvas.drawCircle(Offset(w * 0.75, h * 0.74), 10, checkBg);
-    canvas.drawCircle(Offset(w * 0.75, h * 0.74), 10, outline);
-    final Path checkPath = Path()
-      ..moveTo(w * 0.70, h * 0.74)
-      ..lineTo(w * 0.74, h * 0.78)
-      ..lineTo(w * 0.81, h * 0.69);
-    canvas.drawPath(checkPath, outline);
-  }
-
-  @override
-  bool shouldRepaint(covariant _TaskDeadlinePainter oldDelegate) => false;
-}
-
-/// 3. Doodle Illustration for Jadwal Kuis (Lotus Bowl of Wisdom)
-class _LotusBowlDoodle extends StatelessWidget {
-  final double size;
-
-  const _LotusBowlDoodle({super.key, this.size = 68});
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: size,
-      height: size,
-      child: CustomPaint(
-        painter: _LotusBowlPainter(),
-      ),
-    );
-  }
-}
-
-class _LotusBowlPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final double w = size.width;
-    final double h = size.height;
-
-    final Paint outlinePaint = Paint()
-      ..color = const Color(0xFF1E293B)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 2.0
-      ..strokeCap = StrokeCap.round
-      ..strokeJoin = StrokeJoin.round;
-
-    final Paint bowlPaint = Paint()
-      ..color = const Color(0xFFFED7AA) // Warm peach
-      ..style = PaintingStyle.fill;
-
-    final Paint waterPaint = Paint()
-      ..color = const Color(0xFFBAE6FD) // Light cyan water
-      ..style = PaintingStyle.fill;
-
-    final Paint lotusPaint = Paint()
-      ..color = const Color(0xFFF472B6) // Soft pink lotus
-      ..style = PaintingStyle.fill;
-
-    // 1. Draw Bowl Semi-Ellipse
-    final Path bowlPath = Path()
-      ..moveTo(w * 0.10, h * 0.45)
-      ..cubicTo(w * 0.15, h * 0.95, w * 0.85, h * 0.95, w * 0.90, h * 0.45)
+    // 3. Main Trophy Cup Body
+    // Left half (Golden Yellow)
+    final Path cupLeft = Path()
+      ..moveTo(w * 0.22, h * 0.15)
+      ..lineTo(w * 0.50, h * 0.15)
+      ..lineTo(w * 0.50, h * 0.58)
+      ..cubicTo(w * 0.38, h * 0.58, w * 0.22, h * 0.44, w * 0.22, h * 0.15)
       ..close();
-    canvas.drawPath(bowlPath, bowlPaint);
+    canvas.drawPath(cupLeft, goldBright);
 
-    // 2. Draw Water Surface
-    final Path waterPath = Path()
-      ..moveTo(w * 0.10, h * 0.45)
-      ..cubicTo(w * 0.35, h * 0.55, w * 0.65, h * 0.55, w * 0.90, h * 0.45)
-      ..cubicTo(w * 0.85, h * 0.60, w * 0.15, h * 0.60, w * 0.10, h * 0.45)
-      ..close();
-    canvas.drawPath(waterPath, waterPaint);
-
-    // 3. Draw Lotus Flower on Top
-    final Path lotusPath = Path()
+    // Right half (Shaded Brownish Bronze)
+    final Path cupRight = Path()
       ..moveTo(w * 0.50, h * 0.15)
-      ..quadraticBezierTo(w * 0.42, h * 0.30, w * 0.45, h * 0.45)
-      ..lineTo(w * 0.55, h * 0.45)
-      ..quadraticBezierTo(w * 0.58, h * 0.30, w * 0.50, h * 0.15)
-      ..moveTo(w * 0.45, h * 0.45)
-      ..quadraticBezierTo(w * 0.30, h * 0.30, w * 0.28, h * 0.25)
-      ..quadraticBezierTo(w * 0.36, h * 0.40, w * 0.46, h * 0.46)
-      ..moveTo(w * 0.55, h * 0.45)
-      ..quadraticBezierTo(w * 0.70, h * 0.30, w * 0.72, h * 0.25)
-      ..quadraticBezierTo(w * 0.64, h * 0.40, w * 0.54, h * 0.46)
+      ..lineTo(w * 0.78, h * 0.15)
+      ..cubicTo(w * 0.78, h * 0.44, w * 0.62, h * 0.58, w * 0.50, h * 0.58)
       ..close();
-    canvas.drawPath(lotusPath, lotusPaint);
-    canvas.drawPath(lotusPath, outlinePaint);
+    canvas.drawPath(cupRight, bronzeShade);
 
-    // 4. Draw Bowl Outline
-    canvas.drawPath(bowlPath, outlinePaint);
-    canvas.drawLine(Offset(w * 0.10, h * 0.45), Offset(w * 0.90, h * 0.45), outlinePaint);
+    // 4. Cup Top Rim (Oval Lid/Rim)
+    final RRect rimLeft = RRect.fromRectAndRadius(
+      Rect.fromLTWH(w * 0.18, h * 0.11, w * 0.32, h * 0.08),
+      Radius.circular(w * 0.04),
+    );
+    canvas.drawRRect(rimLeft, goldLight);
+
+    final RRect rimRight = RRect.fromRectAndRadius(
+      Rect.fromLTWH(w * 0.50, h * 0.11, w * 0.32, h * 0.08),
+      Radius.circular(w * 0.04),
+    );
+    canvas.drawRRect(rimRight, bronzeShade);
+
+    // 5. Star / Emblem on Cup (Light Yellow / Bright Highlight)
+    final Path star = Path()
+      ..moveTo(w * 0.50, h * 0.25)
+      ..lineTo(w * 0.525, h * 0.32)
+      ..lineTo(w * 0.60, h * 0.32)
+      ..lineTo(w * 0.54, h * 0.365)
+      ..lineTo(w * 0.565, h * 0.435)
+      ..lineTo(w * 0.50, h * 0.39)
+      ..lineTo(w * 0.435, h * 0.435)
+      ..lineTo(w * 0.46, h * 0.365)
+      ..lineTo(w * 0.40, h * 0.32)
+      ..lineTo(w * 0.475, h * 0.32)
+      ..close();
+    canvas.drawPath(star, goldLight);
   }
 
   @override
-  bool shouldRepaint(covariant _LotusBowlPainter oldDelegate) => false;
+  bool shouldRepaint(covariant _TrophySvgPainter oldDelegate) => false;
+}
+
+/// 1. Premium Vector Illustration for Jadwal Kelas (Kalender + Karakter Avatar Siluet 1 Guru & 3 Siswa - Persegi Panjang)
+class _ClassScheduleDoodle extends StatelessWidget {
+  final double width;
+  final double height;
+  final bool isDark;
+  const _ClassScheduleDoodle({
+    super.key,
+    this.width = 96,
+    this.height = 60,
+    this.isDark = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final spineColor = isDark ? '#FFFFFF' : '#0F172A';
+    final cardBg = isDark ? '#1E293B' : '#FFFFFF';
+    final gridBox = isDark ? '#334155' : '#F1F5F9';
+
+    return SvgPicture.string(
+      '''<svg viewBox="0 0 96 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- 1. Background Calendar Board (Persegi Panjang) -->
+        <rect x="4" y="6" width="88" height="50" rx="12" fill="$cardBg"/>
+        <rect x="4" y="6" width="88" height="13" rx="12" fill="#0284C7"/>
+        <rect x="4" y="13" width="88" height="6" fill="#0284C7"/>
+
+        <!-- Calendar Spiral Rings (20% Black Spine) -->
+        <circle cx="16" cy="6" r="2.2" fill="$spineColor"/>
+        <circle cx="32" cy="6" r="2.2" fill="$spineColor"/>
+        <circle cx="48" cy="6" r="2.2" fill="$spineColor"/>
+        <circle cx="64" cy="6" r="2.2" fill="$spineColor"/>
+        <circle cx="80" cy="6" r="2.2" fill="$spineColor"/>
+
+        <!-- Calendar Month Badge & Mini Grid -->
+        <rect x="12" y="10" width="22" height="4" rx="2" fill="#FFFFFF"/>
+        <circle cx="82" cy="12" r="2" fill="#FACC15"/>
+        <rect x="10" y="24" width="8" height="5" rx="1.5" fill="$gridBox"/>
+        <rect x="22" y="24" width="8" height="5" rx="1.5" fill="#38BDF8"/>
+        <rect x="66" y="24" width="8" height="5" rx="1.5" fill="$gridBox"/>
+        <rect x="78" y="24" width="8" height="5" rx="1.5" fill="#FB923C"/>
+
+        <!-- 2. Karakter 4 Avatar Siluet Minimalis (1 Guru di Tengah + 3 Siswa) -->
+        <!-- Siswa 1 (Kiri - Avatar Biru Muda) -->
+        <circle cx="21" cy="30" r="5" fill="#38BDF8"/>
+        <path d="M12 52c0-6 4-10 9-10s9 4 9 10" fill="#0EA5E9"/>
+
+        <!-- Siswa 3 (Tengah Kiri - Avatar Kuning/Amber) -->
+        <circle cx="35" cy="27" r="4.5" fill="#FDE047"/>
+        <path d="M28 50c0-5 3.2-8.5 7-8.5s7 3.5 7 8.5" fill="#F59E0B"/>
+
+        <!-- GURU (Tengah - Avatar Berwibawa Indigo & Dasi Emas) -->
+        <circle cx="50" cy="25" r="6" fill="#818CF8"/>
+        <circle cx="50" cy="25" r="6" stroke="$spineColor" stroke-width="1.2" fill="none"/>
+        <path d="M40 54c0-7 4.5-12 10-12s10 5 10 12" fill="#4F46E5"/>
+        <polygon points="50,42.5 51.8,47 50,49.5 48.2,47" fill="#FACC15"/>
+
+        <!-- Siswa 2 (Kanan - Avatar Rose/Red) -->
+        <circle cx="68" cy="30" r="5" fill="#FB7185"/>
+        <path d="M59 52c0-6 4-10 9-10s9 4 9 10" fill="#F43F5E"/>
+
+        <!-- Floating Sparkles -->
+        <path d="M6 21l0.6 1.4 1.4 0.6-1.4 0.6-0.6 1.4-0.6-1.4-1.4-0.6 1.4-0.6 0.6-1.4z" fill="#FACC15"/>
+        <path d="M88 22l0.6 1.4 1.4 0.6-1.4 0.6-0.6 1.4-0.6-1.4-1.4-0.6 1.4-0.6 0.6-1.4z" fill="#38BDF8"/>
+      </svg>''',
+      width: width,
+      height: height,
+    );
+  }
+}
+
+/// 2. Premium Vector Illustration for Deadline Tugas (Note + Pulpen + Checklist - Persegi Panjang)
+class _TaskDeadlineDoodle extends StatelessWidget {
+  final double width;
+  final double height;
+  final bool isDark;
+  const _TaskDeadlineDoodle({
+    super.key,
+    this.width = 96,
+    this.height = 60,
+    this.isDark = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final spineColor = isDark ? '#FFFFFF' : '#0F172A';
+    final cardBg = isDark ? '#1E293B' : '#FFFDF5';
+
+    return SvgPicture.string(
+      '''<svg viewBox="0 0 96 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- 1. Clipboard Base (Persegi Panjang) -->
+        <rect x="5" y="6" width="86" height="50" rx="12" fill="$cardBg"/>
+        <!-- Top Spine Clip (20% Black) -->
+        <rect x="33" y="2" width="30" height="7" rx="3.5" fill="$spineColor"/>
+        <circle cx="48" cy="5.5" r="1.6" fill="#FACC15"/>
+
+        <!-- Header Ribbon (Violet) -->
+        <rect x="14" y="14" width="46" height="4" rx="2" fill="#8B5CF6"/>
+
+        <!-- Task Checklist Row 1 (Green Check Badge + Rose Task Bar) -->
+        <circle cx="18" cy="24" r="3.6" fill="#10B981"/>
+        <path d="M16.5 24l1 1 2-2" stroke="#FFFFFF" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+        <rect x="25" y="22" width="34" height="4" rx="2" fill="#FB7185"/>
+
+        <!-- Task Checklist Row 2 (Blue Check Badge + Gold Task Bar) -->
+        <circle cx="18" cy="33.5" r="3.6" fill="#0284C7"/>
+        <path d="M16.5 33.5l1 1 2-2" stroke="#FFFFFF" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+        <rect x="25" y="31.5" width="28" height="4" rx="2" fill="#FACC15"/>
+
+        <!-- Task Checklist Row 3 (Purple Check Badge + Cyan Task Bar) -->
+        <circle cx="18" cy="43" r="3.6" fill="#8B5CF6"/>
+        <path d="M16.5 43l1 1 2-2" stroke="#FFFFFF" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+        <rect x="25" y="41" width="22" height="4" rx="2" fill="#38BDF8"/>
+
+        <!-- 2. Angled Stylus / Pulpen (Orange Body, Gold Nib, Cyan Cap) -->
+        <!-- Pen Body -->
+        <polygon points="62,50 78,14 84,17 68,53" fill="#FB923C"/>
+        <!-- Pen Grip (20% Black Spine) -->
+        <polygon points="64,46 70,32 73,33.5 67,47.5" fill="$spineColor"/>
+        <!-- Pen Cap -->
+        <polygon points="76,19 78,14 84,17 82,22" fill="#06B6D4"/>
+        <rect x="81.5" y="14.5" width="2.5" height="8" rx="1" transform="rotate(30 81.5 14.5)" fill="#FACC15"/>
+        <!-- Pen Nib Tip -->
+        <polygon points="62,50 68,53 58,60" fill="#FACC15"/>
+        <circle cx="58" cy="60" r="1" fill="$spineColor"/>
+
+        <!-- Sparkles -->
+        <path d="M78 8l0.8 1.8 1.8 0.8-1.8 0.8-0.8 1.8-0.8-1.8-1.8-0.8 1.8-0.8 0.8-1.8z" fill="#FACC15"/>
+        <path d="M6 28l0.6 1.4 1.4 0.6-1.4 0.6-0.6 1.4-0.6-1.4-1.4-0.6 1.4-0.6 0.6-1.4z" fill="#10B981"/>
+      </svg>''',
+      width: width,
+      height: height,
+    );
+  }
+}
+
+/// 3. Premium Vector Illustration for Jadwal Kuis (Karakter Avatar Siluet & Puzzle Interlocking - Persegi Panjang)
+class _QuizPuzzleDoodle extends StatelessWidget {
+  final double width;
+  final double height;
+  final bool isDark;
+  const _QuizPuzzleDoodle({
+    super.key,
+    this.width = 96,
+    this.height = 60,
+    this.isDark = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final spineColor = isDark ? '#FFFFFF' : '#0F172A';
+    final auraBg = isDark ? '#2E1065' : '#EDE9FE';
+
+    return SvgPicture.string(
+      '''<svg viewBox="0 0 96 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- 1. Background Aura Badge (Persegi Panjang) -->
+        <rect x="4" y="4" width="88" height="52" rx="14" fill="$auraBg" fill-opacity="0.65"/>
+
+        <!-- 2. Interlocking Colorful Puzzle Pieces (Sisi Kiri) -->
+        <!-- Piece 1: Top-Left (Violet) -->
+        <path d="M12 10h11c0 2 1.6 3.6 3.6 3.6s3.6-1.6 3.6-3.6h6v10c-2 0-3.6 1.6-3.6 3.6s1.6 3.6 3.6 3.6v6H25c0-2-1.6-3.6-3.6-3.6s-3.6 1.6-3.6 3.6H12V30c2 0 3.6-1.6 3.6-3.6s-1.6-3.6-3.6-3.6V10z" fill="#8B5CF6"/>
+        <circle cx="20" cy="18" r="2" fill="#C084FC"/>
+
+        <!-- Piece 2: Top-Right (Sky Blue) -->
+        <path d="M37 10h16c2 0 3.6 1.6 3.6 3.6v12c-2 0-3.6 1.6-3.6 3.6s1.6 3.6 3.6 3.6v4H45c0-2-1.6-3.6-3.6-3.6s-3.6 1.6-3.6 3.6h-2V37c2 0 3.6-1.6 3.6-3.6s-1.6-3.6-3.6-3.6V10z" fill="#0EA5E9"/>
+        <circle cx="47" cy="18" r="2" fill="#7DD3FC"/>
+
+        <!-- Piece 3: Bottom-Left (Emerald Green) -->
+        <path d="M12 34h13c0 2 1.6 3.6 3.6 3.6s3.6-1.6 3.6-3.6h6v12c0 2-1.6 3.6-3.6 3.6H25c0-2-1.6-3.6-3.6-3.6s-3.6 1.6-3.6 3.6H16c-2 0-3.6-1.6-3.6-3.6V34z" fill="#10B981"/>
+        <circle cx="20" cy="42" r="2" fill="#6EE7B7"/>
+
+        <!-- Piece 4: Bottom-Right (Amber Gold) -->
+        <path d="M37 34h19v12c0 2-1.6 3.6-3.6 3.6H41c0-2-1.6-3.6-3.6-3.6s-3.6 1.6-3.6 3.6h-4V34z" fill="#F59E0B"/>
+        <circle cx="47" cy="42" r="2" fill="#FDE047"/>
+
+        <!-- 3. Karakter Avatar Siluet Minimalis (Sisi Kanan - Bentuk Geometris Bersih) -->
+        <!-- Kepala Avatar Siluet (Lingkaran) -->
+        <circle cx="73" cy="22" r="7.5" fill="#A855F7"/>
+        <circle cx="73" cy="22" r="7.5" stroke="$spineColor" stroke-width="1.2" fill="none"/>
+
+        <!-- Badan / Pundak Avatar Siluet (Rounded Torso Silhouette) -->
+        <path d="M60 52c0-8 5.8-14 13-14s13 6 13 14" fill="#7C3AED"/>
+
+        <!-- Floating Golden Star Puzzle Piece -->
+        <rect x="53" y="16" width="10" height="10" rx="2.5" transform="rotate(15 53 16)" fill="#FACC15"/>
+        <circle cx="58" cy="15" r="2" fill="#F59E0B"/>
+
+        <!-- Sparkles -->
+        <path d="M86 12l0.6 1.4 1.4 0.6-1.4 0.6-0.6 1.4-0.6-1.4-1.4-0.6 1.4-0.6 0.6-1.4z" fill="#FACC15"/>
+        <path d="M8 24l0.6 1.4 1.4 0.6-1.4 0.6-0.6 1.4-0.6-1.4-1.4-0.6 1.4-0.6 0.6-1.4z" fill="#38BDF8"/>
+      </svg>''',
+      width: width,
+      height: height,
+    );
+  }
 }
 
 class _StressStyleBarChartPainter extends CustomPainter {
@@ -8958,17 +9050,30 @@ class _StressStyleBarChartPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     if (values.isEmpty) return;
+
     final displayValues = values.length > 5 ? values.sublist(values.length - 5) : values;
     final int count = displayValues.length;
-    final double barWidth = (size.width / (count * 1.5)).clamp(6.0, 14.0);
-    final double spacing = count > 1 ? (size.width - (count * barWidth)) / (count - 1) : 0;
+
+    final double barWidth;
+    final double spacing;
+    final double startX;
+
+    if (count == 1) {
+      barWidth = 14.0;
+      spacing = 0.0;
+      startX = (size.width - barWidth) / 2;
+    } else {
+      barWidth = (size.width / (count * 1.8)).clamp(8.0, 16.0);
+      spacing = (size.width - (count * barWidth)) / (count - 1);
+      startX = 0.0;
+    }
 
     final points = <Offset>[];
 
     for (int i = 0; i < count; i++) {
       final double val = (displayValues[i] / 100.0).clamp(0.20, 1.0);
       final double barH = val * (size.height - 14);
-      final double x = i * (barWidth + spacing);
+      final double x = startX + i * (barWidth + spacing);
       final double y = size.height - barH;
 
       // Draw capsule vertical bar
@@ -8984,8 +9089,13 @@ class _StressStyleBarChartPainter extends CustomPainter {
       points.add(Offset(x + barWidth / 2, y - 4));
     }
 
-    // Draw smooth cubic spline line above bars
-    if (points.length >= 2) {
+    // Draw connecting line & point dots
+    if (points.length == 1) {
+      final Paint dotPaint = Paint()
+        ..color = lineColor
+        ..style = PaintingStyle.fill;
+      canvas.drawCircle(points.first, 3.5, dotPaint);
+    } else if (points.length >= 2) {
       final path = Path()..moveTo(points.first.dx, points.first.dy);
       for (int i = 0; i < points.length - 1; i++) {
         final p0 = points[i];
@@ -9000,6 +9110,13 @@ class _StressStyleBarChartPainter extends CustomPainter {
         ..strokeWidth = 2.2
         ..strokeCap = StrokeCap.round;
       canvas.drawPath(path, linePaint);
+
+      final Paint dotPaint = Paint()
+        ..color = lineColor
+        ..style = PaintingStyle.fill;
+      for (var pt in points) {
+        canvas.drawCircle(pt, 3.0, dotPaint);
+      }
     }
   }
 

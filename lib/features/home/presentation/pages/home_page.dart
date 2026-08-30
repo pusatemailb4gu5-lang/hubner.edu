@@ -8031,47 +8031,79 @@ class _TaskDeadlinePainter extends CustomPainter {
     final Paint outline = Paint()
       ..color = const Color(0xFF1E293B)
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 2.2
+      ..strokeWidth = 2.0
       ..strokeCap = StrokeCap.round
       ..strokeJoin = StrokeJoin.round;
 
-    final Paint boardBg = Paint()..color = const Color(0xFFFED7AA)..style = PaintingStyle.fill;
-    final Paint paperBg = Paint()..color = Colors.white..style = PaintingStyle.fill;
-    final Paint clipBg = Paint()..color = const Color(0xFF94A3B8)..style = PaintingStyle.fill;
-    final Paint checkBg = Paint()..color = const Color(0xFF4ADE80)..style = PaintingStyle.fill;
+    final Paint noteCoverBg = Paint()..color = const Color(0xFFFED7AA)..style = PaintingStyle.fill;
+    final Paint notePaperBg = Paint()..color = Colors.white..style = PaintingStyle.fill;
+    final Paint penBodyBg = Paint()..color = const Color(0xFFFB923C)..style = PaintingStyle.fill;
+    final Paint penCapBg = Paint()..color = const Color(0xFF38BDF8)..style = PaintingStyle.fill;
+    final Paint penNibBg = Paint()..color = const Color(0xFFFDE047)..style = PaintingStyle.fill;
+    final Paint spiralBg = Paint()..color = const Color(0xFF94A3B8)..style = PaintingStyle.fill;
 
-    final RRect board = RRect.fromRectAndRadius(
-      Rect.fromLTWH(w * 0.15, h * 0.16, w * 0.70, h * 0.76),
-      const Radius.circular(12),
+    // 1. Note Book Backing Cover
+    final RRect noteCover = RRect.fromRectAndRadius(
+      Rect.fromLTWH(w * 0.15, h * 0.14, w * 0.64, h * 0.76),
+      const Radius.circular(10),
     );
-    canvas.drawRRect(board, boardBg);
-    canvas.drawRRect(board, outline);
+    canvas.drawRRect(noteCover, noteCoverBg);
+    canvas.drawRRect(noteCover, outline);
 
-    final RRect paper = RRect.fromRectAndRadius(
-      Rect.fromLTWH(w * 0.23, h * 0.24, w * 0.54, h * 0.62),
+    // 2. Note Paper Page
+    final RRect notePaper = RRect.fromRectAndRadius(
+      Rect.fromLTWH(w * 0.22, h * 0.20, w * 0.52, h * 0.64),
       const Radius.circular(6),
     );
-    canvas.drawRRect(paper, paperBg);
-    canvas.drawRRect(paper, outline);
+    canvas.drawRRect(notePaper, notePaperBg);
+    canvas.drawRRect(notePaper, outline);
 
-    final RRect clamp = RRect.fromRectAndRadius(
-      Rect.fromLTWH(w * 0.36, h * 0.10, w * 0.28, h * 0.12),
-      const Radius.circular(5),
-    );
-    canvas.drawRRect(clamp, clipBg);
-    canvas.drawRRect(clamp, outline);
+    // 3. Notebook Horizontal Ruled Lines
+    canvas.drawLine(Offset(w * 0.28, h * 0.34), Offset(w * 0.66, h * 0.34), outline);
+    canvas.drawLine(Offset(w * 0.28, h * 0.46), Offset(w * 0.54, h * 0.46), outline);
+    canvas.drawLine(Offset(w * 0.28, h * 0.58), Offset(w * 0.66, h * 0.58), outline);
+    canvas.drawLine(Offset(w * 0.28, h * 0.70), Offset(w * 0.50, h * 0.70), outline);
 
-    canvas.drawLine(Offset(w * 0.32, h * 0.40), Offset(w * 0.68, h * 0.40), outline);
-    canvas.drawLine(Offset(w * 0.32, h * 0.54), Offset(w * 0.68, h * 0.54), outline);
-    canvas.drawLine(Offset(w * 0.32, h * 0.68), Offset(w * 0.56, h * 0.68), outline);
+    // 4. Spiral Binder Rings on Left
+    for (int i = 0; i < 4; i++) {
+      final double ringY = h * 0.26 + (i * h * 0.14);
+      final RRect ring = RRect.fromRectAndRadius(
+        Rect.fromLTWH(w * 0.12, ringY, w * 0.10, h * 0.06),
+        const Radius.circular(2),
+      );
+      canvas.drawRRect(ring, spiralBg);
+      canvas.drawRRect(ring, outline);
+    }
 
-    canvas.drawCircle(Offset(w * 0.75, h * 0.74), 10, checkBg);
-    canvas.drawCircle(Offset(w * 0.75, h * 0.74), 10, outline);
-    final Path checkPath = Path()
-      ..moveTo(w * 0.70, h * 0.74)
-      ..lineTo(w * 0.74, h * 0.78)
-      ..lineTo(w * 0.81, h * 0.69);
-    canvas.drawPath(checkPath, outline);
+    // 5. Diagonal Pen / Pencil across bottom-right
+    // Pen Barrel
+    final Path penBody = Path()
+      ..moveTo(w * 0.56, h * 0.72)
+      ..lineTo(w * 0.82, h * 0.24)
+      ..lineTo(w * 0.90, h * 0.29)
+      ..lineTo(w * 0.64, h * 0.77)
+      ..close();
+    canvas.drawPath(penBody, penBodyBg);
+    canvas.drawPath(penBody, outline);
+
+    // Pen Cap / Top Accent
+    final Path penCap = Path()
+      ..moveTo(w * 0.78, h * 0.31)
+      ..lineTo(w * 0.82, h * 0.24)
+      ..lineTo(w * 0.90, h * 0.29)
+      ..lineTo(w * 0.86, h * 0.36)
+      ..close();
+    canvas.drawPath(penCap, penCapBg);
+    canvas.drawPath(penCap, outline);
+
+    // Pen Nib (Pointed Tip)
+    final Path penNib = Path()
+      ..moveTo(w * 0.56, h * 0.72)
+      ..lineTo(w * 0.64, h * 0.77)
+      ..lineTo(w * 0.50, h * 0.86)
+      ..close();
+    canvas.drawPath(penNib, penNibBg);
+    canvas.drawPath(penNib, outline);
   }
 
   @override

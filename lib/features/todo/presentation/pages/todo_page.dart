@@ -11,6 +11,7 @@ import 'package:hubner/features/projects/presentation/pages/mengerjakan_quiz_pag
 import 'package:hubner/features/projects/presentation/pages/mengerjakan_tugas_page.dart';
 import 'package:hubner/features/projects/presentation/pages/baca_materi_page.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:hubner/main.dart';
 
 class TodoPage extends StatefulWidget {
   final DateTime? initialDate;
@@ -176,30 +177,35 @@ class _TodoPageState extends State<TodoPage> {
 
   @override
   Widget build(BuildContext context) {
-    final bool isDark = AppColors.isDarkMode;
-    final DateTime now = DateTime.now();
-    final DateTime todayDate = DateTime(now.year, now.month, now.day);
+    return ValueListenableBuilder<String>(
+      valueListenable: HubnerApp.themeNotifier,
+      builder: (context, themeMode, _) {
+        final bool isDark = themeMode == 'Gelap' || themeMode == 'Hitam';
+        AppColors.themeMode = themeMode;
 
-    // 16 rolling calendar days around today
-    final List<DateTime> calendarDays = List.generate(21, (index) {
-      return todayDate.subtract(const Duration(days: 4)).add(Duration(days: index));
-    });
+        final DateTime now = DateTime.now();
+        final DateTime todayDate = DateTime(now.year, now.month, now.day);
 
-    final fullDateText = _getFullDateString(_selectedDay);
+        // 21 rolling calendar days around today
+        final List<DateTime> calendarDays = List.generate(21, (index) {
+          return todayDate.subtract(const Duration(days: 4)).add(Duration(days: index));
+        });
 
-    return Scaffold(
-      backgroundColor: Colors.transparent,
-      body: Align(
-        alignment: Alignment.topCenter,
-        child: Container(
-          constraints: BoxConstraints(
-            maxWidth: MediaQuery.of(context).size.width > 500 ? double.infinity : 500,
-          ),
-          child: Stack(
-            children: [
-              // 1. Main Scrollable Content (Underlay with smooth blur transition)
-              StreamBuilder<DocumentSnapshot>(
-                stream: _userStream,
+        final fullDateText = _getFullDateString(_selectedDay);
+
+        return Scaffold(
+          backgroundColor: Colors.transparent,
+          body: Align(
+            alignment: Alignment.topCenter,
+            child: Container(
+              constraints: BoxConstraints(
+                maxWidth: MediaQuery.of(context).size.width > 500 ? double.infinity : 500,
+              ),
+              child: Stack(
+                children: [
+                  // 1. Main Scrollable Content (Underlay with smooth blur transition)
+                  StreamBuilder<DocumentSnapshot>(
+                    stream: _userStream,
                     builder: (context, userSnapshot) {
                       if (userSnapshot.connectionState == ConnectionState.waiting && !userSnapshot.hasData) {
                         return const Center(child: CircularProgressIndicator());
@@ -238,7 +244,7 @@ class _TodoPageState extends State<TodoPage> {
                             );
                           }
 
-                            return StreamBuilder<List<DocumentSnapshot>>(
+                          return StreamBuilder<List<DocumentSnapshot>>(
                             stream: _combineUserProgressStreams(projectDocs, currentUid),
                             builder: (context, progressSnap) {
                               final Map<String, List<String>> progressMap = {};
@@ -414,7 +420,7 @@ class _TodoPageState extends State<TodoPage> {
                                       _buildSectionHeader(
                                         title: 'Tugas Hari Ini',
                                         count: tasksToday.length,
-                                        iconWidget: const _TaskDeadlineDoodle(size: 24),
+                                        iconWidget: _TaskDeadlineDoodle(size: 24, isDark: isDark),
                                         accentColor: const Color(0xFFF59E0B),
                                         isDark: isDark,
                                       ),
@@ -422,7 +428,7 @@ class _TodoPageState extends State<TodoPage> {
                                       Container(
                                         clipBehavior: Clip.antiAlias,
                                         decoration: BoxDecoration(
-                                          color: isDark ? const Color(0xFF241D17) : const Color(0xFFFFEDD5),
+                                          color: isDark ? const Color(0xFF1E1B16) : const Color(0xFFFFEDD5),
                                           borderRadius: BorderRadius.circular(22),
                                         ),
                                         child: Stack(
@@ -467,7 +473,7 @@ class _TodoPageState extends State<TodoPage> {
                                       _buildSectionHeader(
                                         title: 'Materi Belum Dibaca',
                                         count: unreadMateris.length,
-                                        iconWidget: const _ClassScheduleDoodle(size: 24),
+                                        iconWidget: _ClassScheduleDoodle(size: 24, isDark: isDark),
                                         accentColor: const Color(0xFF0284C7),
                                         isDark: isDark,
                                       ),
@@ -475,7 +481,7 @@ class _TodoPageState extends State<TodoPage> {
                                       Container(
                                         clipBehavior: Clip.antiAlias,
                                         decoration: BoxDecoration(
-                                          color: isDark ? const Color(0xFF132230) : const Color(0xFFE0F2FE),
+                                          color: isDark ? const Color(0xFF0F1C2E) : const Color(0xFFE0F2FE),
                                           borderRadius: BorderRadius.circular(22),
                                         ),
                                         child: Stack(
@@ -515,7 +521,7 @@ class _TodoPageState extends State<TodoPage> {
                                       _buildSectionHeader(
                                         title: pendingQuizzes.any((q) => q['isCompleted'] != true) ? 'Quiz Belum Dikerjakan' : 'Quiz & Evaluasi',
                                         count: pendingQuizzes.length,
-                                        iconWidget: const _QuizPuzzleDoodle(size: 24),
+                                        iconWidget: _QuizPuzzleDoodle(size: 24, isDark: isDark),
                                         accentColor: const Color(0xFF9333EA),
                                         isDark: isDark,
                                       ),
@@ -523,7 +529,7 @@ class _TodoPageState extends State<TodoPage> {
                                       Container(
                                         clipBehavior: Clip.antiAlias,
                                         decoration: BoxDecoration(
-                                          color: isDark ? const Color(0xFF1E142B) : const Color(0xFFF3E8FF),
+                                          color: isDark ? const Color(0xFF1A1226) : const Color(0xFFF3E8FF),
                                           borderRadius: BorderRadius.circular(22),
                                         ),
                                         child: Stack(
@@ -566,108 +572,110 @@ class _TodoPageState extends State<TodoPage> {
                     },
                   ),
 
-              // 2. Sticky Glassmorphic Header Bar (Transparan Glassmorphic Blur 20px - Muncul saat di-scroll)
-              Positioned(
-                top: 0,
-                left: 0,
-                right: 0,
-                child: ValueListenableBuilder<double>(
-                  valueListenable: _scrollOffsetNotifier,
-                  builder: (context, scrollOffset, _) {
-                    if (scrollOffset <= 20.0) {
-                      return const SizedBox.shrink();
-                    }
-                    final double scrollProgress = ((scrollOffset - 20.0) / 30.0).clamp(0.0, 1.0);
-                    final double blurSigma = 20.0 * scrollProgress;
+                  // 2. Sticky Glassmorphic Header Bar (Transparan Glassmorphic Blur 20px - Muncul saat di-scroll)
+                  Positioned(
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    child: ValueListenableBuilder<double>(
+                      valueListenable: _scrollOffsetNotifier,
+                      builder: (context, scrollOffset, _) {
+                        if (scrollOffset <= 20.0) {
+                          return const SizedBox.shrink();
+                        }
+                        final double scrollProgress = ((scrollOffset - 20.0) / 30.0).clamp(0.0, 1.0);
+                        final double blurSigma = 20.0 * scrollProgress;
 
-                    return Opacity(
-                      opacity: scrollProgress,
-                      child: ClipRect(
-                        child: BackdropFilter(
-                          filter: ui.ImageFilter.blur(
-                            sigmaX: blurSigma > 0.1 ? blurSigma : 0.001,
-                            sigmaY: blurSigma > 0.1 ? blurSigma : 0.001,
-                          ),
-                          child: Container(
-                            width: double.infinity,
-                            padding: EdgeInsets.fromLTRB(
-                              AppTypography.screenHorizontalMargin,
-                              MediaQuery.of(context).padding.top + 8.0,
-                              AppTypography.screenHorizontalMargin,
-                              10.0,
-                            ),
-                            decoration: BoxDecoration(
-                              color: isDark
-                                  ? const Color(0xFF000000).withValues(alpha: 0.60 * scrollProgress)
-                                  : Colors.white.withValues(alpha: 0.65 * scrollProgress),
-                              border: Border(
-                                bottom: BorderSide(
-                                  color: (isDark
-                                          ? const Color(0xFF27272A)
-                                          : const Color(0xFFF1F5F9))
-                                      .withValues(alpha: 0.9 * scrollProgress),
-                                  width: 1.0,
-                                ),
+                        return Opacity(
+                          opacity: scrollProgress,
+                          child: ClipRect(
+                            child: BackdropFilter(
+                              filter: ui.ImageFilter.blur(
+                                sigmaX: blurSigma > 0.1 ? blurSigma : 0.001,
+                                sigmaY: blurSigma > 0.1 ? blurSigma : 0.001,
                               ),
-                            ),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                // Tulisan "Tugas" HILANG digantikan tulisan tanggal
-                                Row(
+                              child: Container(
+                                width: double.infinity,
+                                padding: EdgeInsets.fromLTRB(
+                                  AppTypography.screenHorizontalMargin,
+                                  MediaQuery.of(context).padding.top + 8.0,
+                                  AppTypography.screenHorizontalMargin,
+                                  10.0,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: isDark
+                                      ? const Color(0xFF000000).withValues(alpha: 0.60 * scrollProgress)
+                                      : Colors.white.withValues(alpha: 0.65 * scrollProgress),
+                                  border: Border(
+                                    bottom: BorderSide(
+                                      color: (isDark
+                                              ? const Color(0xFF27272A)
+                                              : const Color(0xFFF1F5F9))
+                                          .withValues(alpha: 0.9 * scrollProgress),
+                                      width: 1.0,
+                                    ),
+                                  ),
+                                ),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    if (widget.showBackButton && Navigator.canPop(context)) ...[
-                                      GestureDetector(
-                                        onTap: () => Navigator.pop(context),
-                                        child: Container(
-                                          width: 32,
-                                          height: 32,
-                                          margin: const EdgeInsets.only(right: 8),
-                                          decoration: BoxDecoration(
-                                            color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
-                                            shape: BoxShape.circle,
+                                    // Tulisan "Tugas" HILANG digantikan tulisan tanggal
+                                    Row(
+                                      children: [
+                                        if (widget.showBackButton && Navigator.canPop(context)) ...[
+                                          GestureDetector(
+                                            onTap: () => Navigator.pop(context),
+                                            child: Container(
+                                              width: 32,
+                                              height: 32,
+                                              margin: const EdgeInsets.only(right: 8),
+                                              decoration: BoxDecoration(
+                                                color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+                                                shape: BoxShape.circle,
+                                              ),
+                                              child: Icon(
+                                                Icons.arrow_back_rounded,
+                                                color: isDark ? Colors.white : Colors.black87,
+                                                size: 16,
+                                              ),
+                                            ),
                                           ),
-                                          child: Icon(
-                                            Icons.arrow_back_rounded,
-                                            color: isDark ? Colors.white : Colors.black87,
-                                            size: 16,
+                                        ],
+                                        Text(
+                                          fullDateText,
+                                          style: GoogleFonts.plusJakartaSans(
+                                            fontSize: 16.0,
+                                            fontWeight: FontWeight.w800,
+                                            color: isDark ? Colors.white : const Color(0xFF0F172A),
                                           ),
                                         ),
-                                      ),
-                                    ],
-                                    Text(
-                                      fullDateText,
-                                      style: GoogleFonts.plusJakartaSans(
-                                        fontSize: 16.0,
-                                        fontWeight: FontWeight.w800,
-                                        color: isDark ? Colors.white : const Color(0xFF0F172A),
-                                      ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 8),
+
+                                    // Slider Kalender juga Sticky
+                                    _buildCircularCalendarSlider(
+                                      isDark: isDark,
+                                      calendarDays: calendarDays,
+                                      controller: _stickyCalendarScrollController,
+                                      storageKey: 'todo_sticky_calendar',
                                     ),
                                   ],
                                 ),
-                                const SizedBox(height: 8),
-
-                                // Slider Kalender juga Sticky
-                                _buildCircularCalendarSlider(
-                                  isDark: isDark,
-                                  calendarDays: calendarDays,
-                                  controller: _stickyCalendarScrollController,
-                                  storageKey: 'todo_sticky_calendar',
-                                ),
-                              ],
+                              ),
                             ),
                           ),
-                        ),
-                      ),
-                    );
-                  },
-                ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 
@@ -914,7 +922,7 @@ class _TodoPageState extends State<TodoPage> {
 
               const SizedBox(width: 8),
 
-              // SVG Action Button for Task (Kerjakan Tugas - Tanpa Background)
+              // SVG Action Button for Task (Dual-Tone 50% Black/White + 50% Amber)
               GestureDetector(
                 onTap: onOpen,
                 child: SizedBox(
@@ -923,7 +931,8 @@ class _TodoPageState extends State<TodoPage> {
                   child: Center(
                     child: SvgPicture.string(
                       '''<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" stroke="${isDark ? '#FDE68A' : '#D97706'}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" stroke="${isDark ? '#FFFFFF' : '#0F172A'}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" fill="#F59E0B" stroke="${isDark ? '#FFFFFF' : '#0F172A'}" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
                       </svg>''',
                       width: 18,
                       height: 18,
@@ -1013,7 +1022,7 @@ class _TodoPageState extends State<TodoPage> {
 
               const SizedBox(width: 10),
 
-              // SVG Read Action Button (Baca Materi - Tanpa Background & Ikon Dokumen Pembaca)
+              // SVG Read Action Button (Dual-Tone 50% Black/White + 50% Sky Blue)
               GestureDetector(
                 onTap: onOpen,
                 child: SizedBox(
@@ -1022,7 +1031,9 @@ class _TodoPageState extends State<TodoPage> {
                   child: Center(
                     child: SvgPicture.string(
                       '''<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" stroke="${isDark ? '#38BDF8' : '#0284C7'}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6z" stroke="${isDark ? '#FFFFFF' : '#0F172A'}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M14 2v6h6" stroke="${isDark ? '#FFFFFF' : '#0F172A'}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="#0284C7"/>
+                        <path d="M8 13h8M8 17h5" stroke="#0284C7" stroke-width="1.8" stroke-linecap="round"/>
                       </svg>''',
                       width: 18,
                       height: 18,
@@ -1113,7 +1124,7 @@ class _TodoPageState extends State<TodoPage> {
 
               const SizedBox(width: 10),
 
-              // Jika sudah mengerjakan tombol mulai jadi nilai font bold, jika belum tombol ikon puzzle
+              // Jika sudah mengerjakan tombol mulai jadi nilai font bold, jika belum tombol play segitiga
               if (isDone) ...[
                 Padding(
                   padding: const EdgeInsets.only(right: 4.0),
@@ -1135,7 +1146,8 @@ class _TodoPageState extends State<TodoPage> {
                     child: Center(
                       child: SvgPicture.string(
                         '''<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M14.25 4.5a2.25 2.25 0 00-2.25 2.25v.75H8.25A2.25 2.25 0 006 9.75v3.75h.75a2.25 2.25 0 010 4.5H6v2.25A2.25 2.25 0 008.25 22.5h3.75v-.75a2.25 2.25 0 014.5 0v.75h3.75a2.25 2.25 0 002.25-2.25v-3.75h-.75a2.25 2.25 0 010-4.5h.75V9.75a2.25 2.25 0 00-2.25-2.25h-3.75v-.75A2.25 2.25 0 0014.25 4.5z" stroke="${isDark ? '#D8B4FE' : '#9333EA'}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                          <circle cx="12" cy="12" r="10" stroke="${isDark ? '#FFFFFF' : '#0F172A'}" stroke-width="2"/>
+                          <path d="M10 8l6 4-6 4V8z" fill="#8B5CF6"/>
                         </svg>''',
                         width: 18,
                         height: 18,
@@ -1311,245 +1323,83 @@ class StreamZip<T> extends Stream<List<T>> {
 // SVG / CANVAS DOODLES (MATCHING HOME SISWA EXACTLY)
 // -------------------------------------------------------------
 
-/// 1. Doodle Illustration for Task (Clipboard with Checkmark)
+/// 1. Dual-Tone SVG Vector Icon for Tugas (50% Black/White + 50% Amber Accent)
 class _TaskDeadlineDoodle extends StatelessWidget {
   final double size;
-  const _TaskDeadlineDoodle({this.size = 56});
+  final bool isDark;
+  const _TaskDeadlineDoodle({super.key, this.size = 26, this.isDark = false});
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
+    final mainColor = isDark ? '#FFFFFF' : '#0F172A';
+    const accentColor = '#F59E0B'; // 50% Amber Accent
+
+    return SvgPicture.string(
+      '''<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M7 3H5a2 2 0 00-2 2v14a2 2 0 002 2h10a2 2 0 002-2v-3" stroke="$mainColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M7 8h5M7 12h4M7 16h6" stroke="$mainColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M19.1 2.9a2.12 2.12 0 013 3L13.5 14.5l-4.5 1 1-4.5L19.1 2.9z" fill="$accentColor" stroke="$mainColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>''',
       width: size,
       height: size,
-      child: CustomPaint(
-        painter: _TaskDeadlinePainter(),
-      ),
     );
   }
 }
 
-class _TaskDeadlinePainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final double w = size.width;
-    final double h = size.height;
-    final double strokeW = (w / 28.0).clamp(1.1, 1.35);
-
-    final Paint outline = Paint()
-      ..color = const Color(0xFF1E293B)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = strokeW
-      ..strokeCap = StrokeCap.round
-      ..strokeJoin = StrokeJoin.round;
-
-    final Paint boardBg = Paint()..color = const Color(0xFFFED7AA)..style = PaintingStyle.fill;
-    final Paint paperBg = Paint()..color = Colors.white..style = PaintingStyle.fill;
-    final Paint clipBg = Paint()..color = const Color(0xFF94A3B8)..style = PaintingStyle.fill;
-    final Paint checkBg = Paint()..color = const Color(0xFF4ADE80)..style = PaintingStyle.fill;
-
-    final RRect board = RRect.fromRectAndRadius(
-      Rect.fromLTWH(w * 0.15, h * 0.16, w * 0.70, h * 0.76),
-      const Radius.circular(8),
-    );
-    canvas.drawRRect(board, boardBg);
-    canvas.drawRRect(board, outline);
-
-    final RRect paper = RRect.fromRectAndRadius(
-      Rect.fromLTWH(w * 0.23, h * 0.24, w * 0.54, h * 0.62),
-      const Radius.circular(4),
-    );
-    canvas.drawRRect(paper, paperBg);
-    canvas.drawRRect(paper, outline);
-
-    final RRect clamp = RRect.fromRectAndRadius(
-      Rect.fromLTWH(w * 0.36, h * 0.10, w * 0.28, h * 0.12),
-      const Radius.circular(3),
-    );
-    canvas.drawRRect(clamp, clipBg);
-    canvas.drawRRect(clamp, outline);
-
-    canvas.drawLine(Offset(w * 0.32, h * 0.40), Offset(w * 0.68, h * 0.40), outline);
-    canvas.drawLine(Offset(w * 0.32, h * 0.54), Offset(w * 0.68, h * 0.54), outline);
-    canvas.drawLine(Offset(w * 0.32, h * 0.68), Offset(w * 0.56, h * 0.68), outline);
-
-    final double checkRadius = (w * 0.13).clamp(3.5, 7.0);
-    canvas.drawCircle(Offset(w * 0.75, h * 0.74), checkRadius, checkBg);
-    canvas.drawCircle(Offset(w * 0.75, h * 0.74), checkRadius, outline);
-    final Path checkPath = Path()
-      ..moveTo(w * 0.71, h * 0.74)
-      ..lineTo(w * 0.74, h * 0.77)
-      ..lineTo(w * 0.79, h * 0.70);
-    canvas.drawPath(checkPath, outline);
-  }
-
-  @override
-  bool shouldRepaint(covariant _TaskDeadlinePainter oldDelegate) => false;
-}
-
-/// 2. Doodle Illustration for Materi / PDF (Open Book + Ribbon)
+/// 2. Dual-Tone SVG Vector Icon for Materi (50% Black/White + 50% Sky Blue Accent)
 class _ClassScheduleDoodle extends StatelessWidget {
   final double size;
-  const _ClassScheduleDoodle({this.size = 56});
+  final bool isDark;
+  const _ClassScheduleDoodle({super.key, this.size = 26, this.isDark = false});
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
+    final mainColor = isDark ? '#FFFFFF' : '#0F172A';
+    const accentColor = '#0284C7'; // 50% Sky Blue Accent
+
+    return SvgPicture.string(
+      '''<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M4 19.5A2.5 2.5 0 016.5 17H20" stroke="$mainColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z" stroke="$mainColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M9 7h7M9 11h5" stroke="$accentColor" stroke-width="2" stroke-linecap="round"/>
+        <circle cx="16" cy="11" r="1.5" fill="$accentColor"/>
+      </svg>''',
       width: size,
       height: size,
-      child: CustomPaint(
-        painter: _ClassSchedulePainter(),
-      ),
     );
   }
 }
 
-class _ClassSchedulePainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final double w = size.width;
-    final double h = size.height;
-    final double strokeW = (w / 28.0).clamp(1.1, 1.35);
-
-    final Paint outline = Paint()
-      ..color = const Color(0xFF1E293B)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = strokeW
-      ..strokeCap = StrokeCap.round
-      ..strokeJoin = StrokeJoin.round;
-
-    final Paint bookBg = Paint()..color = const Color(0xFFBAE6FD)..style = PaintingStyle.fill;
-    final Paint bookmark = Paint()..color = const Color(0xFFF472B6)..style = PaintingStyle.fill;
-    final Paint pencil = Paint()..color = const Color(0xFFFDE047)..style = PaintingStyle.fill;
-
-    final Path leftPage = Path()
-      ..moveTo(w * 0.50, h * 0.78)
-      ..cubicTo(w * 0.35, h * 0.72, w * 0.20, h * 0.76, w * 0.12, h * 0.70)
-      ..lineTo(w * 0.12, h * 0.28)
-      ..cubicTo(w * 0.22, h * 0.34, w * 0.36, h * 0.30, w * 0.50, h * 0.36)
-      ..close();
-    canvas.drawPath(leftPage, bookBg);
-    canvas.drawPath(leftPage, outline);
-
-    final Path rightPage = Path()
-      ..moveTo(w * 0.50, h * 0.78)
-      ..cubicTo(w * 0.65, h * 0.72, w * 0.80, h * 0.76, w * 0.88, h * 0.70)
-      ..lineTo(w * 0.88, h * 0.28)
-      ..cubicTo(w * 0.78, h * 0.34, w * 0.64, h * 0.30, w * 0.50, h * 0.36)
-      ..close();
-    canvas.drawPath(rightPage, bookBg);
-    canvas.drawPath(rightPage, outline);
-
-    canvas.drawLine(Offset(w * 0.50, h * 0.36), Offset(w * 0.50, h * 0.78), outline);
-
-    final Path ribbon = Path()
-      ..moveTo(w * 0.46, h * 0.36)
-      ..lineTo(w * 0.46, h * 0.55)
-      ..lineTo(w * 0.50, h * 0.50)
-      ..lineTo(w * 0.54, h * 0.55)
-      ..lineTo(w * 0.54, h * 0.36)
-      ..close();
-    canvas.drawPath(ribbon, bookmark);
-    canvas.drawPath(ribbon, outline);
-
-    final Path pencilPath = Path()
-      ..moveTo(w * 0.70, h * 0.18)
-      ..lineTo(w * 0.82, h * 0.08)
-      ..lineTo(w * 0.88, h * 0.14)
-      ..lineTo(w * 0.76, h * 0.24)
-      ..close();
-    canvas.drawPath(pencilPath, pencil);
-    canvas.drawPath(pencilPath, outline);
-  }
-
-  @override
-  bool shouldRepaint(covariant _ClassSchedulePainter oldDelegate) => false;
-}
-
-/// 3. Doodle Illustration for Quiz (Interlocking Colorful Puzzle Pieces)
+/// 3. Dual-Tone SVG Vector Icon for Quiz (1 2 3 Tiered Stepped Bars - 50% Black/White + 50% Purple Accent)
 class _QuizPuzzleDoodle extends StatelessWidget {
   final double size;
-  const _QuizPuzzleDoodle({this.size = 56});
+  final bool isDark;
+  const _QuizPuzzleDoodle({super.key, this.size = 26, this.isDark = false});
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
+    final mainColor = isDark ? '#FFFFFF' : '#0F172A';
+    const accentColor = '#8B5CF6'; // 50% Violet/Purple Accent
+    final numberColor = isDark ? '#0F172A' : '#FFFFFF';
+
+    return SvgPicture.string(
+      '''<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Step 1 (Tingkat 1 - Rendah) -->
+        <rect x="2.5" y="13.5" width="5.5" height="8" rx="2" fill="$mainColor"/>
+        <path d="M4.5 16.5l1-0.8v4.3" stroke="$numberColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+
+        <!-- Step 2 (Tingkat 2 - Sedang) -->
+        <rect x="9.25" y="8.5" width="5.5" height="13" rx="2" fill="$accentColor"/>
+        <path d="M10.8 11.2c.2-.5.7-.8 1.2-.8.7 0 1.2.4 1.2 1 0 .7-.5 1.1-1.1 1.6l-1.3 1.2h2.4" stroke="#FFFFFF" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+
+        <!-- Step 3 (Tingkat 3 - Tinggi) -->
+        <rect x="16" y="3.5" width="5.5" height="18" rx="2" fill="$mainColor"/>
+        <path d="M17.6 6.2h2.2l-1.1 1.6c.7 0 1.2.4 1.2 1 0 .7-.6 1.2-1.3 1.2-.6 0-1-.3-1.2-.7" stroke="$numberColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>''',
       width: size,
       height: size,
-      child: CustomPaint(
-        painter: _QuizPuzzlePainter(),
-      ),
     );
   }
-}
-
-class _QuizPuzzlePainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final double w = size.width;
-    final double h = size.height;
-    final double strokeW = (w / 28.0).clamp(1.1, 1.35);
-
-    final Paint outlinePaint = Paint()
-      ..color = const Color(0xFF1E293B)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = strokeW
-      ..strokeCap = StrokeCap.round
-      ..strokeJoin = StrokeJoin.round;
-
-    final Paint puzzle1Paint = Paint()
-      ..color = const Color(0xFFC084FC) // Lavender Purple Piece
-      ..style = PaintingStyle.fill;
-
-    final Paint puzzle2Paint = Paint()
-      ..color = const Color(0xFFFDE047) // Amber Gold Piece
-      ..style = PaintingStyle.fill;
-
-    // Piece 1: Left / Top-Left Interlocking Puzzle Piece
-    final Path piece1 = Path()
-      ..moveTo(w * 0.12, h * 0.22)
-      ..lineTo(w * 0.38, h * 0.22)
-      // Top Tab
-      ..cubicTo(w * 0.36, h * 0.08, w * 0.54, h * 0.08, w * 0.52, h * 0.22)
-      ..lineTo(w * 0.56, h * 0.22)
-      // Right Connector to Piece 2
-      ..lineTo(w * 0.56, h * 0.40)
-      ..cubicTo(w * 0.70, h * 0.38, w * 0.70, h * 0.56, w * 0.56, h * 0.54)
-      ..lineTo(w * 0.56, h * 0.78)
-      ..lineTo(w * 0.12, h * 0.78)
-      // Left Indent
-      ..lineTo(w * 0.12, h * 0.54)
-      ..cubicTo(w * 0.24, h * 0.56, w * 0.24, h * 0.38, w * 0.12, h * 0.40)
-      ..close();
-
-    // Piece 2: Right / Bottom-Right Puzzle Piece
-    final Path piece2 = Path()
-      ..moveTo(w * 0.56, h * 0.26)
-      ..lineTo(w * 0.88, h * 0.26)
-      ..lineTo(w * 0.88, h * 0.48)
-      // Right Tab
-      ..cubicTo(w * 1.02, h * 0.46, w * 1.02, h * 0.64, w * 0.88, h * 0.62)
-      ..lineTo(w * 0.88, h * 0.88)
-      ..lineTo(w * 0.56, h * 0.88)
-      // Bottom Indent
-      ..lineTo(w * 0.46, h * 0.88)
-      ..cubicTo(w * 0.48, h * 0.76, w * 0.34, h * 0.76, w * 0.36, h * 0.88)
-      ..lineTo(w * 0.56, h * 0.88)
-      ..lineTo(w * 0.56, h * 0.78)
-      ..lineTo(w * 0.56, h * 0.54)
-      ..cubicTo(w * 0.70, h * 0.56, w * 0.70, h * 0.38, w * 0.56, h * 0.40)
-      ..close();
-
-    // Draw Piece 1 with outline
-    canvas.drawPath(piece1, puzzle1Paint);
-    canvas.drawPath(piece1, outlinePaint);
-
-    // Draw Piece 2 with outline
-    canvas.drawPath(piece2, puzzle2Paint);
-    canvas.drawPath(piece2, outlinePaint);
-  }
-
-  @override
-  bool shouldRepaint(covariant _QuizPuzzlePainter oldDelegate) => false;
 }
 
 class _QuizFacetPatternPainter extends CustomPainter {

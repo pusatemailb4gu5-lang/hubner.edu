@@ -22,7 +22,6 @@ import 'package:hubner/core/theme/app_colors.dart';
 import 'package:hubner/core/services/app_sound_service.dart';
 import 'package:hubner/core/theme/app_typography.dart';
 import 'package:hubner/main.dart' show HubnerApp;
-import 'home_page.dart' show BouncyButton;
 import 'package:hubner/features/projects/presentation/pages/detail_cp_page.dart';
 
 class ChatRoomPage extends StatefulWidget {
@@ -372,12 +371,12 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                             width: 36,
                             height: 36,
                             decoration: BoxDecoration(
-                              color: const Color(0xFF7C3AED).withValues(alpha: 0.15),
+                              color: const Color(0xFF0284C7).withValues(alpha: 0.15),
                               shape: BoxShape.circle,
                             ),
                             child: const Icon(
                               Icons.group_rounded,
-                              color: Color(0xFF7C3AED),
+                              color: Color(0xFF0284C7),
                               size: 20,
                             ),
                           )
@@ -404,7 +403,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                   fontSize: 14.5,
                                   fontWeight: isAll ? FontWeight.bold : FontWeight.w600,
                                   color: isAll
-                                      ? const Color(0xFF7C3AED)
+                                      ? const Color(0xFF0284C7)
                                       : (isDark ? Colors.white : const Color(0xFF0F172A)),
                                 ),
                                 maxLines: 1,
@@ -2652,8 +2651,8 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                 }
                               },
                               child: Container(
-                                width: 42,
-                                height: 42,
+                                width: 52,
+                                height: 52,
                                 margin: const EdgeInsets.only(right: 10),
                                 decoration: BoxDecoration(
                                   color: isDark ? const Color(0xFF18181B) : Colors.white,
@@ -2666,7 +2665,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                 child: Icon(
                                   Icons.arrow_back_rounded,
                                   color: isDark ? Colors.white : Colors.black,
-                                  size: 20,
+                                  size: 24,
                                 ),
                               ),
                             ),
@@ -3684,7 +3683,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                             padding: EdgeInsets.fromLTRB(12, replyData != null ? 6 : 8, 12, 8),
                             decoration: BoxDecoration(
                               color: isMe
-                                  ? (isDark ? const Color(0xFF3B185F) : const Color(0xFF7C3AED))
+                                  ? (isDark ? const Color(0xFF1E293B) : const Color(0xFF0F172A))
                                   : (isDark ? const Color(0xFF1C1C1E) : Colors.white),
                               borderRadius: BorderRadius.only(
                                 topLeft: const Radius.circular(18),
@@ -3694,7 +3693,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                               ),
                               border: Border.all(
                                 color: isMe
-                                    ? (isDark ? const Color(0xFF6B21A8).withValues(alpha: 0.35) : Colors.transparent)
+                                    ? (isDark ? const Color(0xFF334155).withValues(alpha: 0.5) : Colors.transparent)
                                     : (isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0)),
                                 width: 1.0,
                               ),
@@ -3829,7 +3828,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                               if (canEdit) ...[
                                 _buildContextMenuItem(
                                   icon: Icons.edit_rounded,
-                                  iconColor: const Color(0xFF7C3AED),
+                                  iconColor: const Color(0xFF0284C7),
                                   title: 'Edit',
                                   isDark: isDark,
                                   onTap: () {
@@ -4078,7 +4077,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                           child: CircularProgressIndicator(
                                             strokeWidth: 2.2,
                                             valueColor: AlwaysStoppedAnimation<Color>(
-                                              isDark ? const Color(0xFF7C3AED) : const Color(0xFF9333EA),
+                                              isDark ? Colors.white : Colors.black,
                                             ),
                                           ),
                                         ),
@@ -4410,7 +4409,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                                                 ),
                                                           decoration: BoxDecoration(
                                                             color: isMe
-                                                                ? (isDark ? const Color(0xFF3B185F) : const Color(0xFF7C3AED))
+                                                                ? (isDark ? const Color(0xFF1E293B) : const Color(0xFF0F172A))
                                                                 : (isDark ? const Color(0xFF1C1C1E) : Colors.white),
                                                             borderRadius: BorderRadius.only(
                                                               topLeft: const Radius.circular(18),
@@ -4420,7 +4419,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                                             ),
                                                             border: Border.all(
                                                               color: isMe
-                                                                  ? (isDark ? const Color(0xFF6B21A8).withValues(alpha: 0.35) : Colors.transparent)
+                                                                  ? (isDark ? const Color(0xFF334155).withValues(alpha: 0.5) : Colors.transparent)
                                                                   : (isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0)),
                                                               width: 1.0,
                                                             ),
@@ -4811,28 +4810,28 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                         child: Container(
                                           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
                                           decoration: BoxDecoration(
-                                            color: isDark ? const Color(0xFF18181B) : const Color(0xFFF3EEFF),
+                                            color: isDark ? const Color(0xFF18181B) : const Color(0xFFEFF6FF),
                                             border: Border(
                                               bottom: BorderSide(
-                                                color: isDark ? const Color(0xFF27272A) : const Color(0xFFD8B4FE).withValues(alpha: 0.4),
+                                                color: isDark ? const Color(0xFF27272A) : const Color(0xFFBFDBFE).withValues(alpha: 0.5),
                                                 width: 1,
                                               ),
                                             ),
                                           ),
                                           child: Row(
                                             children: [
-                                              const Icon(Icons.alternate_email_rounded, size: 14, color: Color(0xFF9333EA)),
+                                              Icon(Icons.alternate_email_rounded, size: 14, color: isDark ? Colors.white : const Color(0xFF0284C7)),
                                               const SizedBox(width: 6),
                                               Text(
                                                 '@mention (${mentionIds.length})',
                                                 style: GoogleFonts.plusJakartaSans(
                                                   fontSize: 16.0,
                                                   fontWeight: FontWeight.w600,
-                                                  color: const Color(0xFF9333EA),
+                                                  color: isDark ? Colors.white : const Color(0xFF0284C7),
                                                 ),
                                               ),
                                               const Spacer(),
-                                              const Icon(Icons.keyboard_arrow_down_rounded, size: 16, color: Color(0xFF9333EA)),
+                                              Icon(Icons.keyboard_arrow_down_rounded, size: 16, color: isDark ? Colors.white : const Color(0xFF0284C7)),
                                             ],
                                           ),
                                         ),
@@ -4913,8 +4912,8 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                   BouncyButton(
                                     onTap: () => Navigator.pop(context),
                                     child: Container(
-                                      width: 42,
-                                      height: 42,
+                                      width: 52,
+                                      height: 52,
                                       decoration: BoxDecoration(
                                         color: isDark ? const Color(0xFF18181B) : Colors.white,
                                         shape: BoxShape.circle,
@@ -4926,7 +4925,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                       child: Icon(
                                         Icons.arrow_back_rounded,
                                         color: isDark ? Colors.white : Colors.black,
-                                        size: 20,
+                                        size: 24,
                                       ),
                                     ),
                                   ),
@@ -4934,8 +4933,8 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                 ],
                                 if (isPrivate) ...[
                                   SizedBox(
-                                    width: 40,
-                                    height: 40,
+                                    width: 44,
+                                    height: 44,
                                     child: ClipOval(
                                       child: Transform.scale(
                                         scale: 1.45,
@@ -4981,8 +4980,8 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                               elevation: 0,
                               color: isDark ? const Color(0xFF141416) : Colors.white,
                               icon: Container(
-                                width: 42,
-                                height: 42,
+                                width: 52,
+                                height: 52,
                                 decoration: BoxDecoration(
                                   color: isDark ? const Color(0xFF18181B) : Colors.white,
                                   shape: BoxShape.circle,
@@ -4994,7 +4993,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                 child: Icon(
                                   Icons.more_horiz_rounded,
                                   color: isDark ? Colors.white : Colors.black,
-                                  size: 20,
+                                  size: 24,
                                 ),
                               ),
                               onSelected: (val) async {
@@ -5263,7 +5262,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
                                         child: Row(
                                           children: [
-                                            const Icon(Icons.settings_outlined, size: 18, color: Color(0xFF7C3AED)),
+                                            Icon(Icons.settings_outlined, size: 18, color: isDark ? Colors.white : const Color(0xFF0F172A)),
                                             const SizedBox(width: 10),
                                             Text(
                                               'Pengaturan',
@@ -5494,10 +5493,10 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                             width: 38,
                                             height: 38,
                                             decoration: BoxDecoration(
-                                              color: const Color(0xFF7C3AED).withValues(alpha: 0.12),
+                                              color: const Color(0xFF0284C7).withValues(alpha: 0.12),
                                               shape: BoxShape.circle,
                                             ),
-                                            child: const Icon(Icons.edit_rounded, color: Color(0xFF7C3AED), size: 16),
+                                            child: const Icon(Icons.edit_rounded, color: Color(0xFF0284C7), size: 16),
                                           ),
                                           const SizedBox(width: 8),
                                           Expanded(
@@ -5510,7 +5509,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                                   style: GoogleFonts.plusJakartaSans(
                                                     fontSize: 16.5,
                                                     fontWeight: FontWeight.bold,
-                                                    color: const Color(0xFF7C3AED),
+                                                    color: const Color(0xFF0284C7),
                                                   ),
                                                 ),
                                                 Text(
@@ -5587,48 +5586,61 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                             color: isDark ? const Color(0xFF18181B) : const Color(0xFFF8FAFC),
                                             borderRadius: BorderRadius.circular(23),
                                             border: Border.all(
-                                              color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
-                                              width: 1.0,
+                                              color: _inputFocusNode.hasFocus
+                                                  ? (isDark ? Colors.white : Colors.black)
+                                                  : (isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0)),
+                                              width: _inputFocusNode.hasFocus ? 1.3 : 1.0,
                                             ),
                                           ),
-                                          child: CallbackShortcuts(
-                                            bindings: {
-                                              const SingleActivator(LogicalKeyboardKey.enter): () {
-                                                if (!HardwareKeyboard.instance.isShiftPressed) {
-                                                  _sendMessage();
-                                                }
-                                              },
-                                            },
-                                            child: TextField(
-                                              controller: _messageController,
-                                              focusNode: _inputFocusNode,
-                                              minLines: 1,
-                                              maxLines: 4,
-                                              keyboardType: TextInputType.multiline,
-                                              textInputAction: TextInputAction.send,
-                                              onSubmitted: (_) => _sendMessage(),
-                                              onTap: () {
-                                                if (_showAttachmentPanel) {
-                                                  setState(() => _showAttachmentPanel = false);
-                                                }
-                                                _inputFocusNode.requestFocus();
-                                                SystemChannels.textInput.invokeMethod('TextInput.show');
-                                              },
-                                              style: GoogleFonts.dmSans(
-                                                fontSize: 20.0,
-                                                color: isDark ? Colors.white : Colors.black87,
+                                          child: Theme(
+                                            data: Theme.of(context).copyWith(
+                                              textSelectionTheme: TextSelectionThemeData(
+                                                cursorColor: isDark ? Colors.white : Colors.black,
+                                                selectionColor: isDark ? Colors.white24 : Colors.black12,
+                                                selectionHandleColor: isDark ? Colors.white : Colors.black,
                                               ),
-                                              decoration: InputDecoration(
-                                                hintText: _editingMessageId != null ? 'Edit pesan...' : 'Tulis pesan...',
-                                                hintStyle: GoogleFonts.dmSans(
-                                                  color: isDark ? Colors.white38 : Colors.black26,
+                                            ),
+                                            child: CallbackShortcuts(
+                                              bindings: {
+                                                const SingleActivator(LogicalKeyboardKey.enter): () {
+                                                  if (!HardwareKeyboard.instance.isShiftPressed) {
+                                                    _sendMessage();
+                                                  }
+                                                },
+                                              },
+                                              child: TextField(
+                                                controller: _messageController,
+                                                focusNode: _inputFocusNode,
+                                                cursorColor: isDark ? Colors.white : Colors.black,
+                                                cursorWidth: 2.0,
+                                                minLines: 1,
+                                                maxLines: 4,
+                                                keyboardType: TextInputType.multiline,
+                                                textInputAction: TextInputAction.send,
+                                                onSubmitted: (_) => _sendMessage(),
+                                                onTap: () {
+                                                  if (_showAttachmentPanel) {
+                                                    setState(() => _showAttachmentPanel = false);
+                                                  }
+                                                  _inputFocusNode.requestFocus();
+                                                  SystemChannels.textInput.invokeMethod('TextInput.show');
+                                                },
+                                                style: GoogleFonts.dmSans(
                                                   fontSize: 20.0,
+                                                  color: isDark ? Colors.white : Colors.black87,
                                                 ),
-                                                border: InputBorder.none,
-                                                isDense: true,
-                                                contentPadding: const EdgeInsets.symmetric(
-                                                  horizontal: 16,
-                                                  vertical: 10,
+                                                decoration: InputDecoration(
+                                                  hintText: _editingMessageId != null ? 'Edit pesan...' : 'Tulis pesan...',
+                                                  hintStyle: GoogleFonts.dmSans(
+                                                    color: isDark ? Colors.white38 : Colors.black26,
+                                                    fontSize: 20.0,
+                                                  ),
+                                                  border: InputBorder.none,
+                                                  isDense: true,
+                                                  contentPadding: const EdgeInsets.symmetric(
+                                                    horizontal: 16,
+                                                    vertical: 10,
+                                                  ),
                                                 ),
                                               ),
                                             ),
@@ -5636,23 +5648,23 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                         ),
                                       ),
                                       const SizedBox(width: 6),
-                                      // Tombol Kirim: Lingkaran background ungu ikon kirim putih
+                                      // Tombol Kirim: Lingkaran background hitam ikon kirim putih
                                       BouncyButton(
                                         scaleDown: 0.85,
                                         duration: const Duration(milliseconds: 100),
                                         onTap: _sendMessage,
                                         child: Container(
-                                          width: 40,
-                                          height: 40,
-                                          decoration: const BoxDecoration(
-                                            color: Color(0xFF7C3AED),
+                                          width: 44,
+                                          height: 44,
+                                          decoration: BoxDecoration(
+                                            color: isDark ? Colors.white : Colors.black,
                                             shape: BoxShape.circle,
                                           ),
                                           alignment: Alignment.center,
                                           child: Icon(
                                             _editingMessageId != null ? Icons.check_rounded : Icons.send_rounded,
-                                            color: Colors.white,
-                                            size: 19,
+                                            color: isDark ? Colors.black : Colors.white,
+                                            size: 20,
                                           ),
                                         ),
                                       ),
@@ -5926,12 +5938,12 @@ class _ImagePreviewSendDialogState extends State<ImagePreviewSendDialog> {
                         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
                         decoration: BoxDecoration(
                           color: _isHd
-                              ? const Color(0xFF7C3AED)
+                              ? (widget.isDark ? Colors.white : Colors.black)
                               : (widget.isDark ? Colors.black.withValues(alpha: 0.5) : Colors.white),
                           borderRadius: BorderRadius.circular(20),
                           border: Border.all(
                             color: _isHd
-                                ? const Color(0xFFA78BFA)
+                                ? (widget.isDark ? Colors.white : Colors.black)
                                 : (widget.isDark ? Colors.white38 : const Color(0xFFE2E8F0)),
                             width: 1.2,
                           ),
@@ -5943,8 +5955,8 @@ class _ImagePreviewSendDialogState extends State<ImagePreviewSendDialog> {
                               _isHd ? Icons.check_circle_rounded : Icons.high_quality_rounded,
                               size: 18,
                               color: _isHd
-                                  ? Colors.white
-                                  : (widget.isDark ? Colors.white : const Color(0xFF7C3AED)),
+                                  ? (widget.isDark ? Colors.black : Colors.white)
+                                  : (widget.isDark ? Colors.white : const Color(0xFF0F172A)),
                             ),
                             const SizedBox(width: 5),
                             Text(
@@ -5953,7 +5965,7 @@ class _ImagePreviewSendDialogState extends State<ImagePreviewSendDialog> {
                                 fontSize: 13.0,
                                 fontWeight: FontWeight.bold,
                                 color: _isHd
-                                    ? Colors.white
+                                    ? (widget.isDark ? Colors.black : Colors.white)
                                     : (widget.isDark ? Colors.white : const Color(0xFF1E293B)),
                               ),
                             ),
@@ -5993,6 +6005,8 @@ class _ImagePreviewSendDialogState extends State<ImagePreviewSendDialog> {
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       child: TextField(
                         controller: _captionController,
+                        cursorColor: widget.isDark ? Colors.white : Colors.black,
+                        cursorWidth: 2.0,
                         style: GoogleFonts.dmSans(
                           fontSize: 15.0,
                           color: widget.isDark ? Colors.white : const Color(0xFF0F172A),
@@ -6025,14 +6039,14 @@ class _ImagePreviewSendDialogState extends State<ImagePreviewSendDialog> {
                     child: Container(
                       width: 44,
                       height: 44,
-                      decoration: const BoxDecoration(
-                        color: Color(0xFF7C3AED),
+                      decoration: BoxDecoration(
+                        color: widget.isDark ? Colors.white : Colors.black,
                         shape: BoxShape.circle,
                       ),
                       alignment: Alignment.center,
-                      child: const Icon(
+                      child: Icon(
                         Icons.send_rounded,
-                        color: Colors.white,
+                        color: widget.isDark ? Colors.black : Colors.white,
                         size: 20,
                       ),
                     ),
@@ -6499,22 +6513,22 @@ class _PurpleMicroPatternPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    // 1. Solid Flat Background (20% Ungu lembut pada mode light)
-    final Color solidBg = isDark ? const Color(0xFF000000) : const Color(0xFFF3EDFD);
+    // 1. Solid Flat Background (Soft Biru Muda pada mode light)
+    final Color solidBg = isDark ? const Color(0xFF000000) : const Color(0xFFEFF6FF);
     canvas.drawColor(solidBg, BlendMode.src);
 
-    // 2. Abstract Squiggle & Brush Paint (Ungu soft elegan)
+    // 2. Abstract Squiggle & Brush Paint (Hitam / Gelap lembut)
     final strokePaint = Paint()
-      ..color = (isDark ? const Color(0xFFA855F7) : const Color(0xFF7C3AED))
-          .withValues(alpha: isDark ? 0.14 : 0.20)
+      ..color = (isDark ? Colors.white : Colors.black)
+          .withValues(alpha: isDark ? 0.12 : 0.15)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.3
       ..strokeCap = StrokeCap.round
       ..strokeJoin = StrokeJoin.round;
 
     final dotPaint = Paint()
-      ..color = (isDark ? const Color(0xFFC084FC) : const Color(0xFF7C3AED))
-          .withValues(alpha: isDark ? 0.18 : 0.12)
+      ..color = (isDark ? Colors.white : Colors.black)
+          .withValues(alpha: isDark ? 0.15 : 0.10)
       ..style = PaintingStyle.fill;
 
     // Use sticky screen dimensions so pattern doesn't compress/shift when keyboard appears
