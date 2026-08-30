@@ -2650,22 +2650,12 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                   Navigator.pop(modalCtx);
                                 }
                               },
-                              child: Container(
-                                width: 52,
-                                height: 52,
-                                margin: const EdgeInsets.only(right: 10),
-                                decoration: BoxDecoration(
-                                  color: isDark ? const Color(0xFF18181B) : Colors.white,
-                                  shape: BoxShape.circle,
-                                  border: Border.all(
-                                    color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
-                                    width: 1.2,
-                                  ),
-                                ),
+                              child: Padding(
+                                padding: const EdgeInsets.only(right: 10, top: 4, bottom: 4),
                                 child: Icon(
                                   Icons.arrow_back_rounded,
-                                  color: isDark ? Colors.white : Colors.black,
-                                  size: 24,
+                                  color: isDark ? Colors.white : Colors.black87,
+                                  size: 26,
                                 ),
                               ),
                             ),
@@ -4911,25 +4901,16 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                 if (!widget.isEmbedded) ...[
                                   BouncyButton(
                                     onTap: () => Navigator.pop(context),
-                                    child: Container(
-                                      width: 52,
-                                      height: 52,
-                                      decoration: BoxDecoration(
-                                        color: isDark ? const Color(0xFF18181B) : Colors.white,
-                                        shape: BoxShape.circle,
-                                        border: Border.all(
-                                          color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
-                                          width: 1.2,
-                                        ),
-                                      ),
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 4.0),
                                       child: Icon(
                                         Icons.arrow_back_rounded,
-                                        color: isDark ? Colors.white : Colors.black,
-                                        size: 24,
+                                        color: isDark ? Colors.white : Colors.black87,
+                                        size: 26,
                                       ),
                                     ),
                                   ),
-                                  const SizedBox(width: 10),
+                                  const SizedBox(width: 8),
                                 ],
                                 if (isPrivate) ...[
                                   SizedBox(
@@ -4979,21 +4960,12 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                               ),
                               elevation: 0,
                               color: isDark ? const Color(0xFF141416) : Colors.white,
-                              icon: Container(
-                                width: 52,
-                                height: 52,
-                                decoration: BoxDecoration(
-                                  color: isDark ? const Color(0xFF18181B) : Colors.white,
-                                  shape: BoxShape.circle,
-                                  border: Border.all(
-                                    color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
-                                    width: 1.2,
-                                  ),
-                                ),
+                              icon: Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 4.0),
                                 child: Icon(
                                   Icons.more_horiz_rounded,
-                                  color: isDark ? Colors.white : Colors.black,
-                                  size: 24,
+                                  color: isDark ? Colors.white : Colors.black87,
+                                  size: 26,
                                 ),
                               ),
                               onSelected: (val) async {

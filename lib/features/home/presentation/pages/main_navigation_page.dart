@@ -6382,10 +6382,9 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
       padding: const EdgeInsets.only(top: 18, bottom: 8, left: 4),
       child: Text(
         title,
-        style: GoogleFonts.plusJakartaSans(
-          fontSize: 16,
-          fontWeight: FontWeight.w800,
+        style: AppTypography.sectionHeader(
           color: isDark ? Colors.white : Colors.black87,
+          fontWeight: FontWeight.w800,
         ),
       ),
     );

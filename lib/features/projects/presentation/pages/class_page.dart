@@ -5067,30 +5067,12 @@ class _ClassPageState extends State<ClassPage> {
                                   Navigator.pop(context);
                                 }
                               },
-                              child: ClipOval(
-                                child: BackdropFilter(
-                                  filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-                                  child: Container(
-                                    width: 42,
-                                    height: 42,
-                                    decoration: BoxDecoration(
-                                      color: isDark
-                                          ? Colors.black.withValues(alpha: 0.35)
-                                          : Colors.white.withValues(alpha: 0.65),
-                                      shape: BoxShape.circle,
-                                      border: Border.all(
-                                        color: isDark
-                                            ? Colors.white.withValues(alpha: 0.15)
-                                            : Colors.white.withValues(alpha: 0.6),
-                                        width: 1.0,
-                                      ),
-                                    ),
-                                    child: Icon(
-                                      Icons.arrow_back_rounded,
-                                      color: isDark ? Colors.white : Colors.black87,
-                                      size: 20,
-                                    ),
-                                  ),
+                              child: Padding(
+                                padding: const EdgeInsets.all(4.0),
+                                child: Icon(
+                                  Icons.arrow_back_rounded,
+                                  color: isDark ? Colors.white : Colors.black87,
+                                  size: 24,
                                 ),
                               ),
                             ),
@@ -5106,30 +5088,12 @@ class _ClassPageState extends State<ClassPage> {
                               ),
                               elevation: 8,
                               color: isDark ? const Color(0xFF101012) : Colors.white,
-                              child: ClipOval(
-                                child: BackdropFilter(
-                                  filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-                                  child: Container(
-                                    width: 42,
-                                    height: 42,
-                                    decoration: BoxDecoration(
-                                      color: isDark
-                                          ? Colors.black.withValues(alpha: 0.35)
-                                          : Colors.white.withValues(alpha: 0.65),
-                                      shape: BoxShape.circle,
-                                      border: Border.all(
-                                        color: isDark
-                                            ? Colors.white.withValues(alpha: 0.15)
-                                            : Colors.white.withValues(alpha: 0.6),
-                                        width: 1.0,
-                                      ),
-                                    ),
-                                    child: Icon(
-                                      Icons.more_horiz_rounded,
-                                      color: isDark ? Colors.white : Colors.black87,
-                                      size: 20,
-                                    ),
-                                  ),
+                              icon: Padding(
+                                padding: const EdgeInsets.all(4.0),
+                                child: Icon(
+                                  Icons.more_horiz_rounded,
+                                  color: isDark ? Colors.white : Colors.black87,
+                                  size: 24,
                                 ),
                               ),
                               onSelected: (val) {

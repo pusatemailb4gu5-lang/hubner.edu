@@ -399,18 +399,19 @@ class _RegisterPageState extends State<RegisterPage> {
 
   @override
   Widget build(BuildContext context) {
-    final safeBottomPadding = MediaQuery.of(context).padding.bottom;
-    final viewInsetsBottom = MediaQuery.of(context).viewInsets.bottom;
+    final double statusBarHeight = MediaQuery.of(context).padding.top;
+    final double viewInsetsBottom = MediaQuery.of(context).viewInsets.bottom;
     final double screenWidth = MediaQuery.of(context).size.width;
     final bool isTablet = screenWidth > 500;
     final bool isDark = AppColors.isDarkMode;
 
     Widget formContent = SingleChildScrollView(
+      physics: const ClampingScrollPhysics(),
       padding: EdgeInsets.fromLTRB(
         isTablet ? 16.0 : 16.0,
-        isTablet ? 16.0 : 12.0,
+        isTablet ? 16.0 : statusBarHeight + 12.0,
         isTablet ? 16.0 : 16.0,
-        24.0 + safeBottomPadding + viewInsetsBottom,
+        24.0 + viewInsetsBottom,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1245,8 +1246,8 @@ class _RegisterPageState extends State<RegisterPage> {
                 ),
               ),
 
-              // 2. Form Content (Header outside, Card 1, Divider outside, Card 2)
-              SafeArea(
+              // 2. Form Content (Edge-to-edge scroll view)
+              Positioned.fill(
                 child: formContent,
               ),
             ],

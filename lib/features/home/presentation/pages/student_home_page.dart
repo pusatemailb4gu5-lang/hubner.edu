@@ -6973,12 +6973,14 @@ class _StudentHomePageState extends State<StudentHomePage> {
                 onTap: () {
                   HapticFeedback.lightImpact();
                   Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (_) => const NoteEditorPage(
+                    PageRouteBuilder(
+                      pageBuilder: (_, __, ___) => const NoteEditorPage(
                         noteId: null,
                         initialTitle: '',
                         initialContent: '',
                       ),
+                      transitionDuration: Duration.zero,
+                      reverseTransitionDuration: Duration.zero,
                     ),
                   );
                 },

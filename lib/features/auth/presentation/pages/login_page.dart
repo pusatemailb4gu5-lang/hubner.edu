@@ -39,13 +39,11 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   late final ScrollController _scrollController;
-  bool _isPopping = false;
 
   @override
   void initState() {
     super.initState();
     _scrollController = ScrollController();
-    _scrollController.addListener(_onScroll);
     _emailController.addListener(_clearError);
     _passwordController.addListener(_clearError);
     _initGoogleSignIn();
@@ -64,25 +62,6 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
-  void _dismissBackToOnboarding() {
-    if (_isPopping) return;
-    _isPopping = true;
-    if (Navigator.of(context).canPop()) {
-      Navigator.of(context).pop();
-    } else {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const OnboardingPage()),
-      );
-    }
-  }
-
-  void _onScroll() {
-    if (_isPopping) return;
-    if (_scrollController.hasClients && _scrollController.offset < -50.0) {
-      _dismissBackToOnboarding();
-    }
-  }
-
   Future<void> _initGoogleSignIn() async {
     try {
       await GoogleSignIn.instance.initialize(
@@ -91,7 +70,6 @@ class _LoginPageState extends State<LoginPage> {
       );
     } catch (_) {}
   }
-
 
   @override
   void dispose() {
@@ -103,7 +81,6 @@ class _LoginPageState extends State<LoginPage> {
     _passwordController.dispose();
     super.dispose();
   }
-
 
   bool _isLoading = false;
 
@@ -327,32 +304,24 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    final safeBottomPadding = MediaQuery.of(context).padding.bottom;
-    final viewInsetsBottom = MediaQuery.of(context).viewInsets.bottom;
+    final double statusBarHeight = MediaQuery.of(context).padding.top;
+    final double viewInsetsBottom = MediaQuery.of(context).viewInsets.bottom;
     final double screenWidth = MediaQuery.of(context).size.width;
     final bool isTablet = screenWidth > 500;
     final bool isDark = AppColors.isDarkMode;
 
-    Widget formContent = GestureDetector(
-      onVerticalDragUpdate: (details) {
-        if (!isTablet && details.primaryDelta != null && details.primaryDelta! > 10) {
-          if (_scrollController.hasClients && _scrollController.offset <= 0) {
-            _dismissBackToOnboarding();
-          }
-        }
-      },
-      child: SingleChildScrollView(
-        controller: _scrollController,
-        physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
-        padding: EdgeInsets.fromLTRB(
-          isTablet ? 16.0 : 16.0,
-          isTablet ? 16.0 : 12.0,
-          isTablet ? 16.0 : 16.0,
-          24.0 + safeBottomPadding + viewInsetsBottom,
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+    Widget formContent = SingleChildScrollView(
+      controller: _scrollController,
+      physics: const ClampingScrollPhysics(),
+      padding: EdgeInsets.fromLTRB(
+        isTablet ? 16.0 : 16.0,
+        isTablet ? 16.0 : statusBarHeight + 12.0,
+        isTablet ? 16.0 : 16.0,
+        24.0 + viewInsetsBottom,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
             // 1. Top Bar: Back Button (Left) & Google Sign In Pill (Right) - Height 52px matching Masuk button
             Padding(
               padding: const EdgeInsets.only(bottom: 14.0),
@@ -666,8 +635,7 @@ class _LoginPageState extends State<LoginPage> {
             ),
           ],
         ),
-      ),
-    );
+      );
 
     Widget onboardingPanel = Container(
       padding: const EdgeInsets.all(40),
@@ -772,8 +740,8 @@ class _LoginPageState extends State<LoginPage> {
                 ),
               ),
 
-              // 2. Form Content (Header outside, Card 1, Divider outside, Card 2)
-              SafeArea(
+              // 2. Form Content (Edge-to-edge scroll view)
+              Positioned.fill(
                 child: formContent,
               ),
             ],

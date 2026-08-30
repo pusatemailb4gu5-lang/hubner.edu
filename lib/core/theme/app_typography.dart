@@ -24,27 +24,27 @@ class AppTypography {
       EdgeInsets.only(left: screenHorizontalMargin, right: screenHorizontalMargin, top: top, bottom: bottom);
 
   // =========================================================================
-  // 1. MASTER SCALE TOKENS (Ubah angka di sini, seluruh aplikasi otomatis berubah!)
+  // 1. MASTER SCALE TOKENS (Acuan Standar Desain: Profil, Menu & Onboarding)
   // =========================================================================
-  static const double sizePageTitle          = 28.0; // Judul Halaman Utama / Profil Display
-  static const double sizeChatHeaderTitle    = 18.0; // Judul Header Chat (Nama Grup/Kontak)
-  static const double sizeChatHeaderSubtitle = 18.0; // Subjudul Header Chat (Status/Anggota)
-  static const double sizeDiscussionTitle    = 18.0; // Judul Item di Tab Diskusi
-  static const double sizeChatBody           = 18.0; // Isi Teks Pesan di Daun/Bubble Chat
-  static const double sizeSearchInput        = 17.0; // Kolom Input Pencarian & Hint
-  static const double sizeSenderName         = 18.0; // Nama Pengirim di Daun Chat
-  static const double sizeReplyTitle         = 16.5; // Nama Pengirim Reply
-  static const double sizeReplySubtitle      = 16.5; // Isi Ringkasan Reply
-  static const double sizeSectionHeader      = 18.0; // Judul Bagian / Kartu ("Hari Ini", "Daftar Kelas")
-  static const double sizeCardTitle          = 16.5; // Judul Kartu Kelas / Catatan
-  static const double sizeTimestamp          = 15.0; // Jam / Keterangan Waktu Pesan & Jadwal
-  static const double sizeBodySubtitle       = 15.5; // Keterangan Subtitle / Role ("Siswa · SMA/SMK")
-  static const double sizeDocumentTitle      = 18.5; // Nama Berkas Dokumen (Disamakan dengan Judul Chat Grup 18.5px)
-  static const double sizeButtonAction       = 15.0; // Tombol Aksi ("Catatan", "Statistik", dsb.)
-  static const double sizeTagChannel         = 13.5; // Tag Channel (#umum, #diskusi)
-  static const double sizeDropdown           = 15.0; // Tombol & Opsi Menu Dropdown Selector
-  static const double sizeCheckbox           = 15.0; // Teks Label Checkbox & Multi-selector (18px)
-  static const double sizeFileSize           = 12.0; // Ukuran Berkas Lampiran (KB/MB)
+  static const double sizePageTitle          = 24.0; // Judul Halaman Utama / Display Besar (Acuan Onboarding & Profil)
+  static const double sizeChatHeaderTitle    = 17.0; // Judul Header Bar / Appbar Atas ("Profil", "Catatan", Kelas)
+  static const double sizeChatHeaderSubtitle = 13.0; // Subjudul Header Bar (Status / Anggota)
+  static const double sizeSectionHeader      = 16.0; // Judul Section Header (Acuan Profil: "Informasi Akun", "Pengaturan")
+  static const double sizeCardTitle          = 15.0; // Judul Kartu Utama / Label Menu (Acuan Menu Profil & List Card)
+  static const double sizeDiscussionTitle    = 15.5; // Judul Item di Tab Diskusi
+  static const double sizeDocumentTitle      = 15.0; // Nama Berkas Dokumen
+  static const double sizeChatBody           = 15.0; // Isi Teks Pesan & Deskripsi (Acuan Onboarding Body)
+  static const double sizeSearchInput        = 14.5; // Kolom Input Pencarian & Hint
+  static const double sizeSenderName         = 14.5; // Nama Pengirim di Daun Chat
+  static const double sizeButtonAction       = 14.5; // Tombol Aksi ("Masuk", "Catatan", dsb.)
+  static const double sizeDropdown           = 14.5; // Tombol & Opsi Menu Dropdown Selector
+  static const double sizeCheckbox           = 14.5; // Teks Label Checkbox & Multi-selector
+  static const double sizeBodySubtitle       = 13.5; // Keterangan Subtitle / Role ("Pengajar · SMA", "Siswa")
+  static const double sizeReplyTitle         = 13.5; // Nama Pengirim Reply
+  static const double sizeTagChannel         = 13.0; // Tag Channel (#umum, #diskusi)
+  static const double sizeReplySubtitle      = 13.0; // Isi Ringkasan Reply
+  static const double sizeTimestamp          = 12.5; // Jam / Tanggal / Nilai Trailing Menu Profil
+  static const double sizeFileSize           = 11.5; // Ukuran Berkas Lampiran (KB/MB)
   static const double sizeMicroBadge         = 11.0; // Tag Status / HD Badge / Counter Reaksi
 
   // =========================================================================

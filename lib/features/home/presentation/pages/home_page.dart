@@ -3965,7 +3965,10 @@ class _HomePageState extends State<HomePage> {
                                 },
                               ),
                             ),
-                  ),
+                        ],
+                      ),
+                    );
+                  },
                 );
               },
             ),
@@ -6497,12 +6500,14 @@ class _QuickNotesDropdownContent extends StatelessWidget {
                   onTap: () {
                     Navigator.pop(context);
                     Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (_) => const NoteEditorPage(
+                      PageRouteBuilder(
+                        pageBuilder: (_, __, ___) => const NoteEditorPage(
                           noteId: null,
                           initialTitle: '',
                           initialContent: '',
                         ),
+                        transitionDuration: Duration.zero,
+                        reverseTransitionDuration: Duration.zero,
                       ),
                     );
                   },
@@ -6628,12 +6633,14 @@ class _QuickNotesDropdownContent extends StatelessWidget {
                     onTap: () {
                       Navigator.pop(context);
                       Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (_) => NoteEditorPage(
+                        PageRouteBuilder(
+                          pageBuilder: (_, __, ___) => NoteEditorPage(
                             noteId: noteId,
                             initialTitle: title,
                             initialContent: content,
                           ),
+                          transitionDuration: Duration.zero,
+                          reverseTransitionDuration: Duration.zero,
                         ),
                       );
                     },

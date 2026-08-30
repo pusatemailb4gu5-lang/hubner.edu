@@ -1,9 +1,7 @@
-import 'dart:math' as math;
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:hubner/core/widgets/bouncy_button.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:hubner/core/widgets/bouncy_button.dart';
 import '../../../../core/theme/app_colors.dart';
 import 'package:hubner/core/theme/app_typography.dart';
 
@@ -26,6 +24,8 @@ class NoteEditorPage extends StatefulWidget {
 class _NoteEditorPageState extends State<NoteEditorPage> {
   late final TextEditingController _titleController;
   late final TextEditingController _contentController;
+  late final ScrollController _scrollController;
+  final ValueNotifier<double> _scrollOffsetNotifier = ValueNotifier<double>(0.0);
   String? _currentNoteId;
   bool _isSaving = false;
 
@@ -35,6 +35,10 @@ class _NoteEditorPageState extends State<NoteEditorPage> {
     _currentNoteId = widget.noteId;
     _titleController = TextEditingController(text: widget.initialTitle);
     _contentController = TextEditingController(text: widget.initialContent);
+    _scrollController = ScrollController()
+      ..addListener(() {
+        _scrollOffsetNotifier.value = _scrollController.offset;
+      });
   }
 
   Future<void> _saveNote() async {
@@ -120,8 +124,8 @@ class _NoteEditorPageState extends State<NoteEditorPage> {
 
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (ctx) => NotesListPage(
+      PageRouteBuilder(
+        pageBuilder: (ctx, _, _) => NotesListPage(
           isDark: isDark,
           selectedNoteId: _currentNoteId,
           onSelectNote: (id, title, content) {
@@ -131,12 +135,16 @@ class _NoteEditorPageState extends State<NoteEditorPage> {
             _createNewNote();
           },
         ),
+        transitionDuration: Duration.zero,
+        reverseTransitionDuration: Duration.zero,
       ),
     );
   }
 
   @override
   void dispose() {
+    _scrollController.dispose();
+    _scrollOffsetNotifier.dispose();
     _titleController.dispose();
     _contentController.dispose();
     super.dispose();
@@ -145,6 +153,7 @@ class _NoteEditorPageState extends State<NoteEditorPage> {
   @override
   Widget build(BuildContext context) {
     final bool isDark = AppColors.isDarkMode;
+    final double statusBarHeight = MediaQuery.of(context).padding.top;
 
     return Scaffold(
       backgroundColor: isDark ? const Color(0xFF09090B) : Colors.white,
@@ -154,159 +163,177 @@ class _NoteEditorPageState extends State<NoteEditorPage> {
           constraints: BoxConstraints(
             maxWidth: MediaQuery.of(context).size.width > 500 ? double.infinity : 500,
           ),
-          child: SafeArea(
-            child: Column(
-              children: [
-                // AppBar
-                Padding(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: AppTypography.screenHorizontalMargin,
-                    vertical: 10.0,
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      // Tombol Back (<) - 52x52px Standar Login
-                      BouncyButton(
-                        onTap: () => Navigator.pop(context),
+          child: Stack(
+            children: [
+              // Scrollable Editor Body
+              SingleChildScrollView(
+                controller: _scrollController,
+                padding: EdgeInsets.only(
+                  left: AppTypography.screenHorizontalMargin,
+                  right: AppTypography.screenHorizontalMargin,
+                  top: statusBarHeight + 68.0,
+                  bottom: 30.0,
+                ),
+                child: Column(
+                  children: [
+                    // Title Textfield
+                    TextField(
+                      controller: _titleController,
+                      maxLines: 1,
+                      cursorColor: isDark ? Colors.white : Colors.black,
+                      style: AppTypography.pageTitle(
+                        color: isDark ? Colors.white : Colors.black87,
+                      ),
+                      decoration: InputDecoration(
+                        hintText: 'Judul Catatan',
+                        hintStyle: AppTypography.pageTitle(
+                          color: isDark ? Colors.white30 : Colors.black26,
+                        ),
+                        border: InputBorder.none,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    // Content Textfield
+                    TextField(
+                      controller: _contentController,
+                      maxLines: null,
+                      cursorColor: isDark ? Colors.white : Colors.black,
+                      style: AppTypography.chatBody(
+                        color: isDark ? const Color(0xFFE2E8F0) : Colors.black87,
+                        height: 1.6,
+                      ),
+                      decoration: InputDecoration(
+                        hintText: 'Mulai menulis catatan Anda di sini...',
+                        hintStyle: AppTypography.chatBody(
+                          color: isDark ? Colors.white30 : Colors.black26,
+                        ),
+                        border: InputBorder.none,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              // Sticky Glassmorphic Header Bar with Blur
+              Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                child: ValueListenableBuilder<double>(
+                  valueListenable: _scrollOffsetNotifier,
+                  builder: (context, scrollOffset, _) {
+                    final double scrollProgress = (scrollOffset / 20.0).clamp(0.0, 1.0);
+                    final double blurSigma = 20.0 * scrollProgress;
+
+                    return ClipRect(
+                      child: BackdropFilter(
+                        filter: ui.ImageFilter.blur(
+                          sigmaX: blurSigma > 0.1 ? blurSigma : 0.001,
+                          sigmaY: blurSigma > 0.1 ? blurSigma : 0.001,
+                        ),
                         child: Container(
-                          width: 52,
-                          height: 52,
+                          padding: EdgeInsets.fromLTRB(
+                            AppTypography.screenHorizontalMargin,
+                            statusBarHeight + 8.0,
+                            AppTypography.screenHorizontalMargin,
+                            10.0,
+                          ),
                           decoration: BoxDecoration(
-                            color: isDark ? const Color(0xFF18181B) : Colors.white,
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
-                              width: 1.2,
+                            color: isDark
+                                ? const Color(0xFF09090B).withValues(alpha: 0.65 * scrollProgress)
+                                : Colors.white.withValues(alpha: 0.70 * scrollProgress),
+                            border: Border(
+                              bottom: BorderSide(
+                                color: (isDark
+                                        ? const Color(0xFF27272A)
+                                        : const Color(0xFFF1F5F9))
+                                    .withValues(alpha: 0.9 * scrollProgress),
+                                width: 1.0,
+                              ),
                             ),
                           ),
-                          child: Icon(
-                            Icons.arrow_back_rounded,
-                            color: isDark ? Colors.white : Colors.black87,
-                            size: 24,
-                          ),
-                        ),
-                      ),
-                      Text(
-                        _currentNoteId == null ? 'Catatan Baru' : 'Edit Catatan',
-                        style: AppTypography.chatHeaderTitle(
-                          color: isDark ? Colors.white : Colors.black,
-                        ),
-                      ),
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          // Tombol 3 Garis Horisontal (Buka Halaman Daftar Catatan) - 52x52px
-                          BouncyButton(
-                            onTap: _navigateToNotesList,
-                            child: Container(
-                              width: 52,
-                              height: 52,
-                              decoration: BoxDecoration(
-                                color: isDark ? const Color(0xFF18181B) : Colors.white,
-                                shape: BoxShape.circle,
-                                border: Border.all(
-                                  color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
-                                  width: 1.2,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              // Tombol Back (<) - Frameless
+                              BouncyButton(
+                                onTap: () => Navigator.pop(context),
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 4.0),
+                                  child: Icon(
+                                    Icons.arrow_back_rounded,
+                                    color: isDark ? Colors.white : Colors.black87,
+                                    size: 26,
+                                  ),
                                 ),
                               ),
-                              child: Icon(
-                                Icons.menu_rounded,
-                                color: isDark ? Colors.white : Colors.black87,
-                                size: 24,
+                              Text(
+                                'Catatan',
+                                style: AppTypography.chatHeaderTitle(
+                                  color: isDark ? Colors.white : Colors.black,
+                                ),
                               ),
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          // Tombol Centang (✓) Simpan - 52x52px
-                          _isSaving
-                              ? const SizedBox(
-                                  width: 52,
-                                  height: 52,
-                                  child: Center(
-                                    child: SizedBox(
-                                      width: 24,
-                                      height: 24,
-                                      child: CircularProgressIndicator(strokeWidth: 2.2),
-                                    ),
-                                  ),
-                                )
-                              : BouncyButton(
-                                  onTap: _saveNote,
-                                  child: Container(
-                                    width: 52,
-                                    height: 52,
-                                    decoration: BoxDecoration(
-                                      color: isDark ? const Color(0xFF18181B) : Colors.black,
-                                      shape: BoxShape.circle,
-                                      border: Border.all(
-                                        color: isDark ? const Color(0xFF27272A) : Colors.black,
-                                        width: 1.2,
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  // Tombol Menu Daftar Catatan - Frameless
+                                  BouncyButton(
+                                    onTap: _navigateToNotesList,
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 4.0),
+                                      child: Icon(
+                                        Icons.menu_rounded,
+                                        color: isDark ? Colors.white : Colors.black87,
+                                        size: 26,
                                       ),
                                     ),
-                                    child: const Icon(
-                                      Icons.check_rounded,
-                                      color: Colors.white,
-                                      size: 24,
-                                    ),
                                   ),
-                                ),
-                        ],
+                                  const SizedBox(width: 6),
+                                  // Tombol Centang (✓) Simpan - Lingkaran Hitam dengan Icon Putih
+                                  _isSaving
+                                      ? const SizedBox(
+                                          width: 44,
+                                          height: 44,
+                                          child: Center(
+                                            child: SizedBox(
+                                              width: 20,
+                                              height: 20,
+                                              child: CircularProgressIndicator(strokeWidth: 2.2),
+                                            ),
+                                          ),
+                                        )
+                                      : BouncyButton(
+                                          onTap: _saveNote,
+                                          child: Container(
+                                            width: 44,
+                                            height: 44,
+                                            decoration: BoxDecoration(
+                                              color: isDark ? const Color(0xFF18181B) : Colors.black,
+                                              shape: BoxShape.circle,
+                                              border: isDark
+                                                  ? Border.all(color: const Color(0xFF27272A), width: 1.2)
+                                                  : null,
+                                            ),
+                                            child: const Center(
+                                              child: Icon(
+                                                Icons.check_rounded,
+                                                color: Colors.white,
+                                                size: 22,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
-                    ],
-                  ),
+                    );
+                  },
                 ),
-                Divider(
-                  color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
-                  height: 1,
-                ),
-
-                // Editor Body
-                Expanded(
-                  child: SingleChildScrollView(
-                    padding: AppTypography.pagePadding(top: 20.0, bottom: 20.0),
-                    child: Column(
-                      children: [
-                        // Title Textfield
-                        TextField(
-                          controller: _titleController,
-                          maxLines: 1,
-                          cursorColor: isDark ? Colors.white : Colors.black,
-                          style: AppTypography.pageTitle(
-                            color: isDark ? Colors.white : Colors.black87,
-                          ),
-                          decoration: InputDecoration(
-                            hintText: 'Judul Catatan',
-                            hintStyle: AppTypography.pageTitle(
-                              color: isDark ? Colors.white30 : Colors.black26,
-                            ),
-                            border: InputBorder.none,
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                        // Content Textfield
-                        TextField(
-                          controller: _contentController,
-                          maxLines: null,
-                          cursorColor: isDark ? Colors.white : Colors.black,
-                          style: AppTypography.chatBody(
-                            color: isDark ? const Color(0xFFE2E8F0) : Colors.black87,
-                            height: 1.6,
-                          ),
-                          decoration: InputDecoration(
-                            hintText: 'Mulai menulis catatan Anda di sini...',
-                            hintStyle: AppTypography.chatBody(
-                              color: isDark ? Colors.white30 : Colors.black26,
-                            ),
-                            border: InputBorder.none,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
@@ -314,7 +341,7 @@ class _NoteEditorPageState extends State<NoteEditorPage> {
   }
 }
 
-/// Halaman Baru Daftar Catatan (Full Page, Tanpa Card, Dipisahkan Garis Divider, Ada Tombol Back)
+/// Halaman Daftar Catatan (Sticky Header with Blur, Search Bar, List Tanpa Card)
 class NotesListPage extends StatefulWidget {
   final bool isDark;
   final String? selectedNoteId;
@@ -336,9 +363,22 @@ class NotesListPage extends StatefulWidget {
 class _NotesListPageState extends State<NotesListPage> {
   String _searchQuery = '';
   final TextEditingController _searchController = TextEditingController();
+  late final ScrollController _scrollController;
+  final ValueNotifier<double> _scrollOffsetNotifier = ValueNotifier<double>(0.0);
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController = ScrollController()
+      ..addListener(() {
+        _scrollOffsetNotifier.value = _scrollController.offset;
+      });
+  }
 
   @override
   void dispose() {
+    _scrollController.dispose();
+    _scrollOffsetNotifier.dispose();
     _searchController.dispose();
     super.dispose();
   }
@@ -360,9 +400,9 @@ class _NotesListPageState extends State<NotesListPage> {
     final month = dt.month.toString().padLeft(2, '0');
 
     if (dt.year == now.year && dt.month == now.month && dt.day == now.day) {
-      return 'Hari ini, $hour:$minute';
+      return '$hour:$minute';
     }
-    return '$day/$month/${dt.year} $hour:$minute';
+    return '$day/$month $hour:$minute';
   }
 
   Future<void> _deleteNote(String noteId) async {
@@ -411,6 +451,7 @@ class _NotesListPageState extends State<NotesListPage> {
   @override
   Widget build(BuildContext context) {
     final isDark = widget.isDark;
+    final double statusBarHeight = MediaQuery.of(context).padding.top;
 
     return Scaffold(
       backgroundColor: isDark ? const Color(0xFF09090B) : Colors.white,
@@ -420,307 +461,330 @@ class _NotesListPageState extends State<NotesListPage> {
           constraints: BoxConstraints(
             maxWidth: MediaQuery.of(context).size.width > 500 ? double.infinity : 500,
           ),
-          child: SafeArea(
-            child: Column(
-              children: [
-                // Top AppBar
-                Padding(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: AppTypography.screenHorizontalMargin,
-                    vertical: 10.0,
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      // Tombol Back (<) untuk kembali ke buat catatan / editor
-                      BouncyButton(
-                        onTap: () => Navigator.pop(context),
-                        child: Container(
-                          width: 52,
-                          height: 52,
-                          decoration: BoxDecoration(
-                            color: isDark ? const Color(0xFF18181B) : Colors.white,
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
-                              width: 1.2,
+          child: Stack(
+            children: [
+              // List of Notes (Scrollable underneath Sticky Header)
+              StreamBuilder<QuerySnapshot>(
+                stream: FirebaseFirestore.instance
+                    .collection('notes')
+                    .orderBy('updatedAt', descending: true)
+                    .snapshots(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting && !snapshot.hasData) {
+                    return const Center(
+                      child: SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      ),
+                    );
+                  }
+
+                  final allDocs = snapshot.data?.docs ?? [];
+                  final filteredDocs = allDocs.where((doc) {
+                    if (_searchQuery.isEmpty) return true;
+                    final data = doc.data() as Map<String, dynamic>;
+                    final title = (data['title'] ?? '').toString().toLowerCase();
+                    final content = (data['content'] ?? '').toString().toLowerCase();
+                    return title.contains(_searchQuery) || content.contains(_searchQuery);
+                  }).toList();
+
+                  if (filteredDocs.isEmpty) {
+                    return Center(
+                      child: Padding(
+                        padding: EdgeInsets.only(top: statusBarHeight + 130.0, left: 32, right: 32),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.note_alt_outlined,
+                              size: 48,
+                              color: isDark ? Colors.white24 : Colors.black26,
                             ),
-                          ),
-                          child: Icon(
-                            Icons.arrow_back_rounded,
-                            color: isDark ? Colors.white : Colors.black87,
-                            size: 24,
-                          ),
+                            const SizedBox(height: 12),
+                            Text(
+                              _searchQuery.isNotEmpty
+                                  ? 'Tidak ada catatan yang cocok'
+                                  : 'Belum ada catatan tersimpan',
+                              style: TextStyle(
+                                color: isDark ? Colors.white54 : Colors.black45,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      Text(
-                        'Daftar Catatan',
-                        style: AppTypography.chatHeaderTitle(
-                          color: isDark ? Colors.white : Colors.black,
-                        ),
-                      ),
-                      // Tombol Buat Catatan Baru (+)
-                      BouncyButton(
+                    );
+                  }
+
+                  return ListView.separated(
+                    controller: _scrollController,
+                    padding: EdgeInsets.only(
+                      top: statusBarHeight + 124.0,
+                      bottom: 24.0,
+                    ),
+                    itemCount: filteredDocs.length,
+                    separatorBuilder: (_, _) => Divider(
+                      height: 1,
+                      thickness: 1,
+                      color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+                    ),
+                    itemBuilder: (context, index) {
+                      final doc = filteredDocs[index];
+                      final data = doc.data() as Map<String, dynamic>;
+                      final noteId = doc.id;
+                      final title = (data['title'] ?? 'Tanpa Judul').toString();
+                      final content = (data['content'] ?? '').toString();
+                      final dateStr = _formatDate(data['updatedAt'] ?? data['createdAt']);
+                      final bool isSelected = widget.selectedNoteId == noteId;
+
+                      return InkWell(
                         onTap: () {
-                          widget.onCreateNew();
+                          widget.onSelectNote(noteId, title, content);
                           Navigator.pop(context);
                         },
                         child: Container(
-                          width: 52,
-                          height: 52,
-                          decoration: BoxDecoration(
-                            color: isDark ? const Color(0xFF18181B) : Colors.black,
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: isDark ? const Color(0xFF27272A) : Colors.black,
-                              width: 1.2,
-                            ),
-                          ),
-                          child: const Icon(
-                            Icons.add_rounded,
-                            color: Colors.white,
-                            size: 26,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Divider(
-                  color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
-                  height: 1,
-                ),
-
-                // Search Bar
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
-                  child: Container(
-                    height: 44,
-                    padding: const EdgeInsets.symmetric(horizontal: 14),
-                    decoration: BoxDecoration(
-                      color: isDark ? const Color(0xFF18181B) : const Color(0xFFF8FAFC),
-                      borderRadius: BorderRadius.circular(14),
-                      border: Border.all(
-                        color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
-                        width: 1.0,
-                      ),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.search_rounded,
-                          size: 20,
-                          color: isDark ? Colors.white38 : Colors.black38,
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: TextField(
-                            controller: _searchController,
-                            onChanged: (val) {
-                              setState(() {
-                                _searchQuery = val.trim().toLowerCase();
-                              });
-                            },
-                            style: TextStyle(
-                              color: isDark ? Colors.white : Colors.black87,
-                              fontSize: 14,
-                            ),
-                            decoration: InputDecoration(
-                              hintText: 'Cari catatan...',
-                              hintStyle: TextStyle(
-                                color: isDark ? Colors.white30 : Colors.black26,
-                                fontSize: 14,
-                              ),
-                              border: InputBorder.none,
-                              isDense: true,
-                              contentPadding: EdgeInsets.zero,
-                            ),
-                          ),
-                        ),
-                        if (_searchQuery.isNotEmpty)
-                          GestureDetector(
-                            onTap: () {
-                              _searchController.clear();
-                              setState(() {
-                                _searchQuery = '';
-                              });
-                            },
-                            child: Icon(
-                              Icons.close_rounded,
-                              size: 18,
-                              color: isDark ? Colors.white54 : Colors.black45,
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
-                ),
-                Divider(
-                  height: 1,
-                  color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
-                ),
-
-                // List of Notes (Tanpa Card, Hanya Dipisahkan dengan Garis Divider)
-                Expanded(
-                  child: StreamBuilder<QuerySnapshot>(
-                    stream: FirebaseFirestore.instance
-                        .collection('notes')
-                        .orderBy('updatedAt', descending: true)
-                        .snapshots(),
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting && !snapshot.hasData) {
-                        return const Center(
-                          child: SizedBox(
-                            width: 24,
-                            height: 24,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          ),
-                        );
-                      }
-
-                      final allDocs = snapshot.data?.docs ?? [];
-                      final filteredDocs = allDocs.where((doc) {
-                        if (_searchQuery.isEmpty) return true;
-                        final data = doc.data() as Map<String, dynamic>;
-                        final title = (data['title'] ?? '').toString().toLowerCase();
-                        final content = (data['content'] ?? '').toString().toLowerCase();
-                        return title.contains(_searchQuery) || content.contains(_searchQuery);
-                      }).toList();
-
-                      if (filteredDocs.isEmpty) {
-                        return Center(
-                          child: Padding(
-                            padding: const EdgeInsets.all(32.0),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  Icons.note_alt_outlined,
-                                  size: 48,
-                                  color: isDark ? Colors.white24 : Colors.black26,
-                                ),
-                                const SizedBox(height: 12),
-                                Text(
-                                  _searchQuery.isNotEmpty
-                                      ? 'Tidak ada catatan yang cocok'
-                                      : 'Belum ada catatan tersimpan',
-                                  style: TextStyle(
-                                    color: isDark ? Colors.white54 : Colors.black45,
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        );
-                      }
-
-                      return ListView.separated(
-                        padding: const EdgeInsets.symmetric(vertical: 4),
-                        itemCount: filteredDocs.length,
-                        separatorBuilder: (_, __) => Divider(
-                          height: 1,
-                          thickness: 1,
-                          color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
-                        ),
-                        itemBuilder: (context, index) {
-                          final doc = filteredDocs[index];
-                          final data = doc.data() as Map<String, dynamic>;
-                          final noteId = doc.id;
-                          final title = (data['title'] ?? 'Tanpa Judul').toString();
-                          final content = (data['content'] ?? '').toString();
-                          final dateStr = _formatDate(data['updatedAt'] ?? data['createdAt']);
-                          final bool isSelected = widget.selectedNoteId == noteId;
-
-                          return InkWell(
-                            onTap: () {
-                              widget.onSelectNote(noteId, title, content);
-                              Navigator.pop(context);
-                            },
-                            child: Container(
-                              color: isSelected
-                                  ? (isDark ? const Color(0xFF1C1917) : const Color(0xFFF8FAFC))
-                                  : Colors.transparent,
-                              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                          color: isSelected
+                              ? (isDark ? const Color(0xFF1C1917) : const Color(0xFFF8FAFC))
+                              : Colors.transparent,
+                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // Baris 1: Judul Catatan & Tombol Hapus
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
                                   Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          title.isNotEmpty ? title : 'Tanpa Judul',
-                                          style: AppTypography.cardTitle(
-                                            color: isDark ? Colors.white : const Color(0xFF0F172A),
-                                          ).copyWith(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.w700,
-                                          ),
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                        if (content.isNotEmpty) ...[
-                                          const SizedBox(height: 6),
-                                          Text(
-                                            content,
-                                            style: TextStyle(
-                                              color: isDark ? Colors.white60 : const Color(0xFF64748B),
-                                              fontSize: 13.5,
-                                              height: 1.4,
-                                            ),
-                                            maxLines: 2,
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
-                                        ],
-                                        const SizedBox(height: 8),
-                                        Row(
-                                          children: [
-                                            Icon(
-                                              Icons.access_time_rounded,
-                                              size: 13,
-                                              color: isDark ? Colors.white38 : Colors.black38,
-                                            ),
-                                            const SizedBox(width: 4),
-                                            Text(
-                                              dateStr,
-                                              style: TextStyle(
-                                                color: isDark ? Colors.white38 : Colors.black38,
-                                                fontSize: 12,
-                                                fontWeight: FontWeight.w500,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ],
+                                    child: Text(
+                                      title.isNotEmpty ? title : 'Tanpa Judul',
+                                      style: AppTypography.cardTitle(
+                                        color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                      ).copyWith(
+                                        fontSize: 15.0,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
                                     ),
                                   ),
-                                  const SizedBox(width: 12),
-                                  // Delete button
+                                  const SizedBox(width: 8),
                                   GestureDetector(
                                     onTap: () => _deleteNote(noteId),
                                     behavior: HitTestBehavior.opaque,
                                     child: Padding(
-                                      padding: const EdgeInsets.all(6.0),
+                                      padding: const EdgeInsets.all(3.0),
                                       child: Icon(
                                         Icons.delete_outline_rounded,
-                                        size: 22,
+                                        size: 19,
                                         color: isDark ? Colors.white38 : Colors.black38,
                                       ),
                                     ),
                                   ),
                                 ],
                               ),
-                            ),
-                          );
-                        },
+                              const SizedBox(height: 3),
+                              // Baris 2: Preview Isi (Lurus Sejajar) & Tanggal di Sebelah Kanan
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      content.isNotEmpty
+                                          ? content.replaceAll('\n', ' ')
+                                          : 'Tidak ada teks tambahan',
+                                      style: TextStyle(
+                                        color: isDark ? Colors.white60 : const Color(0xFF64748B),
+                                        fontSize: 13.0,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Text(
+                                    dateStr,
+                                    style: TextStyle(
+                                      color: isDark ? Colors.white38 : Colors.black38,
+                                      fontSize: 11.5,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
                       );
                     },
-                  ),
+                  );
+                },
+              ),
+
+              // Sticky Glassmorphic Header Bar with Blur (Top Bar + Search Bar)
+              Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                child: ValueListenableBuilder<double>(
+                  valueListenable: _scrollOffsetNotifier,
+                  builder: (context, scrollOffset, _) {
+                    final double scrollProgress = (scrollOffset / 20.0).clamp(0.0, 1.0);
+                    final double blurSigma = 20.0 * scrollProgress;
+
+                    return ClipRect(
+                      child: BackdropFilter(
+                        filter: ui.ImageFilter.blur(
+                          sigmaX: blurSigma > 0.1 ? blurSigma : 0.001,
+                          sigmaY: blurSigma > 0.1 ? blurSigma : 0.001,
+                        ),
+                        child: Container(
+                          padding: EdgeInsets.fromLTRB(
+                            AppTypography.screenHorizontalMargin,
+                            statusBarHeight + 8.0,
+                            AppTypography.screenHorizontalMargin,
+                            10.0,
+                          ),
+                          decoration: BoxDecoration(
+                            color: isDark
+                                ? const Color(0xFF09090B).withValues(alpha: 0.65 * scrollProgress)
+                                : Colors.white.withValues(alpha: 0.70 * scrollProgress),
+                            border: Border(
+                              bottom: BorderSide(
+                                color: (isDark
+                                        ? const Color(0xFF27272A)
+                                        : const Color(0xFFF1F5F9))
+                                    .withValues(alpha: 0.9 * scrollProgress),
+                                width: 1.0,
+                              ),
+                            ),
+                          ),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              // Top Bar
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  // Tombol Back (<) - Frameless
+                                  BouncyButton(
+                                    onTap: () => Navigator.pop(context),
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 4.0),
+                                      child: Icon(
+                                        Icons.arrow_back_rounded,
+                                        color: isDark ? Colors.white : Colors.black87,
+                                        size: 26,
+                                      ),
+                                    ),
+                                  ),
+                                  Text(
+                                    'Catatan',
+                                    style: AppTypography.chatHeaderTitle(
+                                      color: isDark ? Colors.white : Colors.black,
+                                    ),
+                                  ),
+                                  // Tombol Buat Catatan Baru (+) - Lingkaran Hitam dengan Icon Putih
+                                  BouncyButton(
+                                    onTap: () {
+                                      widget.onCreateNew();
+                                      Navigator.pop(context);
+                                    },
+                                    child: Container(
+                                      width: 44,
+                                      height: 44,
+                                      decoration: BoxDecoration(
+                                        color: isDark ? const Color(0xFF18181B) : Colors.black,
+                                        shape: BoxShape.circle,
+                                        border: isDark
+                                            ? Border.all(color: const Color(0xFF27272A), width: 1.2)
+                                            : null,
+                                      ),
+                                      child: const Center(
+                                        child: Icon(
+                                          Icons.add_rounded,
+                                          color: Colors.white,
+                                          size: 24,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 10),
+
+                              // Search Bar - Bentuk Round (Pill Shape)
+                              Container(
+                                height: 44,
+                                padding: const EdgeInsets.symmetric(horizontal: 16),
+                                decoration: BoxDecoration(
+                                  color: isDark ? const Color(0xFF18181B) : const Color(0xFFF8FAFC),
+                                  borderRadius: BorderRadius.circular(30),
+                                  border: Border.all(
+                                    color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                                    width: 1.0,
+                                  ),
+                                ),
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.search_rounded,
+                                      size: 20,
+                                      color: isDark ? Colors.white38 : Colors.black38,
+                                    ),
+                                    const SizedBox(width: 10),
+                                    Expanded(
+                                      child: TextField(
+                                        controller: _searchController,
+                                        onChanged: (val) {
+                                          setState(() {
+                                            _searchQuery = val.trim().toLowerCase();
+                                          });
+                                        },
+                                        style: TextStyle(
+                                          color: isDark ? Colors.white : Colors.black87,
+                                          fontSize: 14,
+                                        ),
+                                        decoration: InputDecoration(
+                                          hintText: 'Cari catatan...',
+                                          hintStyle: TextStyle(
+                                            color: isDark ? Colors.white30 : Colors.black26,
+                                            fontSize: 14,
+                                          ),
+                                          border: InputBorder.none,
+                                          isDense: true,
+                                          contentPadding: EdgeInsets.zero,
+                                        ),
+                                      ),
+                                    ),
+                                    if (_searchQuery.isNotEmpty)
+                                      GestureDetector(
+                                        onTap: () {
+                                          _searchController.clear();
+                                          setState(() {
+                                            _searchQuery = '';
+                                          });
+                                        },
+                                        child: Icon(
+                                          Icons.close_rounded,
+                                          size: 18,
+                                          color: isDark ? Colors.white54 : Colors.black45,
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    );
+                  },
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),

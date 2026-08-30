@@ -2654,118 +2654,116 @@ class _MonitoringPageState extends State<MonitoringPage> {
             top: 0,
             left: 0,
             right: 0,
-            child: SafeArea(
-              bottom: false,
-              child: ValueListenableBuilder<double>(
-                valueListenable: _scrollOffsetNotifier,
-                builder: (context, scrollOffset, _) {
-                  if (scrollOffset <= 20.0) {
-                    return const SizedBox.shrink();
-                  }
-                  final double scrollProgress =
-                      ((scrollOffset - 20.0) / 30.0).clamp(0.0, 1.0);
-                  final double blurSigma = 20.0 * scrollProgress;
+            child: ValueListenableBuilder<double>(
+              valueListenable: _scrollOffsetNotifier,
+              builder: (context, scrollOffset, _) {
+                if (scrollOffset <= 20.0) {
+                  return const SizedBox.shrink();
+                }
+                final double scrollProgress =
+                    ((scrollOffset - 20.0) / 30.0).clamp(0.0, 1.0);
+                final double blurSigma = 20.0 * scrollProgress;
+                final double topInset = MediaQuery.of(context).padding.top;
 
-                  return Opacity(
-                    opacity: scrollProgress,
-                    child: ClipRect(
-                      child: BackdropFilter(
-                        filter: ui.ImageFilter.blur(
-                          sigmaX: blurSigma > 0.1 ? blurSigma : 0.001,
-                          sigmaY: blurSigma > 0.1 ? blurSigma : 0.001,
-                        ),
-                        child: Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
-                          decoration: BoxDecoration(
-                            color: isDark
-                                ? const Color(0xFF000000).withValues(alpha: 0.70 * scrollProgress)
-                                : Colors.white.withValues(alpha: 0.80 * scrollProgress),
-                            border: Border(
-                              bottom: BorderSide(
-                                color: (isDark
-                                        ? const Color(0xFF27272A)
-                                        : const Color(0xFFE2E8F0))
-                                    .withValues(alpha: 0.85 * scrollProgress),
-                                width: 1.0,
-                              ),
+                return Opacity(
+                  opacity: scrollProgress,
+                  child: ClipRect(
+                    child: BackdropFilter(
+                      filter: ui.ImageFilter.blur(
+                        sigmaX: blurSigma > 0.1 ? blurSigma : 0.001,
+                        sigmaY: blurSigma > 0.1 ? blurSigma : 0.001,
+                      ),
+                      child: Container(
+                        width: double.infinity,
+                        padding: EdgeInsets.fromLTRB(20, topInset + 8.0, 20, 12.0),
+                        decoration: BoxDecoration(
+                          color: isDark
+                              ? const Color(0xFF000000).withValues(alpha: 0.70 * scrollProgress)
+                              : Colors.white.withValues(alpha: 0.80 * scrollProgress),
+                          border: Border(
+                            bottom: BorderSide(
+                              color: (isDark
+                                      ? const Color(0xFF27272A)
+                                      : const Color(0xFFE2E8F0))
+                                  .withValues(alpha: 0.85 * scrollProgress),
+                              width: 1.0,
                             ),
                           ),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  projectTitle,
-                                  style: GoogleFonts.plusJakartaSans(
-                                    fontSize: 16.0,
-                                    fontWeight: FontWeight.bold,
-                                    color: isDark ? Colors.white : Colors.black87,
+                        ),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                projectTitle,
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 16.0,
+                                  fontWeight: FontWeight.bold,
+                                  color: isDark ? Colors.white : Colors.black87,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            if (_userProjects.length > 1) ...[
+                              const SizedBox(width: 10),
+                              BouncyButton(
+                                key: _stickyClassDropdownKey,
+                                scaleDown: 0.92,
+                                onTap: () => _openClassDropdownMenu(
+                                  context,
+                                  _stickyClassDropdownKey,
+                                  _userProjects,
+                                ),
+                                child: Container(
+                                  height: 38,
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 14,
                                   ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
+                                  decoration: BoxDecoration(
+                                    color: isDark
+                                        ? const Color(0xFF1C1C1E)
+                                        : Colors.white,
+                                    borderRadius: BorderRadius.circular(20),
+                                    border: Border.all(
+                                      color: isDark
+                                          ? const Color(0xFF27272A)
+                                          : const Color(0xFFE2E8F0),
+                                      width: 1.0,
+                                    ),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text(
+                                        'Ganti',
+                                        style: GoogleFonts.plusJakartaSans(
+                                          fontSize: 13.5,
+                                          fontWeight: FontWeight.bold,
+                                          color: isDark
+                                              ? Colors.white
+                                              : Colors.black87,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Icon(
+                                        Icons.keyboard_arrow_down_rounded,
+                                        color: isDark
+                                            ? Colors.white70
+                                            : Colors.black54,
+                                        size: 18,
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
-                              if (_userProjects.length > 1) ...[
-                                const SizedBox(width: 10),
-                                BouncyButton(
-                                  key: _stickyClassDropdownKey,
-                                  scaleDown: 0.92,
-                                  onTap: () => _openClassDropdownMenu(
-                                    context,
-                                    _stickyClassDropdownKey,
-                                    _userProjects,
-                                  ),
-                                  child: Container(
-                                    height: 38,
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 14,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: isDark
-                                          ? const Color(0xFF1C1C1E)
-                                          : Colors.white,
-                                      borderRadius: BorderRadius.circular(20),
-                                      border: Border.all(
-                                        color: isDark
-                                            ? const Color(0xFF27272A)
-                                            : const Color(0xFFE2E8F0),
-                                        width: 1.0,
-                                      ),
-                                    ),
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Text(
-                                          'Ganti',
-                                          style: GoogleFonts.plusJakartaSans(
-                                            fontSize: 13.5,
-                                            fontWeight: FontWeight.bold,
-                                            color: isDark
-                                                ? Colors.white
-                                                : Colors.black87,
-                                          ),
-                                        ),
-                                        const SizedBox(width: 4),
-                                        Icon(
-                                          Icons.keyboard_arrow_down_rounded,
-                                          color: isDark
-                                              ? Colors.white70
-                                              : Colors.black54,
-                                          size: 18,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ],
                             ],
-                          ),
+                          ],
                         ),
                       ),
                     ),
-                  );
-                },
-              ),
+                  ),
+                );
+              },
             ),
           ),
         ],
