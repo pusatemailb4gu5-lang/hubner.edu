@@ -12,7 +12,6 @@ import 'dart:math' as math;
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:hubner/features/projects/presentation/pages/manage_attendance_page.dart';
-import 'package:hubner/core/widgets/classroom_card_pattern_painter.dart';
 import 'package:hubner/main.dart';
 
 class LaporanPage extends StatefulWidget {
@@ -28,8 +27,10 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
   int? _selectedMateriFilterIdx;
   bool _filterTugas = true;
   bool _filterQuiz = true;
+  bool _isFilterSectionCollapsed = false;
 
   final GlobalKey _classDropdownKey = GlobalKey();
+  final GlobalKey _stickyClassDropdownKey = GlobalKey();
   final GlobalKey _elemenDropdownKey = GlobalKey();
   final GlobalKey _materiDropdownKey = GlobalKey();
 
@@ -527,6 +528,16 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
     );
   }
 
+  // Duo-tone Vector Icon: 40% Hitam, 60% Warna (Total Siswa)
+  Widget _buildTotalSiswaDuoIcon(bool isDark) {
+    return TotalSiswaVectorIcon(isDark: isDark, size: 38);
+  }
+
+  // Duo-tone Vector Icon: 40% Hitam, 60% Warna (Telah Bergabung)
+  Widget _buildTelahBergabungDuoIcon(bool isDark) {
+    return TelahBergabungVectorIcon(isDark: isDark, size: 38);
+  }
+
   Widget _buildModeCheckbox({
     required String label,
     required bool isSelected,
@@ -1019,16 +1030,15 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
       valueListenable: HubnerApp.themeNotifier,
       builder: (context, themeMode, _) {
         final bool isDark = themeMode == 'Gelap' || themeMode == 'Hitam';
-        final double statusBarHeight = MediaQuery.of(context).padding.top;
 
         return Scaffold(
-          backgroundColor: isDark ? const Color(0xFF6B3BA3) : const Color(0xFF7F52FC),
+          backgroundColor: isDark ? const Color(0xFF09090B) : Colors.white,
           body: StreamBuilder<QuerySnapshot>(
             stream: _projectsStream,
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting && !snapshot.hasData) {
                 return Scaffold(
-                  backgroundColor: isDark ? const Color(0xFF6B3BA3) : const Color(0xFF7F52FC),
+                  backgroundColor: isDark ? const Color(0xFF09090B) : Colors.white,
                   body: const SizedBox.shrink(),
                 );
               }
@@ -1036,7 +1046,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
           final classrooms = snapshot.data?.docs ?? [];
           if (classrooms.isEmpty) {
             return Scaffold(
-              backgroundColor: isDark ? const Color(0xFF141416) : Colors.white,
+              backgroundColor: isDark ? const Color(0xFF09090B) : Colors.white,
               body: _buildEmptyState(
                 title: 'Belum Ada Kelas',
                 subtitle: 'Anda belum memiliki kelas yang diampu.',
@@ -1055,968 +1065,1054 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
           final List masterList = classroomData['studentsMasterList'] as List? ?? [];
           final List stages = classroomData['stages'] as List? ?? [];
 
+          final bool showTugas = _filterTugas;
+          final bool showQuiz = _filterQuiz;
+          final double tableWidth = 200.0 + 90.0 + (showTugas ? 350.0 : 0.0) + (showQuiz ? 350.0 : 0.0);
+
           return Row(
             children: [
-              // Main Body with Hero & Draggable White Sheet
+              // Main Body (Full Pure White / No Hero / Single Unified Layout)
               Expanded(
                 child: Scaffold(
-                  backgroundColor: isDark ? const Color(0xFF6B3BA3) : const Color(0xFF7F52FC),
-                  body: Stack(
-                    children: [
-                      // ==========================================
-                      // LAYER 0: FULL SCREEN CLASSROOM CARD STYLE PATTERN BACKGROUND (Sampai Ke Bawah)
-                      // ==========================================
-                      Positioned.fill(
-                        child: CustomPaint(
-                          painter: ClassroomCardPatternPainter(
-                            patternIndex: 0,
-                            accentColor: const Color(0xFF7F52FC),
-                            isDark: isDark,
-                          ),
-                        ),
-                      ),
-
-                      // ==========================================
-                      // LAYER 0.5: HERO HEADER CONTENT
-                      // ==========================================
-                      Positioned(
-                        top: 0,
-                        left: 0,
-                        right: 0,
-                        child: Padding(
-                          padding: EdgeInsets.fromLTRB(AppTypography.screenHorizontalMargin, statusBarHeight + 16, AppTypography.screenHorizontalMargin, 20),
-                          child: Column(
+                  backgroundColor: isDark ? const Color(0xFF09090B) : Colors.white,
+                  body: SafeArea(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // 1. HEADER SECTION (STICKY & COLLAPSIBLE MODE)
+                        AnimatedCrossFade(
+                          crossFadeState: _isFilterSectionCollapsed
+                              ? CrossFadeState.showSecond
+                              : CrossFadeState.showFirst,
+                          duration: const Duration(milliseconds: 250),
+                          // Expanded Mode: Full Title + Subtitle + Big Classroom Selector
+                          firstChild: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                                  // 1. JUDUL LEBIH BESAR + PENJELASAN DIBAWAHNYA DENGAN JEDA
-                                  Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        'Laporan Perkembangan Kelas',
-                                        style: AppTypography.pageTitle(color: Colors.white, fontWeight: FontWeight.w900, height: 1.2, letterSpacing: -0.4),
+                              Padding(
+                                padding: EdgeInsets.fromLTRB(
+                                  AppTypography.screenHorizontalMargin,
+                                  16,
+                                  AppTypography.screenHorizontalMargin,
+                                  0,
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Laporan Perkembangan Kelas',
+                                      style: AppTypography.pageTitle(
+                                        color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                        fontWeight: FontWeight.w800,
                                       ),
-                                      const SizedBox(height: 5),
-                                      Text(
-                                        'Pantau presensi, progres tugas, dan evaluasi hasil belajar siswa.',
-                                        style: AppTypography.timestamp(color: Colors.white.withValues(alpha: 0.92), fontWeight: FontWeight.w500),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      'Pantau presensi, progres tugas, dan evaluasi hasil belajar siswa.',
+                                      style: AppTypography.timestamp(
+                                        color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                                        fontWeight: FontWeight.w500,
                                       ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 16),
-
-                                   // ==========================================
-                                   // 2. PILIH CLASSROOM (BOUNCY BUTTON DENGAN DROPDOWN OVERLAY PERSIS CATATAN)
-                                   // ==========================================
-                                   BouncyButton(
-                                     key: _classDropdownKey,
-                                     onTap: () => _openClassDropdown(context, _classDropdownKey, classrooms),
-                                     child: Container(
-                                       height: 52,
-                                       padding: const EdgeInsets.fromLTRB(4, 4, 16, 4),
-                                       decoration: BoxDecoration(
-                                         color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
-                                         borderRadius: BorderRadius.circular(30),
-                                         border: Border.all(
-                                           color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
-                                           width: 1.2,
-                                         ),
-                                       ),
-                                       child: Row(
-                                         children: [
-                                           // Real Classroom Icon (Besar & mepet batas kiri card)
-                                           _buildClassIcon(classroomData, size: 44),
-                                           const SizedBox(width: 10),
-                                           Expanded(
-                                             child: Text(
-                                               className,
-                                               style: AppTypography.dropdown(color: isDark ? Colors.white : Colors.black87, fontWeight: FontWeight.bold, height: 1.15),
-                                               maxLines: 2,
-                                               overflow: TextOverflow.ellipsis,
-                                             ),
-                                           ),
-                                           const SizedBox(width: 4),
-                                           Icon(
-                                             Icons.keyboard_arrow_down_rounded,
-                                             color: isDark ? Colors.white70 : Colors.black54,
-                                             size: 22,
-                                           ),
-                                         ],
-                                       ),
-                                     ),
-                                   ),
-                                   const SizedBox(height: 12),
-
-                                   // ==========================================
-                                   // 3. TOTAL SISWA & TELAH BERGABUNG (IKON KIRI, ANGKA & TULISAN DI KANAN)
-                                   // ==========================================
-                                   Row(
-                                     children: [
-                                       // Total Siswa Card (Solid Orange - Design System #04)
-                                       Expanded(
-                                         child: Container(
-                                           height: 78,
-                                           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                                           decoration: BoxDecoration(
-                                             color: isDark ? const Color(0xFFC76D10) : const Color(0xFFF7BD84),
-                                             borderRadius: BorderRadius.circular(20),
-                                             border: Border.all(
-                                               color: isDark ? const Color(0xFFE28A2B).withValues(alpha: 0.3) : Colors.transparent,
-                                               width: 1.1,
-                                             ),
-                                           ),
-                                           child: Row(
-                                             crossAxisAlignment: CrossAxisAlignment.center,
-                                             children: [
-                                               // Ikon Frameless di Kiri
-                                               Icon(
-                                                 Icons.people_alt_rounded,
-                                                 color: isDark ? Colors.white : const Color(0xFF7C2D12),
-                                                 size: 28,
-                                               ),
-                                               const SizedBox(width: 10),
-                                               // Angka & Tulisan di Kanan
-                                               Expanded(
-                                                 child: Column(
-                                                   crossAxisAlignment: CrossAxisAlignment.start,
-                                                   mainAxisAlignment: MainAxisAlignment.center,
-                                                   children: [
-                                                     Text(
-                                                       '${masterList.length}',
-                                                       style: AppTypography.pageTitle(color: isDark ? Colors.white : const Color(0xFF431407), fontWeight: FontWeight.w900, height: 1.0),
-                                                     ),
-                                                     const SizedBox(height: 3),
-                                                     FittedBox(
-                                                       fit: BoxFit.scaleDown,
-                                                       alignment: Alignment.centerLeft,
-                                                       child: Text(
-                                                         'Total Siswa',
-                                                         style: AppTypography.buttonLabel(color: isDark ? Colors.white.withValues(alpha: 0.9) : const Color(0xFF7C2D12), fontWeight: FontWeight.w800),
-                                                       ),
-                                                     ),
-                                                   ],
-                                                 ),
-                                               ),
-                                             ],
-                                           ),
-                                         ),
-                                       ),
-                                       const SizedBox(width: 10),
-
-                                       // Telah Bergabung Card (Solid Tosca - Design System #03)
-                                       Expanded(
-                                         child: Container(
-                                           height: 78,
-                                           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                                           decoration: BoxDecoration(
-                                             color: isDark ? const Color(0xFF147D75) : const Color(0xFF7DE3D0),
-                                             borderRadius: BorderRadius.circular(20),
-                                             border: Border.all(
-                                               color: isDark ? const Color(0xFF2DD4BF).withValues(alpha: 0.3) : Colors.transparent,
-                                               width: 1.1,
-                                             ),
-                                           ),
-                                           child: Row(
-                                             crossAxisAlignment: CrossAxisAlignment.center,
-                                             children: [
-                                               // Ikon Frameless di Kiri
-                                               Icon(
-                                                 Icons.how_to_reg_rounded,
-                                                 color: isDark ? Colors.white : const Color(0xFF064E3B),
-                                                 size: 28,
-                                               ),
-                                               const SizedBox(width: 10),
-                                               // Angka & Tulisan di Kanan
-                                               Expanded(
-                                                 child: Column(
-                                                   crossAxisAlignment: CrossAxisAlignment.start,
-                                                   mainAxisAlignment: MainAxisAlignment.center,
-                                                   children: [
-                                                     Text(
-                                                       '${masterList.where((s) => s['joined'] == true).length}',
-                                                       style: AppTypography.pageTitle(color: isDark ? Colors.white : const Color(0xFF022C22), fontWeight: FontWeight.w900, height: 1.0),
-                                                     ),
-                                                     const SizedBox(height: 3),
-                                                     FittedBox(
-                                                       fit: BoxFit.scaleDown,
-                                                       alignment: Alignment.centerLeft,
-                                                       child: Text(
-                                                         'Telah Bergabung',
-                                                         style: AppTypography.buttonLabel(color: isDark ? Colors.white.withValues(alpha: 0.9) : const Color(0xFF064E3B), fontWeight: FontWeight.w800),
-                                                       ),
-                                                     ),
-                                                   ],
-                                                 ),
-                                               ),
-                                             ],
-                                           ),
-                                         ),
-                                       ),
-                                     ],
-                                   ),
-                                  const SizedBox(height: 12),
-
-                                  // ==========================================
-                                  // 4. SEMUA ELEMEN & SEMUA MATERI (BOUNCY BUTTON DENGAN DROPDOWN OVERLAY PERSIS CATATAN)
-                                  // ==========================================
-                                  Row(
-                                    children: [
-                                      // Dropdown Elemen (BouncyButton)
-                                      Expanded(
-                                        child: BouncyButton(
-                                          key: _elemenDropdownKey,
-                                          onTap: () => _openElemenDropdown(context, _elemenDropdownKey, stages),
-                                          child: Container(
-                                            height: 52,
-                                            padding: const EdgeInsets.symmetric(horizontal: 14),
-                                            decoration: BoxDecoration(
-                                              color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
-                                              borderRadius: BorderRadius.circular(30),
-                                              border: Border.all(
-                                                color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
-                                                width: 1.2,
-                                              ),
-                                            ),
-                                            child: Row(
-                                              children: [
-                                                Expanded(
-                                                  child: Text(
-                                                    _selectedStageFilterIdx == null
-                                                        ? 'Semua Elemen'
-                                                        : ((stages[_selectedStageFilterIdx!]['name'] ?? 'Elemen')
-                                                            .toString()
-                                                            .replaceFirst(RegExp(r'^Materi\s*\d*:\s*', caseSensitive: false), '')
-                                                            .trim()),
-                                                    style: AppTypography.dropdown(color: isDark ? Colors.white : Colors.black87, fontWeight: FontWeight.bold, height: 1.15),
-                                                    overflow: TextOverflow.ellipsis,
-                                                    maxLines: 2,
-                                                  ),
-                                                ),
-                                                const SizedBox(width: 4),
-                                                Icon(
-                                                  Icons.keyboard_arrow_down_rounded,
-                                                  color: isDark ? Colors.white70 : Colors.black54,
-                                                  size: 20,
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                      const SizedBox(width: 8),
-
-                                      // Dropdown Materi (BouncyButton)
-                                      Expanded(
-                                        child: BouncyButton(
-                                          key: _materiDropdownKey,
-                                          onTap: () => _openMateriDropdown(context, _materiDropdownKey, stages),
-                                          child: Container(
-                                            height: 52,
-                                            padding: const EdgeInsets.symmetric(horizontal: 14),
-                                            decoration: BoxDecoration(
-                                              color: isDark
-                                                  ? const Color(0xFF1C1C1E).withValues(alpha: (_selectedStageFilterIdx == null ? 0.55 : 1.0))
-                                                  : (_selectedStageFilterIdx == null
-                                                      ? Colors.white.withValues(alpha: 0.75)
-                                                      : Colors.white),
-                                              borderRadius: BorderRadius.circular(30),
-                                              border: Border.all(
-                                                color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
-                                                width: 1.2,
-                                              ),
-                                            ),
-                                            child: Row(
-                                              children: [
-                                                Expanded(
-                                                  child: Text(
-                                                    (() {
-                                                      if (_selectedStageFilterIdx == null) return 'Semua Materi';
-                                                      if (_selectedMateriFilterIdx == null) return 'Semua Materi';
-                                                      final stage = stages[_selectedStageFilterIdx!] as Map<String, dynamic>;
-                                                      final List rawMateris = stage['materis'] as List? ?? [];
-                                                      if (rawMateris.isNotEmpty && _selectedMateriFilterIdx! < rawMateris.length) {
-                                                        return rawMateris[_selectedMateriFilterIdx!]['title'] ?? 'Materi';
-                                                      }
-                                                      return 'Materi';
-                                                    })(),
-                                                    style: AppTypography.dropdown(color: isDark ? Colors.white : Colors.black87, fontWeight: FontWeight.bold, height: 1.15),
-                                                    overflow: TextOverflow.ellipsis,
-                                                    maxLines: 2,
-                                                  ),
-                                                ),
-                                                const SizedBox(width: 4),
-                                                Icon(
-                                                  Icons.keyboard_arrow_down_rounded,
-                                                  color: isDark
-                                                      ? (_selectedStageFilterIdx == null ? Colors.white24 : Colors.white70)
-                                                      : (_selectedStageFilterIdx == null ? Colors.black26 : Colors.black54),
-                                                  size: 20,
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
+                                    ),
+                                  ],
+                                ),
                               ),
-                            ),
-                          ),
+                              const SizedBox(height: 12),
 
-                      // ==========================================
-                      // ==========================================
-                      // LAYER 1: DRAGGABLE SCROLLABLE SHEET PUTIH FULL KE BAWAH (Seperti Detail Classroom)
-                      // ==========================================
-                      DraggableScrollableSheet(
-                        initialChildSize: 0.50,
-                        minChildSize: 0.50,
-                        maxChildSize: 0.96,
-                        snap: true,
-                        snapSizes: const [0.50, 0.96],
-                        builder: (context, scrollController) {
-                          final bool showTugas = _filterTugas;
-                          final bool showQuiz = _filterQuiz;
-                          final double tableWidth = 200.0 + 90.0 + (showTugas ? 350.0 : 0.0) + (showQuiz ? 350.0 : 0.0);
-
-                          return Container(
-                            decoration: BoxDecoration(
-                              color: isDark ? const Color(0xFF141416) : Colors.white,
-                              borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const SizedBox(height: 12),
-                                // Drag Handle (Sticky di Atas)
-                                Center(
+                              // PILIH CLASSROOM (BOUNCY BUTTON)
+                              Padding(
+                                padding: EdgeInsets.symmetric(horizontal: AppTypography.screenHorizontalMargin),
+                                child: BouncyButton(
+                                  key: _classDropdownKey,
+                                  onTap: () => _openClassDropdown(context, _classDropdownKey, classrooms),
                                   child: Container(
-                                    width: 44,
-                                    height: 4.5,
+                                    height: 52,
+                                    padding: const EdgeInsets.fromLTRB(4, 4, 16, 4),
                                     decoration: BoxDecoration(
-                                      color: isDark ? Colors.white24 : const Color(0xFFE2E8F0),
-                                      borderRadius: BorderRadius.circular(3),
+                                      color: isDark ? const Color(0xFF18181B) : const Color(0xFFF8FAFC),
+                                      borderRadius: BorderRadius.circular(30),
+                                      border: Border.all(
+                                        color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                                        width: 1.2,
+                                      ),
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        _buildClassIcon(classroomData, size: 44),
+                                        const SizedBox(width: 10),
+                                        Expanded(
+                                          child: Text(
+                                            className,
+                                            style: AppTypography.dropdown(
+                                              color: isDark ? Colors.white : Colors.black87,
+                                              fontWeight: FontWeight.bold,
+                                              height: 1.15,
+                                            ),
+                                            maxLines: 2,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 4),
+                                        Icon(
+                                          Icons.keyboard_arrow_down_rounded,
+                                          color: isDark ? Colors.white70 : Colors.black54,
+                                          size: 22,
+                                        ),
+                                      ],
                                     ),
                                   ),
                                 ),
-                                const SizedBox(height: 12),
-                                // ==========================================
-                                // SIMPLE TOOLBAR: CHECKBOX TUGAS & QUIZ, ATUR PRESENSI & IKON UNDUH (STICKY)
-                                // ==========================================
-                                Padding(
-                                  padding: EdgeInsets.symmetric(horizontal: AppTypography.screenHorizontalMargin, vertical: 4),
-                                  child: Row(
-                                    children: [
-                                      // Mode Checkbox: Tugas
-                                      _buildModeCheckbox(
-                                        label: 'Tugas',
-                                        isSelected: _filterTugas,
-                                        onTap: () {
-                                          setState(() {
-                                            if (_filterTugas && !_filterQuiz) return;
-                                            _filterTugas = !_filterTugas;
-                                          });
-                                        },
-                                        isDark: isDark,
+                              ),
+                              const SizedBox(height: 12),
+
+                              // STATISTIK TOTAL KELAS & TELAH BERGABUNG (TRANSPARAN TANPA CARD & TEKS HITAM)
+                              Padding(
+                                padding: EdgeInsets.symmetric(horizontal: AppTypography.screenHorizontalMargin),
+                                child: Row(
+                                  children: [
+                                    // Total Siswa (Tanpa Card)
+                                    Expanded(
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                                        color: Colors.transparent,
+                                        child: Row(
+                                          crossAxisAlignment: CrossAxisAlignment.center,
+                                          children: [
+                                            _buildTotalSiswaDuoIcon(isDark),
+                                            const SizedBox(width: 10),
+                                            Expanded(
+                                              child: Column(
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                mainAxisAlignment: MainAxisAlignment.center,
+                                                children: [
+                                                  Text(
+                                                    '${masterList.length}',
+                                                    style: AppTypography.pageTitle(
+                                                      color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                                      fontWeight: FontWeight.w900,
+                                                      height: 1.0,
+                                                    ),
+                                                  ),
+                                                  const SizedBox(height: 2),
+                                                  FittedBox(
+                                                    fit: BoxFit.scaleDown,
+                                                    alignment: Alignment.centerLeft,
+                                                    child: Text(
+                                                      'Total Siswa',
+                                                      style: AppTypography.buttonLabel(
+                                                        color: isDark ? Colors.white70 : const Color(0xFF1E293B),
+                                                        fontWeight: FontWeight.w700,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
                                       ),
-                                      const SizedBox(width: 8),
+                                    ),
+                                    const SizedBox(width: 14),
 
-                                      // Mode Checkbox: Quiz
-                                      _buildModeCheckbox(
-                                        label: 'Quiz',
-                                        isSelected: _filterQuiz,
-                                        onTap: () {
-                                          setState(() {
-                                            if (_filterQuiz && !_filterTugas) return;
-                                            _filterQuiz = !_filterQuiz;
-                                          });
-                                        },
-                                        isDark: isDark,
+                                    // Telah Bergabung (Tanpa Card)
+                                    Expanded(
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                                        color: Colors.transparent,
+                                        child: Row(
+                                          crossAxisAlignment: CrossAxisAlignment.center,
+                                          children: [
+                                            _buildTelahBergabungDuoIcon(isDark),
+                                            const SizedBox(width: 10),
+                                            Expanded(
+                                              child: Column(
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                mainAxisAlignment: MainAxisAlignment.center,
+                                                children: [
+                                                  Text(
+                                                    '${masterList.where((s) => s['joined'] == true).length}',
+                                                    style: AppTypography.pageTitle(
+                                                      color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                                      fontWeight: FontWeight.w900,
+                                                      height: 1.0,
+                                                    ),
+                                                  ),
+                                                  const SizedBox(height: 2),
+                                                  FittedBox(
+                                                    fit: BoxFit.scaleDown,
+                                                    alignment: Alignment.centerLeft,
+                                                    child: Text(
+                                                      'Telah Bergabung',
+                                                      style: AppTypography.buttonLabel(
+                                                        color: isDark ? Colors.white70 : const Color(0xFF1E293B),
+                                                        fontWeight: FontWeight.w700,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
                                       ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(height: 12),
 
-                                      const Spacer(),
-
-                                      // Tombol Atur Presensi (Merah, Text Putih, Ukuran sesuai tombol unduh)
-                                      BouncyButton(
-                                        scaleDown: 0.92,
-                                        onTap: () {
-                                          final screenWidth = MediaQuery.of(context).size.width;
-                                          if (screenWidth > 900) {
-                                            if (_showAttendancePanel && _attendancePanelProjectId == _selectedProjectId) {
-                                              _closeAttendancePanel();
-                                            } else {
-                                              _openAttendancePanel(_selectedProjectId!, masterList);
-                                            }
-                                          } else {
-                                            Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                builder: (_) => ManageAttendancePage(
-                                                  projectId: _selectedProjectId!,
-                                                  currentMasterList: masterList,
+                              // DROPDOWN ELEMEN & MATERI
+                              Padding(
+                                padding: EdgeInsets.symmetric(horizontal: AppTypography.screenHorizontalMargin),
+                                child: Row(
+                                  children: [
+                                    // Dropdown Elemen
+                                    Expanded(
+                                      child: BouncyButton(
+                                        key: _elemenDropdownKey,
+                                        onTap: () => _openElemenDropdown(context, _elemenDropdownKey, stages),
+                                        child: Container(
+                                          height: 48,
+                                          padding: const EdgeInsets.symmetric(horizontal: 14),
+                                          decoration: BoxDecoration(
+                                            color: isDark ? const Color(0xFF18181B) : const Color(0xFFF8FAFC),
+                                            borderRadius: BorderRadius.circular(24),
+                                            border: Border.all(
+                                              color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                                              width: 1.2,
+                                            ),
+                                          ),
+                                          child: Row(
+                                            children: [
+                                              Expanded(
+                                                child: Text(
+                                                  _selectedStageFilterIdx == null
+                                                      ? 'Semua Elemen'
+                                                      : ((stages[_selectedStageFilterIdx!]['name'] ?? 'Elemen')
+                                                          .toString()
+                                                          .replaceFirst(RegExp(r'^Materi\s*\d*:\s*', caseSensitive: false), '')
+                                                          .trim()),
+                                                  style: AppTypography.dropdown(
+                                                    color: isDark ? Colors.white : Colors.black87,
+                                                    fontWeight: FontWeight.bold,
+                                                    height: 1.15,
+                                                  ),
+                                                  overflow: TextOverflow.ellipsis,
+                                                  maxLines: 2,
                                                 ),
                                               ),
-                                            );
-                                          }
-                                        },
-                                        child: Container(
-                                          height: 34,
-                                          padding: const EdgeInsets.symmetric(horizontal: 12),
-                                          decoration: BoxDecoration(
-                                            color: const Color(0xFFEF4444),
-                                            borderRadius: BorderRadius.circular(17),
-                                          ),
-                                          alignment: Alignment.center,
-                                          child: Row(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              const Icon(Icons.manage_accounts_rounded, color: Colors.white, size: 16),
-                                              const SizedBox(width: 5),
-                                              Text(
-                                                'Presensi',
-                                                style: AppTypography.buttonLabel(color: Colors.white, fontWeight: FontWeight.bold),
+                                              const SizedBox(width: 4),
+                                              Icon(
+                                                Icons.keyboard_arrow_down_rounded,
+                                                color: isDark ? Colors.white70 : Colors.black54,
+                                                size: 20,
                                               ),
                                             ],
                                           ),
                                         ),
                                       ),
-                                      const SizedBox(width: 8),
+                                    ),
+                                    const SizedBox(width: 8),
 
-                                      // Simple Unduh CSV Icon Saja
-                                      StreamBuilder<QuerySnapshot>(
-                                        stream: FirebaseFirestore.instance
-                                            .collection('projects')
-                                            .doc(_selectedProjectId)
-                                            .collection('studentProgress')
-                                            .snapshots(),
-                                        builder: (context, progressSnapshot) {
-                                          final progressDocs = progressSnapshot.data?.docs ?? [];
-                                          final Map<String, List<String>> studentCompletedTasks = {};
-
-                                          for (var doc in progressDocs) {
-                                            final data = doc.data() as Map<String, dynamic>;
-                                            final List<String> completed = List<String>.from(data['completedTasks'] ?? []);
-                                            studentCompletedTasks[doc.id] = completed;
-                                          }
-
-                                          return BouncyButton(
-                                            scaleDown: 0.88,
-                                            onTap: () => _exportToCSV(
-                                              context: context,
-                                              className: className,
-                                              masterList: masterList,
-                                              stages: stages,
-                                              studentCompletedTasks: studentCompletedTasks,
+                                    // Dropdown Materi
+                                    Expanded(
+                                      child: BouncyButton(
+                                        key: _materiDropdownKey,
+                                        onTap: () => _openMateriDropdown(context, _materiDropdownKey, stages),
+                                        child: Container(
+                                          height: 48,
+                                          padding: const EdgeInsets.symmetric(horizontal: 14),
+                                          decoration: BoxDecoration(
+                                            color: isDark
+                                                ? const Color(0xFF18181B).withValues(alpha: (_selectedStageFilterIdx == null ? 0.55 : 1.0))
+                                                : (_selectedStageFilterIdx == null
+                                                    ? const Color(0xFFF8FAFC).withValues(alpha: 0.75)
+                                                    : const Color(0xFFF8FAFC)),
+                                            borderRadius: BorderRadius.circular(24),
+                                            border: Border.all(
+                                              color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                                              width: 1.2,
                                             ),
-                                            child: Container(
-                                              width: 34,
-                                              height: 34,
-                                              decoration: const BoxDecoration(
-                                                shape: BoxShape.circle,
-                                                color: Color(0xFF7C3AED),
+                                          ),
+                                          child: Row(
+                                            children: [
+                                              Expanded(
+                                                child: Text(
+                                                  (() {
+                                                    if (_selectedStageFilterIdx == null) return 'Semua Materi';
+                                                    if (_selectedMateriFilterIdx == null) return 'Semua Materi';
+                                                    final stage = stages[_selectedStageFilterIdx!] as Map<String, dynamic>;
+                                                    final List rawMateris = stage['materis'] as List? ?? [];
+                                                    if (rawMateris.isNotEmpty && _selectedMateriFilterIdx! < rawMateris.length) {
+                                                      return rawMateris[_selectedMateriFilterIdx!]['title'] ?? 'Materi';
+                                                    }
+                                                    return 'Materi';
+                                                  })(),
+                                                  style: AppTypography.dropdown(
+                                                    color: isDark ? Colors.white : Colors.black87,
+                                                    fontWeight: FontWeight.bold,
+                                                    height: 1.15,
+                                                  ),
+                                                  overflow: TextOverflow.ellipsis,
+                                                  maxLines: 2,
+                                                ),
                                               ),
-                                              alignment: Alignment.center,
-                                              child: const Icon(
-                                                Icons.file_download_rounded,
-                                                color: Colors.white,
-                                                size: 18,
+                                              const SizedBox(width: 4),
+                                              Icon(
+                                                Icons.keyboard_arrow_down_rounded,
+                                                color: isDark
+                                                    ? (_selectedStageFilterIdx == null ? Colors.white24 : Colors.white70)
+                                                    : (_selectedStageFilterIdx == null ? Colors.black26 : Colors.black54),
+                                                size: 20,
                                               ),
-                                            ),
-                                          );
-                                        },
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                          // Sticky Collapsed Mode: Menampilkan Avatar Kelas dan Nama Mapel Kelas
+                          secondChild: Padding(
+                            padding: EdgeInsets.fromLTRB(
+                              AppTypography.screenHorizontalMargin,
+                              10,
+                              AppTypography.screenHorizontalMargin,
+                              4,
+                            ),
+                            child: BouncyButton(
+                              key: _stickyClassDropdownKey,
+                              onTap: () => _openClassDropdown(context, _stickyClassDropdownKey, classrooms),
+                              child: Container(
+                                height: 46,
+                                padding: const EdgeInsets.fromLTRB(4, 4, 14, 4),
+                                decoration: BoxDecoration(
+                                  color: isDark ? const Color(0xFF18181B) : const Color(0xFFF8FAFC),
+                                  borderRadius: BorderRadius.circular(24),
+                                  border: Border.all(
+                                    color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                                    width: 1.1,
+                                  ),
+                                ),
+                                child: Row(
+                                  children: [
+                                    _buildClassIcon(classroomData, size: 36),
+                                    const SizedBox(width: 10),
+                                    Expanded(
+                                      child: Text(
+                                        className,
+                                        style: AppTypography.dropdown(
+                                          color: isDark ? Colors.white : Colors.black87,
+                                          fontWeight: FontWeight.bold,
+                                          height: 1.15,
+                                        ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Icon(
+                                      Icons.keyboard_arrow_down_rounded,
+                                      color: isDark ? Colors.white70 : Colors.black54,
+                                      size: 20,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+
+                        // PEMBATAS INTERAKTIF DENGAN TOMBOL HIDE/SHOW UNTUK SEMBUNYIKAN/TAMPILKAN DROPDOWN & STATS
+                        GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              _isFilterSectionCollapsed = !_isFilterSectionCollapsed;
+                            });
+                          },
+                          behavior: HitTestBehavior.opaque,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Divider(
+                                    height: 1,
+                                    thickness: 1,
+                                    color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                                  ),
+                                ),
+                                Container(
+                                  margin: const EdgeInsets.symmetric(horizontal: 10),
+                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    color: isDark ? const Color(0xFF18181B) : const Color(0xFFF1F5F9),
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(
+                                      color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                                      width: 1,
+                                    ),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        _isFilterSectionCollapsed
+                                            ? Icons.keyboard_arrow_down_rounded
+                                            : Icons.keyboard_arrow_up_rounded,
+                                        size: 15,
+                                        color: isDark ? Colors.white70 : Colors.black54,
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        _isFilterSectionCollapsed ? 'Tampilkan Filter' : 'Sembunyikan Filter',
+                                        style: TextStyle(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w600,
+                                          color: isDark ? Colors.white70 : Colors.black54,
+                                        ),
                                       ),
                                     ],
                                   ),
                                 ),
-                                const SizedBox(height: 8),
-
-                                _buildTableScrollIndicator(isDark),
-                                const SizedBox(height: 8),
-
-                                // ==========================================
-                                // TABEL LAPORAN: STICKY HEADER & SCROLLABLE BODY
-                                // ==========================================
                                 Expanded(
-                                  child: SingleChildScrollView(
-                                    controller: _tableHorizontalScrollController,
-                                    scrollDirection: Axis.horizontal,
-                                    physics: const ClampingScrollPhysics(),
-                                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                                    child: Container(
-                                      width: tableWidth + 2.0,
-                                      decoration: BoxDecoration(
-                                        color: isDark ? const Color(0xFF1E1E24) : Colors.white,
-                                        border: Border.all(
-                                          color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
-                                          width: 1,
+                                  child: Divider(
+                                    height: 1,
+                                    thickness: 1,
+                                    color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+
+                        // 5. TOOLBAR (Checkboxes + Presensi + Unduh CSV)
+                        Padding(
+                          padding: EdgeInsets.symmetric(horizontal: AppTypography.screenHorizontalMargin),
+                          child: Row(
+                            children: [
+                              // Checkbox Tugas
+                              _buildModeCheckbox(
+                                label: 'Tugas',
+                                isSelected: _filterTugas,
+                                onTap: () {
+                                  setState(() {
+                                    if (_filterTugas && !_filterQuiz) return;
+                                    _filterTugas = !_filterTugas;
+                                  });
+                                },
+                                isDark: isDark,
+                              ),
+                              const SizedBox(width: 8),
+
+                              // Checkbox Quiz
+                              _buildModeCheckbox(
+                                label: 'Quiz',
+                                isSelected: _filterQuiz,
+                                onTap: () {
+                                  setState(() {
+                                    if (_filterQuiz && !_filterTugas) return;
+                                    _filterQuiz = !_filterQuiz;
+                                  });
+                                },
+                                isDark: isDark,
+                              ),
+
+                              const Spacer(),
+
+                              // Tombol Presensi
+                              BouncyButton(
+                                scaleDown: 0.92,
+                                onTap: () {
+                                  final screenWidth = MediaQuery.of(context).size.width;
+                                  if (screenWidth > 900) {
+                                    if (_showAttendancePanel && _attendancePanelProjectId == _selectedProjectId) {
+                                      _closeAttendancePanel();
+                                    } else {
+                                      _openAttendancePanel(_selectedProjectId!, masterList);
+                                    }
+                                  } else {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) => ManageAttendancePage(
+                                          projectId: _selectedProjectId!,
+                                          currentMasterList: masterList,
                                         ),
-                                        borderRadius: BorderRadius.circular(12),
                                       ),
-                                      child: ClipRRect(
-                                        borderRadius: BorderRadius.circular(11),
-                                        child: SizedBox(
-                                          width: tableWidth,
-                                          child: Column(
-                                            children: [
-                                                // Table Header: STICKY
-                                                Container(
-                                                  decoration: BoxDecoration(
-                                                    border: Border(
-                                                      bottom: BorderSide(
-                                                        color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
-                                                        width: 1,
-                                                      ),
-                                                    ),
+                                    );
+                                  }
+                                },
+                                child: Container(
+                                  height: 34,
+                                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFEF4444),
+                                    borderRadius: BorderRadius.circular(17),
+                                  ),
+                                  alignment: Alignment.center,
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      const Icon(Icons.manage_accounts_rounded, color: Colors.white, size: 16),
+                                      const SizedBox(width: 5),
+                                      Text(
+                                        'Presensi',
+                                        style: AppTypography.buttonLabel(color: Colors.white, fontWeight: FontWeight.bold),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+
+                              // Tombol Unduh CSV
+                              StreamBuilder<QuerySnapshot>(
+                                stream: FirebaseFirestore.instance
+                                    .collection('projects')
+                                    .doc(_selectedProjectId)
+                                    .collection('studentProgress')
+                                    .snapshots(),
+                                builder: (context, progressSnapshot) {
+                                  final progressDocs = progressSnapshot.data?.docs ?? [];
+                                  final Map<String, List<String>> studentCompletedTasks = {};
+
+                                  for (var doc in progressDocs) {
+                                    final data = doc.data() as Map<String, dynamic>;
+                                    final List<String> completed = List<String>.from(data['completedTasks'] ?? []);
+                                    studentCompletedTasks[doc.id] = completed;
+                                  }
+
+                                  return BouncyButton(
+                                    scaleDown: 0.88,
+                                    onTap: () => _exportToCSV(
+                                      context: context,
+                                      className: className,
+                                      masterList: masterList,
+                                      stages: stages,
+                                      studentCompletedTasks: studentCompletedTasks,
+                                    ),
+                                    child: Container(
+                                      width: 34,
+                                      height: 34,
+                                      decoration: const BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        color: Color(0xFF7C3AED),
+                                      ),
+                                      alignment: Alignment.center,
+                                      child: const Icon(
+                                        Icons.file_download_rounded,
+                                        color: Colors.white,
+                                        size: 18,
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+
+                        _buildTableScrollIndicator(isDark),
+                        const SizedBox(height: 8),
+
+                        // 6. TABEL LAPORAN PROGRESS
+                        Expanded(
+                          child: SingleChildScrollView(
+                            controller: _tableHorizontalScrollController,
+                            scrollDirection: Axis.horizontal,
+                            physics: const ClampingScrollPhysics(),
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            child: Container(
+                              width: tableWidth + 2.0,
+                              decoration: BoxDecoration(
+                                color: isDark ? const Color(0xFF141416) : Colors.white,
+                                border: Border.all(
+                                  color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                                  width: 1,
+                                ),
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(13),
+                                child: SizedBox(
+                                  width: tableWidth,
+                                  child: Column(
+                                    children: [
+                                      // STICKY TABLE HEADER
+                                      Container(
+                                        decoration: BoxDecoration(
+                                          border: Border(
+                                            bottom: BorderSide(
+                                              color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                                              width: 1,
+                                            ),
+                                          ),
+                                        ),
+                                        child: Row(
+                                          children: [
+                                            // Kolom 1: Nama Siswa (Ungu Core 01, Lebar 200)
+                                            Container(
+                                              width: 200,
+                                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                                              decoration: BoxDecoration(
+                                                color: isDark ? const Color(0xFF6B3BA3) : const Color(0xFF7C3AED),
+                                                border: Border(
+                                                  right: BorderSide(
+                                                    color: Colors.black.withValues(alpha: 0.12),
+                                                    width: 1,
                                                   ),
-                                                  child: Row(
-                                                    children: [
-                                                      // Kolom 1: Nama Siswa (Ungu Core 01, Lebar 200)
-                                                      Container(
-                                                        width: 200,
-                                                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                                                        decoration: BoxDecoration(
-                                                          color: isDark ? const Color(0xFF6B3BA3) : const Color(0xFF7C3AED),
-                                                          border: Border(
+                                                ),
+                                              ),
+                                              child: Text(
+                                                'Nama Siswa (${masterList.length})',
+                                                style: AppTypography.buttonLabel(color: Colors.white, fontWeight: FontWeight.w800),
+                                              ),
+                                            ),
+                                            // Kolom 2: Progress (Biru Sky Blue 02, Lebar 90)
+                                            Container(
+                                              width: 90,
+                                              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 12),
+                                              decoration: BoxDecoration(
+                                                color: isDark ? const Color(0xFF2864A8) : const Color(0xFF2563EB),
+                                                border: (showTugas || showQuiz)
+                                                    ? Border(
+                                                        right: BorderSide(
+                                                          color: Colors.black.withValues(alpha: 0.12),
+                                                          width: 1,
+                                                        ),
+                                                      )
+                                                    : null,
+                                              ),
+                                              child: Text(
+                                                'Progress',
+                                                textAlign: TextAlign.center,
+                                                style: AppTypography.buttonLabel(color: Colors.white, fontWeight: FontWeight.w800),
+                                              ),
+                                            ),
+                                            // Kolom 3..7: Tugas 1 s/d 5 (Toska Emerald 03, 5 x 70)
+                                            if (showTugas)
+                                              ...List.generate(5, (i) {
+                                                return Container(
+                                                  width: 70,
+                                                  padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 12),
+                                                  decoration: BoxDecoration(
+                                                    color: isDark ? const Color(0xFF147D75) : const Color(0xFF0D9488),
+                                                    border: (i == 4 && !showQuiz)
+                                                        ? null
+                                                        : Border(
                                                             right: BorderSide(
                                                               color: Colors.black.withValues(alpha: 0.12),
                                                               width: 1,
                                                             ),
                                                           ),
-                                                        ),
-                                                        child: Text(
-                                                          'Nama Siswa (${masterList.length})',
-                                                          style: AppTypography.buttonLabel(color: Colors.white, fontWeight: FontWeight.w800),
-                                                        ),
-                                                      ),
-                                                      // Kolom 2: Progress (Biru Sky Blue 02, Lebar 90)
-                                                      Container(
-                                                        width: 90,
-                                                        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 12),
-                                                        decoration: BoxDecoration(
-                                                          color: isDark ? const Color(0xFF2864A8) : const Color(0xFF2563EB),
-                                                          border: (showTugas || showQuiz)
-                                                              ? Border(
-                                                                  right: BorderSide(
-                                                                    color: Colors.black.withValues(alpha: 0.12),
-                                                                    width: 1,
-                                                                  ),
-                                                                )
-                                                              : null,
-                                                        ),
-                                                        child: Text(
-                                                          'Progress',
-                                                          textAlign: TextAlign.center,
-                                                          style: AppTypography.buttonLabel(color: Colors.white, fontWeight: FontWeight.w800),
-                                                        ),
-                                                      ),
-                                                      // Kolom 3..7: Tugas 1 s/d 5 (Toska Emerald 03, 5 x 70)
-                                                      if (showTugas)
-                                                        ...List.generate(5, (i) {
-                                                          return Container(
-                                                            width: 70,
-                                                            padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 12),
-                                                            decoration: BoxDecoration(
-                                                              color: isDark ? const Color(0xFF147D75) : const Color(0xFF0D9488),
-                                                              border: (i == 4 && !showQuiz)
-                                                                  ? null
-                                                                  : Border(
-                                                                      right: BorderSide(
-                                                                        color: Colors.black.withValues(alpha: 0.12),
-                                                                        width: 1,
-                                                                      ),
-                                                                    ),
-                                                            ),
-                                                            alignment: Alignment.center,
-                                                            child: Text(
-                                                              'Tugas ${i + 1}',
-                                                              textAlign: TextAlign.center,
-                                                              style: AppTypography.buttonLabel(color: Colors.white, fontWeight: FontWeight.w800),
-                                                            ),
-                                                          );
-                                                        }),
-                                                      // Kolom 8..12: Quiz 1 s/d 5 (Orange Amber 04, 5 x 70)
-                                                      if (showQuiz)
-                                                        ...List.generate(5, (i) {
-                                                          return Container(
-                                                            width: 70,
-                                                            padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 12),
-                                                            decoration: BoxDecoration(
-                                                              color: isDark ? const Color(0xFFC76D10) : const Color(0xFFEA580C),
-                                                              border: i == 4
-                                                                  ? null
-                                                                  : Border(
-                                                                      right: BorderSide(
-                                                                        color: Colors.black.withValues(alpha: 0.12),
-                                                                        width: 1,
-                                                                      ),
-                                                                    ),
-                                                            ),
-                                                            alignment: Alignment.center,
-                                                            child: Text(
-                                                              'Quiz ${i + 1}',
-                                                              textAlign: TextAlign.center,
-                                                              style: AppTypography.buttonLabel(color: Colors.white, fontWeight: FontWeight.w800),
-                                                            ),
-                                                          );
-                                                        }),
-                                                    ],
                                                   ),
-                                                ),
-
-                                                // Table Body: SCROLLABLE UNDER HEADER
-                                                Expanded(
-                                                  child: masterList.isEmpty
-                                                      ? Container(
-                                                          width: tableWidth,
-                                                          padding: const EdgeInsets.symmetric(vertical: 36, horizontal: 16),
-                                                          color: isDark ? const Color(0xFF1E1E24) : Colors.white,
-                                                          child: Center(
-                                                            child: Text(
-                                                              'Belum ada siswa di kelas ini.',
-                                                              style: AppTypography.timestamp(color: isDark ? Colors.white38 : Colors.black38),
+                                                  alignment: Alignment.center,
+                                                  child: Text(
+                                                    'Tugas ${i + 1}',
+                                                    textAlign: TextAlign.center,
+                                                    style: AppTypography.buttonLabel(color: Colors.white, fontWeight: FontWeight.w800),
+                                                  ),
+                                                );
+                                              }),
+                                            // Kolom 8..12: Quiz 1 s/d 5 (Orange Amber 04, 5 x 70)
+                                            if (showQuiz)
+                                              ...List.generate(5, (i) {
+                                                return Container(
+                                                  width: 70,
+                                                  padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 12),
+                                                  decoration: BoxDecoration(
+                                                    color: isDark ? const Color(0xFFC76D10) : const Color(0xFFEA580C),
+                                                    border: i == 4
+                                                        ? null
+                                                        : Border(
+                                                            right: BorderSide(
+                                                              color: Colors.black.withValues(alpha: 0.12),
+                                                              width: 1,
                                                             ),
                                                           ),
-                                                        )
-                                                      : StreamBuilder<QuerySnapshot>(
-                                                          stream: FirebaseFirestore.instance
-                                                              .collection('users')
-                                                              .where('projectIds', arrayContains: _selectedProjectId)
-                                                              .snapshots(),
-                                                          builder: (context, usersSnapshot) {
-                                                            final Map<String, String> userAccountIds = {};
-                                                            if (usersSnapshot.hasData) {
-                                                              for (var uDoc in usersSnapshot.data!.docs) {
-                                                                final uData = uDoc.data() as Map<String, dynamic>;
-                                                                final String uid = uDoc.id;
-                                                                final String accId = (uData['userId'] ?? uData['id'] ?? uData['username'] ?? '').toString();
-                                                                if (accId.isNotEmpty) {
-                                                                  userAccountIds[uid] = accId;
-                                                                }
+                                                  ),
+                                                  alignment: Alignment.center,
+                                                  child: Text(
+                                                    'Quiz ${i + 1}',
+                                                    textAlign: TextAlign.center,
+                                                    style: AppTypography.buttonLabel(color: Colors.white, fontWeight: FontWeight.w800),
+                                                  ),
+                                                );
+                                              }),
+                                          ],
+                                        ),
+                                      ),
+
+                                      // SCROLLABLE TABLE BODY
+                                      Expanded(
+                                        child: masterList.isEmpty
+                                            ? Container(
+                                                width: tableWidth,
+                                                padding: const EdgeInsets.symmetric(vertical: 36, horizontal: 16),
+                                                color: isDark ? const Color(0xFF141416) : Colors.white,
+                                                child: Center(
+                                                  child: Text(
+                                                    'Belum ada siswa di kelas ini.',
+                                                    style: AppTypography.timestamp(color: isDark ? Colors.white38 : Colors.black38),
+                                                  ),
+                                                ),
+                                              )
+                                            : StreamBuilder<QuerySnapshot>(
+                                                stream: FirebaseFirestore.instance
+                                                    .collection('users')
+                                                    .where('projectIds', arrayContains: _selectedProjectId)
+                                                    .snapshots(),
+                                                builder: (context, usersSnapshot) {
+                                                  final Map<String, String> userAccountIds = {};
+                                                  if (usersSnapshot.hasData) {
+                                                    for (var uDoc in usersSnapshot.data!.docs) {
+                                                      final uData = uDoc.data() as Map<String, dynamic>;
+                                                      final String uid = uDoc.id;
+                                                      final String accId = (uData['userId'] ?? uData['id'] ?? uData['username'] ?? '').toString();
+                                                      if (accId.isNotEmpty) {
+                                                        userAccountIds[uid] = accId;
+                                                      }
+                                                    }
+                                                  }
+
+                                                  return StreamBuilder<QuerySnapshot>(
+                                                    stream: _getProgressStream(_selectedProjectId!),
+                                                    builder: (context, progressSnapshot) {
+                                                      final progressDocs = progressSnapshot.data?.docs ?? [];
+                                                      final Map<String, Map<String, dynamic>> studentProgressData = {};
+
+                                                      for (var doc in progressDocs) {
+                                                        final data = doc.data() as Map<String, dynamic>;
+                                                        studentProgressData[doc.id] = data;
+                                                      }
+
+                                                      final List<Map<String, dynamic>> filteredTasks = _getFilteredTasks(stages);
+                                                      final List<Map<String, dynamic>> tugasList = filteredTasks.where((t) => t['type'] != 'quiz').toList();
+                                                      final List<Map<String, dynamic>> quizList = filteredTasks.where((t) => t['type'] == 'quiz').toList();
+
+                                                      return MediaQuery.removePadding(
+                                                        context: context,
+                                                        removeTop: true,
+                                                        removeBottom: true,
+                                                        child: ListView.separated(
+                                                          physics: const ClampingScrollPhysics(),
+                                                          padding: const EdgeInsets.only(bottom: 75),
+                                                          itemCount: masterList.length,
+                                                          separatorBuilder: (context, index) => Divider(
+                                                            height: 1,
+                                                            color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+                                                          ),
+                                                          itemBuilder: (context, index) {
+                                                            final student = masterList[index] as Map<String, dynamic>;
+                                                            final String sName = student['name'] ?? 'Siswa';
+                                                            final String sUid = student['uid'] ?? '';
+                                                            final bool joined = student['joined'] ?? false;
+                                                            final String defaultId = (student['id'] ?? student['studentId'] ?? student['nis'] ?? student['nisn'] ?? (index + 1).toString().padLeft(2, '0')).toString();
+
+                                                            final Map<String, dynamic> studentData = joined ? (studentProgressData[sUid] ?? {}) : {};
+                                                            final List<String> completed = joined ? List<String>.from(studentData['completedTasks'] ?? []) : [];
+                                                            final String sAvatar = (studentData['avatar']?.toString().isNotEmpty == true
+                                                                ? studentData['avatar'].toString()
+                                                                : (student['avatar']?.toString().isNotEmpty == true
+                                                                    ? student['avatar'].toString()
+                                                                    : 'assets/icon_pack/avatar/avatar_2.png'));
+
+                                                            int filteredDoneCount = 0;
+                                                            for (var t in filteredTasks) {
+                                                              if (completed.contains(t['key'])) {
+                                                                filteredDoneCount++;
                                                               }
                                                             }
+                                                            final double progressPercent = filteredTasks.isNotEmpty
+                                                                ? (filteredDoneCount / filteredTasks.length) * 100
+                                                                : 0.0;
 
-                                                            return StreamBuilder<QuerySnapshot>(
-                                                                stream: _getProgressStream(_selectedProjectId!),
-                                                                builder: (context, progressSnapshot) {
-                                                            final progressDocs = progressSnapshot.data?.docs ?? [];
-                                                            final Map<String, Map<String, dynamic>> studentProgressData = {};
+                                                            final bool isEven = index % 2 == 0;
 
-                                                            for (var doc in progressDocs) {
-                                                              final data = doc.data() as Map<String, dynamic>;
-                                                              studentProgressData[doc.id] = data;
-                                                            }
-
-                                                            final List<Map<String, dynamic>> filteredTasks = _getFilteredTasks(stages);
-                                                            final List<Map<String, dynamic>> tugasList = filteredTasks.where((t) => t['type'] != 'quiz').toList();
-                                                            final List<Map<String, dynamic>> quizList = filteredTasks.where((t) => t['type'] == 'quiz').toList();
-
-                                                            return MediaQuery.removePadding(
-                                                              context: context,
-                                                              removeTop: true,
-                                                              removeBottom: true,
-                                                              child: ListView.separated(
-                                                                controller: scrollController,
-                                                                physics: const ClampingScrollPhysics(),
-                                                                padding: const EdgeInsets.only(bottom: 75),
-                                                                itemCount: masterList.length,
-                                                                separatorBuilder: (context, index) => Divider(
-                                                                  height: 1,
-                                                                  color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
-                                                                ),
-                                                                itemBuilder: (context, index) {
-                                                                  final student = masterList[index] as Map<String, dynamic>;
-                                                                  final String sName = student['name'] ?? 'Siswa';
-                                                                  final String sUid = student['uid'] ?? '';
-                                                                  final bool joined = student['joined'] ?? false;
-                                                                  final String defaultId = (student['id'] ?? student['studentId'] ?? student['nis'] ?? student['nisn'] ?? (index + 1).toString().padLeft(2, '0')).toString();
-
-                                                                  final Map<String, dynamic> studentData = joined ? (studentProgressData[sUid] ?? {}) : {};
-                                                                  final List<String> completed = joined ? List<String>.from(studentData['completedTasks'] ?? []) : [];
-                                                                  final String sAvatar = (studentData['avatar']?.toString().isNotEmpty == true
-                                                                      ? studentData['avatar'].toString()
-                                                                      : (student['avatar']?.toString().isNotEmpty == true
-                                                                          ? student['avatar'].toString()
-                                                                          : 'assets/icon_pack/avatar/avatar_2.png'));
-
-                                                                  int filteredDoneCount = 0;
-                                                                  for (var t in filteredTasks) {
-                                                                    if (completed.contains(t['key'])) {
-                                                                      filteredDoneCount++;
-                                                                    }
-                                                                  }
-                                                                  final double progressPercent = filteredTasks.isNotEmpty
-                                                                      ? (filteredDoneCount / filteredTasks.length) * 100
-                                                                      : 0.0;
-
-                                                                  final bool isEven = index % 2 == 0;
-
-                                                                  return Material(
-                                                                    color: isEven
-                                                                        ? (isDark ? const Color(0xFF1E1E24) : Colors.white)
-                                                                        : (isDark ? const Color(0xFF16161B) : const Color(0xFFFAFAFA)),
-                                                                    child: InkWell(
-                                                                      onTap: joined
-                                                                          ? () => _showStudentSubmissionDetailsSheet(context, sName, sUid, stages, defaultAvatar: sAvatar)
-                                                                          : null,
+                                                            return Material(
+                                                              color: isEven
+                                                                  ? (isDark ? const Color(0xFF1E1E24) : Colors.white)
+                                                                  : (isDark ? const Color(0xFF16161B) : const Color(0xFFFAFAFA)),
+                                                              child: InkWell(
+                                                                onTap: joined
+                                                                    ? () => _showStudentSubmissionDetailsSheet(context, sName, sUid, stages, defaultAvatar: sAvatar)
+                                                                    : null,
+                                                                child: Row(
+                                                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                                                  children: [
+                                                                    // Kolom 1: Avatar + Nama 2 Baris (Lebar 200)
+                                                                    Container(
+                                                                      width: 200,
+                                                                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                                                                      decoration: BoxDecoration(
+                                                                        border: Border(
+                                                                          right: BorderSide(
+                                                                            color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+                                                                            width: 1,
+                                                                          ),
+                                                                        ),
+                                                                      ),
                                                                       child: Row(
                                                                         crossAxisAlignment: CrossAxisAlignment.center,
                                                                         children: [
-                                                                          // Kolom 1: Avatar + Nama 2 Baris (Lebar 200)
                                                                           Container(
-                                                                            width: 200,
-                                                                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                                                                            width: 36,
+                                                                            height: 36,
                                                                             decoration: BoxDecoration(
-                                                                              border: Border(
+                                                                              shape: BoxShape.circle,
+                                                                              color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+                                                                            ),
+                                                                            child: StudentAvatarWidget(
+                                                                              uid: sUid,
+                                                                              defaultAvatar: sAvatar,
+                                                                              studentName: sName,
+                                                                              joined: joined,
+                                                                            ),
+                                                                          ),
+                                                                          const SizedBox(width: 8),
+                                                                          Expanded(
+                                                                            child: Column(
+                                                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                                                              mainAxisAlignment: MainAxisAlignment.center,
+                                                                              children: [
+                                                                                Text(
+                                                                                  sName,
+                                                                                  style: AppTypography.buttonLabel(
+                                                                                    color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                                                                    fontWeight: FontWeight.bold,
+                                                                                    height: 1.15,
+                                                                                  ),
+                                                                                  maxLines: 1,
+                                                                                  overflow: TextOverflow.ellipsis,
+                                                                                ),
+                                                                                const SizedBox(height: 2),
+                                                                                Row(
+                                                                                  children: [
+                                                                                    Container(
+                                                                                      width: 7,
+                                                                                      height: 7,
+                                                                                      decoration: BoxDecoration(
+                                                                                        shape: BoxShape.circle,
+                                                                                        color: joined ? const Color(0xFF10B981) : const Color(0xFF94A3B8),
+                                                                                      ),
+                                                                                    ),
+                                                                                    const SizedBox(width: 4),
+                                                                                    Expanded(
+                                                                                      child: Text(
+                                                                                        joined
+                                                                                            ? (userAccountIds[sUid]?.isNotEmpty == true
+                                                                                                ? 'ID: ${userAccountIds[sUid]}'
+                                                                                                : 'ID: $defaultId')
+                                                                                            : 'Belum Join',
+                                                                                        style: AppTypography.fileSize(
+                                                                                          color: joined
+                                                                                              ? (isDark ? const Color(0xFF6EE7B7) : const Color(0xFF059669))
+                                                                                              : (isDark ? const Color(0xFF71717A) : const Color(0xFF94A3B8)),
+                                                                                          fontWeight: FontWeight.w600,
+                                                                                        ),
+                                                                                        maxLines: 1,
+                                                                                        overflow: TextOverflow.ellipsis,
+                                                                                      ),
+                                                                                    ),
+                                                                                  ],
+                                                                                ),
+                                                                              ],
+                                                                            ),
+                                                                          ),
+                                                                        ],
+                                                                      ),
+                                                                    ),
+
+                                                                    // Kolom 2: Progres Bar & Angka (Lebar 90)
+                                                                    Container(
+                                                                      width: 90,
+                                                                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
+                                                                      decoration: BoxDecoration(
+                                                                        border: (showTugas || showQuiz)
+                                                                            ? Border(
                                                                                 right: BorderSide(
                                                                                   color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
                                                                                   width: 1,
                                                                                 ),
+                                                                              )
+                                                                            : null,
+                                                                      ),
+                                                                      child: Column(
+                                                                        mainAxisAlignment: MainAxisAlignment.center,
+                                                                        children: [
+                                                                          Text(
+                                                                            joined ? '${progressPercent.toInt()}%' : '-',
+                                                                            style: AppTypography.fileSize(
+                                                                              color: joined
+                                                                                  ? (progressPercent == 100
+                                                                                      ? (isDark ? const Color(0xFF6EE7B7) : const Color(0xFF059669))
+                                                                                      : (isDark ? const Color(0xFF93C5FD) : const Color(0xFF2563EB)))
+                                                                                  : (isDark ? Colors.white24 : Colors.black26),
+                                                                              fontWeight: FontWeight.w800,
+                                                                            ),
+                                                                          ),
+                                                                          if (joined && filteredTasks.isNotEmpty) ...[
+                                                                            const SizedBox(height: 4),
+                                                                            ClipRRect(
+                                                                              borderRadius: BorderRadius.circular(2),
+                                                                              child: LinearProgressIndicator(
+                                                                                value: progressPercent / 100,
+                                                                                minHeight: 4,
+                                                                                backgroundColor: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                                                                                valueColor: AlwaysStoppedAnimation<Color>(
+                                                                                  progressPercent == 100
+                                                                                      ? const Color(0xFF10B981)
+                                                                                      : const Color(0xFF3B82F6),
+                                                                                ),
                                                                               ),
                                                                             ),
-                                                                            child: Row(
-                                                                              crossAxisAlignment: CrossAxisAlignment.center,
-                                                                              children: [
-                                                                                Container(
-                                                                                  width: 36,
-                                                                                  height: 36,
-                                                                                  decoration: BoxDecoration(
-                                                                                    shape: BoxShape.circle,
-                                                                                    color: joined
-                                                                                        ? _getAvatarColor(sName)
-                                                                                        : (isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9)),
-                                                                                    border: joined
-                                                                                        ? null
-                                                                                        : Border.all(
-                                                                                            color: isDark ? const Color(0xFF334155) : const Color(0xFFCBD5E1),
-                                                                                            width: 1.2,
-                                                                                          ),
-                                                                                  ),
-                                                                                  child: joined
-                                                                                      ? StudentAvatarWidget(
-                                                                                          uid: sUid,
-                                                                                          defaultAvatar: sAvatar,
-                                                                                          studentName: sName,
-                                                                                          joined: joined,
-                                                                                        )
-                                                                                      : Center(
-                                                                                          child: Icon(
-                                                                                            Icons.person_outline_rounded,
-                                                                                            size: 19,
-                                                                                            color: isDark ? Colors.white38 : const Color(0xFF94A3B8),
-                                                                                          ),
-                                                                                        ),
-                                                                                ),
-                                                                                const SizedBox(width: 8),
-                                                                                Expanded(
-                                                                                  child: Column(
-                                                                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                                                                    mainAxisSize: MainAxisSize.min,
-                                                                                    children: [
-                                                                                      Text(
-                                                                                        sName,
-                                                                                        style: AppTypography.buttonLabel(color: joined ? (isDark ? Colors.white : Colors.black87) : Colors.black38, fontWeight: FontWeight.bold, height: 1.15),
-                                                                                        maxLines: 2,
-                                                                                        softWrap: true,
-                                                                                        overflow: TextOverflow.ellipsis,
-                                                                                      ),
-                                                                                      const SizedBox(height: 2),
-                                                                                      Text(
-                                                                                        joined
-                                                                                            ? 'ID: ${userAccountIds[sUid] ?? studentData['userId'] ?? student['userId'] ?? (sUid.isNotEmpty ? (sUid.length > 6 ? sUid.substring(0, 6) : sUid) : defaultId)}'
-                                                                                            : 'Belum Bergabung',
-                                                                                        style: AppTypography.timestamp(color: joined ? (isDark ? Colors.white54 : Colors.black45) : (isDark ? Colors.red.shade300 : Colors.red.shade400), fontWeight: FontWeight.w500),
-                                                                                      ),
-                                                                                    ],
-                                                                                  ),
-                                                                                ),
-                                                                              ],
-                                                                            ),
-                                                                          ),
-
-                                                                          // Kolom 2: Progress (Lebar 90)
-                                                                          Container(
-                                                                            width: 90,
-                                                                            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
-                                                                            decoration: BoxDecoration(
-                                                                              border: (showTugas || showQuiz)
-                                                                                  ? Border(
-                                                                                      right: BorderSide(
-                                                                                        color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
-                                                                                        width: 1,
-                                                                                      ),
-                                                                                    )
-                                                                                  : null,
-                                                                            ),
-                                                                            child: Column(
-                                                                              crossAxisAlignment: CrossAxisAlignment.center,
-                                                                              mainAxisAlignment: MainAxisAlignment.center,
-                                                                              children: [
-                                                                                Text(
-                                                                                  filteredTasks.isNotEmpty ? '$filteredDoneCount/${filteredTasks.length}' : '-',
-                                                                                  style: AppTypography.buttonLabel(color: isDark ? Colors.white : Colors.black87, fontWeight: FontWeight.w800),
-                                                                                  textAlign: TextAlign.center,
-                                                                                ),
-                                                                                if (filteredTasks.isNotEmpty) ...[
-                                                                                  const SizedBox(height: 4),
-                                                                                  SizedBox(
-                                                                                    width: 44,
-                                                                                    child: ClipRRect(
-                                                                                      borderRadius: BorderRadius.circular(4),
-                                                                                      child: LinearProgressIndicator(
-                                                                                        value: progressPercent / 100,
-                                                                                        minHeight: 4.0,
-                                                                                        backgroundColor: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
-                                                                                        valueColor: AlwaysStoppedAnimation<Color>(
-                                                                                          progressPercent == 100
-                                                                                              ? const Color(0xFF10B981)
-                                                                                              : const Color(0xFF7F52FC),
-                                                                                        ),
-                                                                                      ),
-                                                                                    ),
-                                                                                  ),
-                                                                                ],
-                                                                              ],
-                                                                            ),
-                                                                          ),
-
-                                                                          // Kolom 3..7: Tugas 1 s/d 5 (Lebar 5 x 70)
-                                                                          if (showTugas)
-                                                                            ...List.generate(5, (i) {
-                                                                              final task = i < tugasList.length ? tugasList[i] : null;
-                                                                              final String? tKey = task?['key'];
-                                                                              final String? tTitle = task?['title'];
-                                                                              final bool isDone = tKey != null && completed.contains(tKey);
-
-                                                                              return Container(
-                                                                                width: 70,
-                                                                                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
-                                                                                decoration: BoxDecoration(
-                                                                                  border: (i == 4 && !showQuiz)
-                                                                                      ? null
-                                                                                      : Border(
-                                                                                          right: BorderSide(
-                                                                                            color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
-                                                                                            width: 1,
-                                                                                          ),
-                                                                                        ),
-                                                                                ),
-                                                                                alignment: Alignment.center,
-                                                                                child: (!joined || task == null)
-                                                                                    ? Text(
-                                                                                        '-',
-                                                                                        style: AppTypography.buttonLabel(color: isDark ? Colors.white24 : Colors.black26, fontWeight: FontWeight.w600),
-                                                                                      )
-                                                                                    : Tooltip(
-                                                                                        message: '📝 Tugas: $tTitle\n${isDone ? "Sudah dikerjakan (Klik untuk lihat)" : "Belum dikerjakan"}',
-                                                                                        triggerMode: TooltipTriggerMode.tap,
-                                                                                        child: GestureDetector(
-                                                                                          onTap: isDone
-                                                                                              ? () => _showViewTaskSubmissionDialog(context, sName, tTitle ?? 'Tugas ${i + 1}', studentData, tKey)
-                                                                                              : null,
-                                                                                          child: Container(
-                                                                                            width: 24,
-                                                                                            height: 24,
-                                                                                            decoration: BoxDecoration(
-                                                                                              color: isDone
-                                                                                                  ? (isDark ? const Color(0xFF064E3B) : const Color(0xFFDCFCE7))
-                                                                                                  : (isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9)),
-                                                                                              borderRadius: BorderRadius.circular(6),
-                                                                                              border: Border.all(
-                                                                                                color: isDone ? const Color(0xFF10B981) : (isDark ? const Color(0xFF3F3F46) : Colors.black12),
-                                                                                                width: 1,
-                                                                                              ),
-                                                                                            ),
-                                                                                            alignment: Alignment.center,
-                                                                                            child: isDone
-                                                                                                ? Icon(Icons.check_rounded, size: 13, color: isDark ? const Color(0xFF6EE7B7) : const Color(0xFF15803D))
-                                                                                                : Text(
-                                                                                                    '-',
-                                                                                                    style: AppTypography.buttonLabel(color: isDark ? const Color(0xFF71717A) : const Color(0xFF475569), fontWeight: FontWeight.bold),
-                                                                                                  ),
-                                                                                          ),
-                                                                                        ),
-                                                                                      ),
-                                                                              );
-                                                                            }),
-
-                                                                          // Kolom 8..12: Quiz 1 s/d 5 (Lebar 5 x 70)
-                                                                          if (showQuiz)
-                                                                            ...List.generate(5, (i) {
-                                                                              final quiz = i < quizList.length ? quizList[i] : null;
-                                                                              final String? qKey = quiz?['key'];
-                                                                              final String? qTitle = quiz?['title'];
-                                                                              final quizScore = (qKey != null && joined) ? studentData['quizScore_$qKey'] : null;
-                                                                              final bool isFinished = quizScore != null;
-
-                                                                              return Container(
-                                                                                width: 70,
-                                                                                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
-                                                                                decoration: BoxDecoration(
-                                                                                  border: i == 4
-                                                                                      ? null
-                                                                                      : Border(
-                                                                                          right: BorderSide(
-                                                                                            color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
-                                                                                            width: 1,
-                                                                                          ),
-                                                                                        ),
-                                                                                ),
-                                                                                alignment: Alignment.center,
-                                                                                child: (!joined || quiz == null)
-                                                                                    ? Text(
-                                                                                        '-',
-                                                                                        style: AppTypography.buttonLabel(color: isDark ? Colors.white24 : Colors.black26, fontWeight: FontWeight.w600),
-                                                                                      )
-                                                                                    : Tooltip(
-                                                                                        message: '❓ Quiz: $qTitle\nNilai: ${quizScore ?? "Belum dikerjakan"}',
-                                                                                        triggerMode: TooltipTriggerMode.tap,
-                                                                                        child: Container(
-                                                                                          width: 32,
-                                                                                          height: 24,
-                                                                                          decoration: BoxDecoration(
-                                                                                            color: isFinished
-                                                                                                ? (isDark ? const Color(0xFF451A03) : const Color(0xFFFFF7ED))
-                                                                                                : (isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9)),
-                                                                                            borderRadius: BorderRadius.circular(6),
-                                                                                            border: Border.all(
-                                                                                              color: isFinished ? (isDark ? const Color(0xFFF97316) : const Color(0xFFEA580C)) : (isDark ? const Color(0xFF3F3F46) : Colors.black12),
-                                                                                              width: 1,
-                                                                                            ),
-                                                                                          ),
-                                                                                          alignment: Alignment.center,
-                                                                                          child: Text(
-                                                                                            isFinished ? quizScore.toString() : '-',
-                                                                                            style: AppTypography.buttonLabel(color: isFinished ? (isDark ? const Color(0xFFFDBA74) : const Color(0xFFEA580C)) : (isDark ? const Color(0xFF71717A) : Colors.black45), fontWeight: FontWeight.bold),
-                                                                                          ),
-                                                                                        ),
-                                                                                      ),
-                                                                              );
-                                                                            }),
+                                                                          ],
                                                                         ],
                                                                       ),
                                                                     ),
-                                                                  );
-                                                                },
+
+                                                                    // Kolom 3..7: Tugas 1 s/d 5 (Lebar 5 x 70)
+                                                                    if (showTugas)
+                                                                      ...List.generate(5, (i) {
+                                                                        final task = i < tugasList.length ? tugasList[i] : null;
+                                                                        final String? tKey = task?['key'];
+                                                                        final String? tTitle = task?['title'];
+                                                                        final bool isDone = tKey != null && completed.contains(tKey);
+
+                                                                        return Container(
+                                                                          width: 70,
+                                                                          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+                                                                          decoration: BoxDecoration(
+                                                                            border: (i == 4 && !showQuiz)
+                                                                                ? null
+                                                                                : Border(
+                                                                                    right: BorderSide(
+                                                                                      color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+                                                                                      width: 1,
+                                                                                    ),
+                                                                                  ),
+                                                                          ),
+                                                                          alignment: Alignment.center,
+                                                                          child: (!joined || task == null)
+                                                                              ? Text(
+                                                                                  '-',
+                                                                                  style: AppTypography.buttonLabel(color: isDark ? Colors.white24 : Colors.black26, fontWeight: FontWeight.w600),
+                                                                                )
+                                                                              : Tooltip(
+                                                                                  message: '📝 Tugas: $tTitle\n${isDone ? "Sudah dikerjakan (Klik untuk lihat)" : "Belum dikerjakan"}',
+                                                                                  triggerMode: TooltipTriggerMode.tap,
+                                                                                  child: GestureDetector(
+                                                                                    onTap: isDone
+                                                                                        ? () => _showViewTaskSubmissionDialog(context, sName, tTitle ?? 'Tugas ${i + 1}', studentData, tKey)
+                                                                                        : null,
+                                                                                    child: Container(
+                                                                                      width: 24,
+                                                                                      height: 24,
+                                                                                      decoration: BoxDecoration(
+                                                                                        color: isDone
+                                                                                            ? (isDark ? const Color(0xFF064E3B) : const Color(0xFFDCFCE7))
+                                                                                            : (isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9)),
+                                                                                        borderRadius: BorderRadius.circular(6),
+                                                                                        border: Border.all(
+                                                                                          color: isDone ? const Color(0xFF10B981) : (isDark ? const Color(0xFF3F3F46) : Colors.black12),
+                                                                                          width: 1,
+                                                                                        ),
+                                                                                      ),
+                                                                                      alignment: Alignment.center,
+                                                                                      child: isDone
+                                                                                          ? Icon(Icons.check_rounded, size: 13, color: isDark ? const Color(0xFF6EE7B7) : const Color(0xFF15803D))
+                                                                                          : Text(
+                                                                                              '-',
+                                                                                              style: AppTypography.buttonLabel(color: isDark ? const Color(0xFF71717A) : const Color(0xFF475569), fontWeight: FontWeight.bold),
+                                                                                            ),
+                                                                                    ),
+                                                                                  ),
+                                                                                ),
+                                                                        );
+                                                                      }),
+
+                                                                    // Kolom 8..12: Quiz 1 s/d 5 (Lebar 5 x 70)
+                                                                    if (showQuiz)
+                                                                      ...List.generate(5, (i) {
+                                                                        final quiz = i < quizList.length ? quizList[i] : null;
+                                                                        final String? qKey = quiz?['key'];
+                                                                        final String? qTitle = quiz?['title'];
+                                                                        final quizScore = (qKey != null && joined) ? studentData['quizScore_$qKey'] : null;
+                                                                        final bool isFinished = quizScore != null;
+
+                                                                        return Container(
+                                                                          width: 70,
+                                                                          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+                                                                          decoration: BoxDecoration(
+                                                                            border: i == 4
+                                                                                ? null
+                                                                                : Border(
+                                                                                    right: BorderSide(
+                                                                                      color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+                                                                                      width: 1,
+                                                                                    ),
+                                                                                  ),
+                                                                          ),
+                                                                          alignment: Alignment.center,
+                                                                          child: (!joined || quiz == null)
+                                                                              ? Text(
+                                                                                  '-',
+                                                                                  style: AppTypography.buttonLabel(color: isDark ? Colors.white24 : Colors.black26, fontWeight: FontWeight.w600),
+                                                                                )
+                                                                              : Tooltip(
+                                                                                  message: '❓ Quiz: $qTitle\nNilai: ${quizScore ?? "Belum dikerjakan"}',
+                                                                                  triggerMode: TooltipTriggerMode.tap,
+                                                                                  child: Container(
+                                                                                    width: 32,
+                                                                                    height: 24,
+                                                                                    decoration: BoxDecoration(
+                                                                                      color: isFinished
+                                                                                          ? (isDark ? const Color(0xFF451A03) : const Color(0xFFFFF7ED))
+                                                                                          : (isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9)),
+                                                                                      borderRadius: BorderRadius.circular(6),
+                                                                                      border: Border.all(
+                                                                                        color: isFinished ? (isDark ? const Color(0xFFF97316) : const Color(0xFFEA580C)) : (isDark ? const Color(0xFF3F3F46) : Colors.black12),
+                                                                                        width: 1,
+                                                                                      ),
+                                                                                    ),
+                                                                                    alignment: Alignment.center,
+                                                                                    child: Text(
+                                                                                      isFinished ? quizScore.toString() : '-',
+                                                                                      style: AppTypography.buttonLabel(color: isFinished ? (isDark ? const Color(0xFFFDBA74) : const Color(0xFFEA580C)) : (isDark ? const Color(0xFF71717A) : Colors.black45), fontWeight: FontWeight.bold),
+                                                                                    ),
+                                                                                  ),
+                                                                                ),
+                                                                        );
+                                                                      }),
+                                                                  ],
+                                                                ),
                                                               ),
                                                             );
                                                           },
-                                                        );
-                                                      },
-                                                    ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        ),
+                                                        ),
+                                                      );
+                                                    },
+                                                  );
+                                                },
+                                              ),
                                       ),
-                                    ),
+                                    ],
                                   ),
-                              ],
+                                ),
+                              ),
                             ),
-                          );
-                        },
-                      ),
-                    ],
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -2724,3 +2820,148 @@ class _StudentAvatarWidgetState extends State<StudentAvatarWidget> {
     );
   }
 }
+
+/// Custom Vector Icon: Total Siswa (40% Hitam, 60% Vibrant Orange)
+class TotalSiswaVectorIcon extends StatelessWidget {
+  final bool isDark;
+  final double size;
+
+  const TotalSiswaVectorIcon({
+    super.key,
+    required this.isDark,
+    this.size = 38,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomPaint(
+      size: Size(size, size),
+      painter: _TotalSiswaPainter(isDark: isDark),
+    );
+  }
+}
+
+class _TotalSiswaPainter extends CustomPainter {
+  final bool isDark;
+
+  _TotalSiswaPainter({required this.isDark});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final double scale = size.width / 36.0;
+
+    final darkPaint = Paint()
+      ..color = isDark ? const Color(0xFF71717A) : const Color(0xFF18181B)
+      ..style = PaintingStyle.fill
+      ..isAntiAlias = true;
+
+    final orangePaint = Paint()
+      ..color = const Color(0xFFEA580C)
+      ..style = PaintingStyle.fill
+      ..isAntiAlias = true;
+
+    // 1. Back Left Student (Dark Charcoal/Black - 40% tone)
+    canvas.drawCircle(Offset(10 * scale, 12 * scale), 3.8 * scale, darkPaint);
+    final leftBodyPath = Path()
+      ..moveTo(4 * scale, 28 * scale)
+      ..quadraticBezierTo(4 * scale, 19.5 * scale, 10 * scale, 19.5 * scale)
+      ..quadraticBezierTo(16 * scale, 19.5 * scale, 16 * scale, 28 * scale)
+      ..close();
+    canvas.drawPath(leftBodyPath, darkPaint);
+
+    // 2. Back Right Student (Dark Charcoal/Black - 40% tone)
+    canvas.drawCircle(Offset(26 * scale, 12 * scale), 3.8 * scale, darkPaint);
+    final rightBodyPath = Path()
+      ..moveTo(20 * scale, 28 * scale)
+      ..quadraticBezierTo(20 * scale, 19.5 * scale, 26 * scale, 19.5 * scale)
+      ..quadraticBezierTo(32 * scale, 19.5 * scale, 32 * scale, 28 * scale)
+      ..close();
+    canvas.drawPath(rightBodyPath, darkPaint);
+
+    // 3. Center Front Student (Vibrant Orange - 60% tone)
+    canvas.drawCircle(Offset(18 * scale, 9 * scale), 4.8 * scale, orangePaint);
+    final centerBodyPath = Path()
+      ..moveTo(9.5 * scale, 30 * scale)
+      ..quadraticBezierTo(10 * scale, 17.5 * scale, 18 * scale, 17.5 * scale)
+      ..quadraticBezierTo(26 * scale, 17.5 * scale, 26.5 * scale, 30 * scale)
+      ..close();
+    canvas.drawPath(centerBodyPath, orangePaint);
+  }
+
+  @override
+  bool shouldRepaint(covariant _TotalSiswaPainter oldDelegate) => oldDelegate.isDark != isDark;
+}
+
+/// Custom Vector Icon: Telah Bergabung (40% Hitam, 60% Vibrant Emerald)
+class TelahBergabungVectorIcon extends StatelessWidget {
+  final bool isDark;
+  final double size;
+
+  const TelahBergabungVectorIcon({
+    super.key,
+    required this.isDark,
+    this.size = 38,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomPaint(
+      size: Size(size, size),
+      painter: _TelahBergabungPainter(isDark: isDark),
+    );
+  }
+}
+
+class _TelahBergabungPainter extends CustomPainter {
+  final bool isDark;
+
+  _TelahBergabungPainter({required this.isDark});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final double scale = size.width / 36.0;
+
+    final darkPaint = Paint()
+      ..color = isDark ? const Color(0xFF71717A) : const Color(0xFF18181B)
+      ..style = PaintingStyle.fill
+      ..isAntiAlias = true;
+
+    final greenPaint = Paint()
+      ..color = const Color(0xFF059669)
+      ..style = PaintingStyle.fill
+      ..isAntiAlias = true;
+
+    final checkStroke = Paint()
+      ..color = Colors.white
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.0 * scale
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round
+      ..isAntiAlias = true;
+
+    // 1. Student Silhouette (Left-Center, 40% Dark)
+    canvas.drawCircle(Offset(13.5 * scale, 10 * scale), 5.5 * scale, darkPaint);
+    final bodyPath = Path()
+      ..moveTo(4 * scale, 30 * scale)
+      ..quadraticBezierTo(4.5 * scale, 18.5 * scale, 13.5 * scale, 18.5 * scale)
+      ..quadraticBezierTo(22.5 * scale, 18.5 * scale, 23 * scale, 30 * scale)
+      ..close();
+    canvas.drawPath(bodyPath, darkPaint);
+
+    // 2. Verified Green Badge (60% Vibrant Emerald)
+    final badgeCenter = Offset(26 * scale, 20.5 * scale);
+    final badgeRadius = 7.5 * scale;
+    canvas.drawCircle(badgeCenter, badgeRadius, greenPaint);
+
+    // 3. Crisp White Checkmark (Inside Badge, without overlapping background sticker box)
+    final checkPath = Path()
+      ..moveTo(badgeCenter.dx - 3.2 * scale, badgeCenter.dy)
+      ..lineTo(badgeCenter.dx - 0.8 * scale, badgeCenter.dy + 2.5 * scale)
+      ..lineTo(badgeCenter.dx + 3.5 * scale, badgeCenter.dy - 2.5 * scale);
+    canvas.drawPath(checkPath, checkStroke);
+  }
+
+  @override
+  bool shouldRepaint(covariant _TelahBergabungPainter oldDelegate) => oldDelegate.isDark != isDark;
+}
+

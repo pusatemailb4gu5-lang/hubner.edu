@@ -8839,7 +8839,7 @@ class _TrophySvgPainter extends CustomPainter {
   bool shouldRepaint(covariant _TrophySvgPainter oldDelegate) => false;
 }
 
-/// 1. Premium Vector Illustration for Jadwal Kelas (Kalender + Karakter Avatar Siluet 1 Guru & 3 Siswa - Persegi Panjang)
+/// 1. Premium 3D Material Design Illustration for Jadwal Kelas
 class _ClassScheduleDoodle extends StatelessWidget {
   final double width;
   final double height;
@@ -8853,62 +8853,19 @@ class _ClassScheduleDoodle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final spineColor = isDark ? '#FFFFFF' : '#0F172A';
-    final cardBg = isDark ? '#1E293B' : '#FFFFFF';
-    final gridBox = isDark ? '#334155' : '#F1F5F9';
-
-    return SvgPicture.string(
-      '''<svg viewBox="0 0 96 60" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <!-- 1. Background Calendar Board (Persegi Panjang) -->
-        <rect x="4" y="6" width="88" height="50" rx="12" fill="$cardBg"/>
-        <rect x="4" y="6" width="88" height="13" rx="12" fill="#0284C7"/>
-        <rect x="4" y="13" width="88" height="6" fill="#0284C7"/>
-
-        <!-- Calendar Spiral Rings (20% Black Spine) -->
-        <circle cx="16" cy="6" r="2.2" fill="$spineColor"/>
-        <circle cx="32" cy="6" r="2.2" fill="$spineColor"/>
-        <circle cx="48" cy="6" r="2.2" fill="$spineColor"/>
-        <circle cx="64" cy="6" r="2.2" fill="$spineColor"/>
-        <circle cx="80" cy="6" r="2.2" fill="$spineColor"/>
-
-        <!-- Calendar Month Badge & Mini Grid -->
-        <rect x="12" y="10" width="22" height="4" rx="2" fill="#FFFFFF"/>
-        <circle cx="82" cy="12" r="2" fill="#FACC15"/>
-        <rect x="10" y="24" width="8" height="5" rx="1.5" fill="$gridBox"/>
-        <rect x="22" y="24" width="8" height="5" rx="1.5" fill="#38BDF8"/>
-        <rect x="66" y="24" width="8" height="5" rx="1.5" fill="$gridBox"/>
-        <rect x="78" y="24" width="8" height="5" rx="1.5" fill="#FB923C"/>
-
-        <!-- 2. Karakter 4 Avatar Siluet Minimalis (1 Guru di Tengah + 3 Siswa) -->
-        <!-- Siswa 1 (Kiri - Avatar Biru Muda) -->
-        <circle cx="21" cy="30" r="5" fill="#38BDF8"/>
-        <path d="M12 52c0-6 4-10 9-10s9 4 9 10" fill="#0EA5E9"/>
-
-        <!-- Siswa 3 (Tengah Kiri - Avatar Kuning/Amber) -->
-        <circle cx="35" cy="27" r="4.5" fill="#FDE047"/>
-        <path d="M28 50c0-5 3.2-8.5 7-8.5s7 3.5 7 8.5" fill="#F59E0B"/>
-
-        <!-- GURU (Tengah - Avatar Berwibawa Indigo & Dasi Emas) -->
-        <circle cx="50" cy="25" r="6" fill="#818CF8"/>
-        <circle cx="50" cy="25" r="6" stroke="$spineColor" stroke-width="1.2" fill="none"/>
-        <path d="M40 54c0-7 4.5-12 10-12s10 5 10 12" fill="#4F46E5"/>
-        <polygon points="50,42.5 51.8,47 50,49.5 48.2,47" fill="#FACC15"/>
-
-        <!-- Siswa 2 (Kanan - Avatar Rose/Red) -->
-        <circle cx="68" cy="30" r="5" fill="#FB7185"/>
-        <path d="M59 52c0-6 4-10 9-10s9 4 9 10" fill="#F43F5E"/>
-
-        <!-- Floating Sparkles -->
-        <path d="M6 21l0.6 1.4 1.4 0.6-1.4 0.6-0.6 1.4-0.6-1.4-1.4-0.6 1.4-0.6 0.6-1.4z" fill="#FACC15"/>
-        <path d="M88 22l0.6 1.4 1.4 0.6-1.4 0.6-0.6 1.4-0.6-1.4-1.4-0.6 1.4-0.6 0.6-1.4z" fill="#38BDF8"/>
-      </svg>''',
-      width: width,
-      height: height,
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(14),
+      child: Image.asset(
+        'assets/images/home_schedule_card.png',
+        width: width,
+        height: height,
+        fit: BoxFit.cover,
+      ),
     );
   }
 }
 
-/// 2. Premium Vector Illustration for Deadline Tugas (Note + Pulpen + Checklist - Persegi Panjang)
+/// 2. Premium 3D Material Design Illustration for Deadline Tugas
 class _TaskDeadlineDoodle extends StatelessWidget {
   final double width;
   final double height;
@@ -8922,58 +8879,19 @@ class _TaskDeadlineDoodle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final spineColor = isDark ? '#FFFFFF' : '#0F172A';
-    final cardBg = isDark ? '#1E293B' : '#FFFDF5';
-
-    return SvgPicture.string(
-      '''<svg viewBox="0 0 96 60" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <!-- 1. Clipboard Base (Persegi Panjang) -->
-        <rect x="5" y="6" width="86" height="50" rx="12" fill="$cardBg"/>
-        <!-- Top Spine Clip (20% Black) -->
-        <rect x="33" y="2" width="30" height="7" rx="3.5" fill="$spineColor"/>
-        <circle cx="48" cy="5.5" r="1.6" fill="#FACC15"/>
-
-        <!-- Header Ribbon (Violet) -->
-        <rect x="14" y="14" width="46" height="4" rx="2" fill="#8B5CF6"/>
-
-        <!-- Task Checklist Row 1 (Green Check Badge + Rose Task Bar) -->
-        <circle cx="18" cy="24" r="3.6" fill="#10B981"/>
-        <path d="M16.5 24l1 1 2-2" stroke="#FFFFFF" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
-        <rect x="25" y="22" width="34" height="4" rx="2" fill="#FB7185"/>
-
-        <!-- Task Checklist Row 2 (Blue Check Badge + Gold Task Bar) -->
-        <circle cx="18" cy="33.5" r="3.6" fill="#0284C7"/>
-        <path d="M16.5 33.5l1 1 2-2" stroke="#FFFFFF" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
-        <rect x="25" y="31.5" width="28" height="4" rx="2" fill="#FACC15"/>
-
-        <!-- Task Checklist Row 3 (Purple Check Badge + Cyan Task Bar) -->
-        <circle cx="18" cy="43" r="3.6" fill="#8B5CF6"/>
-        <path d="M16.5 43l1 1 2-2" stroke="#FFFFFF" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
-        <rect x="25" y="41" width="22" height="4" rx="2" fill="#38BDF8"/>
-
-        <!-- 2. Angled Stylus / Pulpen (Orange Body, Gold Nib, Cyan Cap) -->
-        <!-- Pen Body -->
-        <polygon points="62,50 78,14 84,17 68,53" fill="#FB923C"/>
-        <!-- Pen Grip (20% Black Spine) -->
-        <polygon points="64,46 70,32 73,33.5 67,47.5" fill="$spineColor"/>
-        <!-- Pen Cap -->
-        <polygon points="76,19 78,14 84,17 82,22" fill="#06B6D4"/>
-        <rect x="81.5" y="14.5" width="2.5" height="8" rx="1" transform="rotate(30 81.5 14.5)" fill="#FACC15"/>
-        <!-- Pen Nib Tip -->
-        <polygon points="62,50 68,53 58,60" fill="#FACC15"/>
-        <circle cx="58" cy="60" r="1" fill="$spineColor"/>
-
-        <!-- Sparkles -->
-        <path d="M78 8l0.8 1.8 1.8 0.8-1.8 0.8-0.8 1.8-0.8-1.8-1.8-0.8 1.8-0.8 0.8-1.8z" fill="#FACC15"/>
-        <path d="M6 28l0.6 1.4 1.4 0.6-1.4 0.6-0.6 1.4-0.6-1.4-1.4-0.6 1.4-0.6 0.6-1.4z" fill="#10B981"/>
-      </svg>''',
-      width: width,
-      height: height,
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(14),
+      child: Image.asset(
+        'assets/images/home_task_card.png',
+        width: width,
+        height: height,
+        fit: BoxFit.cover,
+      ),
     );
   }
 }
 
-/// 3. Premium Vector Illustration for Jadwal Kuis (Karakter Avatar Siluet & Puzzle Interlocking - Persegi Panjang)
+/// 3. Premium 3D Material Design Illustration for Jadwal Kuis
 class _QuizPuzzleDoodle extends StatelessWidget {
   final double width;
   final double height;
@@ -8987,49 +8905,14 @@ class _QuizPuzzleDoodle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final spineColor = isDark ? '#FFFFFF' : '#0F172A';
-    final auraBg = isDark ? '#2E1065' : '#EDE9FE';
-
-    return SvgPicture.string(
-      '''<svg viewBox="0 0 96 60" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <!-- 1. Background Aura Badge (Persegi Panjang) -->
-        <rect x="4" y="4" width="88" height="52" rx="14" fill="$auraBg" fill-opacity="0.65"/>
-
-        <!-- 2. Interlocking Colorful Puzzle Pieces (Sisi Kiri) -->
-        <!-- Piece 1: Top-Left (Violet) -->
-        <path d="M12 10h11c0 2 1.6 3.6 3.6 3.6s3.6-1.6 3.6-3.6h6v10c-2 0-3.6 1.6-3.6 3.6s1.6 3.6 3.6 3.6v6H25c0-2-1.6-3.6-3.6-3.6s-3.6 1.6-3.6 3.6H12V30c2 0 3.6-1.6 3.6-3.6s-1.6-3.6-3.6-3.6V10z" fill="#8B5CF6"/>
-        <circle cx="20" cy="18" r="2" fill="#C084FC"/>
-
-        <!-- Piece 2: Top-Right (Sky Blue) -->
-        <path d="M37 10h16c2 0 3.6 1.6 3.6 3.6v12c-2 0-3.6 1.6-3.6 3.6s1.6 3.6 3.6 3.6v4H45c0-2-1.6-3.6-3.6-3.6s-3.6 1.6-3.6 3.6h-2V37c2 0 3.6-1.6 3.6-3.6s-1.6-3.6-3.6-3.6V10z" fill="#0EA5E9"/>
-        <circle cx="47" cy="18" r="2" fill="#7DD3FC"/>
-
-        <!-- Piece 3: Bottom-Left (Emerald Green) -->
-        <path d="M12 34h13c0 2 1.6 3.6 3.6 3.6s3.6-1.6 3.6-3.6h6v12c0 2-1.6 3.6-3.6 3.6H25c0-2-1.6-3.6-3.6-3.6s-3.6 1.6-3.6 3.6H16c-2 0-3.6-1.6-3.6-3.6V34z" fill="#10B981"/>
-        <circle cx="20" cy="42" r="2" fill="#6EE7B7"/>
-
-        <!-- Piece 4: Bottom-Right (Amber Gold) -->
-        <path d="M37 34h19v12c0 2-1.6 3.6-3.6 3.6H41c0-2-1.6-3.6-3.6-3.6s-3.6 1.6-3.6 3.6h-4V34z" fill="#F59E0B"/>
-        <circle cx="47" cy="42" r="2" fill="#FDE047"/>
-
-        <!-- 3. Karakter Avatar Siluet Minimalis (Sisi Kanan - Bentuk Geometris Bersih) -->
-        <!-- Kepala Avatar Siluet (Lingkaran) -->
-        <circle cx="73" cy="22" r="7.5" fill="#A855F7"/>
-        <circle cx="73" cy="22" r="7.5" stroke="$spineColor" stroke-width="1.2" fill="none"/>
-
-        <!-- Badan / Pundak Avatar Siluet (Rounded Torso Silhouette) -->
-        <path d="M60 52c0-8 5.8-14 13-14s13 6 13 14" fill="#7C3AED"/>
-
-        <!-- Floating Golden Star Puzzle Piece -->
-        <rect x="53" y="16" width="10" height="10" rx="2.5" transform="rotate(15 53 16)" fill="#FACC15"/>
-        <circle cx="58" cy="15" r="2" fill="#F59E0B"/>
-
-        <!-- Sparkles -->
-        <path d="M86 12l0.6 1.4 1.4 0.6-1.4 0.6-0.6 1.4-0.6-1.4-1.4-0.6 1.4-0.6 0.6-1.4z" fill="#FACC15"/>
-        <path d="M8 24l0.6 1.4 1.4 0.6-1.4 0.6-0.6 1.4-0.6-1.4-1.4-0.6 1.4-0.6 0.6-1.4z" fill="#38BDF8"/>
-      </svg>''',
-      width: width,
-      height: height,
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(14),
+      child: Image.asset(
+        'assets/images/home_quiz_card.png',
+        width: width,
+        height: height,
+        fit: BoxFit.cover,
+      ),
     );
   }
 }

@@ -1722,6 +1722,10 @@ class _HomePageState extends State<HomePage> {
                       .toString()
                       .trim();
 
+                  final String capitalizedName = fullName.trim().isEmpty
+                      ? 'User'
+                      : fullName.trim().split(RegExp(r'\s+')).map((w) => w.isNotEmpty ? (w[0].toUpperCase() + (w.length > 1 ? w.substring(1).toLowerCase() : '')) : '').join(' ');
+
                   return SafeArea(
                     bottom: false,
                     child: Stack(
@@ -1738,49 +1742,42 @@ class _HomePageState extends State<HomePage> {
                               // Normal Top Header (Tampil asli di posisi awal halaman)
                               if (!isDesktop) ...[
                                 if (role.toLowerCase() == 'guru') ...[
-                                  // Teacher Top Controls (Kiri: Toggle Dark / Light Mode, Kanan: Notifikasi)
+                                  // Teacher Top Controls (Kanan: Dark Mode & Notifikasi - Tanpa background & tanpa border)
                                   Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    mainAxisAlignment: MainAxisAlignment.end,
                                     children: [
-                                      // Pojok Kiri: Toggle Dark / Light Mode
+                                      // Dark / Light Mode Toggle (Tanpa background & frame)
                                       ValueListenableBuilder<String>(
                                         valueListenable: HubnerApp.themeNotifier,
                                         builder: (context, currentTheme, _) {
-                                          final bool isDark = currentTheme == 'Gelap' || currentTheme == 'Hitam';
+                                          final bool isDarkTheme = currentTheme == 'Gelap' || currentTheme == 'Hitam';
                                           return BouncyButton(
-                                            onTap: () => _toggleThemeWithBounce(context, isDark),
-                                            child: Container(
-                                              width: 52,
-                                              height: 52,
-                                              decoration: BoxDecoration(
-                                                color: isDark
-                                                    ? const Color(0xFF18181B)
-                                                    : Colors.white,
-                                                shape: BoxShape.circle,
-                                                border: Border.all(
-                                                  color: isDark
-                                                      ? const Color(0xFF27272A)
-                                                      : const Color(0xFFE2E8F0),
-                                                  width: 1.2,
-                                                ),
-                                              ),
+                                            onTap: () => _toggleThemeWithBounce(context, isDarkTheme),
+                                            child: Padding(
+                                              padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 2.0),
                                               child: Icon(
-                                                isDark ? Icons.wb_sunny_rounded : Icons.nightlight_round,
-                                                color: isDark ? const Color(0xFFFBBF24) : Colors.black87,
-                                                size: 24,
+                                                isDarkTheme ? Icons.wb_sunny_rounded : Icons.nightlight_round,
+                                                color: isDarkTheme ? const Color(0xFFFBBF24) : Colors.black87,
+                                                size: 26,
                                               ),
                                             ),
                                           );
                                         },
                                       ),
-                                      // Pojok Kanan: Tombol Notifikasi
-                                       ValueListenableBuilder<String>(
-                                         valueListenable: HubnerApp.themeNotifier,
-                                         builder: (context, currentTheme, _) {
-                                           final bool isDark = currentTheme == 'Gelap' || currentTheme == 'Hitam';
-                                           return NotificationBellIcon(isDark: isDark, size: 52);
-                                         },
-                                       ),
+                                      const SizedBox(width: 8),
+
+                                      // Notification Bell (Tanpa background & frame)
+                                      ValueListenableBuilder<String>(
+                                        valueListenable: HubnerApp.themeNotifier,
+                                        builder: (context, currentTheme, _) {
+                                          final bool isDarkTheme = currentTheme == 'Gelap' || currentTheme == 'Hitam';
+                                          return NotificationBellIcon(
+                                            isDark: isDarkTheme,
+                                            size: 40,
+                                            showFrame: false,
+                                          );
+                                        },
+                                      ),
                                     ],
                                   ),
                                   const SizedBox(height: 16),
@@ -3785,200 +3782,190 @@ class _HomePageState extends State<HomePage> {
                         ],
                       ),
                     ),
+                    // 2. Sticky Glassmorphic Header Bar (Transparan Glassmorphic Blur 20px & Pembatas - Muncul saat di-scroll)
                     if (!isDesktop)
-                      ValueListenableBuilder<double>(
-                        valueListenable: _headerScrollOffsetNotifier,
-                        builder: (context, scrollOffset, _) {
-                          if (scrollOffset <= 20.0) {
-                            return const SizedBox.shrink();
-                          }
-                          final bool isDark = AppColors.isDarkMode;
-                          final double t = ((scrollOffset - 20.0) / 40.0).clamp(0.0, 1.0);
+                      Positioned(
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        child: ValueListenableBuilder<double>(
+                          valueListenable: _headerScrollOffsetNotifier,
+                          builder: (context, scrollOffset, _) {
+                            if (scrollOffset <= 20.0) {
+                              return const SizedBox.shrink();
+                            }
+                            final double scrollProgress = ((scrollOffset - 20.0) / 30.0).clamp(0.0, 1.0);
+                            final double blurSigma = 20.0 * scrollProgress;
+                            final bool isDark = AppColors.isDarkMode;
 
-                          return Positioned(
-                            top: 0,
-                            left: 0,
-                            right: 0,
-                            child: Opacity(
-                              opacity: t,
-                              child: Container(
-                                padding: const EdgeInsets.fromLTRB(14, 8, 14, 36),
-                                decoration: BoxDecoration(
-                                  gradient: LinearGradient(
-                                    begin: Alignment.topCenter,
-                                    end: Alignment.bottomCenter,
-                                    colors: [
-                                      (isDark ? Colors.black : Colors.white).withValues(alpha: t * 0.98),
-                                      (isDark ? Colors.black : Colors.white).withValues(alpha: t * 0.95),
-                                      (isDark ? Colors.black : Colors.white).withValues(alpha: t * 0.45),
-                                      (isDark ? Colors.black : Colors.white).withValues(alpha: 0.0),
-                                    ],
-                                    stops: const [0.0, 0.48, 0.75, 1.0],
-                                  ),
-                                ),
-                                    child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                      crossAxisAlignment: CrossAxisAlignment.center,
-                                      children: [
-                                        // Sebelah Kiri: Avatar di sebelah kirinya Nama dan Role
-                                        Expanded(
-                                          child: Row(
-                                            children: [
-                                              if (userPhoto.isNotEmpty) ...[
-                                                Container(
-                                                  width: 36,
-                                                  height: 36,
-                                                  decoration: BoxDecoration(
-                                                    shape: BoxShape.circle,
-                                                    color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
-                                                  ),
-                                                  child: ClipOval(
-                                                    child: Transform.scale(
-                                                      scale: 1.45,
-                                                      child: ColorFiltered(
-                                                        colorFilter: isDark
-                                                            ? ColorFilter.mode(Colors.black.withValues(alpha: 0.10), BlendMode.darken)
-                                                            : const ColorFilter.mode(Colors.transparent, BlendMode.dst),
-                                                        child: userPhoto.isNotEmpty
-                                                            ? (userPhoto.startsWith('http')
-                                                                ? Image.network(
-                                                                    userPhoto,
-                                                                    fit: BoxFit.cover,
-                                                                    errorBuilder: (_, __, ___) => Center(
-                                                                      child: Text(
-                                                                        userName.isNotEmpty
-                                                                            ? userName.substring(0, (userName.length >= 2 ? 2 : 1)).toUpperCase()
-                                                                            : 'P',
-                                                                        style: GoogleFonts.plusJakartaSans(
-                                                                          fontWeight: FontWeight.w800,
-                                                                          color: isDark ? Colors.white : Colors.black,
-                                                                          fontSize: 20,
-                                                                        ),
-                                                                      ),
-                                                                    ),
-                                                                  )
-                                                                : Image.asset(
-                                                                    userPhoto,
-                                                                    fit: BoxFit.cover,
-                                                                    errorBuilder: (_, __, ___) => Center(
-                                                                      child: Text(
-                                                                        userName.isNotEmpty
-                                                                            ? userName.substring(0, (userName.length >= 2 ? 2 : 1)).toUpperCase()
-                                                                            : 'P',
-                                                                        style: GoogleFonts.plusJakartaSans(
-                                                                          fontWeight: FontWeight.w800,
-                                                                          color: isDark ? Colors.white : Colors.black,
-                                                                          fontSize: 20,
-                                                                        ),
-                                                                      ),
-                                                                    ),
-                                                                  ))
-                                                            : Center(
-                                                                child: Text(
-                                                                  userName.isNotEmpty
-                                                                      ? userName.substring(0, (userName.length >= 2 ? 2 : 1)).toUpperCase()
-                                                                      : 'P',
-                                                                  style: GoogleFonts.plusJakartaSans(
-                                                                    fontWeight: FontWeight.w800,
-                                                                    color: isDark ? Colors.white : Colors.black,
-                                                                    fontSize: 20,
-                                                                  ),
-                                                                ),
-                                                              ),
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ),
-                                                const SizedBox(width: 9),
-                                              ],
-                                                Expanded(
-                                                  child: Column(
-                                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                                    mainAxisSize: MainAxisSize.min,
-                                                    children: [
-                                                      Text(
-                                                        role.toLowerCase() == 'guru'
-                                                            ? 'Pengajar · ${schoolLevel.isNotEmpty ? schoolLevel.toUpperCase() : 'SMA/SMK'}'
-                                                            : 'Siswa · ${schoolLevel.isNotEmpty ? schoolLevel.toUpperCase() : 'SMA/SMK'}',
-                                                        style: GoogleFonts.dmSans(
-                                                          fontSize: 14.0,
-                                                          fontWeight: FontWeight.w500,
-                                                          color: isDark ? Colors.white60 : const Color(0xFF64748B),
-                                                        ),
-                                                        maxLines: 1,
-                                                        overflow: TextOverflow.ellipsis,
-                                                      ),
-                                                      const SizedBox(height: 1.0),
-                                                      Text(
-                                                        fullName.isNotEmpty ? fullName : userName,
-                                                        style: GoogleFonts.plusJakartaSans(
-                                                          fontSize: 16.0,
-                                                          fontWeight: FontWeight.w800,
-                                                          color: isDark ? Colors.white : const Color(0xFF0F172A),
-                                                        ),
-                                                        maxLines: 1,
-                                                        overflow: TextOverflow.ellipsis,
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ),
-                                              ],
+                                  return Opacity(
+                                    opacity: scrollProgress,
+                                    child: ClipRect(
+                                      child: BackdropFilter(
+                                        filter: ui.ImageFilter.blur(
+                                          sigmaX: blurSigma > 0.1 ? blurSigma : 0.001,
+                                          sigmaY: blurSigma > 0.1 ? blurSigma : 0.001,
+                                        ),
+                                        child: Container(
+                                          width: double.infinity,
+                                          padding: EdgeInsets.fromLTRB(
+                                            AppTypography.screenHorizontalMargin,
+                                            MediaQuery.of(context).padding.top + 8.0,
+                                            AppTypography.screenHorizontalMargin,
+                                            10.0,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: isDark
+                                                ? const Color(0xFF000000).withValues(alpha: 0.60 * scrollProgress)
+                                                : Colors.white.withValues(alpha: 0.65 * scrollProgress),
+                                            border: Border(
+                                              bottom: BorderSide(
+                                                color: (isDark
+                                                        ? const Color(0xFF27272A)
+                                                        : const Color(0xFFF1F5F9))
+                                                    .withValues(alpha: 0.9 * scrollProgress),
+                                                width: 1.0,
+                                              ),
                                             ),
                                           ),
-                                          const SizedBox(width: 10),
-                                          Row(
+                                          child: Row(
                                             children: [
+                                              // Profile Avatar (Ukuran 38x38)
+                                              Container(
+                                                width: 38,
+                                                height: 38,
+                                                decoration: BoxDecoration(
+                                                  shape: BoxShape.circle,
+                                                  color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
+                                                ),
+                                                child: ClipOval(
+                                                  child: Transform.scale(
+                                                    scale: 1.45,
+                                                    child: userPhoto.isNotEmpty
+                                                        ? (userPhoto.startsWith('http')
+                                                            ? Image.network(
+                                                                userPhoto,
+                                                                fit: BoxFit.cover,
+                                                                errorBuilder: (_, __, ___) => Center(
+                                                                  child: Text(
+                                                                    userName.isNotEmpty
+                                                                        ? userName.substring(0, (userName.length >= 2 ? 2 : 1)).toUpperCase()
+                                                                        : 'P',
+                                                                    style: GoogleFonts.plusJakartaSans(
+                                                                      fontWeight: FontWeight.w800,
+                                                                      color: isDark ? Colors.white : Colors.black,
+                                                                      fontSize: 15,
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                              )
+                                                            : Image.asset(
+                                                                userPhoto,
+                                                                fit: BoxFit.cover,
+                                                                errorBuilder: (_, __, ___) => Center(
+                                                                  child: Text(
+                                                                    userName.isNotEmpty
+                                                                        ? userName.substring(0, (userName.length >= 2 ? 2 : 1)).toUpperCase()
+                                                                        : 'P',
+                                                                    style: GoogleFonts.plusJakartaSans(
+                                                                      fontWeight: FontWeight.w800,
+                                                                      color: isDark ? Colors.white : Colors.black,
+                                                                      fontSize: 15,
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                              ))
+                                                        : Center(
+                                                            child: Text(
+                                                              userName.isNotEmpty
+                                                                  ? userName.substring(0, (userName.length >= 2 ? 2 : 1)).toUpperCase()
+                                                                  : 'P',
+                                                              style: GoogleFonts.plusJakartaSans(
+                                                                fontWeight: FontWeight.w800,
+                                                                color: isDark ? Colors.white : Colors.black,
+                                                                fontSize: 15,
+                                                              ),
+                                                            ),
+                                                          ),
+                                                  ),
+                                                ),
+                                              ),
+                                              const SizedBox(width: 10),
+
+                                              // Name & Role
+                                              Expanded(
+                                                child: Column(
+                                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                                  mainAxisAlignment: MainAxisAlignment.center,
+                                                  children: [
+                                                    Text(
+                                                      'Hai, $capitalizedName',
+                                                      style: GoogleFonts.plusJakartaSans(
+                                                        fontSize: 16.0,
+                                                        fontWeight: FontWeight.bold,
+                                                        color: isDark ? Colors.white : Colors.black,
+                                                        height: 1.15,
+                                                      ),
+                                                      maxLines: 1,
+                                                      overflow: TextOverflow.ellipsis,
+                                                    ),
+                                                    const SizedBox(height: 1),
+                                                    Text(
+                                                      'Pengajar · ${schoolLevel.isNotEmpty ? schoolLevel.toUpperCase() : 'SMA/SMK'}',
+                                                      style: GoogleFonts.dmSans(
+                                                        fontSize: 11.5,
+                                                        fontWeight: FontWeight.w600,
+                                                        color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                                                      ),
+                                                      maxLines: 1,
+                                                      overflow: TextOverflow.ellipsis,
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+
+                                              // Dark / Light Mode Toggle (Tanpa background & tanpa border)
                                               ValueListenableBuilder<String>(
                                                 valueListenable: HubnerApp.themeNotifier,
                                                 builder: (context, currentTheme, _) {
-                                                  final bool currentIsDark = currentTheme == 'Gelap' || currentTheme == 'Hitam';
+                                                  final bool isDarkTheme = currentTheme == 'Gelap' || currentTheme == 'Hitam';
                                                   return BouncyButton(
-                                                    onTap: () => _toggleThemeWithBounce(context, currentIsDark),
-                                                    child: Container(
-                                                      width: 42,
-                                                      height: 42,
-                                                      decoration: BoxDecoration(
-                                                        color: currentIsDark
-                                                            ? const Color(0xFF1C1C1E)
-                                                            : Colors.white,
-                                                        shape: BoxShape.circle,
-                                                        border: Border.all(
-                                                          color: currentIsDark
-                                                              ? const Color(0xFF27272A)
-                                                              : const Color(0xFFF1F5F9),
-                                                          width: 1.2,
-                                                        ),
-                                                      ),
+                                                    onTap: () => _toggleThemeWithBounce(context, isDarkTheme),
+                                                    child: Padding(
+                                                      padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 2.0),
                                                       child: Icon(
-                                                        currentIsDark ? Icons.wb_sunny_rounded : Icons.nightlight_round,
-                                                        color: currentIsDark ? const Color(0xFFFBBF24) : Colors.black87,
-                                                        size: 20,
+                                                        isDarkTheme ? Icons.wb_sunny_rounded : Icons.nightlight_round,
+                                                        color: isDarkTheme ? const Color(0xFFFBBF24) : Colors.black87,
+                                                        size: 22,
                                                       ),
                                                     ),
                                                   );
                                                 },
                                               ),
-                                              const SizedBox(width: 10),
+                                              const SizedBox(width: 4),
+
+                                              // Notification Bell (Tanpa background & tanpa border)
                                               ValueListenableBuilder<String>(
                                                 valueListenable: HubnerApp.themeNotifier,
                                                 builder: (context, currentTheme, _) {
-                                                  final bool isDark = currentTheme == 'Gelap' || currentTheme == 'Hitam';
-                                                  return NotificationBellIcon(isDark: isDark, size: 52);
+                                                  final bool isDarkTheme = currentTheme == 'Gelap' || currentTheme == 'Hitam';
+                                                  return NotificationBellIcon(
+                                                    isDark: isDarkTheme,
+                                                    size: 40,
+                                                    showFrame: false,
+                                                  );
                                                 },
                                               ),
                                             ],
                                           ),
-                                        ],
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                );
-                              },
+                                  );
+                                },
+                              ),
                             ),
-                        ],
-                      ),
-                    );
-                  },
+                  ),
                 );
               },
             ),
