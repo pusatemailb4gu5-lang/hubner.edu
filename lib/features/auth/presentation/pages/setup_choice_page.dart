@@ -136,7 +136,7 @@ class _SetupChoicePageState extends State<SetupChoicePage> {
         PageRouteBuilder(
           opaque: false,
           barrierColor: Colors.transparent,
-          pageBuilder: (context, _, __) => AddClassPage(registrationData: registrationData),
+          pageBuilder: (context, _, _) => AddClassPage(registrationData: registrationData),
           transitionsBuilder: (context, animation, secondaryAnimation, child) {
             return child;
           },
@@ -180,7 +180,11 @@ class _SetupChoicePageState extends State<SetupChoicePage> {
                   // User ID Field
                   Text(
                     'ID User Anda',
-                    style: AppTypography.buttonLabel(color: Colors.black54, fontWeight: FontWeight.w600),
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 13.5,
+                      fontWeight: FontWeight.w700,
+                      color: const Color(0xFF0F172A),
+                    ),
                   ),
                   const SizedBox(height: 8),
                   Row(
@@ -188,25 +192,33 @@ class _SetupChoicePageState extends State<SetupChoicePage> {
                       Expanded(
                         child: TextField(
                           controller: _userIdController,
-                          style: AppTypography.cardTitle(color: Colors.black87, fontWeight: FontWeight.w600),
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 15.0,
+                            fontWeight: FontWeight.w700,
+                            color: const Color(0xFF0F172A),
+                          ),
                           onChanged: (val) {
                             setState(() {
                               _hasChecked = false;
                             });
                           },
+                          cursorColor: const Color(0xFF68CECA),
                           decoration: InputDecoration(
                             hintText: 'Contoh: marie12',
-                            hintStyle: AppTypography.timestamp(color: Colors.black26),
+                            hintStyle: GoogleFonts.plusJakartaSans(
+                              fontSize: 14.0,
+                              color: const Color(0xFF94A3B8),
+                            ),
                             filled: true,
                             fillColor: const Color(0xFFF8FAFC),
                             contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                             enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(16),
-                              borderSide: const BorderSide(color: Color(0xFFF1F5F9)),
+                              borderRadius: BorderRadius.circular(14),
+                              borderSide: const BorderSide(color: Color(0xFF0F172A), width: 1.2),
                             ),
                             focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(16),
-                              borderSide: const BorderSide(color: Colors.black),
+                              borderRadius: BorderRadius.circular(14),
+                              borderSide: const BorderSide(color: Color(0xFF68CECA), width: 1.5),
                             ),
                           ),
                         ),
@@ -217,22 +229,29 @@ class _SetupChoicePageState extends State<SetupChoicePage> {
                             ? null
                             : () => _checkUserIdUnique(_userIdController.text),
                         child: Container(
-                          height: 48,
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          height: 50,
+                          padding: const EdgeInsets.symmetric(horizontal: 18),
                           decoration: BoxDecoration(
-                            color: Colors.black,
-                            borderRadius: BorderRadius.circular(16),
+                            color: const Color(0xFFDCF585), // Warna Stabilo Lime
+                            borderRadius: BorderRadius.circular(14),
                           ),
                           alignment: Alignment.center,
                           child: _isCheckingId
                               ? const SizedBox(
                                   width: 20,
                                   height: 20,
-                                  child: CircularProgressIndicator(),
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2.2,
+                                    valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF0F172A)),
+                                  ),
                                 )
                               : Text(
                                   'Periksa',
-                                  style: AppTypography.buttonLabel(color: Colors.white, fontWeight: FontWeight.w600),
+                                  style: GoogleFonts.plusJakartaSans(
+                                    color: const Color(0xFF0F172A), // Teks Hitam
+                                    fontWeight: FontWeight.w800,
+                                    fontSize: 14.0,
+                                  ),
                                 ),
                         ),
                       ),
@@ -248,7 +267,7 @@ class _SetupChoicePageState extends State<SetupChoicePage> {
                               : Icons.error_outline_rounded,
                           size: 16,
                           color: _isIdUnique && _idErrorMessage == null
-                              ? Colors.green
+                              ? const Color(0xFFEA580C) // Warna Orange
                               : Colors.redAccent,
                         ),
                         const SizedBox(width: 6),
@@ -257,43 +276,49 @@ class _SetupChoicePageState extends State<SetupChoicePage> {
                             _isIdUnique && _idErrorMessage == null
                                 ? 'ID tersedia dan dapat digunakan.'
                                 : (_idErrorMessage ?? 'ID tidak valid.'),
-                            style: AppTypography.timestamp(color: _isIdUnique && _idErrorMessage == null ? Colors.green : Colors.redAccent, fontWeight: FontWeight.w500),
+                            style: GoogleFonts.plusJakartaSans(
+                              color: _isIdUnique && _idErrorMessage == null
+                                  ? const Color(0xFFEA580C) // Warna Orange
+                                  : Colors.redAccent,
+                              fontSize: 12.5,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
                         ),
                       ],
                     ),
                   ],
-                  const SizedBox(height: 48),
+                  const SizedBox(height: 40),
 
                   Text(
                     'Pilih Cara Memulai',
-                    style: AppTypography.cardTitle(color: Colors.black87, fontWeight: FontWeight.bold),
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 15.5,
+                      fontWeight: FontWeight.w800,
+                      color: const Color(0xFF0F172A),
+                    ),
                   ),
                   const SizedBox(height: 16),
 
-                  // Option 1: Create Project Card
+                  // Option 1: Melengkapi Data Kelas (Tanpa Card, Ikon Tombol Warna Orange)
                   GestureDetector(
+                    behavior: HitTestBehavior.opaque,
                     onTap: () => _onChoiceSelected(true),
-                    child: Container(
-                      padding: const EdgeInsets.all(20),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: const Color(0xFFF1F5F9), width: 1.5),
-                      ),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
                       child: Row(
                         children: [
                           Container(
                             width: 52,
                             height: 52,
-                            decoration: const BoxDecoration(
-                              color: Color(0xFFEFF6FF),
-                              shape: BoxShape.circle,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFFFF7ED), // Soft Orange background
+                              borderRadius: BorderRadius.circular(16),
                             ),
                             child: const Icon(
                               Icons.add_task_rounded,
-                              color: Color(0xFF2563EB),
-                              size: 24,
+                              color: Color(0xFFEA580C), // Ikon Warna Orange
+                              size: 26,
                             ),
                           ),
                           const SizedBox(width: 16),
@@ -303,17 +328,25 @@ class _SetupChoicePageState extends State<SetupChoicePage> {
                               children: [
                                 Text(
                                   'Melengkapi Data Kelas',
-                                  style: AppTypography.cardTitle(color: Colors.black87, fontWeight: FontWeight.w600),
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontSize: 15.0,
+                                    fontWeight: FontWeight.w800,
+                                    color: const Color(0xFF0F172A),
+                                  ),
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
                                   'Atur nama kelas & materi pembelajaran (dapat diatur nanti).',
-                                  style: AppTypography.timestamp(color: Colors.black38),
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontSize: 12.5,
+                                    fontWeight: FontWeight.w400,
+                                    color: const Color(0xFF64748B),
+                                  ),
                                 ),
                               ],
                             ),
                           ),
-                          const Icon(Icons.chevron_right_rounded, color: Colors.black26),
+                          const Icon(Icons.chevron_right_rounded, color: Color(0xFF94A3B8), size: 22),
                         ],
                       ),
                     ),
