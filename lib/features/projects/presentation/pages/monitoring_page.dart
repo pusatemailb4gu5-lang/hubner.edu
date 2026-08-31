@@ -13,6 +13,7 @@ import 'dart:ui' as ui;
 import 'package:hubner/core/widgets/bouncy_button.dart';
 import 'manage_members_page.dart';
 import 'package:hubner/core/theme/app_colors.dart';
+import 'package:hubner/core/widgets/classroom_card_pattern_painter.dart';
 
 class MonitoringPage extends StatefulWidget {
   final String? initialProjectId;
@@ -2004,11 +2005,10 @@ class _MonitoringPageState extends State<MonitoringPage> {
                                   child: Stack(
                                     children: [
                                       Positioned.fill(
-                                        child: CustomPaint(
-                                          painter: ClassroomCardPatternPainter(
-                                            patternIndex: themeIdx,
-                                            accentColor: accentColor,
-                                          ),
+                                        child: AnimatedClassroomPattern(
+                                          patternIndex: themeIdx,
+                                          accentColor: accentColor,
+                                          isDark: isDark,
                                         ),
                                       ),
                                       Column(
@@ -3406,168 +3406,4 @@ class MetricCardPatternPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
-
-class ClassroomCardPatternPainter extends CustomPainter {
-  final int patternIndex;
-  final Color accentColor;
-
-  const ClassroomCardPatternPainter({
-    required this.patternIndex,
-    required this.accentColor,
-  });
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final bool isDark = AppColors.isDarkMode;
-    final Color primaryPatternColor = isDark
-        ? Colors.black.withValues(alpha: 0.18)
-        : accentColor.withValues(alpha: 0.20);
-    final Color secondaryPatternColor = isDark
-        ? Colors.black.withValues(alpha: 0.28)
-        : Colors.white.withValues(alpha: 0.30);
-    final Color strokePatternColor = isDark
-        ? Colors.black.withValues(alpha: 0.35)
-        : Colors.white.withValues(alpha: 0.35);
-    final Color ringPatternColor = isDark
-        ? Colors.black.withValues(alpha: 0.16)
-        : accentColor.withValues(alpha: 0.07);
-    final Color dotPatternColor = isDark
-        ? Colors.black.withValues(alpha: 0.22)
-        : accentColor.withValues(alpha: 0.10);
-
-    switch (patternIndex % 5) {
-      case 0:
-        final paint = Paint()
-          ..color = primaryPatternColor
-          ..style = PaintingStyle.fill;
-        final path = Path();
-        path.moveTo(size.width * 0.45, 0);
-        path.cubicTo(
-          size.width * 0.65,
-          size.height * 0.35,
-          size.width * 0.35,
-          size.height * 0.75,
-          size.width * 0.85,
-          size.height,
-        );
-        path.lineTo(size.width, size.height);
-        path.lineTo(size.width, 0);
-        path.close();
-        canvas.drawPath(path, paint);
-
-        final paintSecondary = Paint()
-          ..color = secondaryPatternColor
-          ..style = PaintingStyle.fill;
-        final pathSecondary = Path();
-        pathSecondary.moveTo(size.width * 0.6, 0);
-        pathSecondary.cubicTo(
-          size.width * 0.8,
-          size.height * 0.4,
-          size.width * 0.5,
-          size.height * 0.8,
-          size.width,
-          size.height * 0.7,
-        );
-        pathSecondary.lineTo(size.width, 0);
-        pathSecondary.close();
-        canvas.drawPath(pathSecondary, paintSecondary);
-        break;
-
-      case 1:
-        final paintRing = Paint()
-          ..color = ringPatternColor
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 14;
-        final center = Offset(size.width * 0.85, size.height * 0.3);
-        canvas.drawCircle(center, 30, paintRing);
-        canvas.drawCircle(center, 55, paintRing);
-
-        final paintWave = Paint()
-          ..color = secondaryPatternColor
-          ..style = PaintingStyle.fill;
-        final pathRing = Path();
-        pathRing.moveTo(size.width * 0.55, 0);
-        pathRing.quadraticBezierTo(
-          size.width * 0.8,
-          size.height * 0.5,
-          size.width,
-          size.height,
-        );
-        pathRing.lineTo(size.width, 0);
-        pathRing.close();
-        canvas.drawPath(pathRing, paintWave);
-        break;
-
-      case 2:
-        final paintBubble1 = Paint()
-          ..color = primaryPatternColor
-          ..style = PaintingStyle.fill;
-        canvas.drawCircle(
-          Offset(size.width * 0.8, size.height * 0.2),
-          45,
-          paintBubble1,
-        );
-
-        final paintBubble2 = Paint()
-          ..color = secondaryPatternColor
-          ..style = PaintingStyle.fill;
-        canvas.drawCircle(
-          Offset(size.width * 0.9, size.height * 0.75),
-          35,
-          paintBubble2,
-        );
-        break;
-
-      case 3:
-        final paintDot = Paint()
-          ..color = dotPatternColor
-          ..style = PaintingStyle.fill;
-        for (double x = size.width * 0.5; x < size.width; x += 18) {
-          for (double y = 10; y < size.height; y += 18) {
-            canvas.drawCircle(Offset(x, y), 3, paintDot);
-          }
-        }
-        break;
-
-      case 4:
-      default:
-        final paintRay = Paint()
-          ..color = primaryPatternColor
-          ..style = PaintingStyle.fill;
-        final pathRay = Path();
-        pathRay.moveTo(size.width * 0.5, 0);
-        pathRay.quadraticBezierTo(
-          size.width * 0.7,
-          size.height * 0.5,
-          size.width * 0.8,
-          size.height,
-        );
-        pathRay.lineTo(size.width, size.height);
-        pathRay.lineTo(size.width, 0);
-        pathRay.close();
-        canvas.drawPath(pathRay, paintRay);
-
-        final paintStroke = Paint()
-          ..color = strokePatternColor
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 10
-          ..strokeCap = StrokeCap.round;
-        final pathStroke = Path();
-        pathStroke.moveTo(size.width * 0.65, 0);
-        pathStroke.quadraticBezierTo(
-          size.width * 0.8,
-          size.height * 0.4,
-          size.width * 0.85,
-          size.height,
-        );
-        canvas.drawPath(pathStroke, paintStroke);
-        break;
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant ClassroomCardPatternPainter oldDelegate) {
-    return oldDelegate.patternIndex != patternIndex || oldDelegate.accentColor != accentColor;
-  }
 }

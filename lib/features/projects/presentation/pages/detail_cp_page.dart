@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hubner/core/theme/app_typography.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:async';
 import 'dart:ui';
+import 'dart:ui' as ui;
 import 'package:hubner/core/theme/app_colors.dart';
 import 'package:hubner/core/services/app_sound_service.dart';
 import 'mengerjakan_quiz_page.dart';
@@ -27,12 +29,179 @@ class DetailCpPage extends StatefulWidget {
     required this.cardColor,
   });
 
+  static void openCreateTaskPage(
+    BuildContext context, {
+    required String projectId,
+    required String projectTitle,
+    required int stageIdx,
+    required bool isOwner,
+    required Color accentColor,
+    required Color cardColor,
+    required List stages,
+    int initialMateriIdx = 0,
+    bool openFromClassPage = true,
+  }) {
+    openTaskPage(
+      context,
+      stages,
+      initialMateriIdx: initialMateriIdx,
+      openFromClassPage: openFromClassPage,
+      customProjectId: projectId,
+      customProjectTitle: projectTitle,
+      customStageIdx: stageIdx,
+      customIsOwner: isOwner,
+      customAccentColor: accentColor,
+      customCardColor: cardColor,
+    );
+  }
+
+  static void openTaskPage(
+    BuildContext context,
+    List stages, {
+    int initialMateriIdx = 0,
+    Map<String, dynamic>? taskToEdit,
+    int? taskIdxToEdit,
+    bool openFromClassPage = false,
+    String? customProjectId,
+    String? customProjectTitle,
+    int? customStageIdx,
+    bool? customIsOwner,
+    Color? customAccentColor,
+    Color? customCardColor,
+  }) {
+    _DetailCpPageState.openTaskPage(
+      context,
+      stages,
+      initialMateriIdx: initialMateriIdx,
+      taskToEdit: taskToEdit,
+      taskIdxToEdit: taskIdxToEdit,
+      openFromClassPage: openFromClassPage,
+      customProjectId: customProjectId,
+      customProjectTitle: customProjectTitle,
+      customStageIdx: customStageIdx,
+      customIsOwner: customIsOwner,
+      customAccentColor: customAccentColor,
+      customCardColor: customCardColor,
+    );
+  }
+
+  static void openCreateQuizPage(
+    BuildContext context, {
+    required String projectId,
+    required String projectTitle,
+    required int stageIdx,
+    required bool isOwner,
+    required Color accentColor,
+    required Color cardColor,
+    required List stages,
+    int initialMateriIdx = 0,
+    bool openFromClassPage = true,
+  }) {
+    openQuizPage(
+      context,
+      stages,
+      initialMateriIdx: initialMateriIdx,
+      openFromClassPage: openFromClassPage,
+      customProjectId: projectId,
+      customProjectTitle: projectTitle,
+      customStageIdx: stageIdx,
+      customIsOwner: isOwner,
+      customAccentColor: accentColor,
+      customCardColor: cardColor,
+    );
+  }
+
+  static void openQuizPage(
+    BuildContext context,
+    List stages, {
+    int initialMateriIdx = 0,
+    Map<String, dynamic>? taskToEdit,
+    int? taskIdxToEdit,
+    bool openFromClassPage = false,
+    String? customProjectId,
+    String? customProjectTitle,
+    int? customStageIdx,
+    bool? customIsOwner,
+    Color? customAccentColor,
+    Color? customCardColor,
+  }) {
+    _DetailCpPageState.openQuizPage(
+      context,
+      stages,
+      initialMateriIdx: initialMateriIdx,
+      taskToEdit: taskToEdit,
+      taskIdxToEdit: taskIdxToEdit,
+      openFromClassPage: openFromClassPage,
+      customProjectId: customProjectId,
+      customProjectTitle: customProjectTitle,
+      customStageIdx: customStageIdx,
+      customIsOwner: customIsOwner,
+      customAccentColor: customAccentColor,
+      customCardColor: customCardColor,
+    );
+  }
+
+  static void openCreateMateriPage(
+    BuildContext context, {
+    required String projectId,
+    required String projectTitle,
+    required int stageIdx,
+    required bool isOwner,
+    required Color accentColor,
+    required Color cardColor,
+    required List stages,
+    int initialMateriIdx = 0,
+    bool openFromClassPage = true,
+  }) {
+    openMateriItemPage(
+      context,
+      stages,
+      initialMateriIdx: initialMateriIdx,
+      openFromClassPage: openFromClassPage,
+      customProjectId: projectId,
+      customProjectTitle: projectTitle,
+      customStageIdx: stageIdx,
+      customIsOwner: isOwner,
+      customAccentColor: accentColor,
+      customCardColor: cardColor,
+    );
+  }
+
+  static void openMateriItemPage(
+    BuildContext context,
+    List stages, {
+    int initialMateriIdx = 0,
+    Map<String, dynamic>? taskToEdit,
+    int? taskIdxToEdit,
+    bool openFromClassPage = false,
+    String? customProjectId,
+    String? customProjectTitle,
+    int? customStageIdx,
+    bool? customIsOwner,
+    Color? customAccentColor,
+    Color? customCardColor,
+  }) {
+    _DetailCpPageState.openMateriItemPage(
+      context,
+      stages,
+      initialMateriIdx: initialMateriIdx,
+      taskToEdit: taskToEdit,
+      taskIdxToEdit: taskIdxToEdit,
+      openFromClassPage: openFromClassPage,
+      customProjectId: customProjectId,
+      customProjectTitle: customProjectTitle,
+      customStageIdx: customStageIdx,
+      customIsOwner: customIsOwner,
+      customAccentColor: customAccentColor,
+      customCardColor: customCardColor,
+    );
+  }
+
   @override
   State<DetailCpPage> createState() => _DetailCpPageState();
 }
 
 class _DetailCpPageState extends State<DetailCpPage> {
-  final Set<String> _collapsedMateriKeys = {};
   bool _isEditMode = false;
   List _cachedStages = [];
   TextEditingController? _stageNameController;
@@ -40,12 +209,16 @@ class _DetailCpPageState extends State<DetailCpPage> {
   final Map<int, TextEditingController> _materiControllers = {};
   Timer? _debounceTimer;
 
+  late final ScrollController _scrollController;
+  final ValueNotifier<double> _scrollOffsetNotifier = ValueNotifier<double>(0.0);
+  final Set<int> _expandedMateriIndices = {};
+
   final List<Color> _classroomCardColors = const [
-    Color(0xFFD6A5F8), // 01. Lilac Purple (Core)
-    Color(0xFF9CC8FC), // 02. Sky Blue
-    Color(0xFF7DE3D0), // 03. Emerald Mint / Tosca
-    Color(0xFFF7BD84), // 04. Amber Peach / Orange
-    Color(0xFFF794BE), // 05. Rose Magenta / Pink
+    Color(0xFFF3E8FF), // 01. Soft Purple (Lilac)
+    Color(0xFFE0F2FE), // 02. Soft Blue
+    Color(0xFFD1FAE5), // 03. Soft Mint / Green
+    Color(0xFFFFEDD5), // 04. Soft Orange / Peach
+    Color(0xFFFCE7F3), // 05. Soft Pink
     Color(0xFFA5B4FC), // 06. Indigo Violet
     Color(0xFFBEF264), // 07. Fresh Lime
     Color(0xFF67E8F9), // 08. Ocean Cyan
@@ -54,11 +227,11 @@ class _DetailCpPageState extends State<DetailCpPage> {
   ];
 
   final List<Color> _classroomCardDarkColors = const [
-    Color(0xFF6B3BA3), // 01. Deep Lilac (Core)
-    Color(0xFF2864A8), // 02. Deep Sky Blue
-    Color(0xFF147D75), // 03. Deep Teal / Tosca
-    Color(0xFFC76D10), // 04. Deep Amber / Orange
-    Color(0xFFA82658), // 05. Deep Rose / Magenta
+    Color(0xFF1E162B), // 01. Dark Soft Purple
+    Color(0xFF102030), // 02. Dark Soft Blue
+    Color(0xFF0C241C), // 03. Dark Soft Mint
+    Color(0xFF2B1D11), // 04. Dark Soft Orange
+    Color(0xFF2B1220), // 05. Dark Soft Pink
     Color(0xFF4338CA), // 06. Deep Indigo
     Color(0xFF4D7C0F), // 07. Deep Olive Lime
     Color(0xFF0E7490), // 08. Deep Ocean Cyan
@@ -80,7 +253,20 @@ class _DetailCpPageState extends State<DetailCpPage> {
   ];
 
   @override
+  void initState() {
+    super.initState();
+    _scrollController = ScrollController();
+    _scrollController.addListener(() {
+      if (_scrollController.hasClients) {
+        _scrollOffsetNotifier.value = _scrollController.offset;
+      }
+    });
+  }
+
+  @override
   void dispose() {
+    _scrollController.dispose();
+    _scrollOffsetNotifier.dispose();
     _stageNameController?.dispose();
     _stageDescController?.dispose();
     for (var c in _materiControllers.values) {
@@ -140,107 +326,9 @@ class _DetailCpPageState extends State<DetailCpPage> {
     final Color cpCardBg = isDark
         ? _classroomCardDarkColors[badgeColorIdx]
         : _classroomCardColors[badgeColorIdx];
-    final Color accentCol = _classroomAccentColors[badgeColorIdx];
-    final Color badgeTextCol = isDark
-        ? Colors.white.withValues(alpha: 0.16)
-        : accentCol.withValues(alpha: 0.25);
-
-    final Color materiTopColor = isDark ? const Color(0xFF27272A) : Color.lerp(cpCardBg, Colors.white, 0.40)!;
 
     return Scaffold(
       backgroundColor: isDark ? const Color(0xFF000000) : const Color(0xFFF8FAFC),
-      appBar: AppBar(
-        backgroundColor: isDark ? const Color(0xFF1C1C1E) : Colors.white,
-        elevation: 0,
-        scrolledUnderElevation: 0,
-        toolbarHeight: 64,
-        leadingWidth: 64,
-        leading: Padding(
-          padding: const EdgeInsets.only(left: 16),
-          child: Center(
-            child: GestureDetector(
-              onTap: () => Navigator.pop(context),
-              child: Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: isDark ? const Color(0xFF3F3F46) : const Color(0xFFE2E8F0),
-                    width: 1.0,
-                  ),
-                ),
-                child: Icon(
-                  Icons.arrow_back_rounded,
-                  color: isDark ? Colors.white : Colors.black87,
-                  size: 22,
-                ),
-              ),
-            ),
-          ),
-        ),
-        titleSpacing: 8,
-        title: Text(
-          'Detail Capaian Pembelajaran',
-          maxLines: 2,
-          style: AppTypography.chatHeaderTitle(color: isDark ? Colors.white : const Color(0xFF0F172A), fontWeight: FontWeight.w800, height: 1.15),
-        ),
-        actions: [
-          if (widget.isOwner)
-            Padding(
-              padding: const EdgeInsets.only(right: 16),
-              child: _isEditMode
-                  ? GestureDetector(
-                      onTap: () {
-                        _saveAllEdits(_cachedStages);
-                        setState(() {
-                          _isEditMode = false;
-                        });
-                      },
-                      behavior: HitTestBehavior.opaque,
-                      child: const Center(
-                        child: Icon(
-                          Icons.check_rounded,
-                          color: Color(0xFF10B981),
-                          size: 28,
-                        ),
-                      ),
-                    )
-                  : GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          _isEditMode = true;
-                        });
-                      },
-                      behavior: HitTestBehavior.opaque,
-                      child: Center(
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
-                          decoration: BoxDecoration(
-                            color: isDark ? const Color(0xFF27272A) : const Color(0xFF1E293B),
-                            borderRadius: BorderRadius.circular(20),
-                            border: isDark
-                                ? Border.all(color: const Color(0xFF3F3F46), width: 1.0)
-                                : null,
-                          ),
-                          child: Text(
-                            'Mode Edit',
-                            style: AppTypography.buttonLabel(color: Colors.white, fontWeight: FontWeight.bold),
-                          ),
-                        ),
-                      ),
-                    ),
-            ),
-        ],
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(1),
-          child: Divider(
-            height: 1,
-            color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
-          ),
-        ),
-      ),
       body: StreamBuilder<DocumentSnapshot>(
         stream: FirebaseFirestore.instance
             .collection('projects')
@@ -312,318 +400,362 @@ class _DetailCpPageState extends State<DetailCpPage> {
                 progData['completedTasks'] ?? [],
               );
 
-              return SingleChildScrollView(
-                padding: AppTypography.pagePadding(top: 20, bottom: 20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // CP Header Hero Card
-                    Container(
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                        color: cpCardBg,
-                        borderRadius: BorderRadius.circular(32),
-                      ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(32),
-                        child: Stack(
+              return Stack(
+                children: [
+                  // 1. SingleChildScrollView: Halaman Normal yang Bergulir Penuh secara Alami
+                  SingleChildScrollView(
+                    controller: _scrollController,
+                    padding: EdgeInsets.fromLTRB(
+                      16,
+                      MediaQuery.of(context).padding.top + 8,
+                      16,
+                      32,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Row 1: Back Button (Kiri) + Status Proses & Mode Edit (Kanan)
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            // Angka tanpa frame berupa Pattern besar menyatu dengan kartu
-                            Positioned(
-                              left: 14,
-                              top: 2,
-                              child: Text(
-                                (widget.stageIdx + 1).toString().padLeft(2, '0'),
-                                style: AppTypography.pageTitle(color: badgeTextCol.withValues(alpha: 0.25), fontWeight: FontWeight.w900, height: 1.0, letterSpacing: -3.5),
-                              ),
-                            ),
-                            // Decorative Background Pattern Circles
-                            Positioned(
-                              right: -25,
-                              top: -25,
+                            GestureDetector(
+                              onTap: () => Navigator.pop(context),
+                              behavior: HitTestBehavior.opaque,
                               child: Container(
-                                width: 130,
-                                height: 130,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: Colors.white.withValues(alpha: isDark ? 0.08 : 0.18),
+                                width: 36,
+                                height: 36,
+                                alignment: Alignment.centerLeft,
+                                color: Colors.transparent,
+                                child: Icon(
+                                  Icons.arrow_back_rounded,
+                                  color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                  size: 24,
                                 ),
                               ),
                             ),
-                            Positioned(
-                              right: 65,
-                              bottom: -40,
-                              child: Container(
-                                width: 110,
-                                height: 110,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: Colors.white.withValues(alpha: isDark ? 0.06 : 0.14),
-                                ),
-                              ),
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                // Tombol Proses di kirinya Mode Edit
+                                _buildStatusBadge(stageStatus, isDark, stages),
+                                if (widget.isOwner) ...[
+                                  const SizedBox(width: 8),
+                                  _isEditMode
+                                      ? GestureDetector(
+                                          onTap: () {
+                                            _saveAllEdits(_cachedStages);
+                                            setState(() {
+                                              _isEditMode = false;
+                                            });
+                                          },
+                                          behavior: HitTestBehavior.opaque,
+                                          child: const Center(
+                                            child: Icon(
+                                              Icons.check_rounded,
+                                              color: Color(0xFF10B981),
+                                              size: 28,
+                                            ),
+                                          ),
+                                        )
+                                      : GestureDetector(
+                                          onTap: () {
+                                            setState(() {
+                                              _isEditMode = true;
+                                            });
+                                          },
+                                          behavior: HitTestBehavior.opaque,
+                                          child: Container(
+                                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+                                            decoration: BoxDecoration(
+                                              color: isDark ? const Color(0xFF27272A) : const Color(0xFF1E293B),
+                                              borderRadius: BorderRadius.circular(20),
+                                              border: isDark
+                                                  ? Border.all(color: const Color(0xFF3F3F46), width: 1.0)
+                                                  : null,
+                                            ),
+                                            child: Text(
+                                              'Mode Edit',
+                                              style: AppTypography.buttonLabel(color: Colors.white, fontWeight: FontWeight.bold),
+                                            ),
+                                          ),
+                                        ),
+                                ],
+                              ],
                             ),
-                            Positioned(
-                              left: -30,
-                              bottom: -30,
-                              child: Container(
-                                width: 90,
-                                height: 90,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: Colors.white.withValues(alpha: isDark ? 0.06 : 0.12),
-                                ),
+                          ],
+                        ),
+                        const SizedBox(height: 14),
+
+                        // Row 2: CP Header Hero (01 + Nama CP Penuh)
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            // Angka 01
+                            Container(
+                              width: 32,
+                              height: 32,
+                              decoration: BoxDecoration(
+                                color: isDark ? const Color(0xFF18181B) : const Color(0xFF0F172A),
+                                shape: BoxShape.circle,
                               ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.fromLTRB(14, 12, 14, 16),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  // Row 1: Status Dropdown di pojok kanan atas
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.end,
-                                    crossAxisAlignment: CrossAxisAlignment.center,
-                                    children: [
-                                      _buildStatusBadge(stageStatus, isDark, stages),
-                                    ],
+                              child: Center(
+                                child: Text(
+                                  (widget.stageIdx + 1).toString().padLeft(2, '0'),
+                                  style: GoogleFonts.plusJakartaSans(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w900,
+                                    fontSize: 13,
+                                    letterSpacing: -0.3,
                                   ),
-                                  const SizedBox(height: 12),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+
+                            // Judul CP (Besar & Tebal)
+                            Expanded(
+                              child: _isEditMode
+                                  ? TextField(
+                                      controller: _stageNameController,
+                                      minLines: 1,
+                                      maxLines: null,
+                                      style: GoogleFonts.plusJakartaSans(
+                                        fontSize: 20.0,
+                                        fontWeight: FontWeight.w900,
+                                        color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                        height: 1.22,
+                                        letterSpacing: -0.5,
+                                      ),
+                                      decoration: InputDecoration(
+                                        isDense: true,
+                                        filled: true,
+                                        fillColor: isDark ? const Color(0xFF1C1C1E) : Colors.white,
+                                        hintText: 'Nama Capaian Pembelajaran',
+                                        hintStyle: AppTypography.timestamp(color: isDark ? Colors.white38 : Colors.black38),
+                                        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                                        border: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(14),
+                                          borderSide: const BorderSide(color: Color(0xFF7C3AED), width: 1.5),
+                                        ),
+                                        focusedBorder: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(14),
+                                          borderSide: const BorderSide(color: Color(0xFF7C3AED), width: 2),
+                                        ),
+                                      ),
+                                      onChanged: (v) => _debouncedAutoSave(stages),
+                                    )
+                                  : Text(
+                                      stageName,
+                                      style: GoogleFonts.plusJakartaSans(
+                                        fontSize: 20.0,
+                                        fontWeight: FontWeight.w900,
+                                        color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                        height: 1.22,
+                                        letterSpacing: -0.5,
+                                      ),
+                                    ),
+                            ),
+                          ],
+                        ),
+
+                        // Row 3: Deskripsi CP (Sesuai Warna Card Tahapan di Classroom & Teks Hitam) Tepat di Bawah Nama CP
+                        if (stageDesc.isNotEmpty || _isEditMode) ...[
+                          const SizedBox(height: 14),
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(20),
+                            child: Container(
+                              width: double.infinity,
+                              decoration: BoxDecoration(
+                                color: cpCardBg,
+                                borderRadius: BorderRadius.circular(20),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.04),
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
+                              ),
+                              child: Stack(
+                                children: [
+                                  Positioned.fill(
+                                    child: CustomPaint(
+                                      painter: _TaskFacetPatternPainter(isDark: isDark),
+                                    ),
+                                  ),
                                   Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: 4),
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        // Row 2: Detail CP (Perbesar Judul CP)
-                                        if (_isEditMode)
-                                          TextField(
-                                            controller: _stageNameController,
-                                            minLines: 1,
+                                    padding: const EdgeInsets.all(16),
+                                    child: _isEditMode
+                                        ? TextField(
+                                            controller: _stageDescController,
                                             maxLines: null,
-                                            style: AppTypography.pageTitle(color: isDark ? Colors.white : const Color(0xFF0F172A), fontWeight: FontWeight.w800, height: 1.25, letterSpacing: -0.4),
+                                            style: AppTypography.timestamp(
+                                              color: isDark ? Colors.white : Colors.black,
+                                              fontWeight: FontWeight.w600,
+                                              height: 1.5,
+                                            ),
                                             decoration: InputDecoration(
+                                              border: InputBorder.none,
                                               isDense: true,
-                                              filled: true,
-                                              fillColor: isDark ? const Color(0xFF1C1C1E) : Colors.white,
-                                              hintText: 'Nama Capaian Pembelajaran',
-                                              hintStyle: AppTypography.timestamp(color: isDark ? Colors.white38 : Colors.black38),
-                                              contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                                              border: OutlineInputBorder(
-                                                borderRadius: BorderRadius.circular(14),
-                                                borderSide: const BorderSide(color: Color(0xFF7C3AED), width: 1.5),
-                                              ),
-                                              focusedBorder: OutlineInputBorder(
-                                                borderRadius: BorderRadius.circular(14),
-                                                borderSide: const BorderSide(color: Color(0xFF7C3AED), width: 2),
+                                              contentPadding: EdgeInsets.zero,
+                                              hintText: 'Tulis ringkasan capaian pembelajaran di sini...',
+                                              hintStyle: AppTypography.timestamp(
+                                                color: isDark ? Colors.white38 : Colors.black38,
                                               ),
                                             ),
                                             onChanged: (v) => _debouncedAutoSave(stages),
                                           )
-                                        else
-                                          Text(
-                                            stageName,
-                                            style: AppTypography.pageTitle(color: isDark ? Colors.white : const Color(0xFF0F172A), fontWeight: FontWeight.w800, height: 1.25, letterSpacing: -0.4),
-                                          ),
-                                        const SizedBox(height: 4),
-                                        // Row 3: Text kecil mapel di bawahnya (Lengkap, tanpa ...)
-                                        Text(
-                                          widget.projectTitle,
-                                          style: AppTypography.timestamp(color: isDark ? Colors.white70 : const Color(0xFF334155), fontWeight: FontWeight.w600, height: 1.3),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  if (stageDesc.isNotEmpty || _isEditMode) ...[
-                                    const SizedBox(height: 14),
-                                    // Deskripsi CP Lebih Putih & Bersih
-                                    Container(
-                                      width: double.infinity,
-                                      padding: EdgeInsets.symmetric(
-                                        horizontal: _isEditMode ? 14 : 18,
-                                        vertical: _isEditMode ? 12 : 16,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: isDark
-                                            ? const Color(0xFF141416).withValues(alpha: 0.65)
-                                            : Colors.white.withValues(alpha: 0.90),
-                                        borderRadius: BorderRadius.circular(22),
-                                        border: Border.all(
-                                          color: _isEditMode
-                                              ? const Color(0xFF7C3AED)
-                                              : (isDark
-                                                  ? Colors.white.withValues(alpha: 0.18)
-                                                  : Colors.white.withValues(alpha: 0.95)),
-                                          width: _isEditMode ? 1.5 : 1.0,
-                                        ),
-                                      ),
-                                      child: _isEditMode
-                                          ? TextField(
-                                              controller: _stageDescController,
-                                              maxLines: null,
-                                              style: AppTypography.timestamp(color: isDark ? Colors.white : const Color(0xFF0F172A), fontWeight: FontWeight.w500, height: 1.5),
-                                              decoration: InputDecoration(
-                                                border: InputBorder.none,
-                                                isDense: true,
-                                                contentPadding: EdgeInsets.zero,
-                                                hintText: 'Tulis ringkasan capaian pembelajaran di sini...',
-                                                hintStyle: AppTypography.timestamp(color: isDark ? Colors.white38 : Colors.black38),
-                                              ),
-                                              onChanged: (v) => _debouncedAutoSave(stages),
-                                            )
-                                          : Text(
-                                              stageDesc,
-                                              style: AppTypography.timestamp(color: isDark ? Colors.white : const Color(0xFF0F172A), fontWeight: FontWeight.w400, height: 1.5),
+                                        : Text(
+                                            stageDesc,
+                                            style: AppTypography.timestamp(
+                                              color: isDark ? Colors.white : Colors.black,
+                                              fontWeight: FontWeight.w600,
+                                              height: 1.5,
                                             ),
-                                    ),
-                                  ],
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-
-                    // Section Title & Add Materi Button (Bulat solid hitam)
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'Materi Pembelajaran',
-                          style: AppTypography.chatHeaderTitle(color: isDark ? Colors.white : Colors.black87, fontWeight: FontWeight.bold),
-                        ),
-                        if (widget.isOwner)
-                          GestureDetector(
-                            onTap: () => _showAddMateriDialog(context, stages),
-                            child: Container(
-                              width: 28,
-                              height: 28,
-                              decoration: BoxDecoration(
-                                color: isDark ? Colors.white : Colors.black,
-                                shape: BoxShape.circle,
-                              ),
-                              child: Icon(
-                                Icons.add_rounded,
-                                color: isDark ? Colors.black : Colors.white,
-                                size: 16,
-                              ),
-                            ),
-                          ),
-                      ],
-                    ),
-                    const SizedBox(height: 14),
-
-                    if (materis.isEmpty)
-                      Center(
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 40),
-                          child: Column(
-                            children: [
-                              Icon(
-                                Icons.auto_stories_outlined,
-                                size: 48,
-                                color: isDark ? Colors.white24 : Colors.black26,
-                              ),
-                              const SizedBox(height: 12),
-                              Text(
-                                'Belum ada materi pada capaian pembelajaran ini.',
-                                style: AppTypography.timestamp(color: isDark ? Colors.white54 : Colors.black45),
-                              ),
-                            ],
-                          ),
-                        ),
-                      )
-                    else
-                      ListView.separated(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemCount: materis.length,
-                        separatorBuilder: (context, index) => const SizedBox(height: 12),
-                        itemBuilder: (context, mIdx) {
-                          final materi = materis[mIdx];
-                          final String mTitle = (materi['title'] ?? 'Materi ${mIdx + 1}').toString();
-                          final List tasks = materi['tasks'] as List? ?? [];
-                          final String materiKey = '${widget.stageIdx}_$mIdx';
-                          final bool isExpanded = !_collapsedMateriKeys.contains(materiKey);
-
-                          int tugasCount = 0;
-                          int quizCount = 0;
-                          int pdfCount = 0;
-
-                          for (var t in tasks) {
-                            final type = (t as Map)['type'] ?? 'tugas';
-                            if (type == 'quiz') {
-                              quizCount++;
-                            } else if (type == 'pdf') {
-                              pdfCount++;
-                            } else {
-                              tugasCount++;
-                            }
-                          }
-
-                          return Dismissible(
-                            key: ValueKey('materi_${widget.stageIdx}_${mIdx}_$mTitle'),
-                            direction: widget.isOwner ? DismissDirection.endToStart : DismissDirection.none,
-                            confirmDismiss: (direction) async {
-                              AppSoundService.playDeleteWhoosh();
-                              return await _confirmDeleteMateri(context, stages, mIdx, mTitle);
-                            },
-                            onUpdate: (details) {
-                              if (details.reached && !details.previousReached) {
-                                AppSoundService.playDeleteWhoosh();
-                              }
-                            },
-                            background: Container(
-                              alignment: Alignment.centerRight,
-                              padding: const EdgeInsets.only(right: 20),
-                              color: Colors.transparent,
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  const Icon(Icons.delete_outline_rounded, color: Color(0xFFEF4444), size: 22),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    'Hapus',
-                                    style: AppTypography.buttonLabel(color: const Color(0xFFEF4444), fontWeight: FontWeight.bold),
+                                          ),
                                   ),
                                 ],
                               ),
                             ),
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
-                                borderRadius: BorderRadius.circular(30),
-                                border: Border.all(
-                                  color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
-                                  width: 1.2,
+                          ),
+                        ],
+                        const SizedBox(height: 18),
+
+                        // Row 4: Header Section Materi Pembelajaran & Tombol Tambah Materi
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'Materi Pembelajaran',
+                              style: AppTypography.chatHeaderTitle(
+                                color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                            if (widget.isOwner)
+                              GestureDetector(
+                                onTap: () => _showAddMateriDialog(context, stages),
+                                behavior: HitTestBehavior.opaque,
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+                                  decoration: BoxDecoration(
+                                    color: isDark ? const Color(0xFF27272A) : const Color(0xFF0F172A),
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  child: Text(
+                                    'Tambah Materi',
+                                    style: GoogleFonts.plusJakartaSans(
+                                      color: Colors.white,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w800,
+                                    ),
+                                  ),
                                 ),
                               ),
-                              child: Column(
-                                children: [
-                                  // Materi Header (Solid Soft Pastel / Dark Container)
-                                  Container(
-                                    decoration: BoxDecoration(
-                                      color: materiTopColor,
-                                      borderRadius: isExpanded
-                                          ? const BorderRadius.vertical(top: Radius.circular(28))
-                                          : BorderRadius.circular(28),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+
+                        // List Setiap Materi: Judul di Luar Card, di Bawahnya Card Berisi Tugas/Materi/Quiz
+                          if (materis.isEmpty)
+                            Center(
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(vertical: 24),
+                                child: Column(
+                                  children: [
+                                    Icon(
+                                      Icons.auto_stories_outlined,
+                                      size: 40,
+                                      color: isDark ? Colors.white24 : Colors.black26,
                                     ),
-                                    child: InkWell(
-                                      onTap: () {
-                                        setState(() {
-                                          if (_collapsedMateriKeys.contains(materiKey)) {
-                                            _collapsedMateriKeys.remove(materiKey);
-                                          } else {
-                                            _collapsedMateriKeys.add(materiKey);
-                                          }
-                                        });
-                                      },
-                                      borderRadius: isExpanded
-                                          ? const BorderRadius.vertical(top: Radius.circular(28))
-                                          : BorderRadius.circular(28),
-                                      child: Padding(
-                                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                                    const SizedBox(height: 10),
+                                    Text(
+                                      'Belum ada materi pada capaian pembelajaran ini.',
+                                      style: AppTypography.timestamp(
+                                        color: isDark ? Colors.white54 : Colors.black45,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            )
+                          else
+                            ListView.builder(
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              itemCount: materis.length,
+                              padding: EdgeInsets.zero,
+                              itemBuilder: (context, mIdx) {
+                                final materi = materis[mIdx];
+                              final String mTitle = (materi['title'] ?? 'Materi ${mIdx + 1}').toString();
+                              final List tasks = materi['tasks'] as List? ?? [];
+                              final bool isExpanded = _expandedMateriIndices.contains(mIdx);
+
+                              // Filter items by category
+                              final List<Map<String, dynamic>> tugasItems = [];
+                              final List<Map<String, dynamic>> pdfItems = [];
+                              final List<Map<String, dynamic>> quizItems = [];
+
+                              for (int tIdx = 0; tIdx < tasks.length; tIdx++) {
+                                final t = Map<String, dynamic>.from(tasks[tIdx] as Map);
+                                t['_origIdx'] = tIdx;
+                                final type = (t['type'] as String? ?? 'tugas').toLowerCase();
+                                if (type == 'quiz') {
+                                  quizItems.add(t);
+                                } else if (type == 'pdf' || type == 'materi') {
+                                  pdfItems.add(t);
+                                } else {
+                                  tugasItems.add(t);
+                                }
+                              }
+
+                              final int tugasCount = tugasItems.length;
+                              final int pdfCount = pdfItems.length;
+                              final int quizCount = quizItems.length;
+
+                              return Dismissible(
+                                key: ValueKey('materi_${mIdx}_${mTitle}_${stages.hashCode}'),
+                                direction: widget.isOwner ? DismissDirection.endToStart : DismissDirection.none,
+                                confirmDismiss: (direction) async {
+                                  AppSoundService.playDeleteWhoosh();
+                                  return await _confirmDeleteMateri(context, stages, mIdx, mTitle);
+                                },
+                                onUpdate: (details) {
+                                  if (details.reached && !details.previousReached) {
+                                    AppSoundService.playDeleteWhoosh();
+                                  }
+                                },
+                                background: Align(
+                                  alignment: Alignment.topRight,
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(top: 2, right: 16),
+                                    child: SizedBox(
+                                      height: 28,
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        crossAxisAlignment: CrossAxisAlignment.center,
+                                        children: [
+                                          const Icon(Icons.delete_outline_rounded, color: Color(0xFFEF4444), size: 20),
+                                          const SizedBox(width: 4),
+                                          Text(
+                                            'Hapus',
+                                            style: AppTypography.buttonLabel(color: const Color(0xFFEF4444), fontWeight: FontWeight.bold),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.only(bottom: 22),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      // 1. Judul Materi DI LUAR CARD (Judul Lengkap Tanpa Ellipsis '...', Lingkaran Warna: Orange=Tugas, Biru=Materi, Ungu=Quiz)
+                                      Padding(
+                                        padding: const EdgeInsets.symmetric(horizontal: 4),
                                         child: Row(
+                                          crossAxisAlignment: CrossAxisAlignment.center,
                                           children: [
                                             Expanded(
                                               child: _isEditMode
@@ -631,12 +763,16 @@ class _DetailCpPageState extends State<DetailCpPage> {
                                                       controller: _getMateriController(mIdx, mTitle),
                                                       minLines: 1,
                                                       maxLines: null,
-                                                      style: AppTypography.buttonLabel(color: isDark ? Colors.white : Colors.black87, fontWeight: FontWeight.bold, height: 1.3),
+                                                      style: GoogleFonts.plusJakartaSans(
+                                                        fontSize: 16.0,
+                                                        fontWeight: FontWeight.w800,
+                                                        color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                                      ),
                                                       decoration: InputDecoration(
                                                         isDense: true,
                                                         filled: true,
-                                                        fillColor: isDark ? const Color(0xFF1C1C1E) : Colors.white.withValues(alpha: 0.8),
-                                                        contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                                                        fillColor: isDark ? const Color(0xFF1C1C1E) : Colors.white,
+                                                        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                                                         hintText: 'Judul Materi...',
                                                         hintStyle: AppTypography.timestamp(color: isDark ? Colors.white38 : Colors.black38),
                                                         border: OutlineInputBorder(
@@ -650,223 +786,1220 @@ class _DetailCpPageState extends State<DetailCpPage> {
                                                       ),
                                                       onChanged: (v) => _debouncedAutoSave(stages),
                                                     )
-                                                  : Column(
-                                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                                      children: [
-                                                        Text(
+                                                  : GestureDetector(
+                                                      onTap: () {
+                                                        setState(() {
+                                                          if (_expandedMateriIndices.contains(mIdx)) {
+                                                            _expandedMateriIndices.remove(mIdx);
+                                                          } else {
+                                                            _expandedMateriIndices.add(mIdx);
+                                                          }
+                                                        });
+                                                      },
+                                                      behavior: HitTestBehavior.opaque,
+                                                      child: Padding(
+                                                        padding: const EdgeInsets.symmetric(vertical: 4),
+                                                        child: Text(
                                                           mTitle,
-                                                          style: AppTypography.buttonLabel(color: isDark ? Colors.white : Colors.black87, fontWeight: FontWeight.bold),
+                                                          style: GoogleFonts.plusJakartaSans(
+                                                            fontSize: 16.0,
+                                                            fontWeight: FontWeight.w800,
+                                                            color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                                            letterSpacing: -0.3,
+                                                          ),
                                                         ),
-                                                        const SizedBox(height: 2),
-                                                        Text(
-                                                          quizCount > 0
-                                                              ? '$tugasCount tugas · $quizCount quiz · $pdfCount materi'
-                                                              : '$tugasCount tugas · $pdfCount materi',
-                                                          style: AppTypography.timestamp(color: isDark ? Colors.white60 : Colors.black54),
-                                                        ),
-                                                      ],
+                                                      ),
                                                     ),
                                             ),
-                                            Icon(
-                                              isExpanded
-                                                  ? Icons.keyboard_arrow_up_rounded
-                                                  : Icons.keyboard_arrow_down_rounded,
-                                              color: isDark ? Colors.white70 : Colors.black54,
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  // Tasks / Items inside Materi as Chips with (+) at the end
-                                  if (isExpanded) ...[
-                                    Divider(
-                                      height: 1,
-                                      thickness: 1,
-                                      color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
-                                    ),
-                                    Container(
-                                      decoration: BoxDecoration(
-                                        color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
-                                        borderRadius: const BorderRadius.vertical(bottom: Radius.circular(28)),
-                                      ),
-                                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                                      child: Align(
-                                        alignment: tasks.isNotEmpty ? Alignment.centerLeft : Alignment.center,
-                                        child: Wrap(
-                                          alignment: tasks.isNotEmpty ? WrapAlignment.start : WrapAlignment.center,
-                                          crossAxisAlignment: WrapCrossAlignment.center,
-                                          spacing: 10,
-                                          runSpacing: 10,
-                                          children: [
-                                            ...List.generate(tasks.length, (tIdx) {
-                                              final task = Map<String, dynamic>.from(tasks[tIdx] as Map);
-                                              final String originalTitle = task['title'] ?? 'Tugas';
-                                              final String displayTitle = originalTitle.length > 10
-                                                  ? '${originalTitle.substring(0, 10)}...'
-                                                  : originalTitle;
-                                              final String type = task['type'] ?? 'tugas';
-                                              final String taskKey = '${widget.stageIdx}_${mIdx}_$tIdx';
-                                              final bool isTaskDone = widget.isOwner
-                                                  ? (task['isDone'] == true)
-                                                  : completedTasks.contains(taskKey);
+                                            const SizedBox(width: 8),
 
-                                              IconData typeIcon;
-                                              Color iconCol;
-                                              Color iconBg;
-                                              if (type == 'quiz') {
-                                                typeIcon = Icons.quiz_outlined;
-                                                iconCol = isDark ? const Color(0xFFFBBF24) : const Color(0xFFD97706);
-                                                iconBg = isDark ? const Color(0xFF451A03) : const Color(0xFFFEF3C7);
-                                              } else if (type == 'pdf') {
-                                                typeIcon = Icons.menu_book_rounded;
-                                                iconCol = isDark ? const Color(0xFF6EE7B7) : const Color(0xFF059669);
-                                                iconBg = isDark ? const Color(0xFF064E3B) : const Color(0xFFD1FAE5);
-                                              } else {
-                                                typeIcon = Icons.assignment_outlined;
-                                                iconCol = isDark ? const Color(0xFF93C5FD) : const Color(0xFF2563EB);
-                                                iconBg = isDark ? const Color(0xFF172554) : const Color(0xFFDBEAFE);
-                                              }
-
-                                              return GestureDetector(
-                                                onTap: () {
-                                                  if (widget.isOwner) {
-                                                    if (type == 'pdf') {
-                                                      _showEditMateriItemDialog(context, mIdx, tIdx, stages, task);
-                                                    } else if (type == 'quiz') {
-                                                      _showEditQuizDialog(context, mIdx, tIdx, stages, task);
-                                                    } else {
-                                                      _showEditTaskDialog(context, mIdx, tIdx, stages, task);
-                                                    }
-                                                  } else {
-                                                    if (type == 'quiz') {
-                                                      Navigator.push(
-                                                        context,
-                                                        MaterialPageRoute(
-                                                          builder: (_) => MengerjakanQuizPage(
-                                                            title: originalTitle,
-                                                            durationStr: task['duration']?.toString() ?? '15',
-                                                            startTime: task['startDate']?.toString() ?? task['startTime']?.toString() ?? '',
-                                                            projectId: widget.projectId,
-                                                            studentUid: currentUid,
-                                                            taskKey: '${widget.stageIdx}_${mIdx}_$tIdx',
-                                                            onCompleted: () => _toggleTaskDone(stages, mIdx, tIdx),
-                                                            isTeacher: false,
-                                                            questions: (task['questions'] as List?)
-                                                                ?.map((e) => Map<String, dynamic>.from(e as Map))
-                                                                .toList(),
-                                                            cpColor: cpCardBg,
-                                                          ),
-                                                        ),
-                                                      );
-                                                    } else {
-                                                      _toggleTaskDone(stages, mIdx, tIdx);
-                                                    }
-                                                  }
-                                                },
-                                                onDoubleTap: () {
-                                                  if (widget.isOwner) {
-                                                    if (type == 'pdf') {
-                                                      _showEditMateriItemDialog(context, mIdx, tIdx, stages, task);
-                                                    } else if (type == 'quiz') {
-                                                      _showEditQuizDialog(context, mIdx, tIdx, stages, task);
-                                                    } else {
-                                                      _showEditTaskDialog(context, mIdx, tIdx, stages, task);
-                                                    }
-                                                  }
-                                                },
-                                                child: Container(
-                                                  padding: const EdgeInsets.fromLTRB(5, 5, 14, 5),
-                                                  decoration: BoxDecoration(
-                                                    color: isDark ? const Color(0xFF27272A) : Colors.white,
-                                                    borderRadius: BorderRadius.circular(30),
-                                                    border: isDark
-                                                        ? Border.all(color: const Color(0xFF3F3F46), width: 1.0)
-                                                        : null,
-                                                  ),
-                                                  child: Row(
-                                                    mainAxisSize: MainAxisSize.min,
-                                                    children: [
-                                                      Container(
-                                                        width: 26,
-                                                        height: 26,
-                                                        decoration: BoxDecoration(
-                                                          color: iconBg,
-                                                          shape: BoxShape.circle,
-                                                        ),
-                                                        child: Center(
-                                                          child: Icon(typeIcon, color: iconCol, size: 14),
-                                                        ),
-                                                      ),
-                                                      const SizedBox(width: 8),
-                                                      Text(
-                                                        displayTitle,
-                                                        style: AppTypography.buttonLabel(color: isDark ? Colors.white : const Color(0xFF0F172A), fontWeight: FontWeight.w600),
-                                                      ),
-                                                      if (_isEditMode && widget.isOwner) ...[
-                                                        const SizedBox(width: 8),
-                                                        GestureDetector(
-                                                          onTap: () => _showEditTaskDialog(context, mIdx, tIdx, stages, task),
-                                                          child: const Icon(
-                                                            Icons.edit_outlined,
-                                                            color: Colors.grey,
-                                                            size: 15,
-                                                          ),
-                                                        ),
-                                                        const SizedBox(width: 4),
-                                                        GestureDetector(
-                                                          onTap: () => _confirmDeleteTask(context, stages, mIdx, tIdx, originalTitle),
-                                                          child: const Icon(
-                                                            Icons.delete_outline,
-                                                            color: Colors.redAccent,
-                                                            size: 15,
-                                                          ),
-                                                        ),
-                                                      ],
-                                                    ],
-                                                  ),
+                                            // Lingkaran Orange: Total Tugas (Warna Soft)
+                                            if (tugasCount > 0) ...[
+                                              Container(
+                                                width: 22,
+                                                height: 22,
+                                                decoration: BoxDecoration(
+                                                  color: isDark ? const Color(0xFF2B1D11) : const Color(0xFFFFEDD5),
+                                                  shape: BoxShape.circle,
                                                 ),
-                                              );
-                                            }),
-                                            // Tombol (+) simetris lingkaran warna hitam text putih
-                                            if (widget.isOwner)
-                                              GestureDetector(
-                                                onTap: () => _showAddTaskChoice(context, mIdx, stages),
-                                                child: Container(
-                                                  width: 26,
-                                                  height: 26,
-                                                  decoration: BoxDecoration(
-                                                    color: isDark ? Colors.white : Colors.black,
-                                                    shape: BoxShape.circle,
-                                                  ),
-                                                  child: Center(
-                                                    child: Icon(
-                                                      Icons.add_rounded,
-                                                      color: isDark ? Colors.black : Colors.white,
-                                                      size: 14,
+                                                child: Center(
+                                                  child: Text(
+                                                    '$tugasCount',
+                                                    style: TextStyle(
+                                                      color: isDark ? const Color(0xFFFDBA74) : const Color(0xFFC2410C),
+                                                      fontSize: 11.5,
+                                                      fontWeight: FontWeight.w900,
+                                                      height: 1.0,
                                                     ),
                                                   ),
                                                 ),
                                               ),
+                                              const SizedBox(width: 4),
+                                            ],
+
+                                            // Lingkaran Biru: Total Materi (Warna Soft)
+                                            if (pdfCount > 0) ...[
+                                              Container(
+                                                width: 22,
+                                                height: 22,
+                                                decoration: BoxDecoration(
+                                                  color: isDark ? const Color(0xFF102030) : const Color(0xFFE0F2FE),
+                                                  shape: BoxShape.circle,
+                                                ),
+                                                child: Center(
+                                                  child: Text(
+                                                    '$pdfCount',
+                                                    style: TextStyle(
+                                                      color: isDark ? const Color(0xFF7DD3FC) : const Color(0xFF0369A1),
+                                                      fontSize: 11.5,
+                                                      fontWeight: FontWeight.w900,
+                                                      height: 1.0,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                              const SizedBox(width: 4),
+                                            ],
+
+                                            // Lingkaran Ungu: Total Quiz (Warna Soft)
+                                            if (quizCount > 0) ...[
+                                              Container(
+                                                width: 22,
+                                                height: 22,
+                                                decoration: BoxDecoration(
+                                                  color: isDark ? const Color(0xFF1E162B) : const Color(0xFFF3E8FF),
+                                                  shape: BoxShape.circle,
+                                                ),
+                                                child: Center(
+                                                  child: Text(
+                                                    '$quizCount',
+                                                    style: TextStyle(
+                                                      color: isDark ? const Color(0xFFD8B4FE) : const Color(0xFF7E22CE),
+                                                      fontSize: 11.5,
+                                                      fontWeight: FontWeight.w900,
+                                                      height: 1.0,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                              const SizedBox(width: 4),
+                                            ],
+
+                                            // Jika belum ada item
+                                            if (tasks.isEmpty) ...[
+                                              Container(
+                                                width: 22,
+                                                height: 22,
+                                                decoration: BoxDecoration(
+                                                  color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+                                                  shape: BoxShape.circle,
+                                                ),
+                                                child: Center(
+                                                  child: Text(
+                                                    '0',
+                                                    style: TextStyle(
+                                                      color: isDark ? Colors.white54 : const Color(0xFF64748B),
+                                                      fontSize: 11.5,
+                                                      fontWeight: FontWeight.w900,
+                                                      height: 1.0,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                              const SizedBox(width: 4),
+                                            ],
+
+                                            // Indikator Chevron ^ / v (Buka / Tutup)
+                                            GestureDetector(
+                                              onTap: () {
+                                                setState(() {
+                                                  if (_expandedMateriIndices.contains(mIdx)) {
+                                                    _expandedMateriIndices.remove(mIdx);
+                                                  } else {
+                                                    _expandedMateriIndices.add(mIdx);
+                                                  }
+                                                });
+                                              },
+                                              behavior: HitTestBehavior.opaque,
+                                              child: Padding(
+                                                padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 2),
+                                                child: Icon(
+                                                  isExpanded ? Icons.keyboard_arrow_up_rounded : Icons.keyboard_arrow_down_rounded,
+                                                  size: 20,
+                                                  color: isDark ? Colors.white70 : const Color(0xFF0F172A),
+                                                ),
+                                              ),
+                                            ),
                                           ],
                                         ),
                                       ),
+                                      const SizedBox(height: 8),
+
+                                    // 2. Card Soft Warna-Warni Berisi Tugas (Orange), Materi (Biru), dan Quiz (Ungu) saat dibuka (Pola Facet Pattern Painter Sesuai Todo Siswa)
+                                    if (isExpanded) ...[
+                                      if (tasks.isEmpty && !widget.isOwner)
+                                        Container(
+                                          width: double.infinity,
+                                          padding: const EdgeInsets.symmetric(vertical: 20),
+                                          decoration: BoxDecoration(
+                                            color: isDark ? const Color(0xFF18181B) : const Color(0xFFF8FAFC),
+                                            borderRadius: BorderRadius.circular(22),
+                                            border: Border.all(
+                                              color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                                              width: 1.0,
+                                            ),
+                                          ),
+                                          child: Center(
+                                            child: Text(
+                                              'Belum ada tugas, materi, atau quiz',
+                                              style: AppTypography.timestamp(
+                                                color: isDark ? Colors.white38 : Colors.black38,
+                                              ),
+                                            ),
+                                          ),
+                                        )
+                                      else ...[
+                                        // A. CARD TUGAS (Soft Orange/Peach dengan Baris Tambah Tugas di Akhir)
+                                        if (tugasItems.isNotEmpty || widget.isOwner) ...[
+                                          Container(
+                                            clipBehavior: Clip.antiAlias,
+                                            width: double.infinity,
+                                            decoration: BoxDecoration(
+                                              color: isDark ? const Color(0xFF1E1B16) : const Color(0xFFFFEDD5),
+                                              borderRadius: BorderRadius.circular(22),
+                                            ),
+                                            child: Stack(
+                                              children: [
+                                                Positioned.fill(
+                                                  child: CustomPaint(
+                                                    painter: _TaskFacetPatternPainter(isDark: isDark),
+                                                  ),
+                                                ),
+                                                Column(
+                                                  mainAxisSize: MainAxisSize.min,
+                                                  children: [
+                                                    if (tugasItems.isNotEmpty)
+                                                      ListView.separated(
+                                                        shrinkWrap: true,
+                                                        physics: const NeverScrollableScrollPhysics(),
+                                                        itemCount: tugasItems.length,
+                                                        padding: EdgeInsets.zero,
+                                                        separatorBuilder: (context, index) => Divider(
+                                                          height: 1,
+                                                          thickness: 0.8,
+                                                          color: isDark ? Colors.white10 : const Color(0xFFFDE68A).withValues(alpha: 0.40),
+                                                        ),
+                                                        itemBuilder: (context, idx) {
+                                                          final task = tugasItems[idx];
+                                                          final int tIdx = task['_origIdx'] as int;
+                                                          final String originalTitle = task['title'] ?? 'Tugas';
+                                                          final bool isLocked = task['isLocked'] == true;
+                                                          final bool isClosed = task['isClosed'] == true;
+
+                                                          final startStr = (task['startDate'] ?? task['start'] ?? '').toString().trim();
+                                                          final endStr = (task['endDate'] ?? task['deadline'] ?? task['end'] ?? '').toString().trim();
+                                                          String periodeText = '';
+                                                          if (startStr.isNotEmpty && endStr.isNotEmpty) {
+                                                            periodeText = '$startStr - $endStr';
+                                                          } else if (endStr.isNotEmpty) {
+                                                            periodeText = 'Sampai $endStr';
+                                                          } else if (startStr.isNotEmpty) {
+                                                            periodeText = 'Mulai $startStr';
+                                                          } else {
+                                                            periodeText = 'Hari ini';
+                                                          }
+
+                                                          return InkWell(
+                                                            splashColor: Colors.transparent,
+                                                            highlightColor: Colors.transparent,
+                                                            hoverColor: Colors.transparent,
+                                                            onTap: () {
+                                                              if (widget.isOwner) {
+                                                                _showEditTaskDialog(context, mIdx, tIdx, stages, task);
+                                                              }
+                                                            },
+                                                            child: Padding(
+                                                              padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 10.0),
+                                                              child: Row(
+                                                                crossAxisAlignment: CrossAxisAlignment.center,
+                                                                children: [
+                                                                  // Ikon Tugas SVG di SEBELAH KIRI (Matching Nav & Todo)
+                                                                  SizedBox(
+                                                                    width: 28,
+                                                                    height: 28,
+                                                                    child: Center(
+                                                                      child: SvgPicture.string(
+                                                                        '''<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                                          <path d="M7 3H5a2 2 0 00-2 2v14a2 2 0 002 2h10a2 2 0 002-2v-3" stroke="${isDark ? '#FDE68A' : '#B45309'}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                                                          <path d="M7 8h5M7 12h4M7 16h6" stroke="${isDark ? '#FDE68A' : '#B45309'}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                                                          <path d="M19.1 2.9a2.12 2.12 0 013 3L13.5 14.5l-4.5 1 1-4.5L19.1 2.9z" fill="${isDark ? '#F59E0B' : '#D97706'}" stroke="${isDark ? '#FDE68A' : '#B45309'}" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                                                                        </svg>''',
+                                                                        width: 22,
+                                                                        height: 22,
+                                                                      ),
+                                                                    ),
+                                                                  ),
+                                                                  const SizedBox(width: 10),
+
+                                                                  // Info Tugas (Tengah)
+                                                                  Expanded(
+                                                                    child: Column(
+                                                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                                                      children: [
+                                                                        Text(
+                                                                          originalTitle,
+                                                                          style: AppTypography.cardTitle(
+                                                                            color: isDark ? Colors.white : Colors.black87,
+                                                                            fontWeight: FontWeight.w700,
+                                                                          ),
+                                                                          maxLines: 1,
+                                                                          overflow: TextOverflow.ellipsis,
+                                                                        ),
+                                                                        const SizedBox(height: 3),
+                                                                        Wrap(
+                                                                          crossAxisAlignment: WrapCrossAlignment.center,
+                                                                          spacing: 6,
+                                                                          runSpacing: 3,
+                                                                          children: [
+                                                                            Container(
+                                                                              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 1.5),
+                                                                              decoration: BoxDecoration(
+                                                                                color: isDark
+                                                                                    ? Colors.white.withValues(alpha: 0.12)
+                                                                                    : Colors.white.withValues(alpha: 0.65),
+                                                                                borderRadius: BorderRadius.circular(6),
+                                                                              ),
+                                                                              child: Text(
+                                                                                'Tugas',
+                                                                                style: GoogleFonts.plusJakartaSans(
+                                                                                  fontSize: 11,
+                                                                                  fontWeight: FontWeight.w700,
+                                                                                  color: isDark ? const Color(0xFFFDE68A) : const Color(0xFFB45309),
+                                                                                ),
+                                                                              ),
+                                                                            ),
+                                                                            Row(
+                                                                              mainAxisSize: MainAxisSize.min,
+                                                                              children: [
+                                                                                Icon(
+                                                                                  Icons.access_time_rounded,
+                                                                                  size: 13,
+                                                                                  color: isDark ? Colors.white38 : Colors.black45,
+                                                                                ),
+                                                                                const SizedBox(width: 3),
+                                                                                Text(
+                                                                                  periodeText,
+                                                                                  style: AppTypography.timestamp(
+                                                                                    color: isDark ? Colors.white38 : Colors.black45,
+                                                                                    fontWeight: FontWeight.w600,
+                                                                                  ),
+                                                                                ),
+                                                                              ],
+                                                                            ),
+                                                                          ],
+                                                                        ),
+                                                                      ],
+                                                                    ),
+                                                                  ),
+
+                                                                  // Sisi Kanan: Aksi Guru (Baris 1: Tutup & Lock, Baris 2: Hapus Rata Kanan)
+                                                                  if (widget.isOwner) ...[
+                                                                    const SizedBox(width: 6),
+                                                                    Column(
+                                                                      mainAxisSize: MainAxisSize.min,
+                                                                      crossAxisAlignment: CrossAxisAlignment.end,
+                                                                      children: [
+                                                                        Row(
+                                                                          mainAxisSize: MainAxisSize.min,
+                                                                          children: [
+                                                                            GestureDetector(
+                                                                              onTap: () => _toggleTaskClosed(stages, mIdx, tIdx),
+                                                                              behavior: HitTestBehavior.opaque,
+                                                                              child: Padding(
+                                                                                padding: const EdgeInsets.all(3),
+                                                                                child: Icon(
+                                                                                  isClosed ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                                                                                  size: 16,
+                                                                                  color: isClosed
+                                                                                      ? (isDark ? const Color(0xFFF87171) : const Color(0xFFEF4444))
+                                                                                      : (isDark ? Colors.white60 : const Color(0xFF64748B)),
+                                                                                ),
+                                                                              ),
+                                                                            ),
+                                                                            const SizedBox(width: 2),
+                                                                            GestureDetector(
+                                                                              onTap: () => _toggleTaskLock(stages, mIdx, tIdx),
+                                                                              behavior: HitTestBehavior.opaque,
+                                                                              child: Padding(
+                                                                                padding: const EdgeInsets.all(3),
+                                                                                child: Icon(
+                                                                                  isLocked ? Icons.lock_outline_rounded : Icons.lock_open_rounded,
+                                                                                  size: 16,
+                                                                                  color: isLocked
+                                                                                      ? (isDark ? const Color(0xFFFBBF24) : const Color(0xFFD97706))
+                                                                                      : (isDark ? Colors.white60 : const Color(0xFF64748B)),
+                                                                                ),
+                                                                              ),
+                                                                            ),
+                                                                          ],
+                                                                        ),
+                                                                        const SizedBox(height: 2),
+                                                                        GestureDetector(
+                                                                          onTap: () => _confirmDeleteTask(context, stages, mIdx, tIdx, originalTitle),
+                                                                          behavior: HitTestBehavior.opaque,
+                                                                          child: const Padding(
+                                                                            padding: EdgeInsets.all(3),
+                                                                            child: Icon(
+                                                                              Icons.delete_outline_rounded,
+                                                                              size: 16,
+                                                                              color: Color(0xFFEF4444),
+                                                                            ),
+                                                                          ),
+                                                                        ),
+                                                                      ],
+                                                                    ),
+                                                                  ],
+                                                                ],
+                                                              ),
+                                                            ),
+                                                          );
+                                                        },
+                                                      ),
+
+                                                    // Baris Akhir: Tambah Tugas (Card Hitam Teks Putih Rata Kiri)
+                                                    if (widget.isOwner) ...[
+                                                      if (tugasItems.isNotEmpty)
+                                                        Divider(
+                                                          height: 1,
+                                                          thickness: 0.8,
+                                                          color: isDark ? Colors.white10 : const Color(0xFFFDE68A).withValues(alpha: 0.40),
+                                                        ),
+                                                      Padding(
+                                                        padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 10.0),
+                                                        child: Align(
+                                                          alignment: Alignment.centerLeft,
+                                                          child: GestureDetector(
+                                                            onTap: () => _showCreateTugasDialog(context, mIdx, stages),
+                                                            behavior: HitTestBehavior.opaque,
+                                                            child: Container(
+                                                              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+                                                              decoration: BoxDecoration(
+                                                                color: isDark ? const Color(0xFF27272A) : const Color(0xFF0F172A),
+                                                                borderRadius: BorderRadius.circular(16),
+                                                              ),
+                                                              child: Text(
+                                                                'Tambah Tugas',
+                                                                style: GoogleFonts.plusJakartaSans(
+                                                                  fontSize: 12,
+                                                                  fontWeight: FontWeight.w800,
+                                                                  color: Colors.white,
+                                                                ),
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ],
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                          const SizedBox(height: 8),
+                                        ],
+
+                                        // B. CARD MATERI PDF / MODUL (Soft Sky Blue dengan Baris Upload Materi di Akhir)
+                                        if (pdfItems.isNotEmpty || widget.isOwner) ...[
+                                          Container(
+                                            clipBehavior: Clip.antiAlias,
+                                            width: double.infinity,
+                                            decoration: BoxDecoration(
+                                              color: isDark ? const Color(0xFF0F1C2E) : const Color(0xFFE0F2FE),
+                                              borderRadius: BorderRadius.circular(22),
+                                            ),
+                                            child: Stack(
+                                              children: [
+                                                Positioned.fill(
+                                                  child: CustomPaint(
+                                                    painter: _QuizFacetPatternPainter(isDark: isDark),
+                                                  ),
+                                                ),
+                                                Column(
+                                                  mainAxisSize: MainAxisSize.min,
+                                                  children: [
+                                                    if (pdfItems.isNotEmpty)
+                                                      ListView.separated(
+                                                        shrinkWrap: true,
+                                                        physics: const NeverScrollableScrollPhysics(),
+                                                        itemCount: pdfItems.length,
+                                                        padding: EdgeInsets.zero,
+                                                        separatorBuilder: (context, index) => Divider(
+                                                          height: 1,
+                                                          thickness: 0.8,
+                                                          color: isDark ? Colors.white10 : const Color(0xFFBAE6FD).withValues(alpha: 0.40),
+                                                        ),
+                                                        itemBuilder: (context, idx) {
+                                                          final task = pdfItems[idx];
+                                                          final int tIdx = task['_origIdx'] as int;
+                                                          final String originalTitle = task['title'] ?? 'Materi Pembelajaran';
+                                                          final String docName = task['fileName'] ?? task['doc'] ?? 'Modul PDF';
+                                                          final bool isLocked = task['isLocked'] == true;
+                                                          final bool isClosed = task['isClosed'] == true;
+
+                                                          String uploadDateText = '';
+                                                          if (task['uploadDate'] != null && task['uploadDate'].toString().isNotEmpty) {
+                                                            uploadDateText = task['uploadDate'].toString();
+                                                          } else if (task['createdAt'] != null && task['createdAt'].toString().isNotEmpty) {
+                                                            final raw = task['createdAt'].toString();
+                                                            try {
+                                                              final dt = DateTime.parse(raw);
+                                                              uploadDateText = '${dt.day.toString().padLeft(2, '0')}/${dt.month.toString().padLeft(2, '0')}/${dt.year}';
+                                                            } catch (_) {
+                                                              uploadDateText = raw.split('T').first;
+                                                            }
+                                                          } else if (task['startDate'] != null && task['startDate'].toString().isNotEmpty) {
+                                                            uploadDateText = task['startDate'].toString();
+                                                          } else {
+                                                            final now = DateTime.now();
+                                                            uploadDateText = '${now.day.toString().padLeft(2, '0')}/${now.month.toString().padLeft(2, '0')}/${now.year}';
+                                                          }
+
+                                                          return InkWell(
+                                                            splashColor: Colors.transparent,
+                                                            highlightColor: Colors.transparent,
+                                                            hoverColor: Colors.transparent,
+                                                            onTap: () {
+                                                              if (widget.isOwner) {
+                                                                _showEditMateriItemDialog(context, mIdx, tIdx, stages, task);
+                                                              }
+                                                            },
+                                                            child: Padding(
+                                                              padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 10.0),
+                                                              child: Row(
+                                                                crossAxisAlignment: CrossAxisAlignment.center,
+                                                                children: [
+                                                                  // Ikon Dokumen Materi SVG di SEBELAH KIRI (Matching Nav & Todo)
+                                                                  SizedBox(
+                                                                    width: 28,
+                                                                    height: 28,
+                                                                    child: Center(
+                                                                      child: SvgPicture.string(
+                                                                        '''<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                                          <path d="M4 19.5A2.5 2.5 0 016.5 17H20" stroke="${isDark ? '#BAE6FD' : '#0369A1'}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                                                          <path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z" stroke="${isDark ? '#BAE6FD' : '#0369A1'}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                                                          <path d="M9 7h7M9 11h5" stroke="${isDark ? '#38BDF8' : '#0284C7'}" stroke-width="2" stroke-linecap="round"/>
+                                                                          <circle cx="16" cy="11" r="1.5" fill="${isDark ? '#38BDF8' : '#0284C7'}"/>
+                                                                        </svg>''',
+                                                                        width: 22,
+                                                                        height: 22,
+                                                                      ),
+                                                                    ),
+                                                                  ),
+                                                                  const SizedBox(width: 10),
+
+                                                                  // Info Materi (Tengah)
+                                                                  Expanded(
+                                                                    child: Column(
+                                                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                                                      children: [
+                                                                        Text(
+                                                                          originalTitle,
+                                                                          style: AppTypography.cardTitle(
+                                                                            color: isDark ? Colors.white : Colors.black87,
+                                                                            fontWeight: FontWeight.w700,
+                                                                          ),
+                                                                          maxLines: 1,
+                                                                          overflow: TextOverflow.ellipsis,
+                                                                        ),
+                                                                        const SizedBox(height: 3),
+                                                                        Wrap(
+                                                                          crossAxisAlignment: WrapCrossAlignment.center,
+                                                                          spacing: 6,
+                                                                          runSpacing: 3,
+                                                                          children: [
+                                                                            Container(
+                                                                              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 1.5),
+                                                                              decoration: BoxDecoration(
+                                                                                color: isDark
+                                                                                    ? Colors.white.withValues(alpha: 0.12)
+                                                                                    : Colors.white.withValues(alpha: 0.65),
+                                                                                borderRadius: BorderRadius.circular(6),
+                                                                              ),
+                                                                              child: Text(
+                                                                                'Materi',
+                                                                                style: GoogleFonts.plusJakartaSans(
+                                                                                  fontSize: 11,
+                                                                                  fontWeight: FontWeight.w700,
+                                                                                  color: isDark ? const Color(0xFFBAE6FD) : const Color(0xFF0369A1),
+                                                                                ),
+                                                                              ),
+                                                                            ),
+                                                                            Row(
+                                                                              mainAxisSize: MainAxisSize.min,
+                                                                              children: [
+                                                                                Icon(
+                                                                                  Icons.access_time_rounded,
+                                                                                  size: 13,
+                                                                                  color: isDark ? Colors.white38 : Colors.black45,
+                                                                                ),
+                                                                                const SizedBox(width: 3),
+                                                                                Text(
+                                                                                  'Diunggah $uploadDateText',
+                                                                                  style: AppTypography.timestamp(
+                                                                                    color: isDark ? Colors.white38 : Colors.black45,
+                                                                                    fontWeight: FontWeight.w600,
+                                                                                  ),
+                                                                                ),
+                                                                              ],
+                                                                            ),
+                                                                            if (docName.isNotEmpty)
+                                                                              Text(
+                                                                                '• $docName',
+                                                                                style: AppTypography.timestamp(
+                                                                                  color: isDark ? Colors.white38 : Colors.black45,
+                                                                                  fontWeight: FontWeight.w600,
+                                                                                ),
+                                                                              ),
+                                                                          ],
+                                                                        ),
+                                                                      ],
+                                                                    ),
+                                                                  ),
+
+                                                                  // Sisi Kanan: Aksi Guru (Baris 1: Tutup & Lock, Baris 2: Hapus Rata Kanan)
+                                                                  if (widget.isOwner) ...[
+                                                                    const SizedBox(width: 6),
+                                                                    Column(
+                                                                      mainAxisSize: MainAxisSize.min,
+                                                                      crossAxisAlignment: CrossAxisAlignment.end,
+                                                                      children: [
+                                                                        Row(
+                                                                          mainAxisSize: MainAxisSize.min,
+                                                                          children: [
+                                                                            GestureDetector(
+                                                                              onTap: () => _toggleTaskClosed(stages, mIdx, tIdx),
+                                                                              behavior: HitTestBehavior.opaque,
+                                                                              child: Padding(
+                                                                                padding: const EdgeInsets.all(3),
+                                                                                child: Icon(
+                                                                                  isClosed ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                                                                                  size: 16,
+                                                                                  color: isClosed
+                                                                                      ? (isDark ? const Color(0xFFF87171) : const Color(0xFFEF4444))
+                                                                                      : (isDark ? Colors.white60 : const Color(0xFF64748B)),
+                                                                                ),
+                                                                              ),
+                                                                            ),
+                                                                            const SizedBox(width: 2),
+                                                                            GestureDetector(
+                                                                              onTap: () => _toggleTaskLock(stages, mIdx, tIdx),
+                                                                              behavior: HitTestBehavior.opaque,
+                                                                              child: Padding(
+                                                                                padding: const EdgeInsets.all(3),
+                                                                                child: Icon(
+                                                                                  isLocked ? Icons.lock_outline_rounded : Icons.lock_open_rounded,
+                                                                                  size: 16,
+                                                                                  color: isLocked
+                                                                                      ? (isDark ? const Color(0xFFFBBF24) : const Color(0xFFD97706))
+                                                                                      : (isDark ? Colors.white60 : const Color(0xFF64748B)),
+                                                                                ),
+                                                                              ),
+                                                                            ),
+                                                                          ],
+                                                                        ),
+                                                                        const SizedBox(height: 2),
+                                                                        GestureDetector(
+                                                                          onTap: () => _confirmDeleteTask(context, stages, mIdx, tIdx, originalTitle),
+                                                                          behavior: HitTestBehavior.opaque,
+                                                                          child: const Padding(
+                                                                            padding: EdgeInsets.all(3),
+                                                                            child: Icon(
+                                                                              Icons.delete_outline_rounded,
+                                                                              size: 16,
+                                                                              color: Color(0xFFEF4444),
+                                                                            ),
+                                                                          ),
+                                                                        ),
+                                                                      ],
+                                                                    ),
+                                                                  ],
+                                                                ],
+                                                              ),
+                                                            ),
+                                                          );
+                                                        },
+                                                      ),
+
+                                                    // Baris Akhir: Upload Materi (Card Hitam Teks Putih Rata Kiri)
+                                                    if (widget.isOwner) ...[
+                                                      if (pdfItems.isNotEmpty)
+                                                        Divider(
+                                                          height: 1,
+                                                          thickness: 0.8,
+                                                          color: isDark ? Colors.white10 : const Color(0xFFBAE6FD).withValues(alpha: 0.40),
+                                                        ),
+                                                      Padding(
+                                                        padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 10.0),
+                                                        child: Align(
+                                                          alignment: Alignment.centerLeft,
+                                                          child: GestureDetector(
+                                                            onTap: () => _showCreateMateriDialog(context, mIdx, stages),
+                                                            behavior: HitTestBehavior.opaque,
+                                                            child: Container(
+                                                              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+                                                              decoration: BoxDecoration(
+                                                                color: isDark ? const Color(0xFF27272A) : const Color(0xFF0F172A),
+                                                                borderRadius: BorderRadius.circular(16),
+                                                              ),
+                                                              child: Text(
+                                                                'Upload Materi',
+                                                                style: GoogleFonts.plusJakartaSans(
+                                                                  fontSize: 12,
+                                                                  fontWeight: FontWeight.w800,
+                                                                  color: Colors.white,
+                                                                ),
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ],
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                          const SizedBox(height: 8),
+                                        ],
+
+                                        // C. CARD QUIZ (Soft Lilac/Purple dengan Baris Buat Quiz di Akhir)
+                                        if (quizItems.isNotEmpty || widget.isOwner) ...[
+                                          Container(
+                                            clipBehavior: Clip.antiAlias,
+                                            width: double.infinity,
+                                            decoration: BoxDecoration(
+                                              color: isDark ? const Color(0xFF1A1226) : const Color(0xFFF3E8FF),
+                                              borderRadius: BorderRadius.circular(22),
+                                            ),
+                                            child: Stack(
+                                              children: [
+                                                Positioned.fill(
+                                                  child: CustomPaint(
+                                                    painter: _QuizFacetPatternPainter(isDark: isDark),
+                                                  ),
+                                                ),
+                                                Column(
+                                                  mainAxisSize: MainAxisSize.min,
+                                                  children: [
+                                                    if (quizItems.isNotEmpty)
+                                                      ListView.separated(
+                                                        shrinkWrap: true,
+                                                        physics: const NeverScrollableScrollPhysics(),
+                                                        itemCount: quizItems.length,
+                                                        padding: EdgeInsets.zero,
+                                                        separatorBuilder: (context, index) => Divider(
+                                                          height: 1,
+                                                          thickness: 0.8,
+                                                          color: isDark ? Colors.white10 : const Color(0xFFE9D5FF).withValues(alpha: 0.40),
+                                                        ),
+                                                        itemBuilder: (context, idx) {
+                                                          final task = quizItems[idx];
+                                                          final int tIdx = task['_origIdx'] as int;
+                                                          final String originalTitle = task['title'] ?? 'Kuis Harian';
+                                                          final questions = task['questions'] as List? ?? [];
+                                                          final questionCount = questions.length;
+                                                          final bool isLocked = task['isLocked'] == true;
+                                                          final bool isClosed = task['isClosed'] == true;
+
+                                                          final startStr = (task['startDate'] ?? task['startTime'] ?? task['start'] ?? '').toString().trim();
+                                                          final endStr = (task['endDate'] ?? task['endTime'] ?? task['deadline'] ?? task['end'] ?? '').toString().trim();
+                                                          String quizPeriodText = '';
+                                                          if (startStr.isNotEmpty && endStr.isNotEmpty) {
+                                                            quizPeriodText = '$startStr - $endStr';
+                                                          } else if (endStr.isNotEmpty) {
+                                                            quizPeriodText = 'Sampai $endStr';
+                                                          } else if (startStr.isNotEmpty) {
+                                                            quizPeriodText = 'Mulai $startStr';
+                                                          } else {
+                                                            quizPeriodText = 'Hari ini';
+                                                          }
+
+                                                          return InkWell(
+                                                            onTap: () {
+                                                              if (widget.isOwner) {
+                                                                _showEditQuizDialog(context, mIdx, tIdx, stages, task);
+                                                              }
+                                                            },
+                                                            child: Padding(
+                                                              padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 10.0),
+                                                              child: Row(
+                                                                crossAxisAlignment: CrossAxisAlignment.center,
+                                                                children: [
+                                                                  // Ikon Quiz SVG di SEBELAH KIRI (Matching Nav & Todo 1 2 3 Podium)
+                                                                  SizedBox(
+                                                                    width: 28,
+                                                                    height: 28,
+                                                                    child: Center(
+                                                                      child: SvgPicture.string(
+                                                                        '''<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                                          <!-- Step 1 (Tingkat 1 - Rendah) -->
+                                                                          <rect x="2.5" y="13.5" width="5.5" height="8" rx="2" fill="${isDark ? '#D8B4FE' : '#7E22CE'}"/>
+                                                                          <path d="M4.5 16.5l1-0.8v4.3" stroke="${isDark ? '#1E162B' : '#FFFFFF'}" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+
+                                                                          <!-- Step 2 (Tingkat 2 - Sedang) -->
+                                                                          <rect x="9.25" y="8.5" width="5.5" height="13" rx="2" fill="${isDark ? '#C084FC' : '#9333EA'}"/>
+                                                                          <path d="M10.8 11.2c.2-.5.7-.8 1.2-.8.7 0 1.2.4 1.2 1 0 .7-.5 1.1-1.1 1.6l-1.3 1.2h2.4" stroke="#FFFFFF" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+
+                                                                          <!-- Step 3 (Tingkat 3 - Tinggi) -->
+                                                                          <rect x="16" y="3.5" width="5.5" height="18" rx="2" fill="${isDark ? '#D8B4FE' : '#7E22CE'}"/>
+                                                                          <path d="M17.6 6.2h2.2l-1.1 1.6c.7 0 1.2.4 1.2 1 0 .7-.6 1.2-1.3 1.2-.6 0-1-.3-1.2-.7" stroke="${isDark ? '#1E162B' : '#FFFFFF'}" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+                                                                        </svg>''',
+                                                                        width: 22,
+                                                                        height: 22,
+                                                                      ),
+                                                                    ),
+                                                                  ),
+                                                                  const SizedBox(width: 10),
+
+                                                                  // Info Quiz (Tengah)
+                                                                  Expanded(
+                                                                    child: Column(
+                                                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                                                      children: [
+                                                                        Text(
+                                                                          originalTitle,
+                                                                          style: AppTypography.cardTitle(
+                                                                            color: isDark ? Colors.white : Colors.black87,
+                                                                            fontWeight: FontWeight.w700,
+                                                                          ),
+                                                                          maxLines: 1,
+                                                                          overflow: TextOverflow.ellipsis,
+                                                                        ),
+                                                                        const SizedBox(height: 3),
+                                                                        Wrap(
+                                                                          crossAxisAlignment: WrapCrossAlignment.center,
+                                                                          spacing: 6,
+                                                                          runSpacing: 3,
+                                                                          children: [
+                                                                            Container(
+                                                                              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 1.5),
+                                                                              decoration: BoxDecoration(
+                                                                                color: isDark
+                                                                                    ? Colors.white.withValues(alpha: 0.12)
+                                                                                    : Colors.white.withValues(alpha: 0.65),
+                                                                                borderRadius: BorderRadius.circular(6),
+                                                                              ),
+                                                                              child: Text(
+                                                                                'Quiz',
+                                                                                style: GoogleFonts.plusJakartaSans(
+                                                                                  fontSize: 11,
+                                                                                  fontWeight: FontWeight.w700,
+                                                                                  color: isDark ? const Color(0xFFE9D5FF) : const Color(0xFF7E22CE),
+                                                                                ),
+                                                                              ),
+                                                                            ),
+                                                                            Row(
+                                                                              mainAxisSize: MainAxisSize.min,
+                                                                              children: [
+                                                                                Icon(
+                                                                                  Icons.access_time_rounded,
+                                                                                  size: 13,
+                                                                                  color: isDark ? Colors.white38 : Colors.black45,
+                                                                                ),
+                                                                                const SizedBox(width: 3),
+                                                                                Text(
+                                                                                  quizPeriodText,
+                                                                                  style: AppTypography.timestamp(
+                                                                                    color: isDark ? Colors.white38 : Colors.black45,
+                                                                                    fontWeight: FontWeight.w600,
+                                                                                  ),
+                                                                                ),
+                                                                              ],
+                                                                            ),
+                                                                            Text(
+                                                                              '• $questionCount Soal',
+                                                                              style: AppTypography.timestamp(
+                                                                                color: isDark ? Colors.white38 : Colors.black45,
+                                                                                fontWeight: FontWeight.w600,
+                                                                              ),
+                                                                            ),
+                                                                          ],
+                                                                        ),
+                                                                      ],
+                                                                    ),
+                                                                  ),
+
+                                                                  // Sisi Kanan: Aksi Guru (Baris 1: Tutup & Lock, Baris 2: Hapus Rata Kanan)
+                                                                  if (widget.isOwner) ...[
+                                                                    const SizedBox(width: 6),
+                                                                    Column(
+                                                                      mainAxisSize: MainAxisSize.min,
+                                                                      crossAxisAlignment: CrossAxisAlignment.end,
+                                                                      children: [
+                                                                        Row(
+                                                                          mainAxisSize: MainAxisSize.min,
+                                                                          children: [
+                                                                            GestureDetector(
+                                                                              onTap: () => _toggleTaskClosed(stages, mIdx, tIdx),
+                                                                              behavior: HitTestBehavior.opaque,
+                                                                              child: Padding(
+                                                                                padding: const EdgeInsets.all(3),
+                                                                                child: Icon(
+                                                                                  isClosed ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                                                                                  size: 16,
+                                                                                  color: isClosed
+                                                                                      ? (isDark ? const Color(0xFFF87171) : const Color(0xFFEF4444))
+                                                                                      : (isDark ? Colors.white60 : const Color(0xFF64748B)),
+                                                                                ),
+                                                                              ),
+                                                                            ),
+                                                                            const SizedBox(width: 2),
+                                                                            GestureDetector(
+                                                                              onTap: () => _toggleTaskLock(stages, mIdx, tIdx),
+                                                                              behavior: HitTestBehavior.opaque,
+                                                                              child: Padding(
+                                                                                padding: const EdgeInsets.all(3),
+                                                                                child: Icon(
+                                                                                  isLocked ? Icons.lock_outline_rounded : Icons.lock_open_rounded,
+                                                                                  size: 16,
+                                                                                  color: isLocked
+                                                                                      ? (isDark ? const Color(0xFFFBBF24) : const Color(0xFFD97706))
+                                                                                      : (isDark ? Colors.white60 : const Color(0xFF64748B)),
+                                                                                ),
+                                                                              ),
+                                                                            ),
+                                                                          ],
+                                                                        ),
+                                                                        const SizedBox(height: 2),
+                                                                        GestureDetector(
+                                                                          onTap: () => _confirmDeleteTask(context, stages, mIdx, tIdx, originalTitle),
+                                                                          behavior: HitTestBehavior.opaque,
+                                                                          child: const Padding(
+                                                                            padding: EdgeInsets.all(3),
+                                                                            child: Icon(
+                                                                              Icons.delete_outline_rounded,
+                                                                              size: 16,
+                                                                              color: Color(0xFFEF4444),
+                                                                            ),
+                                                                          ),
+                                                                        ),
+                                                                      ],
+                                                                    ),
+                                                                  ],
+                                                                ],
+                                                              ),
+                                                            ),
+                                                          );
+                                                        },
+                                                      ),
+
+                                                    // Baris Akhir: Buat Quiz (Card Hitam Teks Putih Rata Kiri)
+                                                    if (widget.isOwner) ...[
+                                                      if (quizItems.isNotEmpty)
+                                                        Divider(
+                                                          height: 1,
+                                                          thickness: 0.8,
+                                                          color: isDark ? Colors.white10 : const Color(0xFFE9D5FF).withValues(alpha: 0.40),
+                                                        ),
+                                                      Padding(
+                                                        padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 10.0),
+                                                        child: Align(
+                                                          alignment: Alignment.centerLeft,
+                                                          child: GestureDetector(
+                                                            onTap: () => _showCreateQuizDialog(context, mIdx, stages),
+                                                            behavior: HitTestBehavior.opaque,
+                                                            child: Container(
+                                                              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+                                                              decoration: BoxDecoration(
+                                                                color: isDark ? const Color(0xFF27272A) : const Color(0xFF0F172A),
+                                                                borderRadius: BorderRadius.circular(16),
+                                                              ),
+                                                              child: Text(
+                                                                'Buat Quiz',
+                                                                style: GoogleFonts.plusJakartaSans(
+                                                                  fontSize: 12,
+                                                                  fontWeight: FontWeight.w800,
+                                                                  color: Colors.white,
+                                                                ),
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ],
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
+                                      ],
+                                    ],
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  // 2. Sticky Glassmorphic Header Bar (Transparan Glassmorphic Blur - Muncul saat di-scroll > 60px)
+                  Positioned(
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    child: ValueListenableBuilder<double>(
+                      valueListenable: _scrollOffsetNotifier,
+                      builder: (context, scrollOffset, _) {
+                        if (scrollOffset <= 60.0) {
+                          return const SizedBox.shrink();
+                        }
+                        final double scrollProgress = ((scrollOffset - 60.0) / 40.0).clamp(0.0, 1.0);
+                        final double blurSigma = 20.0 * scrollProgress;
+
+                        return Opacity(
+                          opacity: scrollProgress,
+                          child: ClipRect(
+                            child: BackdropFilter(
+                              filter: ui.ImageFilter.blur(
+                                sigmaX: blurSigma > 0.1 ? blurSigma : 0.001,
+                                sigmaY: blurSigma > 0.1 ? blurSigma : 0.001,
+                              ),
+                              child: Container(
+                                width: double.infinity,
+                                padding: EdgeInsets.fromLTRB(
+                                  16,
+                                  MediaQuery.of(context).padding.top + 8.0,
+                                  16,
+                                  10.0,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: isDark
+                                      ? const Color(0xFF000000).withValues(alpha: 0.85 * scrollProgress)
+                                      : Colors.white.withValues(alpha: 0.90 * scrollProgress),
+                                  border: Border(
+                                    bottom: BorderSide(
+                                      color: (isDark
+                                              ? const Color(0xFF27272A)
+                                              : const Color(0xFFF1F5F9))
+                                          .withValues(alpha: 0.9 * scrollProgress),
+                                      width: 1.0,
+                                    ),
+                                  ),
+                                ),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    // Single Row: ← + Judul CP (2 baris) + Ikon Proses (lingkaran) + Ikon Edit (lingkaran)
+                                    Row(
+                                      crossAxisAlignment: CrossAxisAlignment.center,
+                                      children: [
+                                        // Tombol Kembali
+                                        GestureDetector(
+                                          onTap: () => Navigator.pop(context),
+                                          behavior: HitTestBehavior.opaque,
+                                          child: Container(
+                                            width: 36,
+                                            height: 36,
+                                            alignment: Alignment.centerLeft,
+                                            decoration: const BoxDecoration(
+                                              color: Colors.transparent,
+                                            ),
+                                            child: Icon(
+                                              Icons.arrow_back_rounded,
+                                              color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                              size: 24,
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(width: 10),
+
+                                        // Judul CP (2 baris max)
+                                        Expanded(
+                                          child: Text(
+                                            stageName,
+                                            maxLines: 2,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: GoogleFonts.plusJakartaSans(
+                                              fontSize: 16.0,
+                                              fontWeight: FontWeight.w800,
+                                              color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                              height: 1.25,
+                                              letterSpacing: -0.3,
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(width: 10),
+
+                                        // Ikon Status Proses (Lingkaran)
+                                        _buildStickyStatusIcon(stageStatus, isDark, stages),
+
+                                        // Ikon Mode Edit (Lingkaran)
+                                        if (widget.isOwner) ...[
+                                          const SizedBox(width: 8),
+                                          _isEditMode
+                                              ? GestureDetector(
+                                                  onTap: () {
+                                                    _saveAllEdits(_cachedStages);
+                                                    setState(() {
+                                                      _isEditMode = false;
+                                                    });
+                                                  },
+                                                  behavior: HitTestBehavior.opaque,
+                                                  child: Container(
+                                                    width: 36,
+                                                    height: 36,
+                                                    decoration: BoxDecoration(
+                                                      color: const Color(0xFF10B981).withValues(alpha: 0.15),
+                                                      shape: BoxShape.circle,
+                                                    ),
+                                                    child: const Center(
+                                                      child: Icon(
+                                                        Icons.check_rounded,
+                                                        color: Color(0xFF10B981),
+                                                        size: 20,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                )
+                                              : GestureDetector(
+                                                  onTap: () {
+                                                    setState(() {
+                                                      _isEditMode = true;
+                                                    });
+                                                  },
+                                                  behavior: HitTestBehavior.opaque,
+                                                  child: Container(
+                                                    width: 36,
+                                                    height: 36,
+                                                    decoration: BoxDecoration(
+                                                      color: isDark ? const Color(0xFF27272A) : const Color(0xFF1E293B),
+                                                      shape: BoxShape.circle,
+                                                      border: isDark
+                                                          ? Border.all(color: const Color(0xFF3F3F46), width: 1.0)
+                                                          : null,
+                                                    ),
+                                                    child: const Center(
+                                                      child: Icon(
+                                                        Icons.edit_rounded,
+                                                        color: Colors.white,
+                                                        size: 18,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                        ],
+                                      ],
+                                    ),
+                                    const SizedBox(height: 12),
+
+                                    // Row 2: Materi Pembelajaran & Tambah Materi
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text(
+                                          'Materi Pembelajaran',
+                                          style: AppTypography.chatHeaderTitle(
+                                            color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                            fontWeight: FontWeight.w800,
+                                          ),
+                                        ),
+                                        if (widget.isOwner)
+                                          GestureDetector(
+                                            onTap: () => _showAddMateriDialog(context, stages),
+                                            behavior: HitTestBehavior.opaque,
+                                            child: Container(
+                                              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+                                              decoration: BoxDecoration(
+                                                color: isDark ? const Color(0xFF27272A) : const Color(0xFF0F172A),
+                                                borderRadius: BorderRadius.circular(20),
+                                              ),
+                                              child: Text(
+                                                'Tambah Materi',
+                                                style: GoogleFonts.plusJakartaSans(
+                                                  color: Colors.white,
+                                                  fontSize: 12,
+                                                  fontWeight: FontWeight.w800,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                      ],
                                     ),
                                   ],
-                                ],
+                                ),
                               ),
                             ),
-                          );
-                        },
-                      ),
-                  ],
-                ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
               );
             },
           );
         },
       ),
     );
+  }
+  Future<void> _toggleTaskLock(List currentStages, int mIdx, int tIdx) async {
+    final updatedStages = List.from(currentStages);
+    if (widget.stageIdx >= updatedStages.length) return;
+    final stage = Map<String, dynamic>.from(updatedStages[widget.stageIdx] as Map);
+    final List rawMateris = stage['materis'] as List? ?? [];
+    final List<Map<String, dynamic>> materis = List<Map<String, dynamic>>.from(
+      rawMateris.map((m) => Map<String, dynamic>.from(m as Map)),
+    );
+    if (mIdx < materis.length) {
+      final List rawTasks = materis[mIdx]['tasks'] as List? ?? [];
+      final List<Map<String, dynamic>> tasks = List<Map<String, dynamic>>.from(
+        rawTasks.map((t) => Map<String, dynamic>.from(t as Map)),
+      );
+      if (tIdx < tasks.length) {
+        final isLocked = tasks[tIdx]['isLocked'] == true;
+        tasks[tIdx]['isLocked'] = !isLocked;
+        materis[mIdx]['tasks'] = tasks;
+        stage['materis'] = materis;
+        updatedStages[widget.stageIdx] = stage;
+
+        await FirebaseFirestore.instance
+            .collection('projects')
+            .doc(widget.projectId)
+            .update({'stages': updatedStages});
+      }
+    }
+  }
+
+  Future<void> _toggleTaskClosed(List currentStages, int mIdx, int tIdx) async {
+    final updatedStages = List.from(currentStages);
+    if (widget.stageIdx >= updatedStages.length) return;
+    final stage = Map<String, dynamic>.from(updatedStages[widget.stageIdx] as Map);
+    final List rawMateris = stage['materis'] as List? ?? [];
+    final List<Map<String, dynamic>> materis = List<Map<String, dynamic>>.from(
+      rawMateris.map((m) => Map<String, dynamic>.from(m as Map)),
+    );
+    if (mIdx < materis.length) {
+      final List rawTasks = materis[mIdx]['tasks'] as List? ?? [];
+      final List<Map<String, dynamic>> tasks = List<Map<String, dynamic>>.from(
+        rawTasks.map((t) => Map<String, dynamic>.from(t as Map)),
+      );
+      if (tIdx < tasks.length) {
+        final isClosed = tasks[tIdx]['isClosed'] == true;
+        tasks[tIdx]['isClosed'] = !isClosed;
+        materis[mIdx]['tasks'] = tasks;
+        stage['materis'] = materis;
+        updatedStages[widget.stageIdx] = stage;
+
+        await FirebaseFirestore.instance
+            .collection('projects')
+            .doc(widget.projectId)
+            .update({'stages': updatedStages});
+      }
+    }
   }
 
   Future<void> _toggleTaskDone(List stages, int mIdx, int tIdx) async {
@@ -896,34 +2029,23 @@ class _DetailCpPageState extends State<DetailCpPage> {
 
   Widget _buildStatusBadge(String status, bool isDark, List stages) {
     String displayLabel = 'Proses';
-    // Status Mobile Match: Proses = Kuning/Orange, Selesai = Hijau, Akan Datang = Abu
-    Color statusBg = isDark ? const Color(0xFF451A03) : const Color(0xFFFEF3C7);
-    Color statusFg = isDark ? const Color(0xFFFBBF24) : const Color(0xFFD97706);
+    Color statusBg = isDark ? const Color(0xFFC76D10) : const Color(0xFFF7BD84);
+    const Color statusFg = Color(0xFF0F172A);
 
     if (status == 'selesai' || status == 'Selesai') {
       displayLabel = 'Selesai';
-      statusBg = isDark ? const Color(0xFF064E3B) : const Color(0xFFD1FAE5);
-      statusFg = isDark ? const Color(0xFF34D399) : const Color(0xFF059669);
+      statusBg = isDark ? const Color(0xFF147D75) : const Color(0xFF7DE3D0);
     } else if (status == 'akan_datang' || status == 'Akan Datang') {
       displayLabel = 'Akan Datang';
-      statusBg = isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9);
-      statusFg = isDark ? const Color(0xFFA1A1AA) : const Color(0xFF475569);
-    } else {
-      displayLabel = 'Proses';
-      statusBg = isDark ? const Color(0xFF451A03) : const Color(0xFFFEF3C7);
-      statusFg = isDark ? const Color(0xFFFBBF24) : const Color(0xFFD97706);
+      statusBg = isDark ? const Color(0xFF3F3F46) : const Color(0xFFE2E8F0);
     }
 
     if (!widget.isOwner) {
       return Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
         decoration: BoxDecoration(
           color: statusBg,
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: isDark ? Colors.white12 : Colors.white.withValues(alpha: 0.8),
-            width: 1.0,
-          ),
         ),
         child: Text(
           displayLabel,
@@ -933,15 +2055,14 @@ class _DetailCpPageState extends State<DetailCpPage> {
     }
 
     return PopupMenuButton<String>(
-      tooltip: 'Pilih Status Elemen',
+      tooltip: '',
       offset: const Offset(0, 36),
-      color: isDark ? const Color(0xFF1E1E24) : Colors.white,
-      elevation: 6,
-      shadowColor: Colors.black.withValues(alpha: 0.12),
+      color: isDark ? const Color(0xFF101012) : Colors.white,
+      elevation: 4,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(14),
         side: BorderSide(
-          color: isDark ? const Color(0xFF2E2E36) : const Color(0xFFE2E8F0),
+          color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
           width: 1.0,
         ),
       ),
@@ -961,87 +2082,237 @@ class _DetailCpPageState extends State<DetailCpPage> {
       itemBuilder: (BuildContext context) => [
         PopupMenuItem<String>(
           value: 'proses',
-          height: 38,
+          height: 32,
           padding: EdgeInsets.zero,
           child: Container(
-            height: 38,
+            height: 32,
             alignment: Alignment.centerLeft,
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 12),
             decoration: BoxDecoration(
               border: Border(
                 bottom: BorderSide(
-                  color: isDark ? const Color(0xFF2E2E36) : const Color(0xFFF1F5F9),
+                  color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
                   width: 1,
                 ),
               ),
             ),
             child: Text(
               'Proses',
-              style: AppTypography.buttonLabel(color: isDark ? Colors.white : const Color(0xFF0F172A), fontWeight: FontWeight.bold),
+              style: AppTypography.buttonLabel(
+                color: isDark ? Colors.white : const Color(0xFF0F172A),
+                fontWeight: FontWeight.w700,
+              ),
             ),
           ),
         ),
         PopupMenuItem<String>(
           value: 'selesai',
-          height: 38,
+          height: 32,
           padding: EdgeInsets.zero,
           child: Container(
-            height: 38,
+            height: 32,
             alignment: Alignment.centerLeft,
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 12),
             decoration: BoxDecoration(
               border: Border(
                 bottom: BorderSide(
-                  color: isDark ? const Color(0xFF2E2E36) : const Color(0xFFF1F5F9),
+                  color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
                   width: 1,
                 ),
               ),
             ),
             child: Text(
               'Selesai',
-              style: AppTypography.buttonLabel(color: isDark ? Colors.white : const Color(0xFF0F172A), fontWeight: FontWeight.bold),
+              style: AppTypography.buttonLabel(
+                color: isDark ? Colors.white : const Color(0xFF0F172A),
+                fontWeight: FontWeight.w700,
+              ),
             ),
           ),
         ),
         PopupMenuItem<String>(
           value: 'akan_datang',
-          height: 38,
+          height: 32,
           padding: EdgeInsets.zero,
           child: Container(
-            height: 38,
+            height: 32,
             alignment: Alignment.centerLeft,
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 12),
             child: Text(
               'Akan Datang',
-              style: AppTypography.buttonLabel(color: isDark ? Colors.white : const Color(0xFF0F172A), fontWeight: FontWeight.bold),
+              style: AppTypography.buttonLabel(
+                color: isDark ? Colors.white : const Color(0xFF0F172A),
+                fontWeight: FontWeight.w700,
+              ),
             ),
           ),
         ),
       ],
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
         decoration: BoxDecoration(
           color: statusBg,
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: isDark ? Colors.white12 : Colors.white.withValues(alpha: 0.8),
-            width: 1.0,
-          ),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
               displayLabel,
-              style: AppTypography.buttonLabel(color: statusFg, fontWeight: FontWeight.bold),
+              style: AppTypography.buttonLabel(
+                color: statusFg,
+                fontWeight: FontWeight.bold,
+              ),
             ),
-            const SizedBox(width: 4),
-            Icon(
-              Icons.arrow_drop_down_rounded,
+            const SizedBox(width: 3),
+            const Icon(
+              Icons.keyboard_arrow_down_rounded,
+              size: 16,
               color: statusFg,
-              size: 18,
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStickyStatusIcon(String status, bool isDark, List stages) {
+    Color statusBg = isDark ? const Color(0xFFC76D10) : const Color(0xFFF7BD84);
+    IconData statusIcon = Icons.timelapse_rounded;
+
+    if (status == 'selesai' || status == 'Selesai') {
+      statusBg = isDark ? const Color(0xFF147D75) : const Color(0xFF7DE3D0);
+      statusIcon = Icons.check_circle_rounded;
+    } else if (status == 'akan_datang' || status == 'Akan Datang') {
+      statusBg = isDark ? const Color(0xFF3F3F46) : const Color(0xFFE2E8F0);
+      statusIcon = Icons.schedule_rounded;
+    }
+
+    if (!widget.isOwner) {
+      return Container(
+        width: 36,
+        height: 36,
+        decoration: BoxDecoration(
+          color: statusBg,
+          shape: BoxShape.circle,
+        ),
+        child: Center(
+          child: Icon(
+            statusIcon,
+            color: const Color(0xFF0F172A),
+            size: 18,
+          ),
+        ),
+      );
+    }
+
+    return PopupMenuButton<String>(
+      tooltip: '',
+      offset: const Offset(0, 40),
+      color: isDark ? const Color(0xFF101012) : Colors.white,
+      elevation: 4,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(14),
+        side: BorderSide(
+          color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+          width: 1.0,
+        ),
+      ),
+      onSelected: (String newValue) async {
+        final updatedStages = List.from(stages);
+        if (widget.stageIdx < updatedStages.length) {
+          final s = Map<String, dynamic>.from(updatedStages[widget.stageIdx] as Map);
+          s['status'] = newValue;
+          updatedStages[widget.stageIdx] = s;
+          await FirebaseFirestore.instance
+              .collection('projects')
+              .doc(widget.projectId)
+              .update({'stages': updatedStages});
+          setState(() {});
+        }
+      },
+      itemBuilder: (BuildContext context) => [
+        PopupMenuItem<String>(
+          value: 'proses',
+          height: 32,
+          padding: EdgeInsets.zero,
+          child: Container(
+            height: 32,
+            alignment: Alignment.centerLeft,
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            decoration: BoxDecoration(
+              border: Border(
+                bottom: BorderSide(
+                  color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+                  width: 1,
+                ),
+              ),
+            ),
+            child: Text(
+              'Proses',
+              style: AppTypography.buttonLabel(
+                color: isDark ? Colors.white : const Color(0xFF0F172A),
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+        ),
+        PopupMenuItem<String>(
+          value: 'selesai',
+          height: 32,
+          padding: EdgeInsets.zero,
+          child: Container(
+            height: 32,
+            alignment: Alignment.centerLeft,
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            decoration: BoxDecoration(
+              border: Border(
+                bottom: BorderSide(
+                  color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+                  width: 1,
+                ),
+              ),
+            ),
+            child: Text(
+              'Selesai',
+              style: AppTypography.buttonLabel(
+                color: isDark ? Colors.white : const Color(0xFF0F172A),
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+        ),
+        PopupMenuItem<String>(
+          value: 'akan_datang',
+          height: 32,
+          padding: EdgeInsets.zero,
+          child: Container(
+            height: 32,
+            alignment: Alignment.centerLeft,
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            child: Text(
+              'Akan Datang',
+              style: AppTypography.buttonLabel(
+                color: isDark ? Colors.white : const Color(0xFF0F172A),
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+        ),
+      ],
+      child: Container(
+        width: 36,
+        height: 36,
+        decoration: BoxDecoration(
+          color: statusBg,
+          shape: BoxShape.circle,
+        ),
+        child: Center(
+          child: Icon(
+            statusIcon,
+            color: const Color(0xFF0F172A),
+            size: 18,
+          ),
         ),
       ),
     );
@@ -1099,120 +2370,6 @@ class _DetailCpPageState extends State<DetailCpPage> {
     );
   }
 
-  void _showAddTaskChoice(BuildContext context, int materiIdx, List currentStages) {
-    final bool isDark = AppColors.isDarkMode;
-
-    showGeneralDialog(
-      context: context,
-      barrierDismissible: true,
-      barrierLabel: 'Tutup',
-      barrierColor: Colors.black.withValues(alpha: isDark ? 0.75 : 0.55),
-      transitionDuration: const Duration(milliseconds: 550),
-      pageBuilder: (dialogCtx, anim1, anim2) {
-        return const SizedBox.shrink();
-      },
-      transitionBuilder: (dialogCtx, animation, secondaryAnimation, child) {
-        final bounceCurve = CurvedAnimation(
-          parent: animation,
-          curve: Curves.elasticOut,
-          reverseCurve: Curves.easeInCubic,
-        );
-
-        return BackdropFilter(
-          filter: ImageFilter.blur(
-            sigmaX: 8 * animation.value,
-            sigmaY: 8 * animation.value,
-          ),
-          child: Center(
-            child: ScaleTransition(
-              scale: bounceCurve,
-              child: Material(
-                color: Colors.transparent,
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    // 1. Tugas (Deep Blue / Pastel Blue)
-                    _buildFramelessCircleItem(
-                      label: 'Tugas',
-                      icon: Icons.assignment_outlined,
-                      circleBg: isDark ? const Color(0xFF2864A8) : const Color(0xFF9CC8FC),
-                      contentFg: isDark ? Colors.white : const Color(0xFF1E3A8A),
-                      onTap: () {
-                        Navigator.pop(dialogCtx);
-                        _showCreateTugasDialog(context, materiIdx, currentStages);
-                      },
-                    ),
-                    const SizedBox(width: 18),
-                    // 2. Quiz (Deep Orange / Pastel Orange)
-                    _buildFramelessCircleItem(
-                      label: 'Quiz',
-                      icon: Icons.quiz_outlined,
-                      circleBg: isDark ? const Color(0xFFC76D10) : const Color(0xFFF7BD84),
-                      contentFg: isDark ? Colors.white : const Color(0xFF7C2D12),
-                      onTap: () {
-                        Navigator.pop(dialogCtx);
-                        _showCreateQuizDialog(context, materiIdx, currentStages);
-                      },
-                    ),
-                    const SizedBox(width: 18),
-                    // 3. Materi (Deep Tosca / Pastel Tosca)
-                    _buildFramelessCircleItem(
-                      label: 'Materi',
-                      icon: Icons.menu_book_rounded,
-                      circleBg: isDark ? const Color(0xFF147D75) : const Color(0xFF7DE3D0),
-                      contentFg: isDark ? Colors.white : const Color(0xFF064E3B),
-                      onTap: () {
-                        Navigator.pop(dialogCtx);
-                        _showCreateMateriDialog(context, materiIdx, currentStages);
-                      },
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildFramelessCircleItem({
-    required String label,
-    required IconData icon,
-    required Color circleBg,
-    required Color contentFg,
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 86,
-        height: 86,
-        decoration: BoxDecoration(
-          color: circleBg,
-          shape: BoxShape.circle,
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Icon(
-              icon,
-              size: 26,
-              color: contentFg,
-            ),
-            const SizedBox(height: 3),
-            Text(
-              label,
-              style: AppTypography.buttonLabel(color: contentFg, fontWeight: FontWeight.w800, letterSpacing: -0.2),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   void _showEditTaskDialog(BuildContext context, int materiIdx, int taskIdx, List currentStages, Map<String, dynamic> task) {
     final String type = task['type'] ?? 'tugas';
     if (type == 'quiz') {
@@ -1228,24 +2385,62 @@ class _DetailCpPageState extends State<DetailCpPage> {
   // 1. POPUP FORM BUAT / EDIT TUGAS (EXACT DESKTOP CLASSROOM MATCH)
   // -------------------------------------------------------------
   void _showCreateTugasDialog(BuildContext context, int initialMateriIdx, List currentStages) {
-    _openTaskDialog(context, currentStages, initialMateriIdx: initialMateriIdx);
+    openTaskPage(
+      context,
+      currentStages,
+      initialMateriIdx: initialMateriIdx,
+      customProjectId: widget.projectId,
+      customProjectTitle: widget.projectTitle,
+      customStageIdx: widget.stageIdx,
+      customIsOwner: widget.isOwner,
+      customAccentColor: widget.accentColor,
+      customCardColor: widget.cardColor,
+      openFromClassPage: false,
+    );
   }
 
   void _showEditTugasDialog(BuildContext context, int materiIdx, int taskIdx, List currentStages, Map<String, dynamic> task) {
-    _openTaskDialog(context, currentStages, initialMateriIdx: materiIdx, taskToEdit: task, taskIdxToEdit: taskIdx);
+    openTaskPage(
+      context,
+      currentStages,
+      initialMateriIdx: materiIdx,
+      taskToEdit: task,
+      taskIdxToEdit: taskIdx,
+      customProjectId: widget.projectId,
+      customProjectTitle: widget.projectTitle,
+      customStageIdx: widget.stageIdx,
+      customIsOwner: widget.isOwner,
+      customAccentColor: widget.accentColor,
+      customCardColor: widget.cardColor,
+      openFromClassPage: false,
+    );
   }
 
-  void _openTaskDialog(
+  static void openTaskPage(
     BuildContext context,
     List stages, {
     int initialMateriIdx = 0,
     Map<String, dynamic>? taskToEdit,
     int? taskIdxToEdit,
+    bool openFromClassPage = false,
+    String? customProjectId,
+    String? customProjectTitle,
+    int? customStageIdx,
+    bool? customIsOwner,
+    Color? customAccentColor,
+    Color? customCardColor,
   }) {
     if (stages.isEmpty) return;
 
+    final String activeProjectId = customProjectId ?? '';
+    final String activeProjectTitle = customProjectTitle ?? '';
+    final bool activeIsOwner = customIsOwner ?? false;
+    final Color activeAccentColor = customAccentColor ?? const Color(0xFFEA580C);
+    final Color activeCardColor = customCardColor ?? const Color(0xFF1E293B);
+    final int baseStageIdx = customStageIdx ?? 0;
+
     final bool isEditMode = taskToEdit != null;
-    int selectedStageIdx = widget.stageIdx < stages.length ? widget.stageIdx : 0;
+    int selectedStageIdx = baseStageIdx < stages.length ? baseStageIdx : 0;
     int selectedMateriIdx = initialMateriIdx;
 
     int countTugas = 0;
@@ -1301,156 +2496,167 @@ class _DetailCpPageState extends State<DetailCpPage> {
 
     bool isSubmitting = false;
 
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (dialogCtx) {
-        final screenHeight = MediaQuery.of(dialogCtx).size.height;
-        final screenWidth = MediaQuery.of(dialogCtx).size.width;
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        fullscreenDialog: true,
+        builder: (dialogCtx) {
+          final screenHeight = MediaQuery.of(dialogCtx).size.height;
+          final screenWidth = MediaQuery.of(dialogCtx).size.width;
 
-        return StatefulBuilder(
-          builder: (ctx, setDialogState) {
-            final isDark = AppColors.isDarkMode;
-            final stageMap = stages[selectedStageIdx] as Map;
-            final List materis = stageMap['materis'] as List? ?? [];
-            if (selectedMateriIdx >= materis.length) {
-              selectedMateriIdx = materis.isNotEmpty ? 0 : 0;
-            }
-
-            Future<void> submitTask() async {
-              if (isSubmitting) return;
-              final title = titleController.text.trim();
-              if (title.isEmpty) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Judul tidak boleh kosong!'),
-                    backgroundColor: Colors.redAccent,
-                  ),
-                );
-                return;
+          return StatefulBuilder(
+            builder: (ctx, setDialogState) {
+              final isDark = AppColors.isDarkMode;
+              final stageMap = stages[selectedStageIdx] as Map;
+              final List materis = stageMap['materis'] as List? ?? [];
+              if (selectedMateriIdx >= materis.length) {
+                selectedMateriIdx = materis.isNotEmpty ? 0 : 0;
               }
 
-              final startStr = startDateController.text.trim();
-              final endStr = endDateController.text.trim();
-
-              Map<String, dynamic> extraData = {};
-              String docName = '';
-
-              if (tugasMode == 'pdf') {
-                docName = taskPdfController.text.trim().isNotEmpty
-                    ? taskPdfController.text.trim()
-                    : 'tugas_soal.pdf';
-                extraData = {
-                  'assignmentType': assignmentType,
-                  'tugasMode': 'pdf',
-                  'tugasText': taskTextController.text.trim(),
-                };
-              } else {
-                extraData = {
-                  'tugasText': taskTextController.text.trim(),
-                  'assignmentType': assignmentType,
-                  'tugasMode': 'text',
-                };
-                docName = taskTextController.text.trim();
-              }
-
-              final newTask = {
-                'id': isEditMode ? (taskToEdit['id'] ?? 'task_${DateTime.now().millisecondsSinceEpoch}') : 'task_${DateTime.now().millisecondsSinceEpoch}',
-                'type': 'tugas',
-                'title': title,
-                'startDate': startStr,
-                'endDate': endStr,
-                'doc': docName,
-                'docName': docName,
-                'assignmentType': assignmentType,
-                'tugasText': taskTextController.text.trim(),
-                'extraData': extraData,
-                'submissions': isEditMode ? (taskToEdit['submissions'] ?? []) : [],
-                'isDone': isEditMode ? (taskToEdit['isDone'] ?? false) : false,
-                'progress': isEditMode ? (taskToEdit['progress'] ?? 0) : 0,
-              };
-
-              setDialogState(() => isSubmitting = true);
-
-              final List updatedStages = List.from(stages);
-              final Map targetStage = Map.from(updatedStages[selectedStageIdx] as Map);
-              final List targetMateris = List.from(targetStage['materis'] as List? ?? []);
-
-              if (selectedMateriIdx < targetMateris.length) {
-                final Map targetMateri = Map.from(targetMateris[selectedMateriIdx] as Map);
-                final List currentMateriTasks = List.from(targetMateri['tasks'] as List? ?? []);
-
-                if (isEditMode) {
-                  if (taskIdxToEdit != null && taskIdxToEdit < currentMateriTasks.length) {
-                    currentMateriTasks[taskIdxToEdit] = newTask;
-                  } else {
-                    final int tIdx = currentMateriTasks.indexWhere((t) => t['id'] == taskToEdit['id']);
-                    if (tIdx != -1) {
-                      currentMateriTasks[tIdx] = newTask;
-                    } else {
-                      currentMateriTasks.add(newTask);
-                    }
-                  }
-                } else {
-                  currentMateriTasks.add(newTask);
+              Future<void> submitTask() async {
+                if (isSubmitting) return;
+                final title = titleController.text.trim();
+                if (title.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Judul tidak boleh kosong!'),
+                      backgroundColor: Colors.redAccent,
+                    ),
+                  );
+                  return;
                 }
 
-                targetMateri['tasks'] = currentMateriTasks;
-                targetMateris[selectedMateriIdx] = targetMateri;
-                targetStage['materis'] = targetMateris;
-                updatedStages[selectedStageIdx] = targetStage;
+                final startStr = startDateController.text.trim();
+                final endStr = endDateController.text.trim();
 
-                await FirebaseFirestore.instance
-                    .collection('projects')
-                    .doc(widget.projectId)
-                    .update({'stages': updatedStages});
-              }
+                Map<String, dynamic> extraData = {};
+                String docName = '';
 
-              if (dialogCtx.mounted) {
-                Navigator.pop(dialogCtx);
-              }
-            }
+                if (tugasMode == 'pdf') {
+                  docName = taskPdfController.text.trim().isNotEmpty
+                      ? taskPdfController.text.trim()
+                      : 'tugas_soal.pdf';
+                  extraData = {
+                    'assignmentType': assignmentType,
+                    'tugasMode': 'pdf',
+                    'tugasText': taskTextController.text.trim(),
+                  };
+                } else {
+                  extraData = {
+                    'tugasText': taskTextController.text.trim(),
+                    'assignmentType': assignmentType,
+                    'tugasMode': 'text',
+                  };
+                  docName = taskTextController.text.trim();
+                }
 
-            return Dialog(
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
-              clipBehavior: Clip.antiAlias,
-              backgroundColor: isDark ? const Color(0xFF1C1C1E) : Colors.white,
-              insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-              child: Container(
-                width: screenWidth > 680 ? 640 : screenWidth * 0.94,
-                constraints: BoxConstraints(maxHeight: screenHeight * 0.88),
-                decoration: BoxDecoration(
-                  color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
-                  borderRadius: BorderRadius.circular(28),
-                ),
-                child: Column(
-                  children: [
-                    // Header Atas Persis Jadwal Pembelajaran (Overlay Blue Theme)
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.fromLTRB(20, 20, 16, 16),
-                      decoration: BoxDecoration(
-                        color: isDark ? const Color(0xFF2864A8) : const Color(0xFF9CC8FC), // Matching Tugas
-                        border: Border(
-                          bottom: BorderSide(
-                            color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
-                            width: 1.0,
-                          ),
+                final newTask = {
+                  'id': isEditMode ? (taskToEdit['id'] ?? 'task_${DateTime.now().millisecondsSinceEpoch}') : 'task_${DateTime.now().millisecondsSinceEpoch}',
+                  'type': 'tugas',
+                  'title': title,
+                  'startDate': startStr,
+                  'endDate': endStr,
+                  'doc': docName,
+                  'docName': docName,
+                  'assignmentType': assignmentType,
+                  'tugasText': taskTextController.text.trim(),
+                  'extraData': extraData,
+                  'submissions': isEditMode ? (taskToEdit['submissions'] ?? []) : [],
+                  'isDone': isEditMode ? (taskToEdit['isDone'] ?? false) : false,
+                  'progress': isEditMode ? (taskToEdit['progress'] ?? 0) : 0,
+                };
+
+                setDialogState(() => isSubmitting = true);
+
+                final List updatedStages = List.from(stages);
+                final Map targetStage = Map.from(updatedStages[selectedStageIdx] as Map);
+                final List targetMateris = List.from(targetStage['materis'] as List? ?? []);
+
+                if (selectedMateriIdx < targetMateris.length) {
+                  final Map targetMateri = Map.from(targetMateris[selectedMateriIdx] as Map);
+                  final List currentMateriTasks = List.from(targetMateri['tasks'] as List? ?? []);
+
+                  if (isEditMode) {
+                    if (taskIdxToEdit != null && taskIdxToEdit < currentMateriTasks.length) {
+                      currentMateriTasks[taskIdxToEdit] = newTask;
+                    } else {
+                      final int tIdx = currentMateriTasks.indexWhere((t) => t['id'] == taskToEdit['id']);
+                      if (tIdx != -1) {
+                        currentMateriTasks[tIdx] = newTask;
+                      } else {
+                        currentMateriTasks.add(newTask);
+                      }
+                    }
+                  } else {
+                    currentMateriTasks.add(newTask);
+                  }
+
+                  targetMateri['tasks'] = currentMateriTasks;
+                  targetMateris[selectedMateriIdx] = targetMateri;
+                  targetStage['materis'] = targetMateris;
+                  updatedStages[selectedStageIdx] = targetStage;
+
+                  await FirebaseFirestore.instance
+                      .collection('projects')
+                      .doc(activeProjectId)
+                      .update({'stages': updatedStages});
+                }
+
+                if (dialogCtx.mounted) {
+                  if (openFromClassPage) {
+                    Navigator.pushReplacement(
+                      dialogCtx,
+                      MaterialPageRoute(
+                        builder: (_) => DetailCpPage(
+                          projectId: activeProjectId,
+                          projectTitle: activeProjectTitle,
+                          stageIdx: selectedStageIdx,
+                          isOwner: activeIsOwner,
+                          accentColor: activeAccentColor,
+                          cardColor: activeCardColor,
                         ),
                       ),
-                      child: Row(
+                    );
+                  } else {
+                    Navigator.pop(dialogCtx);
+                  }
+                }
+              }
+
+              return Scaffold(
+                backgroundColor: isDark ? const Color(0xFF141416) : const Color(0xFFF8FAFC),
+                body: SafeArea(
+                  child: Column(
+                    children: [
+                      // Header Atas Full Page (Transparan Blur Glassmorphic)
+                      ClipRect(
+                        child: BackdropFilter(
+                          filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+                          child: Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+                            decoration: BoxDecoration(
+                              color: (isDark ? const Color(0xFF1E1B16) : const Color(0xFFFFEDD5)).withValues(alpha: isDark ? 0.90 : 0.85),
+                              border: Border(
+                                bottom: BorderSide(
+                                  color: isDark ? Colors.white12 : const Color(0xFFE2E8F0),
+                                  width: 1.0,
+                                ),
+                              ),
+                            ),
+                          child: Row(
                         children: [
                           Container(
                             width: 42,
                             height: 42,
-                            decoration: const BoxDecoration(
-                              color: Colors.white,
+                            decoration: BoxDecoration(
+                              color: isDark ? const Color(0xFF2B1D11) : Colors.white,
                               shape: BoxShape.circle,
                             ),
-                            child: const Center(
+                            child: Center(
                               child: Icon(
                                 Icons.assignment_rounded,
-                                color: Colors.black,
+                                color: isDark ? const Color(0xFFFDBA74) : const Color(0xFFEA580C),
                                 size: 22,
                               ),
                             ),
@@ -1499,6 +2705,8 @@ class _DetailCpPageState extends State<DetailCpPage> {
                         ],
                       ),
                     ),
+                  ),
+                ),
 
                     // Form Body Lengkap with Floating Overlay Action Button
                     Expanded(
@@ -1516,7 +2724,7 @@ class _DetailCpPageState extends State<DetailCpPage> {
                             ),
                             const SizedBox(height: 6),
                             PopupMenuButton<int>(
-                              tooltip: 'Pilih Elemen',
+                              tooltip: '',
                               offset: const Offset(0, 48),
                               color: isDark ? const Color(0xFF1E1E24) : Colors.white,
                               elevation: 6,
@@ -1596,7 +2804,7 @@ class _DetailCpPageState extends State<DetailCpPage> {
                             ),
                             const SizedBox(height: 6),
                             PopupMenuButton<int>(
-                              tooltip: 'Pilih Materi',
+                              tooltip: '',
                               offset: const Offset(0, 48),
                               color: isDark ? const Color(0xFF1E1E24) : Colors.white,
                               elevation: 6,
@@ -1953,7 +3161,7 @@ class _DetailCpPageState extends State<DetailCpPage> {
                           child: Container(
                             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7.5),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF2563EB),
+                              color: const Color(0xFFEA580C),
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: Row(
@@ -1980,6 +3188,7 @@ class _DetailCpPageState extends State<DetailCpPage> {
       },
     );
   },
+),
 );
 }
 
@@ -1987,24 +3196,62 @@ class _DetailCpPageState extends State<DetailCpPage> {
   // 2. POPUP FORM BUAT / EDIT QUIZ (EXACT DESKTOP CLASSROOM MATCH)
   // -------------------------------------------------------------
   void _showCreateQuizDialog(BuildContext context, int initialMateriIdx, List currentStages) {
-    _openQuizDialog(context, currentStages, initialMateriIdx: initialMateriIdx);
+    openQuizPage(
+      context,
+      currentStages,
+      initialMateriIdx: initialMateriIdx,
+      customProjectId: widget.projectId,
+      customProjectTitle: widget.projectTitle,
+      customStageIdx: widget.stageIdx,
+      customIsOwner: widget.isOwner,
+      customAccentColor: widget.accentColor,
+      customCardColor: widget.cardColor,
+      openFromClassPage: false,
+    );
   }
 
   void _showEditQuizDialog(BuildContext context, int materiIdx, int taskIdx, List currentStages, Map<String, dynamic> task) {
-    _openQuizDialog(context, currentStages, initialMateriIdx: materiIdx, taskToEdit: task, taskIdxToEdit: taskIdx);
+    openQuizPage(
+      context,
+      currentStages,
+      initialMateriIdx: materiIdx,
+      taskToEdit: task,
+      taskIdxToEdit: taskIdx,
+      customProjectId: widget.projectId,
+      customProjectTitle: widget.projectTitle,
+      customStageIdx: widget.stageIdx,
+      customIsOwner: widget.isOwner,
+      customAccentColor: widget.accentColor,
+      customCardColor: widget.cardColor,
+      openFromClassPage: false,
+    );
   }
 
-  void _openQuizDialog(
+  static void openQuizPage(
     BuildContext context,
     List stages, {
     int initialMateriIdx = 0,
     Map<String, dynamic>? taskToEdit,
-int? taskIdxToEdit,
+    int? taskIdxToEdit,
+    bool openFromClassPage = false,
+    String? customProjectId,
+    String? customProjectTitle,
+    int? customStageIdx,
+    bool? customIsOwner,
+    Color? customAccentColor,
+    Color? customCardColor,
   }) {
     if (stages.isEmpty) return;
 
+    final String activeProjectId = customProjectId ?? '';
+    final String activeProjectTitle = customProjectTitle ?? '';
+    final bool activeIsOwner = customIsOwner ?? false;
+    final Color activeAccentColor = customAccentColor ?? const Color(0xFF9333EA);
+    final Color activeCardColor = customCardColor ?? const Color(0xFF1E293B);
+    final int baseStageIdx = customStageIdx ?? 0;
+
     final bool isEditMode = taskToEdit != null;
-    int selectedStageIdx = widget.stageIdx < stages.length ? widget.stageIdx : 0;
+    int selectedStageIdx = baseStageIdx < stages.length ? baseStageIdx : 0;
     int selectedMateriIdx = initialMateriIdx;
 
     int countQuiz = 0;
@@ -2083,140 +3330,151 @@ int? taskIdxToEdit,
 
     bool isSubmitting = false;
 
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (dialogCtx) {
-        final screenHeight = MediaQuery.of(dialogCtx).size.height;
-        final screenWidth = MediaQuery.of(dialogCtx).size.width;
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        fullscreenDialog: true,
+        builder: (dialogCtx) {
+          final screenHeight = MediaQuery.of(dialogCtx).size.height;
+          final screenWidth = MediaQuery.of(dialogCtx).size.width;
 
-        return StatefulBuilder(
-          builder: (ctx, setDialogState) {
-            final isDark = AppColors.isDarkMode;
-            final stageMap = stages[selectedStageIdx] as Map;
-            final List materis = stageMap['materis'] as List? ?? [];
-            if (selectedMateriIdx >= materis.length) {
-              selectedMateriIdx = materis.isNotEmpty ? 0 : 0;
-            }
-
-            Future<void> submitQuiz() async {
-              if (isSubmitting) return;
-              final title = titleController.text.trim();
-              if (title.isEmpty) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Judul tidak boleh kosong!'),
-                    backgroundColor: Colors.redAccent,
-                  ),
-                );
-                return;
+          return StatefulBuilder(
+            builder: (ctx, setDialogState) {
+              final isDark = AppColors.isDarkMode;
+              final stageMap = stages[selectedStageIdx] as Map;
+              final List materis = stageMap['materis'] as List? ?? [];
+              if (selectedMateriIdx >= materis.length) {
+                selectedMateriIdx = materis.isNotEmpty ? 0 : 0;
               }
 
-              final startStr = startDateController.text.trim();
-              final endStr = endDateController.text.trim();
-
-              final extraData = {
-                'quizTimeMode': quizTimeMode,
-                'quizTimeType': quizTimeType,
-                'quizTimeDuration': quizTimeController.text.trim(),
-                'questions': questionsList,
-              };
-
-              final newQuiz = {
-                'id': isEditMode ? (taskToEdit['id'] ?? 'quiz_${DateTime.now().millisecondsSinceEpoch}') : 'quiz_${DateTime.now().millisecondsSinceEpoch}',
-                'type': 'quiz',
-                'title': title,
-                'startDate': startStr,
-                'endDate': endStr,
-                'duration': int.tryParse(quizTimeController.text.trim()) ?? 15,
-                'questions': questionsList,
-                'extraData': extraData,
-                'submissions': isEditMode ? (taskToEdit['submissions'] ?? []) : [],
-                'isDone': isEditMode ? (taskToEdit['isDone'] ?? false) : false,
-                'progress': isEditMode ? (taskToEdit['progress'] ?? 0) : 0,
-              };
-
-              setDialogState(() => isSubmitting = true);
-
-              final List updatedStages = List.from(stages);
-              final Map targetStage = Map.from(updatedStages[selectedStageIdx] as Map);
-              final List targetMateris = List.from(targetStage['materis'] as List? ?? []);
-
-              if (selectedMateriIdx < targetMateris.length) {
-                final Map targetMateri = Map.from(targetMateris[selectedMateriIdx] as Map);
-                final List currentMateriTasks = List.from(targetMateri['tasks'] as List? ?? []);
-
-                if (isEditMode) {
-                  if (taskIdxToEdit != null && taskIdxToEdit < currentMateriTasks.length) {
-                    currentMateriTasks[taskIdxToEdit] = newQuiz;
-                  } else {
-                    final int tIdx = currentMateriTasks.indexWhere((t) => t['id'] == taskToEdit['id']);
-                    if (tIdx != -1) {
-                      currentMateriTasks[tIdx] = newQuiz;
-                    } else {
-                      currentMateriTasks.add(newQuiz);
-                    }
-                  }
-                } else {
-                  currentMateriTasks.add(newQuiz);
+              Future<void> submitQuiz() async {
+                if (isSubmitting) return;
+                final title = titleController.text.trim();
+                if (title.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Judul tidak boleh kosong!'),
+                      backgroundColor: Colors.redAccent,
+                    ),
+                  );
+                  return;
                 }
 
-                targetMateri['tasks'] = currentMateriTasks;
-                targetMateris[selectedMateriIdx] = targetMateri;
-                targetStage['materis'] = targetMateris;
-                updatedStages[selectedStageIdx] = targetStage;
+                final startStr = startDateController.text.trim();
+                final endStr = endDateController.text.trim();
 
-                await FirebaseFirestore.instance
-                    .collection('projects')
-                    .doc(widget.projectId)
-                    .update({'stages': updatedStages});
-              }
+                final extraData = {
+                  'quizTimeMode': quizTimeMode,
+                  'quizTimeType': quizTimeType,
+                  'quizTimeDuration': quizTimeController.text.trim(),
+                  'questions': questionsList,
+                };
 
-              if (dialogCtx.mounted) {
-                Navigator.pop(dialogCtx);
-              }
-            }
+                final newQuiz = {
+                  'id': isEditMode ? (taskToEdit['id'] ?? 'quiz_${DateTime.now().millisecondsSinceEpoch}') : 'quiz_${DateTime.now().millisecondsSinceEpoch}',
+                  'type': 'quiz',
+                  'title': title,
+                  'startDate': startStr,
+                  'endDate': endStr,
+                  'duration': int.tryParse(quizTimeController.text.trim()) ?? 15,
+                  'questions': questionsList,
+                  'extraData': extraData,
+                  'submissions': isEditMode ? (taskToEdit['submissions'] ?? []) : [],
+                  'isDone': isEditMode ? (taskToEdit['isDone'] ?? false) : false,
+                  'progress': isEditMode ? (taskToEdit['progress'] ?? 0) : 0,
+                };
 
-            return Dialog(
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
-              clipBehavior: Clip.antiAlias,
-              backgroundColor: isDark ? const Color(0xFF1C1C1E) : Colors.white,
-              insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-              child: Container(
-                width: screenWidth > 680 ? 640 : screenWidth * 0.94,
-                constraints: BoxConstraints(maxHeight: screenHeight * 0.88),
-                decoration: BoxDecoration(
-                  color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
-                  borderRadius: BorderRadius.circular(28),
-                ),
-                child: Column(
-                  children: [
-                    // Header Atas Persis Jadwal Pembelajaran (Overlay Quiz Peach/Orange Theme)
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.fromLTRB(20, 20, 16, 16),
-                      decoration: BoxDecoration(
-                        color: isDark ? const Color(0xFFC76D10) : const Color(0xFFF7BD84), // Matching Quiz
-                        border: Border(
-                          bottom: BorderSide(
-                            color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
-                            width: 1.0,
-                          ),
+                setDialogState(() => isSubmitting = true);
+
+                final List updatedStages = List.from(stages);
+                final Map targetStage = Map.from(updatedStages[selectedStageIdx] as Map);
+                final List targetMateris = List.from(targetStage['materis'] as List? ?? []);
+
+                if (selectedMateriIdx < targetMateris.length) {
+                  final Map targetMateri = Map.from(targetMateris[selectedMateriIdx] as Map);
+                  final List currentMateriTasks = List.from(targetMateri['tasks'] as List? ?? []);
+
+                  if (isEditMode) {
+                    if (taskIdxToEdit != null && taskIdxToEdit < currentMateriTasks.length) {
+                      currentMateriTasks[taskIdxToEdit] = newQuiz;
+                    } else {
+                      final int tIdx = currentMateriTasks.indexWhere((t) => t['id'] == taskToEdit['id']);
+                      if (tIdx != -1) {
+                        currentMateriTasks[tIdx] = newQuiz;
+                      } else {
+                        currentMateriTasks.add(newQuiz);
+                      }
+                    }
+                  } else {
+                    currentMateriTasks.add(newQuiz);
+                  }
+
+                  targetMateri['tasks'] = currentMateriTasks;
+                  targetMateris[selectedMateriIdx] = targetMateri;
+                  targetStage['materis'] = targetMateris;
+                  updatedStages[selectedStageIdx] = targetStage;
+
+                  await FirebaseFirestore.instance
+                      .collection('projects')
+                      .doc(activeProjectId)
+                      .update({'stages': updatedStages});
+                }
+
+                if (dialogCtx.mounted) {
+                  if (openFromClassPage) {
+                    Navigator.pushReplacement(
+                      dialogCtx,
+                      MaterialPageRoute(
+                        builder: (_) => DetailCpPage(
+                          projectId: activeProjectId,
+                          projectTitle: activeProjectTitle,
+                          stageIdx: selectedStageIdx,
+                          isOwner: activeIsOwner,
+                          accentColor: activeAccentColor,
+                          cardColor: activeCardColor,
                         ),
                       ),
-                      child: Row(
+                    );
+                  } else {
+                    Navigator.pop(dialogCtx);
+                  }
+                }
+              }
+
+              return Scaffold(
+                backgroundColor: isDark ? const Color(0xFF141416) : const Color(0xFFF8FAFC),
+                body: SafeArea(
+                  child: Column(
+                    children: [
+                      // Header Atas Full Page (Transparan Blur Glassmorphic)
+                      ClipRect(
+                        child: BackdropFilter(
+                          filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+                          child: Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+                            decoration: BoxDecoration(
+                              color: (isDark ? const Color(0xFF1A1226) : const Color(0xFFF3E8FF)).withValues(alpha: isDark ? 0.90 : 0.85),
+                              border: Border(
+                                bottom: BorderSide(
+                                  color: isDark ? Colors.white12 : const Color(0xFFE2E8F0),
+                                  width: 1.0,
+                                ),
+                              ),
+                            ),
+                          child: Row(
                         children: [
                           Container(
                             width: 42,
                             height: 42,
-                            decoration: const BoxDecoration(
-                              color: Colors.white,
+                            decoration: BoxDecoration(
+                              color: isDark ? const Color(0xFF2E1A47) : Colors.white,
                               shape: BoxShape.circle,
                             ),
-                            child: const Center(
+                            child: Center(
                               child: Icon(
                                 Icons.quiz_rounded,
-                                color: Colors.black,
+                                color: isDark ? const Color(0xFFD8B4FE) : const Color(0xFF9333EA),
                                 size: 22,
                               ),
                             ),
@@ -2265,6 +3523,8 @@ int? taskIdxToEdit,
                         ],
                       ),
                     ),
+                  ),
+                ),
 
                     // Form Body Lengkap with Floating Overlay (Preview & Perbarui)
                     Expanded(
@@ -2282,7 +3542,7 @@ int? taskIdxToEdit,
                             ),
                             const SizedBox(height: 6),
                             PopupMenuButton<int>(
-                              tooltip: 'Pilih Elemen',
+                              tooltip: '',
                               offset: const Offset(0, 48),
                               color: isDark ? const Color(0xFF1E1E24) : Colors.white,
                               elevation: 6,
@@ -2362,7 +3622,7 @@ int? taskIdxToEdit,
                             ),
                             const SizedBox(height: 6),
                             PopupMenuButton<int>(
-                              tooltip: 'Pilih Materi',
+                              tooltip: '',
                               offset: const Offset(0, 48),
                               color: isDark ? const Color(0xFF1E1E24) : Colors.white,
                               elevation: 6,
@@ -2974,7 +4234,7 @@ int? taskIdxToEdit,
                                     ? quizTimeController.text.trim()
                                     : '15';
                                 final currentUid = FirebaseAuth.instance.currentUser?.uid ?? '';
-                                final cpCardBg = widget.cardColor;
+                                final cpCardBg = activeCardColor;
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
@@ -2982,7 +4242,7 @@ int? taskIdxToEdit,
                                       title: title,
                                       durationStr: durationStr,
                                       startTime: startDateController.text.trim(),
-                                      projectId: widget.projectId,
+                                      projectId: activeProjectId,
                                       studentUid: currentUid,
                                       taskKey: 'preview_${DateTime.now().millisecondsSinceEpoch}',
                                       onCompleted: () {},
@@ -3002,11 +4262,11 @@ int? taskIdxToEdit,
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    const Icon(Icons.play_arrow_rounded, color: Color(0xFFD97706), size: 16),
+                                    const Icon(Icons.play_arrow_rounded, color: Color(0xFF9333EA), size: 16),
                                     const SizedBox(width: 3),
                                     Text(
                                       'Preview',
-                                      style: AppTypography.buttonLabel(color: const Color(0xFFD97706), fontWeight: FontWeight.bold),
+                                      style: AppTypography.buttonLabel(color: const Color(0xFF9333EA), fontWeight: FontWeight.bold),
                                     ),
                                   ],
                                 ),
@@ -3018,7 +4278,7 @@ int? taskIdxToEdit,
                               child: Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7.5),
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFFD97706),
+                                  color: const Color(0xFF9333EA),
                                   borderRadius: BorderRadius.circular(20),
                                 ),
                                 child: Row(
@@ -3047,31 +4307,70 @@ int? taskIdxToEdit,
           },
         );
       },
-    );
-  }
+    ),
+  );
+}
 
   // -------------------------------------------------------------
   // 3. POPUP FORM BUAT / EDIT MATERI (EXACT DESKTOP CLASSROOM MATCH)
   // -------------------------------------------------------------
   void _showCreateMateriDialog(BuildContext context, int initialMateriIdx, List currentStages) {
-    _openMateriItemDialog(context, currentStages, initialMateriIdx: initialMateriIdx);
+    openMateriItemPage(
+      context,
+      currentStages,
+      initialMateriIdx: initialMateriIdx,
+      customProjectId: widget.projectId,
+      customProjectTitle: widget.projectTitle,
+      customStageIdx: widget.stageIdx,
+      customIsOwner: widget.isOwner,
+      customAccentColor: widget.accentColor,
+      customCardColor: widget.cardColor,
+      openFromClassPage: false,
+    );
   }
 
   void _showEditMateriItemDialog(BuildContext context, int materiIdx, int taskIdx, List currentStages, Map<String, dynamic> task) {
-    _openMateriItemDialog(context, currentStages, initialMateriIdx: materiIdx, taskToEdit: task, taskIdxToEdit: taskIdx);
+    openMateriItemPage(
+      context,
+      currentStages,
+      initialMateriIdx: materiIdx,
+      taskToEdit: task,
+      taskIdxToEdit: taskIdx,
+      customProjectId: widget.projectId,
+      customProjectTitle: widget.projectTitle,
+      customStageIdx: widget.stageIdx,
+      customIsOwner: widget.isOwner,
+      customAccentColor: widget.accentColor,
+      customCardColor: widget.cardColor,
+      openFromClassPage: false,
+    );
   }
 
-  void _openMateriItemDialog(
+  static void openMateriItemPage(
     BuildContext context,
     List stages, {
     int initialMateriIdx = 0,
     Map<String, dynamic>? taskToEdit,
     int? taskIdxToEdit,
+    bool openFromClassPage = false,
+    String? customProjectId,
+    String? customProjectTitle,
+    int? customStageIdx,
+    bool? customIsOwner,
+    Color? customAccentColor,
+    Color? customCardColor,
   }) {
     if (stages.isEmpty) return;
 
+    final String activeProjectId = customProjectId ?? '';
+    final String activeProjectTitle = customProjectTitle ?? '';
+    final bool activeIsOwner = customIsOwner ?? false;
+    final Color activeAccentColor = customAccentColor ?? const Color(0xFF0284C7);
+    final Color activeCardColor = customCardColor ?? const Color(0xFF1E293B);
+    final int baseStageIdx = customStageIdx ?? 0;
+
     final bool isEditMode = taskToEdit != null;
-    int selectedStageIdx = widget.stageIdx < stages.length ? widget.stageIdx : 0;
+    int selectedStageIdx = baseStageIdx < stages.length ? baseStageIdx : 0;
     int selectedMateriIdx = initialMateriIdx;
 
     int countMateri = 0;
@@ -3093,129 +4392,140 @@ int? taskIdxToEdit,
 
     bool isSubmitting = false;
 
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (dialogCtx) {
-        final screenHeight = MediaQuery.of(dialogCtx).size.height;
-        final screenWidth = MediaQuery.of(dialogCtx).size.width;
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        fullscreenDialog: true,
+        builder: (dialogCtx) {
+          final screenHeight = MediaQuery.of(dialogCtx).size.height;
+          final screenWidth = MediaQuery.of(dialogCtx).size.width;
 
-        return StatefulBuilder(
-          builder: (ctx, setDialogState) {
-            final isDark = AppColors.isDarkMode;
-            final stageMap = stages[selectedStageIdx] as Map;
-            final List materis = stageMap['materis'] as List? ?? [];
-            if (selectedMateriIdx >= materis.length) {
-              selectedMateriIdx = materis.isNotEmpty ? 0 : 0;
-            }
-
-            Future<void> submitMateri() async {
-              if (isSubmitting) return;
-              final title = titleController.text.trim();
-              if (title.isEmpty) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Judul materi tidak boleh kosong!'),
-                    backgroundColor: Colors.redAccent,
-                  ),
-                );
-                return;
+          return StatefulBuilder(
+            builder: (ctx, setDialogState) {
+              final isDark = AppColors.isDarkMode;
+              final stageMap = stages[selectedStageIdx] as Map;
+              final List materis = stageMap['materis'] as List? ?? [];
+              if (selectedMateriIdx >= materis.length) {
+                selectedMateriIdx = materis.isNotEmpty ? 0 : 0;
               }
 
-              final String docName = docController.text.trim();
-
-              final newTask = {
-                'id': isEditMode ? (taskToEdit['id'] ?? 'task_${DateTime.now().millisecondsSinceEpoch}') : 'task_${DateTime.now().millisecondsSinceEpoch}',
-                'type': 'pdf',
-                'title': title,
-                'doc': docName,
-                'docName': docName,
-                'content': descController.text.trim(),
-                'isDone': isEditMode ? (taskToEdit['isDone'] ?? false) : false,
-                'progress': isEditMode ? (taskToEdit['progress'] ?? 0) : 0,
-              };
-
-              setDialogState(() => isSubmitting = true);
-
-              final List updatedStages = List.from(stages);
-              final Map targetStage = Map.from(updatedStages[selectedStageIdx] as Map);
-              final List targetMateris = List.from(targetStage['materis'] as List? ?? []);
-
-              if (selectedMateriIdx < targetMateris.length) {
-                final Map targetMateri = Map.from(targetMateris[selectedMateriIdx] as Map);
-                final List currentMateriTasks = List.from(targetMateri['tasks'] as List? ?? []);
-
-                if (isEditMode) {
-                  if (taskIdxToEdit != null && taskIdxToEdit < currentMateriTasks.length) {
-                    currentMateriTasks[taskIdxToEdit] = newTask;
-                  } else {
-                    final int tIdx = currentMateriTasks.indexWhere((t) => t['id'] == taskToEdit['id']);
-                    if (tIdx != -1) {
-                      currentMateriTasks[tIdx] = newTask;
-                    } else {
-                      currentMateriTasks.add(newTask);
-                    }
-                  }
-                } else {
-                  currentMateriTasks.add(newTask);
+              Future<void> submitMateri() async {
+                if (isSubmitting) return;
+                final title = titleController.text.trim();
+                if (title.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Judul materi tidak boleh kosong!'),
+                      backgroundColor: Colors.redAccent,
+                    ),
+                  );
+                  return;
                 }
 
-                targetMateri['tasks'] = currentMateriTasks;
-                targetMateris[selectedMateriIdx] = targetMateri;
-                targetStage['materis'] = targetMateris;
-                updatedStages[selectedStageIdx] = targetStage;
+                final String docName = docController.text.trim();
 
-                await FirebaseFirestore.instance
-                    .collection('projects')
-                    .doc(widget.projectId)
-                    .update({'stages': updatedStages});
-              }
+                final newTask = {
+                  'id': isEditMode ? (taskToEdit['id'] ?? 'task_${DateTime.now().millisecondsSinceEpoch}') : 'task_${DateTime.now().millisecondsSinceEpoch}',
+                  'type': 'pdf',
+                  'title': title,
+                  'doc': docName,
+                  'docName': docName,
+                  'content': descController.text.trim(),
+                  'isDone': isEditMode ? (taskToEdit['isDone'] ?? false) : false,
+                  'progress': isEditMode ? (taskToEdit['progress'] ?? 0) : 0,
+                };
 
-              if (dialogCtx.mounted) {
-                Navigator.pop(dialogCtx);
-              }
-            }
+                setDialogState(() => isSubmitting = true);
 
-            return Dialog(
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
-              clipBehavior: Clip.antiAlias,
-              backgroundColor: isDark ? const Color(0xFF1C1C1E) : Colors.white,
-              insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-              child: Container(
-                width: screenWidth > 680 ? 640 : screenWidth * 0.94,
-                constraints: BoxConstraints(maxHeight: screenHeight * 0.88),
-                decoration: BoxDecoration(
-                  color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
-                  borderRadius: BorderRadius.circular(28),
-                ),
-                child: Column(
-                  children: [
-                    // Header Atas Persis Jadwal Pembelajaran (Overlay Materi Mint/Tosca Theme)
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.fromLTRB(20, 20, 16, 16),
-                      decoration: BoxDecoration(
-                        color: isDark ? const Color(0xFF147D75) : const Color(0xFF7DE3D0), // Matching Materi
-                        border: Border(
-                          bottom: BorderSide(
-                            color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
-                            width: 1.0,
-                          ),
+                final List updatedStages = List.from(stages);
+                final Map targetStage = Map.from(updatedStages[selectedStageIdx] as Map);
+                final List targetMateris = List.from(targetStage['materis'] as List? ?? []);
+
+                if (selectedMateriIdx < targetMateris.length) {
+                  final Map targetMateri = Map.from(targetMateris[selectedMateriIdx] as Map);
+                  final List currentMateriTasks = List.from(targetMateri['tasks'] as List? ?? []);
+
+                  if (isEditMode) {
+                    if (taskIdxToEdit != null && taskIdxToEdit < currentMateriTasks.length) {
+                      currentMateriTasks[taskIdxToEdit] = newTask;
+                    } else {
+                      final int tIdx = currentMateriTasks.indexWhere((t) => t['id'] == taskToEdit['id']);
+                      if (tIdx != -1) {
+                        currentMateriTasks[tIdx] = newTask;
+                      } else {
+                        currentMateriTasks.add(newTask);
+                      }
+                    }
+                  } else {
+                    currentMateriTasks.add(newTask);
+                  }
+
+                  targetMateri['tasks'] = currentMateriTasks;
+                  targetMateris[selectedMateriIdx] = targetMateri;
+                  targetStage['materis'] = targetMateris;
+                  updatedStages[selectedStageIdx] = targetStage;
+
+                  await FirebaseFirestore.instance
+                      .collection('projects')
+                      .doc(activeProjectId)
+                      .update({'stages': updatedStages});
+                }
+
+                if (dialogCtx.mounted) {
+                  if (openFromClassPage) {
+                    Navigator.pushReplacement(
+                      dialogCtx,
+                      MaterialPageRoute(
+                        builder: (_) => DetailCpPage(
+                          projectId: activeProjectId,
+                          projectTitle: activeProjectTitle,
+                          stageIdx: selectedStageIdx,
+                          isOwner: activeIsOwner,
+                          accentColor: activeAccentColor,
+                          cardColor: activeCardColor,
                         ),
                       ),
-                      child: Row(
+                    );
+                  } else {
+                    Navigator.pop(dialogCtx);
+                  }
+                }
+              }
+
+              return Scaffold(
+                backgroundColor: isDark ? const Color(0xFF141416) : const Color(0xFFF8FAFC),
+                body: SafeArea(
+                  child: Column(
+                    children: [
+                      // Header Atas Full Page (Transparan Blur Glassmorphic)
+                      ClipRect(
+                        child: BackdropFilter(
+                          filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+                          child: Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+                            decoration: BoxDecoration(
+                              color: (isDark ? const Color(0xFF0F1C2E) : const Color(0xFFE0F2FE)).withValues(alpha: isDark ? 0.90 : 0.85),
+                              border: Border(
+                                bottom: BorderSide(
+                                  color: isDark ? Colors.white12 : const Color(0xFFE2E8F0),
+                                  width: 1.0,
+                                ),
+                              ),
+                            ),
+                          child: Row(
                         children: [
                           Container(
                             width: 42,
                             height: 42,
-                            decoration: const BoxDecoration(
-                              color: Colors.white,
+                            decoration: BoxDecoration(
+                              color: isDark ? const Color(0xFF102030) : Colors.white,
                               shape: BoxShape.circle,
                             ),
-                            child: const Center(
+                            child: Center(
                               child: Icon(
                                 Icons.menu_book_rounded,
-                                color: Colors.black,
+                                color: isDark ? const Color(0xFF7DD3FC) : const Color(0xFF0284C7),
                                 size: 22,
                               ),
                             ),
@@ -3264,6 +4574,8 @@ int? taskIdxToEdit,
                         ],
                       ),
                     ),
+                  ),
+                ),
 
                     // Form Body Lengkap with Floating Overlay (Perbarui/Simpan)
                     Expanded(
@@ -3281,7 +4593,7 @@ int? taskIdxToEdit,
                             ),
                             const SizedBox(height: 6),
                             PopupMenuButton<int>(
-                              tooltip: 'Pilih Elemen',
+                              tooltip: '',
                               offset: const Offset(0, 48),
                               color: isDark ? const Color(0xFF1E1E24) : Colors.white,
                               elevation: 6,
@@ -3361,7 +4673,7 @@ int? taskIdxToEdit,
                             ),
                             const SizedBox(height: 6),
                             PopupMenuButton<int>(
-                              tooltip: 'Pilih Materi',
+                              tooltip: '',
                               offset: const Offset(0, 48),
                               color: isDark ? const Color(0xFF1E1E24) : Colors.white,
                               elevation: 6,
@@ -3554,6 +4866,7 @@ int? taskIdxToEdit,
       },
     );
   },
+),
 );
 }
 
@@ -3674,3 +4987,132 @@ int? taskIdxToEdit,
     return false;
   }
 }
+
+class _QuizFacetPatternPainter extends CustomPainter {
+  final bool isDark;
+
+  const _QuizFacetPatternPainter({required this.isDark});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final double w = size.width;
+    final double h = size.height;
+    final Color basePatternColor = isDark ? Colors.black : Colors.white;
+
+    // Facet 1: Top-Right large corner polygon
+    final Path facet1 = Path()
+      ..moveTo(w * 0.58, 0)
+      ..lineTo(w, 0)
+      ..lineTo(w, h * 0.88)
+      ..lineTo(w * 0.76, h)
+      ..lineTo(w * 0.65, h * 0.42)
+      ..close();
+    final Paint p1 = Paint()
+      ..color = basePatternColor.withValues(alpha: isDark ? 0.09 : 0.18)
+      ..style = PaintingStyle.fill;
+    canvas.drawPath(facet1, p1);
+
+    // Facet 2: Angular top wedge / notch
+    final Path facet2 = Path()
+      ..moveTo(w * 0.58, 0)
+      ..lineTo(w * 0.78, 0)
+      ..lineTo(w * 0.68, h * 0.38)
+      ..lineTo(w * 0.48, h * 0.10)
+      ..close();
+    final Paint p2 = Paint()
+      ..color = basePatternColor.withValues(alpha: isDark ? 0.15 : 0.28)
+      ..style = PaintingStyle.fill;
+    canvas.drawPath(facet2, p2);
+
+    // Facet 3: Far right angled flank
+    final Path facet3 = Path()
+      ..moveTo(w * 0.78, 0)
+      ..lineTo(w, 0)
+      ..lineTo(w, h * 0.60)
+      ..lineTo(w * 0.80, h * 0.30)
+      ..close();
+    final Paint p3 = Paint()
+      ..color = basePatternColor.withValues(alpha: isDark ? 0.20 : 0.36)
+      ..style = PaintingStyle.fill;
+    canvas.drawPath(facet3, p3);
+
+    // Facet 4: Bottom right connecting shard
+    final Path facet4 = Path()
+      ..moveTo(w * 0.76, h)
+      ..lineTo(w, h * 0.88)
+      ..lineTo(w, h)
+      ..close();
+    final Paint p4 = Paint()
+      ..color = basePatternColor.withValues(alpha: isDark ? 0.13 : 0.24)
+      ..style = PaintingStyle.fill;
+    canvas.drawPath(facet4, p4);
+  }
+
+  @override
+  bool shouldRepaint(covariant _QuizFacetPatternPainter oldDelegate) =>
+      oldDelegate.isDark != isDark;
+}
+
+class _TaskFacetPatternPainter extends CustomPainter {
+  final bool isDark;
+
+  const _TaskFacetPatternPainter({required this.isDark});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final double w = size.width;
+    final double h = size.height;
+    final Color basePatternColor = isDark ? Colors.black : Colors.white;
+
+    // Shard 1: Diagonal sweep polygon
+    final Path shard1 = Path()
+      ..moveTo(w * 0.52, 0)
+      ..lineTo(w * 0.82, 0)
+      ..lineTo(w * 0.62, h)
+      ..lineTo(w * 0.42, h)
+      ..close();
+    final Paint p1 = Paint()
+      ..color = basePatternColor.withValues(alpha: isDark ? 0.08 : 0.16)
+      ..style = PaintingStyle.fill;
+    canvas.drawPath(shard1, p1);
+
+    // Shard 2: Top Right angular facet
+    final Path shard2 = Path()
+      ..moveTo(w * 0.76, 0)
+      ..lineTo(w, 0)
+      ..lineTo(w, h * 0.72)
+      ..lineTo(w * 0.70, h * 0.34)
+      ..close();
+    final Paint p2 = Paint()
+      ..color = basePatternColor.withValues(alpha: isDark ? 0.15 : 0.28)
+      ..style = PaintingStyle.fill;
+    canvas.drawPath(shard2, p2);
+
+    // Shard 3: Bottom right origami triangle
+    final Path shard3 = Path()
+      ..moveTo(w * 0.62, h)
+      ..lineTo(w, h * 0.62)
+      ..lineTo(w, h)
+      ..close();
+    final Paint p3 = Paint()
+      ..color = basePatternColor.withValues(alpha: isDark ? 0.12 : 0.22)
+      ..style = PaintingStyle.fill;
+    canvas.drawPath(shard3, p3);
+
+    // Shard 4: Left subtle accent notch
+    final Path shard4 = Path()
+      ..moveTo(0, h * 0.25)
+      ..lineTo(w * 0.14, h * 0.42)
+      ..lineTo(0, h * 0.62)
+      ..close();
+    final Paint p4 = Paint()
+      ..color = basePatternColor.withValues(alpha: isDark ? 0.06 : 0.12)
+      ..style = PaintingStyle.fill;
+    canvas.drawPath(shard4, p4);
+  }
+
+  @override
+  bool shouldRepaint(covariant _TaskFacetPatternPainter oldDelegate) =>
+      oldDelegate.isDark != isDark;
+}
+

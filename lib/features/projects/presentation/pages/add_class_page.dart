@@ -1,8 +1,9 @@
-import 'dart:convert';
 import 'dart:async';
-import 'dart:ui' as ui;
-import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'dart:math' as math;
+import 'dart:ui' as ui show ImageFilter, PointerDeviceKind;
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hubner/core/theme/app_typography.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -11,7 +12,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:hubner/features/home/presentation/pages/main_navigation_page.dart';
 import 'package:hubner/features/notifications/domain/notification_service.dart';
 import 'package:hubner/core/theme/app_colors.dart';
+import 'package:hubner/core/config/gemini_config.dart';
 import 'package:hubner/core/widgets/classroom_card_pattern_painter.dart';
+import 'package:hubner/core/widgets/bouncy_button.dart';
 
 class AddClassPage extends StatefulWidget {
   final Map<String, String>? registrationData;
@@ -29,11 +32,12 @@ class AddClassPage extends StatefulWidget {
   State<AddClassPage> createState() => _AddClassPageState();
 }
 
-class _AddClassPageState extends State<AddClassPage> {
+class _AddClassPageState extends State<AddClassPage> with SingleTickerProviderStateMixin {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _descController = TextEditingController();
   final TextEditingController _cpController = TextEditingController();
   final TextEditingController _majorController = TextEditingController();
+  late final AnimationController _particleController;
 
   String _selectedGradeLevel = 'Kelas 10 (SMA/SMK)'; // Default grade level
   final List<String> _gradeOptions = const [
@@ -91,6 +95,10 @@ class _AddClassPageState extends State<AddClassPage> {
   @override
   void initState() {
     super.initState();
+    _particleController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 12),
+    )..repeat();
     _nameController.addListener(_onFieldChanged);
     _majorController.addListener(_onFieldChanged);
 
@@ -197,6 +205,100 @@ class _AddClassPageState extends State<AddClassPage> {
     });
   }
 
+  void _openGradeDropdown(BuildContext btnContext, bool isDark) {
+    final RenderBox renderBox = btnContext.findRenderObject() as RenderBox;
+    final Offset offset = renderBox.localToGlobal(Offset.zero);
+    final Size size = renderBox.size;
+
+    showGeneralDialog(
+      context: context,
+      barrierDismissible: true,
+      barrierLabel: 'DismissGradeDropdown',
+      barrierColor: Colors.black.withValues(alpha: 0.25),
+      transitionDuration: const Duration(milliseconds: 150),
+      pageBuilder: (ctx, anim1, anim2) {
+        return Stack(
+          children: [
+            Positioned(
+              left: offset.dx,
+              top: offset.dy + size.height + 6,
+              width: size.width,
+              child: Material(
+                color: Colors.transparent,
+                child: Container(
+                  constraints: const BoxConstraints(maxHeight: 280),
+                  decoration: BoxDecoration(
+                    color: isDark ? const Color(0xFF18181B) : Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                      width: 1.2,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: isDark ? 0.40 : 0.08),
+                        blurRadius: 16,
+                        offset: const Offset(0, 8),
+                      ),
+                    ],
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(20),
+                    child: ListView.separated(
+                      shrinkWrap: true,
+                      padding: const EdgeInsets.symmetric(vertical: 6),
+                      itemCount: _gradeOptions.length,
+                      separatorBuilder: (_, __) => Divider(
+                        color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+                        height: 1,
+                      ),
+                      itemBuilder: (ctx, index) {
+                        final item = _gradeOptions[index];
+                        final isSelected = item == _selectedGradeLevel;
+                        return InkWell(
+                          onTap: () {
+                            setState(() => _selectedGradeLevel = item);
+                            Navigator.pop(ctx);
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    item,
+                                    style: GoogleFonts.plusJakartaSans(
+                                      fontSize: 13.5,
+                                      fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                                      color: isSelected
+                                          ? const Color(0xFF60A5FA)
+                                          : (isDark ? Colors.white : const Color(0xFF0F172A)),
+                                    ),
+                                  ),
+                                ),
+                                if (isSelected)
+                                  const Icon(
+                                    Icons.check_rounded,
+                                    size: 17,
+                                    color: Color(0xFF60A5FA),
+                                  ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   Future<void> _showCopyDataBottomSheet() async {
     final uid = FirebaseAuth.instance.currentUser?.uid ?? '';
     final bool isDark = AppColors.isDarkMode;
@@ -257,7 +359,7 @@ class _AddClassPageState extends State<AddClassPage> {
                     children: [
                       Row(
                         children: [
-                          const Icon(Icons.copy_all_rounded, color: Color(0xFF7C3AED), size: 22),
+                          Icon(Icons.copy_all_rounded, color: isDark ? Colors.white : const Color(0xFF0F172A), size: 22),
                           const SizedBox(width: 8),
                           Text(
                             'Salin Data Classroom',
@@ -346,7 +448,7 @@ class _AddClassPageState extends State<AddClassPage> {
                                         child: Image.asset(
                                           'assets/icon_pack/project/$pIcon',
                                           fit: BoxFit.cover,
-                                          errorBuilder: (_, __, ___) => const Icon(Icons.school_rounded, color: Color(0xFF7C3AED)),
+                                          errorBuilder: (_, __, ___) => Icon(Icons.school_rounded, color: isDark ? Colors.white : const Color(0xFF0F172A)),
                                         ),
                                       ),
                                     ),
@@ -384,10 +486,10 @@ class _AddClassPageState extends State<AddClassPage> {
                                     width: 32,
                                     height: 32,
                                     decoration: BoxDecoration(
-                                      color: const Color(0xFF7C3AED).withValues(alpha: isDark ? 0.2 : 0.1),
+                                      color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
                                       shape: BoxShape.circle,
                                     ),
-                                    child: const Icon(Icons.content_copy_rounded, size: 15, color: Color(0xFF7C3AED)),
+                                    child: Icon(Icons.content_copy_rounded, size: 15, color: isDark ? Colors.white : const Color(0xFF0F172A)),
                                   ),
                                 ],
                               ),
@@ -410,7 +512,7 @@ class _AddClassPageState extends State<AddClassPage> {
   // Stage circle colors rotating by order
   final List<Color> _stageColors = const [
     Color(0xFFFEF3C7), // Yellow
-    Color(0xFFE2DCF7), // Purple/Lavender
+    Color(0xFFE2E8F0), // Slate
     Color(0xFFEFF6FF), // Blue
     Color(0xFFFCE7F3), // Pink
     Color(0xFFE2ECE9), // Teal
@@ -1118,6 +1220,7 @@ class _AddClassPageState extends State<AddClassPage> {
     for (var list in _materiTitleControllers) {
       for (var ctrl in list) { ctrl.dispose(); }
     }
+    _particleController.dispose();
     super.dispose();
   }
 
@@ -1228,14 +1331,20 @@ class _AddClassPageState extends State<AddClassPage> {
             ),
             child: Stack(
               children: [
-                // Geometric Pattern matching home page
+                // Animated Geometric Pattern for Classroom
                 Positioned.fill(
-                  child: CustomPaint(
-                    painter: ClassroomCardPatternPainter(
-                      patternIndex: _selectedColorIndex % 5,
-                      accentColor: Colors.white.withValues(alpha: 0.20),
-                      isDark: isDark,
-                    ),
+                  child: AnimatedBuilder(
+                    animation: _particleController,
+                    builder: (context, _) {
+                      return CustomPaint(
+                        painter: ClassroomCardPatternPainter(
+                          patternIndex: _selectedColorIndex % 5,
+                          accentColor: currentColor,
+                          isDark: isDark,
+                          progress: _particleController.value,
+                        ),
+                      );
+                    },
                   ),
                 ),
 
@@ -1455,7 +1564,7 @@ class _AddClassPageState extends State<AddClassPage> {
                         ? Center(
                             child: Icon(
                               Icons.school_rounded,
-                              color: isDark ? Colors.white : const Color(0xFF7C3AED),
+                              color: isDark ? Colors.white : const Color(0xFF0F172A),
                               size: 36,
                             ),
                           )
@@ -1465,10 +1574,10 @@ class _AddClassPageState extends State<AddClassPage> {
                               child: Image.asset(
                                 'assets/icon_pack/project/project_${_selectedIconIndex + 1}.png',
                                 fit: BoxFit.contain,
-                                errorBuilder: (_, __, ___) => const Icon(
+                                errorBuilder: (_, __, ___) => Icon(
                                   Icons.school_rounded,
                                   size: 36,
-                                  color: Color(0xFF7C3AED),
+                                  color: isDark ? Colors.white : const Color(0xFF0F172A),
                                 ),
                               ),
                             ),
@@ -1595,17 +1704,17 @@ class _AddClassPageState extends State<AddClassPage> {
                           shape: BoxShape.circle,
                           border: isSelected
                               ? Border.all(
-                                  color: const Color(0xFF7C3AED),
+                                  color: isDark ? Colors.white : Colors.black,
                                   width: 2.0,
                                 )
                               : Border.all(color: Colors.transparent, width: 2.0),
                           color: isDark ? const Color(0xFF18181B) : const Color(0xFFF1F5F9),
                         ),
                         child: isDefault
-                            ? const Center(
+                            ? Center(
                                 child: Icon(
                                   Icons.school_rounded,
-                                  color: Color(0xFF7C3AED),
+                                  color: isDark ? Colors.white : const Color(0xFF0F172A),
                                   size: 26,
                                 ),
                               )
@@ -1614,10 +1723,10 @@ class _AddClassPageState extends State<AddClassPage> {
                                 child: Image.asset(
                                   'assets/icon_pack/project/project_$i.png',
                                   fit: BoxFit.contain,
-                                  errorBuilder: (_, __, ___) => const Icon(
+                                  errorBuilder: (_, __, ___) => Icon(
                                     Icons.school_rounded,
                                     size: 22,
-                                    color: Color(0xFF7C3AED),
+                                    color: isDark ? Colors.white : const Color(0xFF0F172A),
                                   ),
                                 ),
                               ),
@@ -1659,36 +1768,45 @@ class _AddClassPageState extends State<AddClassPage> {
                     style: AppTypography.buttonLabel(color: isDark ? Colors.white70 : Colors.black87, fontWeight: FontWeight.w600),
                   ),
                   const SizedBox(height: 6),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 14),
-                    decoration: BoxDecoration(
-                      color: isDark ? const Color(0xFF18181B) : const Color(0xFFF8FAFC),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0), width: 1.2),
-                    ),
-                    child: DropdownButtonHideUnderline(
-                      child: DropdownButton<String>(
-                        dropdownColor: isDark ? const Color(0xFF18181B) : Colors.white,
-                        borderRadius: BorderRadius.circular(16),
-                        itemHeight: null,
-                        value: _selectedGradeLevel,
-                        isExpanded: true,
-                        icon: Icon(Icons.keyboard_arrow_down_rounded, color: isDark ? Colors.white60 : Colors.black45, size: 18),
-                        style: AppTypography.buttonLabel(color: isDark ? Colors.white : Colors.black87, fontWeight: FontWeight.w600),
-                        items: _gradeOptions.map((String grade) {
-                          return DropdownMenuItem<String>(
-                            value: grade,
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                              child: Text(grade, style: AppTypography.timestamp(color: isDark ? Colors.white : Colors.black87)),
+                  Builder(
+                    builder: (btnContext) {
+                      return GestureDetector(
+                        onTap: () => _openGradeDropdown(btnContext, isDark),
+                        child: Container(
+                          height: 48,
+                          padding: const EdgeInsets.symmetric(horizontal: 14),
+                          decoration: BoxDecoration(
+                            color: isDark ? const Color(0xFF18181B) : const Color(0xFFF8FAFC),
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                              color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                              width: 1.2,
                             ),
-                          );
-                        }).toList(),
-                        onChanged: (val) {
-                          if (val != null) setState(() => _selectedGradeLevel = val);
-                        },
-                      ),
-                    ),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  _selectedGradeLevel,
+                                  style: AppTypography.buttonLabel(
+                                    color: isDark ? Colors.white : Colors.black87,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              Icon(
+                                Icons.keyboard_arrow_down_rounded,
+                                color: isDark ? Colors.white60 : Colors.black45,
+                                size: 20,
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
                   ),
                 ],
               ),
@@ -1876,7 +1994,7 @@ class _AddClassPageState extends State<AddClassPage> {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF7C3AED),
+                  color: isDark ? const Color(0xFF27272A) : const Color(0xFF0F172A),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Row(
@@ -2229,7 +2347,7 @@ class _AddClassPageState extends State<AddClassPage> {
               child: ElevatedButton(
                 onPressed: _createProject,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF7C3AED),
+                  backgroundColor: isDark ? const Color(0xFF27272A) : const Color(0xFF0F172A),
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(24),
@@ -2406,98 +2524,130 @@ class _AddClassPageState extends State<AddClassPage> {
     }
 
     // Mobile View
+    final double statusBarHeight = MediaQuery.of(context).padding.top;
     return Scaffold(
       backgroundColor: isDark ? const Color(0xFF000000) : const Color(0xFFFAF8FF),
       body: Align(
         alignment: Alignment.topCenter,
         child: Container(
           constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width > 500 ? double.infinity : 500),
-          child: SafeArea(
-            child: Column(
-              children: [
-                // Custom AppBar
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: AppTypography.screenHorizontalMargin, vertical: 10.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      GestureDetector(
-                        onTap: () => Navigator.pop(context),
-                        child: Container(
-                          width: 42,
-                          height: 42,
-                          decoration: BoxDecoration(
-                            color: isDark ? const Color(0xFF18181B) : const Color(0xFFF1F5F9),
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
-                            ),
-                          ),
-                          child: Icon(
-                            Icons.arrow_back_rounded,
-                            color: isDark ? Colors.white : Colors.black87,
-                            size: 18,
+          child: Stack(
+            children: [
+              // Scrollable Body
+              SingleChildScrollView(
+                padding: EdgeInsets.only(
+                  left: AppTypography.screenHorizontalMargin,
+                  right: AppTypography.screenHorizontalMargin,
+                  top: statusBarHeight + 64.0,
+                  bottom: 30.0,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    buildLeftColumn(),
+                    const SizedBox(height: 24),
+                    buildRightColumn(false),
+                    const SizedBox(height: 20),
+                  ],
+                ),
+              ),
+
+              // Sticky Header Bar with Blur
+              Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                child: ClipRect(
+                  child: BackdropFilter(
+                    filter: ui.ImageFilter.blur(
+                      sigmaX: 16.0,
+                      sigmaY: 16.0,
+                    ),
+                    child: Container(
+                      padding: EdgeInsets.fromLTRB(
+                        AppTypography.screenHorizontalMargin,
+                        statusBarHeight + 8.0,
+                        AppTypography.screenHorizontalMargin,
+                        10.0,
+                      ),
+                      decoration: BoxDecoration(
+                        color: isDark
+                            ? const Color(0xFF000000).withValues(alpha: 0.75)
+                            : const Color(0xFFFAF8FF).withValues(alpha: 0.85),
+                        border: Border(
+                          bottom: BorderSide(
+                            color: isDark
+                                ? const Color(0xFF27272A)
+                                : const Color(0xFFF1F5F9),
+                            width: 1.0,
                           ),
                         ),
                       ),
-                      Text(
-                        widget.editProjectId != null ? 'Edit Classroom' : 'Buat Classroom Baru',
-                        style: AppTypography.chatHeaderTitle(color: isDark ? Colors.white : Colors.black87, fontWeight: FontWeight.bold),
-                      ),
-                      if (widget.registrationData != null)
-                        TextButton(
-                          onPressed: _skipClassroomSetup,
-                          child: Text(
-                            'Atur Nanti',
-                            style: AppTypography.buttonLabel(color: const Color(0xFF2563EB), fontWeight: FontWeight.w600),
-                          ),
-                        )
-                      else if (widget.editProjectId == null)
-                        GestureDetector(
-                          onTap: _showCopyDataBottomSheet,
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 6.5),
-                            decoration: BoxDecoration(
-                              color: isDark ? const Color(0xFF27272A) : const Color(0xFF1E293B),
-                              borderRadius: BorderRadius.circular(20),
-                              border: isDark ? Border.all(color: const Color(0xFF3F3F46), width: 1.0) : null,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          // Tombol Back (<) - Frameless persis seperti di Catatan
+                          BouncyButton(
+                            onTap: () => Navigator.pop(context),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 4.0),
+                              child: Icon(
+                                Icons.arrow_back_rounded,
+                                color: isDark ? Colors.white : Colors.black87,
+                                size: 26,
+                              ),
                             ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                const Icon(Icons.content_copy_rounded, size: 13, color: Colors.white),
-                                const SizedBox(width: 5),
-                                Text(
-                                  'Salin Data',
-                                  style: AppTypography.buttonLabel(color: Colors.white, fontWeight: FontWeight.bold),
+                          ),
+                          Text(
+                            widget.editProjectId != null ? 'Edit Classroom' : 'Buat Classroom Baru',
+                            style: AppTypography.chatHeaderTitle(
+                              color: isDark ? Colors.white : Colors.black87,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          if (widget.registrationData != null)
+                            TextButton(
+                              onPressed: _skipClassroomSetup,
+                              child: Text(
+                                'Atur Nanti',
+                                style: AppTypography.buttonLabel(
+                                  color: const Color(0xFF2563EB),
+                                  fontWeight: FontWeight.w600,
                                 ),
-                              ],
-                            ),
-                          ),
-                        )
-                      else
-                        const SizedBox(width: 42),
-                    ],
-                  ),
-                ),
-                Divider(color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9), height: 1),
-
-                Expanded(
-                  child: SingleChildScrollView(
-                    padding: AppTypography.pagePadding(top: 20.0, bottom: 20.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        buildLeftColumn(),
-                        const SizedBox(height: 24),
-                        buildRightColumn(false),
-                        const SizedBox(height: 20),
-                      ],
+                              ),
+                            )
+                          else if (widget.editProjectId == null)
+                            BouncyButton(
+                              onTap: _showCopyDataBottomSheet,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 6.5),
+                                decoration: BoxDecoration(
+                                  color: isDark ? const Color(0xFF27272A) : const Color(0xFF1E293B),
+                                  borderRadius: BorderRadius.circular(20),
+                                  border: isDark ? Border.all(color: const Color(0xFF3F3F46), width: 1.0) : null,
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Icon(Icons.content_copy_rounded, size: 13, color: Colors.white),
+                                    const SizedBox(width: 5),
+                                    Text(
+                                      'Salin Data',
+                                      style: AppTypography.buttonLabel(color: Colors.white, fontWeight: FontWeight.bold),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            )
+                          else
+                            const SizedBox(width: 34),
+                        ],
+                      ),
                     ),
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
@@ -2563,10 +2713,7 @@ class _AddClassPageState extends State<AddClassPage> {
   }
 
   Future<Map<String, dynamic>?> _generateProjectWithAI(String projectDesc) async {
-    final apiKey = 'AIzaSyAC7KqzJs_v1o8VLNivo0tShRJ8JVMj3wE';
-    final url = Uri.parse(
-      'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent?key=$apiKey',
-    );
+    final url = GeminiConfig.generateUrl;
 
     final className = _nameController.text.trim();
     final grade = _selectedGradeLevel;

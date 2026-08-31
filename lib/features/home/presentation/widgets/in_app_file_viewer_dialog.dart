@@ -1,5 +1,5 @@
 import 'dart:io';
-import 'dart:typed_data';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hubner/core/theme/app_typography.dart';
@@ -9,11 +9,16 @@ import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:hubner/main.dart';
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:googleapis/drive/v3.dart' as drive;
+import 'package:hubner/core/services/google_drive_service.dart';
 
 class InAppFileViewerDialog extends StatefulWidget {
   final String fileName;
   final String? mimeType;
   final String fileUrl;
+  final String? fileId;
   final String? uploaderName;
   final String? dateFormatted;
   final int fileSize;
@@ -23,6 +28,7 @@ class InAppFileViewerDialog extends StatefulWidget {
     required this.fileName,
     this.mimeType,
     required this.fileUrl,
+    this.fileId,
     this.uploaderName,
     this.dateFormatted,
     this.fileSize = 0,
@@ -33,6 +39,7 @@ class InAppFileViewerDialog extends StatefulWidget {
     required String fileName,
     String? mimeType,
     required String fileUrl,
+    String? fileId,
     String? uploaderName,
     String? dateFormatted,
     int fileSize = 0,
@@ -45,6 +52,7 @@ class InAppFileViewerDialog extends StatefulWidget {
         fileName: fileName,
         mimeType: mimeType,
         fileUrl: fileUrl,
+        fileId: fileId,
         uploaderName: uploaderName,
         dateFormatted: dateFormatted,
         fileSize: fileSize,
@@ -64,11 +72,11 @@ class _InAppFileViewerDialogState extends State<InAppFileViewerDialog> {
   bool _isLoadingAudio = false;
 
   String? _textContent;
-  bool _isLoadingText = false;
 
-  Uint8List? _pdfBytes;
-  bool _isLoadingPdf = false;
-  String? _pdfError;
+  File? _localFile;
+  Uint8List? _fileBytes;
+  bool _isLoading = true;
+  String? _errorMessage;
 
   bool get _isImage {
     final m = widget.mimeType?.toLowerCase() ?? '';
@@ -83,6 +91,8 @@ class _InAppFileViewerDialogState extends State<InAppFileViewerDialog> {
         n.endsWith('.bmp') ||
         n.endsWith('.heic') ||
         n.endsWith('.svg') ||
+        u.startsWith('data:image') ||
+        u.startsWith('data:') ||
         u.endsWith('.jpg') ||
         u.endsWith('.jpeg') ||
         u.endsWith('.png') ||
@@ -93,106 +103,283 @@ class _InAppFileViewerDialogState extends State<InAppFileViewerDialog> {
   bool get _isAudio {
     final m = widget.mimeType?.toLowerCase() ?? '';
     final n = widget.fileName.toLowerCase();
-    return m.contains('audio') || n.endsWith('.mp3') || n.endsWith('.wav') || n.endsWith('.m4a') || n.endsWith('.aac') || n.endsWith('.ogg');
+    return m.contains('audio') ||
+        n.endsWith('.mp3') ||
+        n.endsWith('.wav') ||
+        n.endsWith('.m4a') ||
+        n.endsWith('.aac') ||
+        n.endsWith('.ogg');
   }
 
   bool get _isText {
     final m = widget.mimeType?.toLowerCase() ?? '';
     final n = widget.fileName.toLowerCase();
-    return m.contains('text') || n.endsWith('.txt') || n.endsWith('.md') || n.endsWith('.json') || n.endsWith('.csv') || n.endsWith('.log');
+    return m.contains('text') ||
+        n.endsWith('.txt') ||
+        n.endsWith('.md') ||
+        n.endsWith('.json') ||
+        n.endsWith('.csv') ||
+        n.endsWith('.log');
   }
 
   bool get _isPdf {
     final m = widget.mimeType?.toLowerCase() ?? '';
     final n = widget.fileName.toLowerCase();
     final u = widget.fileUrl.toLowerCase();
-    return m.contains('pdf') || n.endsWith('.pdf') || u.contains('.pdf');
+    return m.contains('pdf') ||
+        n.endsWith('.pdf') ||
+        u.contains('.pdf') ||
+        u.startsWith('data:application/pdf');
   }
 
   @override
   void initState() {
     super.initState();
+    _loadFile();
     if (_isAudio) {
       _initAudio();
-    } else if (_isText) {
-      _loadTextContent();
-    } else if (_isPdf) {
-      _loadPdfBytes();
     }
   }
 
-  Future<void> _loadPdfBytes() async {
+  Future<void> _loadFile() async {
     setState(() {
-      _isLoadingPdf = true;
-      _pdfError = null;
+      _isLoading = true;
+      _errorMessage = null;
     });
 
     try {
-      final url = widget.fileUrl;
-      // 1. Local file path
-      if (!url.startsWith('http://') && !url.startsWith('https://')) {
-        final file = File(url);
-        if (await file.exists()) {
-          final bytes = await file.readAsBytes();
-          if (mounted) {
-            setState(() {
-              _pdfBytes = bytes;
-              _isLoadingPdf = false;
-            });
+      final rawUrl = widget.fileUrl;
+
+      // 0. Base64 Data URI (e.g. chat images or embedded documents)
+      if (rawUrl.startsWith('data:') && rawUrl.contains(',')) {
+        try {
+          final b64 = rawUrl.split(',').last;
+          final bytes = base64Decode(b64);
+          if (bytes.isNotEmpty) {
+            final docDir = await getApplicationDocumentsDirectory();
+            final hubnerDir = Directory('${docDir.path}/Hubner_Documents');
+            if (!hubnerDir.existsSync()) {
+              await hubnerDir.create(recursive: true);
+            }
+            final safeName = widget.fileName.replaceAll(RegExp(r'[\\/:*?"<>|]'), '_');
+            final cachedFile = File('${hubnerDir.path}/$safeName');
+            try {
+              await cachedFile.writeAsBytes(bytes);
+            } catch (_) {}
+
+            if (mounted) {
+              setState(() {
+                _localFile = cachedFile;
+                _fileBytes = bytes;
+                _isLoading = false;
+                if (_isText) _textContent = utf8.decode(bytes, allowMalformed: true);
+              });
+            }
             return;
           }
+        } catch (e) {
+          debugPrint('Base64 decode error: $e');
         }
       }
 
-      // 2. Network URL: build candidates for Google Drive or direct download
-      final fileId = _extractFileId(url);
-      List<String> pdfCandidateUrls = [];
-      if (fileId.isNotEmpty) {
-        pdfCandidateUrls.add('https://drive.google.com/uc?export=download&id=$fileId');
-        pdfCandidateUrls.add('https://lh3.googleusercontent.com/d/$fileId');
-        pdfCandidateUrls.add('https://docs.google.com/uc?export=download&id=$fileId');
-      }
-      if (url.isNotEmpty && !pdfCandidateUrls.contains(url)) {
-        pdfCandidateUrls.add(_resolveDownloadUrl(url));
-        pdfCandidateUrls.add(url);
+      // 1. Check if rawUrl is already a direct local file
+      if (!rawUrl.startsWith('http://') && !rawUrl.startsWith('https://')) {
+        final f = File(rawUrl);
+        if (await f.exists()) {
+          final bytes = await f.readAsBytes();
+          if (mounted) {
+            setState(() {
+              _localFile = f;
+              _fileBytes = bytes;
+              _isLoading = false;
+              if (_isText) _textContent = utf8.decode(bytes, allowMalformed: true);
+            });
+          }
+          return;
+        }
       }
 
-      for (final candidateUrl in pdfCandidateUrls) {
+      // 2. Determine effective Google Drive File ID
+      final effectiveFileId = (widget.fileId != null && widget.fileId!.isNotEmpty)
+          ? widget.fileId!
+          : _extractFileId(rawUrl);
+
+      // 3. Prepare local cache file path in Hubner_Documents folder
+      final docDir = await getApplicationDocumentsDirectory();
+      final hubnerDir = Directory('${docDir.path}/Hubner_Documents');
+      if (!hubnerDir.existsSync()) {
+        await hubnerDir.create(recursive: true);
+      }
+      final safeName = widget.fileName.replaceAll(RegExp(r'[\\/:*?"<>|]'), '_');
+      final cacheFileName = effectiveFileId.isNotEmpty ? '${effectiveFileId}_$safeName' : safeName;
+      final cachedFile = File('${hubnerDir.path}/$cacheFileName');
+
+      if (await cachedFile.exists() && (await cachedFile.length()) > 0) {
+        final bytes = await cachedFile.readAsBytes();
+        if (mounted) {
+          setState(() {
+            _localFile = cachedFile;
+            _fileBytes = bytes;
+            _isLoading = false;
+            if (_isText) _textContent = utf8.decode(bytes, allowMalformed: true);
+          });
+        }
+        return;
+      }
+
+      // 4. Download file bytes from Google Drive API or HTTP candidates
+      final downloadedBytes = await _downloadFileBytes(effectiveFileId, rawUrl);
+
+      if (downloadedBytes != null && downloadedBytes.isNotEmpty) {
+        // Save local copy to file manager
         try {
-          final response = await http.get(Uri.parse(candidateUrl)).timeout(const Duration(seconds: 14));
-          if (response.statusCode == 200 && response.bodyBytes.isNotEmpty) {
-            final bytes = response.bodyBytes;
-            // Check PDF magic header %PDF
-            if (bytes.length > 4 &&
-                bytes[0] == 0x25 &&
-                bytes[1] == 0x50 &&
-                bytes[2] == 0x44 &&
-                bytes[3] == 0x46) {
-              if (mounted) {
-                setState(() {
-                  _pdfBytes = bytes;
-                  _isLoadingPdf = false;
-                });
-                return;
-              }
-            }
-          }
+          await cachedFile.writeAsBytes(downloadedBytes);
         } catch (_) {}
+
+        if (mounted) {
+          setState(() {
+            _localFile = cachedFile;
+            _fileBytes = downloadedBytes;
+            _isLoading = false;
+            if (_isText) _textContent = utf8.decode(downloadedBytes, allowMalformed: true);
+          });
+        }
+        return;
       }
 
       if (mounted) {
         setState(() {
-          _isLoadingPdf = false;
+          _isLoading = false;
+          _errorMessage = 'Gagal mengunduh atau memuat pratinjau berkas.';
         });
       }
     } catch (e) {
       if (mounted) {
         setState(() {
-          _isLoadingPdf = false;
-          _pdfError = e.toString();
+          _isLoading = false;
+          _errorMessage = e.toString();
         });
       }
     }
+  }
+
+  Future<Uint8List?> _downloadFileBytes(String fileId, String rawUrl) async {
+    // A. Attempt Google Drive API authenticated download
+    if (fileId.isNotEmpty) {
+      try {
+        final account = await GoogleSignIn.instance.attemptLightweightAuthentication();
+        if (account != null) {
+          final auth = await account.authorizationClient.authorizeScopes([
+            drive.DriveApi.driveFileScope,
+            drive.DriveApi.driveReadonlyScope,
+          ]);
+          final api = GoogleDriveService.getDriveApi(auth.accessToken);
+          final dynamic media = await api.files.get(
+            fileId,
+            downloadOptions: drive.DownloadOptions.fullMedia,
+          );
+          if (media is drive.Media) {
+            final List<int> data = [];
+            await for (final chunk in media.stream) {
+              data.addAll(chunk);
+            }
+            if (data.isNotEmpty) {
+              return Uint8List.fromList(data);
+            }
+          }
+        }
+      } catch (e) {
+        debugPrint('Google Drive API download exception: $e');
+      }
+    }
+
+    // B. Build HTTP Candidate URLs
+    final List<String> candidates = [];
+    if (fileId.isNotEmpty) {
+      candidates.add('https://drive.usercontent.google.com/download?id=$fileId&export=download&authuser=0&confirm=t');
+      candidates.add('https://drive.google.com/uc?export=download&id=$fileId&confirm=t');
+      candidates.add('https://docs.google.com/uc?export=download&id=$fileId&confirm=t');
+      candidates.add('https://lh3.googleusercontent.com/d/$fileId');
+      candidates.add('https://drive.google.com/uc?export=download&id=$fileId');
+      candidates.add('https://docs.google.com/uc?export=download&id=$fileId');
+    }
+    if (rawUrl.isNotEmpty && !candidates.contains(rawUrl)) {
+      candidates.add(_resolveDownloadUrl(rawUrl));
+      candidates.add(rawUrl);
+    }
+
+    final headers = {
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+      'Accept': '*/*',
+    };
+
+    for (final url in candidates) {
+      try {
+        final uri = Uri.parse(url);
+        final res = await http.get(uri, headers: headers).timeout(const Duration(seconds: 18));
+        if (res.statusCode == 200 && res.bodyBytes.isNotEmpty) {
+          final bytes = res.bodyBytes;
+          final headStr = String.fromCharCodes(bytes.take(250)).toLowerCase();
+
+          // Check if response is an HTML redirect/warning page instead of the actual file
+          if (headStr.contains('<html') || headStr.contains('<!doctype')) {
+            final htmlBody = utf8.decode(bytes, allowMalformed: true);
+
+            // 1. Direct usercontent link inside html
+            final userContentMatch = RegExp(r'https://drive\.usercontent\.google\.com/download\?[^"\s>]+').firstMatch(htmlBody);
+            if (userContentMatch != null) {
+              final directUrl = userContentMatch.group(0)!.replaceAll('&amp;', '&');
+              final dRes = await http.get(Uri.parse(directUrl), headers: headers).timeout(const Duration(seconds: 20));
+              if (dRes.statusCode == 200 && dRes.bodyBytes.isNotEmpty) {
+                final dHead = String.fromCharCodes(dRes.bodyBytes.take(50)).toLowerCase();
+                if (!dHead.contains('<html') && !dHead.contains('<!doctype')) {
+                  return dRes.bodyBytes;
+                }
+              }
+            }
+
+            // 2. Form action with confirm token
+            final formActionMatch = RegExp(r'action="([^"]+)"').firstMatch(htmlBody);
+            final confirmMatch = RegExp(r'confirm=([0-9a-zA-Z_-]+)').firstMatch(htmlBody);
+            final confirmToken = confirmMatch?.group(1);
+
+            if (formActionMatch != null) {
+              var actionUrl = formActionMatch.group(1)!.replaceAll('&amp;', '&');
+              if (confirmToken != null && !actionUrl.contains('confirm=')) {
+                actionUrl += '&confirm=$confirmToken';
+              }
+              final dRes = await http.get(Uri.parse(actionUrl), headers: headers).timeout(const Duration(seconds: 20));
+              if (dRes.statusCode == 200 && dRes.bodyBytes.isNotEmpty) {
+                final dHead = String.fromCharCodes(dRes.bodyBytes.take(50)).toLowerCase();
+                if (!dHead.contains('<html') && !dHead.contains('<!doctype')) {
+                  return dRes.bodyBytes;
+                }
+              }
+            }
+
+            // 3. Fallback confirm on drive.google.com
+            if (confirmToken != null && fileId.isNotEmpty) {
+              final confirmUrl = 'https://drive.google.com/uc?export=download&id=$fileId&confirm=$confirmToken';
+              final dRes = await http.get(Uri.parse(confirmUrl), headers: headers).timeout(const Duration(seconds: 20));
+              if (dRes.statusCode == 200 && dRes.bodyBytes.isNotEmpty) {
+                final dHead = String.fromCharCodes(dRes.bodyBytes.take(50)).toLowerCase();
+                if (!dHead.contains('<html') && !dHead.contains('<!doctype')) {
+                  return dRes.bodyBytes;
+                }
+              }
+            }
+            continue;
+          }
+
+          // Valid file bytes
+          return bytes;
+        }
+      } catch (e) {
+        debugPrint('Candidate fetch error for $url: $e');
+      }
+    }
+
+    return null;
   }
 
   String _extractFileId(String rawUrl) {
@@ -210,57 +397,6 @@ class _InAppFileViewerDialogState extends State<InAppFileViewerDialog> {
     if (matchDoc != null) return matchDoc.group(1)!;
     if (RegExp(r'^[a-zA-Z0-9_-]{20,}$').hasMatch(rawUrl)) return rawUrl;
     return '';
-  }
-
-  Widget _buildCascadingImage(List<String> urls, int index, bool isDark) {
-    if (index >= urls.length) {
-      return Padding(
-        padding: const EdgeInsets.all(32.0),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(Icons.broken_image_rounded, size: 48, color: Colors.black26),
-            const SizedBox(height: 12),
-            Text(
-              'Gagal memuat pratinjau gambar',
-              style: AppTypography.timestamp(color: isDark ? Colors.white60 : Colors.black54),
-            ),
-          ],
-        ),
-      );
-    }
-
-    final url = urls[index];
-
-    if (!url.startsWith('http://') && !url.startsWith('https://')) {
-      try {
-        final file = File(url);
-        if (file.existsSync()) {
-          return Image.file(
-            file,
-            fit: BoxFit.contain,
-            errorBuilder: (context, error, stackTrace) {
-              return _buildCascadingImage(urls, index + 1, isDark);
-            },
-          );
-        }
-      } catch (_) {}
-    }
-
-    return Image.network(
-      url,
-      fit: BoxFit.contain,
-      loadingBuilder: (context, child, progress) {
-        if (progress == null) return child;
-        return const Padding(
-          padding: EdgeInsets.all(48.0),
-          child: CircularProgressIndicator(strokeWidth: 2.5),
-        );
-      },
-      errorBuilder: (context, error, stackTrace) {
-        return _buildCascadingImage(urls, index + 1, isDark);
-      },
-    );
   }
 
   Future<void> _initAudio() async {
@@ -283,7 +419,11 @@ class _InAppFileViewerDialogState extends State<InAppFileViewerDialog> {
         await _audioPlayer!.pause();
       } else {
         setState(() => _isLoadingAudio = true);
-        await _audioPlayer!.play(UrlSource(_resolveDownloadUrl(widget.fileUrl)));
+        if (_localFile != null && await _localFile!.exists()) {
+          await _audioPlayer!.play(DeviceFileSource(_localFile!.path));
+        } else {
+          await _audioPlayer!.play(UrlSource(_resolveDownloadUrl(widget.fileUrl)));
+        }
         setState(() => _isLoadingAudio = false);
       }
     } catch (_) {
@@ -293,25 +433,6 @@ class _InAppFileViewerDialogState extends State<InAppFileViewerDialog> {
           const SnackBar(content: Text('Gagal memutar file audio.')),
         );
       }
-    }
-  }
-
-  Future<void> _loadTextContent() async {
-    setState(() => _isLoadingText = true);
-    try {
-      final res = await http.get(Uri.parse(_resolveDownloadUrl(widget.fileUrl))).timeout(const Duration(seconds: 10));
-      if (res.statusCode == 200) {
-        if (mounted) {
-          setState(() {
-            _textContent = res.body;
-            _isLoadingText = false;
-          });
-        }
-      } else {
-        if (mounted) setState(() => _isLoadingText = false);
-      }
-    } catch (_) {
-      if (mounted) setState(() => _isLoadingText = false);
     }
   }
 
@@ -426,7 +547,10 @@ class _InAppFileViewerDialogState extends State<InAppFileViewerDialog> {
                           widget.fileName,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: AppTypography.documentTitle(color: isDark ? Colors.white : const Color(0xFF0F172A), fontWeight: FontWeight.bold),
+                          style: AppTypography.documentTitle(
+                            color: isDark ? Colors.white : const Color(0xFF0F172A),
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                         const SizedBox(height: 2),
                         Row(
@@ -491,11 +615,9 @@ class _InAppFileViewerDialogState extends State<InAppFileViewerDialog> {
 
             // Content Area
             Flexible(
-              child: SingleChildScrollView(
-                child: Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: _buildMainContent(isDark),
-                ),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: _buildMainContent(isDark),
               ),
             ),
 
@@ -570,21 +692,91 @@ class _InAppFileViewerDialogState extends State<InAppFileViewerDialog> {
   }
 
   Widget _buildMainContent(bool isDark) {
-    if (_isImage) {
-      final fileId = _extractFileId(widget.fileUrl);
-      final List<String> imageUrls = [];
-      if (fileId.isNotEmpty) {
-        imageUrls.add('https://drive.google.com/thumbnail?id=$fileId&sz=w1200');
-        imageUrls.add('https://lh3.googleusercontent.com/d/$fileId');
-        imageUrls.add('https://drive.google.com/uc?export=view&id=$fileId');
-        imageUrls.add('https://docs.google.com/uc?export=view&id=$fileId');
-      }
-      if (widget.fileUrl.isNotEmpty && !imageUrls.contains(widget.fileUrl)) {
-        imageUrls.add(widget.fileUrl);
-      }
-
+    if (_isLoading) {
       return Container(
-        constraints: const BoxConstraints(maxHeight: 450),
+        height: 400,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: isDark ? const Color(0xFF18181B) : const Color(0xFFF1F5F9),
+          borderRadius: BorderRadius.circular(18),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const CircularProgressIndicator(
+              strokeWidth: 2.8,
+              valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF7F52FC)),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              _isPdf
+                  ? 'Menyiapkan & memuat dokumen PDF...'
+                  : (_isImage ? 'Memuat gambar...' : 'Mengunduh berkas ke File Manager...'),
+              style: AppTypography.buttonLabel(
+                color: isDark ? Colors.white70 : Colors.black87,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              'Menyalin ke penyimpanan lokal...',
+              style: AppTypography.fileSize(
+                color: isDark ? Colors.white38 : Colors.black38,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (_errorMessage != null && _fileBytes == null && _localFile == null) {
+      return Container(
+        height: 380,
+        alignment: Alignment.center,
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          color: isDark ? const Color(0xFF18181B) : const Color(0xFFF1F5F9),
+          borderRadius: BorderRadius.circular(18),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.error_outline_rounded, size: 48, color: Colors.redAccent),
+            const SizedBox(height: 12),
+            Text(
+              'Gagal memuat pratinjau berkas',
+              style: AppTypography.buttonLabel(
+                color: isDark ? Colors.white : Colors.black87,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              'File dapat diunduh langsung menggunakan tombol di bawah.',
+              textAlign: TextAlign.center,
+              style: AppTypography.fileSize(
+                color: isDark ? Colors.white60 : Colors.black54,
+              ),
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton.icon(
+              onPressed: _loadFile,
+              icon: const Icon(Icons.refresh_rounded, size: 16),
+              label: const Text('Coba Lagi'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF7F52FC),
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (_isImage) {
+      return Container(
+        constraints: const BoxConstraints(maxHeight: 460),
         decoration: BoxDecoration(
           color: isDark ? Colors.black26 : const Color(0xFFF1F5F9),
           borderRadius: BorderRadius.circular(18),
@@ -596,7 +788,17 @@ class _InAppFileViewerDialogState extends State<InAppFileViewerDialog> {
             minScale: 0.8,
             maxScale: 4.0,
             child: Center(
-              child: _buildCascadingImage(imageUrls, 0, isDark),
+              child: _localFile != null
+                  ? Image.file(
+                      _localFile!,
+                      fit: BoxFit.contain,
+                      errorBuilder: (context, error, stackTrace) => _fileBytes != null
+                          ? Image.memory(_fileBytes!, fit: BoxFit.contain)
+                          : const SizedBox.shrink(),
+                    )
+                  : (_fileBytes != null
+                      ? Image.memory(_fileBytes!, fit: BoxFit.contain)
+                      : const SizedBox.shrink()),
             ),
           ),
         ),
@@ -604,53 +806,6 @@ class _InAppFileViewerDialogState extends State<InAppFileViewerDialog> {
     }
 
     if (_isPdf) {
-      if (_isLoadingPdf) {
-        return Container(
-          height: 480,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            color: isDark ? const Color(0xFF18181B) : const Color(0xFFF1F5F9),
-            borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0)),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const CircularProgressIndicator(strokeWidth: 2.5),
-              const SizedBox(height: 16),
-              Text(
-                'Memuat pratinjau dokumen PDF...',
-                style: AppTypography.timestamp(color: isDark ? Colors.white70 : Colors.black87),
-              ),
-            ],
-          ),
-        );
-      }
-
-      if (_pdfBytes != null) {
-        return Container(
-          height: 480,
-          decoration: BoxDecoration(
-            color: isDark ? const Color(0xFF18181B) : const Color(0xFFF1F5F9),
-            borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0)),
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(18),
-            child: SfPdfViewer.memory(
-              _pdfBytes!,
-              canShowScrollHead: true,
-              canShowScrollStatus: true,
-              canShowPaginationDialog: true,
-              onDocumentLoadFailed: (PdfDocumentLoadFailedDetails details) {
-                debugPrint('PDF memory load failed: ${details.description}');
-              },
-            ),
-          ),
-        );
-      }
-
-      final downloadUrl = _resolveDownloadUrl(widget.fileUrl);
       return Container(
         height: 480,
         decoration: BoxDecoration(
@@ -660,15 +815,27 @@ class _InAppFileViewerDialogState extends State<InAppFileViewerDialog> {
         ),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(18),
-          child: SfPdfViewer.network(
-            downloadUrl,
-            canShowScrollHead: true,
-            canShowScrollStatus: true,
-            canShowPaginationDialog: true,
-            onDocumentLoadFailed: (PdfDocumentLoadFailedDetails details) {
-              debugPrint('PDF network load failed: ${details.description}');
-            },
-          ),
+          child: _localFile != null
+              ? SfPdfViewer.file(
+                  _localFile!,
+                  canShowScrollHead: true,
+                  canShowScrollStatus: true,
+                  canShowPaginationDialog: true,
+                  onDocumentLoadFailed: (PdfDocumentLoadFailedDetails details) {
+                    debugPrint('PDF file load failed: ${details.description}');
+                  },
+                )
+              : (_fileBytes != null
+                  ? SfPdfViewer.memory(
+                      _fileBytes!,
+                      canShowScrollHead: true,
+                      canShowScrollStatus: true,
+                      canShowPaginationDialog: true,
+                      onDocumentLoadFailed: (PdfDocumentLoadFailedDetails details) {
+                        debugPrint('PDF memory load failed: ${details.description}');
+                      },
+                    )
+                  : const Center(child: Text('PDF tidak dapat dimuat'))),
         ),
       );
     }
@@ -768,15 +935,6 @@ class _InAppFileViewerDialogState extends State<InAppFileViewerDialog> {
     }
 
     if (_isText) {
-      if (_isLoadingText) {
-        return const Center(
-          child: Padding(
-            padding: EdgeInsets.all(32.0),
-            child: CircularProgressIndicator(),
-          ),
-        );
-      }
-
       if (_textContent != null && _textContent!.isNotEmpty) {
         return Container(
           width: double.infinity,
@@ -848,10 +1006,10 @@ class _InAppFileViewerDialogState extends State<InAppFileViewerDialog> {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.verified_user_outlined, size: 16, color: isDark ? Colors.white70 : Colors.black54),
+                Icon(Icons.check_circle_outline_rounded, size: 16, color: const Color(0xFF10B981)),
                 const SizedBox(width: 8),
                 Text(
-                  'Akses publik aman & terenkripsi',
+                  _localFile != null ? 'Tersalin di File Manager lokal' : 'Akses publik aman & terenkripsi',
                   style: AppTypography.fileSize(color: isDark ? Colors.white70 : Colors.black54),
                 ),
               ],

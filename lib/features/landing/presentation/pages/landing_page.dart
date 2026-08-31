@@ -1,8 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:hubner/features/projects/presentation/pages/class_page.dart'
-    show ClassroomCardPatternPainter;
+import 'package:hubner/core/widgets/classroom_card_pattern_painter.dart';
 import 'package:hubner/features/auth/presentation/pages/login_page.dart';
 import 'package:hubner/features/home/presentation/widgets/animated_rainbow_background.dart';
 import 'package:hubner/main.dart' show HubnerApp;
@@ -2763,105 +2762,3 @@ class _HoverCardState extends State<HoverCard> {
   }
 }
 
-// ClassroomCardPatternPainter Definition from class_page.dart
-class ClassroomCardPatternPainter extends CustomPainter {
-  final int patternIndex;
-  final Color accentColor;
-
-  const ClassroomCardPatternPainter({
-    required this.patternIndex,
-    required this.accentColor,
-  });
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final bool isDark = AppColors.isDarkMode;
-    final Color primaryPatternColor = isDark
-        ? Colors.black.withValues(alpha: 0.18)
-        : accentColor.withOpacity(0.08);
-    final Color secondaryPatternColor = isDark
-        ? Colors.black.withValues(alpha: 0.28)
-        : Colors.white.withOpacity(0.30);
-    final Color ringPatternColor = isDark
-        ? Colors.black.withValues(alpha: 0.16)
-        : accentColor.withOpacity(0.07);
-    final Color dotPatternColor = isDark
-        ? Colors.black.withValues(alpha: 0.22)
-        : accentColor.withOpacity(0.08);
-
-    switch (patternIndex % 4) {
-      case 0:
-        final paint = Paint()
-          ..color = primaryPatternColor
-          ..style = PaintingStyle.fill;
-        final path = Path();
-        path.moveTo(size.width * 0.45, 0);
-        path.cubicTo(
-          size.width * 0.65, size.height * 0.35,
-          size.width * 0.35, size.height * 0.75,
-          size.width * 0.85, size.height,
-        );
-        path.lineTo(size.width, size.height);
-        path.lineTo(size.width, 0);
-        path.close();
-        canvas.drawPath(path, paint);
-
-        final paintSecondary = Paint()
-          ..color = secondaryPatternColor
-          ..style = PaintingStyle.fill;
-        final pathSecondary = Path();
-        pathSecondary.moveTo(size.width * 0.6, 0);
-        pathSecondary.cubicTo(
-          size.width * 0.8, size.height * 0.4,
-          size.width * 0.5, size.height * 0.8,
-          size.width, size.height * 0.7,
-        );
-        pathSecondary.lineTo(size.width, 0);
-        pathSecondary.close();
-        canvas.drawPath(pathSecondary, paintSecondary);
-        break;
-
-      case 1:
-        final paintRing = Paint()
-          ..color = ringPatternColor
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 14;
-        canvas.drawCircle(Offset(size.width * 0.9, size.height * 0.1), 30, paintRing);
-        canvas.drawCircle(Offset(size.width * 0.9, size.height * 0.1), 60, paintRing);
-        break;
-
-      case 2:
-        final paintDots = Paint()
-          ..color = dotPatternColor
-          ..style = PaintingStyle.fill;
-        for (int i = 0; i < 4; i++) {
-          for (int j = 0; j < 4; j++) {
-            canvas.drawCircle(
-              Offset(size.width * 0.65 + (i * 12), size.height * 0.2 + (j * 12)),
-              2.5,
-              paintDots,
-            );
-          }
-        }
-        break;
-
-      case 3:
-      default:
-        final paintStripe = Paint()
-          ..color = ringPatternColor
-          ..style = PaintingStyle.fill;
-        final pathStripe = Path();
-        pathStripe.moveTo(size.width * 0.5, 0);
-        pathStripe.lineTo(size.width * 0.7, 0);
-        pathStripe.lineTo(size.width, size.height * 0.5);
-        pathStripe.lineTo(size.width, size.height * 0.8);
-        pathStripe.close();
-        canvas.drawPath(pathStripe, paintStripe);
-        break;
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant ClassroomCardPatternPainter oldDelegate) =>
-      oldDelegate.patternIndex != patternIndex || oldDelegate.accentColor != accentColor;
-}

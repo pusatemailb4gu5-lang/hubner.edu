@@ -1,3 +1,4 @@
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:hubner/core/theme/app_typography.dart';
 import 'package:hubner/core/widgets/bouncy_button.dart';
@@ -455,63 +456,84 @@ class _ManageMembersPageState extends State<ManageMembersPage> {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Custom Top App Bar
-            Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: widget.isEmbedded ? 12.0 : 16.0,
-                vertical: 12.0,
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  if (!widget.isEmbedded)
-                    BouncyButton(
-                      scaleDown: 0.85,
-                      onTap: () => Navigator.pop(context),
-                      child: Container(
-                        width: 42,
-                        height: 42,
-                        decoration: BoxDecoration(
-                          color: isDark ? const Color(0xFF18181B) : Colors.white,
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
-                            width: 1.2,
-                          ),
-                        ),
-                        child: Icon(
-                          Icons.arrow_back_rounded,
-                          color: isDark ? Colors.white : Colors.black87,
-                          size: 20,
-                        ),
+            // Custom Top App Bar (Sticky Glassmorphic Blur)
+            ClipRect(
+              child: BackdropFilter(
+                filter: ui.ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+                child: Container(
+                  width: double.infinity,
+                  padding: EdgeInsets.symmetric(
+                    horizontal: widget.isEmbedded ? 12.0 : 16.0,
+                    vertical: 12.0,
+                  ),
+                  decoration: BoxDecoration(
+                    color: isDark
+                        ? Colors.black.withValues(alpha: 0.75)
+                        : Colors.white.withValues(alpha: 0.85),
+                    border: Border(
+                      bottom: BorderSide(
+                        color: isDark ? const Color(0xFF1E1E22) : const Color(0xFFE2E8F0),
+                        width: 1.0,
                       ),
                     ),
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      if (!widget.isEmbedded)
+                        BouncyButton(
+                          scaleDown: 0.85,
+                          onTap: () => Navigator.pop(context),
+                          child: Container(
+                            width: 40,
+                            height: 40,
+                            color: Colors.transparent,
+                            alignment: Alignment.centerLeft,
+                            child: Icon(
+                              Icons.arrow_back_rounded,
+                              color: isDark ? Colors.white : const Color(0xFF0F172A),
+                              size: 24,
+                            ),
+                          ),
+                        )
+                      else if (widget.onCloseInline != null)
+                        BouncyButton(
+                          scaleDown: 0.85,
+                          onTap: widget.onCloseInline,
+                          child: Container(
+                            width: 40,
+                            height: 40,
+                            color: Colors.transparent,
+                            alignment: Alignment.centerLeft,
+                            child: Icon(
+                              Icons.close_rounded,
+                              color: isDark ? Colors.white : const Color(0xFF0F172A),
+                              size: 24,
+                            ),
+                          ),
+                        )
+                      else
+                        const SizedBox(width: 40),
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                          child: Text(
                             'Data Anggota Kelas',
-                            style: AppTypography.chatHeaderTitle(color: isDark ? Colors.white : const Color(0xFF0F172A), fontWeight: FontWeight.w800),
+                            style: AppTypography.chatHeaderTitle(
+                              color: isDark ? Colors.white : const Color(0xFF0F172A),
+                              fontWeight: FontWeight.w800,
+                            ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             textAlign: TextAlign.center,
                           ),
-                        ],
+                        ),
                       ),
-                    ),
+                      const SizedBox(width: 40),
+                    ],
                   ),
-                  if (!widget.isEmbedded)
-                    const SizedBox(width: 42),
-                ],
+                ),
               ),
-            ),
-
-            Divider(
-              height: 1,
-              color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
             ),
 
             const SizedBox(height: 16),
@@ -524,10 +546,10 @@ class _ManageMembersPageState extends State<ManageMembersPage> {
                   height: 54,
                   padding: const EdgeInsets.fromLTRB(16, 0, 6, 0),
                   decoration: BoxDecoration(
-                    color: isDark ? const Color(0xFF18181B) : Colors.white,
+                    color: isDark ? const Color(0xFF101012) : Colors.white,
                     borderRadius: BorderRadius.circular(32),
                     border: Border.all(
-                      color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                      color: isDark ? const Color(0xFF222226) : const Color(0xFFE2E8F0),
                       width: 1.2,
                     ),
                   ),
@@ -614,10 +636,10 @@ class _ManageMembersPageState extends State<ManageMembersPage> {
                             return Container(
                               padding: const EdgeInsets.fromLTRB(6, 6, 14, 6),
                               decoration: BoxDecoration(
-                                color: isDark ? const Color(0xFF18181B) : Colors.white,
+                                color: isDark ? const Color(0xFF101012) : Colors.white,
                                 borderRadius: BorderRadius.circular(36),
                                 border: Border.all(
-                                  color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                                  color: isDark ? const Color(0xFF222226) : const Color(0xFFE2E8F0),
                                   width: 1.2,
                                 ),
                               ),
@@ -731,10 +753,10 @@ class _ManageMembersPageState extends State<ManageMembersPage> {
                             return Container(
                               padding: const EdgeInsets.fromLTRB(6, 6, 14, 6),
                               decoration: BoxDecoration(
-                                color: isDark ? const Color(0xFF18181B) : Colors.white,
+                                color: isDark ? const Color(0xFF101012) : Colors.white,
                                 borderRadius: BorderRadius.circular(36),
                                 border: Border.all(
-                                  color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                                  color: isDark ? const Color(0xFF222226) : const Color(0xFFE2E8F0),
                                   width: 1.2,
                                 ),
                               ),
@@ -876,10 +898,10 @@ class _ManageMembersPageState extends State<ManageMembersPage> {
                             height: 64,
                             padding: const EdgeInsets.fromLTRB(5, 5, 16, 5),
                             decoration: BoxDecoration(
-                              color: isDark ? const Color(0xFF18181B) : Colors.white,
+                              color: isDark ? const Color(0xFF101012) : Colors.white,
                               borderRadius: BorderRadius.circular(36),
                               border: Border.all(
-                                color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                                color: isDark ? const Color(0xFF222226) : const Color(0xFFE2E8F0),
                                 width: 1.2,
                               ),
                             ),
@@ -1011,7 +1033,7 @@ class _ManageMembersPageState extends State<ManageMembersPage> {
     }
 
     return Scaffold(
-      backgroundColor: isDark ? const Color(0xFF141416) : const Color(0xFFF8FAFC),
+      backgroundColor: isDark ? Colors.black : const Color(0xFFF8FAFC),
       body: SafeArea(
         child: contentWidget,
       ),

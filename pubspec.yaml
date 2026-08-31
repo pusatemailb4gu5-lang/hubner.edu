@@ -41,6 +41,7 @@ dependencies:
   syncfusion_flutter_pdfviewer: ^33.2.13
   flutter_local_notifications: ^18.0.1
   shorebird_code_push: ^2.0.7
+  path_provider: ^2.1.6
 
 dev_dependencies:
   flutter_test:

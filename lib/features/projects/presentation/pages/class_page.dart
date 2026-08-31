@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hubner/core/theme/app_typography.dart';
 import 'dart:async';
 import 'dart:ui';
@@ -23,6 +24,7 @@ import 'detail_cp_page.dart';
 import 'package:hubner/core/services/classroom_export_service.dart';
 import 'package:hubner/core/services/google_drive_service.dart';
 import 'package:hubner/core/services/app_sound_service.dart';
+import 'package:hubner/core/widgets/classroom_card_pattern_painter.dart';
 import 'package:hubner/core/theme/app_colors.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
@@ -60,6 +62,10 @@ class _ClassPageState extends State<ClassPage> {
   Map<String, dynamic>? _editingActivityTask;
   int? _inlineElemenStageIdx;
   String? _inlineElemenMode; // 'edit_elemen' or 'add_elemen'
+
+  int _currentSelectedTab = 0; // 0: Home, 4: Statistik
+  final ScrollController _scrollController = ScrollController();
+  final ValueNotifier<double> _scrollOffset = ValueNotifier<double>(0.0);
 
   final List<Color> _classroomCardColors = const [
     Color(0xFFD6A5F8), // 01. Lilac Purple (Core)
@@ -109,40 +115,26 @@ class _ClassPageState extends State<ClassPage> {
     bool isDark, {
     required List<DocumentSnapshot> studentDocs,
   }) {
-    const double avatarSize = 46.0;
-    const double overlap = 14.0;
+    const double avatarSize = 36.0;
+    const double overlap = 11.0;
 
     if (studentDocs.isEmpty) {
-      return GestureDetector(
-        onTap: () {
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (_) => ManageMembersPage(
-                projectId: projectId,
-                projectName: projectName,
-                ownerUid: ownerUid,
-              ),
-            ),
-          );
-        },
-        behavior: HitTestBehavior.opaque,
-        child: Container(
-          width: avatarSize,
-          height: avatarSize,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
-            border: Border.all(
-              color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
-              width: 1.2,
-            ),
+      return Container(
+        width: avatarSize,
+        height: avatarSize,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
+          border: Border.all(
+            color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+            width: 1.0,
           ),
-          child: Center(
-            child: Icon(
-              Icons.group_add_rounded,
-              size: 20,
-              color: isDark ? Colors.white70 : const Color(0xFF64748B),
-            ),
+        ),
+        child: Center(
+          child: Icon(
+            Icons.group_rounded,
+            size: 16,
+            color: isDark ? Colors.white70 : const Color(0xFF64748B),
           ),
         ),
       );
@@ -153,68 +145,54 @@ class _ClassPageState extends State<ClassPage> {
     final bool hasMore = totalCount > 4;
     final int extraCount = totalCount - 3;
     final int totalSlots = hasMore ? 4 : displayCount;
-    final double totalWidth = totalSlots * (avatarSize - overlap) + overlap + 4.0;
+    final double totalWidth = totalSlots * (avatarSize - overlap) + overlap + 2.0;
 
-    return GestureDetector(
-      onTap: () {
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (_) => ManageMembersPage(
-              projectId: projectId,
-              projectName: projectName,
-              ownerUid: ownerUid,
+    return SizedBox(
+      height: avatarSize,
+      width: totalWidth,
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          for (int i = 0; i < displayCount; i++)
+            Positioned(
+              left: i * (avatarSize - overlap),
+              child: Container(
+                width: avatarSize,
+                height: avatarSize,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
+                ),
+                child: ClipOval(
+                  child: Transform.scale(
+                    scale: 1.35,
+                    child: _buildAvatarImage(
+                      studentDocs[i].data() as Map<String, dynamic>? ?? {},
+                      i,
+                    ),
+                  ),
+                ),
+              ),
             ),
-          ),
-        );
-      },
-      behavior: HitTestBehavior.opaque,
-      child: SizedBox(
-        height: avatarSize,
-        width: totalWidth,
-        child: Stack(
-          clipBehavior: Clip.none,
-          children: [
-            for (int i = 0; i < displayCount; i++)
-              Positioned(
-                left: i * (avatarSize - overlap),
-                child: Container(
-                  width: avatarSize,
-                  height: avatarSize,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
-                  ),
-                  child: ClipOval(
-                    child: Transform.scale(
-                      scale: 1.45,
-                      child: _buildAvatarImage(
-                        studentDocs[i].data() as Map<String, dynamic>? ?? {},
-                        i,
-                      ),
-                    ),
+          if (hasMore)
+            Positioned(
+              left: displayCount * (avatarSize - overlap),
+              child: Container(
+                width: avatarSize,
+                height: avatarSize,
+                decoration: BoxDecoration(
+                  color: isDark ? const Color(0xFF27272A) : const Color(0xFF1E293B),
+                  shape: BoxShape.circle,
+                ),
+                child: Center(
+                  child: Text(
+                    '+$extraCount',
+                    style: AppTypography.timestamp(color: Colors.white, fontWeight: FontWeight.w900),
                   ),
                 ),
               ),
-            if (hasMore)
-              Positioned(
-                left: displayCount * (avatarSize - overlap),
-                child: Container(
-                  width: avatarSize,
-                  height: avatarSize,
-                  decoration: BoxDecoration(
-                    color: isDark ? const Color(0xFF27272A) : const Color(0xFF1E293B),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Center(
-                    child: Text(
-                      '+$extraCount',
-                      style: AppTypography.buttonLabel(color: Colors.white, fontWeight: FontWeight.w900),
-                    ),
-                  ),
-                ),
-              ),
-          ],
-        ),
+            ),
+        ],
       ),
     );
   }
@@ -397,11 +375,15 @@ class _ClassPageState extends State<ClassPage> {
       height: 46,
       padding: const EdgeInsets.fromLTRB(16, 0, 5, 0),
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF18181B) : Colors.white,
+        color: isDark
+            ? Colors.white.withValues(alpha: 0.22)
+            : Colors.white.withValues(alpha: 0.75),
         borderRadius: BorderRadius.circular(30),
         border: Border.all(
-          color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
-          width: 1.2,
+          color: isDark
+              ? Colors.white.withValues(alpha: 0.30)
+              : Colors.white.withValues(alpha: 0.90),
+          width: 1.0,
         ),
       ),
       child: Row(
@@ -410,10 +392,16 @@ class _ClassPageState extends State<ClassPage> {
             child: TextField(
               focusNode: _quickInviteFocusNode,
               controller: _quickInviteController,
-              style: AppTypography.buttonLabel(color: isDark ? Colors.white : Colors.black87, fontWeight: FontWeight.w600),
+              style: AppTypography.buttonLabel(
+                color: isDark ? Colors.white : const Color(0xFF0F172A),
+                fontWeight: FontWeight.w700,
+              ),
               decoration: InputDecoration(
-                hintText: _isQuickInviteFocused ? 'Ketik ID pengguna...' : 'Masukkan ID...',
-                hintStyle: AppTypography.timestamp(color: isDark ? Colors.white38 : Colors.black38),
+                hintText: _isQuickInviteFocused ? 'Ketik ID...' : 'Masukkan ID...',
+                hintStyle: AppTypography.timestamp(
+                  color: isDark ? Colors.white60 : const Color(0xFF334155).withValues(alpha: 0.7),
+                  fontWeight: FontWeight.w600,
+                ),
                 isDense: true,
                 border: InputBorder.none,
                 contentPadding: EdgeInsets.zero,
@@ -472,105 +460,95 @@ class _ClassPageState extends State<ClassPage> {
     required List liveStages,
     required int studentCount,
   }) {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
-      padding: const EdgeInsets.only(left: 14, right: 14),
-      child: Row(
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 14),
+      child: Column(
         children: [
-          // 1. Capaian Pembelajaran (2 Baris + Bounce)
-          _BouncyMenuSliderCard(
-            icon: Icons.auto_stories_rounded,
-            cardBg: const Color(0xFFD6A5F8),
-            title: 'Capaian\nPembelajaran',
-            onTap: () {
-              _showCPDialog(
-                context: context,
-                currentCp: currentCp,
-                isOwner: isOwner,
-                accentColor: accentColor,
-                isDark: isDark,
-              );
-            },
-            isDark: isDark,
-          ),
-          const SizedBox(width: 8),
-
-          // 2. Jadwal Pembelajaran (2 Baris + Bounce)
-          _BouncyMenuSliderCard(
-            icon: Icons.calendar_month_rounded,
-            cardBg: const Color(0xFF9CC8FC),
-            title: 'Jadwal\nPembelajaran',
-            onTap: () {
-              _showTeachingScheduleDialog(
-                context: context,
-                schedules: schedules,
-                isOwner: isOwner,
-                accentColor: accentColor,
-                isDark: isDark,
-              );
-            },
-            isDark: isDark,
-          ),
-          const SizedBox(width: 8),
-
-          // 3. Kelola Siswa (2 Baris + Bounce)
-          _BouncyMenuSliderCard(
-            icon: Icons.people_alt_rounded,
-            cardBg: const Color(0xFF7DE3D0),
-            title: 'Kelola\nSiswa',
-            onTap: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (_) => ManageMembersPage(
-                    projectId: projectId,
-                    projectName: projectName,
-                    ownerUid: ownerUid,
-                  ),
+          // Baris 1: Capaian Pembelajaran & Jadwal Pembelajaran
+          Row(
+            children: [
+              Expanded(
+                child: _BouncyMenuSliderCard(
+                  icon: Icons.auto_stories_rounded,
+                  cardBg: const Color(0xFFD6A5F8),
+                  title: 'Capaian\nPembelajaran',
+                  onTap: () {
+                    _showCPDialog(
+                      context: context,
+                      currentCp: currentCp,
+                      isOwner: isOwner,
+                      accentColor: accentColor,
+                      isDark: isDark,
+                    );
+                  },
+                  isDark: isDark,
                 ),
-              );
-            },
-            isDark: isDark,
-          ),
-          const SizedBox(width: 8),
-
-          // 4. Statistik Lengkap (2 Baris + Bounce - Magenta)
-          _BouncyMenuSliderCard(
-            icon: Icons.insights_rounded,
-            cardBg: const Color(0xFFF794BE),
-            title: 'Statistik\nLengkap',
-            onTap: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (_) => ClassStatisticsPage(
-                    projectId: projectId,
-                    projectName: projectName,
-                    accentColor: accentColor,
-                  ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: _BouncyMenuSliderCard(
+                  icon: Icons.calendar_month_rounded,
+                  cardBg: const Color(0xFF9CC8FC),
+                  title: 'Jadwal\nPembelajaran',
+                  onTap: () {
+                    _showTeachingScheduleDialog(
+                      context: context,
+                      schedules: schedules,
+                      isOwner: isOwner,
+                      accentColor: accentColor,
+                      isDark: isDark,
+                    );
+                  },
+                  isDark: isDark,
                 ),
-              );
-            },
-            isDark: isDark,
+              ),
+            ],
           ),
-          const SizedBox(width: 8),
+          const SizedBox(height: 10),
 
-          // 5. Laporan Hasil Belajar (2 Baris + Bounce - Orange)
-          _BouncyMenuSliderCard(
-            icon: Icons.assignment_outlined,
-            cardBg: const Color(0xFFF7BD84),
-            title: 'Laporan Hasil\nBelajar',
-            onTap: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (_) => ClassLearningReportPage(
-                    projectId: projectId,
-                    projectName: projectName,
-                    accentColor: accentColor,
-                  ),
+          // Baris 2: Kelola Anggota & Raport Kelas
+          Row(
+            children: [
+              Expanded(
+                child: _BouncyMenuSliderCard(
+                  icon: Icons.people_alt_rounded,
+                  cardBg: const Color(0xFF7DE3D0),
+                  title: 'Kelola\nAnggota',
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => ManageMembersPage(
+                          projectId: projectId,
+                          projectName: projectName,
+                          ownerUid: ownerUid,
+                        ),
+                      ),
+                    );
+                  },
+                  isDark: isDark,
                 ),
-              );
-            },
-            isDark: isDark,
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: _BouncyMenuSliderCard(
+                  icon: Icons.assignment_outlined,
+                  cardBg: const Color(0xFFF7BD84),
+                  title: 'Raport\nKelas',
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => ClassLearningReportPage(
+                          projectId: projectId,
+                          projectName: projectName,
+                          accentColor: accentColor,
+                        ),
+                      ),
+                    );
+                  },
+                  isDark: isDark,
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -986,6 +964,11 @@ class _ClassPageState extends State<ClassPage> {
   @override
   void initState() {
     super.initState();
+    _scrollController.addListener(() {
+      if (_scrollController.hasClients) {
+        _scrollOffset.value = _scrollController.offset;
+      }
+    });
     _quickInviteFocusNode.addListener(() {
       if (mounted) {
         setState(() {
@@ -997,6 +980,8 @@ class _ClassPageState extends State<ClassPage> {
 
   @override
   void dispose() {
+    _scrollController.dispose();
+    _scrollOffset.dispose();
     _quickInviteFocusNode.dispose();
     _quickInviteController.dispose();
     super.dispose();
@@ -4246,24 +4231,6 @@ class _ClassPageState extends State<ClassPage> {
             final Color cardColor = activeCardColors[themeIdx];
             final Color accentColor = _classroomAccentColors[themeIdx];
 
-            // Palet Slider (Warna Latar Mode Terang)
-            final List<Color> sliderColors = const [
-              Color(0xFFD6A5F8), // 1. Ungu Slider
-              Color(0xFF9CC8FC), // 2. Biru Slider
-              Color(0xFF7DE3D0), // 3. Tosca Slider
-              Color(0xFFF7BD84), // 4. Orange Slider
-              Color(0xFFF794BE), // 5. Pink Slider
-            ];
-
-            // Palet Soft Pastel (Warna Latar Mode Gelap - Terang & Bersih)
-            final List<Color> softPastelColors = const [
-              Color(0xFFEDE9FE), // Soft Lavender
-              Color(0xFFE0F2FE), // Soft Blue
-              Color(0xFFD1FAE5), // Soft Mint
-              Color(0xFFFEF3C7), // Soft Kuning/Peach
-              Color(0xFFFFE4E6), // Soft Pink
-            ];
-
             final Widget stagesListWidget = Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -4337,12 +4304,12 @@ class _ClassPageState extends State<ClassPage> {
                     ),
                   )
                 else
-                  ListView.separated(
+                    ListView.separated(
                     padding: EdgeInsets.zero,
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
                     itemCount: liveStages.length,
-                    separatorBuilder: (context, index) => const SizedBox(height: 6),
+                    separatorBuilder: (context, index) => const SizedBox(height: 8),
                     itemBuilder: (context, index) {
                       final stage = liveStages[index] as Map<String, dynamic>;
                       final String stageName = stage['name'] ?? 'Elemen ${index + 1}';
@@ -4354,31 +4321,25 @@ class _ClassPageState extends State<ClassPage> {
                         return const SizedBox.shrink();
                       }
 
-                      final int bIdx = index % sliderColors.length;
-                      // Mode Terang: Latar = Warna Slider, Angka = Putih
-                      // Mode Gelap: Latar = Deep Tinted Container, Angka = Warna Aksen Terang
-                      final Color bBg = isDark
-                          ? (bIdx == 0
-                              ? const Color(0xFF2E1065)
-                              : bIdx == 1
-                                  ? const Color(0xFF172554)
-                                  : bIdx == 2
-                                      ? const Color(0xFF064E3B)
-                                      : bIdx == 3
-                                          ? const Color(0xFF451A03)
-                                          : const Color(0xFF4C0519))
-                          : sliderColors[bIdx];
-                      final Color bFg = isDark
-                          ? (bIdx == 0
-                              ? const Color(0xFFD6A5F8)
-                              : bIdx == 1
-                                  ? const Color(0xFF93C5FD)
-                                  : bIdx == 2
-                                      ? const Color(0xFF6EE7B7)
-                                      : bIdx == 3
-                                          ? const Color(0xFFFDBA74)
-                                          : const Color(0xFFF472B6))
-                          : Colors.white;
+                      final List<Color> stageColors = const [
+                        Color(0xFFF3E8FF), // 1. Soft Purple (seperti materi di tugas)
+                        Color(0xFFE0F2FE), // 2. Soft Blue (seperti quiz di tugas)
+                        Color(0xFFD1FAE5), // 3. Soft Mint/Green (seperti selesai di tugas)
+                        Color(0xFFFFEDD5), // 4. Soft Orange (seperti tugas di tugas)
+                        Color(0xFFFCE7F3), // 5. Soft Pink
+                      ];
+                      final List<Color> stageDarkColors = const [
+                        Color(0xFF1E162B), // 1. Dark Soft Purple
+                        Color(0xFF102030), // 2. Dark Soft Blue
+                        Color(0xFF0C241C), // 3. Dark Soft Mint
+                        Color(0xFF2B1D11), // 4. Dark Soft Orange
+                        Color(0xFF2B1220), // 5. Dark Soft Pink
+                      ];
+
+                      final int cIdx = index % stageColors.length;
+                      final Color stageCardBg = isDark ? stageDarkColors[cIdx] : stageColors[cIdx];
+                      final Color stageTitleColor = isDark ? Colors.white : const Color(0xFF0F172A);
+                      final Color stageSubtitleColor = isDark ? Colors.white70 : const Color(0xFF334155);
 
                       final List rawMateris = stage['materis'] as List? ?? [];
                       int totalMateris = rawMateris.length;
@@ -4389,34 +4350,15 @@ class _ClassPageState extends State<ClassPage> {
                       }
 
                       String statusLabel = 'Proses';
-                      Color statusBg = const Color(0xFFDBEAFE);
-                      Color statusFg = const Color(0xFF1D4ED8);
+                      Color statusBg = isDark ? const Color(0xFFC76D10) : const Color(0xFFF7BD84);
+                      const Color statusFg = Color(0xFF0F172A);
                       if (stageStatus == 'selesai') {
                         statusLabel = 'Selesai';
-                        statusBg = const Color(0xFFD1FAE5);
-                        statusFg = const Color(0xFF047857);
+                        statusBg = isDark ? const Color(0xFF147D75) : const Color(0xFF7DE3D0);
                       } else if (stageStatus == 'akan_datang') {
                         statusLabel = 'Akan Datang';
-                        statusBg = isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9);
-                        statusFg = isDark ? Colors.white70 : Colors.black54;
+                        statusBg = isDark ? const Color(0xFF3F3F46) : const Color(0xFFE2E8F0);
                       }
-
-                      Color stageCardBg = isDark ? const Color(0xFF27272A) : Colors.white;
-                      if (stageStatus == 'proses') {
-                        stageCardBg = isDark ? const Color(0xFFC76D10) : const Color(0xFFF7BD84); // Kuning/Orange Slider
-                      } else if (stageStatus == 'selesai') {
-                        stageCardBg = isDark ? const Color(0xFF147D75) : const Color(0xFF7DE3D0); // Hijau/Tosca Slider
-                      }
-
-                      final Color stageTitleColor = (stageStatus == 'proses' || stageStatus == 'selesai')
-                          ? (isDark ? Colors.white : const Color(0xFF0F172A))
-                          : (isDark ? Colors.white : Colors.black87);
-
-                      final Color stageSubtitleColor = (stageStatus == 'proses')
-                          ? (isDark ? Colors.white70 : const Color(0xFF7C2D12).withValues(alpha: 0.85))
-                          : (stageStatus == 'selesai')
-                              ? (isDark ? Colors.white70 : const Color(0xFF064E3B).withValues(alpha: 0.85))
-                              : (isDark ? Colors.white54 : Colors.black45);
 
                       return Dismissible(
                         key: ValueKey('stage_${index}_${stageName}'),
@@ -4446,209 +4388,237 @@ class _ClassPageState extends State<ClassPage> {
                             ],
                           ),
                         ),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            // 1. Angka Bulat Terpisah (Separated Number Badge)
-                            Container(
-                              width: 40,
-                              height: 40,
-                              decoration: BoxDecoration(
-                                color: bBg,
-                                shape: BoxShape.circle,
-                              ),
-                              child: Center(
-                                child: Text(
-                                  (index + 1).toString().padLeft(2, '0'),
-                                  style: AppTypography.buttonLabel(color: bFg, fontWeight: FontWeight.w900, letterSpacing: -0.5),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-
-                            // 2. CP Card Terpisah (Kiri sedikit round atas-bawah, Kanan round penuh)
-                            Expanded(
-                              child: Material(
-                                color: Colors.transparent,
-                                child: InkWell(
-                                  onTap: isLockedForStudent
-                                      ? () {
-                                          ScaffoldMessenger.of(context).showSnackBar(
-                                            SnackBar(
-                                              content: Text('Elemen "$stageName" belum dibuka oleh guru.'),
-                                              backgroundColor: Colors.black87,
-                                            ),
-                                          );
-                                        }
-                                      : () {
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (_) => DetailCpPage(
-                                                projectId: projectId,
-                                                projectTitle: name,
-                                                stageIdx: index,
-                                                isOwner: isOwner,
-                                                accentColor: accentColor,
-                                                cardColor: cardColor,
-                                              ),
-                                            ),
-                                          );
-                                        },
-                                  borderRadius: BorderRadius.circular(10),
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                                    decoration: BoxDecoration(
-                                      color: stageCardBg,
-                                      borderRadius: BorderRadius.circular(10),
-                                    ),
-                                    child: Row(
-                                      crossAxisAlignment: CrossAxisAlignment.center,
-                                      children: [
-                                        // Title & Subtitle
-                                        Expanded(
-                                          child: Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              Text(
-                                                stageName,
-                                                style: AppTypography.buttonLabel(color: stageTitleColor, fontWeight: FontWeight.bold, height: 1.25),
-                                              ),
-                                              const SizedBox(height: 2),
-                                              Text(
-                                                stageDesc.isNotEmpty
-                                                    ? stageDesc
-                                                    : (totalMateris > 0
-                                                        ? '$totalMateris Materi · $totalTasksCount Tugas'
-                                                        : 'Atur materi & tugas'),
-                                                maxLines: 1,
-                                                overflow: TextOverflow.ellipsis,
-                                                style: AppTypography.timestamp(color: stageSubtitleColor),
-                                              ),
-                                            ],
-                                          ),
+                        child: Material(
+                          color: Colors.transparent,
+                          child: InkWell(
+                            onTap: isLockedForStudent
+                                ? () {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text('Elemen "$stageName" belum dibuka oleh guru.'),
+                                        backgroundColor: Colors.black87,
+                                      ),
+                                    );
+                                  }
+                                : () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) => DetailCpPage(
+                                          projectId: projectId,
+                                          projectTitle: name,
+                                          stageIdx: index,
+                                          isOwner: isOwner,
+                                          accentColor: accentColor,
+                                          cardColor: stageCardBg,
                                         ),
-                                        const SizedBox(width: 8),
-                                        // Status Dropdown Menu Mini (Frameless)
-                                        PopupMenuButton<String>(
-                                          tooltip: '',
-                                          padding: EdgeInsets.zero,
-                                          constraints: const BoxConstraints(minWidth: 88, maxWidth: 88),
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(12),
-                                            side: isDark
-                                                ? const BorderSide(color: Color(0xFF27272A), width: 1.0)
-                                                : const BorderSide(color: Color(0xFFE2E8F0), width: 1.0),
+                                      ),
+                                    );
+                                  },
+                            borderRadius: BorderRadius.circular(16),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(16),
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: stageCardBg,
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                                child: Stack(
+                                  children: [
+                                    Positioned.fill(
+                                      child: CustomPaint(
+                                        painter: _StageFacetPatternPainter(isDark: isDark),
+                                      ),
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                                      child: Row(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          // Angka di pojok atas kiri card
+                                          Container(
+                                            width: 28,
+                                            height: 28,
+                                            margin: const EdgeInsets.only(top: 2),
+                                            decoration: BoxDecoration(
+                                              color: isDark ? const Color(0xFF101012) : const Color(0xFF0F172A),
+                                              shape: BoxShape.circle,
+                                            ),
+                                            child: Center(
+                                              child: Text(
+                                                (index + 1).toString().padLeft(2, '0'),
+                                                style: GoogleFonts.plusJakartaSans(
+                                                  color: Colors.white,
+                                                  fontWeight: FontWeight.w900,
+                                                  fontSize: 11.5,
+                                                  letterSpacing: -0.3,
+                                                ),
+                                              ),
+                                            ),
                                           ),
-                                          elevation: 4,
-                                          color: isDark ? const Color(0xFF101012) : Colors.white,
-                                          enabled: isOwner,
-                                          onSelected: (val) {
-                                            _updateStageStatus(index, val, liveStages);
-                                          },
-                                          itemBuilder: (context) => [
-                                            PopupMenuItem(
-                                              value: 'proses',
-                                              height: 28,
-                                              padding: EdgeInsets.zero,
-                                              child: Container(
-                                                height: 28,
-                                                alignment: Alignment.centerLeft,
-                                                padding: const EdgeInsets.symmetric(horizontal: 10),
-                                                decoration: BoxDecoration(
-                                                  border: Border(
-                                                    bottom: BorderSide(
-                                                      color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
-                                                      width: 1,
-                                                    ),
-                                                  ),
-                                                ),
-                                                child: Text(
-                                                  'Proses',
-                                                  style: AppTypography.buttonLabel(color: isDark ? Colors.white : const Color(0xFF0F172A), fontWeight: FontWeight.w700),
-                                                ),
-                                              ),
-                                            ),
-                                            PopupMenuItem(
-                                              value: 'selesai',
-                                              height: 28,
-                                              padding: EdgeInsets.zero,
-                                              child: Container(
-                                                height: 28,
-                                                alignment: Alignment.centerLeft,
-                                                padding: const EdgeInsets.symmetric(horizontal: 10),
-                                                decoration: BoxDecoration(
-                                                  border: Border(
-                                                    bottom: BorderSide(
-                                                      color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
-                                                      width: 1,
-                                                    ),
-                                                  ),
-                                                ),
-                                                child: Text(
-                                                  'Selesai',
-                                                  style: AppTypography.buttonLabel(color: isDark ? Colors.white : const Color(0xFF0F172A), fontWeight: FontWeight.w700),
-                                                ),
-                                              ),
-                                            ),
-                                            PopupMenuItem(
-                                              value: 'akan_datang',
-                                              height: 28,
-                                              padding: EdgeInsets.zero,
-                                              child: Container(
-                                                height: 28,
-                                                alignment: Alignment.centerLeft,
-                                                padding: const EdgeInsets.symmetric(horizontal: 10),
-                                                child: Text(
-                                                  'Akan Datang',
-                                                  style: AppTypography.buttonLabel(color: isDark ? Colors.white : const Color(0xFF0F172A), fontWeight: FontWeight.w700),
-                                                ),
-                                              ),
-                                            ),
-                                          ],
-                                          child: Container(
-                                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-                                            child: Row(
+                                          const SizedBox(width: 10),
+
+                                          // Judul & Deskripsi Lengkap Elemen (Full tanpa terpotong)
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
                                               mainAxisSize: MainAxisSize.min,
-                                              crossAxisAlignment: CrossAxisAlignment.center,
                                               children: [
-                                                Container(
-                                                  width: 5.5,
-                                                  height: 5.5,
-                                                  decoration: BoxDecoration(
-                                                    color: stageStatus == 'selesai'
-                                                        ? const Color(0xFF047857)
-                                                        : stageStatus == 'proses'
-                                                            ? const Color(0xFFC2410C)
-                                                            : (isDark ? Colors.white38 : Colors.black38),
-                                                    shape: BoxShape.circle,
+                                                Text(
+                                                  stageName,
+                                                  style: AppTypography.buttonLabel(
+                                                    color: stageTitleColor,
+                                                    fontWeight: FontWeight.w800,
+                                                    height: 1.25,
                                                   ),
                                                 ),
-                                                const SizedBox(width: 4.5),
+                                                const SizedBox(height: 4),
                                                 Text(
-                                                  statusLabel,
-                                                  style: AppTypography.buttonLabel(color: stageStatus == 'proses' ? const Color(0xFF047857) : Colors.black87, fontWeight: FontWeight.w700),
+                                                  stageDesc.isNotEmpty
+                                                      ? stageDesc
+                                                      : (totalMateris > 0
+                                                          ? '$totalMateris Materi · $totalTasksCount Tugas'
+                                                          : 'Atur materi & tugas'),
+                                                  style: AppTypography.timestamp(
+                                                    color: stageSubtitleColor,
+                                                    fontWeight: FontWeight.w600,
+                                                    height: 1.35,
+                                                  ),
                                                 ),
                                               ],
                                             ),
                                           ),
-                                        ),
-                                      ],
+                                          const SizedBox(width: 8),
+
+                                          // Status Dropdown Button Card (Solid tanpa border & teks hitam)
+                                          PopupMenuButton<String>(
+                                            tooltip: '',
+                                            padding: EdgeInsets.zero,
+                                            constraints: const BoxConstraints(minWidth: 100, maxWidth: 120),
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.circular(14),
+                                              side: isDark
+                                                  ? const BorderSide(color: Color(0xFF27272A), width: 1.0)
+                                                  : const BorderSide(color: Color(0xFFE2E8F0), width: 1.0),
+                                            ),
+                                            elevation: 4,
+                                            color: isDark ? const Color(0xFF101012) : Colors.white,
+                                            enabled: isOwner,
+                                            onSelected: (val) {
+                                              _updateStageStatus(index, val, liveStages);
+                                            },
+                                            itemBuilder: (context) => [
+                                              PopupMenuItem(
+                                                value: 'proses',
+                                                height: 32,
+                                                padding: EdgeInsets.zero,
+                                                child: Container(
+                                                  height: 32,
+                                                  alignment: Alignment.centerLeft,
+                                                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                                                  decoration: BoxDecoration(
+                                                    border: Border(
+                                                      bottom: BorderSide(
+                                                        color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+                                                        width: 1,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  child: Text(
+                                                    'Proses',
+                                                    style: AppTypography.buttonLabel(
+                                                      color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                                      fontWeight: FontWeight.w700,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                              PopupMenuItem(
+                                                value: 'selesai',
+                                                height: 32,
+                                                padding: EdgeInsets.zero,
+                                                child: Container(
+                                                  height: 32,
+                                                  alignment: Alignment.centerLeft,
+                                                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                                                  decoration: BoxDecoration(
+                                                    border: Border(
+                                                      bottom: BorderSide(
+                                                        color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+                                                        width: 1,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  child: Text(
+                                                    'Selesai',
+                                                    style: AppTypography.buttonLabel(
+                                                      color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                                      fontWeight: FontWeight.w700,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                              PopupMenuItem(
+                                                value: 'akan_datang',
+                                                height: 32,
+                                                padding: EdgeInsets.zero,
+                                                child: Container(
+                                                  height: 32,
+                                                  alignment: Alignment.centerLeft,
+                                                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                                                  child: Text(
+                                                    'Akan Datang',
+                                                    style: AppTypography.buttonLabel(
+                                                      color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                                      fontWeight: FontWeight.w700,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                            child: Container(
+                                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                              decoration: BoxDecoration(
+                                                color: statusBg,
+                                                borderRadius: BorderRadius.circular(12),
+                                              ),
+                                              child: Row(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  Text(
+                                                    statusLabel,
+                                                    style: AppTypography.buttonLabel(
+                                                      color: statusFg,
+                                                      fontWeight: FontWeight.w800,
+                                                      fontSize: 11.5,
+                                                    ),
+                                                  ),
+                                                  if (isOwner) ...[
+                                                    const SizedBox(width: 3),
+                                                    Icon(
+                                                      Icons.keyboard_arrow_down_rounded,
+                                                      size: 14,
+                                                      color: statusFg,
+                                                    ),
+                                                  ],
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
                                     ),
-                                  ),
+                                  ],
                                 ),
                               ),
                             ),
-                          ],
+                          ),
                         ),
                       );
                     },
                   ),
               ],
             );
-
-            final double screenHeight = MediaQuery.of(context).size.height;
 
             return AnnotatedRegion<SystemUiOverlayStyle>(
               value: SystemUiOverlayStyle(
@@ -4660,513 +4630,1319 @@ class _ClassPageState extends State<ClassPage> {
                 systemNavigationBarContrastEnforced: false,
               ),
               child: Scaffold(
-                resizeToAvoidBottomInset: false,
                 backgroundColor: isDark ? const Color(0xFF000000) : const Color(0xFFF8FAFC),
-                body: Stack(
-                children: [
-                  // Layer 0: Fixed Hero Background & Header Content (Statis di belakang, tidak bergeser naik saat di-scroll)
-                  Positioned(
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    height: screenHeight * 0.65,
-                    child: Container(
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                        color: isDark ? _classroomCardDarkColors[themeIdx] : cardColor,
-                      ),
-                      child: Stack(
-                        children: [
-                          Positioned.fill(
-                            child: CustomPaint(
-                              painter: ClassroomCardPatternPainter(
-                                patternIndex: themeIdx,
+                resizeToAvoidBottomInset: false,
+                body: SafeArea(
+                  bottom: false,
+                  child: Stack(
+                    children: [
+                      Positioned.fill(
+                        child: _currentSelectedTab == 4
+                            ? ClassStatisticsPage(
+                                projectId: projectId,
+                                projectName: name,
+                                themeIndex: themeIdx,
                                 accentColor: accentColor,
-                              ),
-                            ),
-                          ),
-                          SafeArea(
-                            bottom: false,
-                            child: Padding(
-                              padding: const EdgeInsets.fromLTRB(14, 58, 14, 20),
-                              child: StreamBuilder<QuerySnapshot>(
-                                stream: FirebaseFirestore.instance
-                                    .collection('users')
-                                    .where('projectIds', arrayContains: projectId)
-                                    .snapshots(),
-                                builder: (context, membersSnap) {
-                                  final allDocs = membersSnap.data?.docs ?? [];
-                                  // Anggota kelas hanya menampilkan siswa (filter out guru/pengajar/admin/owner)
-                                  final studentDocs = allDocs.where((d) {
-                                    final data = d.data() as Map<String, dynamic>? ?? {};
-                                    final role = (data['role'] ?? '').toString().toLowerCase();
-                                    if (d.id == ownerUid) return false;
-                                    if (role == 'guru' ||
-                                        role == 'teacher' ||
-                                        role == 'pengajar' ||
-                                        role == 'admin') {
-                                      return false;
-                                    }
-                                    return true;
-                                  }).toList();
-                                  final int studentCount = studentDocs.length;
-
-                                  return Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      // Row: Icon Class + Nama Mapel Lengkap & ID Kelas
-                                       Row(
-                                         crossAxisAlignment: CrossAxisAlignment.center,
-                                         children: [
-                                           Padding(
-                                             padding: const EdgeInsets.only(top: 2),
-                                             child: SizedBox(
-                                               width: 78,
-                                               height: 78,
-                                               child: ColorFiltered(
-                                                 colorFilter: isDark
-                                                     ? ColorFilter.mode(Colors.black.withValues(alpha: 0.12), BlendMode.darken)
-                                                     : const ColorFilter.mode(Colors.transparent, BlendMode.dst),
-                                                 child: Image.asset(
-                                                   iconPath,
-                                                   fit: BoxFit.contain,
-                                                   errorBuilder: (ctx, err, st) => const Icon(
-                                                     Icons.school_rounded,
-                                                     size: 48,
-                                                     color: Colors.black38,
-                                                   ),
-                                                 ),
-                                               ),
-                                             ),
-                                           ),
-                                           const SizedBox(width: 14),
-                                           Expanded(
-                                             child: Column(
-                                               crossAxisAlignment: CrossAxisAlignment.start,
-                                               mainAxisSize: MainAxisSize.min,
-                                               children: [
-                                                 Text(
-                                                   name,
-                                                   maxLines: 3,
-                                                   overflow: TextOverflow.ellipsis,
-                                                   style: AppTypography.buttonLabel(color: isDark ? Colors.white : const Color(0xFF0F172A), fontWeight: FontWeight.w900, height: 1.15, letterSpacing: -0.5),
-                                                 ),
-                                                 const SizedBox(height: 4),
-                                                 GestureDetector(
-                                                   onTap: () {
-                                                     Clipboard.setData(ClipboardData(text: projectId));
-                                                     ScaffoldMessenger.of(context).showSnackBar(
-                                                       const SnackBar(content: Text('ID Kelas berhasil disalin!')),
-                                                     );
-                                                   },
-                                                   behavior: HitTestBehavior.opaque,
-                                                   child: Container(
-                                                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3.5),
-                                                     decoration: BoxDecoration(
-                                                       color: isDark ? Colors.black.withValues(alpha: 0.3) : Colors.black.withValues(alpha: 0.08),
-                                                       borderRadius: BorderRadius.circular(12),
-                                                     ),
-                                                     child: Row(
-                                                       mainAxisSize: MainAxisSize.min,
-                                                       children: [
-                                                         Icon(
-                                                           Icons.copy_rounded,
-                                                           size: 11,
-                                                           color: isDark ? Colors.white70 : Colors.black87,
-                                                         ),
-                                                         const SizedBox(width: 4),
-                                                         Text(
-                                                           'ID: $projectId',
-                                                           style: AppTypography.timestamp(color: isDark ? Colors.white : Colors.black87, fontWeight: FontWeight.w700),
-                                                         ),
-                                                       ],
-                                                     ),
-                                                   ),
-                                                 ),
-                                               ],
-                                             ),
-                                           ),
-                                         ],
-                                       ),
-                                       const SizedBox(height: 10),
-
-                                       // Middle Row: Slider Horizontal (Kelas, Siswa, Scanner)
-                                       SizedBox(
-                                         width: double.infinity,
-                                         child: SingleChildScrollView(
-                                           scrollDirection: Axis.horizontal,
-                                           physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
-                                           clipBehavior: Clip.none,
-                                           child: Row(
-                                             mainAxisSize: MainAxisSize.min,
-                                             children: [
-                                               Container(
-                                                 height: 46,
-                                                 padding: const EdgeInsets.fromLTRB(6, 6, 16, 6),
-                                                 decoration: BoxDecoration(
-                                                   color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
-                                                   borderRadius: BorderRadius.circular(30),
-                                                   border: Border.all(
-                                                     color: isDark
-                                                         ? const Color(0xFF27272A)
-                                                         : const Color(0xFFF1F5F9),
-                                                     width: 1.2,
-                                                   ),
-                                                 ),
-                                                 child: Row(
-                                                   mainAxisSize: MainAxisSize.min,
-                                                   children: [
-                                                     Container(
-                                                       width: 34,
-                                                       height: 34,
-                                                       decoration: BoxDecoration(
-                                                         color: isDark ? const Color(0xFF451A03) : const Color(0xFFFEF3C7),
-                                                         shape: BoxShape.circle,
-                                                       ),
-                                                       child: Center(
-                                                         child: Icon(
-                                                           Icons.school_rounded,
-                                                           size: 17,
-                                                           color: isDark ? const Color(0xFFFBBF24) : const Color(0xFFD97706),
-                                                         ),
-                                                       ),
-                                                     ),
-                                                     const SizedBox(width: 8),
-                                                     Text(
-                                                       classLabel,
-                                                       maxLines: 2,
-                                                       style: AppTypography.buttonLabel(color: isDark ? Colors.white : Colors.black87, fontWeight: FontWeight.bold, height: 1.15),
-                                                     ),
-                                                   ],
-                                                 ),
-                                               ),
-                                               const SizedBox(width: 8),
-                                               GestureDetector(
-                                                 onTap: () {
-                                                   Navigator.of(context).push(
-                                                     MaterialPageRoute(
-                                                       builder: (_) => ManageMembersPage(
-                                                         projectId: projectId,
-                                                         projectName: name,
-                                                         ownerUid: ownerUid,
-                                                       ),
-                                                     ),
-                                                   );
-                                                 },
-                                                 child: Container(
-                                                   height: 46,
-                                                   padding: const EdgeInsets.fromLTRB(6, 6, 16, 6),
-                                                   decoration: BoxDecoration(
-                                                     color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
-                                                     borderRadius: BorderRadius.circular(30),
-                                                     border: Border.all(
-                                                       color: isDark
-                                                           ? const Color(0xFF27272A)
-                                                           : const Color(0xFFF1F5F9),
-                                                       width: 1.2,
-                                                     ),
-                                                   ),
-                                                   child: Row(
-                                                     mainAxisSize: MainAxisSize.min,
-                                                     children: [
-                                                       Container(
-                                                         width: 34,
-                                                         height: 34,
-                                                         decoration: BoxDecoration(
-                                                           color: isDark ? const Color(0xFF172554) : const Color(0xFFE0F2FE),
-                                                           shape: BoxShape.circle,
-                                                         ),
-                                                         child: Center(
-                                                           child: Icon(
-                                                             Icons.people_alt_rounded,
-                                                             size: 17,
-                                                             color: isDark ? const Color(0xFF93C5FD) : accentColor,
-                                                           ),
-                                                         ),
-                                                       ),
-                                                       const SizedBox(width: 8),
-                                                       Text(
-                                                         '$studentCount Siswa',
-                                                         maxLines: 1,
-                                                         style: AppTypography.buttonLabel(color: isDark ? Colors.white : Colors.black87, fontWeight: FontWeight.bold),
-                                                       ),
-                                                     ],
-                                                   ),
-                                                 ),
-                                               ),
-                                               const SizedBox(width: 8),
-                                               GestureDetector(
-                                                 onTap: () => _showBarcodeDialog(context, projectId, name, isDark),
-                                                 behavior: HitTestBehavior.opaque,
-                                                 child: Container(
-                                                   width: 46,
-                                                   height: 46,
-                                                   decoration: BoxDecoration(
-                                                     color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
-                                                     shape: BoxShape.circle,
-                                                     border: Border.all(
-                                                       color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
-                                                       width: 1.2,
-                                                     ),
-                                                   ),
-                                                   child: Center(
-                                                     child: Icon(
-                                                       Icons.qr_code_scanner_rounded,
-                                                       color: isDark ? Colors.white : Colors.black,
-                                                       size: 22,
-                                                     ),
-                                                   ),
-                                                 ),
-                                               ),
-                                             ],
-                                           ),
-                                         ),
-                                       ),
-                                      const SizedBox(height: 8),
-
-                                      // Bottom Row: Members Avatar Stack + Quick Invite Box
-                                      Row(
+                                cardColor: cardColor,
+                                showBackButton: false,
+                              )
+                            : SingleChildScrollView(
+                                controller: _scrollController,
+                                physics: const BouncingScrollPhysics(
+                                  parent: AlwaysScrollableScrollPhysics(),
+                                ),
+                                padding: EdgeInsets.only(
+                                  top: 10,
+                                  bottom: MediaQuery.of(context).padding.bottom + 90,
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Padding(
+                                      padding: const EdgeInsets.fromLTRB(16, 6, 16, 12),
+                                      child: Row(
+                                        crossAxisAlignment: CrossAxisAlignment.center,
                                         children: [
-                                          if (!_isQuickInviteFocused) ...[
-                                            ConstrainedBox(
-                                              constraints: BoxConstraints(
-                                                maxWidth: (MediaQuery.of(context).size.width - 28 - 8) * 0.5,
-                                              ),
-                                              child: _buildMembersAvatarStack(
-                                                context,
-                                                projectId,
-                                                name,
-                                                ownerUid,
-                                                isDark,
-                                                studentDocs: studentDocs,
-                                              ),
-                                            ),
-                                            const SizedBox(width: 8),
-                                          ],
                                           Expanded(
-                                            child: _buildQuickInviteBox(
-                                              context,
-                                              projectId,
-                                              name,
-                                              isDark,
-                                              accentColor: accentColor,
+                                            child: Column(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                Text(
+                                                  'Detail Classroom',
+                                                  style: AppTypography.pageTitle(
+                                                    color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                                    fontWeight: FontWeight.w800,
+                                                    fontSize: 21,
+                                                  ),
+                                                ),
+                                                const SizedBox(height: 2),
+                                                Text(
+                                                  'Kelola aktivitas, materi & evaluasi kelas',
+                                                  style: GoogleFonts.plusJakartaSans(
+                                                    fontSize: 12.5,
+                                                    fontWeight: FontWeight.w500,
+                                                    color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                                                  ),
+                                                ),
+                                              ],
                                             ),
+                                          ),
+                                          _buildMoreButton(
+                                            context: context,
+                                            isDark: isDark,
+                                            liveProjectData: liveProjectData,
+                                            projectId: projectId,
+                                            name: name,
                                           ),
                                         ],
                                       ),
-                                    ],
-                                  );
-                                },
+                                    ),
+                                    // CARD 1
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(horizontal: 14),
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(28),
+                                        child: Container(
+                                          width: double.infinity,
+                                          decoration: BoxDecoration(
+                                            color: isDark ? _classroomCardDarkColors[themeIdx] : cardColor,
+                                            borderRadius: BorderRadius.circular(28),
+                                          ),
+                                          child: Stack(
+                                            children: [
+                                              Positioned.fill(
+                                                child: AnimatedClassroomPattern(
+                                                  patternIndex: themeIdx,
+                                                  accentColor: accentColor,
+                                                  isDark: isDark,
+                                                ),
+                                              ),
+                                              // Barcode di pojok kanan atas Card (Lingkaran Putih Jelas)
+                                              Positioned(
+                                                top: 14,
+                                                right: 14,
+                                                child: GestureDetector(
+                                                  onTap: () => _showBarcodeDialog(context, projectId, name, isDark),
+                                                  behavior: HitTestBehavior.opaque,
+                                                  child: Container(
+                                                    width: 36,
+                                                    height: 36,
+                                                    decoration: BoxDecoration(
+                                                      color: isDark
+                                                          ? Colors.white.withValues(alpha: 0.22)
+                                                          : Colors.white.withValues(alpha: 0.75),
+                                                      shape: BoxShape.circle,
+                                                      border: Border.all(
+                                                        color: isDark
+                                                            ? Colors.white.withValues(alpha: 0.30)
+                                                            : Colors.white.withValues(alpha: 0.90),
+                                                        width: 1.0,
+                                                      ),
+                                                    ),
+                                                    child: Center(
+                                                      child: Icon(
+                                                        Icons.qr_code_scanner_rounded,
+                                                        color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                                        size: 19,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                              Padding(
+                                                padding: const EdgeInsets.all(18),
+                                                child: StreamBuilder<QuerySnapshot>(
+                                                  stream: FirebaseFirestore.instance
+                                                      .collection('users')
+                                                      .where('projectIds', arrayContains: projectId)
+                                                      .snapshots(),
+                                                  builder: (context, membersSnap) {
+                                                    final allDocs = membersSnap.data?.docs ?? [];
+                                                    final studentDocs = allDocs.where((d) {
+                                                      final data = d.data() as Map<String, dynamic>? ?? {};
+                                                      final role = (data['role'] ?? '').toString().toLowerCase();
+                                                      if (d.id == ownerUid) return false;
+                                                      if (role == 'guru' ||
+                                                          role == 'teacher' ||
+                                                          role == 'pengajar' ||
+                                                          role == 'admin') {
+                                                      return false;
+                                                    }
+                                                    return true;
+                                                  }).toList();
+                                                  final int studentCount = studentDocs.length;
+
+                                                  return Column(
+                                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                                    mainAxisSize: MainAxisSize.min,
+                                                    children: [
+                                                      Row(
+                                                        crossAxisAlignment: CrossAxisAlignment.center,
+                                                        children: [
+                                                          SizedBox(
+                                                            width: 90,
+                                                            height: 90,
+                                                            child: Image.asset(
+                                                              iconPath,
+                                                              fit: BoxFit.contain,
+                                                              errorBuilder: (ctx, err, st) => Icon(
+                                                                Icons.school_rounded,
+                                                                size: 52,
+                                                                color: isDark ? Colors.white38 : Colors.black38,
+                                                              ),
+                                                            ),
+                                                          ),
+                                                          const SizedBox(width: 12),
+                                                          Expanded(
+                                                            child: Padding(
+                                                              padding: const EdgeInsets.only(right: 36),
+                                                              child: Column(
+                                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                                mainAxisSize: MainAxisSize.min,
+                                                                children: [
+                                                                  Text(
+                                                                    name,
+                                                                    maxLines: 2,
+                                                                    overflow: TextOverflow.ellipsis,
+                                                                    style: GoogleFonts.plusJakartaSans(
+                                                                      fontSize: 21.0,
+                                                                      fontWeight: FontWeight.w900,
+                                                                      color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                                                      height: 1.15,
+                                                                      letterSpacing: -0.5,
+                                                                    ),
+                                                                  ),
+                                                                  const SizedBox(height: 6),
+                                                                  GestureDetector(
+                                                                    onTap: () {
+                                                                      Clipboard.setData(ClipboardData(text: projectId));
+                                                                      ScaffoldMessenger.of(context).showSnackBar(
+                                                                        const SnackBar(content: Text('ID Kelas berhasil disalin!')),
+                                                                      );
+                                                                    },
+                                                                    behavior: HitTestBehavior.opaque,
+                                                                    child: Padding(
+                                                                      padding: const EdgeInsets.symmetric(vertical: 2),
+                                                                      child: Row(
+                                                                        mainAxisSize: MainAxisSize.min,
+                                                                        children: [
+                                                                          Icon(
+                                                                            Icons.copy_rounded,
+                                                                            size: 13,
+                                                                            color: isDark ? Colors.white70 : const Color(0xFF0F172A),
+                                                                          ),
+                                                                          const SizedBox(width: 5),
+                                                                          Text(
+                                                                            'ID: $projectId',
+                                                                            style: AppTypography.timestamp(
+                                                                              color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                                                              fontWeight: FontWeight.w700,
+                                                                            ),
+                                                                          ),
+                                                                        ],
+                                                                      ),
+                                                                    ),
+                                                                  ),
+                                                                ],
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                      const SizedBox(height: 10),
+
+                                                      // Middle Row: Info Kelas & Siswa (Full Width Simetris & Ikon Hitam)
+                                                      Row(
+                                                        children: [
+                                                          // Card 1: Info Kelas (Fleksibel Mengisi Ruang)
+                                                          Expanded(
+                                                            flex: 3,
+                                                            child: Container(
+                                                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+                                                              decoration: BoxDecoration(
+                                                                color: isDark
+                                                                    ? Colors.white.withValues(alpha: 0.22)
+                                                                    : Colors.white.withValues(alpha: 0.75),
+                                                                borderRadius: BorderRadius.circular(14),
+                                                                border: Border.all(
+                                                                  color: isDark
+                                                                      ? Colors.white.withValues(alpha: 0.30)
+                                                                      : Colors.white.withValues(alpha: 0.90),
+                                                                  width: 1.0,
+                                                                ),
+                                                              ),
+                                                              child: Row(
+                                                                children: [
+                                                                  Icon(
+                                                                    Icons.school_rounded,
+                                                                    size: 15,
+                                                                    color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                                                  ),
+                                                                  const SizedBox(width: 7),
+                                                                  Expanded(
+                                                                    child: Text(
+                                                                      classLabel,
+                                                                      maxLines: 1,
+                                                                      overflow: TextOverflow.ellipsis,
+                                                                      style: AppTypography.buttonLabel(
+                                                                        color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                                                        fontWeight: FontWeight.w700,
+                                                                      ),
+                                                                    ),
+                                                                  ),
+                                                                ],
+                                                              ),
+                                                            ),
+                                                          ),
+                                                          const SizedBox(width: 8),
+
+                                                          // Card 2: Info Siswa (Unclickable)
+                                                          Expanded(
+                                                            flex: 2,
+                                                            child: Container(
+                                                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+                                                              decoration: BoxDecoration(
+                                                                color: isDark
+                                                                    ? Colors.white.withValues(alpha: 0.22)
+                                                                    : Colors.white.withValues(alpha: 0.75),
+                                                                borderRadius: BorderRadius.circular(14),
+                                                                border: Border.all(
+                                                                  color: isDark
+                                                                      ? Colors.white.withValues(alpha: 0.30)
+                                                                      : Colors.white.withValues(alpha: 0.90),
+                                                                  width: 1.0,
+                                                                ),
+                                                              ),
+                                                              child: Row(
+                                                                mainAxisAlignment: MainAxisAlignment.center,
+                                                                children: [
+                                                                  Icon(
+                                                                    Icons.people_alt_rounded,
+                                                                    size: 15,
+                                                                    color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                                                  ),
+                                                                  const SizedBox(width: 7),
+                                                                  Flexible(
+                                                                    child: Text(
+                                                                      '$studentCount Siswa',
+                                                                      maxLines: 1,
+                                                                      overflow: TextOverflow.ellipsis,
+                                                                      style: AppTypography.buttonLabel(
+                                                                        color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                                                        fontWeight: FontWeight.w700,
+                                                                      ),
+                                                                    ),
+                                                                  ),
+                                                                ],
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                      const SizedBox(height: 10),
+
+                                                      // Bottom Row: Tumpukan Siswa + Quick Invite
+                                                      Row(
+                                                        children: [
+                                                          if (!_isQuickInviteFocused) ...[
+                                                            ConstrainedBox(
+                                                              constraints: BoxConstraints(
+                                                                maxWidth: (MediaQuery.of(context).size.width - 28 - 36 - 8) * 0.5,
+                                                              ),
+                                                              child: _buildMembersAvatarStack(
+                                                                context,
+                                                                projectId,
+                                                                name,
+                                                                ownerUid,
+                                                                isDark,
+                                                                studentDocs: studentDocs,
+                                                              ),
+                                                            ),
+                                                            const SizedBox(width: 8),
+                                                          ],
+                                                          Expanded(
+                                                            child: _buildQuickInviteBox(
+                                                              context,
+                                                              projectId,
+                                                              name,
+                                                              isDark,
+                                                              accentColor: accentColor,
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ],
+                                                  );
+                                                },
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 14),
+
+                                  // Kelola Kelas Slider
+                                  StreamBuilder<QuerySnapshot>(
+                                    stream: FirebaseFirestore.instance
+                                        .collection('users')
+                                        .where('projectIds', arrayContains: projectId)
+                                        .snapshots(),
+                                    builder: (context, membersSnap) {
+                                      final allDocs = membersSnap.data?.docs ?? [];
+                                      final studentDocs = allDocs.where((d) {
+                                        final data = d.data() as Map<String, dynamic>? ?? {};
+                                        final role = (data['role'] ?? '').toString().toLowerCase();
+                                        if (d.id == ownerUid) return false;
+                                        if (role == 'guru' ||
+                                            role == 'teacher' ||
+                                            role == 'pengajar' ||
+                                            role == 'admin') {
+                                          return false;
+                                        }
+                                        return true;
+                                      }).toList();
+                                      final int studentCount = studentDocs.length;
+
+                                      return _buildClassMenuSlider(
+                                        context: context,
+                                        projectId: projectId,
+                                        projectName: name,
+                                        ownerUid: ownerUid,
+                                        isOwner: isOwner,
+                                        isDark: isDark,
+                                        accentColor: accentColor,
+                                        currentCp: currentCp,
+                                        schedules: schedules,
+                                        liveStages: liveStages,
+                                        studentCount: studentCount,
+                                      );
+                                    },
+                                  ),
+                                  const SizedBox(height: 14),
+
+                                  // CARD 2: Learning Stages & Activities
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal: 14),
+                                    child: stagesListWidget,
+                                  ),
+                                ],
+                              ),
+                            ),
+                      ),
+                      // Top Sticky Bar
+                      Positioned(
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        child: _buildTopStickyHeader(
+                          context: context,
+                          isDark: isDark,
+                          name: name,
+                          liveProjectData: liveProjectData,
+                          projectId: projectId,
+                        ),
+                      ),
+                      // Floating Fluid iPhone Bottom Nav Bar (Exact model from Home)
+                      Positioned(
+                        left: 14,
+                        right: 14,
+                        bottom: MediaQuery.of(context).padding.bottom > 0
+                            ? MediaQuery.of(context).padding.bottom + 14
+                            : 26,
+                        child: _ClassroomFluidBottomNavBar(
+                          currentIndex: _currentSelectedTab,
+                          isDark: isDark,
+                          accentColor: accentColor,
+                          onTabSelected: (index) {
+                            int getInitialStageIdx(List stages) {
+                              for (int i = 0; i < stages.length; i++) {
+                                final s = stages[i];
+                                if (s is Map && (s['status'] ?? '').toString().toLowerCase() == 'proses') {
+                                  return i;
+                                }
+                              }
+                              return 0;
+                            }
+
+                            if (index == 0) {
+                              if (widget.onDeselectClassroom != null) {
+                                widget.onDeselectClassroom!();
+                              } else if (Navigator.canPop(context)) {
+                                Navigator.pop(context);
+                              } else {
+                                Navigator.of(context).popUntil((route) => route.isFirst);
+                              }
+                            } else if (index == 1) {
+                              DetailCpPage.openCreateMateriPage(
+                                context,
+                                projectId: projectId,
+                                projectTitle: name,
+                                stageIdx: getInitialStageIdx(liveStages),
+                                isOwner: isOwner,
+                                accentColor: accentColor,
+                                cardColor: cardColor,
+                                stages: liveStages,
+                                openFromClassPage: true,
+                              );
+                            } else if (index == 2) {
+                              DetailCpPage.openCreateTaskPage(
+                                context,
+                                projectId: projectId,
+                                projectTitle: name,
+                                stageIdx: getInitialStageIdx(liveStages),
+                                isOwner: isOwner,
+                                accentColor: accentColor,
+                                cardColor: cardColor,
+                                stages: liveStages,
+                                openFromClassPage: true,
+                              );
+                            } else if (index == 3) {
+                              DetailCpPage.openCreateQuizPage(
+                                context,
+                                projectId: projectId,
+                                projectTitle: name,
+                                stageIdx: getInitialStageIdx(liveStages),
+                                isOwner: isOwner,
+                                accentColor: accentColor,
+                                cardColor: cardColor,
+                                stages: liveStages,
+                                openFromClassPage: true,
+                              );
+                            } else if (index == 4) {
+                              setState(() => _currentSelectedTab = 4);
+                            }
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildTopStickyHeader({
+    required BuildContext context,
+    required bool isDark,
+    required String name,
+    required Map<String, dynamic> liveProjectData,
+    required String projectId,
+  }) {
+    return ValueListenableBuilder<double>(
+      valueListenable: _scrollOffset,
+      builder: (context, offset, child) {
+        if (offset <= 24.0) {
+          return const SizedBox.shrink();
+        }
+        final double progress = ((offset - 24.0) / 26.0).clamp(0.0, 1.0);
+        final double blurSigma = 16.0 * progress;
+
+        return Opacity(
+          opacity: progress,
+          child: ClipRect(
+            child: BackdropFilter(
+              filter: ImageFilter.blur(
+                sigmaX: blurSigma > 0.1 ? blurSigma : 0.001,
+                sigmaY: blurSigma > 0.1 ? blurSigma : 0.001,
+              ),
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                decoration: BoxDecoration(
+                  color: (isDark ? const Color(0xFF09090B) : const Color(0xFFF8FAFC)).withValues(alpha: isDark ? 0.85 : 0.88),
+                  border: Border(
+                    bottom: BorderSide(
+                      color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                      width: 1.0,
+                    ),
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.04),
+                      blurRadius: 10,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        name,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 15.5,
+                          fontWeight: FontWeight.w800,
+                          color: isDark ? Colors.white : const Color(0xFF0F172A),
+                          height: 1.2,
+                          letterSpacing: -0.3,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    _buildMoreButton(
+                      context: context,
+                      isDark: isDark,
+                      liveProjectData: liveProjectData,
+                      projectId: projectId,
+                      name: name,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildMoreButton({
+    required BuildContext context,
+    required bool isDark,
+    required Map<String, dynamic> liveProjectData,
+    required String projectId,
+    required String name,
+  }) {
+    return PopupMenuButton<String>(
+      tooltip: '',
+      padding: EdgeInsets.zero,
+      constraints: const BoxConstraints(),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: isDark
+            ? const BorderSide(color: Color(0xFF27272A), width: 1.0)
+            : BorderSide.none,
+      ),
+      elevation: 8,
+      color: isDark ? const Color(0xFF101012) : Colors.white,
+      icon: Container(
+        width: 40,
+        height: 40,
+        decoration: const BoxDecoration(
+          color: Colors.transparent,
+          shape: BoxShape.circle,
+        ),
+        alignment: Alignment.center,
+        child: Icon(
+          Icons.more_horiz_rounded,
+          color: isDark ? Colors.white : const Color(0xFF0F172A),
+          size: 26,
+        ),
+      ),
+      onSelected: (val) {
+        if (val == 'edit') {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (_) => AddClassPage(
+                editProjectId: projectId,
+                initialClassData: liveProjectData,
+              ),
+            ),
+          );
+        } else if (val == 'barcode') {
+          _showBarcodeDialog(context, projectId, name, isDark);
+        } else if (val == 'hapus') {
+          _deleteProject(context);
+        } else if (val == 'export') {
+          ClassroomExportService.exportClassroom(
+            context: context,
+            projectData: liveProjectData,
+          );
+        }
+      },
+      itemBuilder: (context) => [
+        PopupMenuItem(
+          value: 'edit',
+          height: 36,
+          padding: EdgeInsets.zero,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+            child: Row(
+              children: [
+                const Icon(Icons.edit_rounded, size: 18, color: Color(0xFF7C3AED)),
+                const SizedBox(width: 10),
+                Text(
+                  'Edit Kelas',
+                  style: AppTypography.buttonLabel(
+                    color: isDark ? Colors.white : const Color(0xFF0F172A),
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        PopupMenuItem(
+          value: 'barcode',
+          height: 36,
+          padding: EdgeInsets.zero,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+            child: Row(
+              children: [
+                const Icon(Icons.qr_code_2_rounded, size: 18, color: Color(0xFF2563EB)),
+                const SizedBox(width: 10),
+                Text(
+                  'QR Code Kelas',
+                  style: AppTypography.buttonLabel(
+                    color: isDark ? Colors.white : const Color(0xFF0F172A),
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        PopupMenuItem(
+          value: 'export',
+          height: 36,
+          padding: EdgeInsets.zero,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+            child: Row(
+              children: [
+                const Icon(Icons.download_rounded, size: 18, color: Color(0xFF059669)),
+                const SizedBox(width: 10),
+                Text(
+                  'Ekspor Dokumen',
+                  style: AppTypography.buttonLabel(
+                    color: isDark ? Colors.white : const Color(0xFF0F172A),
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        PopupMenuItem(
+          value: 'hapus',
+          height: 36,
+          padding: EdgeInsets.zero,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+            child: Row(
+              children: [
+                const Icon(Icons.delete_outline_rounded, size: 18, color: Colors.redAccent),
+                const SizedBox(width: 10),
+                Text(
+                  'Hapus Kelas',
+                  style: AppTypography.buttonLabel(
+                    color: Colors.redAccent,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  void _showActivityDialog({
+    required BuildContext context,
+    required String type, // 'pdf', 'tugas', 'quiz'
+    required List liveStages,
+    required bool isOwner,
+    required bool isDark,
+  }) {
+    if (!isOwner) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Hanya guru pengajar yang dapat membuat aktivitas.'),
+          backgroundColor: Color(0xFFEF4444),
+        ),
+      );
+      return;
+    }
+
+    if (liveStages.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Tambahkan Elemen Pembelajaran terlebih dahulu.'),
+          backgroundColor: Color(0xFFEF4444),
+        ),
+      );
+      return;
+    }
+
+    // Default ke elemen berstatus proses atau elemen pertama (paling atas)
+    int defaultStageIdx = 0;
+    for (int i = 0; i < liveStages.length; i++) {
+      final s = liveStages[i];
+      if (s is Map && (s['status'] ?? '').toString().toLowerCase() == 'proses') {
+        defaultStageIdx = i;
+        break;
+      }
+    }
+
+    Color headerThemeColor;
+    Color headerDarkColor;
+    IconData headerIcon;
+    String dialogTitle;
+    String dialogSubtitle;
+    String submitButtonText;
+
+    if (type == 'pdf') {
+      headerThemeColor = const Color(0xFF7DE3D0);
+      headerDarkColor = const Color(0xFF147D75);
+      headerIcon = Icons.description_rounded;
+      dialogTitle = 'Upload Materi Pembelajaran';
+      dialogSubtitle = 'Unggah dokumen atau materi ke dalam bab kelas';
+      submitButtonText = 'Simpan & Upload Materi';
+    } else if (type == 'tugas') {
+      headerThemeColor = const Color(0xFF9CC8FC);
+      headerDarkColor = const Color(0xFF2864A8);
+      headerIcon = Icons.assignment_rounded;
+      dialogTitle = 'Buat Tugas Baru';
+      dialogSubtitle = 'Berikan penugasan belajar untuk siswa kelas';
+      submitButtonText = 'Simpan & Berikan Tugas';
+    } else {
+      headerThemeColor = const Color(0xFFD6A5F8);
+      headerDarkColor = const Color(0xFF6B3BA3);
+      headerIcon = Icons.quiz_rounded;
+      dialogTitle = 'Buat Kuis Evaluasi';
+      dialogSubtitle = 'Uji kompetensi siswa dengan evaluasi kuis';
+      submitButtonText = 'Simpan & Publikasikan Kuis';
+    }
+
+    final titleController = TextEditingController();
+    final descController = TextEditingController();
+    final linkController = TextEditingController();
+    final deadlineController = TextEditingController(text: '7 Hari ke depan');
+    int selectedStageIdx = defaultStageIdx;
+    String selectedTaskType = 'Individu';
+
+    showDialog(
+      context: context,
+      builder: (dialogCtx) {
+        return StatefulBuilder(
+          builder: (ctx, setDialogState) {
+            return Dialog(
+              insetPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(36)),
+              clipBehavior: Clip.antiAlias,
+              backgroundColor: isDark ? const Color(0xFF1C1C1E) : Colors.white,
+              child: Container(
+                constraints: const BoxConstraints(maxWidth: 460),
+                decoration: BoxDecoration(
+                  color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
+                  borderRadius: BorderRadius.circular(36),
+                  border: Border.all(
+                    color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+                    width: 1.2,
+                  ),
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Header (Sama persis dengan _showCPDialog)
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.fromLTRB(20, 20, 16, 16),
+                      decoration: BoxDecoration(
+                        color: isDark ? headerDarkColor : headerThemeColor,
+                        border: Border(
+                          bottom: BorderSide(
+                            color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+                            width: 1.0,
+                          ),
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 42,
+                            height: 42,
+                            decoration: BoxDecoration(
+                              color: isDark ? Colors.white.withValues(alpha: 0.15) : Colors.white,
+                              shape: BoxShape.circle,
+                            ),
+                            child: Center(
+                              child: Icon(
+                                headerIcon,
+                                color: isDark ? Colors.white : Colors.black,
+                                size: 22,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  dialogTitle,
+                                  style: AppTypography.cardTitle(
+                                    color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  dialogSubtitle,
+                                  style: AppTypography.timestamp(
+                                    color: isDark ? Colors.white70 : const Color(0xFF334155),
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          GestureDetector(
+                            onTap: () => Navigator.pop(dialogCtx),
+                            child: Container(
+                              width: 36,
+                              height: 36,
+                              decoration: BoxDecoration(
+                                color: isDark
+                                    ? const Color(0xFF27272A)
+                                    : Colors.white.withValues(alpha: 0.8),
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(
+                                Icons.close_rounded,
+                                color: isDark ? Colors.white : Colors.black87,
+                                size: 18,
                               ),
                             ),
                           ),
                         ],
                       ),
                     ),
-                  ),
 
-                  // Layer 1: Draggable Sheet Tahapan Pembelajaran (Meluncur Menutup Hero Saat Di-Drag/Scroll ke Atas)
-                  DraggableScrollableSheet(
-                    initialChildSize: 0.62,
-                    minChildSize: 0.62,
-                    maxChildSize: 0.95,
-                    snap: true,
-                    snapSizes: const [0.62, 0.95],
-                    builder: (context, scrollController) {
-                      return Container(
-                        decoration: BoxDecoration(
-                          color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
-                          borderRadius: const BorderRadius.vertical(
-                            top: Radius.circular(32),
-                          ),
-                        ),
-                        child: SingleChildScrollView(
-                          controller: scrollController,
-                          physics: const ClampingScrollPhysics(),
-                          padding: const EdgeInsets.fromLTRB(0, 14, 0, 40),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Center(
-                                child: Container(
-                                  width: 44,
-                                  height: 4.5,
-                                  decoration: BoxDecoration(
-                                    color: isDark ? Colors.white24 : Colors.black12,
-                                    borderRadius: BorderRadius.circular(3),
-                                  ),
+                    // Body
+                    Flexible(
+                      child: SingleChildScrollView(
+                        padding: const EdgeInsets.all(20),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            // 1. Dropdown Pilihan Elemen
+                            Text(
+                              'Pilih Elemen Tujuan',
+                              style: AppTypography.buttonLabel(
+                                color: isDark ? Colors.white70 : Colors.black87,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: isDark ? const Color(0xFF27272A) : const Color(0xFFF8FAFC),
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(
+                                  color: isDark ? const Color(0xFF3F3F46) : const Color(0xFFE2E8F0),
+                                  width: 1.2,
                                 ),
                               ),
-                              const SizedBox(height: 16),
-                              StreamBuilder<QuerySnapshot>(
-                                stream: FirebaseFirestore.instance
-                                    .collection('users')
-                                    .where('projectIds', arrayContains: projectId)
-                                    .snapshots(),
-                                builder: (context, membersSnap) {
-                                  final allDocs = membersSnap.data?.docs ?? [];
-                                  final studentDocs = allDocs.where((d) {
-                                    final data = d.data() as Map<String, dynamic>? ?? {};
-                                    final role = (data['role'] ?? '').toString().toLowerCase();
-                                    if (d.id == ownerUid) return false;
-                                    if (role == 'guru' ||
-                                        role == 'teacher' ||
-                                        role == 'pengajar' ||
-                                        role == 'admin') {
-                                      return false;
+                              child: DropdownButtonHideUnderline(
+                                child: DropdownButton<int>(
+                                  value: selectedStageIdx,
+                                  isExpanded: true,
+                                  dropdownColor: isDark ? const Color(0xFF1E1E22) : Colors.white,
+                                  icon: const Icon(Icons.keyboard_arrow_down_rounded),
+                                  items: List.generate(liveStages.length, (idx) {
+                                    final s = liveStages[idx] as Map;
+                                    final String sName = s['name'] ?? 'Elemen ${idx + 1}';
+                                    final String status = (s['status'] ?? '').toString().toLowerCase();
+                                    final bool isCurrentProcess = status == 'proses';
+
+                                    return DropdownMenuItem<int>(
+                                      value: idx,
+                                      child: Row(
+                                        children: [
+                                          Icon(
+                                            Icons.layers_rounded,
+                                            size: 18,
+                                            color: isCurrentProcess
+                                                ? const Color(0xFF10B981)
+                                                : (isDark ? Colors.white70 : Colors.black87),
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Expanded(
+                                            child: Text(
+                                              sName,
+                                              style: AppTypography.buttonLabel(
+                                                color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                                fontWeight: isCurrentProcess ? FontWeight.bold : FontWeight.w600,
+                                              ),
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                          ),
+                                          if (isCurrentProcess)
+                                            Container(
+                                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                              decoration: BoxDecoration(
+                                                color: const Color(0xFF10B981).withValues(alpha: 0.15),
+                                                borderRadius: BorderRadius.circular(8),
+                                              ),
+                                              child: Text(
+                                                'Proses',
+                                                style: AppTypography.timestamp(
+                                                  color: const Color(0xFF10B981),
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                            ),
+                                        ],
+                                      ),
+                                    );
+                                  }),
+                                  onChanged: (val) {
+                                    if (val != null) {
+                                      setDialogState(() {
+                                        selectedStageIdx = val;
+                                      });
                                     }
-                                    return true;
-                                  }).toList();
-                                  final int studentCount = studentDocs.length;
-
-                                  return _buildClassMenuSlider(
-                                    context: context,
-                                    projectId: projectId,
-                                    projectName: name,
-                                    ownerUid: ownerUid,
-                                    isOwner: isOwner,
-                                    isDark: isDark,
-                                    accentColor: accentColor,
-                                    currentCp: currentCp,
-                                    schedules: schedules,
-                                    liveStages: liveStages,
-                                    studentCount: studentCount,
-                                  );
-                                },
-                              ),
-                              const SizedBox(height: 8),
-                              Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 14),
-                                child: stagesListWidget,
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-
-                  // Layer 2: Pinned Top Action Bar (Back & 3-dots) selalu di atas dan clickable
-                  Positioned(
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    child: SafeArea(
-                      bottom: false,
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(14, 8, 14, 0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            GestureDetector(
-                              onTap: () {
-                                if (widget.onDeselectClassroom != null) {
-                                  widget.onDeselectClassroom!();
-                                } else if (Navigator.canPop(context)) {
-                                  Navigator.pop(context);
-                                }
-                              },
-                              child: Padding(
-                                padding: const EdgeInsets.all(4.0),
-                                child: Icon(
-                                  Icons.arrow_back_rounded,
-                                  color: isDark ? Colors.white : Colors.black87,
-                                  size: 24,
+                                  },
                                 ),
                               ),
                             ),
-                            PopupMenuButton<String>(
-                              tooltip: '',
-                              padding: EdgeInsets.zero,
-                              constraints: const BoxConstraints(),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(20),
-                                side: isDark
-                                    ? const BorderSide(color: Color(0xFF27272A), width: 1.0)
-                                    : BorderSide.none,
+                            const SizedBox(height: 16),
+
+                            // 2. Input Judul
+                            Text(
+                              type == 'pdf' ? 'Judul Materi' : (type == 'tugas' ? 'Judul Tugas' : 'Judul Kuis'),
+                              style: AppTypography.buttonLabel(
+                                color: isDark ? Colors.white70 : Colors.black87,
+                                fontWeight: FontWeight.bold,
                               ),
-                              elevation: 8,
-                              color: isDark ? const Color(0xFF101012) : Colors.white,
-                              icon: Padding(
-                                padding: const EdgeInsets.all(4.0),
-                                child: Icon(
-                                  Icons.more_horiz_rounded,
-                                  color: isDark ? Colors.white : Colors.black87,
-                                  size: 24,
+                            ),
+                            const SizedBox(height: 8),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 14),
+                              decoration: BoxDecoration(
+                                color: isDark ? const Color(0xFF27272A) : const Color(0xFFF8FAFC),
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(
+                                  color: isDark ? const Color(0xFF3F3F46) : const Color(0xFFE2E8F0),
+                                  width: 1.2,
                                 ),
                               ),
-                              onSelected: (val) {
-                                if (val == 'edit') {
-                                  Navigator.of(context).push(
-                                    MaterialPageRoute(
-                                      builder: (_) => AddClassPage(
-                                        editProjectId: projectId,
-                                        initialClassData: liveProjectData,
+                              child: TextField(
+                                controller: titleController,
+                                style: AppTypography.subtitle(
+                                  color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                ),
+                                decoration: InputDecoration(
+                                  border: InputBorder.none,
+                                  hintText: type == 'pdf'
+                                      ? 'Contoh: Modul 1 - Pengenalan Algoritma'
+                                      : (type == 'tugas'
+                                          ? 'Contoh: Latihan Pemrograman Dasar'
+                                          : 'Contoh: Kuis Evaluasi Pemahaman'),
+                                  hintStyle: AppTypography.timestamp(
+                                    color: isDark ? Colors.white38 : Colors.black38,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+
+                            // 3. Input Deskripsi / Petunjuk
+                            Text(
+                              'Deskripsi / Petunjuk',
+                              style: AppTypography.buttonLabel(
+                                color: isDark ? Colors.white70 : Colors.black87,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: isDark ? const Color(0xFF27272A) : const Color(0xFFF8FAFC),
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(
+                                  color: isDark ? const Color(0xFF3F3F46) : const Color(0xFFE2E8F0),
+                                  width: 1.2,
+                                ),
+                              ),
+                              child: TextField(
+                                controller: descController,
+                                minLines: 2,
+                                maxLines: 4,
+                                style: AppTypography.subtitle(
+                                  color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                ),
+                                decoration: InputDecoration(
+                                  border: InputBorder.none,
+                                  hintText: 'Tuliskan rangkuman materi atau petunjuk...',
+                                  hintStyle: AppTypography.timestamp(
+                                    color: isDark ? Colors.white38 : Colors.black38,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+
+                            // 4. Special Fields per Type
+                            if (type == 'pdf') ...[
+                              Text(
+                                'Tautan Dokumen / File PDF',
+                                style: AppTypography.buttonLabel(
+                                  color: isDark ? Colors.white70 : Colors.black87,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 14),
+                                decoration: BoxDecoration(
+                                  color: isDark ? const Color(0xFF27272A) : const Color(0xFFF8FAFC),
+                                  borderRadius: BorderRadius.circular(16),
+                                  border: Border.all(
+                                    color: isDark ? const Color(0xFF3F3F46) : const Color(0xFFE2E8F0),
+                                    width: 1.2,
+                                  ),
+                                ),
+                                child: TextField(
+                                  controller: linkController,
+                                  style: AppTypography.subtitle(
+                                    color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                  ),
+                                  decoration: InputDecoration(
+                                    border: InputBorder.none,
+                                    prefixIcon: const Icon(Icons.link_rounded, size: 18),
+                                    hintText: 'https://... atau nama file materi',
+                                    hintStyle: AppTypography.timestamp(
+                                      color: isDark ? Colors.white38 : Colors.black38,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ] else if (type == 'tugas') ...[
+                              Text(
+                                'Tipe Penugasan',
+                                style: AppTypography.buttonLabel(
+                                  color: isDark ? Colors.white70 : Colors.black87,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Row(
+                                children: [
+                                  ChoiceChip(
+                                    label: const Text('Individu'),
+                                    selected: selectedTaskType == 'Individu',
+                                    onSelected: (val) {
+                                      if (val) setDialogState(() => selectedTaskType = 'Individu');
+                                    },
+                                    selectedColor: isDark ? const Color(0xFF2864A8) : const Color(0xFF9CC8FC),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  ChoiceChip(
+                                    label: const Text('Kelompok'),
+                                    selected: selectedTaskType == 'Kelompok',
+                                    onSelected: (val) {
+                                      if (val) setDialogState(() => selectedTaskType = 'Kelompok');
+                                    },
+                                    selectedColor: isDark ? const Color(0xFF2864A8) : const Color(0xFF9CC8FC),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 16),
+                              Text(
+                                'Tenggat Waktu (Deadline)',
+                                style: AppTypography.buttonLabel(
+                                  color: isDark ? Colors.white70 : Colors.black87,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 14),
+                                decoration: BoxDecoration(
+                                  color: isDark ? const Color(0xFF27272A) : const Color(0xFFF8FAFC),
+                                  borderRadius: BorderRadius.circular(16),
+                                  border: Border.all(
+                                    color: isDark ? const Color(0xFF3F3F46) : const Color(0xFFE2E8F0),
+                                    width: 1.2,
+                                  ),
+                                ),
+                                child: TextField(
+                                  controller: deadlineController,
+                                  style: AppTypography.subtitle(
+                                    color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                  ),
+                                  decoration: InputDecoration(
+                                    border: InputBorder.none,
+                                    prefixIcon: const Icon(Icons.event_rounded, size: 18),
+                                    hintText: 'Contoh: 7 Hari ke depan / 12 September',
+                                    hintStyle: AppTypography.timestamp(
+                                      color: isDark ? Colors.white38 : Colors.black38,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ] else ...[
+                              Text(
+                                'Durasi Waktu Pengerjaan',
+                                style: AppTypography.buttonLabel(
+                                  color: isDark ? Colors.white70 : Colors.black87,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 14),
+                                decoration: BoxDecoration(
+                                  color: isDark ? const Color(0xFF27272A) : const Color(0xFFF8FAFC),
+                                  borderRadius: BorderRadius.circular(16),
+                                  border: Border.all(
+                                    color: isDark ? const Color(0xFF3F3F46) : const Color(0xFFE2E8F0),
+                                    width: 1.2,
+                                  ),
+                                ),
+                                child: TextField(
+                                  controller: deadlineController,
+                                  style: AppTypography.subtitle(
+                                    color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                  ),
+                                  decoration: InputDecoration(
+                                    border: InputBorder.none,
+                                    prefixIcon: const Icon(Icons.timer_outlined, size: 18),
+                                    hintText: 'Contoh: 30 Menit / 60 Menit',
+                                    hintStyle: AppTypography.timestamp(
+                                      color: isDark ? Colors.white38 : Colors.black38,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                            const SizedBox(height: 24),
+
+                            // Tombol Aksi Simpan
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: TextButton(
+                                    onPressed: () => Navigator.pop(dialogCtx),
+                                    style: TextButton.styleFrom(
+                                      padding: const EdgeInsets.symmetric(vertical: 14),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(24),
                                       ),
                                     ),
-                                  );
-                                } else if (val == 'hapus') {
-                                  _deleteProject(context);
-                                } else if (val == 'export') {
-                                  ClassroomExportService.exportClassroom(
-                                    context: context,
-                                    projectData: liveProjectData,
-                                  );
-                                }
-                              },
-                              itemBuilder: (context) => [
-                                PopupMenuItem(
-                                  value: 'edit',
-                                  height: 36,
-                                  padding: EdgeInsets.zero,
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
-                                    child: Row(
-                                      children: [
-                                        const Icon(Icons.edit_rounded, size: 18, color: Color(0xFF7C3AED)),
-                                        const SizedBox(width: 10),
-                                        Text(
-                                          'Edit',
-                                          style: AppTypography.buttonLabel(color: isDark ? Colors.white : const Color(0xFF0F172A), fontWeight: FontWeight.w600),
-                                        ),
-                                      ],
+                                    child: Text(
+                                      'Batal',
+                                      style: AppTypography.buttonLabel(
+                                        color: isDark ? Colors.white60 : Colors.black54,
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
                                   ),
                                 ),
-                                PopupMenuItem(
-                                  value: 'hapus',
-                                  height: 36,
-                                  padding: EdgeInsets.zero,
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
-                                    child: Row(
-                                      children: [
-                                        const Icon(Icons.delete_outline_rounded, size: 18, color: Color(0xFFEF4444)),
-                                        const SizedBox(width: 10),
-                                        Text(
-                                          'Hapus',
-                                          style: AppTypography.buttonLabel(color: const Color(0xFFEF4444), fontWeight: FontWeight.w600),
-                                        ),
-                                      ],
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  flex: 2,
+                                  child: ElevatedButton(
+                                    onPressed: () async {
+                                      final title = titleController.text.trim();
+                                      if (title.isEmpty) {
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          const SnackBar(
+                                            content: Text('Judul tidak boleh kosong!'),
+                                            backgroundColor: Color(0xFFEF4444),
+                                          ),
+                                        );
+                                        return;
+                                      }
+
+                                      Navigator.pop(dialogCtx);
+
+                                      final updatedStages = List.from(liveStages);
+                                      final curStage = Map<String, dynamic>.from(updatedStages[selectedStageIdx]);
+                                      final rawMateris = curStage['materis'] as List? ?? [];
+                                      final List<Map<String, dynamic>> materis = List<Map<String, dynamic>>.from(
+                                        rawMateris.map((m) => Map<String, dynamic>.from(m as Map)),
+                                      );
+
+                                      if (materis.isEmpty) {
+                                        materis.add({
+                                          'title': 'Materi Pembelajaran 1',
+                                          'tasks': [],
+                                        });
+                                      }
+
+                                      final firstMateri = Map<String, dynamic>.from(materis[0]);
+                                      final tasks = List.from(firstMateri['tasks'] ?? []);
+
+                                      final Map<String, dynamic> newTask = {
+                                        'title': title,
+                                        'type': type,
+                                        'desc': descController.text.trim(),
+                                        'start': 'Hari Ini',
+                                        'end': deadlineController.text.trim(),
+                                        'doc': linkController.text.trim(),
+                                        'isDone': false,
+                                        'progress': 0,
+                                        'taskType': selectedTaskType,
+                                      };
+
+                                      tasks.add(newTask);
+                                      firstMateri['tasks'] = tasks;
+                                      materis[0] = firstMateri;
+                                      curStage['materis'] = materis;
+                                      updatedStages[selectedStageIdx] = curStage;
+
+                                      try {
+                                        await FirebaseFirestore.instance
+                                            .collection('projects')
+                                            .doc(widget.projectId)
+                                            .update({'stages': updatedStages});
+                                        if (context.mounted) {
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            SnackBar(
+                                              content: Text('$dialogTitle berhasil disimpan!'),
+                                              backgroundColor: const Color(0xFF10B981),
+                                            ),
+                                          );
+                                        }
+                                      } catch (e) {
+                                        if (context.mounted) {
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            SnackBar(
+                                              content: Text('Gagal menyimpan aktivitas: $e'),
+                                              backgroundColor: const Color(0xFFEF4444),
+                                            ),
+                                          );
+                                        }
+                                      }
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: isDark ? const Color(0xFF27272A) : const Color(0xFF0F172A),
+                                      foregroundColor: Colors.white,
+                                      padding: const EdgeInsets.symmetric(vertical: 14),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(24),
+                                      ),
+                                      elevation: 0,
                                     ),
-                                  ),
-                                ),
-                                PopupMenuItem(
-                                  value: 'export',
-                                  height: 36,
-                                  padding: EdgeInsets.zero,
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
-                                    child: Row(
-                                      children: [
-                                        const Icon(Icons.file_download_outlined, size: 18, color: Color(0xFF10B981)),
-                                        const SizedBox(width: 10),
-                                        Text(
-                                          'Export',
-                                          style: AppTypography.buttonLabel(color: isDark ? Colors.white : const Color(0xFF0F172A), fontWeight: FontWeight.w600),
-                                        ),
-                                      ],
+                                    child: Text(
+                                      submitButtonText,
+                                      style: AppTypography.buttonLabel(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -5176,14 +5952,69 @@ class _ClassPageState extends State<ClassPage> {
                         ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-          );
+            );
           },
         );
       },
+    );
+  }
+
+  Widget _buildClassIcon(Map<String, dynamic> data, {double size = 26}) {
+    final rawIcon = (data['icon'] ?? '').toString();
+    String iconPath = 'assets/icon_pack/project/project_1.png';
+    if (rawIcon.isNotEmpty) {
+      if (rawIcon.startsWith('assets/')) {
+        iconPath = rawIcon;
+      } else {
+        iconPath = 'assets/icon_pack/project/$rawIcon';
+      }
+    }
+    return Image.asset(
+      iconPath,
+      width: size,
+      height: size,
+      fit: BoxFit.contain,
+      errorBuilder: (context, error, stackTrace) => Icon(
+        Icons.school_rounded,
+        color: const Color(0xFF7F52FC),
+        size: size,
+      ),
+    );
+  }
+
+  Widget _buildSafeAvatar(String? avatar) {
+    final String raw = (avatar ?? '').trim();
+    if (raw.isEmpty) {
+      return Image.asset('assets/icon_pack/avatar/avatar_2.png', fit: BoxFit.cover);
+    }
+    if (raw.startsWith('http://') || raw.startsWith('https://')) {
+      return Image.network(
+        raw,
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) => Image.asset('assets/icon_pack/avatar/avatar_2.png', fit: BoxFit.cover),
+      );
+    }
+    String assetPath = raw;
+    if (!assetPath.startsWith('assets/')) {
+      if (assetPath.startsWith('icon_pack/')) {
+        assetPath = 'assets/$assetPath';
+      } else {
+        assetPath = 'assets/icon_pack/avatar/$assetPath';
+      }
+    }
+    if (!assetPath.toLowerCase().endsWith('.png') &&
+        !assetPath.toLowerCase().endsWith('.jpg') &&
+        !assetPath.toLowerCase().endsWith('.jpeg') &&
+        !assetPath.toLowerCase().endsWith('.webp')) {
+      assetPath = '$assetPath.png';
+    }
+    return Image.asset(
+      assetPath,
+      fit: BoxFit.cover,
+      errorBuilder: (_, __, ___) => Image.asset('assets/icon_pack/avatar/avatar_2.png', fit: BoxFit.cover),
     );
   }
 
@@ -8717,159 +9548,6 @@ class DashedBorderPainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
-class ClassroomCardPatternPainter extends CustomPainter {
-  final int patternIndex;
-  final Color accentColor;
-  const ClassroomCardPatternPainter({
-    required this.patternIndex,
-    required this.accentColor,
-  });
-  @override
-  void paint(Canvas canvas, Size size) {
-    final bool isDark = AppColors.isDarkMode;
-    final Color primaryPatternColor = isDark
-        ? Colors.black.withValues(alpha: 0.18)
-        : accentColor.withValues(alpha: 0.08);
-    final Color secondaryPatternColor = isDark
-        ? Colors.black.withValues(alpha: 0.28)
-        : Colors.white.withValues(alpha: 0.30);
-    final Color strokePatternColor = isDark
-        ? Colors.black.withValues(alpha: 0.35)
-        : Colors.white.withValues(alpha: 0.35);
-    final Color ringPatternColor = isDark
-        ? Colors.black.withValues(alpha: 0.16)
-        : accentColor.withValues(alpha: 0.07);
-    final Color dotPatternColor = isDark
-        ? Colors.black.withValues(alpha: 0.22)
-        : accentColor.withValues(alpha: 0.10);
-
-    switch (patternIndex % 5) {
-      case 0:
-        final paint = Paint()
-          ..color = primaryPatternColor
-          ..style = PaintingStyle.fill;
-        final path = Path();
-        path.moveTo(size.width * 0.45, 0);
-        path.cubicTo(
-          size.width * 0.65,
-          size.height * 0.35,
-          size.width * 0.35,
-          size.height * 0.75,
-          size.width * 0.85,
-          size.height,
-        );
-        path.lineTo(size.width, size.height);
-        path.lineTo(size.width, 0);
-        path.close();
-        canvas.drawPath(path, paint);
-        final paintSecondary = Paint()
-          ..color = secondaryPatternColor
-          ..style = PaintingStyle.fill;
-        final pathSecondary = Path();
-        pathSecondary.moveTo(size.width * 0.6, 0);
-        pathSecondary.cubicTo(
-          size.width * 0.8,
-          size.height * 0.4,
-          size.width * 0.5,
-          size.height * 0.8,
-          size.width,
-          size.height * 0.7,
-        );
-        pathSecondary.lineTo(size.width, 0);
-        pathSecondary.close();
-        canvas.drawPath(pathSecondary, paintSecondary);
-        break;
-      case 1:
-        final paintRing = Paint()
-          ..color = ringPatternColor
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 14;
-        final center = Offset(size.width * 0.85, size.height * 0.3);
-        canvas.drawCircle(center, 30, paintRing);
-        canvas.drawCircle(center, 55, paintRing);
-        final paintWave = Paint()
-          ..color = secondaryPatternColor
-          ..style = PaintingStyle.fill;
-        final pathRing = Path();
-        pathRing.moveTo(size.width * 0.55, 0);
-        pathRing.quadraticBezierTo(
-          size.width * 0.8,
-          size.height * 0.5,
-          size.width,
-          size.height,
-        );
-        pathRing.lineTo(size.width, 0);
-        pathRing.close();
-        canvas.drawPath(pathRing, paintWave);
-        break;
-      case 2:
-        final paintBubble1 = Paint()
-          ..color = primaryPatternColor
-          ..style = PaintingStyle.fill;
-        canvas.drawCircle(
-          Offset(size.width * 0.8, size.height * 0.2),
-          45,
-          paintBubble1,
-        );
-        final paintBubble2 = Paint()
-          ..color = secondaryPatternColor
-          ..style = PaintingStyle.fill;
-        canvas.drawCircle(
-          Offset(size.width * 0.9, size.height * 0.75),
-          35,
-          paintBubble2,
-        );
-        break;
-      case 3:
-        final paintDot = Paint()
-          ..color = dotPatternColor
-          ..style = PaintingStyle.fill;
-        for (double x = size.width * 0.5; x < size.width; x += 18) {
-          for (double y = 10; y < size.height; y += 18) {
-            canvas.drawCircle(Offset(x, y), 3, paintDot);
-          }
-        }
-        break;
-      case 4:
-      default:
-        final paintRay = Paint()
-          ..color = primaryPatternColor
-          ..style = PaintingStyle.fill;
-        final pathRay = Path();
-        pathRay.moveTo(size.width * 0.5, 0);
-        pathRay.quadraticBezierTo(
-          size.width * 0.7,
-          size.height * 0.5,
-          size.width * 0.8,
-          size.height,
-        );
-        pathRay.lineTo(size.width, size.height);
-        pathRay.lineTo(size.width, 0);
-        pathRay.close();
-        canvas.drawPath(pathRay, paintRay);
-        final paintStroke = Paint()
-          ..color = strokePatternColor
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 10
-          ..strokeCap = StrokeCap.round;
-        final pathStroke = Path();
-        pathStroke.moveTo(size.width * 0.65, 0);
-        pathStroke.quadraticBezierTo(
-          size.width * 0.82,
-          size.height * 0.45,
-          size.width * 0.88,
-          size.height,
-        );
-        canvas.drawPath(pathStroke, paintStroke);
-        break;
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant ClassroomCardPatternPainter oldDelegate) =>
-      oldDelegate.patternIndex != patternIndex || oldDelegate.accentColor != accentColor;
-}
-
 class _BouncyMenuSliderCard extends StatelessWidget {
   final IconData icon;
   final Color cardBg;
@@ -8905,20 +9583,19 @@ class _BouncyMenuSliderCard extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(32),
+        borderRadius: BorderRadius.circular(24),
         child: Container(
-          height: 54,
-          padding: const EdgeInsets.fromLTRB(6, 6, 16, 6),
+          height: 52,
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
           decoration: BoxDecoration(
             color: actualCardBg,
-            borderRadius: BorderRadius.circular(32),
+            borderRadius: BorderRadius.circular(24),
           ),
           child: Row(
-            mainAxisSize: MainAxisSize.min,
             children: [
               Container(
-                width: 42,
-                height: 42,
+                width: 38,
+                height: 38,
                 decoration: BoxDecoration(
                   color: isDark ? Colors.black.withValues(alpha: 0.25) : Colors.white,
                   shape: BoxShape.circle,
@@ -8926,16 +9603,23 @@ class _BouncyMenuSliderCard extends StatelessWidget {
                 child: Center(
                   child: Icon(
                     icon,
-                    size: 22,
+                    size: 20,
                     color: isDark ? Colors.white : Colors.black,
                   ),
                 ),
               ),
-              const SizedBox(width: 10),
-              Text(
-                title,
-                maxLines: 2,
-                style: AppTypography.buttonLabel(color: isDark ? Colors.white : Colors.black, fontWeight: FontWeight.w800, height: 1.15),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  title,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTypography.buttonLabel(
+                    color: isDark ? Colors.white : Colors.black,
+                    fontWeight: FontWeight.w800,
+                    height: 1.15,
+                  ),
+                ),
               ),
             ],
           ),
@@ -9054,4 +9738,427 @@ class _AutoMarqueeTextState extends State<_AutoMarqueeText>
       },
     );
   }
+}
+
+class _ClassroomFluidBottomNavBar extends StatefulWidget {
+  final int currentIndex;
+  final ValueChanged<int> onTabSelected;
+  final bool isDark;
+  final Color accentColor;
+
+  const _ClassroomFluidBottomNavBar({
+    super.key,
+    required this.currentIndex,
+    required this.onTabSelected,
+    required this.isDark,
+    required this.accentColor,
+  });
+
+  @override
+  State<_ClassroomFluidBottomNavBar> createState() => _ClassroomFluidBottomNavBarState();
+}
+
+class _ClassroomFluidBottomNavBarState extends State<_ClassroomFluidBottomNavBar>
+    with TickerProviderStateMixin {
+  late AnimationController _animController;
+  late AnimationController _pressController;
+  late Animation<double> _pressScaleAnim;
+  late Animation<double> _pressStretchAnim;
+  late Animation<double> _anim;
+  double _currentPillPosition = 0.0;
+  bool _isDragging = false;
+  int _lastHapticIndex = -1;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentPillPosition = widget.currentIndex.toDouble();
+    _lastHapticIndex = widget.currentIndex;
+    _animController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 380),
+    );
+    _pressController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 240),
+    );
+    _pressScaleAnim = Tween<double>(begin: 1.0, end: 0.98).animate(
+      CurvedAnimation(
+        parent: _pressController,
+        curve: Curves.easeInOut,
+      ),
+    );
+    _pressStretchAnim = Tween<double>(begin: 1.0, end: 1.02).animate(
+      CurvedAnimation(
+        parent: _pressController,
+        curve: Curves.easeInOut,
+      ),
+    );
+  }
+
+  @override
+  void didUpdateWidget(covariant _ClassroomFluidBottomNavBar oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.currentIndex != widget.currentIndex && !_isDragging) {
+      _animateTo(widget.currentIndex.toDouble());
+    }
+  }
+
+  @override
+  void dispose() {
+    _animController.dispose();
+    _pressController.dispose();
+    super.dispose();
+  }
+
+  void _onPressStart() {
+    _pressController.forward();
+    HapticFeedback.selectionClick();
+  }
+
+  void _onPressEnd() {
+    _pressController.reverse();
+  }
+
+  void _animateTo(double target) {
+    _anim = Tween<double>(
+      begin: _currentPillPosition,
+      end: target,
+    ).animate(
+      CurvedAnimation(
+        parent: _animController,
+        curve: Curves.easeOutBack,
+      ),
+    )..addListener(() {
+        setState(() {
+          _currentPillPosition = _anim.value;
+        });
+      });
+    _animController.forward(from: 0.0);
+  }
+
+  void _handleDrag(double localDx, double totalWidth) {
+    final double tabWidth = totalWidth / 5;
+    final double rawPos = (localDx / tabWidth) - 0.5;
+    final double clampedPos = rawPos.clamp(0.0, 4.0);
+
+    final int targetIdx = clampedPos.round().clamp(0, 4);
+    if (targetIdx != _lastHapticIndex) {
+      HapticFeedback.selectionClick();
+      _lastHapticIndex = targetIdx;
+    }
+
+    setState(() {
+      _currentPillPosition = clampedPos;
+    });
+  }
+
+  void _finishDrag() {
+    final int finalIndex = _currentPillPosition.round().clamp(0, 4);
+    _isDragging = false;
+    _onPressEnd();
+    _animateTo(finalIndex.toDouble());
+    widget.onTabSelected(finalIndex);
+  }
+
+  Widget _buildNavSvg({
+    required int index,
+    required bool isActive,
+    required bool isDark,
+  }) {
+    final mainColor = isActive
+        ? (isDark ? '#FFFFFF' : '#0F172A')
+        : (isDark ? '#71717A' : '#94A3B8');
+    final numberColor = isDark ? '#0F172A' : '#FFFFFF';
+
+    String svgStr;
+    switch (index) {
+      case 0: // Beranda (Grid Dashboard - Exact from Home Page)
+        final accentColor = isActive ? '#7C3AED' : (isDark ? '#71717A' : '#94A3B8');
+        svgStr = '''<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="3.5" y="3.5" width="7" height="7" rx="2.5" fill="$mainColor"/>
+          <rect x="13.5" y="3.5" width="7" height="7" rx="2.5" fill="$accentColor"/>
+          <rect x="3.5" y="13.5" width="7" height="7" rx="2.5" fill="$mainColor"/>
+          <rect x="13.5" y="13.5" width="7" height="7" rx="2.5" fill="$mainColor"/>
+        </svg>''';
+        break;
+
+      case 1: // Materi (Exact Student Todo _ClassScheduleDoodle)
+        final accentColor = isActive ? '#0284C7' : (isDark ? '#71717A' : '#94A3B8');
+        svgStr = '''<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M4 19.5A2.5 2.5 0 016.5 17H20" stroke="$mainColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z" stroke="$mainColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M9 7h7M9 11h5" stroke="$accentColor" stroke-width="2" stroke-linecap="round"/>
+          <circle cx="16" cy="11" r="1.5" fill="$accentColor"/>
+        </svg>''';
+        break;
+
+      case 2: // Tugas (Exact Student Todo _TaskDeadlineDoodle)
+        final accentColor = isActive ? '#F59E0B' : (isDark ? '#71717A' : '#94A3B8');
+        svgStr = '''<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M7 3H5a2 2 0 00-2 2v14a2 2 0 002 2h10a2 2 0 002-2v-3" stroke="$mainColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M7 8h5M7 12h4M7 16h6" stroke="$mainColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M19.1 2.9a2.12 2.12 0 013 3L13.5 14.5l-4.5 1 1-4.5L19.1 2.9z" fill="$accentColor" stroke="$mainColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>''';
+        break;
+
+      case 3: // Quiz (Exact Student Todo _QuizPuzzleDoodle 1 2 3 Stepped Bars)
+        final accentColor = isActive ? '#8B5CF6' : (isDark ? '#71717A' : '#94A3B8');
+        svgStr = '''<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Step 1 (Tingkat 1 - Rendah) -->
+          <rect x="2.5" y="13.5" width="5.5" height="8" rx="2" fill="$mainColor"/>
+          <path d="M4.5 16.5l1-0.8v4.3" stroke="$numberColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+
+          <!-- Step 2 (Tingkat 2 - Sedang) -->
+          <rect x="9.25" y="8.5" width="5.5" height="13" rx="2" fill="$accentColor"/>
+          <path d="M10.8 11.2c.2-.5.7-.8 1.2-.8.7 0 1.2.4 1.2 1 0 .7-.5 1.1-1.1 1.6l-1.3 1.2h2.4" stroke="#FFFFFF" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+
+          <!-- Step 3 (Tingkat 3 - Tinggi) -->
+          <rect x="16" y="3.5" width="5.5" height="18" rx="2" fill="$mainColor"/>
+          <path d="M17.6 6.2h2.2l-1.1 1.6c.7 0 1.2.4 1.2 1 0 .7-.6 1.2-1.3 1.2-.6 0-1-.3-1.2-.7" stroke="$numberColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>''';
+        break;
+
+      case 4: // Statistik (Bar Chart Analytics - 60% Black/White, 40% Emerald Accent)
+      default:
+        final accentColor = isActive ? '#10B981' : (isDark ? '#71717A' : '#94A3B8');
+        svgStr = '''<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M3 21h18" stroke="$mainColor" stroke-width="2" stroke-linecap="round"/>
+          <rect x="5" y="12" width="3.5" height="6" rx="1.5" fill="$mainColor"/>
+          <rect x="10.25" y="8" width="3.5" height="10" rx="1.5" fill="$mainColor"/>
+          <rect x="15.5" y="4" width="3.5" height="14" rx="1.5" fill="$accentColor"/>
+        </svg>''';
+        break;
+    }
+
+    return SvgPicture.string(
+      svgStr,
+      width: 21,
+      height: 21,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final bool isDark = widget.isDark;
+
+    final navItems = [
+      {'label': 'Beranda'},
+      {'label': 'Materi'},
+      {'label': 'Tugas'},
+      {'label': 'Quiz'},
+      {'label': 'Statistik'},
+    ];
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final double totalWidth = constraints.maxWidth;
+        final double tabWidth = totalWidth / 5;
+
+        // Fluid liquid pill calculation perfectly centered on the active tab
+        final double pillWidth = tabWidth - 6.0;
+        final double pillCenter = (_currentPillPosition + 0.5) * tabWidth;
+        final double pillLeft = (pillCenter - (pillWidth / 2)).clamp(2.0, totalWidth - pillWidth - 2.0);
+
+        return GestureDetector(
+          onTapDown: (details) {
+            _onPressStart();
+            final int index = (details.localPosition.dx / tabWidth).floor().clamp(0, 4);
+            _animateTo(index.toDouble());
+            widget.onTabSelected(index);
+          },
+          onTapUp: (_) => _onPressEnd(),
+          onTapCancel: () => _onPressEnd(),
+          onHorizontalDragStart: (details) {
+            _isDragging = true;
+            _onPressStart();
+            _animController.stop();
+            _handleDrag(details.localPosition.dx, totalWidth);
+          },
+          onHorizontalDragUpdate: (details) {
+            _handleDrag(details.localPosition.dx, totalWidth);
+          },
+          onHorizontalDragEnd: (details) {
+            _finishDrag();
+          },
+          onHorizontalDragCancel: () {
+            _finishDrag();
+          },
+          child: Container(
+            height: 62,
+            clipBehavior: Clip.antiAlias,
+            padding: EdgeInsets.zero,
+            decoration: BoxDecoration(
+              color: isDark
+                  ? Colors.black.withValues(alpha: 0.85)
+                  : Colors.white.withValues(alpha: 0.85),
+              borderRadius: BorderRadius.circular(30),
+              border: Border.all(
+                color: isDark
+                    ? Colors.white.withValues(alpha: 0.15)
+                    : const Color(0xFFE2E8F0),
+                width: 1.0,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: isDark ? 0.4 : 0.08),
+                  blurRadius: 20,
+                  offset: const Offset(0, 8),
+                ),
+              ],
+            ),
+            child: Stack(
+              alignment: Alignment.centerLeft,
+              children: [
+                // 1. Fluid Liquid Sliding Pill Indicator
+                Positioned(
+                  left: pillLeft,
+                  top: 4,
+                  bottom: 4,
+                  child: AnimatedBuilder(
+                    animation: _pressController,
+                    builder: (context, child) {
+                      return Transform.scale(
+                        scaleX: _pressStretchAnim.value,
+                        scaleY: _pressScaleAnim.value,
+                        alignment: Alignment.center,
+                        child: child,
+                      );
+                    },
+                    child: Container(
+                      width: pillWidth,
+                      decoration: BoxDecoration(
+                        color: isDark
+                            ? Colors.white.withValues(alpha: 0.12)
+                            : const Color(0xFF0F172A).withValues(alpha: 0.07),
+                        borderRadius: BorderRadius.circular(24),
+                        border: Border.all(
+                          color: isDark
+                              ? Colors.white.withValues(alpha: 0.16)
+                              : const Color(0xFF0F172A).withValues(alpha: 0.08),
+                          width: 1.0,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+
+                // 2. Interactive Navigation Items
+                Row(
+                  children: List.generate(5, (index) {
+                    final item = navItems[index];
+                    final String label = item['label'] as String;
+
+                    final double dist = (index - _currentPillPosition).abs();
+                    final double activeFactor = (1.0 - dist).clamp(0.0, 1.0);
+                    final bool isClosest = dist < 0.5;
+
+                    return Expanded(
+                      child: Container(
+                        alignment: Alignment.center,
+                        padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 4),
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Transform.scale(
+                                scale: 1.0 + (activeFactor * 0.08),
+                                child: _buildNavSvg(
+                                  index: index,
+                                  isActive: isClosest,
+                                  isDark: isDark,
+                                ),
+                              ),
+                              const SizedBox(height: 2.5),
+                              Text(
+                                label,
+                                style: AppTypography.microBadge(
+                                  color: isDark
+                                      ? (isClosest ? Colors.white : const Color(0xFF71717A))
+                                      : (isClosest ? const Color(0xFF0F172A) : const Color(0xFF94A3B8)),
+                                  fontWeight: isClosest ? FontWeight.w800 : FontWeight.w500,
+                                  letterSpacing: -0.2,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    );
+                  }),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _StageFacetPatternPainter extends CustomPainter {
+  final bool isDark;
+
+  const _StageFacetPatternPainter({required this.isDark});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final double w = size.width;
+    final double h = size.height;
+    final Color basePatternColor = isDark ? Colors.black : Colors.white;
+
+    // Shard 1: Diagonal sweep polygon
+    final Path shard1 = Path()
+      ..moveTo(w * 0.52, 0)
+      ..lineTo(w * 0.82, 0)
+      ..lineTo(w * 0.62, h)
+      ..lineTo(w * 0.42, h)
+      ..close();
+    final Paint p1 = Paint()
+      ..color = basePatternColor.withValues(alpha: isDark ? 0.08 : 0.16)
+      ..style = PaintingStyle.fill;
+    canvas.drawPath(shard1, p1);
+
+    // Shard 2: Top Right angular facet
+    final Path shard2 = Path()
+      ..moveTo(w * 0.76, 0)
+      ..lineTo(w, 0)
+      ..lineTo(w, h * 0.72)
+      ..lineTo(w * 0.70, h * 0.34)
+      ..close();
+    final Paint p2 = Paint()
+      ..color = basePatternColor.withValues(alpha: isDark ? 0.15 : 0.28)
+      ..style = PaintingStyle.fill;
+    canvas.drawPath(shard2, p2);
+
+    // Shard 3: Bottom right origami triangle
+    final Path shard3 = Path()
+      ..moveTo(w * 0.62, h)
+      ..lineTo(w, h * 0.62)
+      ..lineTo(w, h)
+      ..close();
+    final Paint p3 = Paint()
+      ..color = basePatternColor.withValues(alpha: isDark ? 0.12 : 0.22)
+      ..style = PaintingStyle.fill;
+    canvas.drawPath(shard3, p3);
+
+    // Shard 4: Left subtle accent notch
+    final Path shard4 = Path()
+      ..moveTo(0, h * 0.25)
+      ..lineTo(w * 0.14, h * 0.42)
+      ..lineTo(0, h * 0.62)
+      ..close();
+    final Paint p4 = Paint()
+      ..color = basePatternColor.withValues(alpha: isDark ? 0.06 : 0.12)
+      ..style = PaintingStyle.fill;
+    canvas.drawPath(shard4, p4);
+  }
+
+  @override
+  bool shouldRepaint(covariant _StageFacetPatternPainter oldDelegate) =>
+      oldDelegate.isDark != isDark;
 }

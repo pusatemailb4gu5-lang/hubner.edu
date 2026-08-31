@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter/services.dart';
@@ -4326,15 +4327,18 @@ class _DocumentsTabState extends State<DocumentsTab> {
 
   Future<void> _ensureChatFilesFolderExists() async {
     try {
+      final currentUid = FirebaseAuth.instance.currentUser?.uid ?? '';
+      if (currentUid.isEmpty) return;
+
       final query = await FirebaseFirestore.instance
           .collection('driveDocuments')
+          .where('uploaderUid', isEqualTo: currentUid)
           .where('name', isEqualTo: 'Berkas Diskusi')
           .where('isFolder', isEqualTo: true)
           .limit(1)
           .get();
 
       if (query.docs.isEmpty) {
-        final currentUid = FirebaseAuth.instance.currentUser?.uid ?? '';
         await FirebaseFirestore.instance.collection('driveDocuments').add({
           'name': 'Berkas Diskusi',
           'mimeType': 'application/vnd.google-apps.folder',
@@ -4587,10 +4591,28 @@ class _DocumentsTabState extends State<DocumentsTab> {
         content: TextField(
           controller: textController,
           autofocus: true,
-          style: AppTypography.timestamp(color: AppColors.isDarkMode ? Colors.white : Colors.black87),
+          style: AppTypography.messageInput(color: AppColors.isDarkMode ? Colors.white : Colors.black87),
           decoration: InputDecoration(
             hintText: 'Nama Folder',
-            hintStyle: AppTypography.timestamp(color: AppColors.isDarkMode ? Colors.white38 : Colors.black26),
+            hintStyle: AppTypography.messageInput(color: AppColors.isDarkMode ? Colors.white38 : const Color(0xFF94A3B8)),
+            enabledBorder: UnderlineInputBorder(
+              borderSide: BorderSide(
+                color: AppColors.isDarkMode ? Colors.white70 : Colors.black,
+                width: 1.5,
+              ),
+            ),
+            focusedBorder: UnderlineInputBorder(
+              borderSide: BorderSide(
+                color: AppColors.isDarkMode ? Colors.white : Colors.black,
+                width: 2.0,
+              ),
+            ),
+            border: UnderlineInputBorder(
+              borderSide: BorderSide(
+                color: AppColors.isDarkMode ? Colors.white70 : Colors.black,
+                width: 1.5,
+              ),
+            ),
           ),
         ),
         actions: [
@@ -4786,10 +4808,22 @@ class _DocumentsTabState extends State<DocumentsTab> {
         content: TextField(
           controller: textController,
           autofocus: true,
-          style: AppTypography.timestamp(color: AppColors.isDarkMode ? Colors.white : Colors.black87),
+          style: AppTypography.messageInput(color: AppColors.isDarkMode ? Colors.white : Colors.black87),
           decoration: InputDecoration(
             hintText: 'Nama baru',
-            hintStyle: AppTypography.timestamp(color: AppColors.isDarkMode ? Colors.white38 : Colors.black26),
+            hintStyle: AppTypography.messageInput(color: AppColors.isDarkMode ? Colors.white38 : const Color(0xFF94A3B8)),
+            enabledBorder: UnderlineInputBorder(
+              borderSide: BorderSide(
+                color: AppColors.isDarkMode ? Colors.white70 : const Color(0xFF18181B),
+                width: 1.5,
+              ),
+            ),
+            focusedBorder: UnderlineInputBorder(
+              borderSide: BorderSide(
+                color: AppColors.isDarkMode ? Colors.white : const Color(0xFF000000),
+                width: 2.2,
+              ),
+            ),
           ),
         ),
         actions: [
@@ -4840,21 +4874,109 @@ class _DocumentsTabState extends State<DocumentsTab> {
 
   Color _getFileColor(String? mimeType, bool isFolder) {
     if (isFolder || (mimeType != null && mimeType.contains('folder'))) return const Color(0xFFF59E0B);
-    if (mimeType == null) return const Color(0xFF6B7280);
+    if (mimeType == null) return const Color(0xFF64748B);
     if (mimeType.contains('pdf')) return const Color(0xFFEF4444);
     if (mimeType.contains('image')) return const Color(0xFF8B5CF6);
-    if (mimeType.contains('video')) return const Color(0xFFDC2626);
+    if (mimeType.contains('video')) return const Color(0xFFF43F5E);
     if (mimeType.contains('audio')) return const Color(0xFF10B981);
-    if (mimeType.contains('spreadsheet') || mimeType.contains('excel')) return const Color(0xFF059669);
-    if (mimeType.contains('presentation') || mimeType.contains('powerpoint')) return const Color(0xFFD97706);
-    if (mimeType.contains('document') || mimeType.contains('word')) return const Color(0xFF2563EB);
-    return const Color(0xFF4B5563);
+    if (mimeType.contains('spreadsheet') || mimeType.contains('excel')) return const Color(0xFF10B981);
+    if (mimeType.contains('presentation') || mimeType.contains('powerpoint')) return const Color(0xFFF97316);
+    if (mimeType.contains('document') || mimeType.contains('word')) return const Color(0xFF3B82F6);
+    if (mimeType.contains('zip') || mimeType.contains('compressed')) return const Color(0xFF6366F1);
+    return const Color(0xFF64748B);
+  }
+
+  Widget _buildDualToneDocControlSvg(String type, bool isDark, {double size = 22}) {
+    final primaryColor = isDark ? '#FFFFFF' : '#18181B';
+    final accentColor = isDark ? '#60A5FA' : '#2563EB';
+
+    String svgString;
+    switch (type) {
+      case 'create_folder':
+        final folderAccent = isDark ? '#FBBF24' : '#F59E0B';
+        svgString = '''<svg width="$size" height="$size" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M2 7C2 5.89543 2.89543 5 4 5H9.17157C9.70201 5 10.2107 5.21071 10.5858 5.58579L12.4142 7.41421C12.7893 7.78929 13.298 8 13.8284 8H20C21.1046 8 22 8.89543 22 10V18C22 19.1046 21.1046 20 20 20H4C2.89543 20 2 19.1046 2 18V7Z" fill="$primaryColor" fill-opacity="0.2" stroke="$primaryColor" stroke-width="1.8" stroke-linejoin="round"/>
+          <path d="M12 11.5V16.5M9.5 14H14.5" stroke="$folderAccent" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>''';
+        break;
+      case 'grid_view':
+        svgString = '''<svg width="$size" height="$size" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="3.5" y="3.5" width="7" height="7" rx="2" fill="$primaryColor" fill-opacity="0.85"/>
+          <rect x="13.5" y="3.5" width="7" height="7" rx="2" fill="$accentColor"/>
+          <rect x="3.5" y="13.5" width="7" height="7" rx="2" fill="$accentColor"/>
+          <rect x="13.5" y="13.5" width="7" height="7" rx="2" fill="$primaryColor" fill-opacity="0.85"/>
+        </svg>''';
+        break;
+      case 'list_view':
+        svgString = '''<svg width="$size" height="$size" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="5" cy="6" r="2.2" fill="$accentColor"/>
+          <circle cx="5" cy="12" r="2.2" fill="$accentColor"/>
+          <circle cx="5" cy="18" r="2.2" fill="$accentColor"/>
+          <path d="M10 6H20M10 12H20M10 18H20" stroke="$primaryColor" stroke-width="2.2" stroke-linecap="round"/>
+        </svg>''';
+        break;
+      default:
+        svgString = '';
+    }
+    return SvgPicture.string(svgString, width: size, height: size);
+  }
+
+  Widget _buildFileOrFolderSvg(String? mimeType, bool isFolder, bool isDark, {double size = 26}) {
+    final primaryDark = isDark ? '#E2E8F0' : '#18181B';
+    final mt = (mimeType ?? '').toLowerCase();
+
+    if (isFolder || mt.contains('folder')) {
+      return SvgPicture.string('''<svg width="$size" height="$size" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M2 7C2 5.89543 2.89543 5 4 5H9.17157C9.70201 5 10.2107 5.21071 10.5858 5.58579L12.4142 7.41421C12.7893 7.78929 13.298 8 13.8284 8H20C21.1046 8 22 8.89543 22 10V18C22 19.1046 21.1046 20 20 20H4C2.89543 20 2 19.1046 2 18V7Z" fill="#F59E0B" fill-opacity="0.25" stroke="#F59E0B" stroke-width="1.8" stroke-linejoin="round"/>
+        <path d="M2 10H22" stroke="$primaryDark" stroke-width="1.4" stroke-linecap="round"/>
+        <path d="M6 14H13" stroke="$primaryDark" stroke-width="1.8" stroke-linecap="round"/>
+      </svg>''', width: size, height: size);
+    }
+
+    if (mt.contains('pdf')) {
+      return SvgPicture.string('''<svg width="$size" height="$size" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M6 2H14L20 8V20C20 21.1046 19.1046 22 18 22H6C4.89543 22 4 21.1046 4 20V4C4 2.89543 4.89543 2 6 2Z" fill="#EF4444" fill-opacity="0.2" stroke="#EF4444" stroke-width="1.8" stroke-linejoin="round"/>
+        <path d="M14 2V8H20" stroke="#EF4444" stroke-width="1.8" stroke-linejoin="round"/>
+        <path d="M7 14H17M7 17H13" stroke="$primaryDark" stroke-width="1.8" stroke-linecap="round"/>
+      </svg>''', width: size, height: size);
+    }
+
+    if (mt.contains('image')) {
+      return SvgPicture.string('''<svg width="$size" height="$size" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="3" y="3" width="18" height="18" rx="4" fill="#8B5CF6" fill-opacity="0.2" stroke="#8B5CF6" stroke-width="1.8"/>
+        <circle cx="8.5" cy="8.5" r="2" fill="#8B5CF6"/>
+        <path d="M21 15L16 10L5 21" stroke="$primaryDark" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>''', width: size, height: size);
+    }
+
+    if (mt.contains('video')) {
+      return SvgPicture.string('''<svg width="$size" height="$size" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="3" y="4" width="13" height="16" rx="3" fill="#F43F5E" fill-opacity="0.2" stroke="#F43F5E" stroke-width="1.8"/>
+        <path d="M16 9.5L21 6.5V17.5L16 14.5" stroke="$primaryDark" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>''', width: size, height: size);
+    }
+
+    if (mt.contains('audio')) {
+      return SvgPicture.string('''<svg width="$size" height="$size" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="6" cy="18" r="3" fill="#10B981" fill-opacity="0.25" stroke="#10B981" stroke-width="1.8"/>
+        <circle cx="18" cy="16" r="3" fill="#10B981" fill-opacity="0.25" stroke="#10B981" stroke-width="1.8"/>
+        <path d="M9 18V7C9 5.89543 9.89543 5 11 5H18C19.1046 5 20 5.89543 20 7V16" stroke="$primaryDark" stroke-width="1.8" stroke-linecap="round"/>
+        <path d="M9 10L20 8" stroke="$primaryDark" stroke-width="1.8" stroke-linecap="round"/>
+      </svg>''', width: size, height: size);
+    }
+
+    return SvgPicture.string('''<svg width="$size" height="$size" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M6 2H14L20 8V20C20 21.1046 19.1046 22 18 22H6C4.89543 22 4 21.1046 4 20V4C4 2.89543 4.89543 2 6 2Z" fill="#3B82F6" fill-opacity="0.2" stroke="#3B82F6" stroke-width="1.8" stroke-linejoin="round"/>
+      <path d="M14 2V8H20" stroke="#3B82F6" stroke-width="1.8" stroke-linejoin="round"/>
+      <path d="M8 13H16M8 17H14" stroke="$primaryDark" stroke-width="1.8" stroke-linecap="round"/>
+    </svg>''', width: size, height: size);
   }
 
   void _openFileInApp({
     required String fileName,
     required String? mimeType,
     required String driveLink,
+    String? driveFileId,
     required String uploaderName,
     required String dateStr,
     required int fileSize,
@@ -4864,6 +4986,7 @@ class _DocumentsTabState extends State<DocumentsTab> {
       fileName: fileName,
       mimeType: mimeType,
       fileUrl: driveLink,
+      fileId: driveFileId,
       uploaderName: uploaderName,
       dateFormatted: dateStr,
       fileSize: fileSize,
@@ -4890,12 +5013,54 @@ class _DocumentsTabState extends State<DocumentsTab> {
             final bool isDriveConnected = (userData?['isDriveConnected'] ?? publicDriveFolderId.isNotEmpty) == true;
 
             return StreamBuilder<QuerySnapshot>(
-              stream: FirebaseFirestore.instance
-                  .collection('driveDocuments')
-                  .orderBy('uploadedAt', descending: true)
-                  .snapshots(),
+              stream: (isDriveConnected && currentUid.isNotEmpty)
+                  ? FirebaseFirestore.instance
+                      .collection('driveDocuments')
+                      .where('uploaderUid', isEqualTo: currentUid)
+                      .snapshots()
+                  : const Stream.empty(),
               builder: (context, docSnap) {
-                final docs = docSnap.data?.docs ?? [];
+                final docs = isDriveConnected ? (docSnap.data?.docs ?? []) : <QueryDocumentSnapshot>[];
+
+                // Filter by current folder (or search globally if query is not empty)
+                final filtered = docs.where((doc) {
+                  final data = doc.data() as Map<String, dynamic>;
+                  final name = (data['name'] ?? '').toString().toLowerCase();
+                  final parentId = (data['parentFolderId'] ?? '').toString();
+
+                  if (_searchQuery.isNotEmpty) {
+                    return name.contains(_searchQuery);
+                  }
+                  // Hierarchy matching:
+                  if (_folderCrumbs.isEmpty) {
+                    return parentId.isEmpty || parentId == publicDriveFolderId;
+                  }
+                  return parentId == _folderCrumbs.last.id;
+                }).toList();
+
+                // Sort filtered items
+                filtered.sort((a, b) {
+                  final dataA = a.data() as Map<String, dynamic>;
+                  final dataB = b.data() as Map<String, dynamic>;
+                  final bool isFolderA = dataA['isFolder'] == true;
+                  final bool isFolderB = dataB['isFolder'] == true;
+                  if (isFolderA != isFolderB) {
+                    return isFolderA ? -1 : 1;
+                  }
+                  if (_sortBy == 'name_asc') {
+                    return (dataA['name'] ?? '').toString().compareTo((dataB['name'] ?? '').toString());
+                  } else if (_sortBy == 'size_desc') {
+                    final sizeA = (dataA['fileSize'] ?? 0) as num;
+                    final sizeB = (dataB['fileSize'] ?? 0) as num;
+                    return sizeB.compareTo(sizeA);
+                  } else {
+                    final timeA = dataA['uploadedAt'] as Timestamp?;
+                    final timeB = dataB['uploadedAt'] as Timestamp?;
+                    if (timeA == null) return 1;
+                    if (timeB == null) return -1;
+                    return timeB.compareTo(timeA);
+                  }
+                });
 
                 return PopScope(
                   canPop: false,
@@ -4910,535 +5075,557 @@ class _DocumentsTabState extends State<DocumentsTab> {
                     }
                   },
                   child: Align(
-                  alignment: Alignment.topCenter,
-                  child: Container(
-                    constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width > 500 ? double.infinity : 500),
-                    child: SafeArea(
-                      bottom: false,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Top Main Header (Title & Subtitle)
-                          Padding(
-                            padding: EdgeInsets.symmetric(horizontal: AppTypography.screenHorizontalMargin, vertical: 12.0),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    alignment: Alignment.topCenter,
+                    child: Container(
+                      width: double.infinity,
+                      height: double.infinity,
+                      constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width > 500 ? double.infinity : 500),
+                      child: CustomScrollView(
+                        physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+                        slivers: [
+                          // 1. Top Main Header (Title & Subtitle) + Google Drive Status Card
+                          SliverToBoxAdapter(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                Padding(
+                                  padding: EdgeInsets.fromLTRB(
+                                    AppTypography.screenHorizontalMargin,
+                                    MediaQuery.of(context).padding.top + 12.0,
+                                    AppTypography.screenHorizontalMargin,
+                                    12.0,
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                     children: [
-                                      Text(
-                                        'Dokumen',
-                                        style: AppTypography.pageTitle(color: isDark ? Colors.white : Colors.black, fontWeight: FontWeight.bold),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              'Dokumen',
+                                              style: AppTypography.pageTitle(color: isDark ? Colors.white : Colors.black, fontWeight: FontWeight.bold),
+                                            ),
+                                            Text(
+                                              'Kelola & pratinjau berkas bersama',
+                                              style: AppTypography.bodySubtitle(color: isDark ? Colors.white60 : Colors.black45),
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                          ],
+                                        ),
                                       ),
-                                      Text(
-                                        'Kelola & pratinjau berkas bersama',
-                                        style: AppTypography.bodySubtitle(color: isDark ? Colors.white60 : Colors.black45),
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
+                                      if (_isUploading)
+                                        const SizedBox(
+                                          width: 18,
+                                          height: 18,
+                                          child: CircularProgressIndicator(strokeWidth: 2, valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF7F52FC))),
+                                        ),
                                     ],
                                   ),
                                 ),
-                                if (_isUploading)
-                                  const SizedBox(
-                                    width: 18,
-                                    height: 18,
-                                    child: CircularProgressIndicator(strokeWidth: 2, valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF7F52FC))),
+
+                                // Status Bar Google Drive: Terhubung
+                                if (isDriveConnected)
+                                  Padding(
+                                    padding: EdgeInsets.symmetric(horizontal: AppTypography.screenHorizontalMargin, vertical: 4.0),
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                      decoration: BoxDecoration(
+                                        color: isDark ? const Color(0xFF18181B) : const Color(0xFFF8FAFC),
+                                        borderRadius: BorderRadius.circular(20),
+                                        border: Border.all(
+                                          color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                                          width: 1.0,
+                                        ),
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          const GoogleDriveLogoWidget(size: 26),
+                                          const SizedBox(width: 12),
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  'Google Drive',
+                                                  style: AppTypography.buttonLabel(
+                                                    color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                ),
+                                                const SizedBox(height: 3),
+                                                Row(
+                                                  children: [
+                                                    Container(
+                                                      width: 7,
+                                                      height: 7,
+                                                      decoration: const BoxDecoration(
+                                                        color: Color(0xFF10B981),
+                                                        shape: BoxShape.circle,
+                                                      ),
+                                                    ),
+                                                    const SizedBox(width: 6),
+                                                    Text(
+                                                      'Terhubung',
+                                                      style: AppTypography.fileSize(
+                                                        color: const Color(0xFF10B981),
+                                                        fontWeight: FontWeight.w600,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                          // Tombol Putuskan: Lingkaran Ikon Putus Warna Merah Tanpa Background Lurus dengan Ikon
+                                          BouncyButton(
+                                            onTap: _disconnectGoogleDrive,
+                                            child: Container(
+                                              width: 36,
+                                              height: 36,
+                                              alignment: Alignment.center,
+                                              child: const Icon(
+                                                Icons.link_off_rounded,
+                                                color: Color(0xFFEF4444),
+                                                size: 22,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  )
+                                else if (!isUserLoading)
+                                  Padding(
+                                    padding: EdgeInsets.symmetric(horizontal: AppTypography.screenHorizontalMargin, vertical: 4.0),
+                                    child: _buildDriveNotConnectedCard(isDark),
                                   ),
+                                const SizedBox(height: 4),
                               ],
                             ),
                           ),
 
-                          // Status Bar Google Drive: Terhubung (Google Drive -> Terhubung dengan dot hijau -> Tombol Putuskan di bawahnya)
-                          if (isDriveConnected)
-                            Padding(
-                              padding: EdgeInsets.symmetric(horizontal: AppTypography.screenHorizontalMargin, vertical: 4.0),
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                                decoration: BoxDecoration(
-                                  color: isDark ? const Color(0xFF18181B) : const Color(0xFFF8FAFC),
-                                  borderRadius: BorderRadius.circular(20),
-                                  border: Border.all(
-                                    color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
-                                    width: 1.0,
-                                  ),
-                                ),
-                                child: Column(
-                                  children: [
-                                    Row(
-                                      children: [
-                                        const GoogleDriveLogoWidget(size: 26),
-                                        const SizedBox(width: 12),
-                                        Expanded(
-                                          child: Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                'Google Drive',
-                                                style: AppTypography.buttonLabel(
-                                                  color: isDark ? Colors.white : const Color(0xFF0F172A),
-                                                  fontWeight: FontWeight.bold,
-                                                ),
-                                              ),
-                                              const SizedBox(height: 3),
-                                              Row(
+                          // 2. STICKY BLURRED CONTROLS BAR (Breadcrumb < Root, Search + Upload, Sort & Filter buttons)
+                          SliverPersistentHeader(
+                            pinned: true,
+                            delegate: _DriveControlsHeaderDelegate(
+                              height: 138.0,
+                              topPadding: MediaQuery.of(context).padding.top,
+                              child: ClipRect(
+                                child: BackdropFilter(
+                                  filter: ui.ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      color: (isDark
+                                              ? const Color(0xFF000000)
+                                              : const Color(0xFFF8FAFC))
+                                          .withValues(alpha: 0.75),
+                                      border: Border(
+                                        bottom: BorderSide(
+                                          color: (isDark
+                                                  ? const Color(0xFF27272A)
+                                                  : const Color(0xFFE2E8F0))
+                                              .withValues(alpha: 0.9),
+                                          width: 1.0,
+                                        ),
+                                      ),
+                                    ),
+                                    child: SafeArea(
+                                      bottom: false,
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          // Breadcrumb Navigation
+                                          Container(
+                                            width: double.infinity,
+                                            padding: EdgeInsets.symmetric(horizontal: AppTypography.screenHorizontalMargin, vertical: 6.0),
+                                            child: SingleChildScrollView(
+                                              scrollDirection: Axis.horizontal,
+                                              child: Row(
                                                 children: [
-                                                  Container(
-                                                    width: 7,
-                                                    height: 7,
-                                                    decoration: const BoxDecoration(
-                                                      color: Color(0xFF10B981),
-                                                      shape: BoxShape.circle,
+                                                  GestureDetector(
+                                                    onTap: () {
+                                                      if (_folderCrumbs.isNotEmpty) {
+                                                        setState(() {
+                                                          _folderCrumbs.removeLast();
+                                                        });
+                                                      } else {
+                                                        widget.onBackToHome?.call();
+                                                      }
+                                                    },
+                                                    child: Container(
+                                                      padding: const EdgeInsets.all(6),
+                                                      margin: const EdgeInsets.only(right: 8),
+                                                      decoration: BoxDecoration(
+                                                        color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                                                        shape: BoxShape.circle,
+                                                      ),
+                                                      child: Icon(Icons.arrow_back_ios_new_rounded, size: 14, color: isDark ? Colors.white : Colors.black87),
                                                     ),
                                                   ),
-                                                  const SizedBox(width: 6),
-                                                  Text(
-                                                    'Terhubung',
-                                                    style: AppTypography.fileSize(
-                                                      color: const Color(0xFF10B981),
-                                                      fontWeight: FontWeight.w600,
+                                                  GestureDetector(
+                                                    onTap: () {
+                                                      setState(() {
+                                                        _folderCrumbs.clear();
+                                                      });
+                                                    },
+                                                    child: Container(
+                                                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                                      decoration: BoxDecoration(
+                                                        color: _folderCrumbs.isEmpty
+                                                            ? const Color(0xFF2563EB).withValues(alpha: 0.1)
+                                                            : Colors.transparent,
+                                                        borderRadius: BorderRadius.circular(16),
+                                                      ),
+                                                      child: Row(
+                                                        mainAxisSize: MainAxisSize.min,
+                                                        children: [
+                                                          Icon(
+                                                            Icons.home_rounded,
+                                                            size: 16,
+                                                            color: _folderCrumbs.isEmpty ? const Color(0xFF2563EB) : (isDark ? Colors.white70 : Colors.black87),
+                                                          ),
+                                                          const SizedBox(width: 4),
+                                                          Text(
+                                                            'Root',
+                                                            style: AppTypography.channelTag(color: _folderCrumbs.isEmpty ? const Color(0xFF2563EB) : (isDark ? Colors.white70 : Colors.black87), fontWeight: _folderCrumbs.isEmpty ? FontWeight.bold : FontWeight.w500),
+                                                          ),
+                                                        ],
+                                                      ),
                                                     ),
                                                   ),
+                                                  for (int i = 0; i < _folderCrumbs.length; i++) ...[
+                                                    Icon(Icons.chevron_right, size: 16, color: isDark ? Colors.white38 : Colors.black38),
+                                                    GestureDetector(
+                                                      onTap: () {
+                                                        setState(() {
+                                                          _folderCrumbs.removeRange(i + 1, _folderCrumbs.length);
+                                                        });
+                                                      },
+                                                      child: Container(
+                                                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                                        decoration: BoxDecoration(
+                                                          color: i == _folderCrumbs.length - 1
+                                                              ? const Color(0xFF2563EB).withValues(alpha: 0.1)
+                                                              : Colors.transparent,
+                                                          borderRadius: BorderRadius.circular(16),
+                                                        ),
+                                                        child: Text(
+                                                          _folderCrumbs[i].name,
+                                                          style: AppTypography.channelTag(color: i == _folderCrumbs.length - 1 ? const Color(0xFF2563EB) : (isDark ? Colors.white70 : Colors.black87), fontWeight: i == _folderCrumbs.length - 1 ? FontWeight.bold : FontWeight.w500),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ],
                                                 ],
                                               ),
-                                            ],
+                                            ),
+                                          ),
+
+                                          // Search Input with Upload Button
+                                          Padding(
+                                            padding: EdgeInsets.symmetric(horizontal: AppTypography.screenHorizontalMargin, vertical: 4.0),
+                                            child: Row(
+                                              children: [
+                                                Expanded(
+                                                  child: Container(
+                                                    height: 44,
+                                                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                                                    decoration: BoxDecoration(
+                                                      color: isDark ? const Color(0xFF18181B) : const Color(0xFFF1F5F9),
+                                                      borderRadius: BorderRadius.circular(24),
+                                                      border: Border.all(
+                                                        color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                                                        width: 1.0,
+                                                      ),
+                                                    ),
+                                                    child: Row(
+                                                      children: [
+                                                        Icon(
+                                                          Icons.search_rounded,
+                                                          color: isDark ? Colors.white54 : Colors.black45,
+                                                          size: 18,
+                                                        ),
+                                                        const SizedBox(width: 10),
+                                                        Expanded(
+                                                          child: TextField(
+                                                            controller: _searchController,
+                                                            onChanged: (val) {
+                                                              setState(() {
+                                                                _searchQuery = val.trim().toLowerCase();
+                                                              });
+                                                            },
+                                                            style: AppTypography.searchInput(color: isDark ? Colors.white : Colors.black87),
+                                                            decoration: InputDecoration(
+                                                              hintText: 'Cari berkas...',
+                                                              hintStyle: AppTypography.searchInput(color: isDark ? Colors.white38 : Colors.black38),
+                                                              border: InputBorder.none,
+                                                              isDense: true,
+                                                              contentPadding: const EdgeInsets.symmetric(vertical: 10),
+                                                            ),
+                                                          ),
+                                                        ),
+                                                        if (_searchQuery.isNotEmpty)
+                                                          GestureDetector(
+                                                            onTap: () {
+                                                              _searchController.clear();
+                                                              setState(() {
+                                                                _searchQuery = '';
+                                                              });
+                                                            },
+                                                            child: Icon(
+                                                              Icons.close_rounded,
+                                                              color: isDark ? Colors.white54 : Colors.black45,
+                                                              size: 16,
+                                                            ),
+                                                          ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                ),
+                                                const SizedBox(width: 8),
+                                                BouncyButton(
+                                                  onTap: () => _uploadFileToDrive(
+                                                    targetFolderId: publicDriveFolderId,
+                                                    isDriveConnected: isDriveConnected,
+                                                  ),
+                                                  child: Container(
+                                                    width: 42,
+                                                    height: 42,
+                                                    decoration: const BoxDecoration(
+                                                      color: Color(0xFF2563EB), // Blue
+                                                      shape: BoxShape.circle,
+                                                    ),
+                                                    child: const Icon(
+                                                      Icons.cloud_upload_rounded,
+                                                      color: Colors.white,
+                                                      size: 20,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+
+                                          // Sub-Bar: Sort text & Add Folder + View Mode Toggle
+                                          Padding(
+                                            padding: EdgeInsets.symmetric(horizontal: AppTypography.screenHorizontalMargin, vertical: 4.0),
+                                            child: Row(
+                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                              children: [
+                                                InkWell(
+                                                  borderRadius: BorderRadius.circular(12),
+                                                  onTap: () {
+                                                    setState(() {
+                                                      if (_sortBy == 'name_asc') {
+                                                        _sortBy = 'name_desc';
+                                                      } else if (_sortBy == 'name_desc') {
+                                                        _sortBy = 'date_desc';
+                                                      } else {
+                                                        _sortBy = 'name_asc';
+                                                      }
+                                                    });
+                                                  },
+                                                  child: Padding(
+                                                    padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 4.0),
+                                                    child: Row(
+                                                      mainAxisSize: MainAxisSize.min,
+                                                      children: [
+                                                        Icon(
+                                                          Icons.sort_by_alpha_rounded,
+                                                          size: 16,
+                                                          color: isDark ? Colors.white70 : const Color(0xFF475569),
+                                                        ),
+                                                        const SizedBox(width: 6),
+                                                        Text(
+                                                          _sortBy == 'name_asc'
+                                                              ? 'Nama (A - Z)'
+                                                              : (_sortBy == 'name_desc' ? 'Nama (Z - A)' : 'Terbaru'),
+                                                          style: AppTypography.timestamp(
+                                                            color: isDark ? Colors.white70 : const Color(0xFF475569),
+                                                            fontWeight: FontWeight.w600,
+                                                          ),
+                                                        ),
+                                                        const SizedBox(width: 4),
+                                                        Icon(
+                                                          _sortBy == 'name_desc' ? Icons.arrow_downward_rounded : Icons.arrow_upward_rounded,
+                                                          size: 13,
+                                                          color: isDark ? Colors.white54 : Colors.black45,
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                ),
+                                                Row(
+                                                  mainAxisSize: MainAxisSize.min,
+                                                  children: [
+                                                    BouncyButton(
+                                                      onTap: () => _createFolderInDrive(
+                                                        parentFolderId: publicDriveFolderId,
+                                                        isDriveConnected: isDriveConnected,
+                                                      ),
+                                                      child: Container(
+                                                        width: 34,
+                                                        height: 34,
+                                                        alignment: Alignment.center,
+                                                        child: Icon(
+                                                          Icons.create_new_folder_rounded,
+                                                          color: isDark ? Colors.white70 : Colors.black87,
+                                                          size: 20,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                    const SizedBox(width: 8),
+                                                    BouncyButton(
+                                                      onTap: () => setState(() => _isGridView = !_isGridView),
+                                                      child: Container(
+                                                        width: 34,
+                                                        height: 34,
+                                                        alignment: Alignment.center,
+                                                        child: Icon(
+                                                          _isGridView ? Icons.format_list_bulleted_rounded : Icons.grid_view_rounded,
+                                                          color: isDark ? Colors.white70 : Colors.black87,
+                                                          size: 20,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+
+                            // 3. File Explorer List / Grid from Firestore
+                            if (!isDriveConnected)
+                              SliverFillRemaining(
+                                hasScrollBody: false,
+                                child: Center(
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(24.0),
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(
+                                          Icons.cloud_off_rounded,
+                                          size: 52,
+                                          color: isDark ? Colors.white24 : Colors.black26,
+                                        ),
+                                        const SizedBox(height: 12),
+                                        Text(
+                                          'Google Drive Belum Tersambung',
+                                          style: AppTypography.buttonLabel(
+                                            color: isDark ? Colors.white70 : Colors.black87,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 6),
+                                        Text(
+                                          'Hubungkan Google Drive untuk mulai melihat dan mengelola dokumen akun Anda.',
+                                          textAlign: TextAlign.center,
+                                          style: AppTypography.subtitle(
+                                            color: isDark ? Colors.white38 : Colors.black38,
                                           ),
                                         ),
                                       ],
                                     ),
-                                    const SizedBox(height: 10),
-                                    SizedBox(
-                                      width: double.infinity,
-                                      child: BouncyButton(
-                                        onTap: _disconnectGoogleDrive,
-                                        child: Container(
-                                          padding: const EdgeInsets.symmetric(vertical: 8),
-                                          alignment: Alignment.center,
-                                          decoration: BoxDecoration(
-                                            color: isDark ? Colors.red.withValues(alpha: 0.12) : const Color(0xFFFEE2E2),
-                                            borderRadius: BorderRadius.circular(20),
-                                            border: Border.all(
-                                              color: isDark ? Colors.red.withValues(alpha: 0.3) : const Color(0xFFFECACA),
-                                              width: 1.0,
-                                            ),
-                                          ),
-                                          child: Row(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              const Icon(Icons.link_off_rounded, color: Color(0xFFDC2626), size: 14),
-                                              const SizedBox(width: 6),
-                                              Text(
-                                                'Putuskan',
-                                                style: AppTypography.buttonLabel(
-                                                  color: const Color(0xFFDC2626),
-                                                  fontWeight: FontWeight.bold,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            )
-                          else if (!isUserLoading)
-                            Padding(
-                              padding: EdgeInsets.symmetric(horizontal: AppTypography.screenHorizontalMargin, vertical: 4.0),
-                              child: _buildDriveNotConnectedCard(isDark),
-                            ),
-
-                      Container(
-                        width: double.infinity,
-                        padding: EdgeInsets.symmetric(horizontal: AppTypography.screenHorizontalMargin, vertical: 8.0),
-                        child: SingleChildScrollView(
-                          scrollDirection: Axis.horizontal,
-                          child: Row(
-                            children: [
-                              GestureDetector(
-                                onTap: () {
-                                  if (_folderCrumbs.isNotEmpty) {
-                                    setState(() {
-                                      _folderCrumbs.removeLast();
-                                    });
-                                  } else {
-                                    widget.onBackToHome?.call();
-                                  }
-                                },
-                                child: Container(
-                                  padding: const EdgeInsets.all(6),
-                                  margin: const EdgeInsets.only(right: 8),
-                                  decoration: BoxDecoration(
-                                    color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
-                                    shape: BoxShape.circle,
                                   ),
-                                  child: Icon(Icons.arrow_back_ios_new_rounded, size: 14, color: isDark ? Colors.white : Colors.black87),
                                 ),
-                              ),
-                              GestureDetector(
-                                onTap: () {
-                                  setState(() {
-                                    _folderCrumbs.clear();
-                                  });
-                                },
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                                  decoration: BoxDecoration(
-                                    color: _folderCrumbs.isEmpty
-                                        ? const Color(0xFF2563EB).withValues(alpha: 0.1)
-                                        : Colors.transparent,
-                                    borderRadius: BorderRadius.circular(16),
-                                  ),
-                                  child: Row(
+                              )
+                            else if (filtered.isEmpty)
+                              SliverFillRemaining(
+                                hasScrollBody: false,
+                                child: Center(
+                                  child: Column(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
                                       Icon(
-                                        Icons.home_rounded,
-                                        size: 16,
-                                        color: _folderCrumbs.isEmpty ? const Color(0xFF2563EB) : (isDark ? Colors.white70 : Colors.black87),
+                                        Icons.folder_open,
+                                        size: 48,
+                                        color: isDark ? Colors.white12 : Colors.black12,
                                       ),
-                                      const SizedBox(width: 4),
+                                      const SizedBox(height: 12),
                                       Text(
-                                        'Root',
-                                        style: AppTypography.channelTag(color: _folderCrumbs.isEmpty ? const Color(0xFF2563EB) : (isDark ? Colors.white70 : Colors.black87), fontWeight: _folderCrumbs.isEmpty ? FontWeight.bold : FontWeight.w500),
+                                        _searchQuery.isNotEmpty
+                                            ? 'Tidak ada berkas cocok dengan pencarian.'
+                                            : 'Folder ini masih kosong.\nUpload berkas atau buat folder baru!',
+                                        textAlign: TextAlign.center,
+                                        style: AppTypography.subtitle(color: isDark ? Colors.white38 : Colors.black38),
                                       ),
                                     ],
                                   ),
                                 ),
-                              ),
-                              for (int i = 0; i < _folderCrumbs.length; i++) ...[
-                                Icon(Icons.chevron_right, size: 16, color: isDark ? Colors.white38 : Colors.black38),
-                                GestureDetector(
-                                  onTap: () {
-                                    setState(() {
-                                      _folderCrumbs.removeRange(i + 1, _folderCrumbs.length);
-                                    });
-                                  },
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                                    decoration: BoxDecoration(
-                                      color: i == _folderCrumbs.length - 1
-                                          ? const Color(0xFF2563EB).withValues(alpha: 0.1)
-                                          : Colors.transparent,
-                                      borderRadius: BorderRadius.circular(16),
-                                    ),
-                                    child: Text(
-                                      _folderCrumbs[i].name,
-                                      style: AppTypography.channelTag(color: i == _folderCrumbs.length - 1 ? const Color(0xFF2563EB) : (isDark ? Colors.white70 : Colors.black87), fontWeight: i == _folderCrumbs.length - 1 ? FontWeight.bold : FontWeight.w500),
-                                    ),
+                              )
+                            else if (_isGridView)
+                              SliverPadding(
+                                padding: EdgeInsets.only(
+                                  left: AppTypography.screenHorizontalMargin,
+                                  right: AppTypography.screenHorizontalMargin,
+                                  bottom: 120.0,
+                                  top: 12,
+                                ),
+                                sliver: SliverGrid(
+                                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                                    crossAxisCount: 3,
+                                    crossAxisSpacing: 12,
+                                    mainAxisSpacing: 14,
+                                    childAspectRatio: 0.72,
+                                  ),
+                                  delegate: SliverChildBuilderDelegate(
+                                    (context, index) {
+                                      final docSnap = filtered[index];
+                                      final data = docSnap.data() as Map<String, dynamic>;
+                                      return _buildGridItem(context, docSnap.id, data, currentUid, isDark);
+                                    },
+                                    childCount: filtered.length,
                                   ),
                                 ),
-                              ],
-                            ],
-                          ),
-                        ),
-                      ),
-
-                      // Search Input with Upload Button placed next to it
-                      Padding(
-                        padding: EdgeInsets.symmetric(horizontal: AppTypography.screenHorizontalMargin, vertical: 4.0),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: Container(
-                                height: 44,
-                                padding: const EdgeInsets.symmetric(horizontal: 16),
-                                decoration: BoxDecoration(
-                                  color: isDark ? const Color(0xFF18181B) : const Color(0xFFF1F5F9),
-                                  borderRadius: BorderRadius.circular(24),
-                                  border: Border.all(
-                                    color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
-                                    width: 1.0,
+                              )
+                            else
+                              SliverPadding(
+                                padding: const EdgeInsets.only(bottom: 120.0, top: 6),
+                                sliver: SliverList(
+                                  delegate: SliverChildBuilderDelegate(
+                                    (context, index) {
+                                      final itemIndex = index ~/ 2;
+                                      if (index.isEven) {
+                                        final docSnap = filtered[itemIndex];
+                                        final data = docSnap.data() as Map<String, dynamic>;
+                                        return _buildListItem(context, docSnap.id, data, currentUid, isDark);
+                                      } else {
+                                        return Divider(
+                                          height: 1,
+                                          thickness: 0.8,
+                                          color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+                                          indent: 56 + AppTypography.screenHorizontalMargin,
+                                          endIndent: AppTypography.screenHorizontalMargin,
+                                        );
+                                      }
+                                    },
+                                    childCount: filtered.length * 2 - 1,
                                   ),
                                 ),
-                                child: Row(
-                                  children: [
-                                    Icon(
-                                      Icons.search_rounded,
-                                      color: isDark ? Colors.white54 : Colors.black45,
-                                      size: 18,
-                                    ),
-                                    const SizedBox(width: 10),
-                                    Expanded(
-                                      child: TextField(
-                                        controller: _searchController,
-                                        onChanged: (val) {
-                                          setState(() {
-                                            _searchQuery = val.trim().toLowerCase();
-                                          });
-                                        },
-                                        style: AppTypography.searchInput(color: isDark ? Colors.white : Colors.black87),
-                                        decoration: InputDecoration(
-                                          hintText: 'Cari berkas...',
-                                          hintStyle: AppTypography.searchInput(color: isDark ? Colors.white38 : Colors.black38),
-                                          border: InputBorder.none,
-                                          isDense: true,
-                                          contentPadding: const EdgeInsets.symmetric(vertical: 10),
-                                        ),
-                                      ),
-                                    ),
-                                    if (_searchQuery.isNotEmpty)
-                                      GestureDetector(
-                                        onTap: () {
-                                          _searchController.clear();
-                                          setState(() {
-                                            _searchQuery = '';
-                                          });
-                                        },
-                                        child: Icon(
-                                          Icons.close_rounded,
-                                          color: isDark ? Colors.white54 : Colors.black45,
-                                          size: 16,
-                                        ),
-                                      ),
-                                  ],
-                                ),
                               ),
-                            ),
-                            const SizedBox(width: 8),
-                            BouncyButton(
-                              onTap: () => _uploadFileToDrive(
-                                targetFolderId: publicDriveFolderId,
-                                isDriveConnected: isDriveConnected,
-                              ),
-                              child: Container(
-                                width: 42,
-                                height: 42,
-                                decoration: const BoxDecoration(
-                                  color: Color(0xFFF97316), // Orange
-                                  shape: BoxShape.circle,
-                                ),
-                                child: const Icon(
-                                  Icons.cloud_upload_rounded,
-                                  color: Colors.white,
-                                  size: 20,
-                                ),
-                              ),
-                            ),
                           ],
                         ),
                       ),
-
-                      // Sub-Bar: Sort text with A Arrow Up icon ("A Panah Naik") & Add Folder below textbox + View Mode Toggle
-                      Padding(
-                        padding: EdgeInsets.symmetric(horizontal: AppTypography.screenHorizontalMargin, vertical: 4.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            InkWell(
-                              borderRadius: BorderRadius.circular(12),
-                              onTap: () {
-                                setState(() {
-                                  if (_sortBy == 'name_asc') {
-                                    _sortBy = 'name_desc';
-                                  } else if (_sortBy == 'name_desc') {
-                                    _sortBy = 'date_desc';
-                                  } else {
-                                    _sortBy = 'name_asc';
-                                  }
-                                });
-                              },
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 4.0),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(
-                                      Icons.sort_by_alpha_rounded,
-                                      size: 16,
-                                      color: isDark ? Colors.white70 : const Color(0xFF475569),
-                                    ),
-                                    const SizedBox(width: 6),
-                                    Text(
-                                      _sortBy == 'name_asc'
-                                          ? 'Nama (A - Z)'
-                                          : (_sortBy == 'name_desc' ? 'Nama (Z - A)' : 'Terbaru'),
-                                      style: AppTypography.timestamp(
-                                        color: isDark ? Colors.white70 : const Color(0xFF475569),
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 4),
-                                    Icon(
-                                      _sortBy == 'name_desc' ? Icons.arrow_downward_rounded : Icons.arrow_upward_rounded,
-                                      size: 13,
-                                      color: isDark ? Colors.white54 : Colors.black45,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                            Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                BouncyButton(
-                                  onTap: () => _createFolderInDrive(
-                                    parentFolderId: publicDriveFolderId,
-                                    isDriveConnected: isDriveConnected,
-                                  ),
-                                  child: Container(
-                                    width: 34,
-                                    height: 34,
-                                    decoration: BoxDecoration(
-                                      color: isDark ? const Color(0xFF18181B) : const Color(0xFFF1F5F9),
-                                      shape: BoxShape.circle,
-                                      border: Border.all(color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0)),
-                                    ),
-                                    child: Icon(
-                                      Icons.create_new_folder_rounded,
-                                      color: isDark ? Colors.white70 : Colors.black87,
-                                      size: 16,
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                BouncyButton(
-                                  onTap: () => setState(() => _isGridView = !_isGridView),
-                                  child: Container(
-                                    width: 34,
-                                    height: 34,
-                                    decoration: BoxDecoration(
-                                      color: isDark ? const Color(0xFF18181B) : const Color(0xFFF1F5F9),
-                                      shape: BoxShape.circle,
-                                      border: Border.all(color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0)),
-                                    ),
-                                    child: Icon(
-                                      _isGridView ? Icons.format_list_bulleted_rounded : Icons.grid_view_rounded,
-                                      color: isDark ? Colors.white70 : Colors.black87,
-                                      size: 16,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      // File Explorer List / Grid from Firestore
-                      Expanded(
-                        child: Builder(
-                          builder: (context) {
-                            if (docSnap.connectionState == ConnectionState.waiting && !docSnap.hasData) {
-                              return const SizedBox.shrink();
-                            }
-
-                            // Filter by current folder (or search globally if query is not empty)
-                            final filtered = docs.where((doc) {
-                              final data = doc.data() as Map<String, dynamic>;
-                              final name = (data['name'] ?? '').toString().toLowerCase();
-                              final parentId = (data['parentFolderId'] ?? '').toString();
-
-                              if (_searchQuery.isNotEmpty) {
-                                return name.contains(_searchQuery);
-                              }
-                              // Hierarchy matching:
-                              if (_folderCrumbs.isEmpty) {
-                                return parentId.isEmpty || parentId == publicDriveFolderId;
-                              }
-                              return parentId == _folderCrumbs.last.id;
-                            }).toList();
-
-                            // Sort filtered items
-                            filtered.sort((a, b) {
-                              final dataA = a.data() as Map<String, dynamic>;
-                              final dataB = b.data() as Map<String, dynamic>;
-                              final bool isFolderA = dataA['isFolder'] == true;
-                              final bool isFolderB = dataB['isFolder'] == true;
-                              if (isFolderA != isFolderB) {
-                                return isFolderA ? -1 : 1;
-                              }
-                              if (_sortBy == 'name_asc') {
-                                return (dataA['name'] ?? '').toString().compareTo((dataB['name'] ?? '').toString());
-                              } else if (_sortBy == 'size_desc') {
-                                final sizeA = (dataA['fileSize'] ?? 0) as num;
-                                final sizeB = (dataB['fileSize'] ?? 0) as num;
-                                return sizeB.compareTo(sizeA);
-                              } else {
-                                final timeA = dataA['uploadedAt'] as Timestamp?;
-                                final timeB = dataB['uploadedAt'] as Timestamp?;
-                                if (timeA == null) return 1;
-                                if (timeB == null) return -1;
-                                return timeB.compareTo(timeA);
-                              }
-                            });
-
-                            if (filtered.isEmpty) {
-                              return Center(
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(
-                                      Icons.folder_open,
-                                      size: 48,
-                                      color: isDark ? Colors.white12 : Colors.black12,
-                                    ),
-                                    const SizedBox(height: 12),
-                                    Text(
-                                      _searchQuery.isNotEmpty
-                                          ? 'Tidak ada berkas cocok dengan pencarian.'
-                                          : 'Folder ini masih kosong.\nUpload berkas atau buat folder baru!',
-                                      textAlign: TextAlign.center,
-                                      style: AppTypography.subtitle(color: isDark ? Colors.white38 : Colors.black38),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            }
-
-                            if (_isGridView) {
-                              return GridView.builder(
-                                padding: EdgeInsets.only(left: AppTypography.screenHorizontalMargin, right: AppTypography.screenHorizontalMargin, bottom: 120.0, top: 8),
-                                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                                  crossAxisCount: 2,
-                                  crossAxisSpacing: 12,
-                                  mainAxisSpacing: 12,
-                                  childAspectRatio: 1.1,
-                                ),
-                                itemCount: filtered.length,
-                                itemBuilder: (context, index) {
-                                  final docSnap = filtered[index];
-                                  final data = docSnap.data() as Map<String, dynamic>;
-                                  return _buildGridItem(context, docSnap.id, data, currentUid, isDark);
-                                },
-                              );
-                            }
-
-                            return ListView.separated(
-                              padding: const EdgeInsets.only(left: 0, right: 0, bottom: 120.0, top: 4),
-                              itemCount: filtered.length,
-                              separatorBuilder: (context, index) => Divider(
-                                height: 1,
-                                thickness: 0.8,
-                                color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
-                                indent: 56 + AppTypography.screenHorizontalMargin,
-                                endIndent: AppTypography.screenHorizontalMargin,
-                              ),
-                              itemBuilder: (context, index) {
-                                final docSnap = filtered[index];
-                                final data = docSnap.data() as Map<String, dynamic>;
-                                return _buildListItem(context, docSnap.id, data, currentUid, isDark);
-                              },
-                            );
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
+                    ),
+                  );
+                },
+              );
+            },
           );
         },
       );
-    },
-  );
-},
-);
-}
+    }
 
   Widget _buildListItem(BuildContext context, String docId, Map<String, dynamic> data, String currentUid, bool isDark) {
     final fileName = data['name'] ?? 'Untitled';
@@ -5471,6 +5658,7 @@ class _DocumentsTabState extends State<DocumentsTab> {
               fileName: fileName,
               mimeType: mimeType,
               driveLink: driveLink,
+              driveFileId: driveFileId,
               uploaderName: uploaderName,
               dateStr: dateStr,
               fileSize: fileSize is int ? fileSize : 0,
@@ -5481,14 +5669,12 @@ class _DocumentsTabState extends State<DocumentsTab> {
           padding: EdgeInsets.symmetric(horizontal: AppTypography.screenHorizontalMargin, vertical: 8),
           child: Row(
             children: [
-              Container(
-                width: 42,
-                height: 42,
-                decoration: BoxDecoration(
-                  color: fileColor.withValues(alpha: isDark ? 0.22 : 0.12),
-                  shape: BoxShape.circle,
+              SizedBox(
+                width: 36,
+                height: 36,
+                child: Center(
+                  child: Icon(fileIcon, color: fileColor, size: 28),
                 ),
-                child: Icon(fileIcon, color: fileColor, size: 22),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -5561,6 +5747,7 @@ class _DocumentsTabState extends State<DocumentsTab> {
                       fileName: fileName,
                       mimeType: mimeType,
                       driveLink: driveLink,
+                      driveFileId: driveFileId,
                       uploaderName: uploaderName,
                       dateStr: dateStr,
                       fileSize: fileSize is int ? fileSize : 0,
@@ -5671,6 +5858,193 @@ class _DocumentsTabState extends State<DocumentsTab> {
   );
 }
 
+  bool _isImageFile(String? mimeType, String fileName, String driveLink) {
+    final m = (mimeType ?? '').toLowerCase();
+    final n = fileName.toLowerCase();
+    final u = driveLink.toLowerCase();
+    return m.contains('image') ||
+        n.endsWith('.png') ||
+        n.endsWith('.jpg') ||
+        n.endsWith('.jpeg') ||
+        n.endsWith('.webp') ||
+        n.endsWith('.gif') ||
+        n.endsWith('.bmp') ||
+        u.startsWith('data:image') ||
+        u.endsWith('.png') ||
+        u.endsWith('.jpg') ||
+        u.endsWith('.jpeg');
+  }
+
+  String _getImagePreviewUrl(String driveLink, String driveFileId) {
+    if (driveLink.startsWith('data:image')) {
+      return driveLink;
+    }
+    if (driveFileId.isNotEmpty && !driveFileId.startsWith('folder_') && !driveFileId.startsWith('file_')) {
+      return 'https://lh3.googleusercontent.com/d/$driveFileId=w400';
+    }
+    if (driveLink.startsWith('http')) {
+      final reg = RegExp(r'/file/d/([a-zA-Z0-9_-]+)');
+      final match = reg.firstMatch(driveLink);
+      if (match != null) {
+        final id = match.group(1)!;
+        return 'https://lh3.googleusercontent.com/d/$id=w400';
+      }
+      final regId = RegExp(r'[?&]id=([a-zA-Z0-9_-]+)');
+      final matchId = regId.firstMatch(driveLink);
+      if (matchId != null) {
+        final id = matchId.group(1)!;
+        return 'https://lh3.googleusercontent.com/d/$id=w400';
+      }
+      return driveLink;
+    }
+    return driveLink;
+  }
+
+  Widget _buildGridItemPreview({
+    required bool isImage,
+    required String? mimeType,
+    required String fileName,
+    required String driveLink,
+    required String driveFileId,
+    required IconData fileIcon,
+    required Color fileColor,
+    required bool isDark,
+  }) {
+    if (isImage) {
+      final imgUrl = _getImagePreviewUrl(driveLink, driveFileId);
+      final placeholderWidget = Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: BoxDecoration(
+          color: isDark ? const Color(0xFF18181B) : const Color(0xFFF1F5F9),
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2.0,
+                  valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF2563EB)),
+                ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                'Memuat...',
+                style: GoogleFonts.dmSans(
+                  fontSize: 10.0,
+                  fontWeight: FontWeight.w600,
+                  color: isDark ? Colors.white60 : const Color(0xFF64748B),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      if (imgUrl.startsWith('data:image')) {
+        try {
+          final bytes = base64Decode(imgUrl.split(',').last);
+          return Container(
+            width: double.infinity,
+            height: double.infinity,
+            decoration: BoxDecoration(
+              color: isDark ? const Color(0xFF18181B) : const Color(0xFFF1F5F9),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(16),
+              child: Image.memory(
+                bytes,
+                fit: BoxFit.cover,
+                cacheWidth: 300,
+                frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
+                  if (wasSynchronouslyLoaded || frame != null) return child;
+                  return placeholderWidget;
+                },
+                errorBuilder: (_, __, ___) => Center(child: Icon(fileIcon, color: fileColor, size: 40)),
+              ),
+            ),
+          );
+        } catch (_) {
+          return Container(
+            width: double.infinity,
+            height: double.infinity,
+            decoration: BoxDecoration(
+              color: isDark ? const Color(0xFF18181B) : const Color(0xFFF1F5F9),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Center(child: Icon(fileIcon, color: fileColor, size: 40)),
+          );
+        }
+      } else if (imgUrl.isNotEmpty && imgUrl.startsWith('http')) {
+        return Container(
+          width: double.infinity,
+          height: double.infinity,
+          decoration: BoxDecoration(
+            color: isDark ? const Color(0xFF18181B) : const Color(0xFFF1F5F9),
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(16),
+            child: Image.network(
+              imgUrl,
+              fit: BoxFit.cover,
+              cacheWidth: 300,
+              frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
+                if (wasSynchronouslyLoaded || frame != null) return child;
+                return placeholderWidget;
+              },
+              loadingBuilder: (context, child, loadingProgress) {
+                if (loadingProgress == null) return child;
+                return placeholderWidget;
+              },
+              errorBuilder: (context, error, stackTrace) {
+                if (driveFileId.isNotEmpty && !driveFileId.startsWith('file_')) {
+                  return Image.network(
+                    'https://drive.google.com/thumbnail?id=$driveFileId&sz=w300',
+                    fit: BoxFit.cover,
+                    cacheWidth: 300,
+                    frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
+                      if (wasSynchronouslyLoaded || frame != null) return child;
+                      return placeholderWidget;
+                    },
+                    loadingBuilder: (context, child, loadingProgress) {
+                      if (loadingProgress == null) return child;
+                      return placeholderWidget;
+                    },
+                    errorBuilder: (_, __, ___) => Center(child: Icon(fileIcon, color: fileColor, size: 40)),
+                  );
+                }
+                return Center(child: Icon(fileIcon, color: fileColor, size: 40));
+              },
+            ),
+          ),
+        );
+      }
+    }
+
+    // Non-image files (Folder, PDF, Word, Excel, etc.)
+    return Container(
+      width: double.infinity,
+      height: double.infinity,
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF18181B) : const Color(0xFFF1F5F9),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Center(
+        child: Icon(
+          fileIcon,
+          color: fileColor,
+          size: 40,
+        ),
+      ),
+    );
+  }
+
   Widget _buildGridItem(BuildContext context, String docId, Map<String, dynamic> data, String currentUid, bool isDark) {
     final fileName = data['name'] ?? 'Untitled';
     final mimeType = data['mimeType'] as String?;
@@ -5688,6 +6062,7 @@ class _DocumentsTabState extends State<DocumentsTab> {
 
     final fileColor = _getFileColor(mimeType, isFolder);
     final fileIcon = _getFileIcon(mimeType, isFolder);
+    final isImage = !isFolder && _isImageFile(mimeType, fileName, driveLink);
 
     return GestureDetector(
       onTap: () {
@@ -5700,72 +6075,191 @@ class _DocumentsTabState extends State<DocumentsTab> {
             fileName: fileName,
             mimeType: mimeType,
             driveLink: driveLink,
+            driveFileId: driveFileId,
             uploaderName: uploaderName,
             dateStr: dateStr,
             fileSize: fileSize is int ? fileSize : 0,
           );
         }
       },
-      child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: isDark ? const Color(0xFF18181B) : const Color(0xFFF8FAFC),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0)),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      onLongPress: () => _showDocumentItemBottomSheet(
+        context: context,
+        docId: docId,
+        fileName: fileName,
+        mimeType: mimeType,
+        isFolder: isFolder,
+        driveLink: driveLink,
+        driveFileId: driveFileId,
+        uploaderName: uploaderName,
+        dateStr: dateStr,
+        fileSize: fileSize is int ? fileSize : 0,
+        isMyFile: isMyFile,
+        isDark: isDark,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Full top preview box without 3 dots and without outer card border/background
+          AspectRatio(
+            aspectRatio: 1.0,
+            child: _buildGridItemPreview(
+              isImage: isImage,
+              mimeType: mimeType,
+              fileName: fileName,
+              driveLink: driveLink,
+              driveFileId: driveFileId,
+              fileIcon: fileIcon,
+              fileColor: fileColor,
+              isDark: isDark,
+            ),
+          ),
+          const SizedBox(height: 6),
+
+          // File name matching preview width
+          Text(
+            fileName,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: AppTypography.documentTitle(
+              color: isDark ? Colors.white : const Color(0xFF0F172A),
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            isFolder ? 'Folder' : (fileSize > 0 ? _formatBytes(fileSize.toDouble()) : (isMyFile ? 'Saya' : uploaderName)),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: AppTypography.fileSize(color: isDark ? Colors.white38 : Colors.black38),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showDocumentItemBottomSheet({
+    required BuildContext context,
+    required String docId,
+    required String fileName,
+    required String? mimeType,
+    required bool isFolder,
+    required String driveLink,
+    required String driveFileId,
+    required String uploaderName,
+    required String dateStr,
+    required int fileSize,
+    required bool isMyFile,
+    required bool isDark,
+  }) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: isDark ? const Color(0xFF18181B) : Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Container(
-                  width: 38,
-                  height: 38,
+                  width: 36,
+                  height: 4,
+                  margin: const EdgeInsets.only(bottom: 12),
                   decoration: BoxDecoration(
-                    color: fileColor.withValues(alpha: isDark ? 0.22 : 0.12),
-                    shape: BoxShape.circle,
+                    color: isDark ? Colors.white24 : Colors.black12,
+                    borderRadius: BorderRadius.circular(2),
                   ),
-                  child: Icon(fileIcon, color: fileColor, size: 20),
                 ),
-                PopupMenuButton<String>(
-                  tooltip: '',
-                  icon: Icon(Icons.more_horiz_rounded, size: 16, color: isDark ? Colors.white38 : Colors.black38),
-                  color: isDark ? const Color(0xFF18181B) : Colors.white,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                  onSelected: (val) async {
-                    if (val == 'view') {
-                      if (isFolder) {
-                        setState(() {
-                          _folderCrumbs.add(_FolderCrumb(id: driveFileId.isNotEmpty ? driveFileId : docId, name: fileName));
-                        });
-                      } else {
-                        _openFileInApp(
-                          fileName: fileName,
-                          mimeType: mimeType,
-                          driveLink: driveLink,
-                          uploaderName: uploaderName,
-                          dateStr: dateStr,
-                          fileSize: fileSize is int ? fileSize : 0,
-                        );
-                      }
-                    } else if (val == 'download') {
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                  child: Row(
+                    children: [
+                      Icon(
+                        _getFileIcon(mimeType, isFolder),
+                        color: _getFileColor(mimeType, isFolder),
+                        size: 24,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          fileName,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppTypography.documentTitle(
+                            color: isDark ? Colors.white : const Color(0xFF0F172A),
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const Divider(),
+                ListTile(
+                  leading: const Icon(Icons.open_in_new_rounded, size: 20),
+                  title: Text(isFolder ? 'Buka Folder' : 'Buka di Aplikasi', style: AppTypography.buttonLabel()),
+                  onTap: () {
+                    Navigator.pop(ctx);
+                    if (isFolder) {
+                      setState(() {
+                        _folderCrumbs.add(_FolderCrumb(id: driveFileId.isNotEmpty ? driveFileId : docId, name: fileName));
+                      });
+                    } else {
+                      _openFileInApp(
+                        fileName: fileName,
+                        mimeType: mimeType,
+                        driveLink: driveLink,
+                        driveFileId: driveFileId,
+                        uploaderName: uploaderName,
+                        dateStr: dateStr,
+                        fileSize: fileSize,
+                      );
+                    }
+                  },
+                ),
+                if (!isFolder && driveLink.isNotEmpty)
+                  ListTile(
+                    leading: const Icon(Icons.download_rounded, size: 20, color: Color(0xFF10B981)),
+                    title: Text('Unduh', style: AppTypography.buttonLabel(color: const Color(0xFF10B981), fontWeight: FontWeight.w600)),
+                    onTap: () async {
+                      Navigator.pop(ctx);
                       final uri = Uri.parse(driveLink);
                       if (await canLaunchUrl(uri)) {
                         await launchUrl(uri, mode: LaunchMode.externalApplication);
                       }
-                    } else if (val == 'rename') {
-                      _renameItem(docId, fileName, isFolder);
-                    } else if (val == 'copy') {
-                      Clipboard.setData(ClipboardData(text: driveLink));
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Tautan berhasil disalin!')),
-                      );
-                    } else if (val == 'delete') {
+                    },
+                  ),
+                ListTile(
+                  leading: const Icon(Icons.edit_outlined, size: 20),
+                  title: Text('Ganti Nama', style: AppTypography.buttonLabel()),
+                  onTap: () {
+                    Navigator.pop(ctx);
+                    _renameItem(docId, fileName, isFolder);
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.copy_rounded, size: 20),
+                  title: Text('Salin Tautan', style: AppTypography.buttonLabel()),
+                  onTap: () {
+                    Navigator.pop(ctx);
+                    Clipboard.setData(ClipboardData(text: driveLink));
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Tautan berhasil disalin!')),
+                    );
+                  },
+                ),
+                if (isMyFile)
+                  ListTile(
+                    leading: const Icon(Icons.delete_outline_rounded, size: 20, color: Colors.redAccent),
+                    title: Text('Hapus', style: AppTypography.buttonLabel(color: Colors.redAccent)),
+                    onTap: () async {
+                      Navigator.pop(ctx);
                       final confirm = await showDialog<bool>(
                         context: context,
-                        builder: (ctx) => AlertDialog(
+                        builder: (dCtx) => AlertDialog(
                           backgroundColor: isDark ? const Color(0xFF18181B) : Colors.white,
                           title: Text(
                             'Hapus ${isFolder ? "Folder" : "Berkas"}',
@@ -5777,11 +6271,11 @@ class _DocumentsTabState extends State<DocumentsTab> {
                           ),
                           actions: [
                             TextButton(
-                              onPressed: () => Navigator.pop(ctx, false),
+                              onPressed: () => Navigator.pop(dCtx, false),
                               child: Text('Batal', style: AppTypography.buttonLabel(color: Colors.black54)),
                             ),
                             TextButton(
-                              onPressed: () => Navigator.pop(ctx, true),
+                              onPressed: () => Navigator.pop(dCtx, true),
                               child: Text('Hapus', style: AppTypography.buttonLabel(color: Colors.redAccent, fontWeight: FontWeight.bold)),
                             ),
                           ],
@@ -5790,61 +6284,13 @@ class _DocumentsTabState extends State<DocumentsTab> {
                       if (confirm == true) {
                         await FirebaseFirestore.instance.collection('driveDocuments').doc(docId).delete();
                       }
-                    }
-                  },
-                  itemBuilder: (ctx) => [
-                    PopupMenuItem(
-                      value: 'view',
-                      child: Text(isFolder ? 'Buka Folder' : 'Buka di Aplikasi', style: AppTypography.buttonLabel()),
-                    ),
-                    if (!isFolder && driveLink.isNotEmpty)
-                      PopupMenuItem(
-                        value: 'download',
-                        child: Row(
-                          children: [
-                            const Icon(Icons.download_rounded, size: 16, color: Color(0xFF10B981)),
-                            const SizedBox(width: 8),
-                            Text('Unduh', style: AppTypography.buttonLabel(color: const Color(0xFF10B981), fontWeight: FontWeight.w600)),
-                          ],
-                        ),
-                      ),
-                    PopupMenuItem(
-                      value: 'rename',
-                      child: Text('Ganti Nama', style: AppTypography.buttonLabel()),
-                    ),
-                    PopupMenuItem(
-                      value: 'copy',
-                      child: Text('Salin Tautan', style: AppTypography.buttonLabel()),
-                    ),
-                    if (isMyFile) ...[
-                      PopupMenuItem(
-                        value: 'delete',
-                        child: Text('Hapus', style: AppTypography.buttonLabel(color: Colors.redAccent)),
-                      ),
-                    ],
-                  ],
-                ),
+                    },
+                  ),
               ],
             ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  fileName,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: AppTypography.documentTitle(color: isDark ? Colors.white : const Color(0xFF0F172A), fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  isFolder ? 'Folder' : (fileSize > 0 ? _formatBytes(fileSize.toDouble()) : (isMyFile ? 'Saya' : uploaderName)),
-                  style: AppTypography.fileSize(color: isDark ? Colors.white38 : Colors.black38),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 
@@ -5923,6 +6369,36 @@ class _DocumentsTabState extends State<DocumentsTab> {
         ),
       ),
     );
+  }
+}
+
+class _DriveControlsHeaderDelegate extends SliverPersistentHeaderDelegate {
+  final Widget child;
+  final double height;
+  final double topPadding;
+
+  _DriveControlsHeaderDelegate({
+    required this.child,
+    required this.height,
+    this.topPadding = 0.0,
+  });
+
+  @override
+  double get minExtent => height + topPadding;
+
+  @override
+  double get maxExtent => height + topPadding;
+
+  @override
+  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+    return SizedBox.expand(
+      child: child,
+    );
+  }
+
+  @override
+  bool shouldRebuild(covariant _DriveControlsHeaderDelegate oldDelegate) {
+    return oldDelegate.child != child || oldDelegate.height != height || oldDelegate.topPadding != topPadding;
   }
 }
 
@@ -7316,35 +7792,13 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
                               trailing: 'Hubner Edu v1.1.0',
                               isDark: isDark,
                               onTap: () {
-                                showDialog(
-                                  context: context,
-                                  builder: (ctx) => AlertDialog(
-                                    backgroundColor: isDark ? const Color(0xFF1C1C1E) : Colors.white,
-                                    title: Text(
-                                      'Tentang Hubner Edu',
-                                      style: AppTypography.buttonLabel(
-                                        color: isDark ? Colors.white : Colors.black87,
-                                        fontWeight: FontWeight.bold,
-                                      ),
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => const ProfileSubPage(
+                                      title: 'Tentang Aplikasi',
+                                      child: AboutAppContent(),
                                     ),
-                                    content: Text(
-                                      'Hubner Edu adalah platform manajemen kelas online dan pembelajaran interaktif secara real-time.',
-                                      style: AppTypography.buttonLabel(
-                                        color: isDark ? Colors.white70 : Colors.black87,
-                                      ),
-                                    ),
-                                    actions: [
-                                      TextButton(
-                                        onPressed: () => Navigator.pop(ctx),
-                                        child: Text(
-                                          'Tutup',
-                                          style: AppTypography.buttonLabel(
-                                            color: isDark ? Colors.white : Colors.black87,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                      )
-                                    ],
                                   ),
                                 );
                               },
@@ -7535,50 +7989,46 @@ class ProfileSubPage extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: isDark ? const Color(0xFF000000) : const Color(0xFFF8FAFC),
-      appBar: AppBar(
-        backgroundColor: isDark ? const Color(0xFF000000) : const Color(0xFFF8FAFC),
-        elevation: 0,
-        centerTitle: true,
-        leading: Padding(
-          padding: const EdgeInsets.only(left: 14.0),
-          child: Center(
-            child: InkWell(
-              borderRadius: BorderRadius.circular(24),
-              onTap: () => Navigator.pop(context),
-              child: Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
-                  border: Border.all(
-                    color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
-                    width: 1.0,
-                  ),
-                ),
-                child: Icon(
+      extendBodyBehindAppBar: true,
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(kToolbarHeight),
+        child: ClipRect(
+          child: BackdropFilter(
+            filter: ui.ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+            child: AppBar(
+              backgroundColor: (isDark ? const Color(0xFF000000) : const Color(0xFFF8FAFC)).withValues(alpha: 0.75),
+              elevation: 0,
+              scrolledUnderElevation: 0,
+              centerTitle: true,
+              leading: IconButton(
+                icon: Icon(
                   Icons.arrow_back_rounded,
-                  size: 20,
+                  size: 22,
                   color: isDark ? Colors.white : const Color(0xFF0F172A),
+                ),
+                splashRadius: 24,
+                onPressed: () => Navigator.pop(context),
+              ),
+              title: Text(
+                title,
+                style: AppTypography.chatHeaderTitle(
+                  color: isDark ? Colors.white : const Color(0xFF0F172A),
+                  fontWeight: FontWeight.bold,
                 ),
               ),
             ),
           ),
         ),
-        title: Text(
-          title,
-          style: AppTypography.chatHeaderTitle(
-            color: isDark ? Colors.white : const Color(0xFF0F172A),
-            fontWeight: FontWeight.bold,
-          ),
-        ),
       ),
-      body: Align(
-        alignment: Alignment.topCenter,
-        child: Container(
-          constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width > 500 ? double.infinity : 500),
-          padding: const EdgeInsets.all(20.0),
-          child: child,
+      body: SafeArea(
+        top: true,
+        child: Align(
+          alignment: Alignment.topCenter,
+          child: Container(
+            constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width > 500 ? double.infinity : 500),
+            padding: const EdgeInsets.all(20.0),
+            child: child,
+          ),
         ),
       ),
     );
@@ -7623,23 +8073,23 @@ class _EditNameFormState extends State<EditNameForm> {
         const SizedBox(height: 8),
         TextField(
           controller: _controller,
-          style: AppTypography.replySubtitle(
+          style: AppTypography.messageInput(
             color: isDark ? Colors.white : Colors.black87,
           ),
           decoration: InputDecoration(
             filled: true,
-            fillColor: isDark ? const Color(0xFF2C2C2E) : const Color(0xFFF8FAFC),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            fillColor: isDark ? const Color(0xFF1C1C1E) : const Color(0xFFF8FAFC),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
             enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(20),
               borderSide: BorderSide(
                 color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
               ),
             ),
             focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(20),
               borderSide: BorderSide(
-                color: isDark ? Colors.white : Colors.black,
+                color: isDark ? Colors.white : const Color(0xFF18181B),
                 width: 1.2,
               ),
             ),
@@ -7737,11 +8187,14 @@ class ChangePasswordForm extends StatefulWidget {
 class _ChangePasswordFormState extends State<ChangePasswordForm> {
   final _newPasswordController = TextEditingController();
   bool _isLoading = false;
+  bool _obscurePassword = true;
+
   @override
   void dispose() {
     _newPasswordController.dispose();
     super.dispose();
   }
+
   @override
   Widget build(BuildContext context) {
     final bool isDark = AppColors.isDarkMode;
@@ -7759,24 +8212,39 @@ class _ChangePasswordFormState extends State<ChangePasswordForm> {
         const SizedBox(height: 8),
         TextField(
           controller: _newPasswordController,
-          obscureText: true,
-          style: AppTypography.replySubtitle(
+          obscureText: _obscurePassword,
+          style: AppTypography.messageInput(
             color: isDark ? Colors.white : Colors.black87,
           ),
           decoration: InputDecoration(
+            hintText: 'Masukkan kata sandi baru',
+            hintStyle: AppTypography.messageInput(
+              color: isDark ? Colors.white38 : const Color(0xFF94A3B8),
+            ),
             filled: true,
-            fillColor: isDark ? const Color(0xFF2C2C2E) : const Color(0xFFF8FAFC),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            fillColor: isDark ? const Color(0xFF1C1C1E) : const Color(0xFFF8FAFC),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
+            suffixIcon: IconButton(
+              icon: Icon(
+                _obscurePassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                color: isDark ? Colors.white54 : const Color(0xFF64748B),
+                size: 20,
+              ),
+              splashRadius: 20,
+              onPressed: () {
+                setState(() => _obscurePassword = !_obscurePassword);
+              },
+            ),
             enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(20),
               borderSide: BorderSide(
                 color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
               ),
             ),
             focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(20),
               borderSide: BorderSide(
-                color: isDark ? Colors.white : Colors.black,
+                color: isDark ? Colors.white : const Color(0xFF18181B),
                 width: 1.2,
               ),
             ),
@@ -7978,8 +8446,13 @@ class ThemeSetupForm extends StatelessWidget {
 
         return ListView.separated(
           shrinkWrap: true,
+          padding: EdgeInsets.zero,
+          physics: const NeverScrollableScrollPhysics(),
           itemCount: themes.length,
-          separatorBuilder: (_, __) => Divider(color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9)),
+          separatorBuilder: (_, _) => Divider(
+            color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+            height: 1,
+          ),
           itemBuilder: (context, idx) {
             final th = themes[idx];
             final key = th['key']!;
@@ -7987,18 +8460,8 @@ class ThemeSetupForm extends StatelessWidget {
                 ? false
                 : (activeTheme == key);
 
-            return ListTile(
-              contentPadding: EdgeInsets.zero,
-              title: Text(
-                th['label']!,
-                style: AppTypography.cardTitle(
-                  color: isDark ? Colors.white : Colors.black87,
-                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                ),
-              ),
-              trailing: isSelected
-                  ? Icon(Icons.check_circle_rounded, color: isDark ? Colors.white : const Color(0xFF18181B))
-                  : null,
+            return InkWell(
+              borderRadius: BorderRadius.circular(14),
               onTap: () async {
                 String newTheme;
                 final prefs = await SharedPreferences.getInstance();
@@ -8019,6 +8482,28 @@ class ThemeSetupForm extends StatelessWidget {
                   Navigator.pop(context);
                 }
               },
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 13, horizontal: 4),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        th['label']!,
+                        style: AppTypography.messageInput(
+                          color: isDark ? Colors.white : Colors.black87,
+                          fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                    if (isSelected)
+                      Icon(
+                        Icons.check_circle_rounded,
+                        color: isDark ? Colors.white : const Color(0xFF18181B),
+                        size: 22,
+                      ),
+                  ],
+                ),
+              ),
             );
           },
         );
@@ -8100,6 +8585,304 @@ class _NotificationSetupFormState extends State<NotificationSetupForm> {
           },
         ),
       ],
+    );
+  }
+}
+
+// --- Halaman / Konten Tentang Aplikasi Lengkap ---
+class AboutAppContent extends StatelessWidget {
+  const AboutAppContent({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final bool isDark = AppColors.isDarkMode;
+
+    final features = [
+      {
+        'icon': '💬',
+        'title': 'Ruang Diskusi & Chat Interaktif',
+        'desc': 'Obrolan kelas real-time, channel per mata pelajaran, pesan suara (voice note), dan berbagi gambar atau dokumen.',
+      },
+      {
+        'icon': '📂',
+        'title': 'Manajemen Dokumen & Cloud Drive',
+        'desc': 'Pratinjau instan dokumen (PDF, Gambar, Audio) langsung di aplikasi tanpa aplikasi pihak ketiga, serta integrasi Google Drive.',
+      },
+      {
+        'icon': '📅',
+        'title': 'Jadwal Pelajaran & Kalender',
+        'desc': 'Pengingat jadwal kelas harian yang terintegrasi dan pelacakan agenda kegiatan belajar-mengajar interaktif.',
+      },
+      {
+        'icon': '📝',
+        'title': 'Tugas & Catatan Digital',
+        'desc': 'Manajemen tenggat tugas siswa, pengumpulan materi digital, dan sistem catatan pelajaran terorganisir.',
+      },
+      {
+        'icon': '🛡️',
+        'title': 'Keamanan Akun & Kustomisasi',
+        'desc': 'Otentikasi 2 Langkah (2FA), personalisasi avatar profil, dan dukungan tema Gelap/Terang adaptif.',
+      },
+    ];
+
+    return SingleChildScrollView(
+      physics: const BouncingScrollPhysics(),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          const SizedBox(height: 8),
+          // 1. App Icon Logo Card
+          Container(
+            width: 84,
+            height: 84,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(22),
+              color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
+              border: Border.all(
+                color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                width: 1.2,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.06),
+                  blurRadius: 18,
+                  offset: const Offset(0, 6),
+                ),
+              ],
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(22),
+              child: Image.asset(
+                'assets/iconapp/iconapp.png',
+                fit: BoxFit.cover,
+                errorBuilder: (_, __, ___) => const Center(
+                  child: Icon(Icons.school_rounded, size: 40, color: Color(0xFF7C3AED)),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 14),
+          Text(
+            'Hubner Edu',
+            style: AppTypography.pageTitle(
+              color: isDark ? Colors.white : const Color(0xFF0F172A),
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+            decoration: BoxDecoration(
+              color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: isDark ? const Color(0xFF3F3F46) : const Color(0xFFE2E8F0),
+                width: 0.8,
+              ),
+            ),
+            child: Text(
+              'Versi 1.1.0 (Build 4)',
+              style: AppTypography.channelTag(
+                color: isDark ? Colors.white70 : const Color(0xFF475569),
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          const SizedBox(height: 18),
+
+          // 2. Penjelasan / Ringkasan Aplikasi
+          Text(
+            'Hubner Edu adalah ekosistem digital pembelajaran dan manajemen kelas interaktif yang dirancang untuk mempermudah kolaborasi belajar antara siswa dan pendidik secara modern, aman, dan efisien.',
+            textAlign: TextAlign.center,
+            style: AppTypography.chatBody(
+              color: isDark ? Colors.white70 : const Color(0xFF475569),
+              height: 1.5,
+              fontSize: 14.0,
+            ),
+          ),
+          const SizedBox(height: 22),
+
+          // 3. Link Resmi hubner.id (Interactive Action Tile)
+          InkWell(
+            borderRadius: BorderRadius.circular(20),
+            onTap: () async {
+              final uri = Uri.parse('https://hubner.id');
+              if (await canLaunchUrl(uri)) {
+                await launchUrl(uri, mode: LaunchMode.externalApplication);
+              } else {
+                if (context.mounted) {
+                  Clipboard.setData(const ClipboardData(text: 'https://hubner.id'));
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Tautan https://hubner.id disalin ke clipboard!'),
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
+                }
+              }
+            },
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              decoration: BoxDecoration(
+                color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                  width: 1.0,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.04),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: isDark ? const Color(0xFF27272A) : const Color(0xFFEFF6FF),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.language_rounded,
+                      color: Color(0xFF3B82F6),
+                      size: 22,
+                    ),
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Website Resmi',
+                          style: AppTypography.timestamp(
+                            color: isDark ? Colors.white54 : const Color(0xFF64748B),
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          'hubner.id',
+                          style: AppTypography.cardTitle(
+                            color: const Color(0xFF3B82F6),
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15.5,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Icon(
+                    Icons.open_in_new_rounded,
+                    color: isDark ? Colors.white54 : const Color(0xFF64748B),
+                    size: 18,
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 24),
+
+          // 4. Fitur-fitur Utama
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              'FITUR UTAMA',
+              style: AppTypography.channelTag(
+                color: isDark ? Colors.white38 : const Color(0xFF64748B),
+                fontWeight: FontWeight.bold,
+                letterSpacing: 0.8,
+              ),
+            ),
+          ),
+          const SizedBox(height: 10),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+            decoration: BoxDecoration(
+              color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
+              borderRadius: BorderRadius.circular(22),
+              border: Border.all(
+                color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                width: 1.0,
+              ),
+            ),
+            child: ListView.separated(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: features.length,
+              separatorBuilder: (_, __) => Divider(
+                color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+                height: 1,
+              ),
+              itemBuilder: (context, idx) {
+                final feat = features[idx];
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 11),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        feat['icon']!,
+                        style: const TextStyle(fontSize: 20),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              feat['title']!,
+                              style: AppTypography.cardTitle(
+                                color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14.5,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              feat['desc']!,
+                              style: AppTypography.chatBody(
+                                color: isDark ? Colors.white60 : const Color(0xFF64748B),
+                                fontSize: 13.0,
+                                height: 1.35,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
+          const SizedBox(height: 28),
+
+          // 5. Copyright & Info Tambahan
+          Text(
+            '© 2026 Hubner Edu • Hak Cipta Dilindungi',
+            style: AppTypography.timestamp(
+              color: isDark ? Colors.white38 : const Color(0xFF94A3B8),
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'Dibuat untuk kemajuan pendidikan Indonesia',
+            style: AppTypography.timestamp(
+              color: isDark ? Colors.white24 : const Color(0xFFCBD5E1),
+              fontSize: 11.5,
+            ),
+          ),
+          const SizedBox(height: 24),
+        ],
+      ),
     );
   }
 }

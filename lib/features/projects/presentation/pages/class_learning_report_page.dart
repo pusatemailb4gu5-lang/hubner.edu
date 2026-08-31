@@ -4,6 +4,7 @@ import 'package:hubner/core/theme/app_typography.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:hubner/core/theme/app_colors.dart';
+import 'package:hubner/core/widgets/classroom_card_pattern_painter.dart';
 import 'package:hubner/main.dart';
 import 'class_page.dart';
 

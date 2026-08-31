@@ -1,5 +1,8 @@
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:hubner/core/theme/app_colors.dart';
 import 'package:hubner/core/theme/app_typography.dart';
 
@@ -111,6 +114,73 @@ class _EditProfilePageState extends State<EditProfilePage> {
     }
   }
 
+  Widget _buildDualToneSvgIcon(String iconType, String accentHex, bool isDark, {double size = 20}) {
+    final String mainColor = isDark ? '#FFFFFF' : '#18181B';
+    String svgStr;
+
+    switch (iconType) {
+      case 'person':
+        svgStr = '''<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="12" cy="8" r="4.5" stroke="$mainColor" stroke-width="2"/>
+          <path d="M4 20c0-4.418 3.582-8 8-8s8 3.582 8 8" stroke="$mainColor" stroke-width="2" stroke-linecap="round"/>
+          <circle cx="12" cy="8" r="2.2" fill="$accentHex"/>
+        </svg>''';
+        break;
+
+      case 'gender':
+        svgStr = '''<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="12" cy="8" r="4.5" stroke="$mainColor" stroke-width="2"/>
+          <path d="M4 20c0-4.418 3.582-8 8-8s8 3.582 8 8" stroke="$mainColor" stroke-width="2" stroke-linecap="round"/>
+          <circle cx="12" cy="8" r="2.2" fill="$accentHex"/>
+        </svg>''';
+        break;
+
+      case 'school':
+        svgStr = '''<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 3L2 8l10 5 10-5-10-5z" stroke="$mainColor" stroke-width="2" stroke-linejoin="round"/>
+          <path d="M6 10.6v5.4c0 3.3 2.7 6 6 6s6-2.7 6-6v-5.4" stroke="$mainColor" stroke-width="2" stroke-linecap="round"/>
+          <path d="M22 8v7" stroke="$accentHex" stroke-width="2" stroke-linecap="round"/>
+          <circle cx="22" cy="15.5" r="1.5" fill="$accentHex"/>
+        </svg>''';
+        break;
+
+      case 'grade':
+        svgStr = '''<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" stroke="$mainColor" stroke-width="2" stroke-linejoin="round"/>
+          <circle cx="12" cy="11" r="2" fill="$accentHex"/>
+        </svg>''';
+        break;
+
+      case 'timezone':
+        svgStr = '''<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="12" cy="12" r="9" stroke="$mainColor" stroke-width="2"/>
+          <path d="M12 7v5l3.5 2" stroke="$accentHex" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="12" cy="12" r="1.5" fill="$accentHex"/>
+        </svg>''';
+        break;
+
+      case 'language':
+        svgStr = '''<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="12" cy="12" r="9" stroke="$mainColor" stroke-width="2"/>
+          <path d="M3.6 9h16.8M3.6 15h16.8" stroke="$mainColor" stroke-width="1.8" stroke-linecap="round"/>
+          <path d="M12 3a14 14 0 010 18M12 3a14 14 0 000 18" stroke="$accentHex" stroke-width="2" stroke-linecap="round"/>
+        </svg>''';
+        break;
+
+      default:
+        svgStr = '''<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="12" cy="12" r="9" stroke="$mainColor" stroke-width="2"/>
+          <circle cx="12" cy="12" r="3" fill="$accentHex"/>
+        </svg>''';
+    }
+
+    return SvgPicture.string(
+      svgStr,
+      width: size,
+      height: size,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final bool isDark = AppColors.isDarkMode;
@@ -142,240 +212,209 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
     return Scaffold(
       backgroundColor: isDark ? const Color(0xFF000000) : const Color(0xFFF8FAFC),
-      appBar: AppBar(
-        backgroundColor: isDark ? const Color(0xFF000000) : const Color(0xFFF8FAFC),
-        elevation: 0,
-        centerTitle: true,
-        leading: Padding(
-          padding: const EdgeInsets.only(left: 14.0),
-          child: Center(
-            child: InkWell(
-              borderRadius: BorderRadius.circular(24),
-              onTap: () => Navigator.pop(context),
-              child: Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
-                  border: Border.all(
-                    color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
-                    width: 1.0,
-                  ),
-                ),
-                child: Icon(
+      extendBodyBehindAppBar: true,
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(kToolbarHeight),
+        child: ClipRect(
+          child: BackdropFilter(
+            filter: ui.ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+            child: AppBar(
+              backgroundColor: (isDark ? const Color(0xFF000000) : const Color(0xFFF8FAFC)).withValues(alpha: 0.75),
+              elevation: 0,
+              scrolledUnderElevation: 0,
+              centerTitle: true,
+              // Tombol Back Tanpa Card / Tanpa Lingkaran Solid
+              leading: IconButton(
+                icon: Icon(
                   Icons.arrow_back_rounded,
-                  size: 20,
+                  size: 22,
                   color: isDark ? Colors.white : const Color(0xFF0F172A),
+                ),
+                splashRadius: 24,
+                onPressed: () => Navigator.pop(context),
+              ),
+              title: Text(
+                'Edit Profil',
+                style: AppTypography.chatHeaderTitle(
+                  color: isDark ? Colors.white : const Color(0xFF0F172A),
+                  fontWeight: FontWeight.bold,
                 ),
               ),
             ),
-          ),
-        ),
-        title: Text(
-          'Edit Profil',
-          style: AppTypography.chatHeaderTitle(
-            color: isDark ? Colors.white : const Color(0xFF0F172A),
-            fontWeight: FontWeight.bold,
           ),
         ),
       ),
-      body: SingleChildScrollView(
-        padding: EdgeInsets.symmetric(
-          horizontal: AppTypography.screenHorizontalMargin,
-          vertical: 16,
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // 1. Form Section Card (Solid Round Style with Colored Icons)
-            _buildSectionTitle('Informasi Profil', isDark),
-            const SizedBox(height: 10),
-            Container(
-              padding: const EdgeInsets.all(18),
-              decoration: BoxDecoration(
-                color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
-                borderRadius: BorderRadius.circular(24),
-                border: Border.all(
-                  color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
-                  width: 1.0,
+      body: SafeArea(
+        top: true,
+        child: SingleChildScrollView(
+          padding: EdgeInsets.symmetric(
+            horizontal: AppTypography.screenHorizontalMargin,
+            vertical: 16,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // 1. Informasi Profil (Langsung tanpa Card pembungkus)
+              _buildSectionTitle('Informasi Profil', isDark),
+              const SizedBox(height: 12),
+
+              // Nama Lengkap
+              _buildFieldLabel('Nama Lengkap', isDark),
+              const SizedBox(height: 8),
+              TextFormField(
+                controller: _nameController,
+                style: AppTypography.messageInput(
+                  color: isDark ? Colors.white : Colors.black87,
+                  fontWeight: FontWeight.w500,
+                ),
+                decoration: _inputDecoration(
+                  hintText: 'Masukkan nama lengkap',
+                  prefixSvg: _buildDualToneSvgIcon('person', '#8B5CF6', isDark, size: 20),
+                  isDark: isDark,
                 ),
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Nama Lengkap
-                  _buildFieldLabel('Nama Lengkap', isDark),
-                  const SizedBox(height: 8),
-                  TextFormField(
-                    controller: _nameController,
-                    style: AppTypography.cardTitle(
-                      color: isDark ? Colors.white : Colors.black87,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 16,
-                    ),
-                    decoration: _inputDecoration(
-                      hintText: 'Masukkan nama lengkap',
-                      prefixIcon: Icons.person_outline_rounded,
-                      prefixIconColor: const Color(0xFF7F52FC),
-                      isDark: isDark,
-                    ),
-                  ),
-                  const SizedBox(height: 18),
+              const SizedBox(height: 16),
 
-                  // Jenis Kelamin
-                  _buildFieldLabel('Jenis Kelamin', isDark),
-                  const SizedBox(height: 8),
-                  _buildCustomDropdownField(
-                    dropdownKey: _genderKey,
-                    prefixIcon: Icons.wc_rounded,
-                    prefixIconColor: const Color(0xFFEC4899),
-                    selectedValue: _selectedGender,
-                    items: genderOptions,
-                    isDark: isDark,
-                    onChanged: (val) {
-                      setState(() => _selectedGender = val);
-                    },
-                  ),
-                  const SizedBox(height: 18),
-
-                  // Tingkat Sekolah
-                  _buildFieldLabel('Tingkat Sekolah', isDark),
-                  const SizedBox(height: 8),
-                  _buildCustomDropdownField(
-                    dropdownKey: _schoolLevelKey,
-                    prefixIcon: Icons.school_outlined,
-                    prefixIconColor: const Color(0xFF0D9488),
-                    selectedValue: _selectedSchoolLevel,
-                    items: schoolLevelOptions,
-                    isDark: isDark,
-                    onChanged: (val) {
-                      setState(() {
-                        _selectedSchoolLevel = val;
-                        if (val == 'SD') {
-                          _selectedClass = '1';
-                        } else if (val == 'SMP') {
-                          _selectedClass = '7';
-                        } else {
-                          _selectedClass = '10';
-                        }
-                      });
-                    },
-                  ),
-
-                  // Tingkat Kelas (Khusus Siswa)
-                  if (_userRole.toLowerCase() == 'siswa') ...[
-                    const SizedBox(height: 18),
-                    _buildFieldLabel('Tingkat Kelas', isDark),
-                    const SizedBox(height: 8),
-                    _buildCustomDropdownField(
-                      dropdownKey: _classKey,
-                      prefixIcon: Icons.grade_outlined,
-                      prefixIconColor: const Color(0xFFF59E0B),
-                      selectedValue: _getValidGradeForLevel(_selectedSchoolLevel, _selectedClass),
-                      items: gradeOptions,
-                      isDark: isDark,
-                      onChanged: (val) {
-                        setState(() => _selectedClass = val);
-                      },
-                    ),
-                  ],
-                ],
+              // Jenis Kelamin
+              _buildFieldLabel('Jenis Kelamin', isDark),
+              const SizedBox(height: 8),
+              _buildCustomDropdownField(
+                dropdownKey: _genderKey,
+                prefixSvg: _buildDualToneSvgIcon('gender', '#EC4899', isDark, size: 20),
+                selectedValue: _selectedGender,
+                items: genderOptions,
+                isDark: isDark,
+                onChanged: (val) {
+                  setState(() => _selectedGender = val);
+                },
               ),
-            ),
-            const SizedBox(height: 24),
+              const SizedBox(height: 16),
 
-            // 2. Pengaturan Regional (Solid Round Style with Colored Icons)
-            _buildSectionTitle('Pengaturan Regional', isDark),
-            const SizedBox(height: 10),
-            Container(
-              padding: const EdgeInsets.all(18),
-              decoration: BoxDecoration(
-                color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
-                borderRadius: BorderRadius.circular(24),
-                border: Border.all(
-                  color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
-                  width: 1.0,
+              // Tingkat Sekolah
+              _buildFieldLabel('Tingkat Sekolah', isDark),
+              const SizedBox(height: 8),
+              _buildCustomDropdownField(
+                dropdownKey: _schoolLevelKey,
+                prefixSvg: _buildDualToneSvgIcon('school', '#14B8A6', isDark, size: 20),
+                selectedValue: _selectedSchoolLevel,
+                items: schoolLevelOptions,
+                isDark: isDark,
+                onChanged: (val) {
+                  setState(() {
+                    _selectedSchoolLevel = val;
+                    if (val == 'SD') {
+                      _selectedClass = '1';
+                    } else if (val == 'SMP') {
+                      _selectedClass = '7';
+                    } else {
+                      _selectedClass = '10';
+                    }
+                  });
+                },
+              ),
+
+              // Tingkat Kelas (Khusus Siswa)
+              if (_userRole.toLowerCase() == 'siswa') ...[
+                const SizedBox(height: 16),
+                _buildFieldLabel('Tingkat Kelas', isDark),
+                const SizedBox(height: 8),
+                _buildCustomDropdownField(
+                  dropdownKey: _classKey,
+                  prefixSvg: _buildDualToneSvgIcon('grade', '#F59E0B', isDark, size: 20),
+                  selectedValue: _getValidGradeForLevel(_selectedSchoolLevel, _selectedClass),
+                  items: gradeOptions,
+                  isDark: isDark,
+                  onChanged: (val) {
+                    setState(() => _selectedClass = val);
+                  },
                 ),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Zona Waktu
-                  _buildFieldLabel('Zona Waktu', isDark),
-                  const SizedBox(height: 8),
-                  _buildCustomDropdownField(
-                    dropdownKey: _timezoneKey,
-                    prefixIcon: Icons.public_rounded,
-                    prefixIconColor: const Color(0xFF3B82F6),
-                    selectedValue: _selectedTimezone,
-                    items: timezoneOptions,
-                    isDark: isDark,
-                    onChanged: (val) {
-                      setState(() => _selectedTimezone = val);
-                    },
-                  ),
-                  const SizedBox(height: 18),
+              ],
+              const SizedBox(height: 24),
 
-                  // Bahasa
-                  _buildFieldLabel('Bahasa Aplikasi', isDark),
-                  const SizedBox(height: 8),
-                  _buildCustomDropdownField(
-                    dropdownKey: _languageKey,
-                    prefixIcon: Icons.language_rounded,
-                    prefixIconColor: const Color(0xFF6366F1),
-                    selectedValue: _selectedLanguage,
-                    items: languageOptions,
-                    isDark: isDark,
-                    onChanged: (val) {
-                      setState(() => _selectedLanguage = val);
-                    },
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 32),
+              // 2. Pengaturan Regional (Langsung tanpa Card pembungkus)
+              _buildSectionTitle('Pengaturan Regional', isDark),
+              const SizedBox(height: 12),
 
-            // 3. Solid Round Action Button
-            SizedBox(
-              width: double.infinity,
-              height: 52,
-              child: ElevatedButton(
-                onPressed: _isSaving ? null : _saveProfile,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF7F52FC), // Solid brand primary
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(32), // Solid round
+              // Zona Waktu
+              _buildFieldLabel('Zona Waktu', isDark),
+              const SizedBox(height: 8),
+              _buildCustomDropdownField(
+                dropdownKey: _timezoneKey,
+                prefixSvg: _buildDualToneSvgIcon('timezone', '#F59E0B', isDark, size: 20),
+                selectedValue: _selectedTimezone,
+                items: timezoneOptions,
+                isDark: isDark,
+                onChanged: (val) {
+                  setState(() => _selectedTimezone = val);
+                },
+              ),
+              const SizedBox(height: 16),
+
+              // Bahasa
+              _buildFieldLabel('Bahasa Aplikasi', isDark),
+              const SizedBox(height: 8),
+              _buildCustomDropdownField(
+                dropdownKey: _languageKey,
+                prefixSvg: _buildDualToneSvgIcon('language', '#3B82F6', isDark, size: 20),
+                selectedValue: _selectedLanguage,
+                items: languageOptions,
+                isDark: isDark,
+                onChanged: (val) {
+                  setState(() => _selectedLanguage = val);
+                },
+              ),
+              const SizedBox(height: 32),
+
+              // 3. Solid Black/Dark Action Button
+              SizedBox(
+                width: double.infinity,
+                height: 52,
+                child: ElevatedButton(
+                  onPressed: _isSaving ? null : _saveProfile,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: isDark ? const Color(0xFF27272A) : const Color(0xFF18181B),
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(32),
+                    ),
+                    elevation: 0,
                   ),
-                  elevation: 0,
-                ),
-                child: _isSaving
-                    ? CircularProgressIndicator(strokeWidth: 2, valueColor: AlwaysStoppedAnimation<Color>(Colors.white))
-                    : Text(
-                        'Simpan Perubahan',
-                        style: AppTypography.buttonLabel(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
+                  child: _isSaving
+                      ? const SizedBox(
+                          width: 22,
+                          height: 22,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2.2,
+                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                          ),
+                        )
+                      : Text(
+                          'Simpan Perubahan',
+                          style: AppTypography.cardTitle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
                         ),
-                      ),
+                ),
               ),
-            ),
-            const SizedBox(height: 32),
-          ],
+              const SizedBox(height: 32),
+            ],
+          ),
         ),
       ),
     );
   }
 
   Widget _buildSectionTitle(String title, bool isDark) {
-    return Text(
-      title.toUpperCase(),
-      style: AppTypography.channelTag(
-        color: isDark ? Colors.white38 : const Color(0xFF64748B),
-        fontWeight: FontWeight.bold,
-        letterSpacing: 0.8,
+    return Padding(
+      padding: const EdgeInsets.only(left: 2, bottom: 4, top: 4),
+      child: Text(
+        title,
+        style: AppTypography.sectionHeader(
+          color: isDark ? Colors.white : const Color(0xFF0F172A),
+          fontWeight: FontWeight.bold,
+        ),
       ),
     );
   }
@@ -392,23 +431,22 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
   InputDecoration _inputDecoration({
     String? hintText,
-    required IconData prefixIcon,
-    required Color prefixIconColor,
+    required Widget prefixSvg,
     required bool isDark,
   }) {
     return InputDecoration(
       hintText: hintText,
-      hintStyle: AppTypography.buttonLabel(
+      hintStyle: AppTypography.messageInput(
         color: isDark ? Colors.white38 : const Color(0xFF94A3B8),
       ),
-      prefixIcon: Icon(
-        prefixIcon,
-        color: prefixIconColor,
-        size: 20,
+      prefixIcon: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 14.0),
+        child: prefixSvg,
       ),
+      prefixIconConstraints: const BoxConstraints(minWidth: 48, minHeight: 48),
       filled: true,
-      fillColor: isDark ? const Color(0xFF2C2C2E) : const Color(0xFFF8FAFC),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      fillColor: isDark ? const Color(0xFF1C1C1E) : const Color(0xFFF8FAFC),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(20),
         borderSide: BorderSide(
@@ -419,7 +457,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(20),
         borderSide: BorderSide(
-          color: isDark ? Colors.white : Colors.black, // Focused border matching register page
+          color: isDark ? Colors.white : const Color(0xFF18181B),
           width: 1.2,
         ),
       ),
@@ -428,8 +466,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
   Widget _buildCustomDropdownField({
     required GlobalKey dropdownKey,
-    required IconData prefixIcon,
-    required Color prefixIconColor,
+    required Widget prefixSvg,
     required String selectedValue,
     required List<Map<String, String>> items,
     required ValueChanged<String> onChanged,
@@ -452,9 +489,9 @@ class _EditProfilePageState extends State<EditProfilePage> {
         isDark: isDark,
       ),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
         decoration: BoxDecoration(
-          color: isDark ? const Color(0xFF2C2C2E) : const Color(0xFFF8FAFC),
+          color: isDark ? const Color(0xFF1C1C1E) : const Color(0xFFF8FAFC),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
@@ -463,17 +500,16 @@ class _EditProfilePageState extends State<EditProfilePage> {
         ),
         child: Row(
           children: [
-            Icon(prefixIcon, color: prefixIconColor, size: 20),
-            const SizedBox(width: 12),
+            prefixSvg,
+            const SizedBox(width: 14),
             Expanded(
               child: Text(
                 displayLabel,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: AppTypography.cardTitle(
+                style: AppTypography.messageInput(
                   color: isDark ? Colors.white : Colors.black87,
-                  fontWeight: FontWeight.w600,
-                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
             ),
@@ -502,7 +538,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
     final size = renderBox.size;
     final offset = renderBox.localToGlobal(Offset.zero);
     final double width = size.width;
-    final double top = offset.dy + size.height + 6;
+    final double top = offset.dy + size.height - 15;
     double left = offset.dx;
 
     showDialog(
@@ -526,71 +562,70 @@ class _EditProfilePageState extends State<EditProfilePage> {
               child: Material(
                 color: Colors.transparent,
                 child: Container(
-                  constraints: const BoxConstraints(maxHeight: 260),
+                  constraints: const BoxConstraints(maxHeight: 280),
                   decoration: BoxDecoration(
-                    color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
+                    color: isDark ? const Color(0xFF18181B) : Colors.white,
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
                       color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
                       width: 1.2,
                     ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: isDark ? 0.45 : 0.12),
-                        blurRadius: 16,
-                        offset: const Offset(0, 6),
-                      ),
-                    ],
                   ),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(20),
-                    child: ListView.separated(
-                      shrinkWrap: true,
-                      padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 6),
-                      itemCount: items.length,
-                      separatorBuilder: (_, _) => Divider(
-                        height: 1,
-                        color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
-                      ),
-                      itemBuilder: (context, index) {
-                        final item = items[index];
-                        final val = item['value']!;
-                        final label = item['label']!;
-                        final isSelected = val == selectedValue;
+                    child: SingleChildScrollView(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: List.generate(items.length, (index) {
+                          final item = items[index];
+                          final val = item['value']!;
+                          final label = item['label']!;
+                          final isSelected = val == selectedValue;
 
-                        return InkWell(
-                          borderRadius: BorderRadius.circular(14),
-                          onTap: () {
-                            Navigator.pop(dialogCtx);
-                            onChanged(val);
-                          },
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                            child: Row(
-                              children: [
-                                Expanded(
-                                  child: Text(
-                                    label,
-                                    style: AppTypography.cardTitle(
-                                      fontSize: 15,
-                                      fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                                      color: isSelected
-                                          ? const Color(0xFF7F52FC)
-                                          : (isDark ? Colors.white : const Color(0xFF0F172A)),
-                                    ),
+                          return Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              if (index > 0)
+                                Divider(
+                                  height: 1,
+                                  color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+                                ),
+                              InkWell(
+                                borderRadius: BorderRadius.circular(12),
+                                onTap: () {
+                                  Navigator.pop(dialogCtx);
+                                  onChanged(val);
+                                },
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                                  child: Row(
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          label,
+                                          style: GoogleFonts.plusJakartaSans(
+                                            fontSize: 14.0,
+                                            fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
+                                            color: isSelected
+                                                ? const Color(0xFF60A5FA)
+                                                : (isDark ? Colors.white : const Color(0xFF0F172A)),
+                                          ),
+                                        ),
+                                      ),
+                                      if (isSelected)
+                                        const Icon(
+                                          Icons.check_rounded,
+                                          color: Color(0xFF60A5FA),
+                                          size: 18,
+                                        ),
+                                    ],
                                   ),
                                 ),
-                                if (isSelected)
-                                  const Icon(
-                                    Icons.check_rounded,
-                                    color: Color(0xFF7F52FC),
-                                    size: 18,
-                                  ),
-                              ],
-                            ),
-                          ),
-                        );
-                      },
+                              ),
+                            ],
+                          );
+                        }),
+                      ),
                     ),
                   ),
                 ),

@@ -1,3 +1,4 @@
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:hubner/core/widgets/bouncy_button.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -129,21 +130,51 @@ class _ManageFriendsPageState extends State<ManageFriendsPage> {
   Future<void> _removeFriend(String friendUid, String friendName) async {
     final currentUid = FirebaseAuth.instance.currentUser?.uid;
     if (currentUid == null) return;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: Colors.white,
-        title: Text('Hapus Teman', style: AppTypography.buttonLabel(fontWeight: FontWeight.bold)),
-        content: Text('Apakah Anda yakin ingin menghapus $friendName dari daftar teman?', style: AppTypography.buttonLabel()),
+        backgroundColor: isDark ? const Color(0xFF141416) : Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+          side: BorderSide(
+            color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+            width: 1.0,
+          ),
+        ),
+        title: Text(
+          'Hapus Teman',
+          style: AppTypography.buttonLabel(
+            color: isDark ? Colors.white : const Color(0xFF0F172A),
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        content: Text(
+          'Apakah Anda yakin ingin menghapus $friendName dari daftar teman?',
+          style: AppTypography.buttonLabel(
+            color: isDark ? Colors.white70 : Colors.black87,
+          ),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: Text('Batal', style: AppTypography.buttonLabel(color: Colors.black54)),
+            child: Text(
+              'Batal',
+              style: AppTypography.buttonLabel(
+                color: isDark ? Colors.white54 : Colors.black54,
+              ),
+            ),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: Text('Hapus', style: AppTypography.buttonLabel(color: Colors.redAccent, fontWeight: FontWeight.bold)),
+            child: Text(
+              'Hapus',
+              style: AppTypography.buttonLabel(
+                color: Colors.redAccent,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
         ],
       ),
@@ -179,7 +210,7 @@ class _ManageFriendsPageState extends State<ManageFriendsPage> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: isDark ? const Color(0xFF0F0F10) : Colors.white,
+      backgroundColor: isDark ? Colors.black : const Color(0xFFF8FAFC),
       body: Align(
         alignment: Alignment.topCenter,
         child: Container(
@@ -188,50 +219,62 @@ class _ManageFriendsPageState extends State<ManageFriendsPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Custom AppBar (Disamakan persis dengan Data Anggota Kelas)
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16.0, 12.0, 16.0, 12.0),
-                  child: Row(
-                    children: [
-                      BouncyButton(
-                        scaleDown: 0.85,
-                        onTap: () => Navigator.pop(context),
-                        child: Container(
-                          width: 42,
-                          height: 42,
-                          decoration: BoxDecoration(
-                            color: isDark ? const Color(0xFF18181B) : Colors.white,
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
-                              width: 1.2,
+                // Custom AppBar (Sticky Glassmorphic Blur)
+                ClipRect(
+                  child: BackdropFilter(
+                    filter: ui.ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+                      decoration: BoxDecoration(
+                        color: isDark
+                            ? Colors.black.withValues(alpha: 0.75)
+                            : Colors.white.withValues(alpha: 0.85),
+                        border: Border(
+                          bottom: BorderSide(
+                            color: isDark ? const Color(0xFF1E1E22) : const Color(0xFFE2E8F0),
+                            width: 1.0,
+                          ),
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          BouncyButton(
+                            scaleDown: 0.85,
+                            onTap: () => Navigator.pop(context),
+                            child: Container(
+                              width: 40,
+                              height: 40,
+                              color: Colors.transparent,
+                              alignment: Alignment.centerLeft,
+                              child: Icon(
+                                Icons.arrow_back_rounded,
+                                color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                size: 24,
+                              ),
                             ),
                           ),
-                          child: Icon(
-                            Icons.arrow_back_rounded,
-                            color: isDark ? Colors.white : Colors.black87,
-                            size: 20,
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                              child: Text(
+                                'Kelola Teman',
+                                style: AppTypography.chatHeaderTitle(
+                                  color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                  fontWeight: FontWeight.w800,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
                           ),
-                        ),
+                          const SizedBox(width: 40),
+                        ],
                       ),
-                      const SizedBox(width: 14),
-                      Expanded(
-                        child: Text(
-                          'Kelola Teman',
-                          style: AppTypography.chatHeaderTitle(color: isDark ? Colors.white : const Color(0xFF0F172A), fontWeight: FontWeight.w800),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                      const SizedBox(width: 42),
-                    ],
+                    ),
                   ),
-                ),
-
-                Divider(
-                  height: 1,
-                  color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
                 ),
 
                 const SizedBox(height: 16),
@@ -243,10 +286,10 @@ class _ManageFriendsPageState extends State<ManageFriendsPage> {
                     height: 54,
                     padding: const EdgeInsets.fromLTRB(16, 0, 6, 0),
                     decoration: BoxDecoration(
-                      color: isDark ? const Color(0xFF18181B) : Colors.white,
+                      color: isDark ? const Color(0xFF101012) : Colors.white,
                       borderRadius: BorderRadius.circular(32),
                       border: Border.all(
-                        color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                        color: isDark ? const Color(0xFF222226) : const Color(0xFFE2E8F0),
                         width: 1.2,
                       ),
                     ),
@@ -366,10 +409,10 @@ class _ManageFriendsPageState extends State<ManageFriendsPage> {
                                     height: 64,
                                     padding: const EdgeInsets.fromLTRB(5, 5, 8, 5),
                                     decoration: BoxDecoration(
-                                      color: isDark ? const Color(0xFF18181B) : Colors.white,
+                                      color: isDark ? const Color(0xFF101012) : Colors.white,
                                       borderRadius: BorderRadius.circular(36),
                                       border: Border.all(
-                                        color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                                        color: isDark ? const Color(0xFF222226) : const Color(0xFFE2E8F0),
                                         width: 1.2,
                                       ),
                                     ),

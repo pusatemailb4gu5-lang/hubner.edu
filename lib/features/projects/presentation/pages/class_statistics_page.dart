@@ -4,7 +4,7 @@ import 'package:hubner/core/theme/app_typography.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:hubner/core/theme/app_colors.dart';
-import 'class_page.dart';
+import 'package:hubner/core/widgets/classroom_card_pattern_painter.dart';
 
 class ClassStatisticsPage extends StatefulWidget {
   final String projectId;
@@ -12,6 +12,7 @@ class ClassStatisticsPage extends StatefulWidget {
   final int themeIndex;
   final Color accentColor;
   final Color cardColor;
+  final bool showBackButton;
 
   const ClassStatisticsPage({
     super.key,
@@ -20,6 +21,7 @@ class ClassStatisticsPage extends StatefulWidget {
     this.themeIndex = 0,
     this.accentColor = const Color(0xFF6366F1),
     this.cardColor = const Color(0xFFD6A5F8),
+    this.showBackButton = true,
   });
 
   @override
@@ -160,22 +162,31 @@ class _ClassStatisticsPageState extends State<ClassStatisticsPage>
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              _BouncyButton(
-                                onTap: () => Navigator.pop(context),
-                                child: Container(
-                                  width: 44,
-                                  height: 44,
-                                  decoration: BoxDecoration(
-                                    color: isDark ? const Color(0xFF1E293B) : Colors.white,
-                                    shape: BoxShape.circle,
+                              if (widget.showBackButton)
+                                _BouncyButton(
+                                  onTap: () => Navigator.pop(context),
+                                  child: Container(
+                                    width: 44,
+                                    height: 44,
+                                    decoration: BoxDecoration(
+                                      color: isDark ? const Color(0xFF1E293B) : Colors.white,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: Icon(
+                                      Icons.arrow_back_rounded,
+                                      color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                      size: 22,
+                                    ),
                                   ),
-                                  child: Icon(
-                                    Icons.arrow_back_rounded,
+                                )
+                              else
+                                Text(
+                                  'Statistik Kelas',
+                                  style: AppTypography.pageTitle(
                                     color: isDark ? Colors.white : const Color(0xFF0F172A),
-                                    size: 22,
+                                    fontWeight: FontWeight.bold,
                                   ),
                                 ),
-                              ),
                               Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
                                 decoration: BoxDecoration(

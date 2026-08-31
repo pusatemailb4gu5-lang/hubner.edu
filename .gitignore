@@ -42,6 +42,13 @@ app.*.map.json
 # Android Studio will place build artifacts here
 /android/app/debug
 /android/app/profile
-/android/app/release
 .kotlin/
 android/.kotlin/
+
+# Secrets & Environment Configurations
+lib/core/config/gemini_config_secret.dart
+*.secret.dart
+.env
+.env.*
+!.env.example
+

@@ -7,6 +7,8 @@ import 'package:hubner/core/theme/app_typography.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:hubner/core/theme/app_colors.dart';
+import 'package:hubner/core/config/gemini_config.dart';
+import 'package:hubner/core/widgets/bouncy_button.dart';
 import 'add_class_page.dart';
 import 'package:hubner/features/home/presentation/widgets/animated_rainbow_background.dart';
 
@@ -1157,10 +1159,7 @@ class _EditClassPageState extends State<EditClassPage> {
   }
 
   Future<Map<String, dynamic>?> _generateProjectWithAI(String projectDesc) async {
-    final apiKey = 'AIzaSyAC7KqzJs_v1o8VLNivo0tShRJ8JVMj3wE';
-    final url = Uri.parse(
-      'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent?key=$apiKey',
-    );
+    final url = GeminiConfig.generateUrl;
 
     final className = _nameController.text.trim();
     final grade = _selectedGradeLevel;
@@ -2210,64 +2209,96 @@ Sertakan HANYA JSON tersebut tanpa penjelasan markdown apa pun di luar JSON.
     }
 
     // Mobile View
+    final bool isDark = AppColors.isDarkMode;
+    final double statusBarHeight = MediaQuery.of(context).padding.top;
     return Scaffold(
-      backgroundColor: Colors.transparent,
-      body: AnimatedRainbowBackground(
-        child: Align(
-          alignment: Alignment.topCenter,
-          child: Container(
-            constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width > 500 ? double.infinity : 500),
-            child: SafeArea(
-              child: Column(
-                children: [
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: AppTypography.screenHorizontalMargin, vertical: 8.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        GestureDetector(
-                          onTap: () => Navigator.pop(context),
-                          child: Container(
-                            width: 44,
-                            height: 44,
-                            decoration: const BoxDecoration(
-                              color: Color(0xFFF1F5F9),
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(
-                              Icons.arrow_back_rounded,
-                              color: Colors.black,
-                              size: 18,
-                            ),
+      backgroundColor: isDark ? const Color(0xFF000000) : const Color(0xFFFAF8FF),
+      body: Align(
+        alignment: Alignment.topCenter,
+        child: Container(
+          constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width > 500 ? double.infinity : 500),
+          child: Stack(
+            children: [
+              // Scrollable Body
+              SingleChildScrollView(
+                padding: EdgeInsets.only(
+                  left: AppTypography.screenHorizontalMargin,
+                  right: AppTypography.screenHorizontalMargin,
+                  top: statusBarHeight + 64.0,
+                  bottom: 30.0,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    buildLeftColumn(),
+                    const SizedBox(height: 24),
+                    buildRightColumn(false),
+                    const SizedBox(height: 16),
+                  ],
+                ),
+              ),
+
+              // Sticky Header Bar with Blur
+              Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                child: ClipRect(
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(
+                      sigmaX: 16.0,
+                      sigmaY: 16.0,
+                    ),
+                    child: Container(
+                      padding: EdgeInsets.fromLTRB(
+                        AppTypography.screenHorizontalMargin,
+                        statusBarHeight + 8.0,
+                        AppTypography.screenHorizontalMargin,
+                        10.0,
+                      ),
+                      decoration: BoxDecoration(
+                        color: isDark
+                            ? const Color(0xFF000000).withValues(alpha: 0.75)
+                            : const Color(0xFFFAF8FF).withValues(alpha: 0.85),
+                        border: Border(
+                          bottom: BorderSide(
+                            color: isDark
+                                ? const Color(0xFF27272A)
+                                : const Color(0xFFF1F5F9),
+                            width: 1.0,
                           ),
                         ),
-                        Text(
-                          'Edit Classroom',
-                          style: AppTypography.chatHeaderTitle(color: Colors.black, fontWeight: FontWeight.w600),
-                        ),
-                        const SizedBox(width: 44),
-                      ],
-                    ),
-                  ),
-                  const Divider(color: Color(0xFFF1F5F9), height: 1),
-
-                  Expanded(
-                    child: SingleChildScrollView(
-                      padding: AppTypography.pagePadding(top: 20.0, bottom: 20.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          buildLeftColumn(),
-                          const SizedBox(height: 24),
-                          buildRightColumn(false),
-                          const SizedBox(height: 16),
+                          // Tombol Back (<) - Frameless persis seperti di Catatan
+                          BouncyButton(
+                            onTap: () => Navigator.pop(context),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 4.0),
+                              child: Icon(
+                                Icons.arrow_back_rounded,
+                                color: isDark ? Colors.white : Colors.black87,
+                                size: 26,
+                              ),
+                            ),
+                          ),
+                          Text(
+                            'Edit Classroom',
+                            style: AppTypography.chatHeaderTitle(
+                              color: isDark ? Colors.white : Colors.black87,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(width: 34),
                         ],
                       ),
                     ),
                   ),
-                ],
+                ),
               ),
-            ),
+            ],
           ),
         ),
       ),

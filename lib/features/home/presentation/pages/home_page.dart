@@ -28,6 +28,7 @@ import 'package:hubner/core/services/google_drive_service.dart';
 import 'package:hubner/core/services/classroom_export_service.dart';
 import 'package:hubner/core/services/login_history_service.dart';
 import 'package:hubner/core/services/app_sound_service.dart';
+import 'package:hubner/core/widgets/classroom_card_pattern_painter.dart';
 
 class HomePage extends StatefulWidget {
   final Function(int index, {String? projectId})? onNavigateTab;
@@ -55,6 +56,9 @@ class _HomePageState extends State<HomePage> {
   List<String>? _cachedProjectIds;
   List<DocumentSnapshot> _lastProjectDocs = [];
   final ValueNotifier<bool> _isManagingClassesNotifier = ValueNotifier<bool>(false);
+  final ValueNotifier<bool> _isSimpleModeNotifier = ValueNotifier<bool>(false);
+  final PageController _simpleModePageController = PageController();
+  int _simpleModeCurrentPage = 0;
   final ValueNotifier<String> _searchQueryNotifier = ValueNotifier<String>('');
   final GlobalKey _notesButtonKey = GlobalKey();
   final ScrollController _homeScrollController = ScrollController();
@@ -820,16 +824,26 @@ class _HomePageState extends State<HomePage> {
     return _cachedProjectsStream!;
   }
 
-  final List<Color> _softCardColors = const [
-    Color(0xFFF9EED2), // Soft Peach/Cream
-    Color(0xFFE5ECEB), // Soft Mint/Teal
-    Color(0xFFE2DCF7), // Soft Lavender/Purple
-    Color(0xFFEFF6FF), // Soft Blue
-    Color(0xFFFCE7F3), // Soft Pink
-    Color(0xFFE2ECE9), // Soft Sage/Slate
-    Color(0xFFFFF1F2), // Soft Rose
-    Color(0xFFF0FDF4), // Soft Green
-  ];
+  static String _formatTeacherTitle(String rawName, String? gender) {
+    if (rawName.trim().isEmpty) return '';
+    final trimmed = rawName.trim();
+    final lower = trimmed.toLowerCase();
+    if (lower.startsWith('pak ') ||
+        lower.startsWith('bu ') ||
+        lower.startsWith('bapak ') ||
+        lower.startsWith('ibu ') ||
+        lower.startsWith('mr. ') ||
+        lower.startsWith('mrs. ') ||
+        lower.startsWith('ms. ')) {
+      return trimmed;
+    }
+    final lowerGender = (gender ?? '').toLowerCase();
+    final isFemale = lowerGender.contains('perempuan') ||
+        lowerGender.contains('wanita') ||
+        lowerGender.contains('female') ||
+        lowerGender.startsWith('p');
+    return isFemale ? 'Bu $trimmed' : 'Pak $trimmed';
+  }
 
   final List<Color> _classroomCardColors = const [
     Color(0xFFD6A5F8), // 01. Lilac Purple (Core)
@@ -1726,16 +1740,16 @@ class _HomePageState extends State<HomePage> {
                       ? 'User'
                       : fullName.trim().split(RegExp(r'\s+')).map((w) => w.isNotEmpty ? (w[0].toUpperCase() + (w.length > 1 ? w.substring(1).toLowerCase() : '')) : '').join(' ');
 
-                  return SafeArea(
-                    bottom: false,
-                    child: Stack(
-                      children: [
-                        SingleChildScrollView(
-                          controller: _homeScrollController,
-                          padding: AppTypography.pagePadding(
-                            top: 12.0,
-                            bottom: 125.0,
-                          ),
+                  return Stack(
+                    children: [
+                      SingleChildScrollView(
+                        controller: _homeScrollController,
+                        padding: EdgeInsets.fromLTRB(
+                          AppTypography.screenHorizontalMargin,
+                          MediaQuery.of(context).padding.top + (isDesktop ? 12.0 : 16.0),
+                          AppTypography.screenHorizontalMargin,
+                          125.0,
+                        ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -1781,167 +1795,237 @@ class _HomePageState extends State<HomePage> {
                                     ],
                                   ),
                                   const SizedBox(height: 16),
-                                  // Teacher Profile: Nama Pengajar di kiri & Avatar bulat di kanan (Sesuai desain asli)
-                                  Builder(
-                                    builder: (context) {
-                                      final bool isDark = AppColors.isDarkMode;
-                                      final String teacherRoleTitle = 'Pengajar · ${schoolLevel.isNotEmpty ? schoolLevel.toUpperCase() : 'SMA/SMK'}';
+                                   // Teacher Profile: Avatar bulat di kiri & Nama Pengajar di kanan
+                                   Builder(
+                                     builder: (context) {
+                                       final bool isDark = AppColors.isDarkMode;
+                                       final String teacherRoleTitle = 'Pengajar · ${schoolLevel.isNotEmpty ? schoolLevel.toUpperCase() : 'SMA/SMK'}';
 
-                                      return Row(
-                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                        crossAxisAlignment: CrossAxisAlignment.center,
-                                        children: [
-                                          Expanded(
-                                            child: Column(
-                                              crossAxisAlignment: CrossAxisAlignment.start,
-                                              children: [
-                                                Text(
-                                                  teacherRoleTitle,
-                                                  style: GoogleFonts.dmSans(
-                                                    fontSize: 13.5,
-                                                    fontWeight: FontWeight.w600,
-                                                    color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
-                                                  ),
-                                                ),
-                                                const SizedBox(height: 3),
-                                                Text(
-                                                  fullName,
-                                                  style: GoogleFonts.plusJakartaSans(
-                                                    fontSize: 28.0,
-                                                    fontWeight: FontWeight.bold,
-                                                    color: isDark ? Colors.white : Colors.black,
-                                                    height: 1.15,
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                          const SizedBox(width: 14),
-                                          Container(
-                                            width: 58,
-                                            height: 58,
-                                            decoration: BoxDecoration(
-                                              shape: BoxShape.circle,
-                                              color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
-                                            ),
-                                            child: ClipOval(
-                                              child: Transform.scale(
-                                                scale: 1.45,
-                                                child: userPhoto.isNotEmpty
-                                                    ? (userPhoto.startsWith('http')
-                                                        ? Image.network(
-                                                            userPhoto,
-                                                            fit: BoxFit.cover,
-                                                            errorBuilder: (_, __, ___) => Center(
-                                                              child: Text(
-                                                                userName.isNotEmpty
-                                                                    ? userName.substring(0, (userName.length >= 2 ? 2 : 1)).toUpperCase()
-                                                                    : 'P',
-                                                                style: GoogleFonts.plusJakartaSans(
-                                                                  fontWeight: FontWeight.w800,
-                                                                  color: isDark ? Colors.white : Colors.black,
-                                                                  fontSize: 20,
-                                                                ),
-                                                              ),
-                                                            ),
-                                                          )
-                                                        : Image.asset(
-                                                            userPhoto,
-                                                            fit: BoxFit.cover,
-                                                            errorBuilder: (_, __, ___) => Center(
-                                                              child: Text(
-                                                                userName.isNotEmpty
-                                                                    ? userName.substring(0, (userName.length >= 2 ? 2 : 1)).toUpperCase()
-                                                                    : 'P',
-                                                                style: GoogleFonts.plusJakartaSans(
-                                                                  fontWeight: FontWeight.w800,
-                                                                  color: isDark ? Colors.white : Colors.black,
-                                                                  fontSize: 20,
-                                                                ),
-                                                              ),
-                                                            ),
-                                                          ))
-                                                    : Center(
-                                                        child: Text(
-                                                          userName.isNotEmpty
-                                                              ? userName.substring(0, (userName.length >= 2 ? 2 : 1)).toUpperCase()
-                                                              : 'P',
-                                                          style: GoogleFonts.plusJakartaSans(
-                                                            fontWeight: FontWeight.w800,
-                                                            color: isDark ? Colors.white : Colors.black,
-                                                            fontSize: 20,
-                                                          ),
-                                                        ),
-                                                      ),
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      );
-                                    },
-                                  ),
-                                ] else ...[
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              'Siswa · ${schoolLevel.isNotEmpty ? schoolLevel.toUpperCase() : 'SMA/SMK'}',
-                                              style: GoogleFonts.dmSans(
-                                                fontSize: 13.5,
-                                                color: isDark ? Colors.white60 : const Color(0xFF64748B),
-                                                fontWeight: FontWeight.w500,
-                                              ),
-                                            ),
-                                            Text(
-                                              fullName,
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
-                                              style: GoogleFonts.plusJakartaSans(
-                                                fontSize: 28.0,
-                                                fontWeight: FontWeight.bold,
-                                                color: isDark ? Colors.white : Colors.black,
-                                                height: 1.15,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                      Row(
-                                        children: [
-                                          ValueListenableBuilder<String>(
-                                            valueListenable: HubnerApp.themeNotifier,
-                                            builder: (context, currentTheme, _) {
-                                              final bool currentIsDark = currentTheme == 'Gelap' || currentTheme == 'Hitam';
-                                              return BouncyButton(
-                                                onTap: () => _toggleThemeWithBounce(context, currentIsDark),
-                                                child: Container(
-                                                  height: 52,
-                                                  decoration: BoxDecoration(
-                                                    color: currentIsDark
-                                                        ? const Color(0xFF1C1C1E)
-                                                        : Colors.white,
-                                                    shape: BoxShape.circle,
-                                                    border: Border.all(
-                                                      color: currentIsDark
-                                                          ? const Color(0xFF27272A)
-                                                          : const Color(0xFFF1F5F9),
-                                                      width: 1.2,
-                                                    ),
-                                                  ),
-                                                  child: Icon(
-                                                    currentIsDark ? Icons.wb_sunny_rounded : Icons.nightlight_round,
-                                                    color: currentIsDark ? const Color(0xFFFBBF24) : Colors.black87,
-                                                    size: 20,
-                                                  ),
-                                                ),
-                                              );
-                                            },
-                                          ),
-                                          const SizedBox(width: 10),
+                                       return Row(
+                                         crossAxisAlignment: CrossAxisAlignment.center,
+                                         children: [
+                                           // 1. Avatar Bulat di SEBELAH KIRI
+                                           Container(
+                                             width: 58,
+                                             height: 58,
+                                             decoration: BoxDecoration(
+                                               shape: BoxShape.circle,
+                                               color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
+                                             ),
+                                             child: ClipOval(
+                                               child: Transform.scale(
+                                                 scale: 1.45,
+                                                 child: userPhoto.isNotEmpty
+                                                     ? (userPhoto.startsWith('http')
+                                                         ? Image.network(
+                                                             userPhoto,
+                                                             fit: BoxFit.cover,
+                                                             errorBuilder: (_, __, ___) => Center(
+                                                               child: Text(
+                                                                 userName.isNotEmpty
+                                                                     ? userName.substring(0, (userName.length >= 2 ? 2 : 1)).toUpperCase()
+                                                                     : 'P',
+                                                                 style: GoogleFonts.plusJakartaSans(
+                                                                   fontWeight: FontWeight.w800,
+                                                                   color: isDark ? Colors.white : Colors.black,
+                                                                   fontSize: 20,
+                                                                 ),
+                                                               ),
+                                                             ),
+                                                           )
+                                                         : Image.asset(
+                                                             userPhoto,
+                                                             fit: BoxFit.cover,
+                                                             errorBuilder: (_, __, ___) => Center(
+                                                               child: Text(
+                                                                 userName.isNotEmpty
+                                                                     ? userName.substring(0, (userName.length >= 2 ? 2 : 1)).toUpperCase()
+                                                                     : 'P',
+                                                                 style: GoogleFonts.plusJakartaSans(
+                                                                   fontWeight: FontWeight.w800,
+                                                                   color: isDark ? Colors.white : Colors.black,
+                                                                   fontSize: 20,
+                                                                 ),
+                                                               ),
+                                                             ),
+                                                           ))
+                                                     : Center(
+                                                         child: Text(
+                                                           userName.isNotEmpty
+                                                               ? userName.substring(0, (userName.length >= 2 ? 2 : 1)).toUpperCase()
+                                                               : 'P',
+                                                           style: GoogleFonts.plusJakartaSans(
+                                                             fontWeight: FontWeight.w800,
+                                                             color: isDark ? Colors.white : Colors.black,
+                                                             fontSize: 20,
+                                                           ),
+                                                         ),
+                                                       ),
+                                               ),
+                                             ),
+                                           ),
+                                           const SizedBox(width: 14),
+
+                                           // 2. Nama Pengajar & Role di SEBELAH KANAN Avatar
+                                           Expanded(
+                                             child: Column(
+                                               crossAxisAlignment: CrossAxisAlignment.start,
+                                               mainAxisSize: MainAxisSize.min,
+                                               children: [
+                                                 Text(
+                                                   teacherRoleTitle,
+                                                   style: GoogleFonts.dmSans(
+                                                     fontSize: 13.5,
+                                                     fontWeight: FontWeight.w600,
+                                                     color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                                                   ),
+                                                 ),
+                                                 const SizedBox(height: 3),
+                                                 Text(
+                                                   fullName,
+                                                   style: GoogleFonts.plusJakartaSans(
+                                                     fontSize: 28.0,
+                                                     fontWeight: FontWeight.bold,
+                                                     color: isDark ? Colors.white : Colors.black,
+                                                     height: 1.15,
+                                                   ),
+                                                   maxLines: 1,
+                                                   overflow: TextOverflow.ellipsis,
+                                                 ),
+                                               ],
+                                             ),
+                                           ),
+                                         ],
+                                       );
+                                     },
+                                   ),
+                                 ] else ...[
+                                   Row(
+                                     crossAxisAlignment: CrossAxisAlignment.center,
+                                     children: [
+                                       // Avatar Siswa di SEBELAH KIRI
+                                       Container(
+                                         width: 52,
+                                         height: 52,
+                                         decoration: BoxDecoration(
+                                           shape: BoxShape.circle,
+                                           color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
+                                         ),
+                                         child: ClipOval(
+                                           child: Transform.scale(
+                                             scale: 1.45,
+                                             child: userPhoto.isNotEmpty
+                                                 ? (userPhoto.startsWith('http')
+                                                     ? Image.network(
+                                                         userPhoto,
+                                                         fit: BoxFit.cover,
+                                                         errorBuilder: (_, __, ___) => Center(
+                                                           child: Text(
+                                                             userName.isNotEmpty
+                                                                 ? userName.substring(0, (userName.length >= 2 ? 2 : 1)).toUpperCase()
+                                                                 : 'S',
+                                                             style: GoogleFonts.plusJakartaSans(
+                                                               fontWeight: FontWeight.w800,
+                                                               color: isDark ? Colors.white : Colors.black,
+                                                               fontSize: 18,
+                                                             ),
+                                                           ),
+                                                         ),
+                                                       )
+                                                     : Image.asset(
+                                                         userPhoto,
+                                                         fit: BoxFit.cover,
+                                                         errorBuilder: (_, __, ___) => Center(
+                                                           child: Text(
+                                                             userName.isNotEmpty
+                                                                 ? userName.substring(0, (userName.length >= 2 ? 2 : 1)).toUpperCase()
+                                                                 : 'S',
+                                                             style: GoogleFonts.plusJakartaSans(
+                                                               fontWeight: FontWeight.w800,
+                                                               color: isDark ? Colors.white : Colors.black,
+                                                               fontSize: 18,
+                                                             ),
+                                                           ),
+                                                         ),
+                                                       ))
+                                                 : Center(
+                                                     child: Text(
+                                                       userName.isNotEmpty
+                                                           ? userName.substring(0, (userName.length >= 2 ? 2 : 1)).toUpperCase()
+                                                           : 'S',
+                                                       style: GoogleFonts.plusJakartaSans(
+                                                         fontWeight: FontWeight.w800,
+                                                         color: isDark ? Colors.white : Colors.black,
+                                                         fontSize: 18,
+                                                       ),
+                                                     ),
+                                                   ),
+                                           ),
+                                         ),
+                                       ),
+                                       const SizedBox(width: 14),
+
+                                       // Info Siswa di Kanan
+                                       Expanded(
+                                         child: Column(
+                                           crossAxisAlignment: CrossAxisAlignment.start,
+                                           mainAxisSize: MainAxisSize.min,
+                                           children: [
+                                             Text(
+                                               'Siswa · ${schoolLevel.isNotEmpty ? schoolLevel.toUpperCase() : 'SMA/SMK'}',
+                                               style: GoogleFonts.dmSans(
+                                                 fontSize: 13.5,
+                                                 color: isDark ? Colors.white60 : const Color(0xFF64748B),
+                                                 fontWeight: FontWeight.w500,
+                                               ),
+                                             ),
+                                             const SizedBox(height: 2),
+                                             Text(
+                                               fullName,
+                                               maxLines: 1,
+                                               overflow: TextOverflow.ellipsis,
+                                               style: GoogleFonts.plusJakartaSans(
+                                                 fontSize: 26.0,
+                                                 fontWeight: FontWeight.bold,
+                                                 color: isDark ? Colors.white : Colors.black,
+                                                 height: 1.15,
+                                               ),
+                                             ),
+                                           ],
+                                         ),
+                                       ),
+                                       Row(
+                                         children: [
+                                           ValueListenableBuilder<String>(
+                                             valueListenable: HubnerApp.themeNotifier,
+                                             builder: (context, currentTheme, _) {
+                                               final bool currentIsDark = currentTheme == 'Gelap' || currentTheme == 'Hitam';
+                                               return BouncyButton(
+                                                 onTap: () => _toggleThemeWithBounce(context, currentIsDark),
+                                                 child: Container(
+                                                   height: 52,
+                                                   decoration: BoxDecoration(
+                                                     color: currentIsDark
+                                                         ? const Color(0xFF1C1C1E)
+                                                         : Colors.white,
+                                                     shape: BoxShape.circle,
+                                                     border: Border.all(
+                                                       color: currentIsDark
+                                                           ? const Color(0xFF27272A)
+                                                           : const Color(0xFFF1F5F9),
+                                                       width: 1.2,
+                                                     ),
+                                                   ),
+                                                   child: Icon(
+                                                     currentIsDark ? Icons.wb_sunny_rounded : Icons.nightlight_round,
+                                                     color: currentIsDark ? const Color(0xFFFBBF24) : Colors.black87,
+                                                     size: 20,
+                                                   ),
+                                                 ),
+                                               );
+                                             },
+                                           ),
+                                           const SizedBox(width: 10),
                                            ValueListenableBuilder<String>(
                                              valueListenable: HubnerApp.themeNotifier,
                                              builder: (context, currentTheme, _) {
@@ -1949,24 +2033,27 @@ class _HomePageState extends State<HomePage> {
                                                return NotificationBellIcon(isDark: isDark, size: 52);
                                              },
                                            ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                                const SizedBox(height: 16),
-                              ],
-                              const SizedBox(height: 4),
-                              _HomeSearchAndNotesRow(
-                                key: const ValueKey('home_search_and_notes_row'),
-                                notesKey: _notesButtonKey,
-                                onNotesTap: _showQuickNotesOverlay,
-                                onSearchChanged: (query) {
-                                  _searchQueryNotifier.value = query;
-                                },
-                                isDark: isDark,
-                              ),
-                              const SizedBox(height: 16),
+                                         ],
+                                       ),
+                                     ],
+                                   ),
+                                 ],
+                                 const SizedBox(height: 16),
+                               ],
+                               const SizedBox(height: 4),
+
+                                // 1. Slider Jadwal Mingguan (Senin - Minggu dengan Dots & Opsi Matikan Hari)
+                                _HomeWeeklyScheduleSlider(
+                                  projectDocs: projectDocs,
+                                  isDark: isDark,
+                                ),
+                                const SizedBox(height: 20),
+
+                                // 2. Section Catatan Mandiri dengan Preview Slider 5 Teratas
+                                _HomeNotesPreviewSection(
+                                  isDark: isDark,
+                                ),
+                                const SizedBox(height: 24),
 
                           if (role.toLowerCase() != 'guru') ...[
                             // Grid Layout for Today & Task States with student progress
@@ -3113,7 +3200,44 @@ class _HomePageState extends State<HomePage> {
                               ),
                               Row(
                                 children: [
-
+                                  // Tombol Toggle Mode Sederhana (2 Kolom x 2 Baris Slider)
+                                  ValueListenableBuilder<bool>(
+                                    valueListenable: _isSimpleModeNotifier,
+                                    builder: (context, isSimple, _) {
+                                      final bool isDark = AppColors.isDarkMode;
+                                      return BouncyButton(
+                                        onTap: () {
+                                          HapticFeedback.selectionClick();
+                                          _isSimpleModeNotifier.value = !isSimple;
+                                        },
+                                        child: Tooltip(
+                                          message: isSimple ? 'Tampilan Lengkap' : 'Tampilan Sederhana',
+                                          child: Container(
+                                            width: 38,
+                                            height: 38,
+                                            decoration: BoxDecoration(
+                                              color: isSimple
+                                                  ? (isDark ? const Color(0xFF27272A) : const Color(0xFF0F172A))
+                                                  : (isDark ? const Color(0xFF1C1C1E) : Colors.white),
+                                              shape: BoxShape.circle,
+                                              border: Border.all(
+                                                color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                                                width: 1.2,
+                                              ),
+                                            ),
+                                            child: Icon(
+                                              isSimple ? Icons.view_agenda_rounded : Icons.grid_view_rounded,
+                                              size: 18,
+                                              color: isSimple
+                                                  ? Colors.white
+                                                  : (isDark ? Colors.white70 : Colors.black87),
+                                            ),
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                  const SizedBox(width: 8),
 
                                   // Tombol Kelola Kelas (Ikon Lingkaran Hitam & Centang Hijau Tanpa Background)
                                   ValueListenableBuilder<bool>(
@@ -3155,8 +3279,8 @@ class _HomePageState extends State<HomePage> {
                                           _isManagingClassesNotifier.value = !isManaging;
                                         },
                                         child: Container(
-                                          width: 44,
-                                          height: 44,
+                                          width: 38,
+                                          height: 38,
                                           decoration: BoxDecoration(
                                             color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
                                             shape: BoxShape.circle,
@@ -3168,7 +3292,7 @@ class _HomePageState extends State<HomePage> {
                                           child: Icon(
                                             Icons.dashboard_customize_rounded,
                                             color: isDark ? Colors.white : Colors.black87,
-                                            size: 20,
+                                            size: 18,
                                           ),
                                         ),
                                       );
@@ -3179,6 +3303,15 @@ class _HomePageState extends State<HomePage> {
                             ],
                           ),
                           const SizedBox(height: 14),
+
+                          // Kolom Pencarian Mandiri di dalam Classroom Section
+                          _HomeStandaloneSearchBar(
+                            onSearchChanged: (query) {
+                              _searchQueryNotifier.value = query;
+                            },
+                            isDark: isDark,
+                          ),
+                          const SizedBox(height: 16),
 
                           // Invitations list
                           StreamBuilder<QuerySnapshot>(
@@ -3740,42 +3873,51 @@ class _HomePageState extends State<HomePage> {
                                   projectCards.add(const AddClassroomPlaceholderCard());
                                 }
 
-                                if (MediaQuery.of(context).size.width >= 700 && MediaQuery.of(context).size.shortestSide >= 700) {
-                                  final double screenW = MediaQuery.of(context).size.width;
-                                  final int cols = screenW > 1350
-                                      ? 4
-                                      : (screenW > 980 ? 3 : 2);
-                                  final double ratio = screenW > 1350
-                                      ? 1.44
-                                      : (screenW > 980 ? 1.40 : 1.44);
+                                return ValueListenableBuilder<bool>(
+                                  valueListenable: _isSimpleModeNotifier,
+                                  builder: (context, isSimpleMode, _) {
+                                    if (isSimpleMode) {
+                                      return _buildSimpleClassroomGrid(activeProjectDocs, role, isDark);
+                                    }
 
-                                  return GridView.builder(
-                                    shrinkWrap: true,
-                                    physics:
-                                        const NeverScrollableScrollPhysics(),
-                                    itemCount: projectCards.length,
-                                    gridDelegate:
-                                        SliverGridDelegateWithFixedCrossAxisCount(
-                                          crossAxisCount: cols,
-                                          crossAxisSpacing: 16,
-                                          mainAxisSpacing: 16,
-                                          childAspectRatio: ratio,
-                                        ),
-                                    itemBuilder: (context, index) =>
-                                        projectCards[index],
-                                  );
-                                } else {
-                                  return ListView.separated(
-                                    shrinkWrap: true,
-                                    physics:
-                                        const NeverScrollableScrollPhysics(),
-                                    itemCount: projectCards.length,
-                                    separatorBuilder: (_, i) =>
-                                        const SizedBox(height: 6),
-                                    itemBuilder: (context, index) =>
-                                        projectCards[index],
-                                  );
-                                }
+                                    if (MediaQuery.of(context).size.width >= 700 && MediaQuery.of(context).size.shortestSide >= 700) {
+                                      final double screenW = MediaQuery.of(context).size.width;
+                                      final int cols = screenW > 1350
+                                          ? 4
+                                          : (screenW > 980 ? 3 : 2);
+                                      final double ratio = screenW > 1350
+                                          ? 1.44
+                                          : (screenW > 980 ? 1.40 : 1.44);
+
+                                      return GridView.builder(
+                                        shrinkWrap: true,
+                                        physics:
+                                            const NeverScrollableScrollPhysics(),
+                                        itemCount: projectCards.length,
+                                        gridDelegate:
+                                            SliverGridDelegateWithFixedCrossAxisCount(
+                                              crossAxisCount: cols,
+                                              crossAxisSpacing: 16,
+                                              mainAxisSpacing: 16,
+                                              childAspectRatio: ratio,
+                                            ),
+                                        itemBuilder: (context, index) =>
+                                            projectCards[index],
+                                      );
+                                    } else {
+                                      return ListView.separated(
+                                        shrinkWrap: true,
+                                        physics:
+                                            const NeverScrollableScrollPhysics(),
+                                        itemCount: projectCards.length,
+                                        separatorBuilder: (_, i) =>
+                                            const SizedBox(height: 6),
+                                        itemBuilder: (context, index) =>
+                                            projectCards[index],
+                                      );
+                                    }
+                                  },
+                                );
                               },
                             ),
                           ],
@@ -3815,14 +3957,15 @@ class _HomePageState extends State<HomePage> {
                                             10.0,
                                           ),
                                           decoration: BoxDecoration(
-                                            color: isDark
-                                                ? const Color(0xFF000000).withValues(alpha: 0.60 * scrollProgress)
-                                                : Colors.white.withValues(alpha: 0.65 * scrollProgress),
+                                            color: (isDark
+                                                    ? const Color(0xFF000000)
+                                                    : const Color(0xFFF8FAFC))
+                                                .withValues(alpha: 0.75 * scrollProgress),
                                             border: Border(
                                               bottom: BorderSide(
                                                 color: (isDark
                                                         ? const Color(0xFF27272A)
-                                                        : const Color(0xFFF1F5F9))
+                                                        : const Color(0xFFE2E8F0))
                                                     .withValues(alpha: 0.9 * scrollProgress),
                                                 width: 1.0,
                                               ),
@@ -3966,9 +4109,8 @@ class _HomePageState extends State<HomePage> {
                               ),
                             ),
                         ],
-                      ),
-                    );
-                  },
+                      );
+                    },
                 );
               },
             ),
@@ -3980,6 +4122,410 @@ class _HomePageState extends State<HomePage> {
 },
 );
 }
+
+  Widget _buildSimpleClassroomGrid(List<DocumentSnapshot> projectDocs, String role, bool isDark) {
+    final List<dynamic> allItems = List.from(projectDocs);
+    if (role.toLowerCase() == 'guru') {
+      allItems.add('__ADD_CARD__');
+    }
+
+    if (allItems.isEmpty) {
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 20),
+        decoration: BoxDecoration(
+          color: isDark ? const Color(0xFF18181B) : Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
+          ),
+        ),
+        child: Center(
+          child: Text(
+            'Belum ada classroom yang tersedia.',
+            style: GoogleFonts.dmSans(
+              fontSize: 14.0,
+              color: isDark ? Colors.white54 : Colors.black45,
+            ),
+          ),
+        ),
+      );
+    }
+
+    final int itemsPerPage = 4;
+    final int totalPages = (allItems.length / itemsPerPage).ceil();
+
+    return StatefulBuilder(
+      builder: (context, setPageState) {
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(
+              height: 300,
+              child: PageView.builder(
+                controller: _simpleModePageController,
+                itemCount: totalPages,
+                physics: const BouncingScrollPhysics(),
+                onPageChanged: (page) {
+                  setPageState(() {
+                    _simpleModeCurrentPage = page;
+                  });
+                },
+                itemBuilder: (context, pageIndex) {
+                  final int start = pageIndex * itemsPerPage;
+                  final int end = math.min(start + itemsPerPage, allItems.length);
+                  final pageItems = allItems.sublist(start, end);
+
+                  Widget buildItem(int idxInPage) {
+                    if (idxInPage >= pageItems.length) {
+                      return const Expanded(child: SizedBox.shrink());
+                    }
+                    final item = pageItems[idxInPage];
+
+                    if (item == '__ADD_CARD__') {
+                      return Expanded(
+                        child: BouncyButton(
+                          scaleDown: 0.96,
+                          onTap: () {
+                            Navigator.of(context).push(
+                              PageRouteBuilder(
+                                opaque: false,
+                                barrierColor: Colors.transparent,
+                                pageBuilder: (context, _, __) => const AddClassPage(),
+                                transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                                  return child;
+                                },
+                              ),
+                            );
+                          },
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(16),
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: isDark
+                                    ? Colors.white.withValues(alpha: 0.03)
+                                    : Colors.black.withValues(alpha: 0.02),
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: Stack(
+                                children: [
+                                  Positioned.fill(
+                                    child: CustomPaint(
+                                      painter: DashedBorderPainter(
+                                        color: isDark
+                                            ? const Color(0xFF3F3F46)
+                                            : const Color(0xFF0F172A).withValues(alpha: 0.4),
+                                        strokeWidth: 1.8,
+                                        dashWidth: 7,
+                                        dashSpace: 5,
+                                        borderRadius: 16,
+                                      ),
+                                    ),
+                                  ),
+                                  Center(
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Container(
+                                          width: 38,
+                                          height: 38,
+                                          decoration: BoxDecoration(
+                                            color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                            shape: BoxShape.circle,
+                                            boxShadow: [
+                                              BoxShadow(
+                                                color: (isDark ? Colors.white : Colors.black).withValues(alpha: 0.12),
+                                                blurRadius: 8,
+                                                offset: const Offset(0, 3),
+                                              ),
+                                            ],
+                                          ),
+                                          child: Icon(
+                                            Icons.add_rounded,
+                                            color: isDark ? Colors.black : Colors.white,
+                                            size: 22,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 8),
+                                        Text(
+                                          'Buat Kelas',
+                                          style: GoogleFonts.plusJakartaSans(
+                                            fontSize: 13.0,
+                                            fontWeight: FontWeight.w800,
+                                            color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      );
+                    }
+
+                    final doc = item as DocumentSnapshot;
+                    final data = doc.data() as Map<String, dynamic>? ?? {};
+                    final String projId = (data['projectId'] != null && data['projectId'].toString().isNotEmpty)
+                        ? data['projectId'].toString()
+                        : doc.id;
+                    final String projTitle = (data['name'] ?? 'Classroom').toString();
+                    final String gradeLevel = (data['gradeLevel'] ?? '').toString();
+                    final String major = (data['major'] ?? '').toString();
+                    final List rawSchedules = data['schedules'] as List? ?? [];
+                    
+                    String scheduleText = 'Jadwal belum diatur';
+                    bool hasSchedule = false;
+                    if (rawSchedules.isNotEmpty) {
+                      final first = rawSchedules.first;
+                      if (first is Map) {
+                        final day = (first['day'] ?? '').toString().trim();
+                        final time = (first['time'] ?? '').toString().trim();
+                        if (day.isNotEmpty || time.isNotEmpty) {
+                          hasSchedule = true;
+                          scheduleText = [day, time].where((s) => s.isNotEmpty).join(', ');
+                        }
+                      }
+                    }
+
+                    final dynamic rawColorIdx = data['colorIndex'];
+                    int patternIndex = 0;
+                    if (rawColorIdx is int) {
+                      patternIndex = rawColorIdx;
+                    } else if (rawColorIdx is String) {
+                      patternIndex = int.tryParse(rawColorIdx) ?? 0;
+                    } else {
+                      patternIndex = start + idxInPage;
+                    }
+
+                    final Color cardColor = isDark
+                        ? _classroomCardDarkColors[patternIndex % _classroomCardDarkColors.length]
+                        : _classroomCardColors[patternIndex % _classroomCardColors.length];
+                    final Color accentColor = _classroomAccentColors[patternIndex % _classroomAccentColors.length];
+
+                    return Expanded(
+                      child: BouncyButton(
+                        scaleDown: 0.96,
+                        onTap: () {
+                          if (MediaQuery.of(context).size.width > 800) {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (_) => DesktopClassroomPage(
+                                  projectId: projId,
+                                  projectTitle: projTitle,
+                                ),
+                              ),
+                            );
+                          } else {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (_) => ClassPage(
+                                  projectId: projId,
+                                  projectTitle: projTitle,
+                                ),
+                              ),
+                            );
+                          }
+                        },
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(16),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: cardColor,
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(
+                                color: isDark ? Colors.white12 : Colors.black.withValues(alpha: 0.06),
+                                width: 1.0,
+                              ),
+                            ),
+                            child: Stack(
+                              children: [
+                                Positioned.fill(
+                                  child: CustomPaint(
+                                    painter: ClassroomCardPatternPainter(
+                                      patternIndex: patternIndex,
+                                      accentColor: accentColor,
+                                      isDark: isDark,
+                                    ),
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 8),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      // 1. Top: Badge Waktu / Jadwal
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                                        decoration: BoxDecoration(
+                                          color: isDark
+                                              ? Colors.black.withValues(alpha: 0.5)
+                                              : Colors.white.withValues(alpha: 0.92),
+                                          borderRadius: BorderRadius.circular(20),
+                                          border: Border.all(
+                                            color: isDark ? Colors.white12 : Colors.black.withValues(alpha: 0.04),
+                                            width: 0.8,
+                                          ),
+                                        ),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Container(
+                                              width: 14,
+                                              height: 14,
+                                              decoration: BoxDecoration(
+                                                color: hasSchedule
+                                                    ? const Color(0xFFDCFCE7)
+                                                    : (isDark ? Colors.white12 : const Color(0xFFF1F5F9)),
+                                                shape: BoxShape.circle,
+                                              ),
+                                              child: Center(
+                                                child: Icon(
+                                                  hasSchedule ? Icons.check_rounded : Icons.warning_amber_rounded,
+                                                  size: 10,
+                                                  color: hasSchedule
+                                                      ? const Color(0xFF16A34A)
+                                                      : const Color(0xFF64748B),
+                                                ),
+                                              ),
+                                            ),
+                                            const SizedBox(width: 4),
+                                            Flexible(
+                                              child: Text(
+                                                scheduleText,
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                                style: GoogleFonts.plusJakartaSans(
+                                                  fontSize: 9.5,
+                                                  fontWeight: FontWeight.w700,
+                                                  color: isDark ? Colors.white : const Color(0xFF1E293B),
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+
+                                      // 2. Middle: Judul Mapel / Kelas
+                                      Text(
+                                        projTitle,
+                                        maxLines: 2,
+                                        softWrap: true,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: GoogleFonts.plusJakartaSans(
+                                          fontSize: 14.0,
+                                          fontWeight: FontWeight.w800,
+                                          color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                          letterSpacing: -0.3,
+                                          height: 1.15,
+                                        ),
+                                      ),
+
+                                      // 3. Bottom: Badge Kelas
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                        decoration: BoxDecoration(
+                                          color: isDark
+                                              ? Colors.black.withValues(alpha: 0.5)
+                                              : Colors.white.withValues(alpha: 0.92),
+                                          borderRadius: BorderRadius.circular(14),
+                                          border: Border.all(
+                                            color: isDark ? Colors.white12 : Colors.black.withValues(alpha: 0.04),
+                                            width: 0.8,
+                                          ),
+                                        ),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            const Icon(
+                                              Icons.bolt_rounded,
+                                              size: 11,
+                                              color: Color(0xFFEAB308),
+                                            ),
+                                            const SizedBox(width: 3),
+                                            Flexible(
+                                              child: Text(
+                                                (gradeLevel.isNotEmpty || major.isNotEmpty)
+                                                    ? '$gradeLevel $major'.trim()
+                                                    : 'Kelas Aktif',
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                                style: GoogleFonts.plusJakartaSans(
+                                                  fontSize: 10.0,
+                                                  fontWeight: FontWeight.w800,
+                                                  color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+                  }
+
+                  return Column(
+                    children: [
+                      Expanded(
+                        child: Row(
+                          children: [
+                            buildItem(0),
+                            const SizedBox(width: 10),
+                            buildItem(1),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      Expanded(
+                        child: Row(
+                          children: [
+                            buildItem(2),
+                            const SizedBox(width: 10),
+                            buildItem(3),
+                          ],
+                        ),
+                      ),
+                    ],
+                  );
+                },
+              ),
+            ),
+            if (totalPages > 1) ...[
+              const SizedBox(height: 10),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: List.generate(totalPages, (idx) {
+                  final bool isSelected = idx == _simpleModeCurrentPage;
+                  return AnimatedContainer(
+                    duration: const Duration(milliseconds: 250),
+                    margin: const EdgeInsets.symmetric(horizontal: 3),
+                    width: isSelected ? 16 : 6,
+                    height: 6,
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? (isDark ? Colors.white : const Color(0xFF0F172A))
+                          : (isDark ? Colors.white24 : Colors.black12),
+                      borderRadius: BorderRadius.circular(3),
+                    ),
+                  );
+                }),
+              ),
+            ],
+          ],
+        );
+      },
+    );
+  }
 
   Widget _buildTeacherProjectCard({
     required BuildContext context,
@@ -4002,11 +4548,18 @@ class _HomePageState extends State<HomePage> {
     final bool isDark = AppColors.isDarkMode;
 
     return FutureBuilder<DocumentSnapshot>(
-      future: FirebaseFirestore.instance.collection('users').doc(ownerUid).get(),
+      future: ownerUid.isNotEmpty
+          ? FirebaseFirestore.instance.collection('users').doc(ownerUid).get()
+          : null,
       builder: (context, userSnap) {
-        String teacherName = 'Pak Dimas Supriadi, M.Pd';
+        String teacherName = 'Guru Pengajar';
         if (userSnap.hasData && userSnap.data != null && userSnap.data!.exists) {
-          teacherName = (userSnap.data!.data() as Map<String, dynamic>)['name'] ?? 'Pak Dimas Supriadi, M.Pd';
+          final uData = userSnap.data!.data() as Map<String, dynamic>;
+          final rawName = (uData['name'] ?? uData['displayName'] ?? '').toString();
+          if (rawName.trim().isNotEmpty) {
+            final gender = uData['gender'] as String? ?? uData['jenisKelamin'] as String?;
+            teacherName = _formatTeacherTitle(rawName, gender);
+          }
         }
 
         return StreamBuilder<QuerySnapshot>(
@@ -4116,11 +4669,10 @@ class _HomePageState extends State<HomePage> {
                         children: [
                           if (!isStatsFlipped && !isBarcodeFlipped)
                             Positioned.fill(
-                              child: CustomPaint(
-                                painter: ClassroomCardPatternPainter(
-                                  patternIndex: patternIndex,
-                                  accentColor: Colors.white.withValues(alpha: 0.15),
-                                ),
+                              child: AnimatedClassroomPattern(
+                                patternIndex: patternIndex,
+                                accentColor: Colors.white.withValues(alpha: 0.15),
+                                isDark: isDark,
                               ),
                             ),
                           Positioned.fill(
@@ -5213,11 +5765,18 @@ class _HomePageState extends State<HomePage> {
   }) {
     final bool isDark = AppColors.isDarkMode;
     return FutureBuilder<DocumentSnapshot>(
-      future: FirebaseFirestore.instance.collection('users').doc(ownerUid).get(),
+      future: ownerUid.isNotEmpty
+          ? FirebaseFirestore.instance.collection('users').doc(ownerUid).get()
+          : null,
       builder: (context, userSnap) {
-        String teacherName = 'Pak Dimas Supriadi, M.Pd';
+        String teacherName = 'Guru Pengajar';
         if (userSnap.hasData && userSnap.data != null && userSnap.data!.exists) {
-          teacherName = (userSnap.data!.data() as Map<String, dynamic>)['name'] ?? 'Pak Dimas Supriadi, M.Pd';
+          final uData = userSnap.data!.data() as Map<String, dynamic>;
+          final rawName = (uData['name'] ?? uData['displayName'] ?? '').toString();
+          if (rawName.trim().isNotEmpty) {
+            final gender = uData['gender'] as String? ?? uData['jenisKelamin'] as String?;
+            teacherName = _formatTeacherTitle(rawName, gender);
+          }
         }
 
         bool isStatsFlipped = false;
@@ -5269,11 +5828,10 @@ class _HomePageState extends State<HomePage> {
                   children: [
                     if (!isStatsFlipped && !isBarcodeFlipped)
                       Positioned.fill(
-                        child: CustomPaint(
-                          painter: ClassroomCardPatternPainter(
-                            patternIndex: patternIndex,
-                            accentColor: Colors.white.withValues(alpha: 0.15),
-                          ),
+                        child: AnimatedClassroomPattern(
+                          patternIndex: patternIndex,
+                          accentColor: Colors.white.withValues(alpha: 0.15),
+                          isDark: isDark,
                         ),
                       ),
                     Positioned.fill(
@@ -6823,175 +7381,6 @@ class AmberCardPatternPainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
-class ClassroomCardPatternPainter extends CustomPainter {
-  final int patternIndex;
-  final Color accentColor;
-
-  const ClassroomCardPatternPainter({
-    required this.patternIndex,
-    required this.accentColor,
-  });
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final bool isDark = AppColors.isDarkMode;
-    final Color primaryPatternColor = isDark
-        ? Colors.black.withValues(alpha: 0.18)
-        : accentColor.withValues(alpha: 0.08);
-    final Color secondaryPatternColor = isDark
-        ? Colors.black.withValues(alpha: 0.28)
-        : Colors.white.withValues(alpha: 0.30);
-    final Color strokePatternColor = isDark
-        ? Colors.black.withValues(alpha: 0.35)
-        : Colors.white.withValues(alpha: 0.35);
-    final Color ringPatternColor = isDark
-        ? Colors.black.withValues(alpha: 0.16)
-        : accentColor.withValues(alpha: 0.07);
-    final Color dotPatternColor = isDark
-        ? Colors.black.withValues(alpha: 0.22)
-        : accentColor.withValues(alpha: 0.10);
-
-    switch (patternIndex % 5) {
-      case 0:
-        // Pattern 1: Wave & Smooth Ribbon (Curved waves flowing down right side)
-        final paint = Paint()
-          ..color = primaryPatternColor
-          ..style = PaintingStyle.fill;
-        final path = Path();
-        path.moveTo(size.width * 0.45, 0);
-        path.cubicTo(
-          size.width * 0.65,
-          size.height * 0.35,
-          size.width * 0.35,
-          size.height * 0.75,
-          size.width * 0.85,
-          size.height,
-        );
-        path.lineTo(size.width, size.height);
-        path.lineTo(size.width, 0);
-        path.close();
-        canvas.drawPath(path, paint);
-
-        final paintSecondary = Paint()
-          ..color = secondaryPatternColor
-          ..style = PaintingStyle.fill;
-        final pathSecondary = Path();
-        pathSecondary.moveTo(size.width * 0.6, 0);
-        pathSecondary.cubicTo(
-          size.width * 0.8,
-          size.height * 0.4,
-          size.width * 0.5,
-          size.height * 0.8,
-          size.width,
-          size.height * 0.7,
-        );
-        pathSecondary.lineTo(size.width, 0);
-        pathSecondary.close();
-        canvas.drawPath(pathSecondary, paintSecondary);
-        break;
-
-      case 1:
-        // Pattern 2: Concentric Swirls & Rings (Arcs centered top-right)
-        final paintRing = Paint()
-          ..color = ringPatternColor
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 14;
-        final center = Offset(size.width * 0.85, size.height * 0.3);
-        canvas.drawCircle(center, 30, paintRing);
-        canvas.drawCircle(center, 55, paintRing);
-
-        final paintWave = Paint()
-          ..color = secondaryPatternColor
-          ..style = PaintingStyle.fill;
-        final pathRing = Path();
-        pathRing.moveTo(size.width * 0.55, 0);
-        pathRing.quadraticBezierTo(
-          size.width * 0.8,
-          size.height * 0.5,
-          size.width,
-          size.height,
-        );
-        pathRing.lineTo(size.width, 0);
-        pathRing.close();
-        canvas.drawPath(pathRing, paintWave);
-        break;
-
-      case 2:
-        // Pattern 3: Floating Soft Circles / Bubbles
-        final paintBubble1 = Paint()
-          ..color = primaryPatternColor
-          ..style = PaintingStyle.fill;
-        canvas.drawCircle(
-          Offset(size.width * 0.8, size.height * 0.2),
-          45,
-          paintBubble1,
-        );
-
-        final paintBubble2 = Paint()
-          ..color = secondaryPatternColor
-          ..style = PaintingStyle.fill;
-        canvas.drawCircle(
-          Offset(size.width * 0.9, size.height * 0.75),
-          35,
-          paintBubble2,
-        );
-        break;
-
-      case 3:
-        // Pattern 4: Modern Geometric Mesh / Node Grid
-        final paintDot = Paint()
-          ..color = dotPatternColor
-          ..style = PaintingStyle.fill;
-        for (double x = size.width * 0.5; x < size.width; x += 18) {
-          for (double y = 10; y < size.height; y += 18) {
-            canvas.drawCircle(Offset(x, y), 3, paintDot);
-          }
-        }
-        break;
-
-      case 4:
-      default:
-        // Pattern 5: Organic Diagonal Rays / Leaf Curves
-        final paintRay = Paint()
-          ..color = primaryPatternColor
-          ..style = PaintingStyle.fill;
-        final pathRay = Path();
-        pathRay.moveTo(size.width * 0.5, 0);
-        pathRay.quadraticBezierTo(
-          size.width * 0.7,
-          size.height * 0.5,
-          size.width * 0.8,
-          size.height,
-        );
-        pathRay.lineTo(size.width, size.height);
-        pathRay.lineTo(size.width, 0);
-        pathRay.close();
-        canvas.drawPath(pathRay, paintRay);
-
-        final paintStroke = Paint()
-          ..color = strokePatternColor
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 10
-          ..strokeCap = StrokeCap.round;
-        final pathStroke = Path();
-        pathStroke.moveTo(size.width * 0.65, 0);
-        pathStroke.quadraticBezierTo(
-          size.width * 0.8,
-          size.height * 0.4,
-          size.width * 0.85,
-          size.height,
-        );
-        canvas.drawPath(pathStroke, paintStroke);
-        break;
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant ClassroomCardPatternPainter oldDelegate) {
-    return oldDelegate.patternIndex != patternIndex || oldDelegate.accentColor != accentColor;
-  }
-}
-
 class HoverFloatingButton extends StatefulWidget {
   final VoidCallback onTap;
   const HoverFloatingButton({super.key, required this.onTap});
@@ -7055,11 +7444,8 @@ class _AddClassroomPlaceholderCardState extends State<AddClassroomPlaceholderCar
   Widget build(BuildContext context) {
     final bool isDark = AppColors.isDarkMode;
     final Color dashedColor = isDark
-        ? const Color(0xFFE9E2FC).withValues(alpha: _isHovered ? 0.8 : 0.6)
-        : const Color(0xFF7C3AED).withValues(alpha: _isHovered ? 0.5 : 0.28);
-    final Color iconColor = isDark
-        ? const Color(0xFFE9E2FC)
-        : const Color(0xFF7C3AED);
+        ? (_isHovered ? Colors.white70 : const Color(0xFF3F3F46))
+        : const Color(0xFF0F172A).withValues(alpha: _isHovered ? 0.75 : 0.35);
 
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovered = true),
@@ -7081,13 +7467,11 @@ class _AddClassroomPlaceholderCardState extends State<AddClassroomPlaceholderCar
           scale: _isHovered ? 1.01 : 1.0,
           duration: const Duration(milliseconds: 150),
           child: Container(
-            height: 154,
+            height: 124,
             margin: EdgeInsets.zero,
             decoration: BoxDecoration(
               color: _isHovered
-                  ? (isDark
-                      ? const Color(0xFFE9E2FC).withValues(alpha: 0.05)
-                      : const Color(0xFF7C3AED).withValues(alpha: 0.03))
+                  ? (isDark ? Colors.white.withValues(alpha: 0.04) : Colors.black.withValues(alpha: 0.03))
                   : Colors.transparent,
               borderRadius: BorderRadius.circular(22),
             ),
@@ -7106,11 +7490,58 @@ class _AddClassroomPlaceholderCardState extends State<AddClassroomPlaceholderCar
                     ),
                   ),
                 ),
-                Center(
-                  child: Icon(
-                    Icons.add_rounded,
-                    color: iconColor, // Tombol + warna ungu soft putih di mode dark
-                    size: 38,
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        width: 44,
+                        height: 44,
+                        decoration: BoxDecoration(
+                          color: isDark ? Colors.white : const Color(0xFF0F172A),
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: (isDark ? Colors.white : Colors.black).withValues(alpha: 0.12),
+                              blurRadius: 10,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: Icon(
+                          Icons.add_rounded,
+                          color: isDark ? Colors.black : Colors.white,
+                          size: 26,
+                        ),
+                      ),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Buat Classroom Baru',
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 15.0,
+                                fontWeight: FontWeight.w800,
+                                color: isDark ? Colors.white : const Color(0xFF0F172A),
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              'Tambahkan mata pelajaran atau kelas baru',
+                              style: GoogleFonts.dmSans(
+                                fontSize: 12.5,
+                                fontWeight: FontWeight.w500,
+                                color: isDark ? Colors.white60 : const Color(0xFF64748B),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
@@ -7372,64 +7803,35 @@ class _AnimatedScheduleCapsuleState extends State<_AnimatedScheduleCapsule> {
   }
 }
 
-class _HomeSearchAndNotesRow extends StatefulWidget {
-  final VoidCallback onNotesTap;
+class _HomeStandaloneSearchBar extends StatefulWidget {
   final ValueChanged<String> onSearchChanged;
   final bool isDark;
-  final GlobalKey? notesKey;
 
-  const _HomeSearchAndNotesRow({
+  const _HomeStandaloneSearchBar({
     super.key,
-    required this.onNotesTap,
     required this.onSearchChanged,
     required this.isDark,
-    this.notesKey,
   });
 
   @override
-  State<_HomeSearchAndNotesRow> createState() => _HomeSearchAndNotesRowState();
+  State<_HomeStandaloneSearchBar> createState() => _HomeStandaloneSearchBarState();
 }
 
-class _HomeSearchAndNotesRowState extends State<_HomeSearchAndNotesRow> {
-  bool _isExpanded = false;
+class _HomeStandaloneSearchBarState extends State<_HomeStandaloneSearchBar> {
   late final TextEditingController _controller;
-  late final FocusNode _focusNode;
   Timer? _debounceTimer;
 
   @override
   void initState() {
     super.initState();
     _controller = TextEditingController();
-    _focusNode = FocusNode();
   }
 
   @override
   void dispose() {
     _debounceTimer?.cancel();
     _controller.dispose();
-    _focusNode.dispose();
     super.dispose();
-  }
-
-  void _expand() {
-    setState(() {
-      _isExpanded = true;
-    });
-    Future.delayed(const Duration(milliseconds: 100), () {
-      if (mounted) {
-        _focusNode.requestFocus();
-      }
-    });
-  }
-
-  void _collapse() {
-    _focusNode.unfocus();
-    _debounceTimer?.cancel();
-    setState(() {
-      _isExpanded = false;
-      _controller.clear();
-    });
-    widget.onSearchChanged('');
   }
 
   void _onChanged(String val) {
@@ -7445,163 +7847,820 @@ class _HomeSearchAndNotesRowState extends State<_HomeSearchAndNotesRow> {
   Widget build(BuildContext context) {
     final isDark = widget.isDark;
 
-    return AnimatedSwitcher(
-      duration: const Duration(milliseconds: 250),
-      transitionBuilder: (child, animation) {
-        return FadeTransition(
-          opacity: animation,
-          child: child,
-        );
-      },
-      child: _isExpanded
-          ? Container(
-              key: const ValueKey('home_search_bar_expanded'),
-              height: 48,
-              padding: const EdgeInsets.fromLTRB(14, 0, 8, 0),
-              decoration: BoxDecoration(
-                color: isDark ? const Color(0xFF18181B) : Colors.white,
-                borderRadius: BorderRadius.circular(28),
-                border: Border.all(
+    return Container(
+      height: 48,
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF18181B) : Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+          width: 1.2,
+        ),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            Icons.search_rounded,
+            color: isDark ? Colors.white60 : Colors.black45,
+            size: 20,
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: TextField(
+              controller: _controller,
+              onChanged: (val) {
+                setState(() {});
+                _onChanged(val);
+              },
+              style: AppTypography.timestamp(
+                color: isDark ? Colors.white : Colors.black87,
+              ),
+              decoration: InputDecoration(
+                hintText: 'Cari kelas atau materi...',
+                hintStyle: AppTypography.subtitle(
+                  color: isDark ? Colors.white38 : Colors.black26,
+                ),
+                border: InputBorder.none,
+                isDense: true,
+                contentPadding: EdgeInsets.zero,
+              ),
+            ),
+          ),
+          if (_controller.text.isNotEmpty) ...[
+            const SizedBox(width: 6),
+            GestureDetector(
+              onTap: () {
+                _controller.clear();
+                setState(() {});
+                widget.onSearchChanged('');
+              },
+              behavior: HitTestBehavior.opaque,
+              child: Container(
+                width: 26,
+                height: 26,
+                decoration: BoxDecoration(
                   color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
-                  width: 1.2,
+                  shape: BoxShape.circle,
+                ),
+                child: Center(
+                  child: Icon(
+                    Icons.close_rounded,
+                    size: 14,
+                    color: isDark ? Colors.white70 : Colors.black54,
+                  ),
                 ),
               ),
-              child: Row(
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+/// --------------------------------------------------------------------------
+/// Slider Jadwal Mingguan (Senin - Minggu dengan Dots & Opsi Matikan Hari)
+/// --------------------------------------------------------------------------
+class _HomeWeeklyScheduleSlider extends StatefulWidget {
+  final List<DocumentSnapshot> projectDocs;
+  final bool isDark;
+
+  const _HomeWeeklyScheduleSlider({
+    super.key,
+    required this.projectDocs,
+    required this.isDark,
+  });
+
+  @override
+  State<_HomeWeeklyScheduleSlider> createState() => _HomeWeeklyScheduleSliderState();
+}
+
+class _HomeWeeklyScheduleSliderState extends State<_HomeWeeklyScheduleSlider> {
+  static const List<String> _allDays = [
+    'Senin',
+    'Selasa',
+    'Rabu',
+    'Kamis',
+    'Jumat',
+    'Sabtu',
+    'Minggu',
+  ];
+
+  late PageController _pageController;
+  int _currentPageIndex = 0;
+  List<String> _enabledDays = List.from(_allDays);
+
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController();
+    _loadEnabledDays();
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _loadEnabledDays() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final saved = prefs.getStringList('weekly_schedule_enabled_days');
+      if (saved != null && saved.isNotEmpty) {
+        if (mounted) {
+          setState(() {
+            _enabledDays = saved;
+          });
+        }
+      }
+    } catch (_) {}
+  }
+
+  Future<void> _saveEnabledDays(List<String> days) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setStringList('weekly_schedule_enabled_days', days);
+    } catch (_) {}
+  }
+
+  void _openDaySettingsModal(BuildContext context) {
+    final bool isDark = widget.isDark;
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (modalContext) {
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            return Container(
+              padding: EdgeInsets.fromLTRB(
+                20,
+                16,
+                20,
+                MediaQuery.of(context).viewInsets.bottom + 24,
+              ),
+              decoration: BoxDecoration(
+                color: isDark ? const Color(0xFF18181B) : Colors.white,
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+                border: isDark
+                    ? Border.all(color: Colors.white12, width: 1)
+                    : null,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(
-                    Icons.search_rounded,
-                    color: isDark ? Colors.white60 : Colors.black45,
-                    size: 20,
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: TextField(
-                      key: const ValueKey('home_search_input'),
-                      controller: _controller,
-                      focusNode: _focusNode,
-                      keyboardType: TextInputType.text,
-                      textInputAction: TextInputAction.search,
-                      autofocus: false,
-                      onChanged: (val) {
-                        setState(() {});
-                        _onChanged(val);
-                      },
-                      style: AppTypography.timestamp(
-                        color: isDark ? Colors.white : Colors.black87,
-                      ),
-                      decoration: InputDecoration(
-                        hintText: 'Cari kelas atau materi...',
-                        hintStyle: AppTypography.subtitle(
-                          color: isDark ? Colors.white38 : Colors.black26,
-                        ),
-                        border: InputBorder.none,
-                        isDense: true,
-                        contentPadding: EdgeInsets.zero,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 6),
-                  GestureDetector(
-                    onTap: _collapse,
-                    behavior: HitTestBehavior.opaque,
+                  // Handle Bar
+                  Center(
                     child: Container(
-                      width: 32,
-                      height: 32,
+                      width: 40,
+                      height: 4,
                       decoration: BoxDecoration(
-                        color: isDark ? const Color(0xFF27272A) : const Color(0xFF0F172A),
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Center(
-                        child: Icon(
-                          Icons.close_rounded,
-                          size: 16,
-                          color: Colors.white,
-                        ),
+                        color: isDark ? Colors.white24 : Colors.black12,
+                        borderRadius: BorderRadius.circular(2),
                       ),
                     ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Modal Title
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Atur Hari Jadwal',
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 18.0,
+                              fontWeight: FontWeight.w800,
+                              color: isDark ? Colors.white : const Color(0xFF0F172A),
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            'Aktifkan atau matikan hari yang ingin ditampilkan',
+                            style: GoogleFonts.dmSans(
+                              fontSize: 12.5,
+                              fontWeight: FontWeight.w500,
+                              color: isDark ? Colors.white60 : const Color(0xFF64748B),
+                            ),
+                          ),
+                        ],
+                      ),
+                      IconButton(
+                        onPressed: () => Navigator.of(modalContext).pop(),
+                        icon: Icon(
+                          Icons.close_rounded,
+                          color: isDark ? Colors.white70 : Colors.black54,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+
+                  // 7 Days List with Switches
+                  ...List.generate(_allDays.length, (idx) {
+                    final day = _allDays[idx];
+                    final bool isEnabled = _enabledDays.contains(day);
+
+                    return Container(
+                      margin: const EdgeInsets.only(bottom: 8),
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: isDark ? const Color(0xFF27272A) : const Color(0xFFF8FAFC),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: isDark ? Colors.white10 : const Color(0xFFE2E8F0),
+                          width: 0.8,
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: [
+                              Container(
+                                width: 34,
+                                height: 34,
+                                decoration: BoxDecoration(
+                                  color: isEnabled
+                                      ? (isDark ? const Color(0xFF0284C7).withValues(alpha: 0.25) : const Color(0xFFE0F2FE))
+                                      : (isDark ? Colors.white10 : const Color(0xFFF1F5F9)),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Icon(
+                                  Icons.calendar_today_rounded,
+                                  size: 16,
+                                  color: isEnabled
+                                      ? (isDark ? const Color(0xFF38BDF8) : const Color(0xFF0284C7))
+                                      : (isDark ? Colors.white38 : Colors.black38),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Text(
+                                day,
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 14.5,
+                                  fontWeight: FontWeight.w700,
+                                  color: isEnabled
+                                      ? (isDark ? Colors.white : const Color(0xFF0F172A))
+                                      : (isDark ? Colors.white38 : Colors.black38),
+                                ),
+                              ),
+                            ],
+                          ),
+                          Switch(
+                            value: isEnabled,
+                            activeThumbColor: const Color(0xFF0284C7),
+                            onChanged: (bool val) {
+                              if (!val && _enabledDays.length <= 1) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('Minimal harus ada 1 hari aktif.'),
+                                    duration: Duration(seconds: 2),
+                                  ),
+                                );
+                                return;
+                              }
+
+                              setModalState(() {
+                                if (val) {
+                                  if (!_enabledDays.contains(day)) {
+                                    _enabledDays.add(day);
+                                    _enabledDays.sort((a, b) => _allDays.indexOf(a).compareTo(_allDays.indexOf(b)));
+                                  }
+                                } else {
+                                  _enabledDays.remove(day);
+                                }
+                              });
+
+                              setState(() {
+                                if (_currentPageIndex >= _enabledDays.length) {
+                                  _currentPageIndex = 0;
+                                }
+                              });
+                              _saveEnabledDays(_enabledDays);
+                            },
+                          ),
+                        ],
+                      ),
+                    );
+                  }),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final bool isDark = widget.isDark;
+
+    // Parse all schedules from projectDocs
+    final Map<String, List<Map<String, dynamic>>> schedulesByDay = {};
+    for (var doc in widget.projectDocs) {
+      final data = doc.data() as Map<String, dynamic>? ?? {};
+      final String projTitle = (data['name'] ?? 'Classroom').toString();
+      final String gradeLevel = (data['gradeLevel'] ?? '').toString();
+      final String major = (data['major'] ?? '').toString();
+      final List rawSchedules = data['schedules'] as List? ?? [];
+
+      for (var s in rawSchedules) {
+        if (s is Map) {
+          final String day = (s['day'] ?? '').toString().trim().toLowerCase();
+          final String time = (s['time'] ?? '').toString().trim();
+          if (day.isNotEmpty) {
+            schedulesByDay.putIfAbsent(day, () => []);
+            schedulesByDay[day]!.add({
+              'time': time.isNotEmpty ? time : 'Jadwal Aktif',
+              'projectName': projTitle,
+              'gradeLevel': gradeLevel,
+              'major': major,
+            });
+          }
+        }
+      }
+    }
+
+    if (_enabledDays.isEmpty) {
+      _enabledDays = List.from(_allDays);
+    }
+
+    final int totalSlides = _enabledDays.length;
+    if (_currentPageIndex >= totalSlides) {
+      _currentPageIndex = 0;
+    }
+
+    return Column(
+      children: [
+        SizedBox(
+          height: 155,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              // Main Card Slide
+              Expanded(
+                child: PageView.builder(
+                  controller: _pageController,
+                  itemCount: totalSlides,
+                  physics: const BouncingScrollPhysics(),
+                  onPageChanged: (idx) {
+                    setState(() {
+                      _currentPageIndex = idx;
+                    });
+                  },
+                  itemBuilder: (context, index) {
+                    final String dayName = _enabledDays[index];
+                    final List<Map<String, dynamic>> daySchedules = schedulesByDay[dayName.toLowerCase()] ?? [];
+
+                    final bool hasSchedule = daySchedules.isNotEmpty;
+
+                    // Light: Soft Sky Blue like screenshot, Dark: Slate Dark
+                    final Color cardBg = isDark ? const Color(0xFF1E293B) : const Color(0xFFE0F2FE);
+                    final Color accentColor = isDark ? const Color(0xFF38BDF8) : const Color(0xFF0284C7);
+                    final Color titleColor = isDark ? Colors.white : const Color(0xFF0F172A);
+                    final Color subtitleColor = isDark ? Colors.white70 : const Color(0xFF475569);
+
+                    return Container(
+                      clipBehavior: Clip.antiAlias,
+                      decoration: BoxDecoration(
+                        color: cardBg,
+                        borderRadius: BorderRadius.circular(28),
+                        border: isDark
+                            ? Border.all(color: Colors.white.withValues(alpha: 0.12), width: 1.0)
+                            : null,
+                      ),
+                      child: Stack(
+                        children: [
+                          Positioned.fill(
+                            child: CustomPaint(
+                              painter: _TaskFacetPatternPainter(isDark: isDark),
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(18, 14, 16, 14),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                // Top Header Row: Icon + "JADWAL SENIN" + Settings Button
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Icon(
+                                          Icons.trending_up_rounded,
+                                          size: 15,
+                                          color: accentColor,
+                                        ),
+                                        const SizedBox(width: 5),
+                                        Text(
+                                          'JADWAL ${dayName.toUpperCase()}',
+                                          style: GoogleFonts.plusJakartaSans(
+                                            fontSize: 11.5,
+                                            fontWeight: FontWeight.w800,
+                                            letterSpacing: 0.8,
+                                            color: accentColor,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    GestureDetector(
+                                      onTap: () {
+                                        HapticFeedback.selectionClick();
+                                        _openDaySettingsModal(context);
+                                      },
+                                      child: Container(
+                                        padding: const EdgeInsets.all(4),
+                                        decoration: BoxDecoration(
+                                          color: isDark ? Colors.white10 : Colors.white.withValues(alpha: 0.8),
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: Icon(
+                                          Icons.tune_rounded,
+                                          size: 14,
+                                          color: isDark ? Colors.white70 : const Color(0xFF0284C7),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+
+                                // Middle Content: Jam / Bebas Jadwal
+                                if (!hasSchedule) ...[
+                                  Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text(
+                                        'Kosong',
+                                        style: GoogleFonts.plusJakartaSans(
+                                          fontSize: 26.0,
+                                          fontWeight: FontWeight.w900,
+                                          color: titleColor,
+                                          height: 1.1,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        'Tidak ada jadwal kelas pada hari ini',
+                                        style: GoogleFonts.dmSans(
+                                          fontSize: 13.0,
+                                          fontWeight: FontWeight.w500,
+                                          color: subtitleColor,
+                                        ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ],
+                                  ),
+                                ] else ...[
+                                  Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      // Jam
+                                      Text(
+                                        daySchedules.first['time'] as String,
+                                        style: GoogleFonts.plusJakartaSans(
+                                          fontSize: 23.0,
+                                          fontWeight: FontWeight.w900,
+                                          color: titleColor,
+                                          height: 1.1,
+                                        ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                      const SizedBox(height: 4),
+                                      // Mapel & Kelas
+                                      Row(
+                                        children: [
+                                          Flexible(
+                                            child: Text(
+                                              '${daySchedules.first['projectName']} · ${daySchedules.first['gradeLevel']} ${daySchedules.first['major']}'.trim(),
+                                              style: GoogleFonts.dmSans(
+                                                fontSize: 13.0,
+                                                fontWeight: FontWeight.w600,
+                                                color: subtitleColor,
+                                              ),
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                          ),
+                                          if (daySchedules.length > 1) ...[
+                                            const SizedBox(width: 6),
+                                            Container(
+                                              padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
+                                              decoration: BoxDecoration(
+                                                color: accentColor.withValues(alpha: 0.15),
+                                                borderRadius: BorderRadius.circular(6),
+                                              ),
+                                              child: Text(
+                                                '+${daySchedules.length - 1}',
+                                                style: GoogleFonts.plusJakartaSans(
+                                                  fontSize: 9.5,
+                                                  fontWeight: FontWeight.w800,
+                                                  color: accentColor,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ],
+
+                                // Bottom summary tag
+                                Text(
+                                  hasSchedule ? '${daySchedules.length} kelas aktif' : '0 jam pembelajaran',
+                                  style: GoogleFonts.dmSans(
+                                    fontSize: 11.5,
+                                    fontWeight: FontWeight.w500,
+                                    color: subtitleColor.withValues(alpha: 0.8),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ),
+
+              // Side Vertical Dot Indicators (Matching Screenshot)
+              const SizedBox(width: 10),
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: List.generate(totalSlides, (dotIdx) {
+                  final bool isActive = dotIdx == _currentPageIndex;
+                  return AnimatedContainer(
+                    duration: const Duration(milliseconds: 220),
+                    margin: const EdgeInsets.symmetric(vertical: 3.5),
+                    width: 7.5,
+                    height: 7.5,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: isActive
+                          ? (isDark ? Colors.white : const Color(0xFF0F172A))
+                          : Colors.transparent,
+                      border: isActive
+                          ? null
+                          : Border.all(
+                              color: isDark ? Colors.white38 : const Color(0xFF94A3B8),
+                              width: 1.6,
+                            ),
+                    ),
+                  );
+                }),
+              ),
+              const SizedBox(width: 4),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _HomeNotesPreviewSection extends StatefulWidget {
+  final bool isDark;
+
+  const _HomeNotesPreviewSection({
+    super.key,
+    required this.isDark,
+  });
+
+  @override
+  State<_HomeNotesPreviewSection> createState() => _HomeNotesPreviewSectionState();
+}
+
+class _HomeNotesPreviewSectionState extends State<_HomeNotesPreviewSection> {
+  int _currentNoteIndex = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    final bool isDark = widget.isDark;
+
+    return StreamBuilder<QuerySnapshot>(
+      stream: FirebaseFirestore.instance
+          .collection('notes')
+          .orderBy('updatedAt', descending: true)
+          .limit(20)
+          .snapshots(),
+      builder: (context, snapshot) {
+        final docs = snapshot.data?.docs ?? [];
+        final int totalNotes = docs.length;
+
+        if (totalNotes > 0 && _currentNoteIndex >= totalNotes) {
+          _currentNoteIndex = 0;
+        }
+
+        String title = 'Belum Ada Catatan';
+        String content = 'Tekan di sini untuk mulai menulis catatan baru.';
+        String? currentDocId;
+
+        if (totalNotes > 0) {
+          final currentDoc = docs[_currentNoteIndex];
+          currentDocId = currentDoc.id;
+          final data = currentDoc.data() as Map<String, dynamic>;
+          title = (data['title'] ?? '').toString().trim();
+          if (title.isEmpty) title = 'Tanpa Judul';
+          content = (data['content'] ?? '').toString().trim();
+          if (content.isEmpty) content = 'Tidak ada isi catatan.';
+        }
+
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // 1. Top Bar: Badge "Catatan" & Tombol (+) di Kiri, Tombol Navigasi < > di Kanan
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  // Sisi Kiri: Badge "Catatan" + Tombol (+)
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: isDark ? const Color(0xFF27272A) : const Color(0xFF18181B),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(
+                          'Catatan',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 13.5,
+                            fontWeight: FontWeight.w800,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      // Tombol Buat Catatan Baru (+)
+                      GestureDetector(
+                        onTap: () {
+                          HapticFeedback.selectionClick();
+                          Navigator.of(context).push(
+                            PageRouteBuilder(
+                              pageBuilder: (_, __, ___) => const NoteEditorPage(
+                                noteId: null,
+                                initialTitle: '',
+                                initialContent: '',
+                              ),
+                              transitionDuration: Duration.zero,
+                              reverseTransitionDuration: Duration.zero,
+                            ),
+                          );
+                        },
+                        child: Container(
+                          width: 32,
+                          height: 32,
+                          decoration: BoxDecoration(
+                            color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Center(
+                            child: Icon(
+                              Icons.add_rounded,
+                              size: 20,
+                              color: isDark ? Colors.white : Colors.black87,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  // Sisi Kanan: Tombol Navigasi < dan >
+                  Row(
+                    children: [
+                      // Tombol <
+                      GestureDetector(
+                        onTap: totalNotes <= 1
+                            ? null
+                            : () {
+                                HapticFeedback.selectionClick();
+                                setState(() {
+                                  _currentNoteIndex = (_currentNoteIndex - 1 + totalNotes) % totalNotes;
+                                });
+                              },
+                        child: Opacity(
+                          opacity: totalNotes <= 1 ? 0.45 : 1.0,
+                          child: Container(
+                            width: 44,
+                            height: 32,
+                            decoration: BoxDecoration(
+                              color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            child: Center(
+                              child: Icon(
+                                Icons.arrow_back_rounded,
+                                size: 18,
+                                color: isDark ? Colors.white : Colors.black87,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      // Tombol >
+                      GestureDetector(
+                        onTap: totalNotes <= 1
+                            ? null
+                            : () {
+                                HapticFeedback.selectionClick();
+                                setState(() {
+                                  _currentNoteIndex = (_currentNoteIndex + 1) % totalNotes;
+                                });
+                              },
+                        child: Opacity(
+                          opacity: totalNotes <= 1 ? 0.45 : 1.0,
+                          child: Container(
+                            width: 44,
+                            height: 32,
+                            decoration: BoxDecoration(
+                              color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            child: Center(
+                              child: Icon(
+                                Icons.arrow_forward_rounded,
+                                size: 18,
+                                color: isDark ? Colors.white : Colors.black87,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
-            )
-          : Row(
-              key: const ValueKey('home_search_bar_collapsed'),
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                // Tombol Catatan (Pill Frameless Netral)
-                BouncyButton(
-                  key: widget.notesKey,
-                  onTap: widget.onNotesTap,
-                  child: Container(
-                    height: 48,
-                    padding: const EdgeInsets.fromLTRB(6, 0, 16, 0),
-                    decoration: BoxDecoration(
-                      color: isDark ? const Color(0xFF18181B) : Colors.white,
-                      borderRadius: BorderRadius.circular(30),
-                      border: Border.all(
-                        color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
-                        width: 1.2,
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Container(
-                          width: 36,
-                          height: 36,
-                          decoration: BoxDecoration(
-                            color: isDark ? const Color(0xFF2E1065) : const Color(0xFFFEF3C7),
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(
-                            Icons.auto_stories_rounded,
-                            color: isDark ? const Color(0xFFD6A5F8) : const Color(0xFFEA580C),
-                            size: 18,
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        Text(
-                          'Catatan',
-                          style: AppTypography.buttonLabel(
-                            color: isDark ? Colors.white : Colors.black87,
-                          ),
-                        ),
-                        const SizedBox(width: 6),
-                        Icon(
-                          Icons.keyboard_arrow_down_rounded,
-                          size: 18,
-                          color: isDark ? Colors.white60 : Colors.black45,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
+              const SizedBox(height: 14),
 
-                // Tombol Cari Lingkaran Netral
-                BouncyButton(
-                  onTap: _expand,
-                  child: Container(
-                    width: 48,
-                    height: 48,
-                    decoration: BoxDecoration(
-                      color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9),
-                        width: 1.2,
+              // 2. Main Card Content: Judul Besar & Isi Cuplikan (Full Width tanpa PNG)
+              BouncyButton(
+                scaleDown: 0.98,
+                onTap: () {
+                  Navigator.of(context).push(
+                    PageRouteBuilder(
+                      pageBuilder: (_, __, ___) => NoteEditorPage(
+                        noteId: currentDocId,
+                        initialTitle: totalNotes > 0 ? (title == 'Tanpa Judul' ? '' : title) : '',
+                        initialContent: totalNotes > 0 ? (content == 'Tidak ada isi catatan.' ? '' : content) : '',
                       ),
+                      transitionDuration: Duration.zero,
+                      reverseTransitionDuration: Duration.zero,
                     ),
-                    child: Center(
-                      child: Icon(
-                        Icons.search_rounded,
-                        color: isDark ? Colors.white70 : Colors.black87,
-                        size: 22,
+                  );
+                },
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '"$title"',
+                      style: AppTypography.pageTitle(
+                        fontSize: 24.0,
+                        fontWeight: FontWeight.w900,
+                        color: isDark ? Colors.white : const Color(0xFF0F172A),
+                        height: 1.2,
                       ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                  ),
+                    const SizedBox(height: 6),
+                    Text(
+                      content,
+                      style: AppTypography.chatBody(
+                        fontSize: 15.5,
+                        fontWeight: FontWeight.w500,
+                        color: isDark ? Colors.white70 : const Color(0xFF475569),
+                        height: 1.4,
+                      ),
+                      maxLines: 3,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }
@@ -8102,4 +9161,67 @@ class _TaskDeadlinePainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _TaskDeadlinePainter oldDelegate) => false;
+}
+
+class _TaskFacetPatternPainter extends CustomPainter {
+  final bool isDark;
+
+  const _TaskFacetPatternPainter({required this.isDark});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final double w = size.width;
+    final double h = size.height;
+    final Color basePatternColor = isDark ? Colors.black : Colors.white;
+
+    // Shard 1: Diagonal sweep polygon
+    final Path shard1 = Path()
+      ..moveTo(w * 0.52, 0)
+      ..lineTo(w * 0.82, 0)
+      ..lineTo(w * 0.62, h)
+      ..lineTo(w * 0.42, h)
+      ..close();
+    final Paint p1 = Paint()
+      ..color = basePatternColor.withValues(alpha: isDark ? 0.08 : 0.16)
+      ..style = PaintingStyle.fill;
+    canvas.drawPath(shard1, p1);
+
+    // Shard 2: Top Right angular facet
+    final Path shard2 = Path()
+      ..moveTo(w * 0.76, 0)
+      ..lineTo(w, 0)
+      ..lineTo(w, h * 0.72)
+      ..lineTo(w * 0.70, h * 0.34)
+      ..close();
+    final Paint p2 = Paint()
+      ..color = basePatternColor.withValues(alpha: isDark ? 0.15 : 0.28)
+      ..style = PaintingStyle.fill;
+    canvas.drawPath(shard2, p2);
+
+    // Shard 3: Bottom right origami triangle
+    final Path shard3 = Path()
+      ..moveTo(w * 0.62, h)
+      ..lineTo(w, h * 0.62)
+      ..lineTo(w, h)
+      ..close();
+    final Paint p3 = Paint()
+      ..color = basePatternColor.withValues(alpha: isDark ? 0.12 : 0.22)
+      ..style = PaintingStyle.fill;
+    canvas.drawPath(shard3, p3);
+
+    // Shard 4: Left subtle accent notch
+    final Path shard4 = Path()
+      ..moveTo(0, h * 0.25)
+      ..lineTo(w * 0.14, h * 0.42)
+      ..lineTo(0, h * 0.62)
+      ..close();
+    final Paint p4 = Paint()
+      ..color = basePatternColor.withValues(alpha: isDark ? 0.06 : 0.12)
+      ..style = PaintingStyle.fill;
+    canvas.drawPath(shard4, p4);
+  }
+
+  @override
+  bool shouldRepaint(covariant _TaskFacetPatternPainter oldDelegate) =>
+      oldDelegate.isDark != isDark;
 }

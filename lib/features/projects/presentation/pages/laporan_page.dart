@@ -12,6 +12,7 @@ import 'dart:math' as math;
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:hubner/features/projects/presentation/pages/manage_attendance_page.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hubner/main.dart';
 
 class LaporanPage extends StatefulWidget {
@@ -85,7 +86,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                 height: 3.5,
                 width: trackWidth,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF7C3AED).withValues(alpha: isDark ? 0.22 : 0.14),
+                  color: isDark ? Colors.white.withValues(alpha: 0.12) : Colors.black.withValues(alpha: 0.08),
                   borderRadius: BorderRadius.circular(2),
                 ),
                 child: Stack(
@@ -97,7 +98,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                       width: thumbWidth,
                       child: Container(
                         decoration: BoxDecoration(
-                          color: const Color(0xFF7C3AED),
+                          color: isDark ? const Color(0xFFE4E4E7) : const Color(0xFF0F172A),
                           borderRadius: BorderRadius.circular(2),
                         ),
                       ),
@@ -125,7 +126,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
 
     final double screenWidth = MediaQuery.of(context).size.width;
     final double width = math.min(math.max(size.width, 240.0), screenWidth - 32.0);
-    final double top = offset.dy + size.height - 10;
+    final double top = offset.dy + size.height - 15;
     double left = offset.dx;
     if (left + width > screenWidth - 16.0) {
       left = screenWidth - width - 16.0;
@@ -229,7 +230,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
 
     final double screenWidth = MediaQuery.of(context).size.width;
     final double width = math.min(math.max(size.width, 240.0), screenWidth - 32.0);
-    final double top = offset.dy + size.height - 10;
+    final double top = offset.dy + size.height - 15;
     double left = offset.dx;
     if (left + width > screenWidth - 16.0) {
       left = screenWidth - width - 16.0;
@@ -385,7 +386,7 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
 
     final double screenWidth = MediaQuery.of(context).size.width;
     final double width = math.min(math.max(size.width, 260.0), screenWidth - 32.0);
-    final double top = offset.dy + size.height - 10;
+    final double top = offset.dy + size.height - 15;
     
     // Right border aligns with button right border, expanding leftwards:
     double left = (offset.dx + size.width) - width;
@@ -1553,15 +1554,27 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                   height: 34,
                                   padding: const EdgeInsets.symmetric(horizontal: 12),
                                   decoration: BoxDecoration(
-                                    color: const Color(0xFFEF4444),
+                                    color: isDark ? const Color(0xFF1E293B) : const Color(0xFF7BA6EE),
                                     borderRadius: BorderRadius.circular(17),
+                                    border: isDark
+                                        ? Border.all(color: const Color(0xFF7BA6EE).withValues(alpha: 0.4), width: 1.0)
+                                        : null,
                                   ),
                                   alignment: Alignment.center,
                                   child: Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      const Icon(Icons.manage_accounts_rounded, color: Colors.white, size: 16),
-                                      const SizedBox(width: 5),
+                                      SvgPicture.string(
+                                        '''<svg width="15" height="15" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                          <circle cx="9" cy="7" r="4" fill="white"/>
+                                          <path d="M9 13C5.69 13 2 14.66 2 18V20H16V18C16 14.66 12.31 13 9 13Z" fill="white"/>
+                                          <circle cx="18" cy="15" r="5" fill="#A5C9FF"/>
+                                          <path d="M16 15L17.5 16.5L20.5 13.5" stroke="#0F172A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                                        </svg>''',
+                                        width: 15,
+                                        height: 15,
+                                      ),
+                                      const SizedBox(width: 6),
                                       Text(
                                         'Presensi',
                                         style: AppTypography.buttonLabel(color: Colors.white, fontWeight: FontWeight.bold),
@@ -1594,16 +1607,16 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                     onTap: () => _exportToCSV(
                                       context: context,
                                       className: className,
-                                      masterList: masterList,
+                                    masterList: masterList,
                                       stages: stages,
                                       studentCompletedTasks: studentCompletedTasks,
                                     ),
                                     child: Container(
                                       width: 34,
                                       height: 34,
-                                      decoration: const BoxDecoration(
+                                      decoration: BoxDecoration(
                                         shape: BoxShape.circle,
-                                        color: Color(0xFF7C3AED),
+                                        color: isDark ? const Color(0xFF27272A) : const Color(0xFF0F172A),
                                       ),
                                       alignment: Alignment.center,
                                       child: const Icon(
@@ -1658,34 +1671,37 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                         ),
                                         child: Row(
                                           children: [
-                                            // Kolom 1: Nama Siswa (Ungu Core 01, Lebar 200)
+                                            // Kolom 1: Nama Siswa (Soft Lavender, Lebar 200)
                                             Container(
                                               width: 200,
                                               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
                                               decoration: BoxDecoration(
-                                                color: isDark ? const Color(0xFF6B3BA3) : const Color(0xFF7C3AED),
+                                                color: isDark ? const Color(0xFF2E1065).withValues(alpha: 0.6) : const Color(0xFFEDE9FE),
                                                 border: Border(
                                                   right: BorderSide(
-                                                    color: Colors.black.withValues(alpha: 0.12),
+                                                    color: isDark ? Colors.white12 : Colors.black.withValues(alpha: 0.08),
                                                     width: 1,
                                                   ),
                                                 ),
                                               ),
                                               child: Text(
                                                 'Nama Siswa (${masterList.length})',
-                                                style: AppTypography.buttonLabel(color: Colors.white, fontWeight: FontWeight.w800),
+                                                style: AppTypography.buttonLabel(
+                                                  color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                                  fontWeight: FontWeight.w800,
+                                                ),
                                               ),
                                             ),
-                                            // Kolom 2: Progress (Biru Sky Blue 02, Lebar 90)
+                                            // Kolom 2: Progress (Soft Sky Blue, Lebar 90)
                                             Container(
                                               width: 90,
                                               padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 12),
                                               decoration: BoxDecoration(
-                                                color: isDark ? const Color(0xFF2864A8) : const Color(0xFF2563EB),
+                                                color: isDark ? const Color(0xFF1E3A8A).withValues(alpha: 0.6) : const Color(0xFFDBEAFE),
                                                 border: (showTugas || showQuiz)
                                                     ? Border(
                                                         right: BorderSide(
-                                                          color: Colors.black.withValues(alpha: 0.12),
+                                                          color: isDark ? Colors.white12 : Colors.black.withValues(alpha: 0.08),
                                                           width: 1,
                                                         ),
                                                       )
@@ -1694,22 +1710,25 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                               child: Text(
                                                 'Progress',
                                                 textAlign: TextAlign.center,
-                                                style: AppTypography.buttonLabel(color: Colors.white, fontWeight: FontWeight.w800),
+                                                style: AppTypography.buttonLabel(
+                                                  color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                                  fontWeight: FontWeight.w800,
+                                                ),
                                               ),
                                             ),
-                                            // Kolom 3..7: Tugas 1 s/d 5 (Toska Emerald 03, 5 x 70)
+                                            // Kolom 3..7: Tugas 1 s/d 5 (Soft Mint / Teal, 5 x 70)
                                             if (showTugas)
                                               ...List.generate(5, (i) {
                                                 return Container(
                                                   width: 70,
                                                   padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 12),
                                                   decoration: BoxDecoration(
-                                                    color: isDark ? const Color(0xFF147D75) : const Color(0xFF0D9488),
+                                                    color: isDark ? const Color(0xFF134E4A).withValues(alpha: 0.6) : const Color(0xFFCCFBF1),
                                                     border: (i == 4 && !showQuiz)
                                                         ? null
                                                         : Border(
                                                             right: BorderSide(
-                                                              color: Colors.black.withValues(alpha: 0.12),
+                                                              color: isDark ? Colors.white12 : Colors.black.withValues(alpha: 0.08),
                                                               width: 1,
                                                             ),
                                                           ),
@@ -1718,23 +1737,26 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                                   child: Text(
                                                     'Tugas ${i + 1}',
                                                     textAlign: TextAlign.center,
-                                                    style: AppTypography.buttonLabel(color: Colors.white, fontWeight: FontWeight.w800),
+                                                    style: AppTypography.buttonLabel(
+                                                      color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                                      fontWeight: FontWeight.w800,
+                                                    ),
                                                   ),
                                                 );
                                               }),
-                                            // Kolom 8..12: Quiz 1 s/d 5 (Orange Amber 04, 5 x 70)
+                                            // Kolom 8..12: Quiz 1 s/d 5 (Soft Peach / Amber, 5 x 70)
                                             if (showQuiz)
                                               ...List.generate(5, (i) {
                                                 return Container(
                                                   width: 70,
                                                   padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 12),
                                                   decoration: BoxDecoration(
-                                                    color: isDark ? const Color(0xFFC76D10) : const Color(0xFFEA580C),
+                                                    color: isDark ? const Color(0xFF7C2D12).withValues(alpha: 0.6) : const Color(0xFFFFEDD5),
                                                     border: i == 4
                                                         ? null
                                                         : Border(
                                                             right: BorderSide(
-                                                              color: Colors.black.withValues(alpha: 0.12),
+                                                              color: isDark ? Colors.white12 : Colors.black.withValues(alpha: 0.08),
                                                               width: 1,
                                                             ),
                                                           ),
@@ -1743,7 +1765,10 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                                                   child: Text(
                                                     'Quiz ${i + 1}',
                                                     textAlign: TextAlign.center,
-                                                    style: AppTypography.buttonLabel(color: Colors.white, fontWeight: FontWeight.w800),
+                                                    style: AppTypography.buttonLabel(
+                                                      color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                                      fontWeight: FontWeight.w800,
+                                                    ),
                                                   ),
                                                 );
                                               }),
@@ -2144,7 +2169,16 @@ class _LaporanPageState extends State<LaporanPage> with TickerProviderStateMixin
                           ),
                           child: Row(
                             children: [
-                              const Icon(Icons.manage_accounts_rounded, size: 18, color: Color(0xFF7F52FC)),
+                              SvgPicture.string(
+                                '''<svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                  <circle cx="9" cy="7" r="4" fill="${isDark ? '#FFFFFF' : '#2563EB'}"/>
+                                  <path d="M9 13C5.69 13 2 14.66 2 18V20H16V18C16 14.66 12.31 13 9 13Z" fill="${isDark ? '#FFFFFF' : '#2563EB'}"/>
+                                  <circle cx="18" cy="15" r="5" fill="#38BDF8"/>
+                                  <path d="M16 15L17.5 16.5L20.5 13.5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>''',
+                                width: 18,
+                                height: 18,
+                              ),
                               const SizedBox(width: 8),
                               Expanded(
                                 child: Text(

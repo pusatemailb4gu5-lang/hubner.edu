@@ -217,6 +217,17 @@ class _LoginPageState extends State<LoginPage> {
 
   bool _isGoogleLoading = false;
 
+  bool _isCancellationError(dynamic e) {
+    final str = e.toString().toLowerCase();
+    return str.contains('cancel') ||
+        str.contains('16') ||
+        str.contains('12501') ||
+        str.contains('abort') ||
+        str.contains('interrupted') ||
+        str.contains('dismiss') ||
+        str.contains('closed');
+  }
+
   Future<void> _processGoogleSignIn(GoogleSignInAccount googleUser) async {
     setState(() => _isGoogleLoading = true);
     try {
@@ -233,6 +244,7 @@ class _LoginPageState extends State<LoginPage> {
         final credential = GoogleAuthProvider.credential(
           idToken: googleAuth.idToken,
         );
+        await FirebaseAuth.instance.signInWithCredential(credential);
         final userDocData = querySnap.docs.first.data();
         await LoginHistoryService.recordLogin(
           email: googleUser.email,
@@ -266,9 +278,10 @@ class _LoginPageState extends State<LoginPage> {
         }
       }
     } catch (e) {
+      if (_isCancellationError(e)) return;
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Gagal masuk dengan Google: $e'), backgroundColor: Colors.redAccent),
+          const SnackBar(content: Text('Gagal masuk dengan Google. Silakan coba lagi.'), backgroundColor: Colors.redAccent),
         );
       }
     } finally {
@@ -292,9 +305,10 @@ class _LoginPageState extends State<LoginPage> {
       final googleUser = await GoogleSignIn.instance.authenticate();
       await _processGoogleSignIn(googleUser);
     } catch (e) {
+      if (_isCancellationError(e)) return;
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Gagal masuk dengan Google: $e'), backgroundColor: Colors.redAccent),
+          const SnackBar(content: Text('Gagal masuk dengan Google. Silakan coba lagi.'), backgroundColor: Colors.redAccent),
         );
       }
     } finally {
@@ -310,89 +324,112 @@ class _LoginPageState extends State<LoginPage> {
     final bool isTablet = screenWidth > 500;
     final bool isDark = AppColors.isDarkMode;
 
-    Widget formContent = SingleChildScrollView(
-      controller: _scrollController,
-      physics: const ClampingScrollPhysics(),
+    Widget topBar = Padding(
       padding: EdgeInsets.fromLTRB(
         isTablet ? 16.0 : 16.0,
-        isTablet ? 16.0 : statusBarHeight + 12.0,
+        isTablet ? 16.0 : statusBarHeight + 8.0,
         isTablet ? 16.0 : 16.0,
-        24.0 + viewInsetsBottom,
+        0,
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-            // 1. Top Bar: Back Button (Left) & Google Sign In Pill (Right) - Height 52px matching Masuk button
-            Padding(
-              padding: const EdgeInsets.only(bottom: 14.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  if (_canPop ?? false)
-                    GestureDetector(
-                      onTap: () => Navigator.of(context).pop(),
-                      behavior: HitTestBehavior.opaque,
-                      child: Container(
-                        width: 52,
-                        height: 52,
-                        decoration: BoxDecoration(
-                          color: isDark ? const Color(0xFF18181B) : Colors.white,
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
-                            width: 1.2,
-                          ),
-                        ),
-                        child: Center(
-                          child: Icon(
-                            Icons.chevron_left_rounded,
-                            color: isDark ? Colors.white : Colors.black87,
-                            size: 26,
-                          ),
-                        ),
-                      ),
-                    )
-                  else
-                    const SizedBox(width: 52),
+          if (_canPop ?? false)
+            GestureDetector(
+              onTap: () => Navigator.of(context).pop(),
+              behavior: HitTestBehavior.opaque,
+              child: Container(
+                width: 52,
+                height: 52,
+                decoration: BoxDecoration(
+                  color: isDark ? const Color(0xFF18181B) : Colors.white,
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                    width: 1.2,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.06),
+                      blurRadius: 10,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
+                ),
+                child: Center(
+                  child: Icon(
+                    Icons.chevron_left_rounded,
+                    color: isDark ? Colors.white : Colors.black87,
+                    size: 26,
+                  ),
+                ),
+              ),
+            )
+          else
+            const SizedBox(width: 52),
 
-                  // Top-Right Google "Masuk" Button - Height 52px matching Masuk button
-                  GestureDetector(
-                    onTap: _isGoogleLoading ? null : _handleGoogleLogin,
-                    behavior: HitTestBehavior.opaque,
-                    child: Container(
-                      height: 52,
-                      padding: const EdgeInsets.symmetric(horizontal: 18),
-                      decoration: BoxDecoration(
-                        color: isDark ? const Color(0xFF18181B) : Colors.white,
-                        borderRadius: BorderRadius.circular(32),
-                        border: Border.all(
-                          color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
-                          width: 1.2,
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const GoogleLogoWidget(size: 20),
-                          const SizedBox(width: 10),
-                          Text(
-                            'Masuk',
-                            style: AppTypography.buttonLabel(
-                              color: isDark ? Colors.white : Colors.black87,
-                              fontWeight: FontWeight.w600,
-                              fontSize: 14,
-                            ),
-                          ),
-                        ],
-                      ),
+          // Top-Right Google "Masuk" Button - Height 52px matching Masuk button
+          GestureDetector(
+            onTap: _isGoogleLoading ? null : _handleGoogleLogin,
+            behavior: HitTestBehavior.opaque,
+            child: Container(
+              height: 52,
+              padding: const EdgeInsets.symmetric(horizontal: 18),
+              decoration: BoxDecoration(
+                color: isDark ? const Color(0xFF18181B) : Colors.white,
+                borderRadius: BorderRadius.circular(32),
+                border: Border.all(
+                  color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                  width: 1.2,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.06),
+                    blurRadius: 10,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const GoogleLogoWidget(size: 20),
+                  const SizedBox(width: 10),
+                  Text(
+                    'Masuk',
+                    style: AppTypography.buttonLabel(
+                      color: isDark ? Colors.white : Colors.black87,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
                     ),
                   ),
                 ],
               ),
             ),
+          ),
+        ],
+      ),
+    );
 
-            // 2. CARD 1: Title, Subtitle, Form Inputs & Submit Button
-            Container(
+    Widget formContent = SingleChildScrollView(
+      controller: _scrollController,
+      physics: const ClampingScrollPhysics(),
+      padding: EdgeInsets.fromLTRB(
+        isTablet ? 16.0 : 16.0,
+        isTablet ? 16.0 : statusBarHeight + 8.0 + 52.0 + 12.0,
+        isTablet ? 16.0 : 16.0,
+        viewInsetsBottom > 0 ? (24.0 + viewInsetsBottom) : 0.0,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (isTablet) ...[
+            topBar,
+            const SizedBox(height: 14),
+          ],
+
+          // 1. CARD 1: Title, Subtitle, Form Inputs & Submit Button
+          Container(
               width: double.infinity,
               padding: const EdgeInsets.fromLTRB(20, 22, 20, 18),
               decoration: BoxDecoration(
@@ -729,6 +766,7 @@ class _LoginPageState extends State<LoginPage> {
     } else {
       screenBody = Scaffold(
         backgroundColor: Colors.transparent,
+        resizeToAvoidBottomInset: false,
         body: SizedBox.expand(
           child: Stack(
             fit: StackFit.expand,
@@ -743,6 +781,14 @@ class _LoginPageState extends State<LoginPage> {
               // 2. Form Content (Edge-to-edge scroll view)
               Positioned.fill(
                 child: formContent,
+              ),
+
+              // 3. Floating Sticky Top Bar: Back & Google Buttons (No background)
+              Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                child: topBar,
               ),
             ],
           ),
